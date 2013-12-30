@@ -11,7 +11,8 @@ sw_dailyC4_TempVar <- function(dailyTempMin, dailyTempMean, simTime2){
 	LengthFreezeFreeGrowingPeriod_Days <- aggregate(dailyTempMin, by=list(simTime2$year_ForEachUsedDay_NSadj), FUN=function(x) max(rle(x > 0)$lengths, na.rm=TRUE))[, 2]
 	DegreeDaysAbove65F_DaysC <- aggregate(dailyTempMean, by=list(simTime2$year_ForEachUsedDay_NSadj), FUN=function(x) sum(ifelse((temp <- x - ((65-32) * 5/9)) > 0, temp, 0)))[, 2]
 	
-	res <- c(apply(temp <- cbind(Month7th_MinTemp_C, LengthFreezeFreeGrowingPeriod_Days, DegreeDaysAbove65F_DaysC), MARGIN=2, FUN=mean), apply(temp, MARGIN=2, FUN=sd))
+	nyrs <- seq_along(Month7th_MinTemp_C) #if southern Hemisphere, then 7th month of last year is not included
+	res <- c(apply(temp <- cbind(Month7th_MinTemp_C[nyrs], LengthFreezeFreeGrowingPeriod_Days[nyrs], DegreeDaysAbove65F_DaysC[nyrs]), MARGIN=2, FUN=mean), apply(temp, MARGIN=2, FUN=sd))
 	names(res) <- c(temp <- c("Month7th_NSadj_MinTemp_C", "LengthFreezeFreeGrowingPeriod_NSadj_Days", "DegreeDaysAbove65F_NSadj_DaysC"), paste(temp, ".sd", sep=""))
 	
 	return(res)
@@ -438,7 +439,28 @@ AdjMonthlyBioMass <- function(tr_VegetationComposition,AdjMonthlyBioMass_Tempera
 		if(!isNorth) growing.season <- c(growing.season[7:12], growing.season[1:6]) #Standard growing season needs to be adjusted for southern Hemi
 		
 		predict.season <- function(biomass_Standard, std.season.padded, std.season.seq, site.season.seq){
-			sapply(apply(biomass_Standard, MARGIN=2, function(x) {lf<-loess(x[std.season.padded] ~ std.season.seq, span=0.4); predict(lf, newdata=data.frame(std.season.seq=site.season.seq) ) }), FUN=function(x) max(0, x)) # guarantee that > 0
+			#length(std.season.seq) >= 3 because of padding and test that season duration > 0
+			calc.loess_coeff <- function(N, span){
+				#prevent call to loessc.c:ehg182(104): "span too small.   fewer data values than degrees of freedom"
+				lcoef <- list(span=min(1, span), degree=2)
+				if(span > 1) return(lcoef)
+				nf <- floor(lcoef$span * N) - 1 #see R/trunk/src/library/stats/src/loessf.f:ehg136()
+				if(nf > 2){
+					lcoef$degree <- 2
+				} else if(nf > 1){
+					lcoef$degree <- 1
+				} else {
+					lcoef <- calc.loess_coeff(N, lcoef$span+0.1)
+				}
+				return(lcoef)		
+			}
+			lcoef <- calc.loess_coeff(N=length(std.season.seq), span=0.4)
+			
+			op <- options(c("warn", "error"))
+			options(warn=-1, error=traceback) #loess throws many warnings: 'pseudoinverse used', see calc.loess_coeff(), etc.
+			res <- sapply(apply(biomass_Standard, MARGIN=2, function(x) {lf<-loess(x[std.season.padded] ~ std.season.seq, span=lcoef$span, degree=lcoef$degree); predict(lf, newdata=data.frame(std.season.seq=site.season.seq) ) }), FUN=function(x) max(0, x)) # guarantee that > 0
+			options(op)
+			return(res)
 		}
 		
 		#Adjust for timing and duration of non-growing season
@@ -457,10 +479,10 @@ AdjMonthlyBioMass <- function(tr_VegetationComposition,AdjMonthlyBioMass_Tempera
 				
 			} else { #if winter lasts 12 months
 				#Take the mean of the winter months
-				shrubs_Composition[] <- matrix(mean(shrubs_Standard[std.winter,]), nrow=12, ncol=ncol(shrubs_Composition), byrow=TRUE)
-				C3_Composition[] <- matrix(mean(C3_Standard[std.winter,]), nrow=12, ncol=ncol(C3_Composition), byrow=TRUE)
-				C4_Composition[] <- matrix(mean(C4_Standard[std.winter,]), nrow=12, ncol=ncol(C4_Composition), byrow=TRUE)
-				AnnGrass_Composition[] <- matrix(mean(AnnGrass_Standard[std.winter,]), nrow=12, ncol=ncol(AnnGrass_Composition), byrow=TRUE)
+				shrubs_Composition[] <- matrix(apply(shrubs_Standard[std.winter,], 2, mean), nrow=12, ncol=ncol(shrubs_Composition), byrow=TRUE)
+				C3_Composition[] <- matrix(apply(C3_Standard[std.winter,], 2, mean), nrow=12, ncol=ncol(C3_Composition), byrow=TRUE)
+				C4_Composition[] <- matrix(apply(C4_Standard[std.winter,], 2, mean), nrow=12, ncol=ncol(C4_Composition), byrow=TRUE)
+				AnnGrass_Composition[] <- matrix(apply(AnnGrass_Standard[std.winter,], 2, mean), nrow=12, ncol=ncol(AnnGrass_Composition), byrow=TRUE)
 			}
 		}
 		
@@ -479,10 +501,10 @@ AdjMonthlyBioMass <- function(tr_VegetationComposition,AdjMonthlyBioMass_Tempera
 				AnnGrass_Composition[site.growing.months,] <- predict.season(AnnGrass_Standard, std.growing.padded, std.growing.seq, site.growing.seq)
 				
 			} else { #if growing season lasts 12 months
-				shrubs_Composition[] <- matrix(apply(shrubs_Standard[3:9,], MARGIN=2, FUN=max), nrow=12, ncol=ncol(shrubs_Composition), byrow=TRUE)
-				C3_Composition[] <- matrix(apply(C3_Standard[3:9,], MARGIN=2, FUN=max), nrow=12, ncol=ncol(C3_Composition), byrow=TRUE)
-				C4_Composition[] <- matrix(apply(C4_Standard[3:9,], MARGIN=2, FUN=max), nrow=12, ncol=ncol(C4_Composition), byrow=TRUE)
-				AnnGrass_Composition[] <- matrix(apply(AnnGrass_Standard[3:9,], MARGIN=2, FUN=max), nrow=12, ncol=ncol(AnnGrass_Composition), byrow=TRUE)
+				shrubs_Composition[] <- matrix(apply(shrubs_Standard[std.growing,], MARGIN=2, FUN=max), nrow=12, ncol=ncol(shrubs_Composition), byrow=TRUE)
+				C3_Composition[] <- matrix(apply(C3_Standard[std.growing,], MARGIN=2, FUN=max), nrow=12, ncol=ncol(C3_Composition), byrow=TRUE)
+				C4_Composition[] <- matrix(apply(C4_Standard[std.growing,], MARGIN=2, FUN=max), nrow=12, ncol=ncol(C4_Composition), byrow=TRUE)
+				AnnGrass_Composition[] <- matrix(apply(AnnGrass_Standard[std.growing,], MARGIN=2, FUN=max), nrow=12, ncol=ncol(AnnGrass_Composition), byrow=TRUE)
 			}
 		}
 		if(!isNorth) { #Adjustements were done as if on nothern hemisphere
