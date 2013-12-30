@@ -1,0 +1,155 @@
+# TODO: Add comment
+# 
+# Author: Ryan J. Murphy (2013)
+###############################################################################
+
+
+print("swEstab")
+swEstabSpecies <- setClass(Class="swEstabSpecies",representation(fileName="character",Name="character",estab_lyrs="integer",barsGERM="numeric",barsESTAB="numeric",min_pregerm_days="integer",max_pregerm_days="integer",min_wetdays_for_germ="integer",
+				max_drydays_postgerm="integer",min_wetdays_for_estab="integer",min_days_germ2estab="integer",max_days_germ2estab="integer",min_temp_germ="numeric",max_temp_germ="numeric",min_temp_estab="numeric",max_temp_estab="numeric"))
+swEstabSpecies_validity<-function(object){
+	temp<-c(length(fileName),length(Name), length(estab_lyrs), length(barsGERM), length(barsESTAB), length(min_pregerm_days), length(max_pregerm_days), length(min_wetdays_for_germ), 
+			length(max_drydays_postgerm), length(min_wetdays_for_estab), length(min_days_germ2estab), length(max_days_germ2estab), length(min_temp_germ), length(max_temp_germ), length(min_temp_estab), length(max_temp_estab))
+	if(length(unique(temp)) != 1)
+		return("Missing values...")
+	TRUE
+}
+setValidity("swEstabSpecies",swEstabSpecies_validity)
+
+setMethod(f="swClear",
+		signature="swEstabSpecies",
+		definition=function(object) {
+			object@fileName = character(0)
+			object@Name=character(0)
+			object@estab_lyrs = integer(0)
+			object@barsGERM = numeric(0)
+			object@barsESTAB = numeric(0)
+			object@min_pregerm_days = integer(0)
+			object@max_pregerm_days = integer(0)
+			object@min_wetdays_for_germ = integer(0)
+			object@max_drydays_postgerm = integer(0)
+			object@min_wetdays_for_estab = integer(0)
+			object@min_days_germ2estab = integer(0)
+			object@max_days_germ2estab = integer(0)
+			object@min_temp_germ = numeric(0)
+			object@max_temp_germ = numeric(0)
+			object@min_temp_estab = numeric(0)
+			object@max_temp_estab = numeric(0)
+			return(object)
+		})
+setMethod("swWriteLines", signature=c(object="swEstabSpecies", file="character"), definition=function(object, file) {
+			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)
+			index<-grep(pattern=basename(file),x=object@fileName,value=F)[1]
+			infilename <- file.path(file)
+			infiletext <- character(15)
+			infiletext[1] = paste(object@Name[index], "# 4-char name of species", sep="\t")
+			infiletext[2] = "# soil layer parameters"
+			infiletext[3] = paste(object@estab_lyrs[index], "# number of layers affecting establishment", sep="\t")
+			infiletext[4] = paste(object@barsGERM[index], "# SWP (bars) requirement for germination (top layer)", sep="\t")
+			infiletext[5] = paste(object@barsESTAB[index], "# SWP (bars) requirement for establishment (average of top layers)", sep="\t")
+			infiletext[6] = "# timing parameters in days"
+			infiletext[7] = paste(object@min_pregerm_days[index], "# first possible day of germination", sep="\t")
+			infiletext[8] = paste(object@max_pregerm_days[index], "# last possible day of germination", sep="\t")
+			infiletext[9] = paste(object@min_wetdays_for_estab[index], "# min number of consecutive \"wet\" days for germination to occur", sep="\t")
+			infiletext[10] = paste(object@max_drydays_postgerm[index], "# max number of consecutive \"dry\" days after germination allowing estab", sep="\t")
+			infiletext[11] = paste(object@min_wetdays_for_estab[index], "# min number of consecutive \"wet\" days after germination before establishment", sep="\t")
+			infiletext[12] = paste(object@min_days_germ2estab[index], "# min number of days between germination and establishment", sep="\t")
+			infiletext[13] = paste(object@max_days_germ2estab[index], "# max number of days between germination and establishment", sep="\t")
+			infiletext[14] = "# temperature parameters in C"
+			infiletext[15] = paste(object@min_temp_germ[index], "# min temp threshold for germination", sep="\t")
+			infiletext[16] = paste(object@max_temp_germ[index], "# max temp threshold for germination", sep="\t")
+			infiletext[17] = paste(object@min_temp_estab[index], "# min temp threshold for establishment", sep="\t")
+			infiletext[18] = paste(object@max_temp_estab[index], "# max temp threshold for establishment", sep="\t")
+			infile <- file(infilename, "w+b")
+			writeLines(text = infiletext, con = infile, sep = "\n")
+			close(infile)
+		})
+setMethod("swReadLines", signature=c(object="swEstabSpecies",file="character"), definition=function(object,file) {
+			infiletext <- readLines(con = file)
+			index<-length(object@fileName)+1
+			object@Name[index] = strsplit(x=infiletext[1],split = c(" ", "#"))[[1]][1]
+			object@estab_lyrs[index] = readInteger(infiletext[3])
+			object@barsGERM[index] = readNumeric(infiletext[4])
+			object@barsESTAB[index] = readNumeric(infiletext[5])
+			object@min_pregerm_days[index] = readInteger(infiletext[7])
+			object@max_pregerm_days[index] = readInteger(infiletext[8])
+			object@min_wetdays_for_germ[index] = readInteger(infiletext[9])
+			object@max_drydays_postgerm[index] = readInteger(infiletext[10])
+			object@min_wetdays_for_estab[index] = readInteger(infiletext[11])
+			object@min_days_germ2estab[index] = readInteger(infiletext[12])
+			object@max_days_germ2estab[index] = readInteger(infiletext[13])
+			object@min_temp_germ[index] = readInteger(infiletext[15])
+			object@max_temp_germ[index] = readNumeric(infiletext[16])
+			object@min_temp_estab[index] = readNumeric(infiletext[17])
+			object@max_temp_estab[index] = readNumeric(infiletext[18])
+			return(object)
+		})
+
+#############################ESTAB.IN#########################################
+swEstab <- setClass(Class="swEstab",representation(useEstab="logical",count="integer"),prototype=prototype(useEstab=FALSE,count=2L),contains="swEstabSpecies")
+setMethod(f="swClear",
+		signature="swEstab",
+		definition=function(object) {
+			object@useEstab = logical(1)
+			object@fileName = character(0)
+			object@Name = character(0)
+			object@estab_lyrs = integer(0)
+			object@barsGERM = numeric(0)
+			object@barsESTAB = numeric(0)
+			object@min_pregerm_days = integer(0)
+			object@max_pregerm_days = integer(0)
+			object@min_wetdays_for_germ = integer(0)
+			object@max_drydays_postgerm = integer(0)
+			object@min_wetdays_for_estab = integer(0)
+			object@min_days_germ2estab = integer(0)
+			object@max_days_germ2estab = integer(0)
+			object@min_temp_germ = integer(0)
+			object@max_temp_germ = numeric(0)
+			object@max_temp_germ = numeric(0)
+			object@max_temp_germ = numeric(0)
+			return(object)
+		})
+setMethod("swEstab_useEstab", "swEstab", function(object) {return(object@useEstab)})
+setReplaceMethod(f="swEstab_useEstab", signature="swEstab", definition=function(object,value) {object@useEstab <- value; return(object)})
+
+setMethod("swWriteLines", signature=c(object="swEstab", file="character"), definition=function(object, file) {
+			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)
+			infilename <- file.path(file)
+			infiletext <- character(9 + ifelse(object@useEstab,object@count,0))
+			infiletext[1] = "# list of filenames for which to check establishment"
+			infiletext[2] = "# each filename pertains to a species and contains the"
+			infiletext[3] = "# soil moisture and timing parameters required for the"
+			infiletext[4] = "# species to establish in a given year."
+			infiletext[5] = "# There is no limit to the number of files in the list."
+			infiletext[6] = "# to suppress checking establishment, comment all the"
+			infiletext[7] = "# lines below."
+			infiletext[9] = paste(as.character(as.integer(object@useEstab)),"\t# use flag; 1=check establishment, 0=don't check, ignore following",sep="")
+			if(object@useEstab) {
+				for(i in 1:object@count) {
+					infiletext[9+i] <- object@fileName[i]
+				}
+			}
+			infile <- file(infilename, "w+b")
+			writeLines(text = infiletext, con = infile, sep = "\n")
+			close(infile)
+		})
+setMethod("swReadLines", signature=c(object="swEstab",file="character"), definition=function(object,file) {
+			infiletext <- readLines(con = file)
+			index<-length(object@fileName)+1
+			object@useEstab = readLogical(infiletext[9])
+			object@count = 0L
+			if(object@useEstab) {
+				infiletext <- infiletext[-c(1:9)]
+				infiletext <- infiletext[infiletext != ""]
+				for(i in 1:length(infiletext)) {
+					#see if the line is commented out
+					line<-strsplit(x=infiletext[i],split=c("#"," "))[[1]][1]
+					if(line != "") {
+						object@count <- object@count + 1L
+						as(object,"swEstabSpecies") <- swReadLines(as(object,"swEstabSpecies"),paste(line,".estab",sep=""))
+					}
+				}
+			}
+			return(object)
+		})
+

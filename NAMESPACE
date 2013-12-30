@@ -1,0 +1,97 @@
+useDynLib(Rsoilwat)
+
+export(sw_exec,
+sw_inputDataFromFiles,
+sw_inputData,
+adjustLayersDepth,
+getLayersWidth,
+setLayerSequence,
+sw_dailyC4_TempVar,
+sw_SiteClimate_Ambient,
+onGetWeatherData,
+onGetSiteId,
+PotentialNaturalVegetation_CompositionShrubsC3C4_Paruelo1996,
+AdjMonthlyBioMass
+)
+
+exportClasses(
+   swFiles,
+   swYears,
+   swWeatherData,
+   swCloud,
+   swMonthlyScalingParams,
+   swMarkov,
+   swWeather,
+   swProd,
+   swSoils,
+   swSite,
+   swEstabSpecies,
+   swEstab,
+   swOUT,
+   swSWC_hist,
+   swSWC,
+   swLog,
+   swInputData,
+   swOutput_KEY,
+   swOutput
+)
+
+## Methods/Generics
+exportMethods(
+	swClear,swWriteLines,swReadLines,
+	
+	#FILES#
+	get_swFiles,swFiles_ProjDir,swFiles_filesIn,swFiles_Years,swFiles_LogFile,swFiles_SiteParams,swFiles_Soils,swFiles_WeatherSetup,swFiles_MarkovProbs,swFiles_MarkovCov,swFiles_Cloud,swFiles_Prod,swFiles_Estab,swFiles_SWCsetup,swFiles_Output,swFiles_WeatherPrefix,swFiles_OutputPrefix,
+	"set_swFiles<-","swFiles_ProjDir<-","swFiles_filesIn<-","swFiles_Years<-","swFiles_LogFile<-","swFiles_SiteParams<-","swFiles_Soils<-","swFiles_WeatherSetup<-","swFiles_MarkovProbs<-","swFiles_MarkovCov<-","swFiles_Cloud<-","swFiles_Prod<-","swFiles_Estab<-","swFiles_SWCsetup<-","swFiles_Output<-","swFiles_WeatherPrefix<-","swFiles_OutputPrefix<-",
+	
+	#YEARS#
+	get_swYears,swYears_StartYear,swYears_EndYear,swYears_FDOFY,swYears_EDOEY,swYears_isNorth,
+	"set_swYears<-","swYears_StartYear<-",	"swYears_EndYear<-","swYears_FDOFY<-","swYears_EDOEY<-","swYears_isNorth<-",
+	
+	#WEATHER#
+	get_swWeather,swWeather_DaysRunningAverage,swWeather_FirstYearHistorical,swWeather_pct_SnowDrift,swWeather_pct_SnowRunoff,swWeather_UseMarkov,swWeather_UseSnow,swWeather_MonScalingParams,
+	"set_swWeather<-","swWeather_DaysRunningAverage<-","swWeather_FirstYearHistorical<-","swWeather_pct_SnowDrift<-","swWeather_pct_SnowRunoff<-","swWeather_UseMarkov<-","swWeather_UseSnow<-","swWeather_MonScalingParams<-",
+	
+	#CLOUD#
+	get_swCloud,swCloud_SkyCover,swCloud_WindSpeed,swCloud_Humidity,swCloud_Transmissivity,swCloud_SnowDensity,
+	"set_swCloud<-","swCloud_SkyCover<-","swCloud_WindSpeed<-","swCloud_Humidity<-","swCloud_Transmissivity<-","swCloud_SnowDensity<-",
+	
+	#WeatherData#
+	get_WeatherHistory,get_swWeatherData,
+	"set_WeatherHistory<-","set_swWeatherData<-",
+	
+	#MARKOV#
+	get_Markov,swMarkov_Prob,swMarkov_Conv,
+	"set_Markov<-","swMarkov_Prob<-","swMarkov_Conv<-",
+	
+	#PROD#
+	get_swProd,swProd_Composition,swProd_Albedo,swProd_Cover_stcr,swProd_CanopyHeight,swProd_VegInterParam,swProd_LitterInterParam,swProd_EsTpartitioning_param,swProd_Es_param_limit,swProd_Shade,swProd_HydrRedstro_use,swProd_HydrRedstro,swProd_CritSoilWaterPotential,swProd_MonProd_grass,swProd_MonProd_shrub,swProd_MonProd_tree,
+	"set_swProd<-","swProd_Composition<-","swProd_Albedo<-","swProd_Cover_stcr<-","swProd_CanopyHeight<-","swProd_VegInterParam<-","swProd_LitterInterParam<-","swProd_EsTpartitioning_param<-","swProd_Es_param_limit<-","swProd_Shade<-","swProd_HydrRedstro_use<-","swProd_HydrRedstro<-","swProd_CritSoilWaterPotential<-","swProd_MonProd_grass<-","swProd_MonProd_shrub<-","swProd_MonProd_tree<-",
+	
+	#SITE#
+	get_swSite,swSite_SWClimits,swSite_ModelFlags,swSite_ModelCoefficients,swSite_SnowSimulationParams,swSite_DrainageCoefficient,swSite_EvapCoefficients,swSite_TranspCoefficients,swSite_IntrinsicSiteParams,swSite_SoilTemperatureFlag,swSite_SoilTemperatureConsts,swSite_TranspirationRegions,
+	"set_swSite<-","swSite_SWClimits<-","swSite_ModelFlags<-","swSite_ModelCoefficients<-","swSite_SnowSimulationParams<-","swSite_DrainageCoefficient<-","swSite_EvapCoefficients<-","swSite_TranspCoefficients<-","swSite_IntrinsicSiteParams<-","swSite_SoilTemperatureFlag<-","swSite_SoilTemperatureConsts<-","swSite_TranspirationRegions<-",
+	
+	#SOILS#
+	get_swSoils,swSoils_Layers,
+	"set_swSoils<-","swSoils_Layers<-",
+	
+	#ESTAB#
+	get_swEstab,swEstab_useEstab,
+	"set_swEstab<-","swEstab_useEstab<-",
+	
+	#OUTPUT#
+	get_swOUT,swOUT_TimeStep,swOUT_OutputSeparator,	
+	"set_swOUT<-","swOUT_TimeStep<-","swOUT_OutputSeparator<-",
+	
+	#SWC#
+	get_swSWC,swSWC_use,swSWC_prefix,swSWC_FirstYear,swSWC_Method,swSWC_HistoricList,swSWC_HistoricData,
+	"set_swSWC<-","swSWC_use<-","swSWC_prefix<-","swSWC_FirstYear<-","swSWC_Method<-","swSWC_HistoricList<-","swSWC_HistoricData<-",
+	
+	#LOG#
+	"swLog_setLine<-",
+	
+	#OUTPUT#
+	"swOutput_KEY_Period", "swOutput_KEY_TimeStep", "swOutput_KEY_Columns", "swOutput_getKEY",
+	"swOutput_getKEY<-"
+)
