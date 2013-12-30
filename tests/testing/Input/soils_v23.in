@@ -1,0 +1,25 @@
+# Soil layer definitions
+# Location: 
+#
+# depth = (cm) lower limit of layer; layers must be in order of depth.
+# bulkd = (g/cm^3) bulk density of soil in this layer.
+# fieldc = (cm^3/cm^3) field capacity soil water volume/volume soil.
+# wiltpt = (cm^3/cm^3) wilting point water volume/volume soil.
+# evco = (frac) proportion of total baresoil evap from this layer.
+# trco = (frac) proportion of total transpiration from this layer for each vegetation type (tree, shrub, grass)
+# %sand = (frac) proportion of sand in layer (0-1.0).
+# %clay = (frac) proportion of clay in layer (0-1.0).
+# imperm = (frac) proportion of 'impermeability' to water percolation(/infiltration/drainage) in layer (0-1.0)
+# soiltemp = the initial temperature of each soil layer (in celcius), from the day before the simulation starts
+# Note that the evco and trco columns must sum to 1.0 or they will
+# be normalized.
+#
+# depth bulkd   fieldc   wiltpt  evco  trco_grass  	trco_shrub  trco_tree  	%sand  %clay imperm soiltemp
+5	1.43	0.2472	0.1203	0.8122	0.0333	0.1336	0.0333	0.5100	0.1500	1	0.1860	
+10	1.41	0.2908	0.1693	0.1534	0.0333	0.0936	0.0333	0.4400	0.2600	0	0.3719	
+20	1.39	0.3308	0.2207	0.0344	0.0667	0.1762	0.0667	0.3500	0.4100	0	0.7438	
+30	1.39	0.3407	0.2332	0.0000	0.0667	0.1746	0.0667	0.3200	0.4500	0	1.1158	
+40	1.38	0.3442	0.2383	0.0000	0.0667	0.1098	0.0667	0.3100	0.4700	0	1.4877	
+60	1.15	0.3418	0.2367	0.0000	0.1333	0.1787	0.1333	0.3200	0.4700	0	2.2315	
+80	1.31	0.2634	0.1565	0.0000	0.1333	0.1011	0.1333	0.5700	0.2800	0	2.9754	
+85	1.31	0.2634	0.1565	0.0000	0.1333	0.1011	0.1333	0.5700	0.2800	0	2.9754	
