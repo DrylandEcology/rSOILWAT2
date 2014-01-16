@@ -1,5 +1,5 @@
-Package: Rsoilwat
-Version: 0.27
+Package: Rsoilwat_31
+Version: 0.01
 Date: 2004-01-01
 Title: SoilWat
 Authors@R: c(person("Ryan Murphy", "Developer", role = c("aut", "cre"),

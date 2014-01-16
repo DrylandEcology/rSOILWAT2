@@ -153,7 +153,7 @@ RealD lyrSWCBulk[MAX_LAYERS], lyrDrain[MAX_LAYERS], lyrTransp_Forb[MAX_LAYERS], 
 RealD drainout; /* h2o drained out of deepest layer */
 
 static RealD forb_h2o_qum[TWO_DAYS], tree_h2o_qum[TWO_DAYS], shrub_h2o_qum[TWO_DAYS], grass_h2o_qum[TWO_DAYS], litter_h2o_qum[TWO_DAYS], standingWater[TWO_DAYS]; /* water on soil surface if layer below is saturated */
-;
+
 
 /* *************************************************** */
 /* *************************************************** */
@@ -178,6 +178,10 @@ void SW_FLW_construct(void) {
 	soil_temp_error = 0;
 	soil_temp_init = 0;
 	fusion_pool_init = 0;
+	//When running as a library make sure these are set to zero.
+	drainout = 0;
+	forb_h2o_qum[0]=tree_h2o_qum[0]=shrub_h2o_qum[0]=grass_h2o_qum[0]=litter_h2o_qum[0]=standingWater[0]=0;
+	forb_h2o_qum[1]=tree_h2o_qum[1]=shrub_h2o_qum[1]=grass_h2o_qum[1]=litter_h2o_qum[1]=standingWater[1]=0;
 }
 
 void SW_Water_Flow(void);

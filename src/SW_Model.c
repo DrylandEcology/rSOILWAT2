@@ -154,7 +154,7 @@ void SW_MDL_read(void) {
 			m->isnorth = (toupper((int) *inbuf) == 'N');
 			fhemi = TRUE;
 			break;
-		}
+		}//TODO: SHOULDN'T WE SKIP THIS BELOW IF ABOVE IS TRUE
 		switch (cnt) {
 		case 1:
 			m->startstart = atoi(inbuf);
