@@ -58,8 +58,8 @@ SW_SOILWAT SW_Soilwat; /* declared here, externed elsewhere */
 /*                Module-Level Variables               */
 /* --------------------------------------------------- */
 static char *MyFileName;
-static RealD temp_snow = 0.;
-static int swcdataIndex = 0;
+static RealD temp_snow;
+static int swcdataIndex;
 
 /* =================================================== */
 /* =================================================== */

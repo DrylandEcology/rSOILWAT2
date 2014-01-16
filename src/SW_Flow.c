@@ -158,6 +158,10 @@ void SW_Water_Flow(void);
 void SW_FLW_construct(void) {
 	soil_temp_error = 0;
 	soil_temp_init = 0;
+	//When running as a library make sure these are set to zero.
+	drainout = 0;
+	tree_h2o_qum[0]=shrub_h2o_qum[0]=grass_h2o_qum[0]=litter_h2o_qum[0]=standingWater[0]=0.0;
+	tree_h2o_qum[1]=shrub_h2o_qum[1]=grass_h2o_qum[1]=litter_h2o_qum[1]=standingWater[1]=0.0;
 }
 
 /* *************************************************** */
@@ -488,7 +492,6 @@ void SW_FLW_construct(void) {
 			lyrImpermeability, &standingWater[Today]);
 
 	SW_Soilwat.surfaceWater = standingWater[Today];
-
 
 	/* Soil Temperature starts here */
 
