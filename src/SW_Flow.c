@@ -198,12 +198,12 @@ void SW_FLW_construct(void) {
 	} else {
 		snowdepth_scale_grass = 1.;
 	}
-	if (GT(SW_VegProd.grass.veg_height_daily[doy], 0.)) {
+	if (GT(SW_VegProd.shrub.veg_height_daily[doy], 0.)) {
 		snowdepth_scale_shrub = 1. - SW_Soilwat.snowdepth / SW_VegProd.shrub.veg_height_daily[doy];
 	} else {
 		snowdepth_scale_shrub = 1.;
 	}
-	if (GT(SW_VegProd.grass.veg_height_daily[doy], 0.)) {
+	if (GT(SW_VegProd.tree.veg_height_daily[doy], 0.)) {
 		snowdepth_scale_tree = 1. - SW_Soilwat.snowdepth / SW_VegProd.tree.veg_height_daily[doy];
 	} else {
 		snowdepth_scale_tree = 1.;
