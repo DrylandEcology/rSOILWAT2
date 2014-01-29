@@ -273,11 +273,7 @@ static OutSum str2stype(char *s) {
 	/* --------------------------------------------------- */
 	OutSum styp;
 
-	for (styp = eSW_Off; styp < SW_NSUMTYPES && Str_CompareI(s, styp2str[styp]); styp++)
-		;
-	if (styp == SW_NSUMTYPES) {
-		LogError(logfp, LOGFATAL, "%s : Invalid summary type (%s)\n", SW_F_name(eOutput), s);
-	}
+	for (styp = eSW_Off; Str_CompareI(s, styp2str[styp]) && styp < SW_NSUMTYPES; styp++);
 	return styp;
 }
 

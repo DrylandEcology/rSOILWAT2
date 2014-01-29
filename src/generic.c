@@ -45,7 +45,7 @@ static void uncomment_cstyle(char *p) {
 	char *e; /* end of comment */
 
 	if ((e = strchr(p + 2, '*'))) {
-		if ((*(++e) == '/')) {
+		if (*(++e) == '/') {
 			e++;
 			while (*e)
 				*(p++) = *(e++);

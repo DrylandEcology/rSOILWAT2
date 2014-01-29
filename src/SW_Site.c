@@ -946,7 +946,6 @@ static void _init_site_info(void) {
 		 */
 		/* for trees */
 		curregion = 0;
-		SW_Site.n_transp_rgn;
 		ForEachTranspRegion(r)
 		{
 			if (s < _TranspRgnBounds[r]) {
