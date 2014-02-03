@@ -17,6 +17,8 @@ sw_exec <- function(data=NULL,weatherList=NULL,dir="", file.in="files_v27.in", e
 
 sw_inputDataFromFiles <- function(dir="", file.in="files_v27.in") {
 	input <- c("sw_v27")
+	if(dir!="")
+		input<-c(input,"-d", dir)
 	if(file.in!="")
 		input<-c(input,"-f", file.in)
 	data <- .Call("onGetInputDataFromFiles",input)
