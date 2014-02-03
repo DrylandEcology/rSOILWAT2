@@ -1,5 +1,5 @@
 Package: Rsoilwat
-Version: 0.27.02
+Version: 0.27.03
 Date: 01-27-2014
 Title: Rsoilwat v27
 Authors@R: c(person("Ryan Murphy", "Developer", role = c("aut", "cre"),

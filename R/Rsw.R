@@ -15,19 +15,9 @@ sw_exec <- function(data=NULL,weatherList=NULL,dir="", file.in="files_v27.in", e
 	return(data)
 }
 
-sw_inputDataFromFiles <- function(dir="", file.in="files_v27.in", echo=FALSE, quiet=FALSE, colNames=FALSE) {
+sw_inputDataFromFiles <- function(dir="", file.in="files_v27.in") {
 	input <- c("sw_v27")
-	if(dir!="")
-		input<-c(input,"-d", dir)
-	if(file.in!="")
-		input<-c(input,"-f", file.in)
-	if(echo)
-		input<-c(input,"-e")
-	if(quiet)
-		input<-c(input,"-q")
 	data <- .Call("onGetInputDataFromFiles",input)
-	if(colNames)
-		.Call("onSetNames",data)
 	return(data)
 }
 
