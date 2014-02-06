@@ -912,7 +912,7 @@ SEXP onSetNames(SEXP SW_R_Data) {
 	PROTECT(Rprecip_names_mo = allocVector(VECSXP, 2));
 	PROTECT(Rprecip_names_y_mo = allocVector(STRSXP, p_Rprecip_columns + 2));
 	SET_STRING_ELT(Rprecip_names_y_mo, 0, mkChar("Year"));
-	SET_STRING_ELT(Rprecip_names_y_mo, 0, mkChar("Month"));
+	SET_STRING_ELT(Rprecip_names_y_mo, 1, mkChar("Month"));
 	for (i = 0; i < p_Rprecip_columns; i++)
 		SET_STRING_ELT(Rprecip_names_y_mo, i + 2, mkChar(Cprecip_names[i]));
 	SET_VECTOR_ELT(Rprecip_names_mo, 1, Rprecip_names_y_mo); //17
@@ -1095,7 +1095,7 @@ SEXP onSetNames(SEXP SW_R_Data) {
 	PROTECT(Rprecip_names_wk = allocVector(VECSXP, 2));
 	PROTECT(Rprecip_names_y_wk = allocVector(STRSXP, p_Rprecip_columns + 2));
 	SET_STRING_ELT(Rprecip_names_y_wk, 0, mkChar("Year"));
-	SET_STRING_ELT(Rprecip_names_y_wk, 0, mkChar("Week"));
+	SET_STRING_ELT(Rprecip_names_y_wk, 1, mkChar("Week"));
 	for (i = 0; i < p_Rprecip_columns; i++)
 		SET_STRING_ELT(Rprecip_names_y_wk, i + 2, mkChar(Cprecip_names[i]));
 	SET_VECTOR_ELT(Rprecip_names_wk, 1, Rprecip_names_y_wk); //17
@@ -1278,7 +1278,7 @@ SEXP onSetNames(SEXP SW_R_Data) {
 	PROTECT(Rprecip_names_dy = allocVector(VECSXP, 2));
 	PROTECT(Rprecip_names_y_dy = allocVector(STRSXP, p_Rprecip_columns + 2));
 	SET_STRING_ELT(Rprecip_names_y_dy, 0, mkChar("Year"));
-	SET_STRING_ELT(Rprecip_names_y_dy, 0, mkChar("DayOfYear"));
+	SET_STRING_ELT(Rprecip_names_y_dy, 1, mkChar("DayOfYear"));
 	for (i = 0; i < p_Rprecip_columns; i++)
 		SET_STRING_ELT(Rprecip_names_y_dy, i + 2, mkChar(Cprecip_names[i]));
 	SET_VECTOR_ELT(Rprecip_names_dy, 1, Rprecip_names_y_dy); //17
