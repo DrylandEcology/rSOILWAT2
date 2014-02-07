@@ -3,9 +3,6 @@ useDynLib(Rsoilwat)
 export(sw_exec,
 sw_inputDataFromFiles,
 sw_inputData,
-adjustLayersDepth,
-getLayersWidth,
-setLayerSequence,
 onGetWeatherData_folders,
 onGetWeatherData_database,
 onGetSiteId
