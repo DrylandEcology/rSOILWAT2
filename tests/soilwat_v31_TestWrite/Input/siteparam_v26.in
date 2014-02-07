@@ -1,0 +1,75 @@
+# ---- SWC limits ----
+-1.0			# swc_min : cm/cm if 0 - <1.0, -bars if >= 1.0.; if < 0. then estimate residual water content for each layer
+15.0			# swc_init: cm/cm if < 1.0, -bars if >= 1.0. 
+15.0			# swc_wet : cm/cm if < 1.0, -bars if >= 1.0. 
+
+# ---- Model flags and coefficients ----
+0			# reset (1/0): reset/don't reset swc each new year
+1			# deepdrain (1/0): allow/disallow deep drainage function.
+			#   if deepdrain == 1, model expects extra layer in soils file.
+1.0			# multiplier for PET (eg for climate change).
+0.0			#proportion of ponded surface water removed as runoff daily (value ranges between 0 and 1; 0=no loss of surface water, 1=all ponded water lost via runoff)
+
+# ---- Snow simulation parameters (SWAT2K model): Neitsch S, Arnold J, Kiniry J, Williams J. 2005. Soil and water assessment tool (SWAT) theoretical documentation. version 2005. Blackland Research Center, Texas Agricultural Experiment Station: Temple, TX.
+# these parameters are RMSE optimized values for 10 random SNOTEL sites for western US
+0.61			# TminAccu2 = Avg. air temp below which ppt is snow ( C)
+1.54			# TmaxCrit = Snow temperature at which snow melt starts ( C)
+0.1			# lambdasnow = Relative contribution of avg. air temperature to todays snow temperture vs. yesterday's snow temperature (0-1)
+0.0			# RmeltMin = Minimum snow melt rate on winter solstice (cm/day/C)
+0.27			# RmeltMax = Maximum snow melt rate on summer solstice (cm/day/C)
+
+# ---- Drainage coefficient ----
+0.02			# slow-drain coefficient per layer (cm/day).  See Eqn 2.9 in ELM doc.
+			# ELM shows this as a value for each layer, but this way it's applied to all.
+			# (Q=.02 in ELM doc, .06 in FORTRAN version).
+
+# ---- Evaporation coefficients ----
+# These control the tangent function (tanfunc) which affects the amount of soil
+# water extractable by evaporation and transpiration.
+# These constants aren't documented by the ELM doc.
+15.0			# rate shift (x value of inflection point).  lower value shifts curve 
+			# leftward, meaning less water lost to evap at a given swp.  effectively
+			# shortens/extends high rate.
+0.06			# rate slope: lower value (eg .01) straightens S shape meaning more gradual
+			# reduction effect; higher value (.5) makes abrupt transition
+0.5			# inflection point (y-value of inflection point)
+1.1			# range: diff btw upper and lower rates at the limits
+
+# ---- Transpiration Coefficients ----
+# comments from Evap constants apply.
+28.0			# rate shift
+0.07			# rate shape
+0.5			# inflection point
+1.1			# range
+
+# ---- Intrinsic site params: Chimney Park, WY (41.068° N, 106.1195° W, 2740 m elevation) ----
+0.681			# latitude of the site in radians, site = 002_-119.415_39.046
+1651.4064			# altitude of site (m a.s.l.)
+0.0			# slope at site (degrees): no slope = 0
+0.0			# aspect at site (degrees): N=0, E=90, S=180, W=270, no slope:-1
+
+# ---- Soil Temperature Constants ----
+# from Parton 1978, ch. 2.2.2 Temperature-profile Submodel
+300.0			# biomass limiter, 300 g/m^2 in Parton's equation for T1(avg daily temperature at the top of the soil)
+15.0			# constant for T1 equation (used if biomass <= biomass limiter), 15 in Parton's equation
+-4.0			# constant for T1 equation (used if biomass > biomass limiter), -4 in Parton's equation
+600.0			# constant for T1 equation (used if biomass > biomass limiter), 600 in Parton's equation
+7.0E-4			# constant for cs (soil-thermal conductivity) equation, 0.00070 in Parton's equation
+3.0E-4			# constant for cs equation, 0.00030 in Parton's equation
+0.18			# constant for sh (specific heat capacity) equation, 0.18 in Parton's equation
+6.69			# constant mean air temperature (the soil temperature at the lower boundary, 180 cm) in celsius
+15.0			# deltaX parameter for soil_temperature function, default is 15.  (distance between profile points in cm)  max depth (the next number) should be evenly divisible by this number
+180.0			# max depth for the soil_temperature function equation, default is 180.  this number should be evenly divisible by deltaX
+0			# flag, 1 to calculate soil_temperature, 0 to not calculate soil_temperature
+
+
+# ---- Transpiration regions ----
+# ndx  : 1=shallow, 2=medium, 3=deep, 4=very deep
+# layer: deepest layer number of the region. 
+# Grasses	Shrubs		Trees		Forbs
+#        Layers are defined in soils.in.
+# ndx    layer
+	1	6
+	2	9
+	3	11
+

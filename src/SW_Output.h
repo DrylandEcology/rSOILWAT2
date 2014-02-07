@@ -53,9 +53,9 @@
 #define SW_VWCBULK  	"VWCBULK"		//6		4		2
 #define SW_VWCMATRIC	"VWCMATRIC"		//7		4		2
 #define SW_SWCBULK    	"SWCBULK"		//8		4		2
-#define SW_SWPMATRIC    "SWPMATRIC"		//9		4		2
-#define SW_SWABULK	 	"SWABULK"		//10	4		2
-#define SW_SWAMATRIC	"SWAMATRIC"		//11	4		2
+#define SW_SWABULK	 	"SWABULK"		//9		4		2
+#define SW_SWAMATRIC	"SWAMATRIC"		//10	4		2
+#define SW_SWPMATRIC    "SWPMATRIC"		//11	4		2
 #define SW_SURFACEW		"SURFACEWATER"	//12	4		2
 #define SW_TRANSP		"TRANSP"		//13	4		1
 #define SW_EVAPSOIL		"EVAPSOIL"		//14	4		1

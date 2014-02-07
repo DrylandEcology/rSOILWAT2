@@ -19,6 +19,6 @@ gcc -I/usr/share/R/include     -fpic  -g -O3 -Wall -c SW_Output.c -o SW_Output.o
 gcc -I/usr/share/R/include     -fpic  -g -O3 -Wall -c SW_VegProd.c -o SW_VegProd.o
 gcc -I/usr/share/R/include     -fpic  -g -O3 -Wall -c SW_Flow_lib.c -o SW_Flow_lib.o
 gcc -I/usr/share/R/include     -fpic  -g -O3 -Wall -c SW_Flow.c -o SW_Flow.o
-gcc -shared  -o sw_v27.so SW_Main.o SW_VegEstab.o SW_Control.o generic.o rands.o Times.o mymemory.o filefuncs.o SW_Files.o SW_Model.o SW_Site.o SW_SoilWater.o SW_Markov.o SW_Weather.o SW_Sky.o SW_Output.o SW_VegProd.o SW_Flow_lib.o SW_Flow.o -lm -L/usr/lib/R/lib -lR
-mv sw_v27.so testing
+gcc -shared  -o sw_v31.so SW_Main.o SW_VegEstab.o SW_Control.o generic.o rands.o Times.o mymemory.o filefuncs.o SW_Files.o SW_Model.o SW_Site.o SW_SoilWater.o SW_Markov.o SW_Weather.o SW_Sky.o SW_Output.o SW_VegProd.o SW_Flow_lib.o SW_Flow.o -lm -L/usr/lib/R/lib -lR
+mv sw_v31.so testing
 

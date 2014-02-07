@@ -33,7 +33,8 @@ void SW_CTL_main(void);
 void SW_CTL_init_model(const char *firstfile);
 
 SEXP onGetInputDataFromFiles(SEXP input);
-SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP outputData);
+SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList);
+SEXP onGetOutput(SEXP inputData);
 
 #endif /* SW_R_LIB_H_ */
 

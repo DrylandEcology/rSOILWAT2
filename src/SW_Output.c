@@ -280,11 +280,8 @@ static void sumof_ves(SW_VEGESTAB *v, SW_VEGESTAB_OUTPUTS *s, OutKey k);
 static OutPeriod str2period(char *s) {
 	/* --------------------------------------------------- */
 	IntUS pd;
-	for (pd = 0; Str_CompareI(s, pd2str[pd]) && pd < SW_OUTNPERIODS; pd++)
-		;
-	if (pd == SW_OUTNPERIODS) {
-		LogError(logfp, LOGFATAL, "%s : Invalid period (%s)", SW_F_name(eOutput), s);
-	}
+	for (pd = 0; Str_CompareI(s, pd2str[pd]) && pd < SW_OUTNPERIODS; pd++);
+
 	return pd;
 }
 
@@ -1877,32 +1874,32 @@ static void get_runoff(void) {
 		case eSW_Day:
 			p_Rrunoff_dy[SW_Output[eSW_Runoff].dy_row + dy_nrow * 0] = SW_Model.year;
 			p_Rrunoff_dy[SW_Output[eSW_Runoff].dy_row + dy_nrow * 1] = SW_Model.doy;
-			p_Rrunoff_dy[SW_Output[eSW_Runoff].dy_row + dy_nrow * 2] = w->dysum.surfaceRunoff;
-			p_Rrunoff_dy[SW_Output[eSW_Runoff].dy_row + dy_nrow * 3] = w->dysum.snowRunoff;
-			p_Rrunoff_dy[SW_Output[eSW_Runoff].dy_row + dy_nrow * 4] = (w->dysum.surfaceRunoff + w->dysum.snowRunoff);
+			p_Rrunoff_dy[SW_Output[eSW_Runoff].dy_row + dy_nrow * 2] = (w->dysum.surfaceRunoff + w->dysum.snowRunoff);
+			p_Rrunoff_dy[SW_Output[eSW_Runoff].dy_row + dy_nrow * 3] = w->dysum.surfaceRunoff;
+			p_Rrunoff_dy[SW_Output[eSW_Runoff].dy_row + dy_nrow * 4] = w->dysum.snowRunoff;
 			SW_Output[eSW_Runoff].dy_row++;
 			break;
 		case eSW_Week:
 			p_Rrunoff_wk[SW_Output[eSW_Runoff].wk_row + wk_nrow * 0] = SW_Model.year;
 			p_Rrunoff_wk[SW_Output[eSW_Runoff].wk_row + wk_nrow * 1] = (SW_Model.week + 1) - tOffset;
-			p_Rrunoff_wk[SW_Output[eSW_Runoff].wk_row + wk_nrow * 2] = w->wkavg.surfaceRunoff;
-			p_Rrunoff_wk[SW_Output[eSW_Runoff].wk_row + wk_nrow * 3] = w->wkavg.snowRunoff;
-			p_Rrunoff_wk[SW_Output[eSW_Runoff].wk_row + wk_nrow * 4] = (w->wkavg.surfaceRunoff + w->wkavg.snowRunoff);
+			p_Rrunoff_wk[SW_Output[eSW_Runoff].wk_row + wk_nrow * 2] = (w->wkavg.surfaceRunoff + w->wkavg.snowRunoff);
+			p_Rrunoff_wk[SW_Output[eSW_Runoff].wk_row + wk_nrow * 3] = w->wkavg.surfaceRunoff;
+			p_Rrunoff_wk[SW_Output[eSW_Runoff].wk_row + wk_nrow * 4] = w->wkavg.snowRunoff;
 			SW_Output[eSW_Runoff].wk_row++;
 			break;
 		case eSW_Month:
 			p_Rrunoff_mo[SW_Output[eSW_Runoff].mo_row + mo_nrow * 0] = SW_Model.year;
 			p_Rrunoff_mo[SW_Output[eSW_Runoff].mo_row + mo_nrow * 1] = (SW_Model.month + 1) - tOffset;
-			p_Rrunoff_mo[SW_Output[eSW_Runoff].mo_row + mo_nrow * 2] = w->moavg.surfaceRunoff;
-			p_Rrunoff_mo[SW_Output[eSW_Runoff].mo_row + mo_nrow * 3] = w->moavg.snowRunoff;
-			p_Rrunoff_mo[SW_Output[eSW_Runoff].mo_row + mo_nrow * 4] = (w->moavg.surfaceRunoff + w->moavg.snowRunoff);
+			p_Rrunoff_mo[SW_Output[eSW_Runoff].mo_row + mo_nrow * 2] = (w->moavg.surfaceRunoff + w->moavg.snowRunoff);
+			p_Rrunoff_mo[SW_Output[eSW_Runoff].mo_row + mo_nrow * 3] = w->moavg.surfaceRunoff;
+			p_Rrunoff_mo[SW_Output[eSW_Runoff].mo_row + mo_nrow * 4] = w->moavg.snowRunoff;
 			SW_Output[eSW_Runoff].mo_row++;
 			break;
 		case eSW_Year:
 			p_Rrunoff_yr[SW_Output[eSW_Runoff].yr_row + yr_nrow * 0] = SW_Model.year;
-			p_Rrunoff_yr[SW_Output[eSW_Runoff].yr_row + yr_nrow * 1] = w->yravg.surfaceRunoff;
-			p_Rrunoff_yr[SW_Output[eSW_Runoff].yr_row + yr_nrow * 2] = w->yravg.snowRunoff;
-			p_Rrunoff_yr[SW_Output[eSW_Runoff].yr_row + yr_nrow * 3] = (w->yravg.surfaceRunoff + w->yravg.snowRunoff);
+			p_Rrunoff_yr[SW_Output[eSW_Runoff].yr_row + yr_nrow * 1] = (w->yravg.surfaceRunoff + w->yravg.snowRunoff);
+			p_Rrunoff_yr[SW_Output[eSW_Runoff].yr_row + yr_nrow * 2] = w->yravg.surfaceRunoff;
+			p_Rrunoff_yr[SW_Output[eSW_Runoff].yr_row + yr_nrow * 3] = w->yravg.snowRunoff;
 			SW_Output[eSW_Runoff].yr_row++;
 			break;
 	}

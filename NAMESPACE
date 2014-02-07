@@ -1,8 +1,9 @@
-useDynLib(Rsoilwat)
+useDynLib(Rsoilwat31)
 
 export(sw_exec,
 sw_inputDataFromFiles,
 sw_inputData,
+sw_outputData,
 adjustLayersDepth,
 getLayersWidth,
 setLayerSequence,

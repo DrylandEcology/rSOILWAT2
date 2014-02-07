@@ -5,7 +5,7 @@
 
 #################################
 print("swFiles")
-swFiles<-setClass("swFiles",representation(ProjDir="character",InFiles="character",WeatherPrefix="character",OutputPrefix="character"),prototype=prototype(ProjDir="",InFiles=c('files_v30.in','Input/years.in','Output/logfile.log','Input/siteparam_v26.in','Input/soils_v23.in','Input/weathsetup_v20.in','Input/data_39.0625_-119.4375/mkv_prob.in','Input/data_39.0625_-119.4375/mkv_covar.in','Input/data_39.0625_-119.4375/cloud_v20.in','Input/sbe_prod_v21.in','Input/estab.in','Input/swcsetup.in','Input/outsetup_v27.in'),WeatherPrefix="Input/data_39.0625_-119.4375/weath",OutputPrefix="Output/"))
+swFiles<-setClass("swFiles",representation(ProjDir="character",InFiles="character",WeatherPrefix="character",OutputPrefix="character"),prototype=prototype(ProjDir="",InFiles=c('files_v30.in','Input/years.in','Output/logfile.log','Input/siteparam_v26.in','Input/soils_v30.in','Input/weathsetup_v20.in','Input/data_39.0625_-119.4375/mkv_prob.in','Input/data_39.0625_-119.4375/mkv_covar.in','Input/data_39.0625_-119.4375/cloud_v20.in','Input/sbe_prod_v31.in','Input/estab.in','Input/swcsetup.in','Input/outsetup_v30.in'),WeatherPrefix="Input/data_39.0625_-119.4375/weath",OutputPrefix="Output/"))
 
 swFiles_validity<-function(object){
 	if(length(object@ProjDir)!=1)
@@ -20,7 +20,7 @@ swFiles_validity<-function(object){
 	TRUE
 }
 setValidity("swFiles",swFiles_validity)
-setMethod("initialize","swFiles",function(.Object,ProjDir="",InFiles=c('files_v27.in','Input/years.in','Output/logfile.log','Input/siteparam_v26.in','Input/soils_v23.in','Input/weathsetup_v20.in','Input/data_39.0625_-119.4375/mkv_prob.in','Input/data_39.0625_-119.4375/mkv_covar.in','Input/data_39.0625_-119.4375/cloud_v20.in','Input/sbe_prod_v21.in','Input/estab.in','Input/swcsetup.in','Input/outsetup_v27.in'),WeatherPrefix="Input/data_39.0625_-119.4375/weath",OutputPrefix="Output/"){
+setMethod("initialize","swFiles",function(.Object,ProjDir="",InFiles=c('files_v30.in','Input/years.in','Output/logfile.log','Input/siteparam_v26.in','Input/soils_v30.in','Input/weathsetup_v20.in','Input/data_39.0625_-119.4375/mkv_prob.in','Input/data_39.0625_-119.4375/mkv_covar.in','Input/data_39.0625_-119.4375/cloud_v20.in','Input/sbe_prod_v31.in','Input/estab.in','Input/swcsetup.in','Input/outsetup_v30.in'),WeatherPrefix="Input/data_39.0625_-119.4375/weath",OutputPrefix="Output/"){
 			names(InFiles) <- c("InputFilesForSimulation","Model_Years","Model_LogFile","Site_Params","Site_Soils","Weather_setup","Markov_precip_probs","Markov_covarianceTable","Weather_atmosphericParams","Vegetation_Productivity","Vegetation_Establishment","SWC_setup","Output_setup")
 			.Object@ProjDir=ProjDir
 			.Object@InFiles=InFiles

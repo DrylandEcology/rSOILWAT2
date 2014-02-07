@@ -1531,7 +1531,11 @@ void soil_temperature(double airTemp, double pet, double aet, double biomass, do
 		sh = sm + (shParam * (1. - sm)); // shParam = 0.18
 
 		if (toDebug)
+#ifndef RSOILWAT
 			printf("k %d cs %5.4f sh %5.4f\n", i, cs, sh);
+#else
+			Rprintf("k %d cs %5.4f sh %5.4f\n", i, cs, sh);
+#endif
 
 		// breaking the equation down into parts to make it easier for me to process
 		part1 = cs / (sh * st->bDensityR[i]);

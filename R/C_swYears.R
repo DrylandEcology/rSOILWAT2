@@ -4,7 +4,7 @@
 ###############################################################################
 
 print("swYears")
-swYears<-setClass("swYears",representation(StartYear="integer",EndYear="integer",FDOFY="integer",EDOEY="integer",isNorth="logical"),prototype=prototype(StartYear=as.integer(1982),EndYear=as.integer(1986),FDOFY=as.integer(1),EDOEY=as.integer(365),isNorth=TRUE))
+swYears<-setClass("swYears",representation(StartYear="integer",EndYear="integer",FDOFY="integer",EDOEY="integer",isNorth="logical"),prototype=prototype(StartYear=as.integer(1982),EndYear=as.integer(1990),FDOFY=as.integer(1),EDOEY=as.integer(365),isNorth=TRUE))
 swYears_validity<-function(object){
 	if(length(object@StartYear)!=1 | is.na(object@StartYear) | object@StartYear<0)
 		return("@StartYear:Needstobeintegerlength1.Non-negativeandnotNA")	

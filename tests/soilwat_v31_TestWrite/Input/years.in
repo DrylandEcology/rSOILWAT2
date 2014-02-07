@@ -1,0 +1,8 @@
+# Model time definition file
+# Location: P1
+
+1982	# starting year (but see weather and swc inputs)
+1990	# ending year
+1	# first day of first year
+365	# ending day of last year
+N	# ending day of last year
