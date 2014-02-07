@@ -300,20 +300,36 @@ PotentialNaturalVegetation_CompositionShrubsC3C4_Paruelo1996 <- function(MAP_mm,
 		
 		#---Potential natural vegetation
 		#1. step: Paruelo JM, Lauenroth WK (1996) Relative abundance of plant functional types in grasslands and shrublands of North America. Ecological Applications, 6, 1212-1224.
-		shrubs.fractionNA <- cut0Inf(1.7105 - 0.2918 * log(MAP_mm) + 1.5451 * ppt.WinterToMAP) 								#if NA, then not enough winter precipitation above a given MAP
-		grass.c4.fractionNA <- cut0Inf(-0.9837 + 0.000594 * MAP_mm + 1.3528 * ppt.SummerToMAP + 0.2710 * log(MAT_C))			#if NA, then either MAT < 0 or not enough summer precipitation or too cold below a given MAP
-		grass.c3ingrasslands.fractionNA <- cut0Inf(1.1905 - 0.02909 * MAT_C + 0.1781 * log(ppt.WinterToMAP) - 0.2383 * 1)		#if NA, then not enough winter precipitation or too warm below a given MAP
-		grass.c3inshrublands.fractionNA <- cut0Inf(1.1905 - 0.02909 * MAT_C + 0.1781 * log(ppt.WinterToMAP) - 0.2383 * 2)
+		if(MAP_mm < 1){
+			shrubs.fractionNA <- NA
+		} else {
+			shrubs.fractionNA <- cut0Inf(1.7105 - 0.2918 * log(MAP_mm) + 1.5451 * ppt.WinterToMAP) 								#if NA, then not enough winter precipitation above a given MAP
+		}
+		if(MAT_C <= 0){
+			grass.c4.fractionNA <- 0
+		} else {
+			grass.c4.fractionNA <- cut0Inf(-0.9837 + 0.000594 * MAP_mm + 1.3528 * ppt.SummerToMAP + 0.2710 * log(MAT_C))			#if NA, then either MAT < 0 or not enough summer precipitation or too cold below a given MAP
+		}
+		if(ppt.WinterToMAP <= 0){
+			grass.c3ingrasslands.fractionNA <- grass.c3inshrublands.fractionNA <- NA
+		} else {
+			grass.c3ingrasslands.fractionNA <- cut0Inf(1.1905 - 0.02909 * MAT_C + 0.1781 * log(ppt.WinterToMAP) - 0.2383 * 1)		#if NA, then not enough winter precipitation or too warm below a given MAP
+			grass.c3inshrublands.fractionNA <- cut0Inf(1.1905 - 0.02909 * MAT_C + 0.1781 * log(ppt.WinterToMAP) - 0.2383 * 2)
+		}
 		grass.c3.fractionNA <- ifelse(shrubs.fractionNA >= shrub.fraction.limit && !is.na(shrubs.fractionNA), grass.c3inshrublands.fractionNA, grass.c3ingrasslands.fractionNA)
 		
 		grass.Annual.fraction <- AnnC4C3ShrubFraction[1] #Ann will be 0 or something <= 1
 		
 		#2. step: Teeri JA, Stowe LG (1976) Climatic patterns and the distribution of C4 grasses in North America. Oecologia, 23, 1-12.
 		#This equations give percent species/vegetation -> use to limit Paruelo's C4 equation, i.e., where no C4 species => there are no C4 abundance > 0
-		x10 <- dailyC4vars["Month7th_NSadj_MinTemp_C"] * 9/5 + 32
-		x13 <- dailyC4vars["DegreeDaysAbove65F_NSadj_DaysC"] * 9/5
-		x18 <- log(dailyC4vars["LengthFreezeFreeGrowingPeriod_NSadj_Days"])
-		grass.c4.species <- as.numeric((1.60 * x10 + 0.0086 * x13 - 8.98 * x18 - 22.44) / 100)
+		if(dailyC4vars["LengthFreezeFreeGrowingPeriod_NSadj_Days"] <= 0){
+			grass.c4.species <- 0
+		} else {
+			x10 <- dailyC4vars["Month7th_NSadj_MinTemp_C"] * 9/5 + 32
+			x13 <- dailyC4vars["DegreeDaysAbove65F_NSadj_DaysC"] * 9/5
+			x18 <- log(dailyC4vars["LengthFreezeFreeGrowingPeriod_NSadj_Days"])
+			grass.c4.species <- as.numeric((1.60 * x10 + 0.0086 * x13 - 8.98 * x18 - 22.44) / 100)
+		}
 		grass.c4.fractionNA <- ifelse(grass.c4.species > 0, grass.c4.fractionNA, NA)
 		
 		#3. step: Replacing missing values: If no or only one successful equation, then add 100% C3 if MAT < 10 C, 100% shrubs if MAP < 600 mm, and 100% C4 if MAT >= 10C & MAP >= 600 mm	[these rules are made up arbitrarily by drs, Nov 2012]
