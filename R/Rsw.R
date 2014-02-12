@@ -1,10 +1,10 @@
 print("Rsw")
-sw_exec <- function(data=NULL,weatherList=NULL,dir="", file.in="files_v27.in", echo=FALSE, quiet=FALSE, colNames=FALSE) {
+sw_exec <- function(data=NULL,weatherList=NULL,dir="", files.in="files_v27.in", echo=FALSE, quiet=FALSE, colNames=FALSE) {
 	input <- c("sw_v27")
 	if(dir!="")
 		input<-c(input,"-d", dir)
-	if(file.in!="")
-		input<-c(input,"-f", file.in)
+	if(files.in!="")
+		input<-c(input,"-f", files.in)
 	if(echo)
 		input<-c(input,"-e")
 	if(quiet)
@@ -15,12 +15,12 @@ sw_exec <- function(data=NULL,weatherList=NULL,dir="", file.in="files_v27.in", e
 	return(data)
 }
 
-sw_inputDataFromFiles <- function(dir="", file.in="files_v27.in") {
+sw_inputDataFromFiles <- function(dir="", files.in="files_v27.in") {
 	input <- c("sw_v27")
 	if(dir!="")
 		input<-c(input,"-d", dir)
-	if(file.in!="")
-		input<-c(input,"-f", file.in)
+	if(files.in!="")
+		input<-c(input,"-f", files.in)
 	data <- .Call("onGetInputDataFromFiles",input)
 	return(data)
 }
