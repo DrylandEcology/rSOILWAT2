@@ -47,7 +47,7 @@ setMethod("swWriteLines", signature=c(object="swEstabSpecies", file="character")
 			infiletext[4] = object@barsESTAB[index]
 			infiletext[5] = object@min_pregerm_days[index]
 			infiletext[6] = object@max_pregerm_days[index]
-			infiletext[7] = object@min_wetdays_for_estab[index]
+			infiletext[7] = object@min_wetdays_for_germ[index]
 			infiletext[8] = object@max_drydays_postgerm[index]
 			infiletext[9] = object@min_wetdays_for_estab[index]
 			infiletext[10] = object@min_days_germ2estab[index]

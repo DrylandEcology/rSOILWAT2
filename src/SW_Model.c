@@ -199,7 +199,7 @@ void SW_MDL_read(void) {
 		m->endend = (m->isnorth) ? Time_get_lastdoy_y(m->endyr) : DAYLAST_SOUTH;
 	} else {
 		d = atoi(enddyval);
-		m->endend = (d < 365) ? d : Time_get_lastdoy_y(m->endyr);
+		m->endend = (d == 365) ? Time_get_lastdoy_y(m->endyr) : d;
 	}
 
 	m->daymid = (m->isnorth) ? DAYMID_NORTH : DAYMID_SOUTH;
@@ -324,7 +324,7 @@ void onSet_SW_MDL(SEXP SW_MDL) {
 	//if (strcmp(enddyval, "end") == 0) {
 		//m->endend = (m->isnorth) ? Time_get_lastdoy_y(m->endyr) : DAYLAST_SOUTH;
 	//} else {
-	m->endend = (d < 365) ? d : Time_get_lastdoy_y(m->endyr);
+	m->endend = (d == 365) ? Time_get_lastdoy_y(m->endyr) : d;
 	//}
 
 	m->daymid = (m->isnorth) ? DAYMID_NORTH : DAYMID_SOUTH;
