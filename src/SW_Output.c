@@ -167,11 +167,11 @@
 #include "SW_VegEstab.h"
 
 #ifdef RSOILWAT
-#include "/usr/share/R/include/R.h"
-#include "/usr/share/R/include/Rdefines.h"
-#include "/usr/share/R/include/Rconfig.h"
-#include "/usr/share/R/include/Rinterface.h"
-#include "/usr/share/R/include/Rinternals.h"
+#include "R.h"
+#include "Rdefines.h"
+#include "Rconfig.h"
+#include "Rinterface.h"
+#include "Rinternals.h"
 #endif
 
 /* =================================================== */
