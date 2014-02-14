@@ -4,7 +4,7 @@
  *  Created on: Jun 25, 2013
  *      Author: Ryan Murphy
  */
-#define RSOILWAT
+//#define RSOILWAT
 #ifdef RSOILWAT
 
 #include "SW_R_lib.h"
@@ -316,7 +316,7 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
 /* Experience has shown that generating the Output Data structure in R is slow compared to C
  * This will generate the OUTPUT data Structure and Names*/
 SEXP onGetOutput(SEXP inputData) {
-	int debug = 1;
+	int debug = 0;
 
 	int tLayers=0, tYears = 0, tevapLayers = 0, tVegEstabCount = 0, pYearUse = 0, pMonthUse = 0, pWeekUse = 0, pDayUse = 0;
 	unsigned int Raet_columns, Rdeedrain_columns, Restabs_columns, Revasoil_columns, Revasurface_columns, Rhydred_columns, Rinfiltration_columns, Rinterception_columns, Rpercolation_columns,
