@@ -15,7 +15,7 @@ swSoilLayers <- setClass("swSoils",representation(Layers="matrix"),
 								.1336,.0936,.1762,.1746,.1098,.1787,.1011,.1011,		#trco forb
 								.51,.44,.35,.32,.31,.32,.57,.57,						#sand
 								.15,.26,.41,.45,.47,.47,.28,.28,						#clay
-								1,0,0,0,0,0,0,0,										#imperm
+								0,0,0,0,0,0,0,0,										#imperm
 								0.1860,0.3719,0.7438,1.1158,1.4877,2.2315,2.9754,2.9754), nrow=8,ncol=12,dimnames=list(NULL,c("depth_cm","bulkDensity_g/cm^3",
 										"gravel_content","EvapBareSoil_frac","transpGrass_frac","transpShrub_frac","transpTree_frac","transpForb_frac","sand_frac","clay_frac","impermeability_frac","soilTemp_c")))))
 
@@ -39,7 +39,7 @@ setMethod(f="initialize",signature="swSoils",definition=function(.Object,Layers=
 								.1336,.0936,.1762,.1746,.1098,.1787,.1011,.1011,		#trco forb
 								.51,.44,.35,.32,.31,.32,.57,.57,						#sand
 								.15,.26,.41,.45,.47,.47,.28,.28,						#clay
-								1,0,0,0,0,0,0,0,										#imperm
+								0,0,0,0,0,0,0,0,										#imperm
 								0.1860,0.3719,0.7438,1.1158,1.4877,2.2315,2.9754,2.9754), nrow=8,ncol=12)
 			colnames(Layers)<-c("depth_cm","bulkDensity_g/cm^3","gravel_content","EvapBareSoil_frac","transpGrass_frac","transpShrub_frac","transpTree_frac","transpForb_frac","sand_frac","clay_frac","impermeability_frac","soilTemp_c")
 			.Object@Layers<-Layers

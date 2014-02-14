@@ -2,7 +2,7 @@
 {
   if(interactive())
   {
-    meta <- packageDescription("Rsoilwat")
+    meta <- packageDescription("Rsoilwat31")
     packageStartupMessage("Package 'Rsoilwat_31', ", meta$Version, " (", meta$Date, ").")
   }
   invisible()

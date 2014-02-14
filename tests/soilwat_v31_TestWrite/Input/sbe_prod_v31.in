@@ -38,7 +38,7 @@
 0.0151	0.0151	0.0151	0.0151	# a
 5.0E-5	5.0E-5	5.0E-5	5.0E-5	# b
 0.0116	0.0116	0.0116	0.0116	# c
-2.0E-5	2.0E-5	2.0E-5	2.0E-5	# d
+2.0E-5	0.0116	2.0E-5	2.0E-5	# d
 
 
 # ---- Parameter for partitioning of bare-soil evaporation and transpiration as in Es = exp(-param*LAI)
@@ -63,10 +63,10 @@
 
 # ---- Hydraulic redistribution: Ryel, Ryel R, Caldwell, Caldwell M, Yoder, Yoder C, Or, Or D, Leffler, Leffler A. 2002. Hydraulic redistribution in a stand of Artemisia tridentata: evaluation of benefits to transpiration assessed with a simulation model. Oecologia 130: 173-184.
 # Grasses	Shrubs		Trees		Forbs
-0	1	1	1	# flag to turn on/off (1/0) hydraulic redistribution
-0.0	-0.2328	-0.2328	-0.2328	# maxCondroot - maximum radial soil-root conductance of the entire active root system for water (cm/-bar/day) = 0.097 cm/MPa/h
-0.0	10.0	10.0	10.0	# swp50 - soil water potential (-bar) where conductance is reduced by 50% = -1. MPa
-0.0	3.22	3.22	3.22	# shapeCond - shaping parameter for the empirical relationship from van Genuchten to model relative soil-root conductance for water
+0	0	0	0	# flag to turn on/off (1/0) hydraulic redistribution
+0.0	0.0	0.0	0.0	# maxCondroot - maximum radial soil-root conductance of the entire active root system for water (cm/-bar/day) = 0.097 cm/MPa/h
+0.0	0.0	0.0	0.0	# swp50 - soil water potential (-bar) where conductance is reduced by 50% = -1. MPa
+0.0	0.0	0.0	0.0	# shapeCond - shaping parameter for the empirical relationship from van Genuchten to model relative soil-root conductance for water
 
 
 # ---- Critical soil water potential (MPa), i.e., when transpiration rates cannot sustained anymore, for instance, for many crop species -1.5 MPa is assumed and called wilting point
@@ -131,7 +131,7 @@
 85.4	210.0	0.06	372.0	# January
 88.2	212.0	0.08	372.0	# February
 95.3	228.0	0.2	372.0	# March
-100.5	272.0	0.33	372.0	# April
+1000.5	272.0	0.33	372.0	# April
 166.4	400.0	0.57	372.0	# May
 186.0	404.0	0.55	372.0	# June
 177.1	381.0	0.5	372.0	# July

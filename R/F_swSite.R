@@ -7,8 +7,8 @@ print("swSite")
 
 ###############################################################SITE#####################################################################
 swSite <- setClass("swSite",representation(SWClimits="numeric",ModelFlags="logical",ModelCoefficients="numeric",SnowSimulationParameters="numeric",DrainageCoefficient="numeric",EvaporationCoefficients="numeric",TranspirationCoefficients="numeric",IntrinsicSiteParams="numeric",SoilTemperatureFlag="logical",SoilTemperatureConstants="numeric",TranspirationRegions="matrix"),
-		prototype=prototype(SWClimits=c(-1,15,15),ModelFlags=c(FALSE,TRUE),ModelCoefficients=c(1,0.5),SnowSimulationParameters=c(.61,1.54,.1,0,.27),DrainageCoefficient=0.02,
-				EvaporationCoefficients=c(15,0.06,0.50,1.10),TranspirationCoefficients=c(28,0.07,0.50,1.10),IntrinsicSiteParams=c(0.681,1651.406,0,0),SoilTemperatureFlag=TRUE,SoilTemperatureConstants=c(300,15,-4,600,0.00070,0.00030,0.18,6.69,15,180),
+		prototype=prototype(SWClimits=c(-1,15,15),ModelFlags=c(FALSE,TRUE),ModelCoefficients=c(1,0.0),SnowSimulationParameters=c(.61,1.54,.1,0,.27),DrainageCoefficient=0.02,
+				EvaporationCoefficients=c(45,0.1,0.25,0.5),TranspirationCoefficients=c(45,0.1,0.50,1.10),IntrinsicSiteParams=c(0.681,1651.4064,0,0),SoilTemperatureFlag=FALSE,SoilTemperatureConstants=c(300,15,-4,600,0.00070,0.00030,0.18,6.69,15,180),
 				TranspirationRegions=matrix(data=c(1,2,3,6,9,11),nrow=3,ncol=2,dimnames=list(NULL,c("ndx","layer")))) )
 
 swSite_validity<-function(object){
@@ -37,8 +37,8 @@ swSite_validity<-function(object){
 	TRUE
 }
 setValidity("swSite",swSite_validity)
-setMethod(f="initialize",signature="swSite",definition=function(.Object,SWClimits=c(-1,15,15),ModelFlags=c(FALSE,TRUE),ModelCoefficients=c(1,0.5),SnowSimulationParameters=c(.61,1.54,.1,0,.27),DrainageCoefficient=0.02,
-				EvaporationCoefficients=c(15,0.06,0.50,1.10),TranspirationCoefficients=c(28,0.07,0.50,1.10),IntrinsicSiteParams=c(0.681,1651.406,0,0),SoilTemperatureFlag=TRUE,SoilTemperatureConstants=c(300,15,-4,600,0.00070,0.00030,0.18,6.69,15,180),TranspirationRegions=NULL ){
+setMethod(f="initialize",signature="swSite",definition=function(.Object,SWClimits=c(-1,15,15),ModelFlags=c(FALSE,TRUE),ModelCoefficients=c(1,0.0),SnowSimulationParameters=c(.61,1.54,.1,0,.27),DrainageCoefficient=0.02,
+				EvaporationCoefficients=c(45,0.1,0.25,0.5),TranspirationCoefficients=c(45,0.1,0.50,1.10),IntrinsicSiteParams=c(0.681,1651.4064,0,0),SoilTemperatureFlag=FALSE,SoilTemperatureConstants=c(300,15,-4,600,0.00070,0.00030,0.18,6.69,15,180),TranspirationRegions=NULL ){
 			if(is.null(TranspirationRegions))
 				TranspirationRegions<-matrix(data=c(1,2,3,6,9,11),nrow=3,ncol=2)
 			colnames(TranspirationRegions)<-c("ndx","layer")
@@ -182,7 +182,7 @@ setMethod("swWriteLines", signature=c(object="swSite", file="character"), defini
 			
 			infiletext[45] <- "# ---- Intrinsic site params ----"
 			infiletext[46] <- paste(format(object@IntrinsicSiteParams[1]),"\t# latitude of the site in radians",sep="")
-			infiletext[47] <- paste(format(object@IntrinsicSiteParams[2]),"\t# altitude of site (m a.s.l.)",sep="")
+			infiletext[47] <- paste(format(object@IntrinsicSiteParams[2],nsmall=4),"\t# altitude of site (m a.s.l.)",sep="")
 			infiletext[48] <- paste(format(object@IntrinsicSiteParams[3]),"\t# slope at site (degrees): no slope = 0",sep="")
 			infiletext[49] <- paste(format(object@IntrinsicSiteParams[4]),"\t# aspect at site (degrees): N=0, E=90, S=180, W=270, no slope:-1",sep="")
 			

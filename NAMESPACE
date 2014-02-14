@@ -3,16 +3,9 @@ useDynLib(Rsoilwat31)
 export(sw_exec,
 sw_inputDataFromFiles,
 sw_inputData,
-sw_outputData,
-adjustLayersDepth,
-getLayersWidth,
-setLayerSequence,
-sw_dailyC4_TempVar,
-sw_SiteClimate_Ambient,
-onGetWeatherData,
-onGetSiteId,
-PotentialNaturalVegetation_CompositionShrubsC3C4_Paruelo1996,
-AdjMonthlyBioMass
+onGetWeatherData_folders,
+onGetWeatherData_database,
+onGetSiteId
 )
 
 exportClasses(

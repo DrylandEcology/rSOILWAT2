@@ -1,6 +1,6 @@
 Package: Rsoilwat31
-Version: 0.27.01
-Date: 02-03-2014
+Version: 0.31.05
+Date: 02-14-2014
 Title: SoilWat v31
 Authors@R: c(person("Ryan Murphy", "Developer", role = c("aut", "cre"),
                     email = "ryanmurf@gmail.com"))

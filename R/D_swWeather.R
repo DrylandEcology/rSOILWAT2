@@ -38,7 +38,7 @@ setMethod(f="swClear",
 
 swWeather <- setClass("swWeather",representation(UseSnow="logical",pct_SnowDrift="numeric",pct_SnowRunoff="numeric",use_Markov="logical",
 				FirstYear_Historical="integer",DaysRunningAverage="integer"),
-		prototype=prototype(UseSnow=TRUE,pct_SnowDrift=0.0,pct_SnowRunoff=0.0,use_Markov=FALSE,FirstYear_Historical=as.integer(1982),DaysRunningAverage=as.integer(5)),
+		prototype=prototype(UseSnow=TRUE,pct_SnowDrift=0.0,pct_SnowRunoff=0.0,use_Markov=FALSE,FirstYear_Historical=as.integer(1979),DaysRunningAverage=as.integer(5)),
 		contains=c("swMonthlyScalingParams"))
 
 swWeather_validity<-function(object){
@@ -58,7 +58,7 @@ swWeather_validity<-function(object){
 		return("@Weather needs to at least length of 1.")
 }
 setValidity("swWeather",swWeather_validity)
-setMethod(f="initialize",signature="swWeather",definition=function(.Object,UseSnow=TRUE,pct_SnowDrift=0.0,pct_SnowRunoff=0.0,use_Markov=FALSE,FirstYear_Historical=as.integer(1982),DaysRunningAverage=as.integer(5)){#weatherYearsIn=NULL
+setMethod(f="initialize",signature="swWeather",definition=function(.Object,UseSnow=TRUE,pct_SnowDrift=0.0,pct_SnowRunoff=0.0,use_Markov=FALSE,FirstYear_Historical=as.integer(1979),DaysRunningAverage=as.integer(5)){#weatherYearsIn=NULL
 			#if(is.null(weatherYearsIn))
 				#weatherYearsIn<-list('1982'=swWeatherData(data=year1982,year=as.integer(1982)),
 				#		'1983'=swWeatherData(data=year1983,year=as.integer(1983)),

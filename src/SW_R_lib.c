@@ -435,6 +435,7 @@ SEXP onGetOutput(SEXP inputData) {
 	}
 
 	tVegEstabCount = INTEGER(GET_SLOT(GET_SLOT(inputData, install("estab")), install("count")))[0];
+
 	//tVegEstabCount = SW_VegEstab.count;
 
 	yr_nrow = tYears * pYearUse;
@@ -442,8 +443,17 @@ SEXP onGetOutput(SEXP inputData) {
 	wk_nrow = tYears * 53 * pWeekUse;
 	if (pDayUse == 1) {
 		dy_nrow = 0;
-		for (i = 0; i < tYears; i++) {
-			dy_nrow += Time_get_lastdoy_y(i);
+		for (i = INTEGER(GET_SLOT(GET_SLOT(inputData, install("years")), install("StartYear")))[0]; i <= INTEGER(GET_SLOT(GET_SLOT(inputData, install("years")), install("EndYear")))[0]; i++) {
+			if(i==0) {//Need to calculate the starting first day of first year
+				dy_nrow += Time_get_lastdoy_y(i) - INTEGER(GET_SLOT(GET_SLOT(inputData, install("years")), install("FDOFY")))[0] + 1;
+				if(debug) Rprintf("Year: %d DAYSINYEAR: %d\n",i,Time_get_lastdoy_y(i) - INTEGER(GET_SLOT(GET_SLOT(inputData, install("years")), install("FDOFY")))[0] + 1);
+			} else if(i==(tYears-1)) {//and last day of last year.
+				dy_nrow += INTEGER(GET_SLOT(GET_SLOT(inputData, install("years")), install("EDOEY")))[0];
+				if(debug) Rprintf("Year: %d DAYSINYEAR: %d\n",i,INTEGER(GET_SLOT(GET_SLOT(inputData, install("years")), install("EDOEY")))[0]);
+			} else {
+				dy_nrow += Time_get_lastdoy_y(i);
+				if(debug) Rprintf("Year: %d DAYSINYEAR: %d\n",i,Time_get_lastdoy_y(i));
+			}
 		}
 	}
 
@@ -1926,7 +1936,7 @@ SEXP onGetOutput(SEXP inputData) {
 		}
 		if(periodUse[18][0]) {
 			if(debug) Rprintf("\tdy\n");
-			Rprintf("\tRows dy_nrow %d Columns %d \n", dy_nrow, Rhydred_columns + 2);
+			if(debug) Rprintf("\tRows dy_nrow %d Columns %d \n", dy_nrow, Rhydred_columns + 2);
 			PROTECT(Rhydred_dy = allocMatrix(REALSXP, dy_nrow, Rhydred_columns+2));
 			PROTECT(Rhydred_names_dy = allocVector(VECSXP, 2));
 			PROTECT(Rhydred_names_y_dy = allocVector(STRSXP, Rhydred_columns + 2));
