@@ -163,6 +163,7 @@ setMethod("swProd_CritSoilWaterPotential", "swProd", function(object) {return(ob
 setMethod("swProd_MonProd_grass", "swProd", function(object) {return(object@MonthlyProductionValues_grass)})
 setMethod("swProd_MonProd_shrub", "swProd", function(object) {return(object@MonthlyProductionValues_shrub)})
 setMethod("swProd_MonProd_tree", "swProd", function(object) {return(object@MonthlyProductionValues_tree)})
+setMethod("swProd_MonProd_forb", "swProd", function(object) {return(object@MonthlyProductionValues_forb)})
 
 setReplaceMethod(f="swProd_Composition", signature="swProd", definition=function(object,value) {object@Composition <- value; return(object)})
 setReplaceMethod(f="swProd_Albedo", signature="swProd", definition=function(object,value) {object@Albedo <- value; return(object)})
@@ -179,6 +180,7 @@ setReplaceMethod(f="swProd_CritSoilWaterPotential", signature="swProd", definiti
 setReplaceMethod(f="swProd_MonProd_grass", signature="swProd", definition=function(object,value) {object@MonthlyProductionValues_grass <- value; return(object)})
 setReplaceMethod(f="swProd_MonProd_shrub", signature="swProd", definition=function(object,value) {object@MonthlyProductionValues_shrub <- value; return(object)})
 setReplaceMethod(f="swProd_MonProd_tree", signature="swProd", definition=function(object,value) {object@MonthlyProductionValues_tree <- value; return(object)})
+setReplaceMethod(f="swProd_MonProd_forb", signature="swProd", definition=function(object,value) {object@MonthlyProductionValues_forb <- value; return(object)})
 
 setMethod("swWriteLines", signature=c(object="swProd", file="character"), definition=function(object, file) {
 			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)

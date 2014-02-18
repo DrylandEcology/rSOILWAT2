@@ -183,6 +183,7 @@ setMethod("swProd_CritSoilWaterPotential", "swInputData", function(object) {retu
 setMethod("swProd_MonProd_grass", "swInputData", function(object) {return(object@prod@MonthlyProductionValues_grass)})
 setMethod("swProd_MonProd_shrub", "swInputData", function(object) {return(object@prod@MonthlyProductionValues_shrub)})
 setMethod("swProd_MonProd_tree", "swInputData", function(object) {return(object@prod@MonthlyProductionValues_tree)})
+setMethod("swProd_MonProd_forb", "swInputData", function(object) {return(object@prod@MonthlyProductionValues_forb)})
 
 setReplaceMethod(f="set_swProd", signature="swInputData", definition=function(object,value) {object@prod <- value; return(object)})
 setReplaceMethod(f="swProd_Composition", signature="swInputData", definition=function(object,value) {object@prod@Composition <- value; return(object)})
@@ -200,6 +201,7 @@ setReplaceMethod(f="swProd_CritSoilWaterPotential", signature="swInputData", def
 setReplaceMethod(f="swProd_MonProd_grass", signature="swInputData", definition=function(object,value) {object@prod@MonthlyProductionValues_grass <- value; return(object)})
 setReplaceMethod(f="swProd_MonProd_shrub", signature="swInputData", definition=function(object,value) {object@prod@MonthlyProductionValues_shrub <- value; return(object)})
 setReplaceMethod(f="swProd_MonProd_tree", signature="swInputData", definition=function(object,value) {object@prod@MonthlyProductionValues_tree <- value; return(object)})
+setReplaceMethod(f="swProd_MonProd_forb", signature="swInputData", definition=function(object,value) {object@prod@MonthlyProductionValues_forb <- value; return(object)})
 ##
 setMethod("get_swSite", "swInputData", function(object) {return(object@site)})
 setMethod("swSite_SWClimits", "swInputData", function(object) {return(object@site@SWClimits)})

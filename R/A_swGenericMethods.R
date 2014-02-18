@@ -143,6 +143,7 @@ setGeneric(name="swProd_CritSoilWaterPotential",function(object) {standardGeneri
 setGeneric(name="swProd_MonProd_grass",function(object) {standardGeneric("swProd_MonProd_grass")})
 setGeneric(name="swProd_MonProd_shrub",function(object) {standardGeneric("swProd_MonProd_shrub")})
 setGeneric(name="swProd_MonProd_tree",function(object) {standardGeneric("swProd_MonProd_tree")})
+setGeneric(name="swProd_MonProd_forb",function(object) {standardGeneric("swProd_MonProd_forb")})
 
 setGeneric(name="set_swProd<-",function(object, value) {standardGeneric("set_swProd<-")})
 setGeneric(name="swProd_Composition<-",function(object, value) {standardGeneric("swProd_Composition<-")})
@@ -160,6 +161,7 @@ setGeneric(name="swProd_CritSoilWaterPotential<-",function(object, value) {stand
 setGeneric(name="swProd_MonProd_grass<-",function(object, value) {standardGeneric("swProd_MonProd_grass<-")})
 setGeneric(name="swProd_MonProd_shrub<-",function(object, value) {standardGeneric("swProd_MonProd_shrub<-")})
 setGeneric(name="swProd_MonProd_tree<-",function(object, value) {standardGeneric("swProd_MonProd_tree<-")})
+setGeneric(name="swProd_MonProd_forb<-",function(object, value) {standardGeneric("swProd_MonProd_forb<-")})
 ########################
 
 #######SITE#############

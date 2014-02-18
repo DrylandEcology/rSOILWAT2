@@ -198,7 +198,7 @@ void LogError(FILE *fp, const int mode, const char *fmt, ...) {
 	char outfmt[50 + strlen(fmt)]; /* to prepend err type str */
 	va_list args;
 #ifdef RSOILWAT
-	char *message = R_alloc(strlen(fmt) + 30, sizeof(char));
+	char *message = R_alloc(strlen(fmt) + 80, sizeof(char));
 #endif
 
 	va_start(args, fmt);
@@ -224,21 +224,21 @@ void LogError(FILE *fp, const int mode, const char *fmt, ...) {
 			strcpy(outfmt, "NOTE: ");
 			strcat(outfmt, fmt);
 			strcat(outfmt, "\n");
-			vsnprintf(message, 30 + strlen(fmt), outfmt, args);
+			vsnprintf(message, 80 + strlen(fmt), outfmt, args);
 			SET_STRING_ELT(Rlogfile, RlogIndex, mkChar(message));
 			RlogIndex++;
 		} else if ((LOGWARN & mode) && logWarn) {
 			strcpy(outfmt, "WARNING: ");
 			strcat(outfmt, fmt);
 			strcat(outfmt, "\n");
-			vsnprintf(message, 30 + strlen(fmt), outfmt, args);
+			vsnprintf(message, 80 + strlen(fmt), outfmt, args);
 			SET_STRING_ELT(Rlogfile, RlogIndex, mkChar(message));
 			RlogIndex++;
 		} else if ((LOGERROR & mode) && logFatl) {
 			strcpy(outfmt, "ERROR: ");
 			strcat(outfmt, fmt);
 			strcat(outfmt, "\n");
-			vsnprintf(message, 30 + strlen(fmt), outfmt, args);
+			vsnprintf(message, 80 + strlen(fmt), outfmt, args);
 			SET_STRING_ELT(Rlogfile, RlogIndex, mkChar(message));
 			RlogIndex++;
 		}
@@ -256,7 +256,7 @@ void LogError(FILE *fp, const int mode, const char *fmt, ...) {
 		strcpy(outfmt, "ERROR: ");
 		strcat(outfmt, fmt);
 		strcat(outfmt, "\n");
-		vsnprintf(message, 30 + strlen(fmt), outfmt, args);
+		vsnprintf(message, 80 + strlen(fmt), outfmt, args);
 		Rprintf("Exit.. %s\n",message);
 		error("@ generic.c LogError");
 #endif
