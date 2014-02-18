@@ -60,7 +60,7 @@ exportMethods(
 	
 	#PROD#
 	get_swProd,swProd_Composition,swProd_Albedo,swProd_Cover_stcr,swProd_CanopyHeight,swProd_VegInterParam,swProd_LitterInterParam,swProd_EsTpartitioning_param,swProd_Es_param_limit,swProd_Shade,swProd_HydrRedstro_use,swProd_HydrRedstro,swProd_CritSoilWaterPotential,swProd_MonProd_grass,swProd_MonProd_shrub,swProd_MonProd_tree,swProd_MonProd_forb,
-	"set_swProd<-","swProd_Composition<-","swProd_Albedo<-","swProd_Cover_stcr<-","swProd_CanopyHeight<-","swProd_VegInterParam<-","swProd_LitterInterParam<-","swProd_EsTpartitioning_param<-","swProd_Es_param_limit<-","swProd_Shade<-","swProd_HydrRedstro_use<-","swProd_HydrRedstro<-","swProd_CritSoilWaterPotential<-","swProd_MonProd_grass<-","swProd_MonProd_shrub<-","swProd_MonProd_tree<-",swProd_MonProd_forb<-",
+	"set_swProd<-","swProd_Composition<-","swProd_Albedo<-","swProd_Cover_stcr<-","swProd_CanopyHeight<-","swProd_VegInterParam<-","swProd_LitterInterParam<-","swProd_EsTpartitioning_param<-","swProd_Es_param_limit<-","swProd_Shade<-","swProd_HydrRedstro_use<-","swProd_HydrRedstro<-","swProd_CritSoilWaterPotential<-","swProd_MonProd_grass<-","swProd_MonProd_shrub<-","swProd_MonProd_tree<-","swProd_MonProd_forb<-",
 	
 	#SITE#
 	get_swSite,swSite_SWClimits,swSite_ModelFlags,swSite_ModelCoefficients,swSite_SnowSimulationParams,swSite_DrainageCoefficient,swSite_EvapCoefficients,swSite_TranspCoefficients,swSite_IntrinsicSiteParams,swSite_SoilTemperatureFlag,swSite_SoilTemperatureConsts,swSite_TranspirationRegions,
