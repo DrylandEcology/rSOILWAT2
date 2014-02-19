@@ -1,11 +1,11 @@
 # Weather setup parameters
-# Location: Chimney Park, WY (41.068° N, 106.1195° W, 2740 m elevation)
+# Location: 
 #
 1      # 1=allow snow accumulation,   0=no snow effects.
 0		# % of snow drift per snow event (+ indicates snow addition, - indicates snow taken away from site)
 0		# % of snowmelt water as runoff/on per event (>0 indicates runoff, <0 indicates runon)
 0      # 0=use historical data only, 1=use markov process for missing weather.
-1982	# first year to begin historical weather.
+1979	# first year to begin historical weather.
 5      # number of days to use in the running average of temperature.
 
 # Monthly scaling parameters:
