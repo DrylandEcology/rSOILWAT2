@@ -297,6 +297,7 @@ void SW_WTH_read(void) {
 	FILE *f;
 	int lineno = 0, month, x;
 	RealF sppt, stmax, stmin;
+	RealF sky,wind,rH,transmissivity;
 
 	MyFileName = SW_F_name(eWeather);
 	f = OpenFile(MyFileName, "r");
@@ -325,7 +326,7 @@ void SW_WTH_read(void) {
 		default:
 			if (lineno == 6 + MAX_MONTHS)
 				break;
-			x = sscanf(inbuf, "%d %f %f %f", &month, &sppt, &stmax, &stmin);
+			x = sscanf(inbuf, "%d %f %f %f %f %f %f %f", &month, &sppt, &stmax, &stmin,&sky,&wind,&rH,&transmissivity);
 			if (x < 4) {
 				CloseFile(&f);
 				LogError(logfp, LOGFATAL, "%s : Bad record %d.", MyFileName, lineno);
@@ -333,6 +334,10 @@ void SW_WTH_read(void) {
 			w->scale_precip[month - 1] = sppt;
 			w->scale_temp_max[month - 1] = stmax;
 			w->scale_temp_min[month - 1] = stmin;
+			w->scale_skyCover[month - 1] = sky;
+			w->scale_wind[month - 1] = wind;
+			w->scale_rH[month - 1] = rH;
+			w->scale_transmissivity[month - 1] = transmissivity;
 		}
 		lineno++;
 	}
@@ -361,10 +366,10 @@ void SW_WTH_read(void) {
 	/* required for PET */
 	SW_SKY_read();
 #ifndef RSOILWAT
-	SW_SKY_init();
+	SW_SKY_init(w->scale_skyCover, w->scale_wind, w->scale_rH, w->scale_transmissivity);
 #else
 	if(!collectInData)
-	SW_SKY_init();
+		SW_SKY_init(w->scale_skyCover, w->scale_wind, w->scale_rH, w->scale_transmissivity);
 #endif
 }
 #ifdef RSOILWAT
@@ -380,7 +385,7 @@ SEXP onGet_SW_WTH() {
 	SEXP MonthlyScalingParams, MonthlyScalingParams_names, MonthlyScalingParams_names_x, MonthlyScalingParams_names_y;
 
 	char *cSW_WTH_names[] = {"UseSnow", "pct_SnowDrift", "pct_SnowRunoff", "use_Markov", "FirstYear_Historical", "DaysRunningAverage", "MonthlyScalingParams"};
-	char *cMonthlyScalingParams_names[] = {"PPT", "MaxT", "MinT"};
+	char *cMonthlyScalingParams_names[] = {"PPT", "MaxT", "MinT","SkyCover","Wind","rH","Transmissivity"};
 	char *cMonths[] = {"January","February","March","April","May","June","July","August","September","October","November","December"};
 
 	PROTECT(swWeather = MAKE_CLASS("swWeather"));
@@ -399,20 +404,24 @@ SEXP onGet_SW_WTH() {
 	PROTECT(days_in_runavg = NEW_INTEGER(1));
 	INTEGER_POINTER(days_in_runavg)[0] = w->days_in_runavg;
 
-	PROTECT(MonthlyScalingParams = allocMatrix(REALSXP,12,3));
+	PROTECT(MonthlyScalingParams = allocMatrix(REALSXP,12,7));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
 	for (i = 0; i < 12; i++) {
 		p_MonthlyValues[i + 12 * 0] = w->scale_precip[i];
 		p_MonthlyValues[i + 12 * 1] = w->scale_temp_max[i];
 		p_MonthlyValues[i + 12 * 2] = w->scale_temp_min[i];
+		p_MonthlyValues[i + 12 * 3] = w->scale_skyCover[i];
+		p_MonthlyValues[i + 12 * 4] = w->scale_wind[i];
+		p_MonthlyValues[i + 12 * 5] = w->scale_rH[i];
+		p_MonthlyValues[i + 12 * 6] = w->scale_transmissivity[i];
 	}
 	PROTECT(MonthlyScalingParams_names = allocVector(VECSXP, 2));
 	PROTECT(MonthlyScalingParams_names_x = allocVector(STRSXP,12));
 	for (i = 0; i < 12; i++)
-	SET_STRING_ELT(MonthlyScalingParams_names_x, i, mkChar(cMonths[i]));
+		SET_STRING_ELT(MonthlyScalingParams_names_x, i, mkChar(cMonths[i]));
 	PROTECT(MonthlyScalingParams_names_y = allocVector(STRSXP,3));
-	for (i = 0; i < 3; i++)
-	SET_STRING_ELT(MonthlyScalingParams_names_y, i, mkChar(cMonthlyScalingParams_names[i]));
+	for (i = 0; i < 7; i++)
+		SET_STRING_ELT(MonthlyScalingParams_names_y, i, mkChar(cMonthlyScalingParams_names[i]));
 	SET_VECTOR_ELT(MonthlyScalingParams_names, 0, MonthlyScalingParams_names_x);
 	SET_VECTOR_ELT(MonthlyScalingParams_names, 1, MonthlyScalingParams_names_y);
 	setAttrib(MonthlyScalingParams, R_DimNamesSymbol, MonthlyScalingParams_names);
@@ -460,6 +469,10 @@ void onSet_SW_WTH(SEXP SW_WTH) {
 		w->scale_precip[i] = p_MonthlyValues[i + 12 * 0];
 		w->scale_temp_max[i] = p_MonthlyValues[i + 12 * 1];
 		w->scale_temp_min[i] = p_MonthlyValues[i + 12 * 2];
+		w->scale_skyCover[i] = p_MonthlyValues[i + 12 * 3];
+		w->scale_wind[i] = p_MonthlyValues[i + 12 * 4];
+		w->scale_rH[i] = p_MonthlyValues[i + 12 * 5];
+		w->scale_transmissivity[i] = p_MonthlyValues[i + 12 * 6];
 	}
 
 	SW_WeatherPrefix(w->name_prefix);
@@ -486,7 +499,7 @@ void onSet_SW_WTH(SEXP SW_WTH) {
 
 	PROTECT(SW_SKY = GET_SLOT(InputData, install("cloud")));
 	onSet_SW_SKY(SW_SKY);
-	SW_SKY_init();
+	SW_SKY_init(w->scale_skyCover, w->scale_wind, w->scale_rH, w->scale_transmissivity);
 	if(w->use_markov)
 		UNPROTECT(11);
 	else

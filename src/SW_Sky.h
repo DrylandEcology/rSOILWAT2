@@ -43,7 +43,7 @@ typedef struct {
 } SW_SKY;
 
 void SW_SKY_read(void);
-void SW_SKY_init(void);
+void SW_SKY_init(double scale_sky[], double scale_wind[], double scale_rH[], double scale_transmissivity[]);
 void SW_SKY_construct(void);
 
 #ifdef RSOILWAT

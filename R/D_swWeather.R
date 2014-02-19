@@ -7,19 +7,19 @@ print("swWeather")
 
 #######################Monthly Scaling Params#################################
 
-swMonthlyScalingParams<-setClass("swMonthlyScalingParams",representation(MonthlyScalingParams="matrix"),prototype=prototype(MonthlyScalingParams=matrix(data=c(rep(1,12),rep(0,12*2)),nrow=12,ncol=3,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("PPT","MaxT","MinT")))))
+swMonthlyScalingParams<-setClass("swMonthlyScalingParams",representation(MonthlyScalingParams="matrix"),prototype=prototype(MonthlyScalingParams=matrix(data=c(rep(1,12),rep(0,12*3),rep(1,12),rep(0,12),rep(1,12)),nrow=12,ncol=7,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("PPT","MaxT","MinT","SkyCover","Wind","rH","Transmissivity")))))
 swMonthlyScalingParams_validity<-function(object){
 	if(dim(object@MonthlyScalingParams)[1]!=12)
 		return("@MonthlyScalingParams needs 12 rows.")
-	if(dim(object@MonthlyScalingParams)[2]!=3)
-		return("@MonthlyScalingParams needs 3 columns.")
+	if(dim(object@MonthlyScalingParams)[2]!=7)
+		return("@MonthlyScalingParams needs 7 columns.")
 	TRUE
 }
 setValidity("swMonthlyScalingParams",swMonthlyScalingParams_validity)
 setMethod(f="initialize",signature="swMonthlyScalingParams",definition=function(.Object,MonthlyScalingParams=NULL){
 			if(is.null(MonthlyScalingParams))
-				MonthlyScalingParams<-matrix(data=c(rep(1,12),rep(0,12*2)),nrow=12,ncol=3)
-			colnames(MonthlyScalingParams)<-c("PPT","MaxT","MinT")
+				MonthlyScalingParams<-matrix(data=c(rep(1,12),rep(0,12*3),rep(1,12),rep(0,12),rep(1,12)),nrow=12,ncol=7)
+			colnames(MonthlyScalingParams)<-c("PPT","MaxT","MinT","SkyCover","Wind","rH","Transmissivity")
 			rownames(MonthlyScalingParams)<-c("January","February","March","April","May","June","July","August","September","October","November","December")
 			.Object@MonthlyScalingParams<-MonthlyScalingParams
 			validObject(.Object)
@@ -28,8 +28,8 @@ setMethod(f="initialize",signature="swMonthlyScalingParams",definition=function(
 setMethod(f="swClear",
 		signature="swMonthlyScalingParams",
 		definition=function(object) {
-			object@MonthlyScalingParams=matrix(data=c(rep(1,12),rep(NA,12*2)),nrow=12,ncol=3)
-			colnames(object@MonthlyScalingParams)<-c("PPT","MaxT","MinT")
+			object@MonthlyScalingParams=matrix(data=c(rep(1,12),rep(0,12*3),rep(1,12),rep(0,12),rep(1,12)),nrow=12,ncol=7)
+			colnames(object@MonthlyScalingParams)<-c("PPT","MaxT","MinT","SkyCover","Wind","rH","Transmissivity")
 			rownames(object@MonthlyScalingParams)<-c("January","February","March","April","May","June","July","August","September","October","November","December")
 			return(object)
 		})
@@ -88,8 +88,8 @@ setMethod(f="swClear",
 			object@DaysRunningAverage=integer(1)
 			#object@weatherYearsIn=list(0)
 			#object@markov = swClear(object@markov)
-			object@MonthlyScalingParams=matrix(data=c(rep(1,12),rep(NA,12*2)),nrow=12,ncol=3)
-			colnames(object@MonthlyScalingParams)<-c("PPT","MaxT","MinT")
+			object@MonthlyScalingParams=matrix(data=c(rep(1,12),rep(0,12*3),rep(1,12),rep(0,12),rep(1,12)),nrow=12,ncol=7)
+			colnames(object@MonthlyScalingParams)<-c("PPT","MaxT","MinT","SkyCover","Wind","rH","Transmissivity")
 			rownames(object@MonthlyScalingParams)<-c("January","February","March","April","May","June","July","August","September","October","November","December")
 			#object@Cloud=matrix(data=NA,nrow=5,ncol=12,byrow=T)
 			#colnames(object@Cloud)<-c("January","February","March","April","May","June","July","August","September","October","November","December")		
@@ -132,11 +132,17 @@ setMethod("swWriteLines", signature=c(object="swWeather", file="character"), def
 			infiletext[13] <- "# PPT = multiplicative for PPT (scale*ppt)."
 			infiletext[14] <- "# MaxT = additive for max temp (scale+maxtemp)."
 			infiletext[15] <- "# MinT = additive for min temp (scale+mintemp)."
-			infiletext[16] <- "#Mon  PPT  MaxT  MinT"
+			infiletext[16] <- "# SkyCover = additive for mean monthly sky cover [%]; min(100, max(0, scale + sky cover))"
+			infiletext[17] <- "# Wind = multiplicative for mean monthly wind speed; max(0, scale * wind speed)"
+			infiletext[18] <- "# rH = additive for mean monthly relative humidity [%]; min(100, max(0, scale + rel. Humidity))"
+			infiletext[19] <- "# Transmissivity = multiplicative for mean monthly relative transmissivity; min(1, max(0, scale * transmissivity))"
+			infiletext[20] <- "#Mon  PPT  MaxT  MinT	SkyCover	Wind	rH	Transmissivity"
 			
-			for(i in 17:28) {
-				infiletext[i] <- paste(format(i-16),"\t",format(object@MonthlyScalingParams[i-16,1]),"\t",
-						format(object@MonthlyScalingParams[i-16,2]),"\t",format(object@MonthlyScalingParams[i-16,3]),sep="")
+			for(i in 21:32) {
+				infiletext[i] <- paste(format(i-20),"\t",format(object@MonthlyScalingParams[i-20,1]),"\t",
+						format(object@MonthlyScalingParams[i-20,2]),"\t",format(object@MonthlyScalingParams[i-20,3]),"\t",
+						format(object@MonthlyScalingParams[i-20,4]),"\t",format(object@MonthlyScalingParams[i-20,5]),"\t",
+						format(object@MonthlyScalingParams[i-20,6]),"\t",format(object@MonthlyScalingParams[i-20,7]),"\t",sep="")
 			}
 			
 			infile <- file(infilename, "w+b")
@@ -153,11 +159,11 @@ setMethod("swReadLines", signature=c(object="swWeather",file="character"), defin
 			object@FirstYear_Historical = readInteger(infiletext[8])
 			object@DaysRunningAverage = readInteger(infiletext[9])
 			
-			data=matrix(data=c(rep(1,12),rep(NA,12*2)),nrow=12,ncol=3)
-			colnames(data)<-c("PPT","MaxT","MinT")
+			data=matrix(data=c(rep(1,12),rep(NA,12*6)),nrow=12,ncol=7)
+			colnames(data)<-c("PPT","MaxT","MinT","SkyCover","Wind","rH","Transmissivity")
 			rownames(data)<-c("January","February","March","April","May","June","July","August","September","October","November","December")
-			for(i in 17:28) {
-				data[i-16,] <- readNumerics(infiletext[i],4)[2:4]
+			for(i in 21:32) {
+				data[i-20,] <- readNumerics(infiletext[i],4)[2:8]
 			}
 			object@MonthlyScalingParams = data
 			return(object)
