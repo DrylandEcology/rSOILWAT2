@@ -199,7 +199,7 @@ void LogError(FILE *fp, const int mode, const char *fmt, ...) {
 	va_list args;
 #ifdef RSOILWAT
 	char *message;
-	message = R_alloc(strlen(fmt) + 91, sizeof(char));
+	message = R_alloc(strlen(fmt) + 121, sizeof(char));
 #endif
 
 	va_start(args, fmt);
@@ -225,21 +225,21 @@ void LogError(FILE *fp, const int mode, const char *fmt, ...) {
 			strcpy(outfmt, "NOTE: ");
 			strcat(outfmt, fmt);
 			strcat(outfmt, "\n");
-			vsnprintf(message, 90 + strlen(fmt), outfmt, args);
+			vsnprintf(message, 120 + strlen(fmt), outfmt, args);
 			SET_STRING_ELT(Rlogfile, RlogIndex, mkChar(message));
 			RlogIndex++;
 		} else if ((LOGWARN & mode) && logWarn) {
 			strcpy(outfmt, "WARNING: ");
 			strcat(outfmt, fmt);
 			strcat(outfmt, "\n");
-			vsnprintf(message, 90 + strlen(fmt), outfmt, args);
+			vsnprintf(message, 120 + strlen(fmt), outfmt, args);
 			SET_STRING_ELT(Rlogfile, RlogIndex, mkChar(message));
 			RlogIndex++;
 		} else if ((LOGERROR & mode) && logFatl) {
 			strcpy(outfmt, "ERROR: ");
 			strcat(outfmt, fmt);
 			strcat(outfmt, "\n");
-			vsnprintf(message, 90 + strlen(fmt), outfmt, args);
+			vsnprintf(message, 120 + strlen(fmt), outfmt, args);
 			SET_STRING_ELT(Rlogfile, RlogIndex, mkChar(message));
 			RlogIndex++;
 		}
