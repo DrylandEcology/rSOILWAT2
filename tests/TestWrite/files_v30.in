@@ -1,0 +1,28 @@
+# List of input files for SOILWAT v32
+# This is the first file read. Simulation information = 
+
+# Model
+Input/years.in	# years for model operation
+Output/logfile.log	# errors or important info (can also be stdout)
+
+#Site
+Input/siteparam_v26.in	# site parameters
+Input/soils_v30.in	# soil layer definitions
+
+#Weather
+Input/weathsetup_v20.in	# weather parameters
+Weather_Test/weath	# data file containing historical weather (can include path)
+Input/mkv_prob.in	# precip probs; required for markov weather
+Input/mkv_covar.in	# covariance table required for markov weather
+Input/cloud_v20.in	# general atmospheric params
+
+#Vegetation
+Input/sbe_prod_v31.in	# productivity values
+Input/estab.in	# plant establishment start file
+
+#SWC measurements
+Input/swcsetup.in	# params for handling measured swc
+
+#Output
+Output	# 'relative' path for output files: / for same directory, or e.g., Output/
+Input/outsetup_v30.in	# define output quantities
