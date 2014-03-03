@@ -419,7 +419,7 @@ SEXP onGet_SW_WTH() {
 	PROTECT(MonthlyScalingParams_names_x = allocVector(STRSXP,12));
 	for (i = 0; i < 12; i++)
 		SET_STRING_ELT(MonthlyScalingParams_names_x, i, mkChar(cMonths[i]));
-	PROTECT(MonthlyScalingParams_names_y = allocVector(STRSXP,3));
+	PROTECT(MonthlyScalingParams_names_y = allocVector(STRSXP,7));
 	for (i = 0; i < 7; i++)
 		SET_STRING_ELT(MonthlyScalingParams_names_y, i, mkChar(cMonthlyScalingParams_names[i]));
 	SET_VECTOR_ELT(MonthlyScalingParams_names, 0, MonthlyScalingParams_names_x);

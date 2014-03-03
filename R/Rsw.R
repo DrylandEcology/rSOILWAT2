@@ -20,7 +20,7 @@ sw_exec <- function(inputData=NULL,weatherList=NULL,dir="", files.in="files_v30.
 sw_inputDataFromFiles <- function(dir="", files.in="files_v30.in") {
 	echo=FALSE
 	quiet=FALSE
-	colNames=FALSE
+	
 	input <- c("sw_v27")
 	if(dir!="")
 		input<-c(input,"-d", dir)
@@ -31,8 +31,7 @@ sw_inputDataFromFiles <- function(dir="", files.in="files_v30.in") {
 	if(quiet)
 		input<-c(input,"-q")
 	data <- .Call("onGetInputDataFromFiles",input)
-	if(colNames)
-		.Call("onSetNames",data)
+	
 	return(data)
 }
 
