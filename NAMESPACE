@@ -1,11 +1,12 @@
 useDynLib(Rsoilwat31)
 
-export(sw_exec,
-sw_inputDataFromFiles,
-sw_inputData,
-onGetWeatherData_folders,
-onGetWeatherData_database,
-onGetSiteId
+export(
+	sw_exec,
+	sw_inputDataFromFiles,
+	sw_inputData,
+	onGetWeatherData_folders,
+	onGetWeatherData_database,
+	onGetSiteId
 )
 
 exportClasses(

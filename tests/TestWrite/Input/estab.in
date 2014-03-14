@@ -7,7 +7,5 @@
 # lines below.
 
 1	# use flag; 1=check establishment, 0=don't check, ignore following
-bouteloua.estab
-bromus.estab
-/home/ryan/workspace/Rsoilwat_v31/tests/IntroductionExample/Input/bouteloua.estab
-/home/ryan/workspace/Rsoilwat_v31/tests/IntroductionExample/Input/bromus.estab
+Input/bouteloua.estab
+Input/bromus.estab
