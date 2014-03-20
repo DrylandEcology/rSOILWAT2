@@ -52,15 +52,8 @@ setMethod("swWriteLines", signature=c(object="swWeatherData", file="character"),
 		})
 setMethod("swReadLines", signature=c(object="swWeatherData",file="character"), definition=function(object,file) {
 			object@year = as.integer(strsplit(x=basename(file),split=".",fixed=TRUE)[[1]][2])
-			infiletext <- readLines(con = file)
-			#should be no empty lines
-			infiletext <- infiletext[infiletext != ""]
-			days <- (length(infiletext)-2)
-			data=matrix(data=c(1:days,rep(999,days*3)),nrow=days,ncol=4)
+			data <-read.csv(file,header=FALSE,skip=2,sep="\t")
 			colnames(data)<-c("DOY","Tmax_C","Tmin_C","PPT_cm")
-			for(i in 3:length(infiletext)) {
-				data[i-2,] <- readNumerics(infiletext[i],4)
-			}
-			object@data = data
+			object@data = as.matrix(data)
 			return(object)
 		})

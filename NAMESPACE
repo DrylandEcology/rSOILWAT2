@@ -4,9 +4,11 @@ export(
 	sw_exec,
 	sw_inputDataFromFiles,
 	sw_inputData,
-	onGetWeatherData_folders,
-	onGetWeatherData_database,
-	onGetSiteId
+	getWeatherData_folders,
+	getWeatherData_database,
+	getSiteId,
+	addWeatherDataToDataBase,
+	createDatabaseFromLookupWeatherFolder
 )
 
 exportClasses(
