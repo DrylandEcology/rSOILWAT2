@@ -7,7 +7,9 @@ getWeatherData_folders,
 getWeatherData_database,
 getSiteId,
 addWeatherDataToDataBase,
-createDatabaseFromLookupWeatherFolder
+createDatabase,
+addToDatabaseFromFolders,
+deleteSiteData
 )
 
 exportClasses(
