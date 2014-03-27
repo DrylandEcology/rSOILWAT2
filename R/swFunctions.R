@@ -69,11 +69,11 @@ dbW_getSiteId <- function(lat=NULL, long=NULL, Label=NULL) {
 }
 
 dbW_getSiteTable <- function() {
-	return(dbReadTable(con.env$con,SQL, "Sites"))
+	return(dbReadTable(con.env$con, "Sites"))
 }
 
 dbW_getScenariosTable <- function() {
-	return(dbReadTable(con.env$con,SQL, "Scenarios"))
+	return(dbReadTable(con.env$con, "Scenarios"))
 }
 
 dbW_getWeatherData <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startYear=NULL,endYear=NULL, Scenario="Current") {
