@@ -205,11 +205,11 @@ dbW_addScenarios <- function(dfScenario) {#names 1 ... 32
 	dbGetPreparedQuery(con.env$con, "INSERT INTO Scenarios VALUES(NULL, :Scenario)", bind.data = as.data.frame(dfScenario,stringsAsFactors=FALSE))
 }
 
-dbW_addWeatherDataNoCheck <- function(con, Site_id, Scenario_id, weatherData) {
-	dbBeginTransaction(con)
+dbW_addWeatherDataNoCheck <- function(Site_id, Scenario_id, weatherData) {
+	dbBeginTransaction(con.env$con)
 	data_blob <- paste0("x'",paste0(memCompress(serialize(weatherData,NULL),type="gzip"),collapse = ""),"'",sep="")
-	dbGetQuery(con, paste("INSERT INTO WeatherData (Site_id, Scenario, data) VALUES (",Site_id,",",Scenario_id,",",data_blob,");",sep=""))
-	dbCommit(con)
+	dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, data) VALUES (",Site_id,",",Scenario_id,",",data_blob,");",sep=""))
+	dbCommit(con.env$con)
 }
 
 dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderPath=NULL, weatherData=NULL, label=NULL, ScenarioName="Current") {
