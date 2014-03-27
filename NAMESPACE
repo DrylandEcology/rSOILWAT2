@@ -4,14 +4,16 @@ export(sw_exec,
 sw_inputDataFromFiles,
 sw_inputData,
 getWeatherData_folders,
-setConnection,
-disconnectConnection,
-getWeatherData_database,
-getSiteId,
-addWeatherDataToDataBase,
-createDatabase,
-addToDatabaseFromFolders,
-deleteSiteData
+dbW_setConnection,
+dbW_disconnectConnection,
+dbW_getWeatherData,
+dbW_getSiteId,
+dbW_addWeatherData,
+dbW_createDatabase,
+dbW_addFromFolders,
+dbW_deleteSiteData,
+dbW_getSiteTable,
+dbW_getScenariosTable
 )
 
 exportClasses(

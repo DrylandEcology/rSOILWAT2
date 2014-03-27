@@ -42,7 +42,7 @@ getWeatherData_folders <- function(LookupWeatherFolder=NULL, weatherDirName=NULL
 	names(weathDataList)<-as.character(weatherDataYears[index])
 	return(weathDataList)
 }
-getSiteId <- function(lat=NULL, long=NULL, Label=NULL) {
+dbW_getSiteId <- function(lat=NULL, long=NULL, Label=NULL) {
 	lat<-as.numeric(lat)
 	long<-as.numeric(long)
 	if(!is.null(Label)) {
@@ -68,7 +68,15 @@ getSiteId <- function(lat=NULL, long=NULL, Label=NULL) {
 	}
 }
 
-getWeatherData_database <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startYear=NULL,endYear=NULL, Scenario="Current") {
+dbW_getSiteTable <- function() {
+	return(dbReadTable(con.env$con,SQL, "Sites"))
+}
+
+dbW_getScenariosTable <- function() {
+	return(dbReadTable(con.env$con,SQL, "Scenarios"))
+}
+
+dbW_getWeatherData <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startYear=NULL,endYear=NULL, Scenario="Current") {
 	if(is.null(Site_id) && is.null(Label) && is.null(lat) && is.null(long)) {
 		stop("No way to locate weather data from input")
 	}
@@ -90,7 +98,7 @@ getWeatherData_database <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,s
 	}
 	Site_id<-as.integer(Site_id)
 	if(length(Site_id) == 0) {
-		Site_id <- getSiteId(lat,long,Label)
+		Site_id <- dbW_getSiteId(lat,long,Label)
 	} else {
 		if(!dbGetQuery(con.env$con, paste("SELECT COUNT(*) FROM WeatherData WHERE Site_id=",Site_id,";",sep=""))[1,1]) {
 			stop("Site_id does not exist.")
@@ -120,11 +128,11 @@ getWeatherData_database <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,s
 	return(data)
 }
 
-addSiteToDataBase <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL) {
+dbW_addSite <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL) {
 	#First See if Site_id exists
 	Site_id<-as.integer(Site_id)
 	if(length(Site_id) == 0) {#Site_id is null
-		Site_id <- getSiteId(lat,long,Label)
+		Site_id <- dbW_getSiteId(lat,long,Label)
 		if(is.null(Site_id)) { #Site_id does not exist for given lat,long, and/or Label. Create it
 			if(is.null(lat)) lat <- "NULL"
 			if(is.null(long)) long <- "NULL"
@@ -170,7 +178,7 @@ addSiteToDataBase <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL) {
 	}
 }
 
-setConnection <- function(dbFilePath) {
+dbW_setConnection <- function(dbFilePath, createAdd=FALSE) {
 	require(RSQLite)
 	drv <- dbDriver("SQLite")
 	
@@ -182,31 +190,33 @@ setConnection <- function(dbFilePath) {
 	}
 	#assign("con", dbConnect(drv, dbname = tfile), envir="package:Rsoilwat")
 	con.env$con <- dbConnect(drv, dbname = tfile)
-	lapply(settings, function(x) dbGetQuery(con.env$con,x))
+	if(createAdd) lapply(settings, function(x) dbGetQuery(con.env$con,x))
 }
 
-disconnectConnection <- function() {
+dbW_disconnectConnection <- function() {
 	dbDisconnect(con.env$con)
 }
 
-addSites <- function(dfLatitudeLongitudeLabel) {#lat #long #Label 1 .... 20165
+dbW_addSites <- function(dfLatitudeLongitudeLabel) {#lat #long #Label 1 .... 20165
 	dbGetPreparedQuery(con.env$con, "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)", bind.data = as.data.frame(dfLatitudeLongitudeLabel,stringsAsFactors=FALSE))
 }
 
-addScenarios <- function(dfScenario) {#names 1 ... 32
+dbW_addScenarios <- function(dfScenario) {#names 1 ... 32
 	dbGetPreparedQuery(con.env$con, "INSERT INTO Scenarios VALUES(NULL, :Scenario)", bind.data = as.data.frame(dfScenario,stringsAsFactors=FALSE))
 }
 
-addWeatherDataToDataBaseNoCheck <- function(Site_id, Scenario_id, weatherData) {
+dbW_addWeatherDataNoCheck <- function(con, Site_id, Scenario_id, weatherData) {
+	dbBeginTransaction(con)
 	data_blob <- paste0("x'",paste0(memCompress(serialize(weatherData,NULL),type="gzip"),collapse = ""),"'",sep="")
-	dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, data) VALUES (",Site_id,",",Scenario_id,",",data_blob,");",sep=""))
+	dbGetQuery(con, paste("INSERT INTO WeatherData (Site_id, Scenario, data) VALUES (",Site_id,",",Scenario_id,",",data_blob,");",sep=""))
+	dbCommit(con)
 }
 
-addWeatherDataToDataBase <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderPath=NULL, weatherData=NULL, label=NULL, ScenarioName="Current") {
+dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderPath=NULL, weatherData=NULL, label=NULL, ScenarioName="Current") {
 	if( (is.null(weatherFolderPath) | ifelse(!is.null(weatherFolderPath), (weatherFolderPath == "" | !file.exists(weatherFolderPath)), FALSE)) & (is.null(weatherData) | !is.list(weatherData) | class(weatherData[[1]]) != "swWeatherData") ) stop("addWeatherDataToDataBase does not have folder path or weatherData to insert")
 	if( (is.null(Site_id) & is.null(lat) & is.null(long) & is.null(weatherFolderPath) & (is.null(label))) | ((!is.null(Site_id) & !is.numeric(Site_id)) & (!is.null(lat) & !is.numeric(lat)) & (!is.null(long) & !is.numeric(long))) ) stop("addWeatherDataToDataBase not enough info to create Site in Sites table.")
 	
-	Site_id <- addSiteToDataBase(Site_id=Site_id, lat=lat, long=long, Label=ifelse(!is.null(weatherFolderPath) & is.null(label), basename(weatherFolderPath), label))
+	Site_id <- dbW_addSite(Site_id=Site_id, lat=lat, long=long, Label=ifelse(!is.null(weatherFolderPath) & is.null(label), basename(weatherFolderPath), label))
 	
 	Scenarios <- dbReadTable(con.env$con,"Scenarios")$Scenario
 	if(ScenarioName %in% Scenarios) {
@@ -238,10 +248,8 @@ addWeatherDataToDataBase <- function(Site_id=NULL, lat=NULL, long=NULL, weatherF
 	}
 }
 
-
-
-createDatabase <- function(dbFilePath="dbWeatherData.sqlite") {
-	setConnection(dbFilePath)
+dbW_createDatabase <- function(dbFilePath="dbWeatherData.sqlite") {
+	dbW_setConnection(dbFilePath, TRUE)
 	
 	SQL <- paste("CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, \"Latitude\" REAL, \"Longitude\" REAL, \"Label\" TEXT);", sep="")
 	dbGetQuery(con.env$con, SQL)
@@ -250,33 +258,33 @@ createDatabase <- function(dbFilePath="dbWeatherData.sqlite") {
 	dbGetQuery(con.env$con, SQL)
 	#Scenario Names
 	SQL <- "CREATE TABLE \"Scenarios\" (\"id\" integer PRIMARY KEY, \"Scenario\" TEXT);"
-	dbGetQuery(con.env$con, SQL)
+	dbGetQuery(con.env$con, SQL)	
 }
 
 
 
 #dataframe of columns folder, lat, long, label where label can equal folderName
-addToDatabaseFromFolders <- function(MetaData=NULL, FoldersPath, ScenarioName="Current") {
+dbW_addFromFolders <- function(MetaData=NULL, FoldersPath, ScenarioName="Current") {
 	if(!is.null(MetaData)) {
-		temp <- apply(MetaData, MARGIN = 1, function(x) addWeatherDataToDataBase(Site_id = NULL, lat=x[2], long=x[3], weatherFolderPath = file.path(FoldersPath, x[1]), weatherData = NULL, label = x[4], ScenarioName = ScenarioName) )
+		temp <- apply(MetaData, MARGIN = 1, function(x) dbW_addWeatherData(Site_id = NULL, lat=x[2], long=x[3], weatherFolderPath = file.path(FoldersPath, x[1]), weatherData = NULL, label = x[4], ScenarioName = ScenarioName) )
 	} else {
 		files <- list.files(path=FoldersPath)
-		temp <- lapply(files, function(x) addWeatherDataToDataBase(Site_id=NULL, lat=NULL, long=NULL, weatherFolderPath=file.path(FoldersPath, x), weatherData=NULL, ScenarioName = ScenarioName))
+		temp <- lapply(files, function(x) dbW_addWeatherData(Site_id=NULL, lat=NULL, long=NULL, weatherFolderPath=file.path(FoldersPath, x), weatherData=NULL, ScenarioName = ScenarioName))
 	}
 }
 
-deleteSite <- function(Site_id) {
+dbW_deleteSite <- function(Site_id) {
 	dbGetQuery(con.env$con, paste("DELETE FROM \"Sites\" WHERE Site_id=",Site_id,";",sep=""))
 }
 
-deleteSiteData <- function(Site_id, Scenario=NULL) {
+dbW_deleteSiteData <- function(Site_id, Scenario=NULL) {
 	if(is.null(Scenario)) { #Remove all data for this site
 		dbGetQuery(con.env$con, paste("DELETE FROM \"WeatherData\" WHERE Site_id=",Site_id,";",sep=""))
-		deleteSite(Site_id)
+		dbW_deleteSite(Site_id)
 	} else {
 		dbGetQuery(con.env$con, paste("DELETE FROM \"WeatherData\" WHERE Site_id=",Site_id," AND Scenario='",Scenario,"';",sep=""))
 		if(!dbGetQuery(con.env$con, paste("SELECT COUNT(*) FROM Sites WHERE Site_id=",Site_id,sep=""))[1,1]) {
-			deleteSite(Site_id)
+			dbW_deleteSite(Site_id)
 		}
 	}
 }
