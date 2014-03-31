@@ -206,10 +206,7 @@ dbW_addScenarios <- function(dfScenario) {#names 1 ... 32
 }
 
 dbW_addWeatherDataNoCheck <- function(Site_id, Scenario_id, weatherData) {
-	dbBeginTransaction(con.env$con)
-	data_blob <- paste0("x'",paste0(memCompress(serialize(weatherData,NULL),type="gzip"),collapse = ""),"'",sep="")
-	dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, data) VALUES (",Site_id,",",Scenario_id,",",data_blob,");",sep=""))
-	dbCommit(con.env$con)
+	dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, data) VALUES (",Site_id,",",Scenario_id,",",weatherData,");",sep=""))
 }
 
 dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderPath=NULL, weatherData=NULL, label=NULL, ScenarioName="Current") {
@@ -260,8 +257,6 @@ dbW_createDatabase <- function(dbFilePath="dbWeatherData.sqlite") {
 	SQL <- "CREATE TABLE \"Scenarios\" (\"id\" integer PRIMARY KEY, \"Scenario\" TEXT);"
 	dbGetQuery(con.env$con, SQL)	
 }
-
-
 
 #dataframe of columns folder, lat, long, label where label can equal folderName
 dbW_addFromFolders <- function(MetaData=NULL, FoldersPath, ScenarioName="Current") {
