@@ -251,7 +251,7 @@ dbW_createDatabase <- function(dbFilePath="dbWeatherData.sqlite") {
 	SQL <- paste("CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, \"Latitude\" REAL, \"Longitude\" REAL, \"Label\" TEXT);", sep="")
 	dbGetQuery(con.env$con, SQL)
 	#TABLE WEATHER DATA
-	SQL <- paste("CREATE TABLE \"WeatherData\" (\"Site_id\" integer, \"Scenario\", \"data\" BLOB, PRIMARY KEY (\"Site_id\", \"Scenario\"));", sep="")
+	SQL <- paste("CREATE TABLE \"WeatherData\" (\"Site_id\" integer, \"Scenario\" integer, \"data\" BLOB, PRIMARY KEY (\"Site_id\", \"Scenario\"));", sep="")
 	dbGetQuery(con.env$con, SQL)
 	#Scenario Names
 	SQL <- "CREATE TABLE \"Scenarios\" (\"id\" integer PRIMARY KEY, \"Scenario\" TEXT);"
