@@ -55,8 +55,8 @@
 	\code{\link{swInputData}}
 	\code{\link{sw_exec}}
 	\code{\link{sw_inputDataFromFiles}}
-	\code{\link{onGetWeatherData_database}}
-	\code{\link{onGetWeatherData_folders}}
+	\code{\link{getWeatherData_database}}
+	\code{\link{getWeatherData_folders}}
 }
 \examples{
 	## Default data set. Default data set includes weather data. 

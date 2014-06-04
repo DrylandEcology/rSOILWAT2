@@ -24,7 +24,7 @@
 	\code{\link{swInputData}}
 	\code{\link{sw_exec}}
 	\code{\link{sw_inputDataFromFiles}}
-	\code{\link{onGetWeatherData_database}}
+	\code{\link{getWeatherData_database}}
 }
 \examples{
 	## Default data set without weather data.

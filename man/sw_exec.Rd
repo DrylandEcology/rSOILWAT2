@@ -69,8 +69,8 @@
 \seealso{
 	\code{\link{sw_inputData}}
 	\code{\link{sw_inputDataFromFiles}}
-	\code{\link{onGetWeatherData_database}}
-	\code{\link{onGetWeatherData_folders}}
+	\code{\link{getWeatherData_database}}
+	\code{\link{getWeatherData_folders}}
 }
 \examples{
 	## No column names. R's working directory is in a SoilWat project directory
@@ -102,7 +102,7 @@
 	## Input data from Files but separate Weather data.
 	## Column Names are also turned on for output
 	inputData4 <- sw_inputDataFromFiles(dir="/home/ryan/Documents/Work/SoilWatProject1/", file.in="files_v27.in")
-	weatherData <- onGetWeatherData_folders(LookupWeatherFolder="/path/to/weatherfolder/", weatherDirName="blabla", filebasename="weath", startYear=swYears_StartYear(inputData4), endYear=swYears_EndYear(inputData4))
+	weatherData <- getWeatherData_folders(LookupWeatherFolder="/path/to/weatherfolder/", weatherDirName="blabla", filebasename="weath", startYear=swYears_StartYear(inputData4), endYear=swYears_EndYear(inputData4))
 	run4<-sw_exec(data=inputData4, weatherList=weatherData, colNames=TRUE)
 	run4$aet$yr
 	run4$logfile

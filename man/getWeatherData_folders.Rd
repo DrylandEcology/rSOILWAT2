@@ -1,15 +1,15 @@
 % 
 % TODO: Review
 % 
-\name{onGetWeatherData_folders}
-\alias{onGetWeatherData_folders}
+\name{getWeatherData_folders}
+\alias{getWeatherData_folders}
 \title{Rsoilwat onGetWeatherData_folders}
 \description{
 	Reads weather data from files.
 	Returns list of weather data.
 }
 \usage{
-	onGetWeatherData_folders(LookupWeatherFolder=NULL, weatherDirName=NULL, filebasename=NULL, startYear=NULL, endYear=NULL)
+	getWeatherData_folders(LookupWeatherFolder=NULL, weatherDirName=NULL, filebasename=NULL, startYear=NULL, endYear=NULL)
 }
 \arguments{
 	\item{LookupWeatherFolder}{String Path. Path to the LookupWeatherFolder location.}
@@ -34,14 +34,14 @@
 	\code{\link{swInputData}}
 	\code{\link{sw_exec}}
 	\code{\link{sw_inputDataFromFiles}}
-	\code{\link{onGetWeatherData_database}}
+	\code{\link{getWeatherData_database}}
 }
 \examples{
 	## Default data set without weather data.
 	## Column Names are also turned on for output
 	library(Rsoilwat)
 	inputData <- sw_inputDataFromFiles(dir="/path/to/project",files.in="files_v27.in") #Get the data set
-	weatherData <- onGetWeatherData_database(LookupWeatherFolder="/projects/1_data/treatments/LookupWeatherFolder", weatherDirName="Weather_NCEPCFSR_0.156--77.813", filebasename="weath", startYear=1960, endYear=1980)
+	weatherData <- getWeatherData_database(LookupWeatherFolder="/projects/1_data/treatments/LookupWeatherFolder", weatherDirName="Weather_NCEPCFSR_0.156--77.813", filebasename="weath", startYear=1960, endYear=1980)
 	#Run the simulation
 	run<-sw_exec(data=inputData, weatherList=weatherData, colNames=TRUE)
 }

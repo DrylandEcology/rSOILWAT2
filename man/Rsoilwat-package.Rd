@@ -50,8 +50,8 @@ Many thanks to all that points out bugs, provide suggestions and comments.
 	\code{\link{sw_exec}}
 	\code{\link{sw_inputData}}
 	\code{\link{sw_inputDataFromFiles}}
-	\code{\link{onGetWeatherData_database}}
-	\code{\link{onGetWeatherData_folders}}
+	\code{\link{getWeatherData_database}}
+	\code{\link{getWeatherData_folders}}
 	\code{\link{swWriteLines}}
 	\code{\link{swReadLines}}
 	\code{\link{swClear}}
