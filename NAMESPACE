@@ -8,7 +8,9 @@ export(
 	getWeatherData_database,
 	getSiteId,
 	addWeatherDataToDataBase,
-	createDatabaseFromLookupWeatherFolder
+	createDatabase,
+	addToDatabaseFromFolders,
+	deleteSiteData
 )
 
 exportClasses(

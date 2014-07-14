@@ -1,12 +1,12 @@
 print("swFunctions")
 
-getWeatherData_folders <- function(LookupWeatherFolder=NULL, weatherDirName=NULL,filebasename=NULL,startYear=NULL,endYear=NULL) {
-	if(is.null(LookupWeatherFolder) | is.null(weatherDirName) | is.null(filebasename))
-		stop("Need LookupWeatherFolder and weatherDirName information to get weather data")
+getWeatherData_folders <- function(LookupWeatherFolder=NULL, Label=NULL,filebasename=NULL,startYear=NULL,endYear=NULL) {
+	if(is.null(LookupWeatherFolder) | is.null(Label) | is.null(filebasename))
+		stop("Need LookupWeatherFolder and Label information to get weather data")
 	useYears<-FALSE
 	useStart<-FALSE
 	useEnd  <-FALSE
-	weatherDataFiles<-tryCatch(list.files(path=file.path(LookupWeatherFolder,weatherDirName),pattern=filebasename), warning=function(w) {stop("Path to weather data bad or filebasename not correct.")})
+	weatherDataFiles<-tryCatch(list.files(path=file.path(LookupWeatherFolder,Label),pattern=filebasename), warning=function(w) {stop("Path to weather data bad or filebasename not correct.")})
 	weatherDataYears <- as.integer(na.exclude(gsub(filebasename,NA,unlist(strsplit(x=basename(weatherDataFiles),split=".",fixed=TRUE)))))
 	if(!is.null(startYear) | !is.null(endYear)) {
 		startYear <- as.integer(startYear)
@@ -33,55 +33,45 @@ getWeatherData_folders <- function(LookupWeatherFolder=NULL, weatherDirName=NULL
 	weathDataList <- list()
 	j <- 1
 	for(i in index) {
-		weathDataList[[j]]<-swReadLines(new("swWeatherData",year=weatherDataYears[i]),file.path(LookupWeatherFolder,weatherDirName,weatherDataFiles[i]))
+		weathDataList[[j]]<-swReadLines(new("swWeatherData",year=weatherDataYears[i]),file.path(LookupWeatherFolder,Label,weatherDataFiles[i]))
 		j <- j+1
 	}
 	names(weathDataList)<-as.character(weatherDataYears[index])
 	return(weathDataList)
 }
 
-getSiteId <- function(con, lat=NULL, long=NULL, weatherDirName=NULL) {
+getSiteId <- function(con, lat=NULL, long=NULL, Label=NULL) {
 	lat<-as.numeric(lat)
 	long<-as.numeric(long)
-	if(!is.null(weatherDirName) & is.character(weatherDirName)) {
-		file <- sub("Weather_NCEPCFSR_", "", weatherDirName)
-		
-		indexs <- gregexpr("-", file)[[1]]
-		if(length(indexs) == 1)
-			Cord <- (c(substr(file, 1, indexs-1) ,substring(file, indexs+1)))
-		if(length(indexs) == 2)
-			if(indexs[1] == 1) {
-				Cord <- (c(substr(file, 1, indexs[2]-1) ,substring(file, indexs[2]+1)))
-			} else {
-				Cord <- (c(substr(file, 1, indexs[1]-1) ,substring(file, indexs[1]+1)))
-			}
-		if(length(indexs) == 3)
-			Cord <- (c(substr(file, 1, indexs[2]-1) ,substring(file, indexs[2]+1)))
-		
-		Cord <- as.numeric(unlist(Cord))
-		lat=Cord[1]
-		long=Cord[2]
-	}
-	if(!is.null(lat) & !is.null(long) & !is.na(lat) & !is.na(long) & length(lat) == 1 & length(long) == 1) {
+	if(!is.null(Label) & is.character(Label)) {
+		SQL <- paste("SELECT Site_id FROM Sites WHERE Label='",Label,"';",sep="")
+		site <- dbGetQuery(con,SQL)
+		Site_id <- as.integer(site)
+	} else  if(!is.null(lat) & !is.null(long) & !is.na(lat) & !is.na(long) & length(lat) == 1 & length(long) == 1) {
 		SQL <- paste("SELECT Site_id FROM Sites WHERE Latitude=",lat," AND Longitude=",long,";",sep="")
 		site <- dbGetQuery(con,SQL)
 		Site_id <- as.integer(site)
 	}
+	if(is.na(Site_id))
+		return(NULL)
 	if(!is.null(Site_id) && is.integer(Site_id) && Site_id >= 0) {
 		return(Site_id)
 	} else {
-		print("Could not obtain Site Id.")
+		warning("Could not obtain Site Id.")
 		return(NULL)
 	}
 }
 
-getWeatherData_database <- function(dbWeatherDataFile, Site_id=NULL,lat=NULL,long=NULL,weatherDirName=NULL,startYear=NULL,endYear=NULL, Scenario="Current") {
+getWeatherData_database <- function(dbFilePath, Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startYear=NULL,endYear=NULL, Scenario="Current") {
 	require(RSQLite)
 	drv <- dbDriver("SQLite")
-	con <- dbConnect(drv, dbname=dbWeatherDataFile)	
+	con <- dbConnect(drv, dbname=dbFilePath)	
 	
-	if(is.null(Site_id) && is.null(weatherDirName) && is.null(lat) && is.null(long))
+	if(is.null(Site_id) && is.null(Label) && is.null(lat) && is.null(long)) {
+		dbDisconnect(con)
 		stop("No way to locate weather data from input")
+	}
+		
 	useYears<-FALSE
 	useStart<-FALSE
 	useEnd  <-FALSE
@@ -92,19 +82,27 @@ getWeatherData_database <- function(dbWeatherDataFile, Site_id=NULL,lat=NULL,lon
 		if(!is.na(endYear)) useEnd<-TRUE
 		if(useStart | useEnd) useYears<-TRUE
 		if(useStart & useEnd) {
-			if(startYear >= endYear | startYear<0 | endYear<0)
+			if(startYear >= endYear | startYear<0 | endYear<0) {
+				dbDisconnect(con)
 				stop("Wrong start or end year")
+			}
 		}
 	}
 	Site_id<-as.integer(Site_id)
 	if(length(Site_id) == 0) {
-		Site_id <- getSiteId(con, lat,long,weatherDirName)
+		Site_id <- getSiteId(con, lat,long,Label)
+	} else {
+		if(!dbGetQuery(con, paste("SELECT COUNT(*) FROM WeatherData WHERE Site_id=",Site_id,";",sep=""))[1,1]) {
+			dbDisconnect(con)
+			stop("Site_id does not exist.")
+		}
 	}
 	if(!is.null(Site_id) && is.integer(Site_id) && Site_id >= 0) {
 		Scenario <- dbGetQuery(con, paste("SELECT id FROM Scenarios WHERE Scenario='",Scenario,"';",sep=""))[1,1]
 		result <- dbGetQuery(con, paste("SELECT data FROM WeatherData WHERE Site_id=",Site_id, " AND Scenario=",Scenario,";",sep=""))[[1]][[1]];
 		data <- unserialize(memDecompress(result,type="gzip"))
 	} else {
+		dbDisconnect(con)
 		stop("Site_id not obtained.")
 	}
 	
@@ -122,83 +120,121 @@ getWeatherData_database <- function(dbWeatherDataFile, Site_id=NULL,lat=NULL,lon
 		}
 	}
 	dbDisconnect(con)
-	return(weathDataList)
+	return(data)
 }
 
-addWeatherDataToDataBase <- function(databasePath, Site_id, ScenarioName, weatherData) {
-	library(RSQLite)
-	drv <- dbDriver("SQLite")
-	
-	settings <- c("PRAGMA page_size=8192","PRAGMA cache_size = 400000;","PRAGMA synchronous = OFF;","PRAGMA journal_mode = OFF;","PRAGMA locking_mode = EXCLUSIVE;","PRAGMA count_changes = OFF;","PRAGMA temp_store = MEMORY;","PRAGMA auto_vacuum = NONE;")
-	
-	tfile <- file.path(databasePath)
-	con_blob <- dbConnect(drv, dbname = tfile)
-	lapply(settings, function(x) dbGetQuery(con_blob,x))
-	
-	Scenarios <- dbReadTable(con_blob,"Scenarios")$Scenario
-	if(ScenarioName %in% Scenarios) {
-		scenarioID <- which(ScenarioName %in% Scenarios)
+addSiteToDataBase <- function(con, Site_id=NULL,lat=NULL,long=NULL,Label=NULL) {
+	#First See if Site_id exists
+	Site_id<-as.integer(Site_id)
+	if(length(Site_id) == 0) {#Site_id is null
+		Site_id <- getSiteId(con,lat,long,Label)
+		if(is.null(Site_id)) { #Site_id does not exist for given lat,long, and/or Label. Create it
+			if(is.null(lat)) lat <- "NULL"
+			if(is.null(long)) long <- "NULL"
+			if(is.null(Label)) Label <- "NULL" else Label <- paste("'",Label,"'",sep="")
+			temp<-dbGetQuery(con, "SELECT MAX(Site_id) FROM Sites;")[1,1]
+			Site_id <- ifelse(is.na(temp),1,temp+1)
+			dbGetQuery(con, paste("INSERT INTO Sites VALUES(",Site_id,",",lat,",",long,",",Label,");",sep=""))
+			return(Site_id)
+		} else { #Site_id exists already
+			SiteData <- dbGetQuery(con, paste("SELECT * FROM Sites WHERE Site_id=",Site_id,sep=""))
+			SiteData_lat <- SiteData[1,2]
+			if(is.na(SiteData_lat)) SiteData_lat <- NULL
+			SiteData_long <- SiteData[1,3]
+			if(is.na(SiteData_long)) SiteData_long <- NULL
+			SiteData_label <- SiteData[1,4]
+			if(is.na(SiteData_label)) SiteData_label <- NULL
+			if( (ifelse(length(temp<-SiteData_lat != lat) == 0, TRUE, temp)) | (ifelse(length(temp<-SiteData_long != long) == 0, TRUE, temp)) | (ifelse(length(temp <- Label != "") == 0, TRUE, temp) & ifelse(length(temp <- SiteData_label != Label) == 0, TRUE, temp)) ) {
+				dbDisconnect(con)
+				stop(paste("Site_id: ",Site_id," already existed in database. Data mismatch, NULL where ignored : (database:given) lat(",SiteData[1,2],":",lat,") long(",SiteData[1,3],":",long,") label(",SiteData[1,4],":",Label,").",sep=""))
+			}
+			return(Site_id)
+		}
 	} else {
-		SQL <- paste("INSERT INTO \"Scenarios\" VALUES(1,'",ScenarioName,"');",sep="")
-		dbGetQuery(con_blob, SQL)
-		Scenarios <- dbReadTable(con_blob,"Scenarios")$Scenario
-		scenarioID <- which(ScenarioName %in% Scenarios)
+		if(dbGetQuery(con, paste("SELECT COUNT(*) FROM Sites WHERE Site_id=",Site_id,sep=""))[1,1]) {#Site id already Exists
+			SiteData <- dbGetQuery(con, paste("SELECT * FROM Sites WHERE Site_id=",Site_id,sep=""))
+			if(is.na(SiteData_lat)) SiteData_lat <- NULL
+			SiteData_long <- SiteData[1,3]
+			if(is.na(SiteData_long)) SiteData_long <- NULL
+			SiteData_label <- SiteData[1,4]
+			if(is.na(SiteData_label)) SiteData_label <- NULL
+			if( (!is.null(lat) & SiteData_lat != lat) | (!is.null(long) & SiteData_long != long) | (!is.null(Label) & Label != "" & SiteData_label != Label) ) {
+				dbDisconnect(con)
+				stop(paste("Site_id: ",Site_id," already existed in database. Data mismatch, NULL where ignored : (database:given) lat(",SiteData[1,2],":",lat,") long(",SiteData[1,3],":",long,") label(",SiteData[1,4],":",Label,").",sep=""))
+			}
+			return(Site_id)
+		} else {#Create it
+			if(is.null(lat)) lat <- "NULL"
+			if(is.null(long)) long <- "NULL"
+			if(is.null(Label)) Label <- "NULL" else Label <- paste("'",Label,"'",sep="")
+			temp<-dbGetQuery(con, "SELECT MAX(Site_id) FROM Sites;")[1,1]
+			Site_id <- ifelse(is.na(temp),1,temp+1)
+			dbGetQuery(con, paste("INSERT INTO Sites VALUES(",Site_id,",",lat,",",long,",",Label,");",sep=""))
+			return(Site_id)
+		}
 	}
-	
-	data_blob <- paste0("x'",paste0(memCompress(serialize(weatherData,NULL),type="gzip"),collapse = ""),"'",sep="")
-	dbGetQuery(con_blob, paste("INSERT INTO WeatherData (Site_id, Scenario, data) VALUES (",Site_id,",",scenarioID,",",data_blob,");",sep=""))
-	dbCommit(con_blob)
-	
-	dbDisconnect(con_blob)
 }
 
-createDatabaseFromLookupWeatherFolder <- function(dbNamePath="dbWeatherData.sqlite", LookupWeatherFolderPath, ScenarioName="Current") {
-	
-	setwd(LookupWeatherFolderPath)
+addWeatherDataToDataBase <- function(dbFilePath, Site_id=NULL, lat=NULL, long=NULL, weatherFolderPath=NULL, weatherData=NULL, label=NULL, ScenarioName="Current") {
+	if( (is.null(weatherFolderPath) | ifelse(!is.null(weatherFolderPath), (weatherFolderPath == "" | !file.exists(weatherFolderPath)), FALSE)) & (is.null(weatherData) | !is.list(weatherData) | class(weatherData[[1]]) != "swWeatherData") ) stop("addWeatherDataToDataBase does not have folder path or weatherData to insert")
+	if( (is.null(Site_id) & is.null(lat) & is.null(long) & is.null(weatherFolderPath) & (is.null(label))) | ((!is.null(Site_id) & !is.numeric(Site_id)) & (!is.null(lat) & !is.numeric(lat)) & (!is.null(long) & !is.numeric(long))) ) stop("addWeatherDataToDataBase not enough info to create Site in Sites table.")
 	
 	require(RSQLite)
 	drv <- dbDriver("SQLite")
 	
 	settings <- c("PRAGMA page_size=8192","PRAGMA cache_size = 400000;","PRAGMA synchronous = OFF;","PRAGMA journal_mode = OFF;","PRAGMA locking_mode = EXCLUSIVE;","PRAGMA count_changes = OFF;","PRAGMA temp_store = MEMORY;","PRAGMA auto_vacuum = NONE;")
 	
-	tfile <- file.path(dbNamePath)
+	tfile <- file.path(dbFilePath)
+	if(!file.exists(dbFilePath)) {
+		stop("dbFilePath does not exist. Create databasebefore trying to insert")
+	}
+	con <- dbConnect(drv, dbname = tfile)
+	lapply(settings, function(x) dbGetQuery(con,x))
+	
+	Site_id <- addSiteToDataBase(con=con, Site_id=Site_id, lat=lat, long=long, Label=ifelse(!is.null(weatherFolderPath) & is.null(label), basename(weatherFolderPath), label))
+	
+	Scenarios <- dbReadTable(con,"Scenarios")$Scenario
+	if(ScenarioName %in% Scenarios) {
+		scenarioID <- which(ScenarioName %in% Scenarios)
+	} else {
+		temp <- dbGetQuery(con, "SELECT MAX(id) FROM \"Scenarios\";")[1,1]
+		scenarioID <- ifelse(is.na(temp),1,temp+1)
+		SQL <- paste("INSERT INTO \"Scenarios\" VALUES(",scenarioID,",'",ScenarioName,"');",sep="")
+		dbGetQuery(con, SQL)
+	}
+	
+	if(!is.null(weatherData)) {
+		data_blob <- paste0("x'",paste0(memCompress(serialize(weatherData,NULL),type="gzip"),collapse = ""),"'",sep="")
+		dbGetQuery(con, paste("INSERT INTO WeatherData (Site_id, Scenario, data) VALUES (",Site_id,",",scenarioID,",",data_blob,");",sep=""))
+		dbCommit(con)
+	} else {
+		weath <- list.files(weatherFolderPath)
+		years <- as.numeric(sub(pattern="weath.",replacement="",weath))
+		weatherData <- list()
+		for(j in 1:length(weath)) {
+			year <- as.numeric(sub(pattern="weath.",replacement="",weath[j]))
+			temp <-read.csv(file.path(weatherFolderPath,weath[j]),header=FALSE,skip=2,sep="\t")
+			weatherData[[j]] <- swReadLines(new("swWeatherData",year),file.path(weatherFolderPath,weath[j]))
+		}
+		names(weatherData) <- years
+		data_blob <- paste0("x'",paste0(memCompress(serialize(weatherData,NULL),type="gzip"),collapse = ""),"'",sep="")
+		dbGetQuery(con, paste("INSERT INTO WeatherData (Site_id, Scenario, data) VALUES (",Site_id,",",scenarioID,",",data_blob,");",sep=""))
+		dbCommit(con)
+	}
+	dbDisconnect(con)
+}
+
+createDatabase <- function(dbFilePath="dbWeatherData.sqlite") {
+	require(RSQLite)
+	drv <- dbDriver("SQLite")
+	
+	settings <- c("PRAGMA page_size=8192","PRAGMA cache_size = 400000;","PRAGMA synchronous = OFF;","PRAGMA journal_mode = OFF;","PRAGMA locking_mode = EXCLUSIVE;","PRAGMA count_changes = OFF;","PRAGMA temp_store = MEMORY;","PRAGMA auto_vacuum = NONE;")
+	
+	tfile <- file.path(dbFilePath)
 	con_blob <- dbConnect(drv, dbname = tfile)
 	lapply(settings, function(x) dbGetQuery(con_blob,x))
 	
-	getSplit <- function(string) {
-		indexs <- gregexpr("-", string)[[1]]
-		if(length(indexs) == 1)
-			return(c(substr(string, 1, indexs-1) ,substring(string, indexs+1)))
-		if(length(indexs) == 2)
-			if(indexs[1] == 1)
-				return(c(substr(string, 1, indexs[2]-1) ,substring(string, indexs[2]+1)))
-			else
-				return(c(substr(string, 1, indexs[1]-1) ,substring(string, indexs[1]+1)))
-		if(length(indexs) == 3)
-			return(c(substr(string, 1, indexs[2]-1) ,substring(string, indexs[2]+1)))
-	}
-	
-	files <- list.files(pattern = "Weather")
-	files <- sub("Weather_NCEPCFSR_", "", files)
-	#SWRunInformation <- tryCatch(read.csv(file.path("/home/ryan/Documents/Work/Projects/1_PC_TempDry_Simulations_Prj04_r3mini/1_Data_SWInput/SWRuns_InputMaster_TemperateArid_SiteSubSubSubsample_MiniProjects_v11.csv"), as.is=TRUE),error=function(e) { print("datafile.SWRunInformation: Bad Path"); print(e)})
-	#weatherFolders <- SWRunInformation$WeatherFolder
-	#weatherFolders <- sub("Weather_NCEPCFSR_", "", weatherFolders)
-		
-	Cord <- lapply(files, getSplit)
-	mCord <- matrix(data=as.numeric(unlist(Cord)), nrow=length(Cord), ncol=2, byrow=TRUE)
-	Cord <- list(lat=mCord[,1], long=mCord[,2])
-	Cord$lat <- as.numeric(Cord$lat)
-	Cord$long <- as.numeric(Cord$long)
-	
-	#Test to see if split works
-	#same <- logical(0)
-	#for(i in 1:length(Cord$lat)) {
-	#	same<-c(same,identical(paste("Weather_NCEPCFSR_", format(Cord$lat[i], digits=1, nsmall=3), "-", formatC(Cord$long[i], digits=3, format="f"), sep=""), SWRunInformation$WeatherFolder[i]))
-	#}
-	#print(all(same))
-	
-	#TABLE SITES
-	SQL <- paste("CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, \"Latitude\" REAL, \"Longitude\" REAL);", sep="")
+	SQL <- paste("CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, \"Latitude\" REAL, \"Longitude\" REAL, \"Label\" TEXT);", sep="")
 	dbGetQuery(con_blob, SQL)
 	#TABLE WEATHER DATA
 	SQL <- paste("CREATE TABLE \"WeatherData\" (\"Site_id\" integer, \"Scenario\", \"data\" BLOB, PRIMARY KEY (\"Site_id\", \"Scenario\"));", sep="")
@@ -206,32 +242,43 @@ createDatabaseFromLookupWeatherFolder <- function(dbNamePath="dbWeatherData.sqli
 	#Scenario Names
 	SQL <- "CREATE TABLE \"Scenarios\" (\"id\" integer PRIMARY KEY, \"Scenario\" TEXT);"
 	dbGetQuery(con_blob, SQL)
-	SQL <- paste("INSERT INTO \"Scenarios\" VALUES(1,'",ScenarioName,"');",sep="")
-	dbGetQuery(con_blob, SQL)
 	
-	#library(Rsoilwat31)
-	
-	for(i in 1:length(Cord$lat)) {#
-		dbBeginTransaction(con_blob)
-		dbGetQuery(con_blob, paste("INSERT INTO \"Sites\" VALUES(",paste("'",c(i,Cord$lat[i],Cord$long[i]),"'", sep="",collapse=","),");"))
-		
-		WeatherFolder <- file.path(LookupWeatherFolderPath,paste("Weather_NCEPCFSR_", format(Cord$lat[i], digits=1, nsmall=3), "-", formatC(Cord$long[i], digits=3, format="f"), sep=""))
-		weath <- list.files(WeatherFolder)
-		years <- as.numeric(sub(pattern="weath.",replacement="",weath))
-		weatherData <- list()
-		for(j in 1:length(weath)) {
-			year <- as.numeric(sub(pattern="weath.",replacement="",weath[j]))
-			temp <-read.csv(file.path(WeatherFolder,weath[j]),header=FALSE,skip=2,sep="\t")
-			weatherData[[j]] <- swReadLines(new("swWeatherData",year),file.path(WeatherFolder,weath[j]))
-		}
-		names(weatherData) <- years
-		data_blob <- paste0("x'",paste0(memCompress(serialize(weatherData,NULL),type="gzip"),collapse = ""),"'",sep="")
-		dbGetQuery(con_blob, paste("INSERT INTO WeatherData (Site_id, Scenario, data) VALUES (",i,",",1,",",data_blob,");",sep=""))
-		dbCommit(con_blob)
-		
-		if(i %in% c(10,100,1000,5000,10000,15000,20000)) print(i)
-	}
 	dbDisconnect(con_blob)
+}
+
+#dataframe of columns folder, lat, long, label where label can equal folderName
+addToDatabaseFromFolders <- function(dbFilePath="dbWeatherData.sqlite", MetaData=NULL, FoldersPath, ScenarioName="Current") {
+	if(!is.null(MetaData)) {
+		temp <- apply(MetaData, MARGIN = 1, function(x) addWeatherDataToDataBase(dbFilePath = dbFilePath,Site_id = NULL, lat=x[2], long=x[3], weatherFolderPath = file.path(FoldersPath, x[1]), weatherData = NULL, label = x[4], ScenarioName = ScenarioName) )
+	} else {
+		files <- list.files(path=FoldersPath)
+		temp <- lapply(files, function(x) addWeatherDataToDataBase(dbFilePath=dbFilePath, Site_id=NULL, lat=NULL, long=NULL, weatherFolderPath=file.path(FoldersPath, x), weatherData=NULL, ScenarioName = ScenarioName))
+	}
+}
+
+deleteSite <- function(con, Site_id) {
+	dbGetQuery(con, paste("DELETE FROM \"Sites\" WHERE Site_id=",Site_id,";",sep=""))
+}
+
+deleteSiteData <- function(dbFilePath, Site_id, Scenario=NULL) {
+	require(RSQLite)
+	drv <- dbDriver("SQLite")
+	tfile <- file.path(dbFilePath)
+	if(!file.exists(tfile)) {
+		stop("dbFilePath does not exist. Create databasebefore trying to insert")
+	}
+	con <- dbConnect(drv, dbname = tfile)
+	
+	if(is.null(Scenario)) { #Remove all data for this site
+		dbGetQuery(con, paste("DELETE FROM \"WeatherData\" WHERE Site_id=",Site_id,";",sep=""))
+		deleteSite(con, Site_id)
+	} else {
+		dbGetQuery(con, paste("DELETE FROM \"WeatherData\" WHERE Site_id=",Site_id," AND Scenario='",Scenario,"';",sep=""))
+		if(!dbGetQuery(con, paste("SELECT COUNT(*) FROM Sites WHERE Site_id=",Site_id,sep=""))[1,1]) {
+			deleteSite(con, Site_id)
+		}
+	}
+	dbDisconnect(con)
 }
 
 readCharacter <- function(text, showWarnings=FALSE) {

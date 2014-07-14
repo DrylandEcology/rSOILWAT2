@@ -145,8 +145,12 @@ Bool ChDir(const char *dname) {
 /**************************************************************/
 #ifdef __BCC__
 #define mkdir(d, m) mkdir(d)
-# else
+#elif __linux__
 #define mkdir(d, m) mkdir(d, m)
+#elif __APPLE__
+#define mkdir(d, m) mkdir(d, m)
+#else
+#define mkdir(d, m) mkdir(d)
 #endif
 Bool MkDir(const char *dname) {
 	/* make a path with 'mkdir -p' -like behavior. provides an
