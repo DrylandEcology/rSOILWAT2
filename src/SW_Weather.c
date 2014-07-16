@@ -415,6 +415,7 @@ SEXP onGet_SW_WTH() {
 	UNPROTECT(12);
 	return SW_WTH;
 }
+
 void onSet_SW_WTH(SEXP SW_WTH) {
 	int i;
 	SW_WEATHER *w = &SW_Weather;
@@ -479,6 +480,7 @@ void onSet_SW_WTH(SEXP SW_WTH) {
 	else
 		UNPROTECT(8);
 }
+
 SEXP onGet_WTH_DATA(void) {
 	TimeInt year;
 	SEXP WTH_DATA, WTH_DATA_names;
@@ -514,6 +516,7 @@ SEXP onGet_WTH_DATA(void) {
 	}
 	return WTH_DATA;
 }
+
 SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	int i,days;
 	SEXP swWeatherData;
@@ -553,6 +556,7 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	UNPROTECT(6);
 	return WeatherData;
 }
+
 Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year) {
 	SW_WEATHER_HIST *wh = &SW_Weather.hist;
 	//SEXP dim;
