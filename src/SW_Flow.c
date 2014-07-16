@@ -175,9 +175,22 @@ static void arrays2records(void);
 
 void SW_FLW_construct(void) {
 	/* 06/26/2013	(rjm) added function SW_FLW_construct() to init global variables between consecutive calls to SoilWat as dynamic library */
+	int i=0;
 	soil_temp_error = 0;
 	soil_temp_init = 0;
 	fusion_pool_init = 0;
+	//These only have to be cleared if a loop is wrong in the code.
+	for (i = 0; i < MAX_LAYERS; i++) {
+		lyrTrRegions_Forb[i] = lyrTrRegions_Tree[i] = lyrTrRegions_Shrub[i] = lyrTrRegions_Grass[i] = 0;
+		lyrSWCBulk[i] = lyrDrain[i] = lyrTransp_Forb[i] = lyrTransp_Tree[i] = lyrTransp_Shrub[i] = lyrTransp_Grass[i] = 0;
+		lyrTranspCo_Forb[i] = lyrTranspCo_Tree[i] = lyrTranspCo_Shrub[i] = lyrTranspCo_Grass[i] = lyrEvap_BareGround[i] = 0;
+		lyrEvap_Forb[i] = lyrEvap_Tree[i] = lyrEvap_Shrub[i] = lyrEvap_Grass[i] = lyrEvapCo[i] = lyrSWCBulk_FieldCaps[i] = 0;
+		lyrWidths[i] = lyrSWCBulk_Wiltpts[i] = lyrSWCBulk_HalfWiltpts[i] = lyrSWCBulk_Mins[i] = lyrSWCBulk_atSWPcrit_Forb[i] = 0;
+		lyrSWCBulk_atSWPcrit_Tree[i] = lyrSWCBulk_atSWPcrit_Shrub[i] = lyrSWCBulk_atSWPcrit_Grass[i] = lyrpsisMatric[i] = 0;
+		lyrthetasMatric[i] = lyrBetasMatric[i] = lyrBetaInvMatric[i] = lyrSumTrCo[MAX_TRANSP_REGIONS + 1] = lyrHydRed_Forb[i] = 0;
+		lyrHydRed_Tree[i] = lyrHydRed_Shrub[i] = lyrHydRed_Grass[i] = lyrImpermeability[i] = lyrSWCBulk_Saturated[i] = 0;
+		lyroldsTemp[i] = lyrsTemp[i] = lyrbDensity[i] = 0;
+	}
 	//When running as a library make sure these are set to zero.
 	drainout = 0;
 	forb_h2o_qum[0]=tree_h2o_qum[0]=shrub_h2o_qum[0]=grass_h2o_qum[0]=litter_h2o_qum[0]=standingWater[0]=0;

@@ -192,10 +192,19 @@ void SW_WTH_new_year(void) {
 #ifndef RSOILWAT
 		weth_found = _read_hist(year);
 #else
+		weth_found = swFALSE;
 		if(bWeatherList) {
-			weth_found = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT( WeatherList, wthdataIndex),install("data")), year);
+			for(i=0;i<LENGTH(WeatherList);i++) {
+				if( year == *INTEGER(GET_SLOT(VECTOR_ELT( WeatherList, i),install("year"))) ) {
+					weth_found = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT( WeatherList, i),install("data")), year);
+				}
+			}
 		} else {
-			weth_found = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT( GET_SLOT(InputData,install("weatherHistory")), wthdataIndex),install("data")), year);
+			for(i=0;i<LENGTH(GET_SLOT(InputData,install("weatherHistory")));i++) {
+				if( year == *INTEGER(GET_SLOT(VECTOR_ELT( GET_SLOT(InputData,install("weatherHistory")), i),install("year"))) ) {
+					weth_found = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT( GET_SLOT(InputData,install("weatherHistory")), i),install("data")), year);
+				}
+			}
 		}
 		wthdataIndex++;
 #endif

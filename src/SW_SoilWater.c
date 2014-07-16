@@ -87,7 +87,7 @@ static void _clear_hist(void) {
 	TimeInt d;
 	LyrIndex z;
 	for (d = 0; d < MAX_DAYS; d++) {
-		ForEachSoilLayer(z)
+		for(z=0; z<MAX_LAYERS; z++)
 		{
 			SW_Soilwat.hist.swc[d][z] = SW_MISSING;
 			SW_Soilwat.hist.std_err[d][z] = SW_MISSING;
