@@ -71,9 +71,10 @@ static void _read_hist(TimeInt year);
 static void _clear_hist(void) {
 	/* --------------------------------------------------- */
 	TimeInt d;
+	int i=0;
 	LyrIndex z;
 	for (d = 0; d < MAX_DAYS; d++) {
-		ForEachSoilLayer(z)
+		for(i=0;i<MAX_LAYERS;i++)
 		{
 			SW_Soilwat.hist.swc[d][z] = SW_MISSING;
 			SW_Soilwat.hist.std_err[d][z] = SW_MISSING;
@@ -418,6 +419,8 @@ SEXP onGet_SW_SWC_hist(TimeInt year) {
 	char *cSWC_hist[] = { "doy", "lyr", "swc", "st_err" };
 	SEXP lyrs, lyrs_names, lyrs_names_y;
 	RealD *p_lyrs;
+
+	_clear_hist();
 
 	PROTECT(swSWC_hist = MAKE_CLASS("swSWC_hist"));
 	PROTECT(hist = NEW_OBJECT(swSWC_hist));

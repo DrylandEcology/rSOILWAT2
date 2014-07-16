@@ -173,7 +173,7 @@ void SW_WTH_new_year(void) {
 	/* =================================================== */
 	SW_WEATHER_2DAYS *wn = &SW_Weather.now;
 	TimeInt year = SW_Model.year;
-
+	int i;
 	_clear_runavg();
 	memset(&SW_Weather.yrsum, 0, sizeof(SW_WEATHER_OUTPUTS));
 
@@ -183,10 +183,19 @@ void SW_WTH_new_year(void) {
 		if (useFiles) {
 			weth_found = _read_hist(year);
 		} else {
+			weth_found = swFALSE;
 			if(bWeatherList) {
-				weth_found = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT( WeatherList, wthdataIndex),install("data")), year);
+				for(i=0;i<LENGTH(WeatherList);i++) {
+					if( year == *INTEGER(GET_SLOT(VECTOR_ELT( WeatherList, i),install("year"))) ) {
+						weth_found = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT( WeatherList, i),install("data")), year);
+					}
+				}
 			} else {
-				weth_found = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT( GET_SLOT(InputData,install("weatherHistory")), wthdataIndex),install("data")), year);
+				for(i=0;i<LENGTH(GET_SLOT(InputData,install("weatherHistory")));i++) {
+					if( year == *INTEGER(GET_SLOT(VECTOR_ELT( GET_SLOT(InputData,install("weatherHistory")), i),install("year"))) ) {
+						weth_found = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT( GET_SLOT(InputData,install("weatherHistory")), i),install("data")), year);
+					}
+				}
 			}
 			wthdataIndex++;
 		}

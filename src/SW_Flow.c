@@ -156,8 +156,18 @@ static void arrays2records(void);
  */
 void SW_Water_Flow(void);
 void SW_FLW_construct(void) {
+	int i=0;
 	soil_temp_error = 0;
 	soil_temp_init = 0;
+	//These only have to be cleared if a loop is wrong in the code.
+	for(i=0;i<MAX_LAYERS;i++) {
+		lyrSWC[i] = lyrTranspCo_Tree[i] = lyrTranspCo_Shrub[i] = lyrTranspCo_Grass[i] = lyrEvapCo[i] = lyrFieldCaps[i] = 0;
+		lyrHalfWiltpts[i] = lyrSWCMins[i] = lyrSWCatSWPcrit_Tree[i] = lyrSWCatSWPcrit_Shrub[i] = lyrSWCatSWPcrit_Grass[i] = lyrPsis[i] = 0;
+		lyrThetas[i] = lyrBetas[i] = lyrBetaInv[i] = lyrImpermeability[i] = lyrSWCsaturated[i] = lyroldsTemp[i] = lyrbDensity[i] = 0;
+
+		lyrDrain[i] = lyrTransp_Tree[i] = lyrTransp_Shrub[i] = lyrTransp_Grass[i] = lyrEvap_Tree[i] = lyrEvap_Shrub[i] = 0;
+		lyrEvap_Grass[i] = lyrHydRed_Tree[i] = lyrHydRed_Shrub[i] = lyrHydRed_Grass[i] = lyrsTemp[i] = 0;
+	}
 	//When running as a library make sure these are set to zero.
 	drainout = 0;
 	tree_h2o_qum[0]=shrub_h2o_qum[0]=grass_h2o_qum[0]=litter_h2o_qum[0]=standingWater[0]=0.0;
