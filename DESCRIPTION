@@ -8,6 +8,7 @@ Authors@R: c(person("Ryan Murphy", "Developer", role = c("aut", "cre"),
 Author: Ryan Murphy
 Maintainer: Ryan Murphy <ryanmurf@gmail.com>
 Depends: R (>= 2.12.0), RSQLite
+NeedsCompilation: yes
 Description: SoilWat package is a R wrapper for the soil wat C code. It allows data to be accessed directly within R from soilwat.
 License: GPL (>= 2)
 URL: http://www.r-project.org, https://github.com/Burke-Lauenroth-Lab/Rsoilwat
