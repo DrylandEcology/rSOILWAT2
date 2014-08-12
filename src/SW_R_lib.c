@@ -654,7 +654,7 @@ SEXP onSetNames(SEXP SW_R_Data) {
 			Rtransp_names_y_dy, Rvwc_names_dy, Rvwc_names_y_dy, Rwetdays_names_dy, Rwetdays_names_y_dy;
 
 	char *OutColNames[] = { "aet", "deep_drain", "estabs", "evap_soil", "evap_surface", "hydred", "infiltration", "interception", "percolation", "pet", "precip", "runoff",
-			"snowpack", "soil_temp", "surface_water", "sw_pot", "swa", "swc", "temp", "transp", "vwc", "wetdays", "logfile" };
+			"snowpack", "soil_temp", "surface_water", "swp", "swa", "swc", "temp", "transp", "vwc", "wetdays", "logfile" };
 
 	char *Layers_names[] = { "Lyr_1", "Lyr_2", "Lyr_3", "Lyr_4", "Lyr_5", "Lyr_6", "Lyr_7", "Lyr_8", "Lyr_9", "Lyr_10", "Lyr_11", "Lyr_12", "Lyr_13", "Lyr_14", "Lyr_15",
 			"Lyr_16", "Lyr_17", "Lyr_18", "Lyr_19", "Lyr_20", "Lyr_21", "Lyr_22", "Lyr_23", "Lyr_24", "Lyr_25", "Lyr_26", "Lyr_27", "Lyr_28", "Lyr_29", "Lyr_30" };

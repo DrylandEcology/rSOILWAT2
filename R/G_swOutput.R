@@ -15,7 +15,7 @@ OutSum = c("off","sum","avg","fnl")
 #######
 swOUT_key <- setClass(Class="swOUT_key",representation(mykey="integer",myobj="integer",period="integer",sumtype="integer",use="logical",first="integer",last="integer",first_orig="integer",last_orig="integer",outfile="character"),
 		prototype=prototype(mykey=as.integer(c(0:4,0,6:16,0,18:23,0,25)),myobj=as.integer(c(0,rep(2,4),0,rep(4,11),0,rep(4,6),0,5)),period=as.integer(c(rep(0,26))),sumtype=as.integer(c(0,2,1,1,1,0,2,2,2,2,2,1,1,1,1,1,1,0,1,1,1,2,1,2,0,1)),use=c(FALSE,rep(TRUE,4),FALSE,rep(TRUE,11),FALSE,rep(TRUE,6),FALSE,TRUE),
-				first=as.integer(rep(0,26)),last=as.integer(rep(0,26)),first_orig=as.integer(c(0,rep(1,4),0,rep(1,11),0,rep(1,6),0,1)),last_orig=as.integer(c(0,rep(366,4),0,rep(366,11),0,rep(366,6),0,366)),outfile=c("","temp","precip","infiltration","runoff","","swc","vwc","sw_pot","swa","surface_water","transp","evap_soil","evap_surface","interception","percolation","hydred","","aet","pet","wetdays","snowpack","deep_drain","soil_temp","","estabs")  ))
+				first=as.integer(rep(0,26)),last=as.integer(rep(0,26)),first_orig=as.integer(c(0,rep(1,4),0,rep(1,11),0,rep(1,6),0,1)),last_orig=as.integer(c(0,rep(366,4),0,rep(366,11),0,rep(366,6),0,366)),outfile=c("","temp","precip","infiltration","runoff","","swc","vwc","swp","swa","surface_water","transp","evap_soil","evap_surface","interception","percolation","hydred","","aet","pet","wetdays","snowpack","deep_drain","soil_temp","","estabs")  ))
 swOUT_key_validity<-function(object){
 	temp<-c(length(mykey), length(myobj), length(period), length(sumtype), length(use), length(first), length(last), length(first_orig), length(last_orig), length(outfile))
 	if(length(unique(temp)) != 1)
