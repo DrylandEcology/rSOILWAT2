@@ -164,8 +164,9 @@ void onSet_SW_SKY(SEXP sxp_SW_SKY) {
 }
 #endif
 void SW_SKY_init(double scale_sky[], double scale_wind[], double scale_rH[], double scale_transmissivity[]) {
+	int i;
 	SW_SKY *v = &SW_Sky;
-	for(int i=0; i<MAX_MONTHS; i++) {
+	for(i=0; i<MAX_MONTHS; i++) {
 		v->cloudcov[i] = min(100., max(0.0,scale_sky[i]+v->cloudcov[i]));
 		v->windspeed[i] = max(0.0, scale_wind[i] * v->windspeed[i]);
 		v->r_humidity[i] = min(100., max(0.0, scale_rH[i] + v->r_humidity[i]));

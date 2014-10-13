@@ -187,10 +187,12 @@ void SW_FLW_construct(void) {
 		lyrEvap_Forb[i] = lyrEvap_Tree[i] = lyrEvap_Shrub[i] = lyrEvap_Grass[i] = lyrEvapCo[i] = lyrSWCBulk_FieldCaps[i] = 0;
 		lyrWidths[i] = lyrSWCBulk_Wiltpts[i] = lyrSWCBulk_HalfWiltpts[i] = lyrSWCBulk_Mins[i] = lyrSWCBulk_atSWPcrit_Forb[i] = 0;
 		lyrSWCBulk_atSWPcrit_Tree[i] = lyrSWCBulk_atSWPcrit_Shrub[i] = lyrSWCBulk_atSWPcrit_Grass[i] = lyrpsisMatric[i] = 0;
-		lyrthetasMatric[i] = lyrBetasMatric[i] = lyrBetaInvMatric[i] = lyrSumTrCo[MAX_TRANSP_REGIONS + 1] = lyrHydRed_Forb[i] = 0;
+		lyrthetasMatric[i] = lyrBetasMatric[i] = lyrBetaInvMatric[i]  = lyrHydRed_Forb[i] = 0;
 		lyrHydRed_Tree[i] = lyrHydRed_Shrub[i] = lyrHydRed_Grass[i] = lyrImpermeability[i] = lyrSWCBulk_Saturated[i] = 0;
 		lyroldsTemp[i] = lyrsTemp[i] = lyrbDensity[i] = 0;
 	}
+	for(i=0; i<= MAX_TRANSP_REGIONS; i++)
+		lyrSumTrCo[i] = 0;
 	//When running as a library make sure these are set to zero.
 	drainout = 0;
 	forb_h2o_qum[0]=tree_h2o_qum[0]=shrub_h2o_qum[0]=grass_h2o_qum[0]=litter_h2o_qum[0]=standingWater[0]=0;

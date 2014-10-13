@@ -93,7 +93,7 @@ void SW_VES_construct(void) {
 }
 
 void SW_VES_clear(void) {
-	int i;
+	unsigned int i;
 	if (SW_VegEstab.count > 0) {
 		free(SW_VegEstab.yrsum.days);
 		//free(SW_VegEstab.yravg.days);

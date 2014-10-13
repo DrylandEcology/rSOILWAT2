@@ -182,7 +182,9 @@ void SW_WTH_new_year(void) {
 	/* =================================================== */
 	SW_WEATHER_2DAYS *wn = &SW_Weather.now;
 	TimeInt year = SW_Model.year;
+#ifdef RSOILWAT
 	int i=0;
+#endif
 	_clear_runavg();
 	memset(&SW_Weather.yrsum, 0, sizeof(SW_WEATHER_OUTPUTS));
 
