@@ -182,7 +182,7 @@ dbW_setConnection <- function(dbFilePath, createAdd=FALSE) {
 	require(RSQLite)
 	drv <- dbDriver("SQLite")
 	
-	settings <- c("PRAGMA page_size=8192","PRAGMA cache_size = 400000;","PRAGMA synchronous = OFF;","PRAGMA journal_mode = OFF;","PRAGMA locking_mode = EXCLUSIVE;","PRAGMA count_changes = OFF;","PRAGMA temp_store = MEMORY;","PRAGMA auto_vacuum = NONE;")
+	#settings <- c("PRAGMA page_size=8192","PRAGMA cache_size = 400000;","PRAGMA synchronous = OFF;","PRAGMA journal_mode = OFF;","PRAGMA locking_mode = EXCLUSIVE;","PRAGMA count_changes = OFF;","PRAGMA temp_store = MEMORY;","PRAGMA auto_vacuum = NONE;")
 	
 	tfile <- file.path(dbFilePath)
 	if(!file.exists(dbFilePath)) {
@@ -190,7 +190,7 @@ dbW_setConnection <- function(dbFilePath, createAdd=FALSE) {
 	}
 	#assign("con", dbConnect(drv, dbname = tfile), envir="package:Rsoilwat")
 	con.env$con <- dbConnect(drv, dbname = tfile)
-	if(createAdd) lapply(settings, function(x) dbGetQuery(con.env$con,x))
+	#if(createAdd) lapply(settings, function(x) dbGetQuery(con.env$con,x))
 }
 
 dbW_disconnectConnection <- function() {
@@ -228,7 +228,7 @@ dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderP
 	if(!is.null(weatherData)) {
 		data_blob <- paste0("x'",paste0(memCompress(serialize(weatherData,NULL),type="gzip"),collapse = ""),"'",sep="")
 		dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, data) VALUES (",Site_id,",",scenarioID,",",data_blob,");",sep=""))
-		dbCommit(con.env$con)
+		#dbCommit(con.env$con)
 	} else {
 		weath <- list.files(weatherFolderPath)
 		years <- as.numeric(sub(pattern="weath.",replacement="",weath))
@@ -241,12 +241,12 @@ dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderP
 		names(weatherData) <- years
 		data_blob <- paste0("x'",paste0(memCompress(serialize(weatherData,NULL),type="gzip"),collapse = ""),"'",sep="")
 		dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, data) VALUES (",Site_id,",",scenarioID,",",data_blob,");",sep=""))
-		dbCommit(con.env$con)
+		#dbCommit(con.env$con)
 	}
 }
 
 dbW_createDatabase <- function(dbFilePath="dbWeatherData.sqlite") {
-	dbW_setConnection(dbFilePath, TRUE)
+	dbW_setConnection(dbFilePath, FALSE)
 	
 	SQL <- paste("CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, \"Latitude\" REAL, \"Longitude\" REAL, \"Label\" TEXT);", sep="")
 	dbGetQuery(con.env$con, SQL)
