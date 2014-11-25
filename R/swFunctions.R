@@ -108,8 +108,9 @@ dbW_getWeatherData <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startY
 		Scenario <- dbGetQuery(con.env$con, paste("SELECT id FROM Scenarios WHERE Scenario='",Scenario,"';",sep=""))[1,1]
 		result <- dbGetQuery(con.env$con, paste("SELECT data FROM WeatherData WHERE Site_id=",Site_id, " AND Scenario=",Scenario,";",sep=""))[[1]][[1]];
 		data <- unserialize(memDecompress(result,type="gzip"))
+		if(inherits(data, "try-error")) stop(paste("Weather data for Site_id", Site_id, "is corrupted"))
 	} else {
-		stop("Site_id not obtained.")
+		stop(paste("Site_id for", Label, "not obtained."))
 	}
 	
 	if(useYears) {
