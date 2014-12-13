@@ -67,14 +67,12 @@ setMethod("swWriteLines", signature=c(object="swWeatherData", file="character"),
 setMethod("swReadLines", signature=c(object="swWeatherData",file="character"), definition=function(object,file) {
 			object@year = as.integer(strsplit(x=basename(file),split=".",fixed=TRUE)[[1]][2])
 			infiletext <- readLines(con = file)
-			#should be no empty lines
-			infiletext <- infiletext[infiletext != ""]
-			days <- (length(infiletext)-2)
+			infiletext <- infiletext[infiletext != ""] #delete empty lines
+			infiletext <- infiletext[!(sapply(infiletext, FUN=function(x) substring(gsub("[[:space:]]", "", x), 1, 1) == "#", USE.NAMES=FALSE))] #delete lines beginning with a comment
+			days <- length(infiletext)
 			data=matrix(data=c(1:days,rep(999,days*3)),nrow=days,ncol=4)
 			colnames(data)<-c("DOY","Tmax_C","Tmin_C","PPT_cm")
-			for(i in 3:length(infiletext)) {
-				data[i-2,] <- readNumerics(infiletext[i],4)
-			}
+    		for (i in 1:days) data[i, ] <- readNumerics(infiletext[i], 4)
 			object@data = data
 			return(object)
 		})
