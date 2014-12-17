@@ -355,7 +355,6 @@ double lobfM(double xs[], double ys[], unsigned int n) {
  **************************************************************************************************************************************/
 double lobfB(double xs[], double ys[], unsigned int n) {
 	double sumX, sumY, temp;
-	;
 	unsigned int i;
 
 	sumX = sumY = 0.0;
