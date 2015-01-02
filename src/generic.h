@@ -10,7 +10,7 @@
 /* 10/22/2010	(drs)	replaced every occurence of F_DELTA, #define F_DELTA (10*FLT_EPSILON), with ( max( 10.*FLT_EPSILON, FLT_EPSILON*pow2(10., ceil(log10(max(fabs(x),max(fabs(y), FLT_EPSILON))+1.)) ) ) ) and similar for D_DELTA
 						because earlier version worked only for 0<=x<fabs(31) */
 /* 01/03/2011	(drs) macro 'isless' renamed to 'isless2' */
-/* 05/25/2012	(DLM) added regression() function															*/
+/* 05/25/2012	(DLM) added interpolation() function															*/
 /* 05/29/2012   (DLM) added lobf(), lobfM(), & lobfCB() functions */
 /* 05/29/2012   (DLM) added squared(x) definition, this squares the value x (ie. returns the value of x^2).  the definition simply calls pow2(x, 2) in the cmath library.  x must be a double. added for convenience */
 
@@ -192,7 +192,7 @@ int  Str_CompareI(char *t, char *s);
 void UnComment( char *s) ;
 void LogError(FILE *fp, const int mode, const char *fmt, ...) ;
 Bool Is_LeapYear(int yr);
-double regression( double x1, double x2, double y1, double y2, double deltaX );
+double interpolation( double x1, double x2, double y1, double y2, double deltaX );
 void st_getBounds(unsigned int *x1, unsigned int *x2, unsigned int *equal, unsigned int size, double depth, double bounds[]);
 double lobfM( double xs[], double ys[], unsigned int n); 
 double lobfB( double xs[], double ys[], unsigned int n);

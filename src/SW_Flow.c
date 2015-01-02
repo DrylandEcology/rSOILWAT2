@@ -114,7 +114,7 @@ extern SW_WEATHER SW_Weather;
 extern SW_VEGPROD SW_VegProd;
 extern SW_SKY SW_Sky; //
 extern unsigned int soil_temp_error;  // simply keeps track of whether or not an error has been reported in the soil_temperature function.  0 for no, 1 for yes.
-extern unsigned int soil_temp_init;   // simply keeps track of whether or not the regression values for the soil_temperature function have been initialized.  0 for no, 1 for yes.
+extern unsigned int soil_temp_init;   // simply keeps track of whether or not the values for the soil_temperature function have been initialized.  0 for no, 1 for yes.
 
 
 /* *************************************************** */
@@ -135,7 +135,7 @@ RealD lyrSWC[MAX_LAYERS], lyrDrain[MAX_LAYERS], lyrTransp_Tree[MAX_LAYERS], lyrT
 
 RealD drainout; /* h2o drained out of deepest layer */
 
-static RealD tree_h2o_qum[TWO_DAYS], shrub_h2o_qum[TWO_DAYS], grass_h2o_qum[TWO_DAYS], litter_h2o_qum[TWO_DAYS], standingWater[TWO_DAYS]; /* water on soil surface if layer below is saturated */
+static RealD surfaceTemp[TWO_DAYS], tree_h2o_qum[TWO_DAYS], shrub_h2o_qum[TWO_DAYS], grass_h2o_qum[TWO_DAYS], litter_h2o_qum[TWO_DAYS], standingWater[TWO_DAYS]; /* water on soil surface if layer below is saturated */
 
 /* *************************************************** */
 /* *************************************************** */
@@ -159,6 +159,7 @@ void SW_FLW_construct(void) {
 	int i=0;
 	soil_temp_error = 0;
 	soil_temp_init = 0;
+	
 	//These only have to be cleared if a loop is wrong in the code.
 	for(i=0;i<MAX_LAYERS;i++) {
 		lyrSWC[i] = lyrTranspCo_Tree[i] = lyrTranspCo_Shrub[i] = lyrTranspCo_Grass[i] = lyrEvapCo[i] = lyrFieldCaps[i] = 0;
@@ -170,6 +171,7 @@ void SW_FLW_construct(void) {
 	}
 	//When running as a library make sure these are set to zero.
 	drainout = 0;
+	surfaceTemp[0] = surfaceTemp[1] = 0.0;
 	tree_h2o_qum[0]=shrub_h2o_qum[0]=grass_h2o_qum[0]=litter_h2o_qum[0]=standingWater[0]=0.0;
 	tree_h2o_qum[1]=shrub_h2o_qum[1]=grass_h2o_qum[1]=litter_h2o_qum[1]=standingWater[1]=0.0;
 }
@@ -512,9 +514,9 @@ void SW_FLW_construct(void) {
 			// soil_temperature function computes the soil temp for each layer and stores it in lyrsTemp
 			// doesn't affect SWC at all, but needs it for the calculation, so therefore the temperature is the last calculation done
 	if (SW_Site.use_soil_temp)
-		soil_temperature(SW_Weather.now.temp_avg[Today], SW_Soilwat.pet, SW_Soilwat.aet, biomass, lyrSWC, lyrbDensity, lyrWidths, lyroldsTemp, lyrsTemp, SW_Site.n_layers,
+		soil_temperature(SW_Weather.now.temp_avg[Today], SW_Soilwat.pet, SW_Soilwat.aet, biomass, lyrSWC, lyrbDensity, lyrWidths, lyroldsTemp, lyrsTemp, surfaceTemp, SW_Site.n_layers,
 				lyrFieldCaps, lyrWiltpts, SW_Site.bmLimiter, SW_Site.t1Param1, SW_Site.t1Param2, SW_Site.t1Param3, SW_Site.csParam1, SW_Site.csParam2, SW_Site.shParam,
-				SW_Soilwat.snowpack[Today], SW_Site.meanAirTemp /*SW_Weather.hist.temp_year_avg*/, SW_Site.stDeltaX, SW_Site.stMaxDepth, SW_Site.stNRGR);
+				SW_Soilwat.snowpack[Today], SW_Site.meanAirTemp, SW_Site.stDeltaX, SW_Site.stMaxDepth, SW_Site.stNRGR);
 
 	/* Soil Temperature ends here */
 
@@ -612,6 +614,7 @@ static void arrays2records(void) {
 		SW_Soilwat.hydred_grass[i] = lyrHydRed_Grass[i];
 		SW_Soilwat.sTemp[i] = lyrsTemp[i];
 	}
+	SW_Soilwat.surfaceTemp = surfaceTemp[Today];
 
 	if (SW_Site.deepdrain)
 		SW_Soilwat.swc[Today][SW_Site.deep_lyr] = drainout;

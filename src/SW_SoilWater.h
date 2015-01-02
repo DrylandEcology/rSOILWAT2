@@ -84,7 +84,9 @@ typedef struct {
            total_int, tree_int, shrub_int, grass_int, litter_int,
            snowpack, snowdepth,
            et, aet, pet, deep,
-           sTemp[MAX_LAYERS];  // soil temperature in celcius for each layer
+           sTemp[MAX_LAYERS],  // soil temperature in celcius for each layer
+           surfaceTemp; // soil surface temperature
+
 } SW_SOILWAT_OUTPUTS;
 
 typedef struct {
@@ -107,7 +109,8 @@ typedef struct {
           aet,
           litter_evap, tree_evap, shrub_evap, grass_evap,
           litter_int, tree_int, shrub_int, grass_int,
-          sTemp[MAX_LAYERS]; // soil temperature
+          sTemp[MAX_LAYERS], // soil temperature
+          surfaceTemp; // soil surface temperature
 
     SW_SOILWAT_OUTPUTS dysum, /* helpful placeholder */
                        wksum, mosum, yrsum, /* accumulators for *avg */

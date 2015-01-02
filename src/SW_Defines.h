@@ -9,7 +9,8 @@
  *  History:
  *     (8/28/01) -- INITIAL CODING - cwb
 	09/09/2011	(drs) added #define ForEachXXXTranspLayer() for each vegetation type (XXX = tree, shrub, grass)
-	05/31/2012  (DLM) added MAX_ST_RGR definition for the maximum amount of soil temperature regressions allowed...
+	05/31/2012  (DLM) added MAX_ST_RGR definition for the maximum amount of soil temperature profile layers allowed...
+	01/02/2015	(drs) changed MAX_ST_RGR from 30 to 100 (to allow a depth of 10 m and 10 cm intervals)
  */
 /********************************************************/
 /********************************************************/
@@ -34,7 +35,7 @@
 /* some basic constants */
 #define MAX_LAYERS  25
 #define MAX_TRANSP_REGIONS 4
-#define MAX_ST_RGR 30
+#define MAX_ST_RGR 100
 
 #define SW_MISSING     999.     /* value to use as MISSING */
 

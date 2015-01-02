@@ -19,7 +19,7 @@
 /*
  History:
  2011/01/27	(drs) renamed from "gen_funcs.c" to "generic.c"
- 05/25/2012  (DLM) added regression() function
+ 05/25/2012  (DLM) added interpolation() function
  05/29/2012  (DLM) added lobf(), lobfM(), & lobfB() function
  05/31/2012  (DLM) added st_getBounds() function for use in the soil_temperature function in SW_Flow_lib.c
  */
@@ -257,12 +257,12 @@ Bool Is_LeapYear(int yr) {
 }
 
 /**************************************************************************************************************************************
- PURPOSE: Calculate a linear regression between two points, for use in soil_temperature function
+ PURPOSE: Calculate a linear interpolation between two points, for use in soil_temperature function
 
  HISTORY:
  05/25/2012 (DLM) initial coding
  **************************************************************************************************************************************/
-double regression(double x1, double x2, double y1, double y2, double deltaX) {
+double interpolation(double x1, double x2, double y1, double y2, double deltaX) {
 	return y1 + (((y2 - y1) / (x2 - x1)) * (deltaX - x1));
 }
 

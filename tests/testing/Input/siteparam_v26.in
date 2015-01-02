@@ -59,7 +59,7 @@
 0.18		# constant for s(h (specific heat capacity) equation, 0.18 in Parton's equation
 6.69		# constant mean air temperature (the soil temperature at the lower boundary, 180 cm) in celsius
 15.			# deltaX parameter for soil_temperature function, default is 15.  (distance between profile points in cm)  max depth (the next number) should be evenly divisible by this number
-180.		# max depth for the soil_temperature function equation, default is 180.  this number should be evenly divisible by deltaX
+990.		# max depth for the soil_temperature function equation, default is 180.  this number should be evenly divisible by deltaX
 1			# flag, 1 to calculate soil_temperature, 0 to not calculate soil_temperature
 
 
