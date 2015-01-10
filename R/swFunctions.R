@@ -115,14 +115,24 @@ dbW_getWeatherData <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startY
 	
 	if(useYears) {
 		if(useStart && useEnd) {
-			startYear_idx <- match(startYear,as.integer(names(data)))
-			endYear_idx <- match(endYear,as.integer(names(data)))
+		        # adjusting so we actually explore the values of the "year" slots of our soilwatDB object list
+			# startYear_idx <- match(startYear,as.integer(names(data)))
+			startYear_idx <- match(startYear, 
+			                       as.integer(unlist(lapply(data, FUN=slot, "year"))))
+			# endYear_idx <- match(endYear,as.integer(names(data)))
+			endYear_idx <- match(endYear, 
+					     as.integer(unlist(lapply(data, FUN=slot, "year"))))
 			data <- data[startYear_idx:endYear_idx]
 		} else if(useStart) {
-			startYear_idx <- match(startYear,as.integer(names(data)))
-			data <- data[startYear_idx:length(as.integer(names(data)))]
+			#startYear_idx <- match(startYear,as.integer(names(data)))
+			startYear_idx <- match(startYear, 
+					       as.integer(unlist(lapply(data, FUN=slot, "year"))))
+			# data <- data[startYear_idx:length(as.integer(names(data)))]
+			data <- data[startYear_idx:length(as.integer(unlist(lapply(data, FUN=slot, "year"))))]
 		} else if(useEnd) {
-			endYear_idx <- match(endYear,as.integer(names(data)))
+			# endYear_idx <- match(endYear,as.integer(names(data)))
+			endYear_idx <- match(endYear,
+			                     as.integer(unlist(lapply(data, FUN=slot, "year"))))
 			data <- data[1:endYear_idx]
 		}
 	}
