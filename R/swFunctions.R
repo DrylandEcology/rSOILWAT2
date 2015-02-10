@@ -42,6 +42,38 @@ getWeatherData_folders <- function(LookupWeatherFolder=NULL, weatherDirName=NULL
 	names(weathDataList)<-as.character(weatherDataYears[index])
 	return(weathDataList)
 }
+
+dbW_blob_to_weatherData <- function(StartYear, EndYear, data_blob) {
+	if(typeof(data_blob) == "list")
+		data_blob <- data_blob[[1]]
+	data <- strsplit(rawToChar(memDecompress(data_blob, type="gzip")), ";")[[1]]
+	years <- seq(from=StartYear, to=EndYear)
+	
+	weatherData <- list()
+	for(i in 1:length(years)) {
+		ydata <- read.table(textConnection(data[i]),header=FALSE,sep=",",stringsAsFactors=FALSE)
+		ydata <- as.matrix(cbind(seq(from=1,to=nrow(ydata)),ydata))
+		colnames(ydata) <- c("DOY","Tmax_C","Tmin_C","PPT_cm")
+		weatherData[[i]] <- new("swWeatherData",year=years[i],data=ydata)
+	}
+	names(weatherData) <- years
+	
+	return(weatherData)
+}
+
+dbW_weatherData_to_blob <- function(weatherData) {
+	string <- character(length=length(weatherData))
+	for(i in 1:length(weatherData)) {
+		zz <- textConnection("dataString","w")
+		write.table(x=weatherData[[i]]@data[,2:4], file=zz, col.names=FALSE, sep="," ,row.names=FALSE)
+		close(zz)
+		string[i] <-paste(dataString,collapse="\n")
+	}
+	string<-paste(string,collapse=";")
+	data_blob <- paste0("x'",paste0(memCompress(string,type="gzip"),collapse = ""),"'",sep="")
+	return(data_blob)
+}
+
 dbW_getSiteId <- function(lat=NULL, long=NULL, Label=NULL) {
 	lat<-as.numeric(lat)
 	long<-as.numeric(long)
@@ -106,8 +138,8 @@ dbW_getWeatherData <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startY
 	}
 	if(!is.null(Site_id) && is.integer(Site_id) && Site_id >= 0) {
 		Scenario <- dbGetQuery(con.env$con, paste("SELECT id FROM Scenarios WHERE Scenario='",Scenario,"';",sep=""))[1,1]
-		result <- dbGetQuery(con.env$con, paste("SELECT data FROM WeatherData WHERE Site_id=",Site_id, " AND Scenario=",Scenario,";",sep=""))[[1]][[1]];
-		data <- unserialize(memDecompress(result,type="gzip"))
+		result <- dbGetQuery(con.env$con, paste("SELECT StartYear,EndYear,data FROM WeatherData WHERE Site_id=",Site_id, " AND Scenario=",Scenario,";",sep=""));
+		data <- dbW_blob_to_weatherData(result$StartYear, result$EndYear, result$data)
 		if(inherits(data, "try-error")) stop(paste("Weather data for Site_id", Site_id, "is corrupted"))
 	} else {
 		stop(paste("Site_id for", Label, "not obtained."))
@@ -216,8 +248,8 @@ dbW_addScenarios <- function(dfScenario) {#names 1 ... 32
 	dbGetPreparedQuery(con.env$con, "INSERT INTO Scenarios VALUES(NULL, :Scenario)", bind.data = as.data.frame(dfScenario,stringsAsFactors=FALSE))
 }
 
-dbW_addWeatherDataNoCheck <- function(Site_id, Scenario_id, weatherData) {
-	dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, data) VALUES (",Site_id,",",Scenario_id,",",weatherData,");",sep=""))
+dbW_addWeatherDataNoCheck <- function(Site_id, Scenario_id, StartYear, EndYear, weatherData) {
+	dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",Scenario_id,",",StartYear,",",EndYear,",",weatherData,");",sep=""))
 }
 
 dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderPath=NULL, weatherData=NULL, label=NULL, ScenarioName="Current") {
@@ -237,8 +269,10 @@ dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderP
 	}
 	
 	if(!is.null(weatherData)) {
-		data_blob <- paste0("x'",paste0(memCompress(serialize(weatherData,NULL),type="gzip"),collapse = ""),"'",sep="")
-		dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, data) VALUES (",Site_id,",",scenarioID,",",data_blob,");",sep=""))
+		data_blob <- dbW_weatherData_to_blob(weatherData)
+		StartYear <- head(as.integer(names(weatherData)),n=1)
+		EndYear <- tail(as.integer(names(weatherData)),n=1)
+		dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
 		#dbCommit(con.env$con)
 	} else {
 		weath <- list.files(weatherFolderPath)
@@ -249,20 +283,25 @@ dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderP
 			temp <-read.csv(file.path(weatherFolderPath,weath[j]),header=FALSE,skip=2,sep="\t")
 			weatherData[[j]] <- swReadLines(new("swWeatherData",year),file.path(weatherFolderPath,weath[j]))
 		}
-		names(weatherData) <- years
-		data_blob <- paste0("x'",paste0(memCompress(serialize(weatherData,NULL),type="gzip"),collapse = ""),"'",sep="")
-		dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, data) VALUES (",Site_id,",",scenarioID,",",data_blob,");",sep=""))
+		StartYear <- head(years,n=1)
+		EndYear <- tail(years,n=1)
+		data_blob <- dbW_weatherData_to_blob(weatherData)
+		dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
 		#dbCommit(con.env$con)
 	}
 }
 
 dbW_createDatabase <- function(dbFilePath="dbWeatherData.sqlite") {
 	dbW_setConnection(dbFilePath, FALSE)
+	SQL <- paste("CREATE TABLE \"Version\" (\"Version\" integer);")
+	dbGetQuery(con.env$con, SQL)
+	
+	dbGetQuery(con.env$con, "INSERT INTO Version (Version) VALUES (1);")
 	
 	SQL <- paste("CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, \"Latitude\" REAL, \"Longitude\" REAL, \"Label\" TEXT);", sep="")
 	dbGetQuery(con.env$con, SQL)
 	#TABLE WEATHER DATA
-	SQL <- paste("CREATE TABLE \"WeatherData\" (\"Site_id\" integer, \"Scenario\" integer, \"data\" BLOB, PRIMARY KEY (\"Site_id\", \"Scenario\"));", sep="")
+	SQL <- paste("CREATE TABLE \"WeatherData\" (\"Site_id\" integer, \"Scenario\" integer,  \"StartYear\" integer, \"EndYear\" integer, \"data\" BLOB, PRIMARY KEY (\"Site_id\", \"Scenario\"));", sep="")
 	dbGetQuery(con.env$con, SQL)
 	#Scenario Names
 	SQL <- "CREATE TABLE \"Scenarios\" (\"id\" integer PRIMARY KEY, \"Scenario\" TEXT);"

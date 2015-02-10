@@ -13,7 +13,9 @@ dbW_createDatabase,
 dbW_addFromFolders,
 dbW_deleteSiteData,
 dbW_getSiteTable,
-dbW_getScenariosTable
+dbW_getScenariosTable,
+dbW_weatherData_to_blob,
+dbW_blob_to_weatherData
 )
 
 exportClasses(
