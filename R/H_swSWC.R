@@ -52,7 +52,7 @@ setMethod(f="swClear",
 			object@DataFilePrefix=character(1)
 			object@FirstYear=integer(1)
 			object@Method=integer(1)
-			object@History=list(0)
+			object@History=list(swClear(new("swSWC_hist")))
 			return(object)
 		})
 

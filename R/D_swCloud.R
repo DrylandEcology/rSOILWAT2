@@ -5,7 +5,7 @@
 
 
 ########################CLOUD DATA################################
-
+print("swCloud")
 swCloud<-setClass("swCloud",representation(Cloud="matrix"),prototype=prototype(Cloud=matrix(data=c(71,61,61,51,41,31,23,23,31,41,61,61,1.3,2.9,3.3,3.8,3.8,3.8,3.3,3.3,2.9,1.3,1.3,1.3,61,61,61,51,51,51,41,41,51,51,61,61,1,1,1,1,1,1,1,1,1,1,1,1,213.7,241.6,261,308,398.1,464.5,0,0,0,140,161.6,185.1),nrow=5,ncol=12,byrow=T,dimnames=list(c("SkyCoverPCT","WindSpeed_m/s","HumidityPCT","Transmissivity","SnowDensity_kg/m^3"),c("January","February","March","April","May","June","July","August","September","October","November","December")))))
 swCloud_validity<-function(object){
 	if(dim(object@Cloud)[1]!=5)

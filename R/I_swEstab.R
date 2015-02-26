@@ -68,22 +68,22 @@ setMethod("swWriteLines", signature=c(object="swEstabSpecies", file="character")
 		})
 setMethod("swReadLines", signature=c(object="swEstabSpecies",file="character"), definition=function(object,file) {
 			infiletext <- readLines(con = file)
-			index<-length(object@fileName)+1
-			object@Name[index] = strsplit(x=infiletext[1],split = c(" ", "#"))[[1]][1]
-			object@estab_lyrs[index] = readInteger(infiletext[3])
-			object@barsGERM[index] = readNumeric(infiletext[4])
-			object@barsESTAB[index] = readNumeric(infiletext[5])
-			object@min_pregerm_days[index] = readInteger(infiletext[7])
-			object@max_pregerm_days[index] = readInteger(infiletext[8])
-			object@min_wetdays_for_germ[index] = readInteger(infiletext[9])
-			object@max_drydays_postgerm[index] = readInteger(infiletext[10])
-			object@min_wetdays_for_estab[index] = readInteger(infiletext[11])
-			object@min_days_germ2estab[index] = readInteger(infiletext[12])
-			object@max_days_germ2estab[index] = readInteger(infiletext[13])
-			object@min_temp_germ[index] = readInteger(infiletext[15])
-			object@max_temp_germ[index] = readNumeric(infiletext[16])
-			object@min_temp_estab[index] = readNumeric(infiletext[17])
-			object@max_temp_estab[index] = readNumeric(infiletext[18])
+
+			object@Name = c(object@Name, gsub("[[:space:]]","",strsplit(x=infiletext[1],split = c("#"," ", "\t"),fixed=F)[[1]][1]))
+			object@estab_lyrs = c(object@estab_lyrs,readInteger(infiletext[3]))
+			object@barsGERM = c(object@barsGERM,readNumeric(infiletext[4]))
+			object@barsESTAB = c(object@barsESTAB,readNumeric(infiletext[5]))
+			object@min_pregerm_days = c(object@min_pregerm_days,readInteger(infiletext[7]))
+			object@max_pregerm_days = c(object@max_pregerm_days,readInteger(infiletext[8]))
+			object@min_wetdays_for_germ = c(object@min_wetdays_for_germ,readInteger(infiletext[9]))
+			object@max_drydays_postgerm = c(object@max_drydays_postgerm,readInteger(infiletext[10]))
+			object@min_wetdays_for_estab = c(object@min_wetdays_for_estab,readInteger(infiletext[11]))
+			object@min_days_germ2estab = c(object@min_days_germ2estab,readInteger(infiletext[12]))
+			object@max_days_germ2estab = c(object@max_days_germ2estab,readInteger(infiletext[13]))
+			object@min_temp_germ = c(object@min_temp_germ,readInteger(infiletext[15]))
+			object@max_temp_germ = c(object@max_temp_germ,readNumeric(infiletext[16]))
+			object@min_temp_estab = c(object@min_temp_estab,readNumeric(infiletext[17]))
+			object@max_temp_estab = c(object@max_temp_estab,readNumeric(infiletext[18]))
 			return(object)
 		})
 
@@ -107,8 +107,8 @@ setMethod(f="swClear",
 			object@max_days_germ2estab = integer(0)
 			object@min_temp_germ = integer(0)
 			object@max_temp_germ = numeric(0)
-			object@max_temp_germ = numeric(0)
-			object@max_temp_germ = numeric(0)
+			object@min_temp_estab = numeric(0)
+			object@max_temp_estab = numeric(0)
 			return(object)
 		})
 setMethod("swEstab_useEstab", "swEstab", function(object) {return(object@useEstab)})
@@ -136,7 +136,7 @@ setMethod("swWriteLines", signature=c(object="swEstab", file="character"), defin
 			close(infile)
 		})
 setMethod("swReadLines", signature=c(object="swEstab",file="character"), definition=function(object,file) {
-			infiletext <- readLines(con = file)
+			infiletext <- readLines(con = file[1])
 			index<-length(object@fileName)+1
 			object@useEstab = readLogical(infiletext[9])
 			object@count = 0L
@@ -145,10 +145,11 @@ setMethod("swReadLines", signature=c(object="swEstab",file="character"), definit
 				infiletext <- infiletext[infiletext != ""]
 				for(i in 1:length(infiletext)) {
 					#see if the line is commented out
-					line<-strsplit(x=infiletext[i],split=c("#"," "))[[1]][1]
+					line<-gsub("[[:space:]]","",strsplit(x=infiletext[i],split=c("#"))[[1]][1])
 					if(line != "") {
+						object@fileName <- c(object@fileName, line)
 						object@count <- object@count + 1L
-						as(object,"swEstabSpecies") <- swReadLines(as(object,"swEstabSpecies"),paste(line,".estab",sep=""))
+						as(object,"swEstabSpecies") <- swReadLines(as(object,"swEstabSpecies"),file.path(file[2],line))
 					}
 				}
 			}

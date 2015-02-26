@@ -145,24 +145,24 @@ setMethod(f="initialize",signature="swOutput",definition=function(.Object,Layers
 			.Object@ALLVEG@Columns <- 0L
 			.Object@ESTABL@Columns <- VegEstabCount
 			
-			for(i in 1:28) {#loop through KEYS
-				if(Key_use[i]) {
-					#only create matrix for time periods used.
-					if(!useTimeStep) {
-						index<-swOutput_KEY_TimeStep(swOutput_getKEY(.Object,i))+1
-						temp <- swOutput_getKEY(.Object,i)
-						swOutput_KEY_Period(temp,index) <- matrix(data=999,nrow=nrow[index],ncol=swOutput_KEY_Columns(temp)+coladd[index],byrow=TRUE)
-						swOutput_getKEY(.Object,i) <- temp
-					} else {
-						for(j in 1:length(timePeriods)) {#Loop through Time Period dy,wk,mo,yr
-							index<-timePeriods[j]+1
-							temp<-swOutput_getKEY(.Object,i)
-							swOutput_KEY_Period(temp,index) <- matrix(data=999,nrow=nrow[index],ncol=swOutput_KEY_Columns(temp)+coladd[index],byrow=TRUE)
-							swOutput_getKEY(.Object,i) <- temp
-						}
-					}
-				}
-			}
+#			for(i in 1:28) {#loop through KEYS
+#				if(Key_use[i]) {
+#					#only create matrix for time periods used.
+#					if(!useTimeStep) {
+#						index<-swOutput_KEY_TimeStep(swOutput_getKEY(.Object,i))+1
+#						temp <- swOutput_getKEY(.Object,i)
+#						#swOutput_KEY_Period(temp,index) <- matrix(data=999,nrow=nrow[index],ncol=swOutput_KEY_Columns(temp)+coladd[index],byrow=TRUE)
+#						swOutput_getKEY(.Object,i) <- temp
+#					} else {
+#						for(j in 1:length(timePeriods)) {#Loop through Time Period dy,wk,mo,yr
+#							index<-timePeriods[j]+1
+#							temp<-swOutput_getKEY(.Object,i)
+#							#swOutput_KEY_Period(temp,index) <- matrix(data=999,nrow=nrow[index],ncol=swOutput_KEY_Columns(temp)+coladd[index],byrow=TRUE)
+#							swOutput_getKEY(.Object,i) <- temp
+#						}
+#					}
+#				}
+#			}
 			
 			validObject(.Object)
 			return(.Object)

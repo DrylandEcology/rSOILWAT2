@@ -12,7 +12,7 @@ setMethod(f="swClear",
 			object@years=swClear(object@years)
 			object@cloud=swClear(object@cloud)
 			object@weather=swClear(object@weather)
-			object@weatherHistory=swClear(object@weatherHistory)
+			object@weatherHistory=list()
 			object@prod=swClear(object@prod)
 			object@site=swClear(object@site)
 			object@estab=swClear(object@estab)
@@ -309,7 +309,7 @@ setMethod(f="swWriteLines",signature=c(object="swInputData",file="character"), d
 				}
 			}
 			swWriteLines(object@cloud, file.path(file,object@files@InFiles[9]))
-			#swWriteLines(object@markov, file.path(file,object@files@InFiles[c(7,8)]))
+			swWriteLines(object@markov, file.path(file,object@files@InFiles[7:8]))
 			swWriteLines(object@prod, file.path(file,object@files@InFiles[10]))
 			swWriteLines(object@site, file.path(file,object@files@InFiles[4]))
 			swWriteLines(object@soils, file.path(file,object@files@InFiles[5]))
@@ -323,4 +323,31 @@ setMethod(f="swWriteLines",signature=c(object="swInputData",file="character"), d
 			swWriteLines(object@swc, file.path(file,object@files@InFiles[12]))
 			#swWriteLines(object@log, file.path(file,object@files@InFiles[3]))
 		})
-setMethod(f="swReadLines", signature=c(object="swInputData",file="character"), definition=function(object,file) { return(swReadLines(object@files,file)) })
+setMethod(f="swReadLines", signature=c(object="swInputData",file="character"), definition=function(object,file) {
+			object@files <- swReadLines(object@files,file)
+			object@files@ProjDir <- dirname(file)
+			object@years <- swReadLines(object@years,file.path(object@files@ProjDir, object@files@InFiles[2]))
+			object@weather <- swReadLines(object@weather,file.path(object@files@ProjDir, object@files@InFiles[6]))
+			weatherFiles <- list.files(path=file.path(object@files@ProjDir,dirname(object@files@WeatherPrefix)), pattern=basename(object@files@WeatherPrefix), include.dirs=F, recursive=F, full.names=T)
+			object@weatherHistory <- list()
+			if(length(weatherFiles) > 0) {
+				for(i in 1:length(weatherFiles)) {
+					wd <- new("swWeatherData",year=0)
+					wd <- swReadLines(wd, weatherFiles[i])
+					object@weatherHistory[[i]] <- wd
+				}
+			}
+			
+			object@cloud <- swReadLines(object@cloud,file.path(object@files@ProjDir, object@files@InFiles[9]))
+			if(all(file.exists(file.path(object@files@ProjDir, object@files@InFiles[7:8]))))
+				object@markov <- swReadLines(object@markov,file.path(object@files@ProjDir, object@files@InFiles[7:8]))
+			object@prod <- swReadLines(object@prod,file.path(object@files@ProjDir, object@files@InFiles[10]))
+			object@site <- swReadLines(object@site,file.path(object@files@ProjDir, object@files@InFiles[4]))
+			object@soils <- swReadLines(object@soils,file.path(object@files@ProjDir, object@files@InFiles[5]))
+			if(file.exists(file.path(object@files@ProjDir, object@files@InFiles[11]))) {#Optional File
+				object@estab <- swReadLines(object@estab,c(file.path(object@files@ProjDir, object@files@InFiles[11]),object@files@ProjDir))
+			}
+			object@output <- swReadLines(object@output,file.path(object@files@ProjDir, object@files@InFiles[13]))
+			object@swc <- swReadLines(object@swc,file.path(object@files@ProjDir, object@files@InFiles[12]))
+			return(object)
+		})

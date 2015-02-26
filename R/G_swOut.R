@@ -148,12 +148,13 @@ setMethod("swWriteLines", signature=c(object="swOUT", file="character"), definit
 		})
 setMethod("swReadLines", signature=c(object="swOUT",file="character"), definition=function(object,file) {
 			infiletext <- readLines(con = file)
-			if(temp<-strsplit(infiletext[41],split=" ")[[1]][2] == "t")
+			if(temp<-strsplit(infiletext[41],split=" ")[[1]][2] == "t") {
 				object@outputSeparator="\t"
-			else if(temp == "s")
+			} else if(temp == "s") {
 				object@outputSeparator=" "
-			else
+			} else {
 				object@outputSeparator="\t"
+			}
 			
 			if(infiletext[42]==""){
 				object@useTimeStep = FALSE
@@ -170,7 +171,7 @@ setMethod("swReadLines", signature=c(object="swOUT",file="character"), definitio
 					temp <- temp[temp != ""][1:6]
 					mykey<- as.integer(grep(pattern=temp[1],x=KEY)[1])
 					sumtype <- as.integer(grep(pattern=temp[2],x=OutSum))-1
-					period <- which(temp[3] == timePeriods)-1
+					period <- which(tolower(temp[3]) == timePeriods)-1
 					start <- as.integer(temp[4])
 					if(grepl(pattern="end",x=temp[5])) {
 						end <- as.integer(366)

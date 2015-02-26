@@ -90,7 +90,7 @@ setMethod("swReadLines", signature=c(object="swSoils",file="character"), definit
 			infiletext <- infiletext[infiletext!=""]#get rid of extra spaces
 			infiletext <- infiletext[17:length(infiletext)]#get rid of comments
 			object@Layers <- matrix(data=NA, nrow=length(1:length(infiletext)),ncol=12)
-			colnames(Layers)<-c("depth_cm","bulkDensity_g/cm^3","gravel_content","EvapBareSoil_frac","transpGrass_frac","transpShrub_frac","transpTree_frac","transpForb_frac","sand_frac","clay_frac","impermeability_frac","soilTemp_c")
+			colnames(object@Layers)<-c("depth_cm","bulkDensity_g/cm^3","gravel_content","EvapBareSoil_frac","transpGrass_frac","transpShrub_frac","transpTree_frac","transpForb_frac","sand_frac","clay_frac","impermeability_frac","soilTemp_c")
 			for(i in 1:length(infiletext)) {
 				object@Layers[i,] = readNumerics(infiletext[i],12)
 			}
