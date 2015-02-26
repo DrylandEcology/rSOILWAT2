@@ -100,8 +100,8 @@ setMethod(f="swClear",
 			object@max_days_germ2estab = integer(0)
 			object@min_temp_germ = integer(0)
 			object@max_temp_germ = numeric(0)
-			object@max_temp_germ = numeric(0)
-			object@max_temp_germ = numeric(0)
+			object@max_temp_estab = numeric(0)
+			object@max_temp_estab = numeric(0)
 			return(object)
 		})
 setMethod("swEstab_useEstab", "swEstab", function(object) {return(object@useEstab)})
@@ -109,7 +109,7 @@ setReplaceMethod(f="swEstab_useEstab", signature="swEstab", definition=function(
 
 setMethod("swWriteLines", signature=c(object="swEstab", file="character"), definition=function(object, file) {
 			infilename <- file.path(file)
-			infiletext <- character(9)
+			infiletext <- character(9+length(object@fileName))
 			infiletext[1] = "# list of filenames for which to check establishment"
 			infiletext[2] = "# each filename pertains to a species and contains the"
 			infiletext[3] = "# soil moisture and timing parameters required for the"
@@ -118,6 +118,9 @@ setMethod("swWriteLines", signature=c(object="swEstab", file="character"), defin
 			infiletext[6] = "# to suppress checking establishment, comment all the"
 			infiletext[7] = "# lines below."
 			infiletext[9] = paste(as.character(as.integer(object@useEstab)),"\t# use flag; 1=check establishment, 0=don't check, ignore following",sep="")
+			for(i in 1:object@count) {
+				infiletext[9+i] = object@fileName[i]
+			}
 			infile <- file(infilename, "w+b")
 			writeLines(text = infiletext, con = infile, sep = "\n")
 			close(infile)
@@ -126,6 +129,19 @@ setMethod("swReadLines", signature=c(object="swEstab",file="character"), definit
 			infiletext <- readLines(con = file)
 			index<-length(object@fileName)+1
 			object@useEstab = readLogical(infiletext[9])
+			object@count = 0L
+			if(object@useEstab) {
+				infiletext <- infiletext[-c(1:9)]
+				infiletext <- infiletext[infiletext != ""]
+				for(i in 1:length(infiletext)) {
+					#see if the line is commented out
+					line<-strsplit(x=infiletext[i],split=c("#"," "))[[1]][1]
+					if(line != "") {
+						object@count <- object@count + 1L
+						as(object,"swEstabSpecies") <- swReadLines(as(object,"swEstabSpecies"),paste(line,".estab",sep=""))
+					}
+				}
+			}
 			return(object)
 		})
 

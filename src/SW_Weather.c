@@ -577,8 +577,10 @@ Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year) {
 	//dim = getAttrib(WTH_DATA_YEAR, R_DimSymbol);
 	days = Time_get_lastdoy_y(year);
 
-	if (nrows(WTH_DATA_YEAR) != days && ncols(WTH_DATA_YEAR) != 4)
+	if (nrows(WTH_DATA_YEAR) != days || ncols(WTH_DATA_YEAR) != 4) {
+		LogError(logfp, LOGFATAL, "weath.%4d : Wrong number of days or columns in data. Expected rows %d had %d. Expected columns 4 had %d.", year, days,nrows(WTH_DATA_YEAR),ncols(WTH_DATA_YEAR));
 		return swFALSE;
+	}
 	p_WTH_DATA = REAL(WTH_DATA_YEAR);
 	_clear_hist_weather();
 
