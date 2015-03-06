@@ -186,8 +186,8 @@ setMethod("swProd_MonProd_tree", "swInputData", function(object) {return(object@
 setMethod("swProd_MonProd_forb", "swInputData", function(object) {return(object@prod@MonthlyProductionValues_forb)})
 
 setReplaceMethod(f="set_swProd", signature="swInputData", definition=function(object,value) {object@prod <- value; return(object)})
-setReplaceMethod(f="swProd_Composition", signature="swInputData", definition=function(object,value) {object@prod@Composition <- value; return(object)})
-setReplaceMethod(f="swProd_Albedo", signature="swInputData", definition=function(object,value) {object@prod@Albedo <- value; return(object)})
+setReplaceMethod(f="swProd_Composition", signature="swInputData", definition=function(object,value) { if(length(value) != 5) stop("need numeric of length 5"); object@prod@Composition <- value; return(object)})
+setReplaceMethod(f="swProd_Albedo", signature="swInputData", definition=function(object,value) { if(length(value) != 5) stop("need numeric of length 5"); object@prod@Albedo <- value; return(object)})
 setReplaceMethod(f="swProd_Cover_stcr", signature="swInputData", definition=function(object,value) {object@prod@Cover_stcr <- value; return(object)})
 setReplaceMethod(f="swProd_CanopyHeight", signature="swInputData", definition=function(object,value) {object@prod@CanopyHeight <- value; return(object)})
 setReplaceMethod(f="swProd_VegInterParam", signature="swInputData", definition=function(object,value) {object@prod@VegetationInterceptionParameters <- value; return(object)})
@@ -309,7 +309,8 @@ setMethod(f="swWriteLines",signature=c(object="swInputData",file="character"), d
 				}
 			}
 			swWriteLines(object@cloud, file.path(file,object@files@InFiles[9]))
-			swWriteLines(object@markov, file.path(file,object@files@InFiles[7:8]))
+			if(object@weather@use_Markov)
+				swWriteLines(object@markov, file.path(file,object@files@InFiles[7:8]))
 			swWriteLines(object@prod, file.path(file,object@files@InFiles[10]))
 			swWriteLines(object@site, file.path(file,object@files@InFiles[4]))
 			swWriteLines(object@soils, file.path(file,object@files@InFiles[5]))
