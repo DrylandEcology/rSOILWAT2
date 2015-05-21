@@ -27,26 +27,26 @@
 # These control the tangent function (tanfunc) which affects the amount of soil 
 # water extractable by evaporation and transpiration.
 # These constants aren't documented by the ELM doc.
-15.          # rate shift (x value of inflection point).  lower value shifts curve 
+45.          # rate shift (x value of inflection point).  lower value shifts curve 
              # leftward, meaning less water lost to evap at a given swp.  effectively
              # shortens/extends high rate.
-.06          # rate slope: lower value (eg .01) straightens S shape meaning more gradual 
+.1          # rate slope: lower value (eg .01) straightens S shape meaning more gradual 
              # reduction effect; higher value (.5) makes abrupt transition
-.5           # inflection point (y-value of inflection point)
-1.1          # range: diff btw upper and lower rates at the limits
+.25           # inflection point (y-value of inflection point)
+0.5          # range: diff btw upper and lower rates at the limits
 
 # ---- Transpiration Coefficients ----
 # comments from Evap constants apply.
-28.          # rate shift
-.07          # rate shape
+45.          # rate shift
+.1          # rate shape
 .5          # inflection point
 1.1          # range
 
-# ---- Intrinsic site params: Chimney Park, WY (41.068° N, 106.1195° W, 2740 m elevation) ----
-0.681	# latitude of the site in radians, site = 002_-119.415_39.046
-1651.4064	# altitude of site (m a.s.l.)
+# ---- Intrinsic site params:
+0.681	# latitude of the site in radians
+1651	# altitude of site (m a.s.l.)
 0	# slope at site (degrees): no slope = 0
-0	# aspect at site (degrees): N=0, E=90, S=180, W=270, no slope:-1
+-1	# aspect at site (degrees): N=0, E=90, S=180, W=270, no slope:-1
 
 # ---- Soil Temperature Constants ----
 # from Parton 1978, ch. 2.2.2 Temperature-profile Submodel
@@ -59,8 +59,8 @@
 0.18		# constant for sh (specific heat capacity) equation, 0.18 in Parton's equation
 6.69		# constant mean air temperature (the soil temperature at the lower boundary, 180 cm) in celsius
 15.			# deltaX parameter for soil_temperature function, default is 15.  (distance between profile points in cm)  max depth (the next number) should be evenly divisible by this number
-180.		# max depth for the soil_temperature function equation, default is 180.  this number should be evenly divisible by deltaX
-0			# flag, 1 to calculate soil_temperature, 0 to not calculate soil_temperature
+990.		# max depth for the soil_temperature function equation, default is 180.  this number should be evenly divisible by deltaX
+1			# flag, 1 to calculate soil_temperature, 0 to not calculate soil_temperature
 
 
 # ---- Transpiration regions ----
