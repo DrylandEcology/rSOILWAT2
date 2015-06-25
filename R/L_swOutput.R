@@ -117,7 +117,7 @@ setMethod(f="initialize",signature="swOutput",definition=function(.Object,Layers
 			coladd <- c(2,2,2,1)
 			#Calculate the Columns
 			.Object@WTHR@Columns <- 0L
-			.Object@TEMP@Columns <- 3L
+			.Object@TEMP@Columns <- 4L
 			.Object@PRECIP@Columns <- 5L
 			.Object@SOILINFILT@Columns <- 1L
 			.Object@RUNOFF@Columns <- 3L
