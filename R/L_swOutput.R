@@ -15,7 +15,7 @@ setMethod("swOutput_KEY_Columns","swOutput_KEY", function(object) { return(objec
 setReplaceMethod(f="swOutput_KEY_Period", signature="swOutput_KEY", definition=function(object,index,value) {slot(object,slotNames(object)[-(1:3)][index]) <- value; return(object)})
 
 swOutput_WTHR <- new("swOutput_KEY",Title="",TimeStep=4L,Columns=0L)
-swOutput_TEMP <- new("swOutput_KEY",Title="temp_air",TimeStep=1L,Columns=3L)
+swOutput_TEMP <- new("swOutput_KEY",Title="temp_air",TimeStep=1L,Columns=4L)
 swOutput_PRECIP <- new("swOutput_KEY",Title="precip",TimeStep=2L,Columns=5L)
 swOutput_SOILINFILT <- new("swOutput_KEY",Title="infiltration",TimeStep=3L,Columns=1L)
 swOutput_RUNOFF <- new("swOutput_KEY",Title="runoff",TimeStep=1L,Columns=3L)
