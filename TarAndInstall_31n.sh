@@ -15,6 +15,7 @@ if [ `uname | awk '{ print $1 }'` = "Darwin" ]; then
   wd=`pwd | awk -F"/" '{print $NF}'`
   cd src/
   make clean;
+  rm SW_R_lib.o
   cd ../../
   R CMD INSTALL $wd
   cd $oldDir
