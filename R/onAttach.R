@@ -4,7 +4,8 @@
   {
     meta <- packageDescription("Rsoilwat31")
     packageStartupMessage("Package 'Rsoilwat_31', ", meta$Version, " (", meta$Date, ").")
-	print("Calculates surface temperature under snow cover based on Koren et al. 1999 JGR")
+	print("Fixed soil temperature bug (strong dampening with depth): SWC - VWC confusion")
+	print("NOTE: soil thawing/freezing turned off due to large number of errors - NEEDS FIX")
   }
   invisible()
 }

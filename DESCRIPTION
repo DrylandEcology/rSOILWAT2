@@ -1,13 +1,13 @@
 Package: Rsoilwat31
-Version: 0.31.11
-Date: 11-23-2015
+Version: 0.31.12
+Date: 01-04-2016
 Title: SoilWat v31
 Authors@R: c(person("Ryan Murphy", "Developer", role = c("aut", "cre"),
                     email = "ryanmurf@gmail.com"))
 Author: Ryan Murphy
-Maintainer: Ryan Murphy <ryanmurf@gmail.com>
+Maintainer: Daniel Schlaepfer <daniel.schlaepfer@unibas.ch>
 Depends: R (>= 2.12.0), RSQLite
 Description: SoilWat package is a R wrapper for the soil wat C code. It allows data to be accessed directly within R from soilwat.
 License: GPL (>= 2)
 URL: http://www.r-project.org
-BugReports: ryanmurf@gmail.com
+BugReports: daniel.schlaepfer@unibas.ch
