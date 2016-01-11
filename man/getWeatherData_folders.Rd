@@ -1,0 +1,55 @@
+% 
+% TODO: Review
+% 
+\name{getWeatherData_folders}
+\alias{getWeatherData_folders}
+\title{Rsoilwat getWeatherData_folders}
+\description{
+	Reads weather data from files.
+	Returns list of weather data.
+}
+\usage{
+	getWeatherData_folders(LookupWeatherFolder=NULL, weatherDirName=NULL, filebasename=NULL, startYear=NULL, endYear=NULL)
+}
+\arguments{
+	\item{LookupWeatherFolder}{String Path. Path to the LookupWeatherFolder location.}
+	\item{weatherDirName}{String. Name of the folder containing weather data files.}
+	\item{filebasename}{String. File prefix for weather data. Usually 'weath'.}
+	\item{startYear}{Numeric. Extracted weather data will start with this year.}
+	\item{endYear}{Numeric. Extracted weather data will end with this year.}
+}
+\details{
+	Weather data for the soil water simulation run can be stored in the input data
+	or it can be separate to keep the input data size down for multiple variations
+	of the same site. This function is used to return the weather data from folders.
+	The other option is to use onGetWeatherData_database.
+	
+	The output from this function can be passed directly to sw_exec with input data.
+}
+\value{
+	Returns weather data as list. Each element contains data for one year.
+}
+\author{Ryan Murphy}
+\seealso{
+	\itemize{
+		\item \code{\link{sw_exec}} for running a simulation
+		\item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for data input
+		\item \code{\link{dbW_getWeatherData}} and \code{\link{getWeatherData_folders}} for weather data input
+	}
+}
+\examples{
+path_demo <- dirname(system.file("extdata", "files_v31.in", package = "Rsoilwat31"))
+
+## ------ Simulation with data prepared beforehand and separate weather data ------------
+## Read inputs from files on disk
+sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files_v31.in")
+
+## Read forcing weather data from files on disk (there are also functions to set up a SQLite database for the weather data)
+sw_weath3 <- getWeatherData_folders(LookupWeatherFolder=file.path(path_demo, "Input"), weatherDirName="data_weather", filebasename="weath", startYear=1979, endYear=2010)
+
+## List of the slots of the input objects of class 'swWeatherData'
+str(weatherList, max.level=1)
+
+## Execute the simulation run
+sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)
+}

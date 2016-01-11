@@ -53,20 +53,21 @@
 }
 \author{Ryan Murphy}
 \seealso{
-	\code{\link{swInputData}}
-	\code{\link{sw_exec}}
-	\code{\link{sw_inputDataFromFiles}}
-	\code{\link{onGetWeatherData_database}}
-	\code{\link{onGetWeatherData_folders}}
+	\itemize{
+		\item \code{\link{sw_exec}} for running a simulation
+		\item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for data input
+		\item \code{\link{dbW_getWeatherData}} and \code{\link{getWeatherData_folders}} for weather data input
+	}
 }
 \examples{
-	## Default data set. Default data set includes weather data. 
-	## Column Names are also turned on for output
-	inputData <- sw_inputData() #Get the default data set
-	swFiles_Cloud(inputData) #Look at some settings
-	swProd_Albedo(inputData)
-	#Run the simulation
-	run<-sw_exec(data=inputData, colNames=TRUE)
+## ------ Simulation with demonstration data ------------
+## Access demonstration data (including daily weather forcing)
+sw_in <- sw_inputData()
+
+## Slots of the input object of class 'swInputData'
+str(sw_in, max.level=2)
+
+## Execute the simulation run
+sw_out <- sw_exec(inputData = sw_in)
 }
-\keyword{sw_inputData}
 

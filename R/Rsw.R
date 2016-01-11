@@ -1,5 +1,23 @@
-print("Rsw")
-sw_exec <- function(inputData=NULL,weatherList=NULL,dir="", files.in="files_v30.in", echo=FALSE, quiet=FALSE) {
+###############################################################################
+#Rsoilwat and Rsoilwat31
+#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+###############################################################################
+
+
+sw_exec <- function(inputData=NULL,weatherList=NULL,dir="", files.in="files_v31.in", echo=FALSE, quiet=FALSE) {
 	input <- c("sw_v27")
 	if(dir!="")
 		input<-c(input,"-d", dir)

@@ -52,20 +52,25 @@
 }
 \author{Ryan Murphy}
 \seealso{
-	\code{\link{swInputData}}
-	\code{\link{sw_exec}}
-	\code{\link{sw_inputDataFromFiles}}
-	\code{\link{onGetWeatherData_database}}
-	\code{\link{onGetWeatherData_folders}}
+	\itemize{
+		\item \code{\link{sw_exec}} for running a simulation
+		\item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for data input
+		\item \code{\link{dbW_getWeatherData}} and \code{\link{getWeatherData_folders}} for weather data input
+	}
 }
 \examples{
-	## Default data set. Default data set includes weather data. 
-	## Column Names are also turned on for output
-	inputData <- sw_inputDataFromFiles(dir="/path/to/project",files.in="files_v27.in") #Get the data set
-	swFiles_Cloud(inputData) #Look at some settings
-	swProd_Albedo(inputData)
-	#Run the simulation
-	run<-sw_exec(data=inputData, colNames=TRUE)
+path_demo <- dirname(system.file("extdata", "files_v31.in", package = "Rsoilwat31"))
+
+
+## ------ Simulation with data prepared beforehand ------------
+## Read inputs from files on disk (including daily weather forcing)
+sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files_v31.in")
+
+## Slots of the input object of class 'swInputData'
+str(sw_in2, max.level=2)
+
+## Execute the simulation run
+sw_out2 <- sw_exec(inputData = sw_in2)
+
 }
-\keyword{sw_inputDataFromFiles}
 
