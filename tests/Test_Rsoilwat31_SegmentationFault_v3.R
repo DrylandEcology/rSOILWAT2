@@ -19,7 +19,7 @@ library(Rsoilwat31)
 print(sessionInfo())
 
 print("Step 1")			
-a <- sw_inputDataFromFiles(dir=file.path(getwd(), "Input", "swrun"), files.in="files_v30.in")
+a <- sw_inputDataFromFiles(dir = dirname(system.file("extdata", "files_v31.in", package = "Rsoilwat31")), files.in = "files_v31.in")
 
 print("Step 2")
 # Location of segfaults with upper bound of b
