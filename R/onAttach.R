@@ -23,7 +23,7 @@
   {
     meta <- packageDescription("Rsoilwat31")
     packageStartupMessage("Package 'Rsoilwat_31', ", meta$Version, " (", meta$Date, ").")
-	print("Replaced frozen/unfrozen soil routine")
+	print("Fixed segfault during import of input data from files")
   }
   invisible()
 }
