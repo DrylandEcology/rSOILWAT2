@@ -41,9 +41,27 @@ KeyComments <- c("","/* max., min, average temperature, surface temperature (C) 
 #######
 #Note I use 0 for keys which are not implemented.
 #######
-swOUT_key <- setClass(Class="swOUT_key",representation(mykey="integer",myobj="integer",period="integer",sumtype="integer",use="logical",first="integer",last="integer",first_orig="integer",last_orig="integer",outfile="character"),
-		prototype=prototype(mykey=as.integer(c(0:4,0,6:18,0,20:25,0,27)),myobj=as.integer(c(0,rep(2,4),0,rep(4,13),0,rep(4,6),0,5)),period=as.integer(c(4,1,2,3,1,4,2,3,0,2,3,1,0,3,0,1,2,0,1,4,3,0,0,1,2,2,4,3)),sumtype=as.integer(c(0,2,1,1,1,0,rep(2,7),rep(1,6),0,1,1,1,2,1,2,0,0)),use=c(FALSE,rep(TRUE,4),FALSE,rep(TRUE,13),FALSE,rep(TRUE,6),FALSE,TRUE),
-				first=as.integer(rep(0,26)),last=as.integer(rep(0,26)),first_orig=as.integer(c(0,rep(1,4),0,rep(1,13),0,rep(1,6),0,1)),last_orig=as.integer(c(0,rep(366,4),0,rep(366,13),0,rep(366,6),0,366)),outfile=c("","temp_air","precip","infiltration","runoff","","vwc_bulk","vwc_matric","swc_bulk","swa_bulk","swa_matric","swp_matric","surface_water","transp","evap_soil","evap_surface","interception","percolation","hydred","","aet","pet","wetdays","snowpack","deep_drain","temp_soil","","estabs")  ))
+swOUT_key <- setClass(Class="swOUT_key",
+				representation(mykey="integer",
+								myobj="integer",
+								period="integer",
+								sumtype="integer",
+								use="logical",
+								first="integer",
+								last="integer",
+								first_orig="integer",
+								last_orig="integer",
+								outfile="character"),
+				prototype=prototype(mykey=as.integer(c(0:4,0,6:18,0,20:25,0,27)),
+									myobj=as.integer(c(0,rep(2,4),0,rep(4,13),0,rep(4,6),0,5)),
+									period=as.integer(c(4,1,2,3,1,4,2,3,0,2,3,1,0,3,0,1,2,0,1,4,3,0,0,1,2,2,4,3)),
+									sumtype=as.integer(c(0,2,1,1,1,0,rep(2,7),rep(1,6),0,1,1,1,2,1,2,0,0)),
+									use=c(FALSE,rep(TRUE,4),FALSE,rep(TRUE,13),FALSE,rep(TRUE,6),FALSE,TRUE),
+									first=as.integer(rep(0,26)),last=as.integer(rep(0,26)),
+									first_orig=as.integer(c(0,rep(1,4),0,rep(1,13),0,rep(1,6),0,1)),
+									last_orig=as.integer(c(0,rep(366,4),0,rep(366,13),0,rep(366,6),0,366)),
+									outfile=c("","temp_air","precip","infiltration","runoff","","vwc_bulk","vwc_matric","swc_bulk","swa_bulk","swa_matric","swp_matric","surface_water","transp","evap_soil","evap_surface","interception","percolation","hydred","","aet","pet","wetdays","snowpack","deep_drain","temp_soil","","estabs")
+				))
 swOUT_key_validity<-function(object){
 	temp<-c(length(mykey), length(myobj), length(period), length(sumtype), length(use), length(first), length(last), length(first_orig), length(last_orig), length(outfile))
 	if(length(unique(temp)) != 1)
@@ -70,7 +88,30 @@ setMethod(f="swClear",
 
 ###########################OUTSETUP.IN########################################
 
-swOUT <- setClass(Class="swOUT",representation(outputSeparator="character",timePeriods="integer",useTimeStep="logical"),prototype=prototype(outputSeparator="\t",timePeriods=as.integer(c(0,3)), useTimeStep=TRUE),contains="swOUT_key")
+swOUT <- setClass(Class="swOUT",
+			representation(outputSeparator="character",timePeriods="integer",useTimeStep="logical"),
+			prototype=prototype(outputSeparator="\t",timePeriods=as.integer(c(0:3)), useTimeStep=TRUE),
+			contains="swOUT_key")
+
+swOUT_validity<-function(object){
+	if(length(object@outputSeparator)!=1)
+		return("@outputSeparator needs to be of length 1.")
+	if(length(object@timePeriods) < 1)
+		return("@timePeriods needs to to contain at least 1 value for output")
+	if(length(object@useTimeStep)!=1)
+		return("@useTimeStep needs to be of length 1.")
+}
+setValidity("swOUT", swOUT_validity)
+
+setMethod("initialize","swOUT",function(.Object,outputSeparator="\t",timePeriods=as.integer(c(0:3)), useTimeStep=TRUE){
+			.Object@outputSeparator=outputSeparator
+			.Object@timePeriods=timePeriods
+			.Object@useTimeStep=useTimeStep
+			validObject(.Object)
+			return(.Object)
+		})
+
+
 setMethod(f="swClear",
 		signature="swOUT",
 		definition=function(object) {
