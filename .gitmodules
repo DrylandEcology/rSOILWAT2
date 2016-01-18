@@ -2,4 +2,4 @@
 	path = src
 	url = https://github.com/Burke-Lauenroth-Lab/SOILWAT.git
 [submodule "SOILWAT"]
-	branch = segfault1
+	branch = master
