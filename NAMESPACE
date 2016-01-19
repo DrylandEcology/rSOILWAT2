@@ -3,7 +3,7 @@ useDynLib(Rsoilwat31)
 export(sw_exec,
 sw_inputDataFromFiles,
 sw_inputData,
-getWeatherData_folders,
+
 dbW_setConnection,
 dbW_disconnectConnection,
 dbW_getWeatherData,
@@ -14,9 +14,13 @@ dbW_addFromFolders,
 dbW_deleteSiteData,
 dbW_getSiteTable,
 dbW_getScenariosTable,
+
 dbW_weatherData_to_blob,
 dbW_blob_to_weatherData
-)
+getWeatherData_folders,
+dbW_weatherData_to_dataframe,
+dbW_dataframe_to_weatherData,
+dbW_weather_to_SOILWATfiles)
 
 exportClasses(
    swFiles,
