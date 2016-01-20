@@ -361,7 +361,7 @@ getWeatherData_folders <- function(LookupWeatherFolder=NULL, weatherDirName=NULL
 
 # Conversion: object of class 'swWeatherData' to data.frame
 dbW_weatherData_to_dataframe <- function(weatherData){
-	do.call(rbind, sapply(weatherData, FUN=function(x) {
+	do.call(rbind, lapply(weatherData, FUN=function(x) {
 							temp <- x@data
 							Year <- rep(x@year, times=nrow(temp))
 							cbind(Year, temp)
