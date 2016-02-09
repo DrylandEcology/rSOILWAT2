@@ -1,7 +1,7 @@
 # Rsoilwat
 A R package for SOILWAT.
 
-We haven’t really published the code yet nor prepared it for sharing (though through our use of github made it openly accessible), it is actively and gradually being developed by the Lauenroth lab and affiliates, and there is no manual either - we cannot give you individual support in setting up and running the model except maybe if we agreed on a collaboration or similar agreement.
+We haven’t really published the code yet nor prepared it for sharing (though through our use of github made it openly accessible), it is actively and gradually being developed by the Lauenroth lab and affiliates, and there is no manual either - we cannot give you individual support in setting up and running the model except if we agreed on a collaboration or similar agreement.
 
 Not every part of the code has been extensively tested or is in a stable state. Similarly, not every combination of model inputs and options has been evaluated in depth and there is not guarantee for anything to work. The code comes with no warranty and no guarantees, expressed or implied, as to suitability, completeness, accuracy, and whatever other claim you would like to make.
 
@@ -9,7 +9,7 @@ There is no graphical user interface, help pages and available documentation may
 
 Note, the branch 'master' is currently not active and there are no releases so far.
 
-If you make use of this model, please cite appropriate references and we would like to hear about your particular study (especially a copy of any published paper).
+If you make use of this model, please cite appropriate references, and we would like to hear about your particular study (especially a copy of any published paper).
 
 
 Some recent references
@@ -51,6 +51,28 @@ Alternatively,
 ```
 tar -pczf Rsoilwat_v31.tar.gz Rsoilwat_v31
 R CMD INSTALL Rsoilwat_v31.tar.gz
+```
+
+
+### For contributors only
+Update the submodule 'SOILWAT' to the latest commit
+```
+git clone https://github.com/Burke-Lauenroth-Lab/Rsoilwat.git Rsoilwat_v31
+cd Rsoilwat_v31
+git checkout Rsoilwat_v31
+# if you want to change to the branch 'XXX' of the submodule 'SOILWAT'
+# git config -f .gitmodules submodule.SOILWAT.branch XXX
+
+git submodule init
+git submodule update --remote #--remote: uses the latest commit; without --remote: uses the previously defined commit
+cd src
+
+git checkout master
+git pull
+
+cd ..
+git commit -am "Pulled down latest commit 'COMMIT-FLAG' to submodule SoilWat"
+git push
 ```
 
 
