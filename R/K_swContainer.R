@@ -23,7 +23,26 @@
 ###############################################################################
 
 print("swContainer")
-swInputData <- setClass(Class="swInputData", representation(files="swFiles",years="swYears",weather="swWeather",cloud="swCloud",weatherHistory="list",markov="swMarkov",prod="swProd",site="swSite",soils="swSoils",estab="swEstab",output="swOUT",swc="swSWC",log="swLog"))
+swInputData <- setClass(Class = "swInputData", 
+						slots = list(files = "swFiles",
+									years = "swYears",
+									weather = "swWeather",
+									cloud = "swCloud",
+									weatherHistory = "list",
+									markov = "swMarkov",
+									prod = "swProd",
+									site = "swSite",
+									soils = "swSoils",
+									estab = "swEstab",
+									output = "swOUT",
+									swc = "swSWC",
+									log = "swLog")
+						)
+
+setValidity("swInputData", function(object){
+	TRUE
+})
+
 setMethod(f="swClear",
 		signature="swInputData",
 		definition=function(object) {
@@ -40,23 +59,25 @@ setMethod(f="swClear",
 			object@log=swClear(object@log)
 			return(object)
 		})
-setMethod("get_swFiles", "swInputData", function(object) {return(object@files)})
-setMethod("swFiles_ProjDir", "swInputData", function(object) {return(object@files@ProjDir)})
-setMethod("swFiles_filesIn", "swInputData", function(object) {return(object@files@InFiles[1])})
-setMethod("swFiles_Years", "swInputData", function(object) {return(object@files@InFiles[2])})
-setMethod("swFiles_LogFile", "swInputData", function(object) {return(object@files@InFiles[3])})
-setMethod("swFiles_SiteParams", "swInputData", function(object) {return(object@files@InFiles[4])})
-setMethod("swFiles_Soils", "swInputData", function(object) {return(object@files@InFiles[5])})
-setMethod("swFiles_WeatherSetup", "swInputData", function(object) {return(object@files@InFiles[6])})
-setMethod("swFiles_MarkovProbs", "swInputData", function(object) {return(object@files@InFiles[7])})
-setMethod("swFiles_MarkovCov", "swInputData", function(object) {return(object@files@InFiles[8])})
-setMethod("swFiles_Cloud", "swInputData", function(object) {return(object@files@InFiles[9])})
-setMethod("swFiles_Prod", "swInputData", function(object) {return(object@files@InFiles[10])})
-setMethod("swFiles_Estab", "swInputData", function(object) {return(object@files@InFiles[11])})
-setMethod("swFiles_SWCsetup", "swInputData", function(object) {return(object@files@InFiles[12])})
-setMethod("swFiles_Output", "swInputData", function(object) {return(object@files@InFiles[13])})
-setMethod("swFiles_WeatherPrefix", "swInputData", function(object) {return(object@files@WeatherPrefix)})
-setMethod("swFiles_OutputPrefix", "swInputData", function(object) {return(object@files@OutputPrefix)})
+	
+setMethod("get_swFiles", "swInputData", function(object) object@files)
+setMethod("swFiles_ProjDir", "swInputData", function(object) object@files@ProjDir)
+setMethod("swFiles_filesIn", "swInputData", function(object) object@files@InFiles[1])
+setMethod("swFiles_Years", "swInputData", function(object) object@files@InFiles[2])
+setMethod("swFiles_LogFile", "swInputData", function(object) object@files@InFiles[3])
+setMethod("swFiles_SiteParams", "swInputData", function(object) object@files@InFiles[4])
+setMethod("swFiles_Soils", "swInputData", function(object) object@files@InFiles[5])
+setMethod("swFiles_WeatherSetup", "swInputData", function(object) object@files@InFiles[6])
+setMethod("swFiles_MarkovProbs", "swInputData", function(object) object@files@InFiles[7])
+setMethod("swFiles_MarkovCov", "swInputData", function(object) object@files@InFiles[8])
+setMethod("swFiles_Cloud", "swInputData", function(object) object@files@InFiles[9])
+setMethod("swFiles_Prod", "swInputData", function(object) object@files@InFiles[10])
+setMethod("swFiles_Estab", "swInputData", function(object) object@files@InFiles[11])
+setMethod("swFiles_SWCsetup", "swInputData", function(object) object@files@InFiles[12])
+setMethod("swFiles_Output", "swInputData", function(object) object@files@InFiles[13])
+setMethod("swFiles_WeatherPrefix", "swInputData", function(object) object@files@WeatherPrefix)
+setMethod("swFiles_OutputPrefix", "swInputData", function(object) object@files@OutputPrefix)
+
 setReplaceMethod(f="set_swFiles", signature="swInputData", definition=function(object,value) {object@files <- value; return(object)})
 setReplaceMethod(f="swFiles_ProjDir", signature="swInputData", definition=function(object,value) {object@files@ProjDir <- value; return(object)})
 setReplaceMethod(f="swFiles_filesIn", signature="swInputData", definition=function(object,value) {object@files@InFiles[1] <- value; return(object)})
@@ -92,7 +113,7 @@ setMethod("get_swCloud","swInputData",function(object) {return(object@cloud)})
 
 setReplaceMethod(f="set_swCloud",signature="swInputData",function(object,value) {object@cloud <- value; return(object)})
 ##
-setMethod("get_swWeather","swInputData",function(object) {return(object@weather)})
+setMethod("get_swWeather","swInputData",function(object) object@weather)
 setMethod("swWeather_DaysRunningAverage","swInputData",function(object) {return(object@weather@DaysRunningAverage)})
 setMethod("swWeather_FirstYearHistorical","swInputData",function(object) {return(object@weather@FirstYear_Historical)})
 setMethod("swWeather_pct_SnowDrift","swInputData",function(object) {return(object@weather@pct_SnowDrift)})
@@ -101,14 +122,16 @@ setMethod("swWeather_UseMarkov","swInputData",function(object) {return(object@we
 setMethod("swWeather_UseSnow","swInputData",function(object) {return(object@weather@UseSnow)})
 setMethod("swWeather_MonScalingParams","swInputData",function(object) {return(object@weather@MonthlyScalingParams)})
 
-setReplaceMethod(f="set_swWeather",signature="swInputData",function(object,value) {object@weather <- value; return(object)})
+setReplaceMethod(f="set_swWeather",signature="swInputData",function(object,value) {slot(object, "weather") <- value; object})
 setReplaceMethod(f="swWeather_DaysRunningAverage",signature="swInputData",function(object,value) {object@weather@DaysRunningAverage <- as.integer(value); return(object)})
 setReplaceMethod(f="swWeather_FirstYearHistorical",signature="swInputData",function(object,value) {object@weather@FirstYear_Historical <- as.integer(value); return(object)})
 setReplaceMethod(f="swWeather_pct_SnowDrift",signature="swInputData",function(object,value) {object@weather@pct_SnowDrift <- value; return(object)})
 setReplaceMethod(f="swWeather_pct_SnowRunoff",signature="swInputData",function(object,value) {object@weather@pct_SnowRunoff <- value; return(object)})
 setReplaceMethod(f="swWeather_UseMarkov",signature="swInputData",function(object,value) {object@weather@UseMarkov <- value; return(object)})
 setReplaceMethod(f="swWeather_UseSnow",signature="swInputData",function(object,value) {object@weather@UseSnow <- value; return(object)})
-setReplaceMethod(f="swWeather_MonScalingParams",signature="swInputData",function(object,value) {object@weather@MonthlyScalingParams <- value; return(object)})
+#setReplaceMethod(f="swWeather_MonScalingParams",signature="swInputData",function(object,value) {object@weather@MonthlyScalingParams <- value; object})
+setReplaceMethod("swWeather_MonScalingParams", signature = "swInputData", function(object, value) {temp <- get_swWeather(object); swWeather_MonScalingParams(temp) <- value; set_swWeather(object) <- temp; object})
+
 ##
 setMethod("get_swCloud","swInputData",function(object) {return(object@cloud)})
 setMethod("swCloud_SkyCover","swInputData",function(object) {return(object@cloud@Cloud[1,])})

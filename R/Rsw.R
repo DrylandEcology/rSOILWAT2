@@ -60,6 +60,6 @@ sw_outputData <- function(inputData) {
 sw_inputData <- function() {
 	temp<-swInputData()
 	data(package="Rsoilwat31", weatherData)
-	temp@weatherHistory <- weatherData
-	return(temp)
+	slot(temp, "weatherHistory") <- weatherData
+	temp
 }

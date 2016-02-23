@@ -19,117 +19,106 @@
 
 # TODO: Add comment
 # 
-# Author: Ryan J. Murphy (2013)
+# Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2016)
 ###############################################################################
 
 print("swWeather")
 
 #######################Monthly Scaling Params#################################
 
-swMonthlyScalingParams<-setClass("swMonthlyScalingParams",representation(MonthlyScalingParams="matrix"),prototype=prototype(MonthlyScalingParams=matrix(data=c(rep(1,12),rep(0,12*3),rep(1,12),rep(0,12),rep(1,12)),nrow=12,ncol=7,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("PPT","MaxT","MinT","SkyCover","Wind","rH","Transmissivity")))))
-swMonthlyScalingParams_validity<-function(object){
-	if(dim(object@MonthlyScalingParams)[1]!=12)
-		return("@MonthlyScalingParams needs 12 rows.")
-	if(dim(object@MonthlyScalingParams)[2]!=7)
-		return("@MonthlyScalingParams needs 7 columns.")
-	TRUE
-}
-setValidity("swMonthlyScalingParams",swMonthlyScalingParams_validity)
-setMethod(f="initialize",signature="swMonthlyScalingParams",definition=function(.Object,MonthlyScalingParams=NULL){
-			if(is.null(MonthlyScalingParams))
-				MonthlyScalingParams<-matrix(data=c(rep(1,12),rep(0,12*3),rep(1,12),rep(0,12),rep(1,12)),nrow=12,ncol=7)
-			colnames(MonthlyScalingParams)<-c("PPT","MaxT","MinT","SkyCover","Wind","rH","Transmissivity")
-			rownames(MonthlyScalingParams)<-c("January","February","March","April","May","June","July","August","September","October","November","December")
-			.Object@MonthlyScalingParams<-MonthlyScalingParams
-			validObject(.Object)
-			return(.Object)
-		})
-setMethod(f="swClear",
-		signature="swMonthlyScalingParams",
-		definition=function(object) {
-			object@MonthlyScalingParams=matrix(data=c(rep(1,12),rep(0,12*3),rep(1,12),rep(0,12),rep(1,12)),nrow=12,ncol=7)
-			colnames(object@MonthlyScalingParams)<-c("PPT","MaxT","MinT","SkyCover","Wind","rH","Transmissivity")
-			rownames(object@MonthlyScalingParams)<-c("January","February","March","April","May","June","July","August","September","October","November","December")
-			return(object)
-		})
+swMonthlyScalingParams <- setClass("swMonthlyScalingParams",
+									 slots = list(MonthlyScalingParams = "matrix"),
+									 prototype = list(MonthlyScalingParams = 
+														matrix(data = c(rep(1, 12), rep(0, 12 * 3), rep(1, 12), rep(0, 12), rep(1, 12)),
+																nrow = 12, ncol = 7,
+																dimnames = list(month.name, c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "Transmissivity"))
+															)
+									 				)
+									)
+
+setValidity("swMonthlyScalingParams", function(object) {
+	if (identical(dim(object@MonthlyScalingParams), c(12L, 7L))) {
+		TRUE
+	} else {
+		paste("@MonthlyScalingParams requires an input of 12 rows and 7 columns instead of", paste(dim(object@MonthlyScalingParams), collapse = " by "))
+	}
+})
+
+		
+setMethod("swClear", signature = "swMonthlyScalingParams", function(object) {
+	slot(object, "MonthlyScalingParams") <- matrix(data = c(rep(1, 12), rep(0, 12 * 3), rep(1, 12), rep(0, 12), rep(1, 12)),
+													nrow = 12, ncol = 7,
+													dimnames = list(month.name, c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "Transmissivity")))
+	
+	object
+})
 
 #####################WEATHERSETUP.IN###################################
 
-swWeather <- setClass("swWeather",representation(UseSnow="logical",pct_SnowDrift="numeric",pct_SnowRunoff="numeric",use_Markov="logical",
-				FirstYear_Historical="integer",DaysRunningAverage="integer"),
-		prototype=prototype(UseSnow=TRUE,pct_SnowDrift=0.0,pct_SnowRunoff=0.0,use_Markov=FALSE,FirstYear_Historical=as.integer(1982),DaysRunningAverage=as.integer(5)),
-		contains=c("swMonthlyScalingParams"))
+swWeather <- setClass("swWeather",
+						slots = list(UseSnow = "logical",
+									pct_SnowDrift = "numeric",
+									pct_SnowRunoff = "numeric",
+									use_Markov = "logical",
+									FirstYear_Historical = "integer",
+									DaysRunningAverage = "integer"),
+						prototype = list(UseSnow = TRUE,
+										pct_SnowDrift = 0.0,
+										pct_SnowRunoff = 0.0,
+										use_Markov = FALSE,
+										FirstYear_Historical = 1982L,
+										DaysRunningAverage = 5L),
+						contains = c("swMonthlyScalingParams")
+					)
 
-swWeather_validity<-function(object){
-	if(length(object@UseSnow)!=1)
-		return("@UseSnow needs to be of length 1.")
-	if(length(object@pct_SnowDrift)!=1)
-		return("@pct_SnowDrift needs to be of length 1.")
-	if(length(object@pct_SnowRunoff)!=1)
-		return("@pct_SnowRunoff needs to be of length 1.")
-	if(length(object@use_Markov)!=1)
-		return("@use_Markov needs to be of length 1.")
-	if(length(object@FirstYear_Historical)!=1)
-		return("@FirstYear_Historical needs to be of length 1.")
-	if(length(object@DaysRunningAverage)!=1)
-		return("@DaysRunningAverage needs to be of length 1.")
-	if(length(object@weatherYearsIn)<1)
-		return("@Weather needs to at least length of 1.")
-}
-setValidity("swWeather",swWeather_validity)
-setMethod(f="initialize",signature="swWeather",definition=function(.Object,UseSnow=TRUE,pct_SnowDrift=0.0,pct_SnowRunoff=0.0,use_Markov=FALSE,FirstYear_Historical=as.integer(1982),DaysRunningAverage=as.integer(5)){#weatherYearsIn=NULL
-			#if(is.null(weatherYearsIn))
-				#weatherYearsIn<-list('1982'=swWeatherData(data=year1982,year=as.integer(1982)),
-				#		'1983'=swWeatherData(data=year1983,year=as.integer(1983)),
-				#		'1984'=swWeatherData(data=year1984,year=as.integer(1984)),
-				#		'1985'=swWeatherData(data=year1985,year=as.integer(1985)),
-				#		'1986'=swWeatherData(data=year1986,year=as.integer(1986)))
-			.Object@UseSnow=UseSnow
-			.Object@pct_SnowDrift=pct_SnowDrift
-			.Object@pct_SnowRunoff=pct_SnowRunoff
-			.Object@use_Markov=use_Markov
-			.Object@FirstYear_Historical=FirstYear_Historical
-			.Object@DaysRunningAverage=DaysRunningAverage
-			#.Object@weatherYearsIn=weatherYearsIn
-			#.Object@Cloud=swCloud()
-			#.Object@MonthlyScalingParams=swMonthlyScalingParams()
-			validObject(.Object)
-			return(.Object)
-		})
-setMethod(f="swClear",
-		signature="swWeather",
-		definition=function(object) {
-			object@UseSnow=logical(1)
-			object@pct_SnowDrift=numeric(1)
-			object@pct_SnowRunoff=numeric(1)
-			object@use_Markov=logical(1)
-			object@FirstYear_Historical=integer(1)
-			object@DaysRunningAverage=integer(1)
-			#object@weatherYearsIn=list(0)
-			#object@markov = swClear(object@markov)
-			object@MonthlyScalingParams=matrix(data=c(rep(1,12),rep(0,12*3),rep(1,12),rep(0,12),rep(1,12)),nrow=12,ncol=7)
-			colnames(object@MonthlyScalingParams)<-c("PPT","MaxT","MinT","SkyCover","Wind","rH","Transmissivity")
-			rownames(object@MonthlyScalingParams)<-c("January","February","March","April","May","June","July","August","September","October","November","December")
-			#object@Cloud=matrix(data=NA,nrow=5,ncol=12,byrow=T)
-			#colnames(object@Cloud)<-c("January","February","March","April","May","June","July","August","September","October","November","December")		
-			#rownames(object@Cloud)<-c("SkyCoverPCT","WindSpeed_m/s","HumidityPCT","Transmissivity","SnowDensity_kg/m^3")
-			return(object)
-		})
-setMethod("swWeather_DaysRunningAverage","swWeather",function(object) {return(object@DaysRunningAverage)})
-setMethod("swWeather_FirstYearHistorical","swWeather",function(object) {return(object@FirstYear_Historical)})
-setMethod("swWeather_pct_SnowDrift","swWeather",function(object) {return(object@pct_SnowDrift)})
-setMethod("swWeather_pct_SnowRunoff","swWeather",function(object) {return(object@pct_SnowRunoff)})
-setMethod("swWeather_UseMarkov","swWeather",function(object) {return(object@UseMarkov)})
-setMethod("swWeather_UseSnow","swWeather",function(object) {return(object@UseSnow)})
-setMethod("swWeather_MonScalingParams","swWeather",function(object) {return(object@MonthlyScalingParams)})
+setValidity("swWeather", function(object){
+	msg <- NULL
+	
+	if (length(object@UseSnow) != 1)
+		msg <- c(msg, "@UseSnow needs to be of length 1.")
+	if (length(object@pct_SnowDrift) != 1)
+		msg <- c(msg, "@pct_SnowDrift needs to be of length 1.")
+	if (length(object@pct_SnowRunoff) != 1)
+		msg <- c(msg, "@pct_SnowRunoff needs to be of length 1.")
+	if (length(object@use_Markov) != 1)
+		msg <- c(msg, "@use_Markov needs to be of length 1.")
+	if (length(object@FirstYear_Historical) != 1)
+		msg <- c(msg, "@FirstYear_Historical needs to be of length 1.")
+	if (length(object@DaysRunningAverage) != 1)
+		msg <- c(msg, "@DaysRunningAverage needs to be of length 1.")
+	
+	if (is.null(msg)) TRUE else msg
+})
 
-setReplaceMethod(f="swWeather_DaysRunningAverage",signature="swWeather",function(object,value) {object@DaysRunningAverage <- value; return(object)})
-setReplaceMethod(f="swWeather_FirstYearHistorical",signature="swWeather",function(object,value) {object@FirstYear_Historical <- value; return(object)})
-setReplaceMethod(f="swWeather_pct_SnowDrift",signature="swWeather",function(object,value) {object@pct_SnowDrift <- value; return(object)})
-setReplaceMethod(f="swWeather_pct_SnowRunoff",signature="swWeather",function(object,value) {object@pct_SnowRunoff <- value; return(object)})
-setReplaceMethod(f="swWeather_UseMarkov",signature="swWeather",function(object,value) {object@UseMarkov <- value; return(object)})
-setReplaceMethod(f="swWeather_UseSnow",signature="swWeather",function(object,value) {object@UseSnow <- value; return(object)})
-setReplaceMethod(f="swWeather_MonScalingParams",signature="swWeather",function(object,value) {object@MonthlyScalingParams <- value; return(object)})
+
+setMethod("swClear", signature = "swWeather", function(object) {
+	slot(object, "UseSnow") <- NA
+	slot(object, "pct_SnowDrift") <- NA_real_
+	slot(object, "pct_SnowRunoff") <- NA_real_
+	slot(object, "use_Markov") <- NA
+	slot(object, "FirstYear_Historical") <- NA_integer_
+	slot(object, "DaysRunningAverage") <- NA_integer_
+	
+	slot(object, "MonthlyScalingParams") <- swClear(slot(object, "MonthlyScalingParams"))
+
+	object
+})
+		
+setMethod("swWeather_DaysRunningAverage", "swWeather", function(object) object@DaysRunningAverage)
+setMethod("swWeather_FirstYearHistorical", "swWeather", function(object) object@FirstYear_Historical)
+setMethod("swWeather_pct_SnowDrift", "swWeather", function(object) object@pct_SnowDrift)
+setMethod("swWeather_pct_SnowRunoff", "swWeather", function(object) object@pct_SnowRunoff)
+setMethod("swWeather_UseMarkov", "swWeather", function(object) object@UseMarkov)
+setMethod("swWeather_UseSnow", "swWeather", function(object) object@UseSnow)
+setMethod("swWeather_MonScalingParams", "swWeather", function(object) object@MonthlyScalingParams)
+
+setReplaceMethod("swWeather_DaysRunningAverage", signature = "swWeather",function(object,value) initialize(object, DaysRunningAverage = value))
+setReplaceMethod("swWeather_FirstYearHistorical", signature = "swWeather",function(object,value) initialize(object, FirstYear_Historical = value))
+setReplaceMethod("swWeather_pct_SnowDrift", signature = "swWeather",function(object,value) initialize(object, pct_SnowDrift = value))
+setReplaceMethod("swWeather_pct_SnowRunoff", signature = "swWeather",function(object,value) initialize(object, pct_SnowRunoff = value))
+setReplaceMethod("swWeather_UseMarkov", signature = "swWeather",function(object,value) initialize(object, UseMarkov = value))
+setReplaceMethod("swWeather_UseSnow", signature = "swWeather",function(object,value) initialize(object, UseSnow = value))
+setReplaceMethod("swWeather_MonScalingParams", signature = "swWeather", function(object, value) initialize(object, MonthlyScalingParams = value))
 
 setMethod("swWriteLines", signature=c(object="swWeather", file="character"), definition=function(object, file) {
 			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)
@@ -168,6 +157,8 @@ setMethod("swWriteLines", signature=c(object="swWeather", file="character"), def
 			writeLines(text = infiletext, con = infile, sep = "\n")
 			close(infile)
 		})
+
+
 setMethod("swReadLines", signature=c(object="swWeather",file="character"), definition=function(object,file) {
 			infiletext <- readLines(con = file)
 			

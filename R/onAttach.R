@@ -23,7 +23,7 @@
   {
     meta <- packageDescription("Rsoilwat31")
     packageStartupMessage("Package 'Rsoilwat_31', ", meta$Version, " (", meta$Date, ").")
-	packageStartupMessage("Fixed segfault during import of input data from files")
+	packageStartupMessage("Fixed validity and replacement methods of the S4 classes 'swWeather' and 'swMonthlyScalingParams'; the other classes likely need those/similar fixes as well")
   }
   invisible()
 }
