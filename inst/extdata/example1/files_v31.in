@@ -1,4 +1,4 @@
-# List of input files for SOILWAT v32
+# List of input files for SOILWAT v31
 # This is the first file read. Simulation information = 
 
 # Model
@@ -12,9 +12,9 @@ Input/soils_v30.in	# soil layer definitions
 #Weather
 Input/weathsetup_v20.in	# weather parameters
 Input/data_weather/weath	# data file containing historical weather (can include path)
-Input/data_weather/mkv_prob.in	# precip probs; required for markov weather
-Input/data_weather/mkv_covar.in	# covariance table required for markov weather
-Input/data_weather/cloud_v20.in	# general atmospheric params
+Input/mkv_prob.in	# precip probs; required for markov weather
+Input/mkv_covar.in	# covariance table required for markov weather
+Input/cloud_v20.in	# general atmospheric params
 
 #Vegetation
 Input/sbe_prod_v31.in	# productivity values

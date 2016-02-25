@@ -118,7 +118,7 @@ setMethod("swWeather_DaysRunningAverage","swInputData",function(object) {return(
 setMethod("swWeather_FirstYearHistorical","swInputData",function(object) {return(object@weather@FirstYear_Historical)})
 setMethod("swWeather_pct_SnowDrift","swInputData",function(object) {return(object@weather@pct_SnowDrift)})
 setMethod("swWeather_pct_SnowRunoff","swInputData",function(object) {return(object@weather@pct_SnowRunoff)})
-setMethod("swWeather_UseMarkov","swInputData",function(object) {return(object@weather@UseMarkov)})
+setMethod("swWeather_UseMarkov","swInputData",function(object) {return(object@weather@use_Markov)})
 setMethod("swWeather_UseSnow","swInputData",function(object) {return(object@weather@UseSnow)})
 setMethod("swWeather_MonScalingParams","swInputData",function(object) {return(object@weather@MonthlyScalingParams)})
 
@@ -127,7 +127,7 @@ setReplaceMethod(f="swWeather_DaysRunningAverage",signature="swInputData",functi
 setReplaceMethod(f="swWeather_FirstYearHistorical",signature="swInputData",function(object,value) {object@weather@FirstYear_Historical <- as.integer(value); return(object)})
 setReplaceMethod(f="swWeather_pct_SnowDrift",signature="swInputData",function(object,value) {object@weather@pct_SnowDrift <- value; return(object)})
 setReplaceMethod(f="swWeather_pct_SnowRunoff",signature="swInputData",function(object,value) {object@weather@pct_SnowRunoff <- value; return(object)})
-setReplaceMethod(f="swWeather_UseMarkov",signature="swInputData",function(object,value) {object@weather@UseMarkov <- value; return(object)})
+setReplaceMethod(f="swWeather_UseMarkov",signature="swInputData",function(object,value) {object@weather@use_Markov <- value; return(object)})
 setReplaceMethod(f="swWeather_UseSnow",signature="swInputData",function(object,value) {object@weather@UseSnow <- value; return(object)})
 #setReplaceMethod(f="swWeather_MonScalingParams",signature="swInputData",function(object,value) {object@weather@MonthlyScalingParams <- value; object})
 setReplaceMethod("swWeather_MonScalingParams", signature = "swInputData", function(object, value) {temp <- get_swWeather(object); swWeather_MonScalingParams(temp) <- value; set_swWeather(object) <- temp; object})

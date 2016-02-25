@@ -24,6 +24,9 @@
 	of the same site. This function is used to return the weather data from folders.
 	The other option is to use onGetWeatherData_database.
 	
+	SOILWAT does not handle missing weather data. If you have missing data, then you have to impute yourself
+	or use the built-in Markov weather generator (see examples for \code{\link{sw_exec}}).
+	
 	The output from this function can be passed directly to sw_exec with input data.
 }
 \value{

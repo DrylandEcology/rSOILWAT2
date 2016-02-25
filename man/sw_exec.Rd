@@ -25,6 +25,11 @@ sw_exec(inputData = NULL, weatherList = NULL, dir = "", files.in = "files_v31.in
 	The option 'weatherList' if set will use the weatherList provided
 	and not the inputdata object's weather data if it has it. Weather
 	data can also be read in when 'dir' and 'files.in' are set.
+	
+	SOILWAT does not handle missing data. If you have missing data, then you have to impute yourself
+	or use the built-in Markov weather generator (see examples section). If you use the weather generator,
+	then you have to provide appropriate values for the input (files) 'mkv_covar.in' and 'mkv_prob.in' 
+	for your simulation run - currently, SOILWAT does not contain code to estimate these values.
 }
 \value{
 	A S4 Object Containing 28 outputkey slots.
@@ -78,7 +83,7 @@ sw_out <- sw_exec(inputData = sw_in)
 
 
 ## ------ Directory to a SOLWAT project used in the following examples
-path_demo <- dirname(system.file("extdata", "files_v31.in", package = "Rsoilwat31"))
+path_demo <- dirname(system.file("extdata", "example1", "files_v31.in", package = "Rsoilwat31"))
 
 ## ------ Simulation with data read from disk during execution ------------
 ## Execute the simulation run
@@ -121,6 +126,21 @@ swProd_Composition(sw_in4) <- c(0.4, 0.6, 0, 0, 0)
 
 ## Execute the simulation run
 sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3)
+
+
+## ------ Simulation with weather generator ------------
+## Currently, the Markov weather generator flag must be turned on prior to reading files to disk
+## - otherwise, the Markov prob.in and covar.in are not being loaded (NOTE: this should be fixed)
+path_demo2 <- dirname(system.file("extdata", "example2", "files_v31.in", package = "Rsoilwat31"))
+sw_in5 <- sw_inputDataFromFiles(dir = path_demo2, files.in = "files_v31.in")
+
+## Turn on the Markov weather generator
+# swWeather_UseMarkov(sw_in5) <- TRUE
+
+## Execute the simulation run
+sw_out5 <- sw_exec(inputData = sw_in5, weatherList = NULL)
+
+
 
 ## See help(package = "Rsoilwat31") for a full list of functions
 }

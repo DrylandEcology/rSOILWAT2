@@ -108,7 +108,7 @@ setMethod("swWeather_DaysRunningAverage", "swWeather", function(object) object@D
 setMethod("swWeather_FirstYearHistorical", "swWeather", function(object) object@FirstYear_Historical)
 setMethod("swWeather_pct_SnowDrift", "swWeather", function(object) object@pct_SnowDrift)
 setMethod("swWeather_pct_SnowRunoff", "swWeather", function(object) object@pct_SnowRunoff)
-setMethod("swWeather_UseMarkov", "swWeather", function(object) object@UseMarkov)
+setMethod("swWeather_UseMarkov", "swWeather", function(object) object@use_Markov)
 setMethod("swWeather_UseSnow", "swWeather", function(object) object@UseSnow)
 setMethod("swWeather_MonScalingParams", "swWeather", function(object) object@MonthlyScalingParams)
 
@@ -116,7 +116,7 @@ setReplaceMethod("swWeather_DaysRunningAverage", signature = "swWeather",functio
 setReplaceMethod("swWeather_FirstYearHistorical", signature = "swWeather",function(object,value) initialize(object, FirstYear_Historical = value))
 setReplaceMethod("swWeather_pct_SnowDrift", signature = "swWeather",function(object,value) initialize(object, pct_SnowDrift = value))
 setReplaceMethod("swWeather_pct_SnowRunoff", signature = "swWeather",function(object,value) initialize(object, pct_SnowRunoff = value))
-setReplaceMethod("swWeather_UseMarkov", signature = "swWeather",function(object,value) initialize(object, UseMarkov = value))
+setReplaceMethod("swWeather_UseMarkov", signature = "swWeather",function(object,value) initialize(object, use_Markov = value))
 setReplaceMethod("swWeather_UseSnow", signature = "swWeather",function(object,value) initialize(object, UseSnow = value))
 setReplaceMethod("swWeather_MonScalingParams", signature = "swWeather", function(object, value) initialize(object, MonthlyScalingParams = value))
 

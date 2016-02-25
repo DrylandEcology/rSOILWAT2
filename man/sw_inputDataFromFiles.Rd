@@ -26,25 +26,32 @@
 	obtain weatherDataList and pass both to sw_exec.
 	
 	swInputData consists of slots for each file that is read in. These slots
-	can be accessed via the following functions.
-	get_Markov			#get markov prop and conv.
-	get_swCloud			#get cloud
-	get_swFiles			#get files.in
-	get_swOUT			#get outpusetup.in
-	get_swProd			#get prod.in
-	get_swSite			#get site.in
-	get_swSoils			#get soils.in
-	get_swSWC			#get swcSetup.in
-	get_swWeather		#get weatherSetup.in
-	get_swWeatherData	#get individual year
-	get_swYears			#get years.in data object
-	get_WeatherHistory	#get S4 of WeatherHistory
+	can be accessed via the following functions:
+	\tabular{ll}{
+		\code{get_Markov}			\tab	#get markov prop and conv\cr
+		\code{get_swCloud}			\tab	#get cloud\cr
+		\code{get_swFiles}			\tab	#get files.in\cr
+		\code{get_swOUT}			\tab	#get outpusetup.in\cr
+		\code{get_swProd}			\tab	#get prod.in\cr
+		\code{get_swSite}			\tab	#get site.in\cr
+		\code{get_swSoils}			\tab	#get soils.in\cr
+		\code{get_swSWC}			\tab	#get swcSetup.in\cr
+		\code{get_swWeather}		\tab	#get weatherSetup.in\cr
+		\code{get_swWeatherData}	\tab	#get individual year\cr
+		\code{get_swYears}			\tab	#get years.in data object\cr
+		\code{get_WeatherHistory}	\tab	#get S4 of WeatherHistory\cr
+	}
 	
-	generic functions to get/set individual elements follow a format
-	sw'then file name'_'option'
-	e.g. swFiles_Cloud
-		swProd_Albedo
-	remember tab complete is your friend.
+	generic functions to get/set individual elements follow a format:
+	'sw' + file name + '_' + option, e.g.
+	\itemize{
+		\item \code{swFiles_Cloud}
+		\item \code{swProd_Albedo}
+	}
+	Remember tab complete is your friend.
+	
+	SOILWAT does not handle missing weather data. If you have missing data, then you have to impute yourself
+	or use the built-in Markov weather generator (see examples for \code{\link{sw_exec}}).
 }
 \value{
 	Returns a S4 class of type swInputData. This is a container for the input
