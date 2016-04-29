@@ -368,6 +368,33 @@ dbW_weatherData_to_dataframe <- function(weatherData){
 						}))
 }
 
+# Conversion: object of class 'swWeatherData' to matrix of monthly values (mean Tmax, mean Tmin, sum PPT)
+dbW_weatherData_to_monthly <- function(dailySW) {
+	monthly <- matrix(NA, nrow = length(dailySW) * 12, ncol = 5, dimnames = list(NULL, c("Year", "Month", "Tmax_C", "Tmin_C", "PPT_cm")))
+	for(y in seq_along(dailySW)){
+		weath <- dailySW[[y]]
+		month <- as.POSIXlt(paste(weath@year, weath@data[, "DOY"], sep = "-"), format = "%Y-%j")$mon + 1
+		monthly[1:12 + 12*(y - 1), ] <- data.matrix(cbind(
+			Year = weath@year, Month = 1:12,
+			aggregate(weath@data[, c("Tmax_C", "Tmin_C")], by = list(month), FUN = mean)[, 2:3],
+			PPT_cm = aggregate(weath@data[, "PPT_cm"], by = list(month), FUN = sum)[, 2]))
+	}
+	
+	monthly
+}
+
+# Conversion: object of daily weather data.frame to matrix of monthly values (mean Tmax, mean Tmin, sum PPT)
+dbW_dataframe_to_monthly <- function(dailySW) {
+	month <- as.POSIXlt(apply(dailySW[, c("Year", "DOY")], 1, paste, collapse = "-"), format = "%Y-%j")$mon + 1
+	as.matrix(cbind(Year = tempT[, 2], Month = tempT[, 1],
+		Tmax_C = as.vector(tapply(dailySW[, "Tmax_C"], INDEX = list(month, dailySW[, "Year"]), FUN = mean)),
+		Tmin_C = as.vector(tapply(dailySW[, "Tmin_C"], INDEX = list(month, dailySW[, "Year"]), FUN = mean)),
+		PPT_cm = as.vector(tapply(dailySW[, "PPT_cm"], INDEX = list(month, dailySW[, "Year"]), FUN = sum))
+	))
+}
+
+
+
 get_years_from_weatherDF <- function(weatherDF, years, weatherDF_dataColumns){
 	if(!is.null(years)){
 		if(length(years) == nrow(weatherDF)){
@@ -390,12 +417,16 @@ get_years_from_weatherDF <- function(weatherDF, years, weatherDF_dataColumns){
 
 
 # Conversion: data.frame to object of class 'swWeatherData'
-dbW_dataframe_to_weatherData <- function(weatherDF, years=NULL, weatherDF_dataColumns=c("DOY","Tmax_C","Tmin_C","PPT_cm")){
+dbW_dataframe_to_weatherData <- function(weatherDF, years=NULL, weatherDF_dataColumns=c("DOY","Tmax_C","Tmin_C","PPT_cm"), round = 2){
 	if(!(length(weatherDF_dataColumns) == 4) || !all(weatherDF_dataColumns %in% colnames(weatherDF)))
 		stop("Not every required weatherDF_dataColumns is available in the 'weatherDF' object")
 
 	ylist <- get_years_from_weatherDF(weatherDF, years, weatherDF_dataColumns)
-
+	
+	if (isTRUE(is.logical(round) && round || is.numeric(round))) {
+		weatherDF <- round(weatherDF, digits = if (is.logical(round)) 2 else round)
+	}
+	
 	weatherData <- list()
 	for(i in 1:length(ylist$years)) {
 		ydata <- as.matrix(weatherDF[ylist$year_ts == ylist$years[i], weatherDF_dataColumns])

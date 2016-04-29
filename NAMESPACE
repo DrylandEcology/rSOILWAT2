@@ -20,7 +20,10 @@ dbW_blob_to_weatherData,
 getWeatherData_folders,
 dbW_weatherData_to_dataframe,
 dbW_dataframe_to_weatherData,
-dbW_weather_to_SOILWATfiles)
+dbW_weather_to_SOILWATfiles,
+
+dbW_weatherData_to_monthly,
+dbW_dataframe_to_monthly)
 
 exportClasses(
    swFiles,
