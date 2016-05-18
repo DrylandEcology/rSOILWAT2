@@ -76,6 +76,7 @@ git push
 ```
 
 Version numbers
+
 We attempt to follow guidelines of [semantic versioning](http://semver.org/) with version numbers of MAJOR.MINOR.PATCH.
 If the version numbers changes, then the following files must be updated
 * DESCRIPTION: adjust lines 'Version' and 'Date'
