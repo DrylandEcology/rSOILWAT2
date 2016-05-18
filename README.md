@@ -75,6 +75,11 @@ git commit -am "Pulled down latest commit 'COMMIT-FLAG' to submodule SoilWat"
 git push
 ```
 
+Version numbers
+We attempt to follow guidelines of [semantic versioning](http://semver.org/) with version numbers of MAJOR.MINOR.PATCH.
+If the version numbers changes, then the following files must be updated
+* DESCRIPTION: adjust lines 'Version' and 'Date'
+* R/zzz.R: adjust package startup message in function '.onAttach'
 
 ### How to contribute
 You can help us in different ways:
