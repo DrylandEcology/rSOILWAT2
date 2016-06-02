@@ -4,6 +4,7 @@ export(sw_exec,
 sw_inputDataFromFiles,
 sw_inputData,
 
+dbW_version,
 dbW_setConnection,
 dbW_disconnectConnection,
 dbW_getWeatherData,

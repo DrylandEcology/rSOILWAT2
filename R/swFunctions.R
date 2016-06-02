@@ -18,10 +18,15 @@
 
 
 ## ------SQLite weather database functions
-# Daily weather data is stored in database as SQL-blob of an R object of class 'swWeatherData'
+# Daily weather data is stored in database as SQL-blob of a list of R objects of class 'swWeatherData'
 
 con.env <- new.env()
 con.env$con <- NULL
+con.env$dbW_version <- "2.0.0"
+
+dbW_version <- function() {
+	numeric_version(dbGetQuery(con.env$con, "SELECT Version FROM Version;"))
+}
 
 dbW_getSiteId <- function(lat=NULL, long=NULL, Label=NULL) {
 	lat<-as.numeric(lat)
@@ -180,7 +185,6 @@ dbW_setConnection <- function(dbFilePath, createAdd=FALSE) {
 	if(!file.exists(dbFilePath)) {
 		print("dbFilePath does not exist. Creating database.")
 	}
-	#assign("con", dbConnect(drv, dbname = tfile), envir="package:Rsoilwat")
 	con.env$con <- dbConnect(drv, dbname = tfile)
 	#if(createAdd) lapply(settings, function(x) dbGetQuery(con.env$con,x))
 }
@@ -240,21 +244,40 @@ dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderP
 	}
 }
 
-dbW_createDatabase <- function(dbFilePath="dbWeatherData.sqlite") {
+dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = NULL, site_subset = NULL, scenarios = NULL) {
+	#---Create tables
+	# Version
 	dbW_setConnection(dbFilePath, FALSE)
-	SQL <- paste("CREATE TABLE \"Version\" (\"Version\" integer);")
-	dbGetQuery(con.env$con, SQL)
+	dbGetQuery(con.env$con, "CREATE TABLE \"Version\" (\"Version\" TEXT);")
+	dbGetQuery(con.env$con, paste0("INSERT INTO Version (Version) VALUES (\'", con.env$dbW_version, "\');")
 	
-	dbGetQuery(con.env$con, "INSERT INTO Version (Version) VALUES (1);")
+	# Table of sites
+	dbGetQuery(con.env$con, "CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, \"Latitude\" REAL, \"Longitude\" REAL, \"Label\" TEXT);")
+	# Table for weather data
+	dbGetQuery(con.env$con, "CREATE TABLE \"WeatherData\" (\"Site_id\" integer, \"Scenario\" integer,  \"StartYear\" integer, \"EndYear\" integer, \"data\" BLOB, PRIMARY KEY (\"Site_id\", \"Scenario\"));")
+	# Table of scenario names
+	dbGetQuery(con.env$con, "CREATE TABLE \"Scenarios\" (\"id\" integer PRIMARY KEY, \"Scenario\" TEXT);")
 	
-	SQL <- paste("CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, \"Latitude\" REAL, \"Longitude\" REAL, \"Label\" TEXT);", sep="")
-	dbGetQuery(con.env$con, SQL)
-	#TABLE WEATHER DATA
-	SQL <- paste("CREATE TABLE \"WeatherData\" (\"Site_id\" integer, \"Scenario\" integer,  \"StartYear\" integer, \"EndYear\" integer, \"data\" BLOB, PRIMARY KEY (\"Site_id\", \"Scenario\"));", sep="")
-	dbGetQuery(con.env$con, SQL)
-	#Scenario Names
-	SQL <- "CREATE TABLE \"Scenarios\" (\"id\" integer PRIMARY KEY, \"Scenario\" TEXT);"
-	dbGetQuery(con.env$con, SQL)	
+	#---Add sites
+	if (NROW(site_data) > 0 && sapply(c("Site_id", "Latitude", "Longitude", "Label"), function(x) x %in% colnames(site_data))) {
+		# Default values
+		MetaData <- data.frame(Site_id = seq_len(max(site_data[, "Site_id"])),
+								Latitude = -999, Longitude = -999,
+								Label = NA)
+		# Fill in data
+		if (is.null(site_subset)) site_subset <- seq_len(nrow(site_data))
+		im <- match(site_data[site_subset, "Site_id"], MetaData[, "Site_id"])
+		MetaData[im, c("Latitude", "Longitude", "Label")] <- site_data[site_subset, c("Latitude", "Longitude", "Label")]
+		
+		dbW_addSites(dfLatitudeLongitudeLabel = MetaData)
+	}
+	
+	#---Add scenario names
+	if (NROW(scenarios) > 0 && "Scenario" %in% colnames(scenarios)) {
+		dbW_addScenarios(dfScenario = scenarios)
+	}
+	
+	invisible(0)
 }
 
 #dataframe of columns folder, lat, long, label where label can equal folderName
