@@ -249,7 +249,7 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = 
 	# Version
 	dbW_setConnection(dbFilePath, FALSE)
 	dbGetQuery(con.env$con, "CREATE TABLE \"Version\" (\"Version\" TEXT);")
-	dbGetQuery(con.env$con, paste0("INSERT INTO Version (Version) VALUES (\'", con.env$dbW_version, "\');")
+	dbGetQuery(con.env$con, paste0("INSERT INTO Version (Version) VALUES (\'", con.env$dbW_version, "\');"))
 	
 	# Table of sites
 	dbGetQuery(con.env$con, "CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, \"Latitude\" REAL, \"Longitude\" REAL, \"Label\" TEXT);")
