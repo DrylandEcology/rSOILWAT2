@@ -82,7 +82,7 @@ setMethod("swWriteLines", signature=c(object="swSoils", file="character"), defin
 			infiletext[2] <- "# Location: "
 			infiletext[3] <- "#"
 			infiletext[4] <- "# depth = (cm) lower limit of layer; layers must be in order of depth."
-			infiletext[5] <- "# matricd = (g/cm^3) bulk density of soil in this layer."
+			infiletext[5] <- "# matricd = (g/cm^3) density of soil matric component of this layer (will be converted to bulk density with eq. 20 from from Saxton and Rawls 2006 SSAJ)."
 			infiletext[6] <- "# fieldc = (cm^3/cm^3) field capacity soil water volume/volume soil."
 			infiletext[7] <- "# wiltpt = (cm^3/cm^3) wilting point water volume/volume soil."
 			infiletext[8] <- "# evco = (frac) proportion of total baresoil evap from this layer."

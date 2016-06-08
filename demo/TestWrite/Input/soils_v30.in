@@ -2,7 +2,7 @@
 # Location: 
 #
 # depth = (cm) lower limit of layer; layers must be in order of depth.
-# matricd = (g/cm^3) bulk density of soil in this layer.
+# matricd = (g/cm^3) density of soil matric component of this layer (will be converted to bulk density with eq. 20 from from Saxton and Rawls 2006 SSAJ).
 # gravel_content = the percent volume of each layer composed of gravel (i.e., particles > 2mm)
 # evco = (frac) proportion of total baresoil evap from this layer.
 # trco = (frac) proportion of total transpiration from this layer for each vegetation type (tree, forb, shrub, grass)
