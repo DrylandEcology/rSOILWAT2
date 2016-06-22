@@ -1,0 +1,18 @@
+bogr	# 4-char name of species
+# soil layer parameters
+2	# number of layers affecting establishment
+10.0	# SWP (bars) requirement for germination (top layer)
+15.0	# SWP (bars) requirement for establishment (average of top layers)
+# timing parameters in days
+60	# first possible day of germination
+180	# last possible day of germination
+2	# min number of consecutive 'wet' days for germination to occur
+40	# max number of consecutive 'dry' days after germination allowing estab
+5	# min number of consecutive 'wet' days after germination before establishment
+15	# min number of days between germination and establishment
+75	# max number of days between germination and establishment
+# temperature parameters in C
+5.0	# min temp threshold for germination
+20.0	# max temp threshold for germination
+0.0	# min temp threshold for establishment
+20.0	# max temp threshold for establishment

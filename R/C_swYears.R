@@ -1,10 +1,29 @@
+###############################################################################
+#Rsoilwat and Rsoilwat31
+#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+###############################################################################
+
+
 # TODO: Add comment
 # 
 # Author: Ryan J. Murphy (2013)
 ###############################################################################
 
 print("swYears")
-swYears<-setClass("swYears",representation(StartYear="integer",EndYear="integer",FDOFY="integer",EDOEY="integer",isNorth="logical"),prototype=prototype(StartYear=as.integer(1982),EndYear=as.integer(1986),FDOFY=as.integer(1),EDOEY=as.integer(365),isNorth=TRUE))
+swYears<-setClass("swYears",representation(StartYear="integer",EndYear="integer",FDOFY="integer",EDOEY="integer",isNorth="logical"),prototype=prototype(StartYear=as.integer(1982),EndYear=as.integer(1990),FDOFY=as.integer(1),EDOEY=as.integer(365),isNorth=TRUE))
 swYears_validity<-function(object){
 	if(length(object@StartYear)!=1 | is.na(object@StartYear) | object@StartYear<0)
 		return("@StartYear:Needstobeintegerlength1.Non-negativeandnotNA")	
@@ -19,7 +38,7 @@ swYears_validity<-function(object){
 	TRUE
 }
 setValidity("swYears",swYears_validity)
-setMethod("initialize","swYears",function(.Object,StartYear=as.integer(1982),EndYear=as.integer(1986),FDOFY=as.integer(1),EDOEY=as.integer(365),isNorth=TRUE){
+setMethod("initialize","swYears",function(.Object,StartYear=as.integer(1982),EndYear=as.integer(1990),FDOFY=as.integer(1),EDOEY=as.integer(365),isNorth=TRUE){
 			.Object@StartYear=StartYear
 			.Object@EndYear=EndYear
 			.Object@FDOFY=FDOFY
@@ -50,6 +69,7 @@ setReplaceMethod(f="swYears_EDOEY", signature="swYears", definition=function(obj
 setReplaceMethod(f="swYears_isNorth", signature="swYears", definition=function(object,value) {object@isNorth <- value; return(object)})
 
 setMethod("swWriteLines", signature=c(object="swYears", file="character"), definition=function(object, file) {
+			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)
 			infilename <- file.path(file)
 			infiletext <- character(8)
 			infiletext[1] <- "# Model time definition file"

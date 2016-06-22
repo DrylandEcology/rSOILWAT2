@@ -1,77 +1,31 @@
-print("swFunctions")
+###############################################################################
+#Rsoilwat and Rsoilwat31
+#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+###############################################################################
+
+
+## ------SQLite weather database functions
+# Daily weather data is stored in database as SQL-blob of a list of R objects of class 'swWeatherData'
 
 con.env <- new.env()
 con.env$con <- NULL
+con.env$dbW_version <- "2.0.0"
 
-getWeatherData_folders <- function(LookupWeatherFolder=NULL, weatherDirName=NULL,filebasename=NULL,startYear=NULL,endYear=NULL) {
-	if(is.null(LookupWeatherFolder) | is.null(weatherDirName) | is.null(filebasename))
-		stop("Need LookupWeatherFolder and weatherDirName information to get weather data")
-	useYears<-FALSE
-	useStart<-FALSE
-	useEnd  <-FALSE
-	weatherDataFiles<-tryCatch(list.files(path=file.path(LookupWeatherFolder,weatherDirName),pattern=filebasename), warning=function(w) {stop("Path to weather data bad or filebasename not correct.")})
-	weatherDataYears <- as.integer(na.exclude(gsub(filebasename,NA,unlist(strsplit(x=basename(weatherDataFiles),split=".",fixed=TRUE)))))
-	if(!is.null(startYear) | !is.null(endYear)) {
-		startYear <- as.integer(startYear)
-		if(!is.na(startYear)) useStart<-TRUE
-		endYear <- as.integer(endYear)
-		if(!is.na(endYear)) useEnd<-TRUE
-		if(useStart | useEnd) useYears<-TRUE
-		if(useStart & useEnd) {
-			if(startYear >= endYear | startYear<0 | endYear<0)
-				stop("Wrong start or end year")
-		}
-	}
-	if(useYears) {
-		if(useStart & useEnd) {
-			index <- which(weatherDataYears >= startYear & weatherDataYears <= endYear)
-		} else if(useStart) {
-			index <- which(weatherDataYears >= startYear)
-		} else if(useEnd) {
-			index <- which(weatherDataYears <= endYear)
-		}
-	} else {
-		index <- 1:length(weatherDataYears)
-	}
-	weathDataList <- list()
-	j <- 1
-	for(i in index) {
-		weathDataList[[j]]<-swReadLines(new("swWeatherData",year=weatherDataYears[i]),file.path(LookupWeatherFolder,weatherDirName,weatherDataFiles[i]))
-		j <- j+1
-	}
-	names(weathDataList)<-as.character(weatherDataYears[index])
-	return(weathDataList)
-}
-
-dbW_blob_to_weatherData <- function(StartYear, EndYear, data_blob) {
-	if(typeof(data_blob) == "list")
-		data_blob <- data_blob[[1]]
-	data <- strsplit(rawToChar(memDecompress(data_blob, type="gzip")), ";")[[1]]
-	years <- seq(from=StartYear, to=EndYear)
-	
-	weatherData <- list()
-	for(i in 1:length(years)) {
-		ydata <- read.table(textConnection(data[i]),header=FALSE,sep=",",stringsAsFactors=FALSE)
-		ydata <- as.matrix(cbind(seq(from=1,to=nrow(ydata)),ydata))
-		colnames(ydata) <- c("DOY","Tmax_C","Tmin_C","PPT_cm")
-		weatherData[[i]] <- new("swWeatherData",year=years[i],data=ydata)
-	}
-	names(weatherData) <- years
-	
-	return(weatherData)
-}
-
-dbW_weatherData_to_blob <- function(weatherData) {
-	string <- character(length=length(weatherData))
-	for(i in 1:length(weatherData)) {
-		zz <- textConnection("dataString","w")
-		write.table(x=weatherData[[i]]@data[,2:4], file=zz, col.names=FALSE, sep="," ,row.names=FALSE)
-		close(zz)
-		string[i] <-paste(dataString,collapse="\n")
-	}
-	string<-paste(string,collapse=";")
-	data_blob <- paste0("x'",paste0(memCompress(string,type="gzip"),collapse = ""),"'",sep="")
-	return(data_blob)
+dbW_version <- function() {
+	numeric_version(dbGetQuery(con.env$con, "SELECT Version FROM Version;"))
 }
 
 dbW_getSiteId <- function(lat=NULL, long=NULL, Label=NULL) {
@@ -231,7 +185,6 @@ dbW_setConnection <- function(dbFilePath, createAdd=FALSE) {
 	if(!file.exists(dbFilePath)) {
 		print("dbFilePath does not exist. Creating database.")
 	}
-	#assign("con", dbConnect(drv, dbname = tfile), envir="package:Rsoilwat")
 	con.env$con <- dbConnect(drv, dbname = tfile)
 	#if(createAdd) lapply(settings, function(x) dbGetQuery(con.env$con,x))
 }
@@ -291,21 +244,40 @@ dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderP
 	}
 }
 
-dbW_createDatabase <- function(dbFilePath="dbWeatherData.sqlite") {
+dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = NULL, site_subset = NULL, scenarios = NULL) {
+	#---Create tables
+	# Version
 	dbW_setConnection(dbFilePath, FALSE)
-	SQL <- paste("CREATE TABLE \"Version\" (\"Version\" integer);")
-	dbGetQuery(con.env$con, SQL)
+	dbGetQuery(con.env$con, "CREATE TABLE \"Version\" (\"Version\" TEXT);")
+	dbGetQuery(con.env$con, paste0("INSERT INTO Version (Version) VALUES (\'", con.env$dbW_version, "\');"))
 	
-	dbGetQuery(con.env$con, "INSERT INTO Version (Version) VALUES (1);")
+	# Table of sites
+	dbGetQuery(con.env$con, "CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, \"Latitude\" REAL, \"Longitude\" REAL, \"Label\" TEXT);")
+	# Table for weather data
+	dbGetQuery(con.env$con, "CREATE TABLE \"WeatherData\" (\"Site_id\" integer, \"Scenario\" integer,  \"StartYear\" integer, \"EndYear\" integer, \"data\" BLOB, PRIMARY KEY (\"Site_id\", \"Scenario\"));")
+	# Table of scenario names
+	dbGetQuery(con.env$con, "CREATE TABLE \"Scenarios\" (\"id\" integer PRIMARY KEY, \"Scenario\" TEXT);")
 	
-	SQL <- paste("CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, \"Latitude\" REAL, \"Longitude\" REAL, \"Label\" TEXT);", sep="")
-	dbGetQuery(con.env$con, SQL)
-	#TABLE WEATHER DATA
-	SQL <- paste("CREATE TABLE \"WeatherData\" (\"Site_id\" integer, \"Scenario\" integer,  \"StartYear\" integer, \"EndYear\" integer, \"data\" BLOB, PRIMARY KEY (\"Site_id\", \"Scenario\"));", sep="")
-	dbGetQuery(con.env$con, SQL)
-	#Scenario Names
-	SQL <- "CREATE TABLE \"Scenarios\" (\"id\" integer PRIMARY KEY, \"Scenario\" TEXT);"
-	dbGetQuery(con.env$con, SQL)	
+	#---Add sites
+	if (NROW(site_data) > 0 && sapply(c("Site_id", "Latitude", "Longitude", "Label"), function(x) x %in% colnames(site_data))) {
+		# Default values
+		MetaData <- data.frame(Site_id = seq_len(max(site_data[, "Site_id"])),
+								Latitude = -999, Longitude = -999,
+								Label = NA)
+		# Fill in data
+		if (is.null(site_subset)) site_subset <- seq_len(nrow(site_data))
+		im <- match(site_data[site_subset, "Site_id"], MetaData[, "Site_id"])
+		MetaData[im, c("Latitude", "Longitude", "Label")] <- site_data[site_subset, c("Latitude", "Longitude", "Label")]
+		
+		dbW_addSites(dfLatitudeLongitudeLabel = MetaData)
+	}
+	
+	#---Add scenario names
+	if (NROW(scenarios) > 0 && "Scenario" %in% colnames(scenarios)) {
+		dbW_addScenarios(dfScenario = scenarios)
+	}
+	
+	invisible(0)
 }
 
 #dataframe of columns folder, lat, long, label where label can equal folderName
@@ -333,11 +305,202 @@ dbW_deleteSiteData <- function(Site_id, Scenario=NULL) {
 		}
 	}
 }
+
+
+## ------ Conversion of weather data formats
+# Conversion: SQL-blob to object of class 'swWeatherData'
+dbW_blob_to_weatherData <- function(StartYear, EndYear, data_blob) {
+	if(typeof(data_blob) == "list")
+		data_blob <- data_blob[[1]]
+	data <- strsplit(rawToChar(memDecompress(data_blob, type="gzip")), ";")[[1]]
+	years <- seq(from=StartYear, to=EndYear)
+	
+	weatherData <- list()
+	for(i in 1:length(years)) {
+		ydata <- read.table(textConnection(data[i]),header=FALSE,sep=",",stringsAsFactors=FALSE)
+		ydata <- as.matrix(cbind(seq(from=1,to=nrow(ydata)),ydata))
+		colnames(ydata) <- c("DOY","Tmax_C","Tmin_C","PPT_cm")
+		weatherData[[i]] <- new("swWeatherData",year=years[i],data=ydata)
+	}
+	names(weatherData) <- years
+	
+	return(weatherData)
+}
+
+# Conversion: object of class 'swWeatherData' to SQL-blob
+dbW_weatherData_to_blob <- function(weatherData) {
+	string <- character(length=length(weatherData))
+	for(i in 1:length(weatherData)) {
+		zz <- textConnection("dataString","w")
+		write.table(x=weatherData[[i]]@data[,2:4], file=zz, col.names=FALSE, sep="," ,row.names=FALSE)
+		close(zz)
+		string[i] <-paste(dataString,collapse="\n")
+	}
+	string<-paste(string,collapse=";")
+	data_blob <- paste0("x'",paste0(memCompress(string,type="gzip"),collapse = ""),"'",sep="")
+	return(data_blob)
+}
+
+# Conversion: reading of SOILWAT input text files to object of class 'swWeatherData'
+getWeatherData_folders <- function(LookupWeatherFolder=NULL, weatherDirName=NULL,filebasename=NULL,startYear=NULL,endYear=NULL) {
+	if(is.null(LookupWeatherFolder) | is.null(weatherDirName) | is.null(filebasename))
+		stop("Need LookupWeatherFolder and weatherDirName information to get weather data")
+	useYears<-FALSE
+	useStart<-FALSE
+	useEnd  <-FALSE
+	weatherDataFiles<-tryCatch(list.files(path=file.path(LookupWeatherFolder,weatherDirName),pattern=filebasename), warning=function(w) {stop("Path to weather data bad or filebasename not correct.")})
+	weatherDataYears <- as.integer(na.exclude(gsub(filebasename,NA,unlist(strsplit(x=basename(weatherDataFiles),split=".",fixed=TRUE)))))
+	if(!is.null(startYear) | !is.null(endYear)) {
+		startYear <- as.integer(startYear)
+		if(!is.na(startYear)) useStart<-TRUE
+		endYear <- as.integer(endYear)
+		if(!is.na(endYear)) useEnd<-TRUE
+		if(useStart | useEnd) useYears<-TRUE
+		if(useStart & useEnd) {
+			if(startYear >= endYear | startYear<0 | endYear<0)
+				stop("Wrong start or end year")
+		}
+	}
+	if(useYears) {
+		if(useStart & useEnd) {
+			index <- which(weatherDataYears >= startYear & weatherDataYears <= endYear)
+		} else if(useStart) {
+			index <- which(weatherDataYears >= startYear)
+		} else if(useEnd) {
+			index <- which(weatherDataYears <= endYear)
+		}
+	} else {
+		index <- 1:length(weatherDataYears)
+	}
+	weathDataList <- list()
+	j <- 1
+	for(i in index) {
+		weathDataList[[j]]<-swReadLines(new("swWeatherData",year=weatherDataYears[i]),file.path(LookupWeatherFolder,weatherDirName,weatherDataFiles[i]))
+		j <- j+1
+	}
+	names(weathDataList)<-as.character(weatherDataYears[index])
+	return(weathDataList)
+}
+
+# Conversion: object of class 'swWeatherData' to data.frame
+dbW_weatherData_to_dataframe <- function(weatherData){
+	do.call(rbind, lapply(weatherData, FUN=function(x) {
+							temp <- x@data
+							Year <- rep(x@year, times=nrow(temp))
+							cbind(Year, temp)
+						}))
+}
+
+# Conversion: object of class 'swWeatherData' to matrix of monthly values (mean Tmax, mean Tmin, sum PPT)
+dbW_weatherData_to_monthly <- function(dailySW) {
+	monthly <- matrix(NA, nrow = length(dailySW) * 12, ncol = 5, dimnames = list(NULL, c("Year", "Month", "Tmax_C", "Tmin_C", "PPT_cm")))
+	for(y in seq_along(dailySW)){
+		weath <- dailySW[[y]]
+		month <- as.POSIXlt(paste(weath@year, weath@data[, "DOY"], sep = "-"), format = "%Y-%j")$mon + 1
+		monthly[1:12 + 12*(y - 1), ] <- data.matrix(cbind(
+			Year = weath@year, Month = 1:12,
+			aggregate(weath@data[, c("Tmax_C", "Tmin_C")], by = list(month), FUN = mean)[, 2:3],
+			PPT_cm = aggregate(weath@data[, "PPT_cm"], by = list(month), FUN = sum)[, 2]))
+	}
+	
+	monthly
+}
+
+# Conversion: object of daily weather data.frame to matrix of monthly values (mean Tmax, mean Tmin, sum PPT)
+dbW_dataframe_to_monthly <- function(dailySW) {
+	month <- as.POSIXlt(apply(dailySW[, c("Year", "DOY")], 1, paste, collapse = "-"), format = "%Y-%j")$mon + 1
+	as.matrix(cbind(Year = tempT[, 2], Month = tempT[, 1],
+		Tmax_C = as.vector(tapply(dailySW[, "Tmax_C"], INDEX = list(month, dailySW[, "Year"]), FUN = mean)),
+		Tmin_C = as.vector(tapply(dailySW[, "Tmin_C"], INDEX = list(month, dailySW[, "Year"]), FUN = mean)),
+		PPT_cm = as.vector(tapply(dailySW[, "PPT_cm"], INDEX = list(month, dailySW[, "Year"]), FUN = sum))
+	))
+}
+
+
+
+get_years_from_weatherDF <- function(weatherDF, years, weatherDF_dataColumns){
+	if(!is.null(years)){
+		if(length(years) == nrow(weatherDF)){
+			year_ts <- years
+		} else if(length(years) == sum(weatherDF[, weatherDF_dataColumns[1]] == 1)){
+			year_ts <- rep(years, times = diff(c(which(weatherDF[, weatherDF_dataColumns[1]] == 1), nrow(weatherDF) + 1)))
+		} else {
+			stop("Not sufficient year information was provided with the 'weatherDF' object")
+		} 
+	} else if(any(temp <- grepl("year", colnames(weatherDF), ignore.case = TRUE))){
+		year_ts <- weatherDF[, which(temp)[1]]
+	} else {
+		stop("No year information was provided with the 'weatherDF' object")
+	}
+	
+	years <- sort(unique(year_ts))
+
+	return(list(years=years, year_ts=year_ts))
+}
+
+
+# Conversion: data.frame to object of class 'swWeatherData'
+dbW_dataframe_to_weatherData <- function(weatherDF, years=NULL, weatherDF_dataColumns=c("DOY","Tmax_C","Tmin_C","PPT_cm"), round = 2){
+	if(!(length(weatherDF_dataColumns) == 4) || !all(weatherDF_dataColumns %in% colnames(weatherDF)))
+		stop("Not every required weatherDF_dataColumns is available in the 'weatherDF' object")
+
+	ylist <- get_years_from_weatherDF(weatherDF, years, weatherDF_dataColumns)
+	
+	if (isTRUE(is.logical(round) && round || is.numeric(round))) {
+		weatherDF <- round(weatherDF, digits = if (is.logical(round)) 2 else round)
+	}
+	
+	weatherData <- list()
+	for(i in 1:length(ylist$years)) {
+		ydata <- as.matrix(weatherDF[ylist$year_ts == ylist$years[i], weatherDF_dataColumns])
+		colnames(ydata) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+		weatherData[[i]] <- new("swWeatherData", year=ylist$years[i], data=ydata)
+	}
+	names(weatherData) <- ylist$years
+	
+	weatherData
+}
+
+
+# Conversion: object of class 'swWeatherData' or data.frame to SOILWAT input text files
+dbW_weather_to_SOILWATfiles <- function(path, site.label, weatherData=NULL, weatherDF=NULL, years=NULL, weatherDF_dataColumns=c("DOY","Tmax_C","Tmin_C","PPT_cm")){
+	stopifnot(is.null(weatherData), is.null(weatherDF))
+	dir.create(path, recursive = TRUE, showWarnings = FALSE)
+	
+	if(!is.null(weatherData)){
+		years <- sapply(weatherData, FUN=function(x) x@year)
+	} else if(!is.null(weatherDF)){
+		if(!(length(weatherDF_dataColumns) == 4) || !all(weatherDF_dataColumns %in% colnames(weatherDF)))
+			stop("Not every required weatherDF_dataColumns is available in the 'weatherDF' object")
+		temp <- get_years_from_weatherDF(weatherDF, years, weatherDF_dataColumns)
+		years <- temp$years
+		year_ts <- temp$year_ts
+	} else {
+		stop("Provide daily weather data either as 'weatherData' or 'weatherDF' object")
+	}
+	
+	for(y in seq_along(years)){
+		data.sw <- if(!is.null(weatherData)) weatherData[[y]]@data else weatherDF[year_ts == years[y], weatherDF_dataColumns]
+		sw.filename <- file.path(path, paste0("weath.", years[y]))
+		sw.comments <- c(paste("# weather for site", site.label, "year = ", years[y]), "# DOY Tmax(C) Tmin(C) PPT(cm)")
+		
+		write.table(sw.comments, file=sw.filename, sep="\t", eol="\r\n", quote=FALSE, row.names=FALSE, col.names=FALSE)
+		write.table(data.frame(data.sw[,1], formatC(data.sw[, 2], digits=2, format="f"), formatC(data.sw[, 3], digits=2, format="f"), formatC(data.sw[, 4], digits=2, format="f")), file=sw.filename, append=TRUE, sep="\t", eol="\r\n", quote=FALSE, row.names=FALSE, col.names=FALSE)							
+	}
+	
+	invisible(years)
+}
+
+
+
+
+## ------ Scanning of SOILWAT input text files
 readCharacter <- function(text, showWarnings=FALSE) {
 	temp <- strsplit(x=text,split="\t")[[1]][1]
 	temp <- unlist(strsplit(x=temp,split=" "))[1]
 	return(temp)
 }
+
 readInteger <- function(text,showWarnings=FALSE) {
 	temp <- suppressWarnings(as.integer(strsplit(x=text,split="\t")[[1]][1]))
 	if(is.na(temp)) {
@@ -350,6 +513,7 @@ readInteger <- function(text,showWarnings=FALSE) {
 	}
 	return(temp)
 }
+
 readLogical <- function(text,showWarnings=FALSE) {
 	temp <- suppressWarnings(as.logical(as.integer(strsplit(x=text,split="\t")[[1]][1])))
 	if(is.na(temp)) {
@@ -362,6 +526,7 @@ readLogical <- function(text,showWarnings=FALSE) {
 	}
 	return(temp)
 }
+
 readNumeric <- function(text,showWarnings=FALSE) {
 	temp <- suppressWarnings(as.numeric(strsplit(x=text,split="\t")[[1]][1]))
 	if(is.na(temp)) {
@@ -374,6 +539,7 @@ readNumeric <- function(text,showWarnings=FALSE) {
 	}
 	return(temp)
 }
+
 readNumerics <- function(text,expectedArgs,showWarnings=FALSE) {
 	temp <- strsplit(x=text,split="\t")[[1]]
 	temp <- temp[temp != ""] #get rid of extra spaces

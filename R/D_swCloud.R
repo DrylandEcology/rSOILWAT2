@@ -1,3 +1,22 @@
+###############################################################################
+#Rsoilwat and Rsoilwat31
+#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+###############################################################################
+
+
 # TODO: Add comment
 # 
 # Author: ryan
@@ -5,7 +24,7 @@
 
 
 ########################CLOUD DATA################################
-
+print("swCloud")
 swCloud<-setClass("swCloud",representation(Cloud="matrix"),prototype=prototype(Cloud=matrix(data=c(71,61,61,51,41,31,23,23,31,41,61,61,1.3,2.9,3.3,3.8,3.8,3.8,3.3,3.3,2.9,1.3,1.3,1.3,61,61,61,51,51,51,41,41,51,51,61,61,1,1,1,1,1,1,1,1,1,1,1,1,213.7,241.6,261,308,398.1,464.5,0,0,0,140,161.6,185.1),nrow=5,ncol=12,byrow=T,dimnames=list(c("SkyCoverPCT","WindSpeed_m/s","HumidityPCT","Transmissivity","SnowDensity_kg/m^3"),c("January","February","March","April","May","June","July","August","September","October","November","December")))))
 swCloud_validity<-function(object){
 	if(dim(object@Cloud)[1]!=5)
@@ -48,6 +67,7 @@ setReplaceMethod(f="swCloud_Transmissivity",signature="swCloud",function(object,
 setReplaceMethod(f="swCloud_SnowDensity",signature="swCloud",function(object,value) {object@Cloud[5,] <- value; return(object)})
 
 setMethod("swWriteLines", signature=c(object="swCloud", file="character"), definition=function(object, file) {
+			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)
 			infilename <- file.path(file)
 			infiletext <- character(5)
 			

@@ -1,3 +1,22 @@
+###############################################################################
+#Rsoilwat and Rsoilwat31
+#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+###############################################################################
+
+
 # TODO: Add comment
 # 
 # Author: Ryan J. Murphy (2013)
@@ -5,7 +24,7 @@
 
 #################################
 print("swFiles")
-swFiles<-setClass("swFiles",representation(ProjDir="character",InFiles="character",WeatherPrefix="character",OutputPrefix="character"),prototype=prototype(ProjDir="",InFiles=c('files_v27.in','Input/years.in','Output/logfile.log','Input/siteparam_v26.in','Input/soils_v23.in','Input/weathsetup_v20.in','Input/data_39.0625_-119.4375/mkv_prob.in','Input/data_39.0625_-119.4375/mkv_covar.in','Input/data_39.0625_-119.4375/cloud_v20.in','Input/sbe_prod_v21.in','Input/estab.in','Input/swcsetup.in','Input/outsetup_v27.in'),WeatherPrefix="Input/data_39.0625_-119.4375/weath",OutputPrefix="Output/"))
+swFiles<-setClass("swFiles",representation(ProjDir="character",InFiles="character",WeatherPrefix="character",OutputPrefix="character"),prototype=prototype(ProjDir="",InFiles=c('files_v30.in','Input/years.in','Output/logfile.log','Input/siteparam_v26.in','Input/soils_v30.in','Input/weathsetup_v20.in','Input/mkv_prob.in','Input/mkv_covar.in','Input/cloud_v20.in','Input/sbe_prod_v31.in','Input/estab.in','Input/swcsetup.in','Input/outsetup_v30.in'),WeatherPrefix="Weather_Test/weath",OutputPrefix="Output/"))
 
 swFiles_validity<-function(object){
 	if(length(object@ProjDir)!=1)
@@ -20,7 +39,7 @@ swFiles_validity<-function(object){
 	TRUE
 }
 setValidity("swFiles",swFiles_validity)
-setMethod("initialize","swFiles",function(.Object,ProjDir="",InFiles=c('files_v27.in','Input/years.in','Output/logfile.log','Input/siteparam_v26.in','Input/soils_v23.in','Input/weathsetup_v20.in','Input/data_39.0625_-119.4375/mkv_prob.in','Input/data_39.0625_-119.4375/mkv_covar.in','Input/data_39.0625_-119.4375/cloud_v20.in','Input/sbe_prod_v21.in','Input/estab.in','Input/swcsetup.in','Input/outsetup_v27.in'),WeatherPrefix="Input/data_39.0625_-119.4375/weath",OutputPrefix="Output/"){
+setMethod("initialize","swFiles",function(.Object,ProjDir="",InFiles=c('files_v30.in','Input/years.in','Output/logfile.log','Input/siteparam_v26.in','Input/soils_v30.in','Input/weathsetup_v20.in','Input/mkv_prob.in','Input/mkv_covar.in','Input/cloud_v20.in','Input/sbe_prod_v31.in','Input/estab.in','Input/swcsetup.in','Input/outsetup_v30.in'),WeatherPrefix="Weather_Test/weath",OutputPrefix="Output/"){
 			names(InFiles) <- c("InputFilesForSimulation","Model_Years","Model_LogFile","Site_Params","Site_Soils","Weather_setup","Markov_precip_probs","Markov_covarianceTable","Weather_atmosphericParams","Vegetation_Productivity","Vegetation_Establishment","SWC_setup","Output_setup")
 			.Object@ProjDir=ProjDir
 			.Object@InFiles=InFiles
@@ -73,9 +92,10 @@ setReplaceMethod(f="swFiles_WeatherPrefix", signature="swFiles", definition=func
 setReplaceMethod(f="swFiles_OutputPrefix", signature="swFiles", definition=function(object,value) {object@OutputPrefix <- value; return(object)})
 
 setMethod("swWriteLines", signature=c(object="swFiles", file="character"), definition=function(object, file) {
+			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)
 			infilename <- file.path(file)
 			infiletext <- character(28)
-			infiletext[1] <- "# List of input files for SOILWAT v27"
+			infiletext[1] <- "# List of input files for SOILWAT v32"
 			infiletext[2] <- paste("# This is the first file read. Simulation information = ")
 			
 			infiletext[4] <- "#Model"

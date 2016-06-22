@@ -1,0 +1,11 @@
+# list of filenames for which to check establishment
+# each filename pertains to a species and contains the
+# soil moisture and timing parameters required for the
+# species to establish in a given year.
+# There is no limit to the number of files in the list.
+# to suppress checking establishment, comment all the
+# lines below.
+
+1	# use flag; 1=check establishment, 0=don't check, ignore following
+Input/bouteloua.estab
+Input/bromus.estab

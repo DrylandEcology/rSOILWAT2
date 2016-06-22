@@ -1,3 +1,22 @@
+###############################################################################
+#Rsoilwat and Rsoilwat31
+#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+###############################################################################
+
+
 # TODO: Add comment
 # 
 # Author: Ryan J. Murphy (2013)
@@ -14,6 +33,7 @@ setMethod(f="swClear",
 			return(object)
 		})
 setMethod("swWriteLines", signature=c(object="swSWC_hist", file="character"), definition=function(object, file) {
+			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)
 			infilename <- file.path(file)
 			infiletext <- character(dim(object@data)[1]+2)
 			infiletext[1] <- paste("# SWC History for site: year =  ",object@year,sep="")
@@ -51,7 +71,7 @@ setMethod(f="swClear",
 			object@DataFilePrefix=character(1)
 			object@FirstYear=integer(1)
 			object@Method=integer(1)
-			object@History=list(0)
+			object@History=list(swClear(new("swSWC_hist")))
 			return(object)
 		})
 
@@ -94,6 +114,7 @@ setReplaceMethod(f="swSWC_HistoricData",signature=c(object="swSWC",swSWCdata="sw
 		})
 
 setMethod("swWriteLines", signature=c(object="swSWC", file="character"), definition=function(object, file) {
+			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)
 			infilename <- file.path(file)
 			infiletext<-character(7)
 			infiletext[1]<-"# Setup parameters for measured swc"

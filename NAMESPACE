@@ -1,9 +1,10 @@
-useDynLib(Rsoilwat)
+useDynLib(Rsoilwat31)
 
 export(sw_exec,
 sw_inputDataFromFiles,
 sw_inputData,
-getWeatherData_folders,
+
+dbW_version,
 dbW_setConnection,
 dbW_disconnectConnection,
 dbW_getWeatherData,
@@ -14,9 +15,16 @@ dbW_addFromFolders,
 dbW_deleteSiteData,
 dbW_getSiteTable,
 dbW_getScenariosTable,
+
 dbW_weatherData_to_blob,
-dbW_blob_to_weatherData
-)
+dbW_blob_to_weatherData,
+getWeatherData_folders,
+dbW_weatherData_to_dataframe,
+dbW_dataframe_to_weatherData,
+dbW_weather_to_SOILWATfiles,
+
+dbW_weatherData_to_monthly,
+dbW_dataframe_to_monthly)
 
 exportClasses(
    swFiles,
@@ -35,7 +43,9 @@ exportClasses(
    swSWC_hist,
    swSWC,
    swLog,
-   swInputData
+   swInputData,
+   swOutput_KEY,
+   swOutput
 )
 
 ## Methods/Generics
@@ -67,8 +77,8 @@ exportMethods(
 	"set_Markov<-","swMarkov_Prob<-","swMarkov_Conv<-",
 	
 	#PROD#
-	get_swProd,swProd_Composition,swProd_Albedo,swProd_Cover_stcr,swProd_CanopyHeight,swProd_VegInterParam,swProd_LitterInterParam,swProd_EsTpartitioning_param,swProd_Es_param_limit,swProd_Shade,swProd_HydrRedstro_use,swProd_HydrRedstro,swProd_CritSoilWaterPotential,swProd_MonProd_grass,swProd_MonProd_shrub,swProd_MonProd_tree,
-	"set_swProd<-","swProd_Composition<-","swProd_Albedo<-","swProd_Cover_stcr<-","swProd_CanopyHeight<-","swProd_VegInterParam<-","swProd_LitterInterParam<-","swProd_EsTpartitioning_param<-","swProd_Es_param_limit<-","swProd_Shade<-","swProd_HydrRedstro_use<-","swProd_HydrRedstro<-","swProd_CritSoilWaterPotential<-","swProd_MonProd_grass<-","swProd_MonProd_shrub<-","swProd_MonProd_tree<-",
+	get_swProd,swProd_Composition,swProd_Albedo,swProd_Cover_stcr,swProd_CanopyHeight,swProd_VegInterParam,swProd_LitterInterParam,swProd_EsTpartitioning_param,swProd_Es_param_limit,swProd_Shade,swProd_HydrRedstro_use,swProd_HydrRedstro,swProd_CritSoilWaterPotential,swProd_MonProd_grass,swProd_MonProd_shrub,swProd_MonProd_tree,swProd_MonProd_forb,
+	"set_swProd<-","swProd_Composition<-","swProd_Albedo<-","swProd_Cover_stcr<-","swProd_CanopyHeight<-","swProd_VegInterParam<-","swProd_LitterInterParam<-","swProd_EsTpartitioning_param<-","swProd_Es_param_limit<-","swProd_Shade<-","swProd_HydrRedstro_use<-","swProd_HydrRedstro<-","swProd_CritSoilWaterPotential<-","swProd_MonProd_grass<-","swProd_MonProd_shrub<-","swProd_MonProd_tree<-","swProd_MonProd_forb<-",
 	
 	#SITE#
 	get_swSite,swSite_SWClimits,swSite_ModelFlags,swSite_ModelCoefficients,swSite_SnowSimulationParams,swSite_DrainageCoefficient,swSite_EvapCoefficients,swSite_TranspCoefficients,swSite_IntrinsicSiteParams,swSite_SoilTemperatureFlag,swSite_SoilTemperatureConsts,swSite_TranspirationRegions,
@@ -91,5 +101,9 @@ exportMethods(
 	"set_swSWC<-","swSWC_use<-","swSWC_prefix<-","swSWC_FirstYear<-","swSWC_Method<-","swSWC_HistoricList<-","swSWC_HistoricData<-",
 	
 	#LOG#
-	"swLog_setLine<-"
+	"swLog_setLine<-",
+	
+	#OUTPUT#
+	"swOutput_KEY_Period", "swOutput_KEY_TimeStep", "swOutput_KEY_Columns", "swOutput_getKEY",
+	"swOutput_getKEY<-"
 )

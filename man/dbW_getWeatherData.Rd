@@ -1,0 +1,57 @@
+% 
+% TODO: Write Documentation 
+% 
+\name{dbW_getWeatherData}
+\alias{dbW_getWeatherData}
+\title{Extracts daily weather data from a SQLite database}
+\description{
+Reads weather data from database.
+Returns list of weather data.
+}
+\usage{
+dbW_getWeatherData(con, Site_id = NULL, lat = NULL, long = NULL, weatherDirName = NULL, startYear = NULL, endYear = NULL)
+}
+\arguments{
+	\item{con}{RSQLite con object. A connection to the weather data database. requires(RSQLite)}
+	\item{Site_id}{Numeric. Used to identify site and extract weather data.}
+	\item{lat}{Numeric. Latitude used with longitude to identify site id if Site_id is missing.}
+	\item{long}{Numeric. Longitude and Latitude are used to identify site if Site_id is missing.}
+	\item{weatherDirName}{String. If Site_id, lat, and long is missing then this will be used to identify Site_id by parsing the lat and long out of the name.}
+	\item{startYear}{Numeric. Extracted weather data will start with this year.}
+	\item{endYear}{Numeric. Extracted weather data will end with this year.}
+}
+\details{
+	Weather data for the soil water simulation run can be stored in the input data
+	or it can be separate to keep the input data size down for multiple variations
+	of the same site. This function is used to return the weather data from a pre
+	defined weather database. Using the database was faster then reading in multiple
+	weather files from disk.
+	
+	SOILWAT does not handle missing weather data. If you have missing data, then you have to impute yourself
+	or use the built-in Markov weather generator (see examples for \code{\link{sw_exec}}).
+	
+	The output from this function can be passed directly to sw_exec with input data.
+}
+\value{
+	Returns weather data as list. Each element contains data for one year.
+}
+\author{Ryan Murphy}
+\seealso{
+	\itemize{
+		\item \code{\link{sw_exec}} for running a simulation
+		\item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for data input
+		\item \code{\link{dbW_getWeatherData}} and \code{\link{getWeatherData_folders}} for weather data input
+	}
+}
+\examples{
+	## Default data set without weather data.
+	## Column Names are also turned on for output
+	library(Rsoilwat)
+	library(RSQLite)
+	drv <- dbDriver("SQLite")
+	con <- dbConnect(drv, "/path/to/weather/database/lookupWeatherDB.sqlite3")
+	inputData <- sw_inputDataFromFiles(dir="/path/to/project",files.in="files_v27.in") #Get the data set
+	weatherData <- dbW_getWeatherData(con, Site_id=200)
+	#Run the simulation
+	run<-sw_exec(data=inputData, weatherList=weatherData, colNames=TRUE)
+}

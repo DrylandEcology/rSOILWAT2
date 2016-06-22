@@ -1,3 +1,22 @@
+###############################################################################
+#Rsoilwat and Rsoilwat31
+#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+###############################################################################
+
+
 # TODO: Add comment
 # 
 # Author: Ryan J. Murphy (2013)
@@ -143,6 +162,7 @@ setGeneric(name="swProd_CritSoilWaterPotential",function(object) {standardGeneri
 setGeneric(name="swProd_MonProd_grass",function(object) {standardGeneric("swProd_MonProd_grass")})
 setGeneric(name="swProd_MonProd_shrub",function(object) {standardGeneric("swProd_MonProd_shrub")})
 setGeneric(name="swProd_MonProd_tree",function(object) {standardGeneric("swProd_MonProd_tree")})
+setGeneric(name="swProd_MonProd_forb",function(object) {standardGeneric("swProd_MonProd_forb")})
 
 setGeneric(name="set_swProd<-",function(object, value) {standardGeneric("set_swProd<-")})
 setGeneric(name="swProd_Composition<-",function(object, value) {standardGeneric("swProd_Composition<-")})
@@ -160,6 +180,7 @@ setGeneric(name="swProd_CritSoilWaterPotential<-",function(object, value) {stand
 setGeneric(name="swProd_MonProd_grass<-",function(object, value) {standardGeneric("swProd_MonProd_grass<-")})
 setGeneric(name="swProd_MonProd_shrub<-",function(object, value) {standardGeneric("swProd_MonProd_shrub<-")})
 setGeneric(name="swProd_MonProd_tree<-",function(object, value) {standardGeneric("swProd_MonProd_tree<-")})
+setGeneric(name="swProd_MonProd_forb<-",function(object, value) {standardGeneric("swProd_MonProd_forb<-")})
 ########################
 
 #######SITE#############
@@ -226,17 +247,29 @@ setGeneric(name="swSWC_HistoricList<-",function(object,swSWC_HistoricList) {stan
 setGeneric(name="swSWC_HistoricData<-",function(object,swSWCdata) {standardGeneric("swSWC_HistoricData<-")})
 ########################
 
-#######OUTPUT###########
+#######OUT###########
 setGeneric(name="get_swOUT", function(object) {standardGeneric("get_swOUT")})
 setGeneric(name="swOUT_TimeStep", function(object) {standardGeneric("swOUT_TimeStep")})
 setGeneric(name="swOUT_OutputSeparator", function(object) {standardGeneric("swOUT_OutputSeparator")})
+setGeneric(name="swOUT_useTimeStep", function(object) {standardGeneric("swOUT_useTimeStep")})
 
 setGeneric(name="set_swOUT<-",function(object,value) {standardGeneric("set_swOUT<-")})
 setGeneric(name="swOUT_TimeStep<-",function(object,value) {standardGeneric("swOUT_TimeStep<-")})
 setGeneric(name="swOUT_OutputSeparator<-",function(object,value) {standardGeneric("swOUT_OutputSeparator<-")})
+setGeneric(name="swOUT_useTimeStep<-",function(object,value) {standardGeneric("swOUT_useTimeStep<-")})
 ########################
 
 ########LOG#############
-setGeneric(name="swLog_setLine<-",function(object, value) {standardGeneric("swLog_setLine<-")})
+setGeneric(name="swLog_setLine<-",function(object, line) {standardGeneric("swLog_setLine<-")})
 ########################
 
+########swOutput########
+setGeneric(name="swOutput_getKEY",function(object,index) {standardGeneric("swOutput_getKEY")})
+setGeneric(name="swOutput_KEY_Period",function(object,index) {standardGeneric("swOutput_KEY_Period")})
+setGeneric(name="swOutput_KEY_TimeStep",function(object) {standardGeneric("swOutput_KEY_TimeStep")})
+setGeneric(name="swOutput_KEY_Columns",function(object) {standardGeneric("swOutput_KEY_Columns")})
+
+setGeneric(name="swOutput_getKEY<-",function(object,index,value) {standardGeneric("swOutput_getKEY<-")})
+setGeneric(name="swOutput_KEY_Period<-",function(object,index,value) {standardGeneric("swOutput_KEY_Period<-")})
+setGeneric(name="swOutput_KEY_TimeStep<-",function(object,value) {standardGeneric("swOutput_KEY_TimeStep<-")})
+setGeneric(name="swOutput_KEY_Columns<-",function(object,value) {standardGeneric("swOutput_KEY_Columns<-")})

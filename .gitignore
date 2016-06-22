@@ -5,6 +5,7 @@
 *.dll
 *.exe
 *.o
+*.d
 *.so
 
 # OS generated files #
@@ -16,3 +17,8 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
+#eclipse project files
+.cproject
+.project
+.settings/
+

@@ -1,3 +1,22 @@
+###############################################################################
+#Rsoilwat and Rsoilwat31
+#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+###############################################################################
+
+
 # TODO: Add comment
 # 
 # Author: ryan
@@ -5,13 +24,13 @@
 
 
 #######################Markov##########################################
-
+print("swMarkov")
 swMarkov <- setClass("swMarkov", representation(Prob="matrix",Conv="matrix"))
 setMethod(f="swClear",
 		signature="swMarkov",
 		definition=function(object) {
-			object@Prob=matrix(0,366,5)
-			object@Conv=matrix(0,53,7)
+			object@Prob=matrix(numeric(0),0,0)
+			object@Conv=matrix(numeric(0),0,0)
 			return(object)
 		})
 

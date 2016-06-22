@@ -12,6 +12,7 @@
 }
 \arguments{
 	\item{object}{S4 Rsoilwat inputData class.}
+	\item{dir}{String for the path to recreate Project in}
 }
 \details{
 	This will write to hard drive the file represented by the object.
@@ -24,7 +25,7 @@
 	\code{\link{swInputData}}
 	\code{\link{sw_exec}}
 	\code{\link{sw_inputDataFromFiles}}
-	\code{\link{getWeatherData_database}}
+	\code{\link{onGetWeatherData_database}}
 }
 \examples{
 	## Default data set without weather data.
