@@ -1,13 +1,13 @@
 Package: Rsoilwat31
-Version: 0.31.17
-Date: 06-02-2016
+Version: 1.0.0
+Date: 06-22-2016
 Title: SoilWat v31
 Authors@R: c(person("Ryan", "Murphy", role = "aut", email = "not@available.com"),
 			person("Daniel", "Schlaepfer", role = c("aut", "cre"), email = "daniel.schlaepfer@unibas.ch"),
 			person("John", "Bradford", role = "ctb", email = "not@available.com"),
 			person("William", "Lauenroth", role = "ctb", email = "not@available.com"))
 Depends: R (>= 2.12.0), RSQLite
-Description: SoilWat package is a R wrapper for the soil wat C code. It allows data to be accessed directly within R from soilwat.
+Description: SoilWat package is a R wrapper for the SOILWAT C code. It allows data to be accessed directly via memory. This package currently uses SOILWAT v3.2.0.
 LazyData: true
 ByteCompile: true
 License: GPL (>= 3)
