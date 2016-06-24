@@ -338,35 +338,37 @@ dbW_deleteSiteData <- function(Site_id, Scenario=NULL) {
 ## ------ Conversion of weather data formats
 # Conversion: SQL-blob to object of class 'swWeatherData'
 dbW_blob_to_weatherData <- function(StartYear, EndYear, data_blob) {
-	if(typeof(data_blob) == "list")
+	if (typeof(data_blob) == "list")
 		data_blob <- data_blob[[1]]
-	data <- strsplit(rawToChar(memDecompress(data_blob, type="gzip")), ";")[[1]]
-	years <- seq(from=StartYear, to=EndYear)
+	data <- strsplit(rawToChar(memDecompress(data_blob, type = "gzip")), ";")[[1]]
+	years <- StartYear:EndYear
 	
 	weatherData <- list()
-	for(i in 1:length(years)) {
-		ydata <- read.table(textConnection(data[i]),header=FALSE,sep=",",stringsAsFactors=FALSE)
-		ydata <- as.matrix(cbind(seq(from=1,to=nrow(ydata)),ydata))
-		colnames(ydata) <- c("DOY","Tmax_C","Tmin_C","PPT_cm")
-		weatherData[[i]] <- new("swWeatherData",year=years[i],data=ydata)
+	for (i in seq_along(years)) {
+		zz <- textConnection(data[i])
+		ydata <- read.table(zz, header = FALSE, sep = ",", stringsAsFactors = FALSE)
+		close(zz)
+		ydata <- as.matrix(cbind(seq_len(nrow(ydata)), ydata))
+		colnames(ydata) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+		weatherData[[i]] <- new("swWeatherData", year = years[i], data = ydata)
 	}
 	names(weatherData) <- years
 	
-	return(weatherData)
+	weatherData
 }
 
 # Conversion: object of class 'swWeatherData' to SQL-blob
 dbW_weatherData_to_blob <- function(weatherData) {
-	string <- character(length=length(weatherData))
-	for(i in 1:length(weatherData)) {
-		zz <- textConnection("dataString","w")
-		write.table(x=weatherData[[i]]@data[,2:4], file=zz, col.names=FALSE, sep="," ,row.names=FALSE)
+	string <- character(length = length(weatherData))
+	for(i in seq_along(weatherData)) {
+		zz <- textConnection("dataString", "w")
+		write.table(x = weatherData[[i]]@data[, -1], file = zz, col.names = FALSE, sep = "," , row.names = FALSE)
 		close(zz)
-		string[i] <-paste(dataString,collapse="\n")
+		string[i] <- paste(dataString, collapse = "\n")
 	}
-	string<-paste(string,collapse=";")
-	data_blob <- paste0("x'",paste0(memCompress(string,type="gzip"),collapse = ""),"'",sep="")
-	return(data_blob)
+	string <- paste(string, collapse=";")
+	
+	paste0("x'", paste0(memCompress(string, type = "gzip"), collapse = ""), "'")
 }
 
 # Conversion: reading of SOILWAT input text files to object of class 'swWeatherData'
