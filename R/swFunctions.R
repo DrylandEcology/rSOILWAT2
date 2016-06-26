@@ -22,7 +22,7 @@
 
 con.env <- new.env()
 con.env$con <- NULL
-con.env$dbW_version <- "3.0.0"
+con.env$dbW_version <- "3.1.0"
 con.env$default_blob_compression_type <- "gzip"
 con.env$blob_compression_type <- NULL
 
@@ -111,7 +111,7 @@ dbW_getWeatherData <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startY
 	if(!is.null(Site_id) && is.integer(Site_id) && Site_id >= 0) {
 		Scenario <- DBI::dbGetQuery(con.env$con, paste("SELECT id FROM Scenarios WHERE Scenario='",Scenario,"';",sep=""))[1,1]
 		result <- DBI::dbGetQuery(con.env$con, paste("SELECT StartYear,EndYear,data FROM WeatherData WHERE Site_id=",Site_id, " AND Scenario=",Scenario,";",sep=""));
-		data <- dbW_blob_to_weatherData(result$StartYear, result$EndYear, result$data, con.env$blob_compression_type)
+		data <- dbW_blob_to_weatherData(result$data, con.env$blob_compression_type)
 		if(inherits(data, "try-error")) stop(paste("Weather data for Site_id", Site_id, "is corrupted"))
 	} else {
 		stop(paste("Site_id for", Label, "not obtained."))
@@ -142,6 +142,72 @@ dbW_getWeatherData <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startY
 	}
 	return(data)
 }
+
+dbW_getWeatherData_old <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startYear=NULL,endYear=NULL, Scenario="Current") {
+	stopifnot(requireNamespace("RSQLite"))
+
+	if(is.null(Site_id) && is.null(Label) && is.null(lat) && is.null(long)) {
+		stop("No way to locate weather data from input")
+	}
+	
+	useYears<-FALSE
+	useStart<-FALSE
+	useEnd  <-FALSE
+	if(!is.null(startYear) | !is.null(endYear)) {#See if we should narrow the start end year range
+		startYear <- as.integer(startYear)
+		if(!is.na(startYear)) useStart<-TRUE
+		endYear <- as.integer(endYear)
+		if(!is.na(endYear)) useEnd<-TRUE
+		if(useStart | useEnd) useYears<-TRUE
+		if(useStart & useEnd) {
+			if(startYear >= endYear | startYear<0 | endYear<0) {
+				stop("Wrong start or end year")
+			}
+		}
+	}
+	Site_id<-as.integer(Site_id)
+	if(length(Site_id) == 0) {
+		Site_id <- dbW_getSiteId(lat,long,Label)
+	} else {
+		if(!DBI::dbGetQuery(con.env$con, paste("SELECT COUNT(*) FROM WeatherData WHERE Site_id=",Site_id,";",sep=""))[1,1]) {
+			stop("Site_id does not exist.")
+		}
+	}
+	if(!is.null(Site_id) && is.integer(Site_id) && Site_id >= 0) {
+		Scenario <- DBI::dbGetQuery(con.env$con, paste("SELECT id FROM Scenarios WHERE Scenario='",Scenario,"';",sep=""))[1,1]
+		result <- DBI::dbGetQuery(con.env$con, paste("SELECT StartYear,EndYear,data FROM WeatherData WHERE Site_id=",Site_id, " AND Scenario=",Scenario,";",sep=""));
+		data <- dbW_blob_to_weatherData_old(result$StartYear, result$EndYear, result$data, con.env$blob_compression_type)
+		if(inherits(data, "try-error")) stop(paste("Weather data for Site_id", Site_id, "is corrupted"))
+	} else {
+		stop(paste("Site_id for", Label, "not obtained."))
+	}
+	
+	if(useYears) {
+		if(useStart && useEnd) {
+		        # adjusting so we actually explore the values of the "year" slots of our soilwatDB object list
+			# startYear_idx <- match(startYear,as.integer(names(data)))
+			startYear_idx <- match(startYear, 
+			                       as.integer(unlist(lapply(data, FUN=slot, "year"))))
+			# endYear_idx <- match(endYear,as.integer(names(data)))
+			endYear_idx <- match(endYear, 
+					     as.integer(unlist(lapply(data, FUN=slot, "year"))))
+			data <- data[startYear_idx:endYear_idx]
+		} else if(useStart) {
+			#startYear_idx <- match(startYear,as.integer(names(data)))
+			startYear_idx <- match(startYear, 
+					       as.integer(unlist(lapply(data, FUN=slot, "year"))))
+			# data <- data[startYear_idx:length(as.integer(names(data)))]
+			data <- data[startYear_idx:length(as.integer(unlist(lapply(data, FUN=slot, "year"))))]
+		} else if(useEnd) {
+			# endYear_idx <- match(endYear,as.integer(names(data)))
+			endYear_idx <- match(endYear,
+			                     as.integer(unlist(lapply(data, FUN=slot, "year"))))
+			data <- data[1:endYear_idx]
+		}
+	}
+	return(data)
+}
+
 
 dbW_addSite <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL) {
 	stopifnot(requireNamespace("RSQLite"))
@@ -258,6 +324,52 @@ dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderP
 	}
 }
 
+dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderPath=NULL, weatherData=NULL, label=NULL, ScenarioName="Current") {
+	stopifnot(requireNamespace("RSQLite"))
+
+	if( (is.null(weatherFolderPath) | ifelse(!is.null(weatherFolderPath), (weatherFolderPath == "" | !file.exists(weatherFolderPath)), FALSE)) & (is.null(weatherData) | !is.list(weatherData) | class(weatherData[[1]]) != "swWeatherData") ) stop("addWeatherDataToDataBase does not have folder path or weatherData to insert")
+	if( (is.null(Site_id) & is.null(lat) & is.null(long) & is.null(weatherFolderPath) & (is.null(label))) | ((!is.null(Site_id) & !is.numeric(Site_id)) & (!is.null(lat) & !is.numeric(lat)) & (!is.null(long) & !is.numeric(long))) ) stop("addWeatherDataToDataBase not enough info to create Site in Sites table.")
+	
+	Site_id <- dbW_addSite(
+		Site_id = Site_id,
+		lat = lat,
+		long = long,
+		Label = if (!is.null(weatherFolderPath) && is.null(label)) basename(weatherFolderPath) else label)
+	
+	Scenarios <- DBI::dbReadTable(con.env$con,"Scenarios")$Scenario
+	if(ScenarioName %in% Scenarios) {
+		scenarioID <- which(ScenarioName %in% Scenarios)
+	} else {
+		temp <- DBI::dbGetQuery(con.env$con, "SELECT MAX(id) FROM \"Scenarios\";")[1,1]
+		scenarioID <- ifelse(is.na(temp),1,temp+1)
+		SQL <- paste("INSERT INTO \"Scenarios\" VALUES(",scenarioID,",'",ScenarioName,"');",sep="")
+		DBI::dbGetQuery(con.env$con, SQL)
+	}
+	
+	if(!is.null(weatherData)) {
+		data_blob <- dbW_weatherData_to_blob_old(weatherData, con.env$blob_compression_type)
+		StartYear <- head(as.integer(names(weatherData)),n=1)
+		EndYear <- tail(as.integer(names(weatherData)),n=1)
+		DBI::dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
+		#dbCommit(con.env$con)
+	} else {
+		weath <- list.files(weatherFolderPath)
+		years <- as.numeric(sub(pattern="weath.",replacement="",weath))
+		weatherData <- list()
+		for(j in 1:length(weath)) {
+			year <- as.numeric(sub(pattern="weath.",replacement="",weath[j]))
+			temp <-read.csv(file.path(weatherFolderPath,weath[j]),header=FALSE,skip=2,sep="\t")
+			weatherData[[j]] <- swReadLines(new("swWeatherData",year),file.path(weatherFolderPath,weath[j]))
+		}
+		StartYear <- head(years,n=1)
+		EndYear <- tail(years,n=1)
+		data_blob <- dbW_weatherData_to_blob_old(weatherData, con.env$blob_compression_type)
+		DBI::dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
+		#dbCommit(con.env$con)
+	}
+}
+
+
 dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = NULL, site_subset = NULL, scenarios = NULL, compression_type) {
 	stopifnot(requireNamespace("RSQLite"))
 	
@@ -336,8 +448,40 @@ dbW_deleteSiteData <- function(Site_id, Scenario=NULL) {
 
 
 ## ------ Conversion of weather data formats
+#' Conversion: (Compressed) raw vector (e.g., SQL-retrieved blob) to (uncompressed) object
+#'
+#' The Rsoilwat SQlite-DB which manages daily weather data (each as a list of elements
+#' of class 'swWeatherData'), uses internally (compressed) blobs. This function is used
+#' to convert the blob object to the object used by Rsoilwat's simulation functions.
+#'
+#' @param data_blob A raw vector
+#' @type A character string. One of c("gzip", "bzip2", "xz", "none").
+#'
+#' @seealso \code{\link{memDecompress}}, \code{\link{unserialize}}
+dbW_blob_to_weatherData <- function(data_blob, type = "gzip") {	
+	if (inherits(data_blob, "list") && inherits(data_blob[[1]], "raw") && length(data_blob) == 1)
+			data_blob <- data_blob[[1]]
+
+	unserialize(memDecompress(data_blob, type = type))
+}
+
+#' Conversion: R object to (compressed) SQL-blob-ready character vector
+#'
+#' The Rsoilwat SQLite-DB which manages daily weather data (each as a list of elements
+#' of class 'swWeatherData'), uses internally (compressed) blobs. This function is used
+#' to a list of daily weather data used by Rsoilwat's simulation functions to a blob object
+#' which can be inserted into a SQLite DB.
+#'
+#' @param weatherData A list of elements of class 'swWeatherData' or any suitable object.
+#' @type A character string. One of c("gzip", "bzip2", "xz", "none").
+#'
+#' @seealso \code{\link{memCompress}}, \code{\link{serialize}}
+dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
+	paste0("x'", paste0(memCompress(serialize(weatherData, connection = NULL), type = type), collapse = ""), "'")
+}
+
 # Conversion: SQL-blob to object of class 'swWeatherData'
-dbW_blob_to_weatherData <- function(StartYear, EndYear, data_blob, type = "gzip") {
+dbW_blob_to_weatherData_old <- function(StartYear, EndYear, data_blob, type = "gzip") {
 	if (typeof(data_blob) == "list")
 		data_blob <- data_blob[[1]]
 	data <- strsplit(memDecompress(data_blob, type = type, asChar = TRUE), ";")[[1]]
@@ -358,7 +502,7 @@ dbW_blob_to_weatherData <- function(StartYear, EndYear, data_blob, type = "gzip"
 }
 
 # Conversion: object of class 'swWeatherData' to SQL-blob
-dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
+dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
 	string <- character(length = length(weatherData))
 	for(i in seq_along(weatherData)) {
 		zz <- textConnection("dataString", "w")
