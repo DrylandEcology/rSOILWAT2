@@ -31,7 +31,7 @@ dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL, type_new = "gz
 	}
 	
 	type_old <- as.character(DBI::dbGetQuery(con, "SELECT Value FROM Meta WHERE Desc=\'Compression_type\'")[1, 1])
-	if (!(type_new %in% eval(formals(memCompress)[[2]])))
+	if (!(type_new %in% eval(formals(memCompress)[[2]]))) {
 		warning("The upgraded weather database cannot store BLOBs with compression type: ", type_new)
 		warning("Instead, the previous compression type: ", type_old, " will be used")
 	}
