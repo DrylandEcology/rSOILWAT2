@@ -19,7 +19,9 @@
 
 ## ------SQLite weather database function: upgrade
 
-dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL) {
+dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL, type_new = "gzip") {
+	print(paste(Sys.time(), ": upgrading database", basename(dbWeatherDataFile), "to version 3.1.0"))
+	
 	con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbWeatherDataFile)
 	v_dbW <- try(numeric_version(as.character(DBI::dbGetQuery(con, "SELECT Value FROM Meta WHERE Desc=\'Version\'")[1, 1])), silent = TRUE)
 	
@@ -28,13 +30,16 @@ dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL) {
 		return(invisible(0))
 	}
 	
-	print(paste(Sys.time(), ": upgrading database", basename(dbWeatherDataFile), "to version 3.1.0"))
+	type_old <- as.character(DBI::dbGetQuery(con, "SELECT Value FROM Meta WHERE Desc=\'Compression_type\'")[1, 1])
+	if (!(type_new %in% eval(formals(memCompress)[[2]])))
+		warning("The upgraded weather database cannot store BLOBs with compression type: ", type_new)
+		warning("Instead, the previous compression type: ", type_old, " will be used")
+	}
 
 	# Backup copy
 	backup_copy(dbWeatherDataFile, fbackup)
 
 	# Update weather blobs
-	type <- as.character(DBI::dbGetQuery(con, "SELECT Value FROM Meta WHERE Desc=\'Compression_type\'")[1, 1])
 	ids <- DBI::dbGetQuery(con, "SELECT Site_id, Scenario FROM WeatherData;")
 	n_ids <- NROW(ids)
 
@@ -64,12 +69,12 @@ dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL) {
 			print(paste(Sys.time(), ":", i, "out of", n_ids))
 	
 			result <- DBI::dbGetQuery(con, paste0("SELECT StartYear,EndYear,data FROM WeatherData WHERE Site_id =", ids[i, 1], " AND Scenario =", ids[i, 2], ";"))
-			weatherData <- blob_to_weatherData_old(result$StartYear, result$EndYear, result$data, type)
+			weatherData <- blob_to_weatherData_old(result$StartYear, result$EndYear, result$data, type_old)
 			if (inherits(weatherData, "try-error") || length(weatherData) == 0) {
 				warning("Weather data for Site_id = ", ids[i, 1], " and Scenario = ", ids[i, 2], " is missing or is corrupted")
 			
 			} else {
-				blob_new <- paste0("x'", paste0(memCompress(serialize(weatherData, connection = NULL), type = type), collapse = ""), "'")
+				blob_new <- paste0("x'", paste0(memCompress(serialize(weatherData, connection = NULL), type = type_new), collapse = ""), "'")
 				DBI::dbGetQuery(con, paste0("UPDATE WeatherData SET data =", blob_new, "WHERE Site_id =", ids[i, 1], " AND Scenario =", ids[i, 2], ";"))
 				rm(blob_new)
 			
