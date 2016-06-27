@@ -26,6 +26,7 @@ dbW_weather_to_SOILWATfiles,
 dbW_weatherData_to_monthly,
 dbW_dataframe_to_monthly,
 
+dbW_upgrade_v3to31,
 dbW_upgrade_v2to3,
 dbW_upgrade_v1to2)
 
