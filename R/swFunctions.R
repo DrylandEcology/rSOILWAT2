@@ -89,6 +89,57 @@ dbW_getScenariosTable <- function() {
 	DBI::dbReadTable(con.env$con, "Scenarios")
 }
 
+
+
+#' Extracts daily weather data from a SQLite database
+#' 
+#' Reads weather data from database. Returns list of weather data.
+#' 
+#' Weather data for the soil water simulation run can be stored in the input
+#' data or it can be separate to keep the input data size down for multiple
+#' variations of the same site. This function is used to return the weather
+#' data from a pre defined weather database. Using the database was faster then
+#' reading in multiple weather files from disk.
+#' 
+#' SOILWAT does not handle missing weather data. If you have missing data, then
+#' you have to impute yourself or use the built-in Markov weather generator
+#' (see examples for \code{\link{sw_exec}}).
+#' 
+#' The output from this function can be passed directly to sw_exec with input
+#' data.
+#' 
+#' @param con RSQLite con object. A connection to the weather data database.
+#' requires(RSQLite)
+#' @param Site_id Numeric. Used to identify site and extract weather data.
+#' @param lat Numeric. Latitude used with longitude to identify site id if
+#' Site_id is missing.
+#' @param long Numeric. Longitude and Latitude are used to identify site if
+#' Site_id is missing.
+#' @param weatherDirName String. If Site_id, lat, and long is missing then this
+#' will be used to identify Site_id by parsing the lat and long out of the
+#' name.
+#' @param startYear Numeric. Extracted weather data will start with this year.
+#' @param endYear Numeric. Extracted weather data will end with this year.
+#' @return Returns weather data as list. Each element contains data for one
+#' year.
+#' @author Ryan Murphy
+#' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
+#' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
+#' data input \item \code{\link{dbW_getWeatherData}} and
+#' \code{\link{getWeatherData_folders}} for weather data input }
+#' @examples
+#' 
+#' 	## Default data set without weather data.
+#' 	## Column Names are also turned on for output
+#' 	library(Rsoilwat)
+#' 	library(RSQLite)
+#' 	drv <- dbDriver("SQLite")
+#' 	con <- dbConnect(drv, "/path/to/weather/database/lookupWeatherDB.sqlite3")
+#' 	inputData <- sw_inputDataFromFiles(dir="/path/to/project",files.in="files_v27.in") #Get the data set
+#' 	weatherData <- dbW_getWeatherData(con, Site_id=200)
+#' 	#Run the simulation
+#' 	run<-sw_exec(data=inputData, weatherList=weatherData, colNames=TRUE)
+#' 
 dbW_getWeatherData <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startYear=NULL,endYear=NULL, Scenario="Current") {
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
@@ -470,7 +521,7 @@ dbW_deleteSiteData <- function(Site_id, Scenario=NULL) {
 #' to convert the blob object to the object used by Rsoilwat's simulation functions.
 #'
 #' @param data_blob A raw vector
-#' @type A character string. One of c("gzip", "bzip2", "xz", "none").
+#' @param type A character string. One of c("gzip", "bzip2", "xz", "none").
 #'
 #' @seealso \code{\link{memDecompress}}, \code{\link{unserialize}}
 dbW_blob_to_weatherData <- function(data_blob, type = "gzip") {	
@@ -488,7 +539,7 @@ dbW_blob_to_weatherData <- function(data_blob, type = "gzip") {
 #' which can be inserted into a SQLite DB.
 #'
 #' @param weatherData A list of elements of class 'swWeatherData' or any suitable object.
-#' @type A character string. One of c("gzip", "bzip2", "xz", "none").
+#' @param type A character string. One of c("gzip", "bzip2", "xz", "none").
 #'
 #' @seealso \code{\link{memCompress}}, \code{\link{serialize}}
 dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
@@ -531,6 +582,55 @@ dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
 }
 
 # Conversion: reading of SOILWAT input text files to object of class 'swWeatherData'
+
+
+#' Rsoilwat getWeatherData_folders
+#' 
+#' Reads weather data from files.  Returns list of weather data.
+#' 
+#' Weather data for the soil water simulation run can be stored in the input
+#' data or it can be separate to keep the input data size down for multiple
+#' variations of the same site. This function is used to return the weather
+#' data from folders.  The other option is to use onGetWeatherData_database.
+#' 
+#' SOILWAT does not handle missing weather data. If you have missing data, then
+#' you have to impute yourself or use the built-in Markov weather generator
+#' (see examples for \code{\link{sw_exec}}).
+#' 
+#' The output from this function can be passed directly to sw_exec with input
+#' data.
+#' 
+#' @param LookupWeatherFolder String Path. Path to the LookupWeatherFolder
+#' location.
+#' @param weatherDirName String. Name of the folder containing weather data
+#' files.
+#' @param filebasename String. File prefix for weather data. Usually 'weath'.
+#' @param startYear Numeric. Extracted weather data will start with this year.
+#' @param endYear Numeric. Extracted weather data will end with this year.
+#' @return Returns weather data as list. Each element contains data for one
+#' year.
+#' @author Ryan Murphy
+#' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
+#' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
+#' data input \item \code{\link{dbW_getWeatherData}} and
+#' \code{\link{getWeatherData_folders}} for weather data input }
+#' @examples
+#' 
+#' path_demo <- dirname(system.file("extdata", "files_v31.in", package = "Rsoilwat31"))
+#' 
+#' ## ------ Simulation with data prepared beforehand and separate weather data ------------
+#' ## Read inputs from files on disk
+#' sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files_v31.in")
+#' 
+#' ## Read forcing weather data from files on disk (there are also functions to set up a SQLite database for the weather data)
+#' sw_weath3 <- getWeatherData_folders(LookupWeatherFolder=file.path(path_demo, "Input"), weatherDirName="data_weather", filebasename="weath", startYear=1979, endYear=2010)
+#' 
+#' ## List of the slots of the input objects of class 'swWeatherData'
+#' str(sw_weath3, max.level=1)
+#' 
+#' ## Execute the simulation run
+#' sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)
+#' 
 getWeatherData_folders <- function(LookupWeatherFolder=NULL, weatherDirName=NULL,filebasename=NULL,startYear=NULL,endYear=NULL) {
 	if(is.null(LookupWeatherFolder) | is.null(weatherDirName) | is.null(filebasename))
 		stop("Need LookupWeatherFolder and weatherDirName information to get weather data")
