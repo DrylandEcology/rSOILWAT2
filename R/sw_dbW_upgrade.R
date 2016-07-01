@@ -129,7 +129,7 @@ dbW_upgrade_v1to2 <- function(dbWeatherDataFile, fbackup = NULL, SWRunInformatio
 	con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbWeatherDataFile)
 	v_dbW <- try(numeric_version(as.character(DBI::dbGetQuery(con, "SELECT Version FROM Version;"))), silent = TRUE)
 	
-	if (inherits(v_dbW, "try-error") || v_dbW >= "1" && v_dbW < "2") {
+	if (inherits(v_dbW, "try-error") || v_dbW >= "2" && v_dbW < "1") {
 		warning("The function 'dbW_upgrade_v1to2' upgrades weather databases from version 1.y.z to 2.0.0; this database is version ", v_dbW)
 		return(invisible(0))
 	}
