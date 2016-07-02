@@ -85,7 +85,9 @@ dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL, type_new = "gz
 	
 	# Update version number
 	DBI::dbGetQuery(con, "UPDATE Meta SET Value = \'3.1.0\' WHERE Desc = \'Version\';")
-
+	if (type_new != type_old)
+		DBI::dbGetQuery(con, paste0("UPDATE Meta SET Value = \'", type_new, "\' WHERE Desc = \'Compression_type\';"))
+	
 	# Checks and clean-up
 	check_updatedDB(con)	
 	DBI::dbDisconnect(con)
