@@ -17,6 +17,149 @@
 ###############################################################################
 
 
+
+
+#' Execute a SOILWAT simulation run
+#' 
+#' Run the simulation and get the output data.  Executes Soil Water simulator
+#' and returns Soil Water data via List.  Uses .Call to pass data to/from C
+#' library.
+#' 
+#' The input data for a simulation run can be passed to the function
+#' \code{\link{sw_exec}} either as \code{swInputData} and \code{weatherList} or
+#' as text files organized in a folder \code{dir} and explained in
+#' \code{files.in}.
+#' 
+#' The weather data can be a part of the input data S4 class or separate as a
+#' list to reduce the input object size.  The option 'weatherList' if set will
+#' use the weatherList provided and not the inputdata object's weather data if
+#' it has it. Weather data can also be read in when 'dir' and 'files.in' are
+#' set.
+#' 
+#' SOILWAT does not handle missing data. If you have missing data, then you
+#' have to impute yourself or use the built-in Markov weather generator (see
+#' examples section). If you use the weather generator, then you have to
+#' provide appropriate values for the input (files) 'mkv_covar.in' and
+#' 'mkv_prob.in' for your simulation run - currently, SOILWAT does not contain
+#' code to estimate these values.
+#' 
+#' @param inputData an object of the S4 class \code{swInputData} which is
+#' generated from \code{\link{sw_inputData}} or
+#' \code{\link{sw_inputDataFromFiles}}.
+#' @param weatherList a list of weather data generated via
+#' \code{\link{dbW_getWeatherData}} or \code{\link{getWeatherData_folders}}.
+#' @param dir a character vector that represents the path to the input data.
+#' Use with files.in
+#' @param files.in a character vector that represents the partial path of the
+#' 'files.in' file
+#' @param echo logical. This option will echo the inputs to the Log Data.
+#' Helpful for debugging.
+#' @param quiet logical. Quiet mode doesn't print messages to the logfile.
+#' @return A S4 Object Containing 28 outputkey slots.  Each of those has slots
+#' for Yr Mo Wk Dy.
+#' 
+#' NOTE: WTHR ALLH2O ET ALLVEG do not work.
+#' 
+#' The output also contains slots for the number of rows for each time period.
+#' Individual outputKeys also have slots for time periods used. Title from
+#' outputsetup. They also have the number of data columns.
+#' 
+#' These elements contain the output data from soilwat based on the
+#' outputSetup.  Output columns should all be labeled.
+#' @author Ryan Murphy
+#' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
+#' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
+#' data input \item \code{\link{dbW_getWeatherData}} and
+#' \code{\link{getWeatherData_folders}} for weather data input }
+#' @references Bradford, J. B., D. R. Schlaepfer, and W. K. Lauenroth (2014)
+#' Ecohydrology of adjacent sagebrush and lodgepole pine ecosystems: The
+#' consequences of climate change and disturbance.  \emph{Ecosystems}
+#' \bold{17}:590--605.
+#' 
+#' Schlaepfer, D. R., W. K. Lauenroth, and J. B. Bradford (2012)
+#' Ecohydrological niche of sagebrush ecosystems.  \emph{Ecohydrology}
+#' \bold{5}:453--466.
+#' 
+#' Parton, W.J. (1978).  \emph{Abiotic section of ELM}. In: Grassland
+#' simulation model (ed. Innis, G.S.).  Springer New York, NY, pp. 31--53.
+#' 
+#' Sala, O.E., Lauenroth, W.K. & Parton, W.J. (1992) Long-term soil-water
+#' dynamics in the shortgrass steppe.  \emph{Ecology} \bold{73}:1175--1181.
+#' @examples
+#' 
+#' ## ------ Simulation with demonstration data ------------
+#' ## Access demonstration data (including daily weather forcing)
+#' sw_in <- sw_inputData()
+#' 
+#' ## Slots of the input object of class 'swInputData'
+#' str(sw_in, max.level=2)
+#' 
+#' ## Execute the simulation run
+#' sw_out <- sw_exec(inputData = sw_in)
+#' 
+#' 
+#' ## ------ Directory to a SOLWAT project used in the following examples
+#' path_demo <- dirname(system.file("extdata", "example1", "files_v31.in", package = "Rsoilwat31"))
+#' 
+#' ## ------ Simulation with data read from disk during execution ------------
+#' ## Execute the simulation run
+#' sw_out1 <- sw_exec(dir = path_demo, files.in = "files_v31.in")
+#' 
+#' ## Slots of the output object of class 'swOutput'
+#' str(sw_out1, max.level=2)
+#' 
+#' 
+#' ## ------ Simulation with data prepared beforehand ------------
+#' ## Read inputs from files on disk (including daily weather forcing)
+#' sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files_v31.in")
+#' 
+#' ## Slots of the input object of class 'swInputData'
+#' str(sw_in2, max.level=2)
+#' 
+#' ## Execute the simulation run
+#' sw_out2 <- sw_exec(inputData = sw_in2)
+#' 
+#' 
+#' ## ------ Simulation with data prepared beforehand and separate weather data ------------
+#' ## Read inputs from files on disk
+#' sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files_v31.in")
+#' 
+#' ## Read forcing weather data from files on disk (there are also functions to set up a SQLite database for the weather data)
+#' sw_weath3 <- getWeatherData_folders(LookupWeatherFolder=file.path(path_demo, "Input"), weatherDirName="data_weather", filebasename="weath", startYear=1979, endYear=2010)
+#' 
+#' ## List of the slots of the input objects of class 'swWeatherData'
+#' str(sw_weath3, max.level=1)
+#' 
+#' ## Execute the simulation run
+#' sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)
+#' 
+#' 
+#' ## ------ Simulation with manipulated input data ------------
+#' sw_in4 <- sw_in3
+#' 
+#' ## Set the vegetation composition to 40% grass and 60% shrubs
+#' swProd_Composition(sw_in4) <- c(0.4, 0.6, 0, 0, 0)	
+#' 
+#' ## Execute the simulation run
+#' sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3)
+#' 
+#' 
+#' ## ------ Simulation with weather generator ------------
+#' ## Currently, the Markov weather generator flag must be turned on prior to reading files to disk
+#' ## - otherwise, the Markov prob.in and covar.in are not being loaded (NOTE: this should be fixed)
+#' path_demo2 <- dirname(system.file("extdata", "example2", "files_v31.in", package = "Rsoilwat31"))
+#' sw_in5 <- sw_inputDataFromFiles(dir = path_demo2, files.in = "files_v31.in")
+#' 
+#' ## Turn on the Markov weather generator
+#' # swWeather_UseMarkov(sw_in5) <- TRUE
+#' 
+#' ## Execute the simulation run
+#' sw_out5 <- sw_exec(inputData = sw_in5, weatherList = NULL)
+#' 
+#' 
+#' 
+#' ## See help(package = "Rsoilwat31") for a full list of functions
+#' 
 sw_exec <- function(inputData=NULL,weatherList=NULL,dir="", files.in="files_v31.in", echo=FALSE, quiet=FALSE) {
 	input <- c("sw_v27")
 	if(dir!="")
@@ -35,6 +178,67 @@ sw_exec <- function(inputData=NULL,weatherList=NULL,dir="", files.in="files_v31.
 	return(.Call("start",input,inputData,weatherList))
 }
 
+
+
+#' Rsoilwat sw_inputDataFromFiles
+#' 
+#' Reads in a SoilWat Project's input data.  Returns swInputData Object.
+#' 
+#' swInputData Object is a S4 object containing slots for all input data.
+#' Calling sw_inputDataFromFiles generates a new swInputData object with data
+#' from the Project files given.
+#' 
+#' The data returned can be directly used to run the simulation if weather Data
+#' was included in the Project Directory. If weather data was not in the
+#' project directory then use onGetWeatherData_database or
+#' onGetWeatherData_folders to obtain weatherDataList and pass both to sw_exec.
+#' 
+#' swInputData consists of slots for each file that is read in. These slots can
+#' be accessed via the following functions: \tabular{ll}{ \code{get_Markov}
+#' \tab #get markov prop and conv\cr \code{get_swCloud} \tab #get cloud\cr
+#' \code{get_swFiles} \tab #get files.in\cr \code{get_swOUT} \tab #get
+#' outpusetup.in\cr \code{get_swProd} \tab #get prod.in\cr \code{get_swSite}
+#' \tab #get site.in\cr \code{get_swSoils} \tab #get soils.in\cr
+#' \code{get_swSWC} \tab #get swcSetup.in\cr \code{get_swWeather} \tab #get
+#' weatherSetup.in\cr \code{get_swWeatherData} \tab #get individual year\cr
+#' \code{get_swYears} \tab #get years.in data object\cr
+#' \code{get_WeatherHistory} \tab #get S4 of WeatherHistory\cr }
+#' 
+#' generic functions to get/set individual elements follow a format: 'sw' +
+#' file name + '_' + option, e.g.  \itemize{ \item \code{swFiles_Cloud} \item
+#' \code{swProd_Albedo} } Remember tab complete is your friend.
+#' 
+#' SOILWAT does not handle missing weather data. If you have missing data, then
+#' you have to impute yourself or use the built-in Markov weather generator
+#' (see examples for \code{\link{sw_exec}}).
+#' 
+#' @param dir String. The path to the Project Directory. Use with files.in
+#' @param files.in String. The partial path, after project dir path, and file
+#' name to files.in file.
+#' @return Returns a S4 class of type swInputData. This is a container for the
+#' input S4 objects used to run soilwat. The data for the given project is
+#' loaded.
+#' @author Ryan Murphy
+#' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
+#' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
+#' data input \item \code{\link{dbW_getWeatherData}} and
+#' \code{\link{getWeatherData_folders}} for weather data input }
+#' @examples
+#' 
+#' path_demo <- dirname(system.file("extdata", "files_v31.in", package = "Rsoilwat31"))
+#' 
+#' 
+#' ## ------ Simulation with data prepared beforehand ------------
+#' ## Read inputs from files on disk (including daily weather forcing)
+#' sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files_v31.in")
+#' 
+#' ## Slots of the input object of class 'swInputData'
+#' str(sw_in2, max.level=2)
+#' 
+#' ## Execute the simulation run
+#' sw_out2 <- sw_exec(inputData = sw_in2)
+#' 
+#' 
 sw_inputDataFromFiles <- function(dir="", files.in="files_v30.in") {
 	echo=FALSE
 	quiet=FALSE
@@ -57,6 +261,62 @@ sw_outputData <- function(inputData) {
 	.Call("onGetOutput",inputData)
 }
 
+
+
+#' Rsoilwat sw_inputData
+#' 
+#' Default data Set for SoilWat.  Use this as a template or for testing the
+#' package.
+#' 
+#' swInputData Object is a S4 object containing slots for all input data.
+#' Calling sw_inputData() generates a new swInputData object with test project
+#' data loaded into them. This can be used for testing or as a template to
+#' build another project off of.
+#' 
+#' The data returned can be directly used to run the simulation. Use the
+#' function sw_exec and pass it the output from this function to run SW.
+#' 
+#' \code{showMethods(class="swInputData")} # Will show all generic functions
+#' that be applied to the inputData. These include getters/setters for slots.
+#' 
+#' swInputData consists of slots for each file that is read in. These slots can
+#' be accessed via the following functions: \tabular{ll}{ \code{get_Markov}
+#' \tab #get markov prop and conv\cr \code{get_swCloud} \tab #get cloud\cr
+#' \code{get_swFiles} \tab #get files.in\cr \code{get_swOUT} \tab #get
+#' outpusetup.in\cr \code{get_swProd} \tab #get prod.in\cr \code{get_swSite}
+#' \tab #get site.in\cr \code{get_swSoils} \tab #get soils.in\cr
+#' \code{get_swSWC} \tab #get swcSetup.in\cr \code{get_swWeather} \tab #get
+#' weatherSetup.in\cr \code{get_swWeatherData} \tab #get individual year\cr
+#' \code{get_swYears} \tab #get years.in data object\cr
+#' \code{get_WeatherHistory} \tab #get S4 of WeatherHistory\cr }
+#' 
+#' generic functions to get/set individual elements follow a format: 'sw' +
+#' file name + '_' + option, e.g.  \itemize{ \item \code{swFiles_Cloud} \item
+#' \code{swProd_Albedo} } Remember tab complete is your friend.
+#' 
+#' SOILWAT does not handle missing data. If you have missing data, then you
+#' have to impute yourself or use the built-in Markov weather generator (see
+#' examples for \code{\link{sw_exec}}).
+#' 
+#' @return Returns a S4 class of type swInputData. This is a container for the
+#' input S4 objects used to run soilwat. The data for a test project is loaded.
+#' @author Ryan Murphy
+#' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
+#' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
+#' data input \item \code{\link{dbW_getWeatherData}} and
+#' \code{\link{getWeatherData_folders}} for weather data input }
+#' @examples
+#' 
+#' ## ------ Simulation with demonstration data ------------
+#' ## Access demonstration data (including daily weather forcing)
+#' sw_in <- sw_inputData()
+#' 
+#' ## Slots of the input object of class 'swInputData'
+#' str(sw_in, max.level=2)
+#' 
+#' ## Execute the simulation run
+#' sw_out <- sw_exec(inputData = sw_in)
+#' 
 sw_inputData <- function() {
 	temp<-swInputData()
 	data(package="Rsoilwat31", weatherData)
