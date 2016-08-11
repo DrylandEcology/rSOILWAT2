@@ -7,7 +7,7 @@ Not every part of the code has been extensively tested or is in a stable state. 
 
 There is no graphical user interface, help pages and available documentation may be out of date, and you will need to write your own tools to analyse outputs.
 
-Note, the branch 'master' is currently not active and there are no releases so far.
+Note, the branch 'master' is deployable and is released with version numbers.
 
 If you make use of this model, please cite appropriate references, and we would like to hear about your particular study (especially a copy of any published paper).
 
@@ -33,7 +33,7 @@ git clone -b Rsoilwat_v31 --single-branch --recursive https://github.com/Burke-L
 ```
 git clone https://github.com/Burke-Lauenroth-Lab/Rsoilwat.git Rsoilwat_v31
 cd Rsoilwat_v31/
-git checkout Rsoilwat_v31
+git checkout master
 git submodule init
 git submodule update ## --remote: uses the latest submodule commit; without --remote: uses a previously defined submodule commit
 cd src
@@ -59,7 +59,7 @@ Update the submodule 'SOILWAT' to the latest commit
 ```
 git clone https://github.com/Burke-Lauenroth-Lab/Rsoilwat.git Rsoilwat_v31
 cd Rsoilwat_v31
-git checkout Rsoilwat_v31
+git checkout master
 # if you want to change to the branch 'XXX' of the submodule 'SOILWAT'
 # git config -f .gitmodules submodule.SOILWAT.branch XXX
 
@@ -75,7 +75,7 @@ git commit -am "Pulled down latest commit 'COMMIT-FLAG' to submodule SoilWat"
 git push
 ```
 
-Version numbers
+### Version numbers
 
 We attempt to follow guidelines of [semantic versioning](http://semver.org/) with version numbers of MAJOR.MINOR.PATCH.
 If the version numbers changes, then the following files must be updated

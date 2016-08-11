@@ -20,6 +20,6 @@ Description: SoilWat package is a R wrapper for the SOILWAT C code. It allows
 LazyData: true
 ByteCompile: true
 License: GPL (>= 3)
-URL: https://github.com/Burke-Lauenroth-Lab/Rsoilwat/tree/Rsoilwat_v31
+URL: https://github.com/Burke-Lauenroth-Lab/Rsoilwat
 BugReports: https://github.com/Burke-Lauenroth-Lab/Rsoilwat/issues
 RoxygenNote: 5.0.1
