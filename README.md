@@ -42,15 +42,21 @@ git pull
 ```
 
 ### Install
-Use one of the bash scripts
+After you downloaded the source code, use one of the bash scripts
 ```
 ./TarAndInstall_31.sh
 ./TarAndInstall_31n.sh
 ```
-Alternatively,
+alternatively,
 ```
 tar -pczf Rsoilwat_v31.tar.gz Rsoilwat_v31
 R CMD INSTALL Rsoilwat_v31.tar.gz
+```
+
+Or do all at once from within R:
+```{r}
+system2(command = "git", args = "clone -b master --single-branch --recursive https://github.com/Burke-Lauenroth-Lab/Rsoilwat.git Rsoilwat")
+tools::Rcmd(args = paste("INSTALL Rsoilwat"))
 ```
 
 
