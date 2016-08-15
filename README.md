@@ -26,7 +26,7 @@ Original references
 
 ### Clone and get submodules
 ```
-git clone -b Rsoilwat_v31 --single-branch --recursive https://github.com/Burke-Lauenroth-Lab/Rsoilwat.git Rsoilwat_v31
+git clone -b master --single-branch --recursive https://github.com/Burke-Lauenroth-Lab/Rsoilwat.git Rsoilwat_v31
 ```
 
 ### Clone and get submodules
