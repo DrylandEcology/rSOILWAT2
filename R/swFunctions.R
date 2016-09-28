@@ -53,7 +53,7 @@ dbW_getSiteId <- function(lat = NULL, long = NULL, Label = NULL) {
 	lat <- as.numeric(lat)
 	long <- as.numeric(long)
 	SQL <- NULL
-	
+
 	if (!is.null(Label)) {
 		if (is.character(Label)) {
 			SQL <- paste("SELECT Site_id FROM Sites WHERE Label='", Label, "';", sep = "")
@@ -63,14 +63,14 @@ dbW_getSiteId <- function(lat = NULL, long = NULL, Label = NULL) {
 			SQL <- paste("SELECT Site_id FROM Sites WHERE Latitude=", lat, " AND Longitude=", long, ";", sep = "")
 		}
 	}
-	
+
 	Site_id <- if (!is.null(SQL)) {
 			as.integer(DBI::dbGetQuery(con.env$con, SQL))
 		} else NULL
-		
+
 	if (!is.finite(Site_id) || Site_id < 0)
 		Site_id <- NULL
-	
+
 	if (is.null(Site_id))
 		warning("'dbW_getSiteId': could not obtain site ID")
 
@@ -92,22 +92,22 @@ dbW_getScenariosTable <- function() {
 
 
 #' Extracts daily weather data from a SQLite database
-#' 
+#'
 #' Reads weather data from database. Returns list of weather data.
-#' 
+#'
 #' Weather data for the soil water simulation run can be stored in the input
 #' data or it can be separate to keep the input data size down for multiple
 #' variations of the same site. This function is used to return the weather
 #' data from a pre defined weather database. Using the database was faster then
 #' reading in multiple weather files from disk.
-#' 
+#'
 #' SOILWAT does not handle missing weather data. If you have missing data, then
 #' you have to impute yourself or use the built-in Markov weather generator
 #' (see examples for \code{\link{sw_exec}}).
-#' 
+#'
 #' The output from this function can be passed directly to sw_exec with input
 #' data.
-#' 
+#'
 #' @param con RSQLite con object. A connection to the weather data database.
 #' requires(RSQLite)
 #' @param Site_id Numeric. Used to identify site and extract weather data.
@@ -128,7 +128,7 @@ dbW_getScenariosTable <- function() {
 #' data input \item \code{\link{dbW_getWeatherData}} and
 #' \code{\link{getWeatherData_folders}} for weather data input }
 #' @examples
-#' 
+#'
 #' 	## Default data set without weather data.
 #' 	## Column Names are also turned on for output
 #' 	library(Rsoilwat)
@@ -139,14 +139,14 @@ dbW_getScenariosTable <- function() {
 #' 	weatherData <- dbW_getWeatherData(con, Site_id=200)
 #' 	#Run the simulation
 #' 	run<-sw_exec(data=inputData, weatherList=weatherData, colNames=TRUE)
-#' 
+#'
 dbW_getWeatherData <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startYear=NULL,endYear=NULL, Scenario="Current") {
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
 	if(is.null(Site_id) && is.null(Label) && is.null(lat) && is.null(long)) {
 		stop("No way to locate weather data from input")
 	}
-	
+
 	useYears<-FALSE
 	useStart<-FALSE
 	useEnd  <-FALSE
@@ -177,24 +177,24 @@ dbW_getWeatherData <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startY
 		result <- DBI::dbGetQuery(con.env$con, paste("SELECT StartYear,EndYear,data FROM WeatherData WHERE Site_id=",Site_id, " AND Scenario=",Scenario,";",sep=""));
 		data <- try(dbW_blob_to_weatherData(result$data, con.env$blob_compression_type))
 		if(inherits(data, "try-error")) stop(paste("Weather data for Site_id", Site_id, "is corrupted"))
-	
+
 	} else {
 		stop(paste("Site_id for", Label, "not obtained."))
 	}
-	
+
 	if(useYears) {
 		if(useStart && useEnd) {
 		        # adjusting so we actually explore the values of the "year" slots of our soilwatDB object list
 			# startYear_idx <- match(startYear,as.integer(names(data)))
-			startYear_idx <- match(startYear, 
+			startYear_idx <- match(startYear,
 			                       as.integer(unlist(lapply(data, FUN=slot, "year"))))
 			# endYear_idx <- match(endYear,as.integer(names(data)))
-			endYear_idx <- match(endYear, 
+			endYear_idx <- match(endYear,
 					     as.integer(unlist(lapply(data, FUN=slot, "year"))))
 			data <- data[startYear_idx:endYear_idx]
 		} else if(useStart) {
 			#startYear_idx <- match(startYear,as.integer(names(data)))
-			startYear_idx <- match(startYear, 
+			startYear_idx <- match(startYear,
 					       as.integer(unlist(lapply(data, FUN=slot, "year"))))
 			# data <- data[startYear_idx:length(as.integer(names(data)))]
 			data <- data[startYear_idx:length(as.integer(unlist(lapply(data, FUN=slot, "year"))))]
@@ -214,7 +214,7 @@ dbW_getWeatherData_old <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,st
 	if(is.null(Site_id) && is.null(Label) && is.null(lat) && is.null(long)) {
 		stop("No way to locate weather data from input")
 	}
-	
+
 	useYears<-FALSE
 	useStart<-FALSE
 	useEnd  <-FALSE
@@ -246,20 +246,20 @@ dbW_getWeatherData_old <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,st
 	} else {
 		stop(paste("Site_id for", Label, "not obtained."))
 	}
-	
+
 	if(useYears) {
 		if(useStart && useEnd) {
 		        # adjusting so we actually explore the values of the "year" slots of our soilwatDB object list
 			# startYear_idx <- match(startYear,as.integer(names(data)))
-			startYear_idx <- match(startYear, 
+			startYear_idx <- match(startYear,
 			                       as.integer(unlist(lapply(data, FUN=slot, "year"))))
 			# endYear_idx <- match(endYear,as.integer(names(data)))
-			endYear_idx <- match(endYear, 
+			endYear_idx <- match(endYear,
 					     as.integer(unlist(lapply(data, FUN=slot, "year"))))
 			data <- data[startYear_idx:endYear_idx]
 		} else if(useStart) {
 			#startYear_idx <- match(startYear,as.integer(names(data)))
-			startYear_idx <- match(startYear, 
+			startYear_idx <- match(startYear,
 					       as.integer(unlist(lapply(data, FUN=slot, "year"))))
 			# data <- data[startYear_idx:length(as.integer(names(data)))]
 			data <- data[startYear_idx:length(as.integer(unlist(lapply(data, FUN=slot, "year"))))]
@@ -282,17 +282,17 @@ dbW_addSite <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL) {
 	if (length(Site_id) == 0) { #Site_id is null
 		Site_id <- dbW_getSiteId(lat,long,Label)
 	}
-	
+
 	if (is.null(Site_id) ||
 		1 > DBI::dbGetQuery(con.env$con, paste("SELECT COUNT(*) FROM Sites WHERE Site_id=",Site_id,sep=""))[1,1]) { #Site_id does not exist for given lat,long, and/or Label. Create it
-		
+
 		if (is.null(lat)) lat <- "NULL"
 		if (is.null(long)) long <- "NULL"
 		Label <- if (is.null(Label)) "NULL" else paste("'", Label, "'", sep = "")
 		temp <- DBI::dbGetQuery(con.env$con, "SELECT MAX(Site_id) FROM Sites;")[1,1]
 		Site_id <- if(is.na(temp)) 1 else {temp + 1}
 		DBI::dbGetQuery(con.env$con, paste("INSERT INTO Sites VALUES(", Site_id, ",", lat, ",", long, ",", Label, ");", sep = ""))
-	
+
 	} else { #Site_id exists already
 		SiteData <- DBI::dbGetQuery(con.env$con, paste("SELECT * FROM Sites WHERE Site_id=", Site_id, sep = ""))
 
@@ -302,7 +302,7 @@ dbW_addSite <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL) {
 				stop(paste("Site_id: ",Site_id," already existed in database. Data mismatch, NULL where ignored : (database:given) lat(",SiteData[1,2],":",lat,") long(",SiteData[1,3],":",long,") label(",SiteData[1,4],":",Label,").",sep=""))
 		}
 	}
-	
+
 	Site_id
 }
 
@@ -315,7 +315,7 @@ dbW_setConnection <- function(dbFilePath) {
 	}
 	con.env$con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbFilePath)
 	con.env$blob_compression_type <- if (DBI::dbExistsTable(con.env$con, "Meta")) dbW_compression() else con.env$default_blob_compression_type
-	
+
 	#settings <- c("PRAGMA page_size=8192","PRAGMA cache_size = 400000;","PRAGMA synchronous = OFF;","PRAGMA journal_mode = OFF;","PRAGMA locking_mode = EXCLUSIVE;","PRAGMA count_changes = OFF;","PRAGMA temp_store = MEMORY;","PRAGMA auto_vacuum = NONE;")
 	#lapply(settings, function(x) DBI::dbGetQuery(con.env$con,x))
 }
@@ -349,13 +349,13 @@ dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderP
 
 	if( (is.null(weatherFolderPath) | ifelse(!is.null(weatherFolderPath), (weatherFolderPath == "" | !file.exists(weatherFolderPath)), FALSE)) & (is.null(weatherData) | !is.list(weatherData) | class(weatherData[[1]]) != "swWeatherData") ) stop("addWeatherDataToDataBase does not have folder path or weatherData to insert")
 	if( (is.null(Site_id) & is.null(lat) & is.null(long) & is.null(weatherFolderPath) & (is.null(label))) | ((!is.null(Site_id) & !is.numeric(Site_id)) & (!is.null(lat) & !is.numeric(lat)) & (!is.null(long) & !is.numeric(long))) ) stop("addWeatherDataToDataBase not enough info to create Site in Sites table.")
-	
+
 	Site_id <- dbW_addSite(
 		Site_id = Site_id,
 		lat = lat,
 		long = long,
 		Label = if (!is.null(weatherFolderPath) && is.null(label)) basename(weatherFolderPath) else label)
-	
+
 	Scenarios <- DBI::dbReadTable(con.env$con,"Scenarios")$Scenario
 	if(ScenarioName %in% Scenarios) {
 		scenarioID <- which(ScenarioName %in% Scenarios)
@@ -365,7 +365,7 @@ dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderP
 		SQL <- paste("INSERT INTO \"Scenarios\" VALUES(",scenarioID,",'",ScenarioName,"');",sep="")
 		DBI::dbGetQuery(con.env$con, SQL)
 	}
-	
+
 	if(!is.null(weatherData)) {
 		data_blob <- dbW_weatherData_to_blob(weatherData, con.env$blob_compression_type)
 		StartYear <- head(as.integer(names(weatherData)),n=1)
@@ -394,13 +394,13 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 
 	if( (is.null(weatherFolderPath) | ifelse(!is.null(weatherFolderPath), (weatherFolderPath == "" | !file.exists(weatherFolderPath)), FALSE)) & (is.null(weatherData) | !is.list(weatherData) | class(weatherData[[1]]) != "swWeatherData") ) stop("addWeatherDataToDataBase does not have folder path or weatherData to insert")
 	if( (is.null(Site_id) & is.null(lat) & is.null(long) & is.null(weatherFolderPath) & (is.null(label))) | ((!is.null(Site_id) & !is.numeric(Site_id)) & (!is.null(lat) & !is.numeric(lat)) & (!is.null(long) & !is.numeric(long))) ) stop("addWeatherDataToDataBase not enough info to create Site in Sites table.")
-	
+
 	Site_id <- dbW_addSite(
 		Site_id = Site_id,
 		lat = lat,
 		long = long,
 		Label = if (!is.null(weatherFolderPath) && is.null(label)) basename(weatherFolderPath) else label)
-	
+
 	Scenarios <- DBI::dbReadTable(con.env$con,"Scenarios")$Scenario
 	if(ScenarioName %in% Scenarios) {
 		scenarioID <- which(ScenarioName %in% Scenarios)
@@ -410,7 +410,7 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 		SQL <- paste("INSERT INTO \"Scenarios\" VALUES(",scenarioID,",'",ScenarioName,"');",sep="")
 		DBI::dbGetQuery(con.env$con, SQL)
 	}
-	
+
 	if(!is.null(weatherData)) {
 		data_blob <- dbW_weatherData_to_blob_old(weatherData, con.env$blob_compression_type)
 		StartYear <- head(as.integer(names(weatherData)),n=1)
@@ -437,29 +437,29 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 
 dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = NULL, site_subset = NULL, scenarios = NULL, compression_type) {
 	stopifnot(requireNamespace("RSQLite"))
-	
+
 	dbW_setConnection(dbFilePath)
-	
+
 	#---Create tables
 	# Meta information
 	if (missing(compression_type) || !(compression_type %in% eval(formals(memCompress)[[2]]))) {
 		compression_type <- con.env$default_blob_compression_type
 	}
 	con.env$blob_compression_type <- compression_type
-	
+
 	stopifnot(DBI::dbIsValid(con.env$con))
 	DBI::dbGetQuery(con.env$con, "CREATE TABLE \"Meta\" (\"Desc\" TEXT PRIMARY KEY, \"Value\" TEXT);")
 	RSQLite::dbGetPreparedQuery(con.env$con, "INSERT INTO Meta VALUES(:Desc, :Value)",
 		bind.data = data.frame(Desc = c("Version", "Compression_type"),
 								Value = c(con.env$dbW_version, con.env$blob_compression_type)))
-	
+
 	# Table of sites
 	DBI::dbGetQuery(con.env$con, "CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, \"Latitude\" REAL, \"Longitude\" REAL, \"Label\" TEXT);")
 	# Table for weather data
 	DBI::dbGetQuery(con.env$con, "CREATE TABLE \"WeatherData\" (\"Site_id\" integer, \"Scenario\" integer,  \"StartYear\" integer, \"EndYear\" integer, \"data\" BLOB, PRIMARY KEY (\"Site_id\", \"Scenario\"));")
 	# Table of scenario names
 	DBI::dbGetQuery(con.env$con, "CREATE TABLE \"Scenarios\" (\"id\" integer PRIMARY KEY, \"Scenario\" TEXT);")
-	
+
 	#---Add sites
 	if (NROW(site_data) > 0 && sapply(c("Site_id", "Latitude", "Longitude", "Label"), function(x) x %in% colnames(site_data))) {
 		# Default values
@@ -470,15 +470,15 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = 
 		if (is.null(site_subset)) site_subset <- seq_len(nrow(site_data))
 		im <- match(site_data[site_subset, "Site_id"], MetaData[, "Site_id"])
 		MetaData[im, c("Latitude", "Longitude", "Label")] <- site_data[site_subset, c("Latitude", "Longitude", "Label")]
-		
+
 		dbW_addSites(dfLatitudeLongitudeLabel = MetaData)
 	}
-	
+
 	#---Add scenario names
 	if (NROW(scenarios) > 0 && "Scenario" %in% colnames(scenarios)) {
 		dbW_addScenarios(dfScenario = scenarios)
 	}
-	
+
 	invisible(0)
 }
 
@@ -524,7 +524,7 @@ dbW_deleteSiteData <- function(Site_id, Scenario=NULL) {
 #' @param type A character string. One of c("gzip", "bzip2", "xz", "none").
 #'
 #' @seealso \code{\link{memDecompress}}, \code{\link{unserialize}}
-dbW_blob_to_weatherData <- function(data_blob, type = "gzip") {	
+dbW_blob_to_weatherData <- function(data_blob, type = "gzip") {
 	if (inherits(data_blob, "list") && inherits(data_blob[[1]], "raw") && length(data_blob) == 1)
 			data_blob <- data_blob[[1]]
 
@@ -552,7 +552,7 @@ dbW_blob_to_weatherData_old <- function(StartYear, EndYear, data_blob, type = "g
 		data_blob <- data_blob[[1]]
 	data <- strsplit(memDecompress(data_blob, type = type, asChar = TRUE), ";")[[1]]
 	years <- StartYear:EndYear
-	
+
 	weatherData <- list()
 	for (i in seq_along(years)) {
 		zz <- textConnection(data[i])
@@ -563,7 +563,7 @@ dbW_blob_to_weatherData_old <- function(StartYear, EndYear, data_blob, type = "g
 		weatherData[[i]] <- new("swWeatherData", year = years[i], data = ydata)
 	}
 	names(weatherData) <- years
-	
+
 	weatherData
 }
 
@@ -577,7 +577,7 @@ dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
 		string[i] <- paste(dataString, collapse = "\n")
 	}
 	string <- paste(string, collapse=";")
-	
+
 	paste0("x'", paste0(memCompress(string, type = type), collapse = ""), "'")
 }
 
@@ -585,21 +585,21 @@ dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
 
 
 #' Rsoilwat getWeatherData_folders
-#' 
+#'
 #' Reads weather data from files.  Returns list of weather data.
-#' 
+#'
 #' Weather data for the soil water simulation run can be stored in the input
 #' data or it can be separate to keep the input data size down for multiple
 #' variations of the same site. This function is used to return the weather
 #' data from folders.  The other option is to use onGetWeatherData_database.
-#' 
+#'
 #' SOILWAT does not handle missing weather data. If you have missing data, then
 #' you have to impute yourself or use the built-in Markov weather generator
 #' (see examples for \code{\link{sw_exec}}).
-#' 
+#'
 #' The output from this function can be passed directly to sw_exec with input
 #' data.
-#' 
+#'
 #' @param LookupWeatherFolder String Path. Path to the LookupWeatherFolder
 #' location.
 #' @param weatherDirName String. Name of the folder containing weather data
@@ -615,22 +615,22 @@ dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
 #' data input \item \code{\link{dbW_getWeatherData}} and
 #' \code{\link{getWeatherData_folders}} for weather data input }
 #' @examples
-#' 
+#'
 #' path_demo <- dirname(system.file("extdata", "files_v31.in", package = "Rsoilwat31"))
-#' 
+#'
 #' ## ------ Simulation with data prepared beforehand and separate weather data ------------
 #' ## Read inputs from files on disk
 #' sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files_v31.in")
-#' 
+#'
 #' ## Read forcing weather data from files on disk (there are also functions to set up a SQLite database for the weather data)
 #' sw_weath3 <- getWeatherData_folders(LookupWeatherFolder=file.path(path_demo, "Input"), weatherDirName="data_weather", filebasename="weath", startYear=1979, endYear=2010)
-#' 
+#'
 #' ## List of the slots of the input objects of class 'swWeatherData'
 #' str(sw_weath3, max.level=1)
-#' 
+#'
 #' ## Execute the simulation run
 #' sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)
-#' 
+#'
 getWeatherData_folders <- function(LookupWeatherFolder=NULL, weatherDirName=NULL,filebasename=NULL,startYear=NULL,endYear=NULL) {
 	if(is.null(LookupWeatherFolder) | is.null(weatherDirName) | is.null(filebasename))
 		stop("Need LookupWeatherFolder and weatherDirName information to get weather data")
@@ -685,19 +685,20 @@ dbW_weatherData_to_monthly <- function(dailySW) {
 	monthly <- matrix(NA, nrow = length(dailySW) * 12, ncol = 5, dimnames = list(NULL, c("Year", "Month", "Tmax_C", "Tmin_C", "PPT_cm")))
 	for(y in seq_along(dailySW)){
 		weath <- dailySW[[y]]
-		month <- as.POSIXlt(paste(weath@year, weath@data[, "DOY"], sep = "-"), format = "%Y-%j")$mon + 1
+		month <- as.POSIXlt(paste(weath@year, weath@data[, "DOY"], sep = "-"),
+												format = "%Y-%j", tz = "UTC")$mon + 1
 		monthly[1:12 + 12*(y - 1), ] <- data.matrix(cbind(
 			Year = weath@year, Month = 1:12,
 			aggregate(weath@data[, c("Tmax_C", "Tmin_C")], by = list(month), FUN = mean)[, 2:3],
 			PPT_cm = aggregate(weath@data[, "PPT_cm"], by = list(month), FUN = sum)[, 2]))
 	}
-	
+
 	monthly
 }
 
 # Conversion: object of daily weather data.frame to matrix of monthly values (mean Tmax, mean Tmin, sum PPT)
 dbW_dataframe_to_monthly <- function(dailySW) {
-	month <- as.POSIXlt(apply(dailySW[, c("Year", "DOY")], 1, paste, collapse = "-"), format = "%Y-%j")$mon + 1
+	month <- as.POSIXlt(apply(dailySW[, c("Year", "DOY")], 1, paste, collapse = "-"), format = "%Y-%j", tz = "UTC")$mon + 1
 	as.matrix(cbind(Year = tempT[, 2], Month = tempT[, 1],
 		Tmax_C = as.vector(tapply(dailySW[, "Tmax_C"], INDEX = list(month, dailySW[, "Year"]), FUN = mean)),
 		Tmin_C = as.vector(tapply(dailySW[, "Tmin_C"], INDEX = list(month, dailySW[, "Year"]), FUN = mean)),
@@ -715,13 +716,13 @@ get_years_from_weatherDF <- function(weatherDF, years, weatherDF_dataColumns){
 			year_ts <- rep(years, times = diff(c(which(weatherDF[, weatherDF_dataColumns[1]] == 1), nrow(weatherDF) + 1)))
 		} else {
 			stop("Not sufficient year information was provided with the 'weatherDF' object")
-		} 
+		}
 	} else if(any(temp <- grepl("year", colnames(weatherDF), ignore.case = TRUE))){
 		year_ts <- weatherDF[, which(temp)[1]]
 	} else {
 		stop("No year information was provided with the 'weatherDF' object")
 	}
-	
+
 	years <- sort(unique(year_ts))
 
 	return(list(years=years, year_ts=year_ts))
@@ -734,11 +735,11 @@ dbW_dataframe_to_weatherData <- function(weatherDF, years=NULL, weatherDF_dataCo
 		stop("Not every required weatherDF_dataColumns is available in the 'weatherDF' object")
 
 	ylist <- get_years_from_weatherDF(weatherDF, years, weatherDF_dataColumns)
-	
+
 	if (isTRUE(is.logical(round) && round || is.numeric(round))) {
 		weatherDF <- round(weatherDF, digits = if (is.logical(round)) 2 else round)
 	}
-	
+
 	weatherData <- list()
 	for(i in 1:length(ylist$years)) {
 		ydata <- as.matrix(weatherDF[ylist$year_ts == ylist$years[i], weatherDF_dataColumns])
@@ -746,7 +747,7 @@ dbW_dataframe_to_weatherData <- function(weatherDF, years=NULL, weatherDF_dataCo
 		weatherData[[i]] <- new("swWeatherData", year=ylist$years[i], data=ydata)
 	}
 	names(weatherData) <- ylist$years
-	
+
 	weatherData
 }
 
@@ -755,7 +756,7 @@ dbW_dataframe_to_weatherData <- function(weatherDF, years=NULL, weatherDF_dataCo
 dbW_weather_to_SOILWATfiles <- function(path, site.label, weatherData=NULL, weatherDF=NULL, years=NULL, weatherDF_dataColumns=c("DOY","Tmax_C","Tmin_C","PPT_cm")){
 	stopifnot(is.null(weatherData) || is.null(weatherDF))
 	dir.create(path, recursive = TRUE, showWarnings = FALSE)
-	
+
 	if(!is.null(weatherData)){
 		years <- sapply(weatherData, FUN=function(x) x@year)
 	} else if(!is.null(weatherDF)){
@@ -767,16 +768,16 @@ dbW_weather_to_SOILWATfiles <- function(path, site.label, weatherData=NULL, weat
 	} else {
 		stop("Provide daily weather data either as 'weatherData' or 'weatherDF' object")
 	}
-	
+
 	for(y in seq_along(years)){
 		data.sw <- if(!is.null(weatherData)) weatherData[[y]]@data else weatherDF[year_ts == years[y], weatherDF_dataColumns]
 		sw.filename <- file.path(path, paste0("weath.", years[y]))
 		sw.comments <- c(paste("# weather for site", site.label, "year = ", years[y]), "# DOY Tmax(C) Tmin(C) PPT(cm)")
-		
+
 		write.table(sw.comments, file=sw.filename, sep="\t", eol="\r\n", quote=FALSE, row.names=FALSE, col.names=FALSE)
-		write.table(data.frame(data.sw[,1], formatC(data.sw[, 2], digits=2, format="f"), formatC(data.sw[, 3], digits=2, format="f"), formatC(data.sw[, 4], digits=2, format="f")), file=sw.filename, append=TRUE, sep="\t", eol="\r\n", quote=FALSE, row.names=FALSE, col.names=FALSE)							
+		write.table(data.frame(data.sw[,1], formatC(data.sw[, 2], digits=2, format="f"), formatC(data.sw[, 3], digits=2, format="f"), formatC(data.sw[, 4], digits=2, format="f")), file=sw.filename, append=TRUE, sep="\t", eol="\r\n", quote=FALSE, row.names=FALSE, col.names=FALSE)
 	}
-	
+
 	invisible(years)
 }
 
