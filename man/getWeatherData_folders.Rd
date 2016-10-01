@@ -42,7 +42,7 @@ data.
 }
 \examples{
 
-path_demo <- dirname(system.file("extdata", "files_v31.in", package = "Rsoilwat31"))
+path_demo <- system.file("extdata", "example1", package = "Rsoilwat31")
 
 ## ------ Simulation with data prepared beforehand and separate weather data ------------
 ## Read inputs from files on disk

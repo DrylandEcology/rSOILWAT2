@@ -18,7 +18,7 @@
 
 
 # TODO: Add comment
-# 
+#
 # Author: Ryan J. Murphy (2013)
 # Updated for v31 Forbs and Bare Ground
 ###############################################################################
@@ -77,7 +77,7 @@ swProd_validity<-function(object){
 setValidity("swProd",swProd_validity)
 setMethod(f="initialize",signature="swProd",definition=function(.Object,Composition=c(0,0,0,1,0),Albedo=c(0.167,0.143,0.106,0.167,0.15),Cover_stcr=c(3.0,2.22,5.0,3.0),CanopyHeight=NULL,VegetationInterceptionParameters=NULL,LitterInterceptionParameters=NULL, EsTpartitioning_param=c(1,1,0.41,1),Es_param_limit=c(999,999,2099,999),Shade=NULL,
 				HydraulicRedistribution_use=c(TRUE,TRUE,TRUE,TRUE),HydraulicRedistribution=NULL,CriticalSoilWaterPotential=c(-3.5,-3.9,-2.0,-2.0),MonthlyProductionValues_grass=NULL,MonthlyProductionValues_shrub=NULL,MonthlyProductionValues_tree=NULL,MonthlyProductionValues_forb=NULL) {
-			
+
 			if(is.null(CanopyHeight))
 				CanopyHeight<-matrix(data=c(300,29.5,85,0.002,0, 0,5,100,0.003,50, 0,5,3000,0.00008,1200, 300,29.5,85,0.002,0),nrow=5,ncol=4,dimnames=list(c("xinflec","yinflec","range","slope","height_cm"),c("Grasses","Shrubs","Trees","Forbs")))
 			if(is.null(VegetationInterceptionParameters))
@@ -96,7 +96,7 @@ setMethod(f="initialize",signature="swProd",definition=function(.Object,Composit
 				MonthlyProductionValues_tree<-matrix(data=c(2000.000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,15000,15000,15000,15000,15000,15000,15000,15000,15000,15000,15000,15000,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,500,500,500,500,500,500,500,500,500,500,500,500),nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
 			if(is.null(MonthlyProductionValues_forb))
 				MonthlyProductionValues_forb<-matrix(data=c(85.40,88.20,95.30,100.50,166.40,186.00,177.10,212.20,157.40,124.90,110.40,104.30,210.00,212.00,228.00,272.00,400.00,404.00,381.00,352.00,286.00,235.00,218.00,214.00,0.06,0.08,0.20,0.33,0.57,0.55,0.50,0.46,0.32,0.15,0.08,0.06,372,372,372,372,372,372,372,372,372,372,372,372),nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
-			
+
 			names(Composition) <- c("Grasses", "Shrubs", "Trees", "Forbs", "BareGround");
 			names(Albedo) <- c("Grasses", "Shrubs", "Trees","Forbs","BareGround");
 			names(Cover_stcr) <- c("Grasses", "Shrubs", "Trees","Forbs");
@@ -104,7 +104,7 @@ setMethod(f="initialize",signature="swProd",definition=function(.Object,Composit
 			names(Es_param_limit) <- c("Grasses", "Shrubs", "Trees","Forbs");
 			names(HydraulicRedistribution_use) <- c("Grasses", "Shrubs", "Trees","Forbs");
 			names(CriticalSoilWaterPotential) <- c("Grasses", "Shrubs", "Trees","Forbs");
-			
+
 			.Object@Composition=Composition
 			.Object@Albedo=Albedo
 			.Object@Cover_stcr=Cover_stcr
@@ -120,7 +120,7 @@ setMethod(f="initialize",signature="swProd",definition=function(.Object,Composit
 			.Object@MonthlyProductionValues_grass=MonthlyProductionValues_grass
 			.Object@MonthlyProductionValues_shrub=MonthlyProductionValues_shrub
 			.Object@MonthlyProductionValues_tree=MonthlyProductionValues_tree
-			
+
 			validObject(.Object)
 			return(.Object)
 		})
@@ -135,7 +135,7 @@ setMethod(f="swClear",
 			MonthlyProductionValues_grass<-matrix(data=NA,nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
 			MonthlyProductionValues_shrub<-matrix(data=NA,nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
 			MonthlyProductionValues_tree<-matrix(data=NA,nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
-			MonthlyProductionValues_forb<-matrix(data=NA,nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))			
+			MonthlyProductionValues_forb<-matrix(data=NA,nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
 			Composition=numeric(5)
 			Albedo=numeric(5)
 			Cover_stcr=numeric(4)
@@ -205,22 +205,22 @@ setMethod("swWriteLines", signature=c(object="swProd", file="character"), defini
 			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)
 			infilename <- file.path(file)
 			infiletext <- character(142)
-			
+
 			infiletext[1] <- "# Plant production data file for SOILWAT"
 			infiletext[2] <- "# Location: "
-			
+
 			infiletext[4] <- "# ---- Composition of vegetation type components (0-1; must add up to 1)"
 			infiletext[5] <- "# Grasses\tShrubs\tTrees\tForbs\tBare Ground"
 			infiletext[6] <- paste(format(object@Composition[1]),"\t",format(object@Composition[2]),"\t",format(object@Composition[3]),"\t",format(object@Composition[4]),"\t",format(object@Composition[5]),"\t",sep="")
-			
+
 			infiletext[9] <- "# ---- Albedo"
 			infiletext[10] <- "# Grasses\tShrubs\tTrees\tForbs\tBare Ground"
-			infiletext[11] <- paste(format(object@Albedo[1]),"\t",format(object@Albedo[2]),"\t",format(object@Albedo[3]),"\t",format(object@Albedo[4]),"\t",format(object@Albedo[5]),"\t# albedo:	(Houldcroft et al. 2009) MODIS snowfree 'grassland', 'open shrub', ‘evergreen needle forest’ with MODIS albedo aggregated over pure IGBP cells where NDVI is greater than the 98th percentile NDVI",sep="")
-			
+			infiletext[11] <- paste(format(object@Albedo[1]),"\t",format(object@Albedo[2]),"\t",format(object@Albedo[3]),"\t",format(object@Albedo[4]),"\t",format(object@Albedo[5]),"\t# albedo:	(Houldcroft et al. 2009) MODIS snowfree 'grassland', 'open shrub', 'evergreen needle forest' with MODIS albedo aggregated over pure IGBP cells where NDVI is greater than the 98th percentile NDVI",sep="")
+
 			infiletext[14] <- "# ---- % Cover: divide standing LAI by this to get % cover"
 			infiletext[15] <- "# Grasses\tShrubs\tTrees\tForbs"
 			infiletext[16] <- paste(format(object@Cover_stcr[1]),"\t",format(object@Cover_stcr[2]),"\t",format(object@Cover_stcr[3]),"\t",format(object@Cover_stcr[4]),sep="")
-			
+
 			infiletext[19] <- "# -- Canopy height (cm) parameters either constant through season or as tanfunc with respect to biomass (g/m^2)"
 			infiletext[20] <- "# Grasses\tShrubs\tTrees\tForbs"
 			infiletext[21] <- paste(format(object@CanopyHeight[1,1]),"\t",format(object@CanopyHeight[1,2]),"\t",format(object@CanopyHeight[1,3]),"\t",format(object@CanopyHeight[1,4]),"\t# xinflec",sep="")
@@ -228,29 +228,29 @@ setMethod("swWriteLines", signature=c(object="swProd", file="character"), defini
 			infiletext[23] <- paste(format(object@CanopyHeight[3,1]),"\t",format(object@CanopyHeight[3,2]),"\t",format(object@CanopyHeight[3,3]),"\t",format(object@CanopyHeight[3,4]),"\t# range",sep="")
 			infiletext[24] <- paste(format(object@CanopyHeight[4,1]),"\t",format(object@CanopyHeight[4,2]),"\t",format(object@CanopyHeight[4,3]),"\t",format(object@CanopyHeight[4,4]),"\t# slope",sep="")
 			infiletext[25] <- paste(format(object@CanopyHeight[5,1]),"\t",format(object@CanopyHeight[5,2]),"\t",format(object@CanopyHeight[5,3]),"\t",format(object@CanopyHeight[5,4]),"\t# if > 0 then constant canopy height (cm)",sep="")
-			
+
 			infiletext[28] <- "# --- Vegetation interception parameters for equation: intercepted rain = (a + b*veg) + (c+d*veg) * ppt; Grasses+Shrubs: veg=vegcov, Trees: veg=LAI"
 			infiletext[29] <- "# Grasses\tShrubs\tTrees\tForbs"
 			infiletext[30] <- paste(format(object@VegetationInterceptionParameters[1,1]),"\t",format(object@VegetationInterceptionParameters[1,2]),"\t",format(object@VegetationInterceptionParameters[1,3]),"\t",format(object@VegetationInterceptionParameters[1,4]),"\t# a",sep="")
 			infiletext[31] <- paste(format(object@VegetationInterceptionParameters[2,1]),"\t",format(object@VegetationInterceptionParameters[2,2]),"\t",format(object@VegetationInterceptionParameters[2,3]),"\t",format(object@VegetationInterceptionParameters[2,4]),"\t# b",sep="")
 			infiletext[32] <- paste(format(object@VegetationInterceptionParameters[3,1]),"\t",format(object@VegetationInterceptionParameters[3,2]),"\t",format(object@VegetationInterceptionParameters[3,3]),"\t",format(object@VegetationInterceptionParameters[3,4]),"\t# c",sep="")
 			infiletext[33] <- paste(format(object@VegetationInterceptionParameters[4,1]),"\t",format(object@VegetationInterceptionParameters[4,2]),"\t",format(object@VegetationInterceptionParameters[4,3]),"\t",format(object@VegetationInterceptionParameters[4,4]),"\t# d",sep="")
-			
+
 			infiletext[36] <- "# --- Litter interception parameters for equation: intercepted rain = (a + b*litter) + (c+d*litter) * ppt"
 			infiletext[37] <- "# Grass-Litter\tShrub-Litter\tTree-Litter\tForbs-Litter"
 			infiletext[38] <- paste(format(object@LitterInterceptionParameters[1,1]),"\t",format(object@LitterInterceptionParameters[1,2]),"\t",format(object@LitterInterceptionParameters[1,3]),"\t",format(object@LitterInterceptionParameters[1,4]),"\t# a",sep="")
 			infiletext[39] <- paste(format(object@LitterInterceptionParameters[2,1]),"\t",format(object@LitterInterceptionParameters[2,2]),"\t",format(object@LitterInterceptionParameters[2,3]),"\t",format(object@LitterInterceptionParameters[2,4]),"\t# b",sep="")
 			infiletext[40] <- paste(format(object@LitterInterceptionParameters[3,1]),"\t",format(object@LitterInterceptionParameters[3,2]),"\t",format(object@LitterInterceptionParameters[3,3]),"\t",format(object@LitterInterceptionParameters[3,4]),"\t# c",sep="")
 			infiletext[41] <- paste(format(object@LitterInterceptionParameters[4,1]),"\t",format(object@LitterInterceptionParameters[4,2]),"\t",format(object@LitterInterceptionParameters[4,3]),"\t",format(object@LitterInterceptionParameters[4,4]),"\t# d",sep="")
-			
+
 			infiletext[44] <- "# ---- Parameter for partitioning of bare-soil evaporation and transpiration as in Es = exp(-param*LAI)"
 			infiletext[45] <- "# Grasses\tShrubs\tTrees\tForbs"
 			infiletext[46] <- paste(format(object@EsTpartitioning_param[1]),"\t",format(object@EsTpartitioning_param[2]),"\t",format(object@EsTpartitioning_param[3]),"\t",format(object@EsTpartitioning_param[4]),"\t# Trees: According to a regression based on a review by Daikoku, K., S. Hattori, A. Deguchi, Y. Aoki, M. Miyashita, K. Matsumoto, J. Akiyama, S. Iida, T. Toba, Y. Fujita, and T. Ohta. 2008. Influence of evaporation from the forest floor on evapotranspiration from the dry canopy. Hydrological Processes 22:4083-4096.",sep="")
-			
+
 			infiletext[49] <- "# ---- Parameter for scaling and limiting bare soil evaporation rate: if totagb (g/m2) > param then no bare-soil evaporation"
 			infiletext[50] <- "# Grasses\tShrubs\tTrees\tForbs"
 			infiletext[51] <- paste(format(object@Es_param_limit[1]),"\t",format(object@Es_param_limit[2]),"\t",format(object@Es_param_limit[3]),"\t",format(object@Es_param_limit[4]),"\t#",sep="")
-			
+
 			infiletext[54] <- "# --- Shade effects on transpiration based on live and dead biomass"
 			infiletext[55] <- "# Grasses\tShrubs\tTrees\tForbs"
 			infiletext[56] <- paste(format(object@Shade[1,1]),"\t",format(object@Shade[1,2]),"\t",format(object@Shade[1,3]),"\t",format(object@Shade[1,4]),"\t# shade scale",sep="")
@@ -259,18 +259,18 @@ setMethod("swWriteLines", signature=c(object="swProd", file="character"), defini
 			infiletext[59] <- paste(format(object@Shade[4,1]),"\t",format(object@Shade[4,2]),"\t",format(object@Shade[4,3]),"\t",format(object@Shade[4,4]),"\t# yinflec",sep="")
 			infiletext[60] <- paste(format(object@Shade[5,1]),"\t",format(object@Shade[5,2]),"\t",format(object@Shade[5,3]),"\t",format(object@Shade[5,4]),"\t# range",sep="")
 			infiletext[61] <- paste(format(object@Shade[6,1]),"\t",format(object@Shade[6,2]),"\t",format(object@Shade[6,3]),"\t",format(object@Shade[6,4]),"\t# slope",sep="")
-			
+
 			infiletext[64] <- "# ---- Hydraulic redistribution: Ryel, Ryel R, Caldwell, Caldwell M, Yoder, Yoder C, Or, Or D, Leffler, Leffler A. 2002. Hydraulic redistribution in a stand of Artemisia tridentata: evaluation of benefits to transpiration assessed with a simulation model. Oecologia 130: 173-184."
 			infiletext[65] <- "# Grass-Litter\tShrub-Litter\tTree-Litter\tForbs"
 			infiletext[66] <- paste(format(as.integer(object@HydraulicRedistribution_use[1])),"\t",format(as.integer(object@HydraulicRedistribution_use[2])),"\t",format(as.integer(object@HydraulicRedistribution_use[3])),"\t",format(as.integer(object@HydraulicRedistribution_use[4])),"\t# flag to turn on/off (1/0) hydraulic redistribution",sep="")
 			infiletext[67] <- paste(format(object@HydraulicRedistribution[1,1]),"\t",format(object@HydraulicRedistribution[1,2]),"\t",format(object@HydraulicRedistribution[1,3]),"\t",format(object@HydraulicRedistribution[1,4]),"\t# maxCondroot - maximum radial soil-root conductance of the entire active root system for water (cm/-bar/day) = 0.097 cm/MPa/h",sep="")
 			infiletext[68] <- paste(format(object@HydraulicRedistribution[2,1]),"\t",format(object@HydraulicRedistribution[2,2]),"\t",format(object@HydraulicRedistribution[2,3]),"\t",format(object@HydraulicRedistribution[2,4]),"\t# swp50 - soil water potential (-bar) where conductance is reduced by 50% = -1. MPa",sep="")
 			infiletext[69] <- paste(format(object@HydraulicRedistribution[3,1]),"\t",format(object@HydraulicRedistribution[3,2]),"\t",format(object@HydraulicRedistribution[3,3]),"\t",format(object@HydraulicRedistribution[3,4]),"\t# shapeCond - shaping parameter for the empirical relationship from van Genuchten to model relative soil-root conductance for water",sep="")
-			
+
 			infiletext[72] <- "# ---- Critical soil water potential (MPa), i.e., when transpiration rates cannot sustained anymore, for instance, for many crop species -1.5 MPa is assumed and called wilting point"
 			infiletext[73] <- "# Grasses\tShrubs\tTrees\tForbs"
 			infiletext[74] <- paste(format(object@CriticalSoilWaterPotential[1]),"\t",format(object@CriticalSoilWaterPotential[2]),"\t",format(object@CriticalSoilWaterPotential[3]),"\t",format(object@CriticalSoilWaterPotential[4]),sep="")
-			
+
 			infiletext[77] <- "# Grasslands component:"
 			infiletext[78] <- "# -------------- Monthly production values ------------"
 			infiletext[79] <- "# Litter   - dead leafy material on the ground (g/m^2 )."
@@ -292,7 +292,7 @@ setMethod("swWriteLines", signature=c(object="swProd", file="character"), defini
 			infiletext[95] <- paste(format(object@MonthlyProductionValues_grass[10,1]),"\t",format(object@MonthlyProductionValues_grass[10,2]),"\t",format(object@MonthlyProductionValues_grass[10,3]),"\t",format(object@MonthlyProductionValues_grass[10,4]),"\t# October",sep="")
 			infiletext[96] <- paste(format(object@MonthlyProductionValues_grass[11,1]),"\t",format(object@MonthlyProductionValues_grass[11,2]),"\t",format(object@MonthlyProductionValues_grass[11,3]),"\t",format(object@MonthlyProductionValues_grass[11,4]),"\t# November",sep="")
 			infiletext[97] <- paste(format(object@MonthlyProductionValues_grass[12,1]),"\t",format(object@MonthlyProductionValues_grass[12,2]),"\t",format(object@MonthlyProductionValues_grass[12,3]),"\t",format(object@MonthlyProductionValues_grass[12,4]),"\t# December",sep="")
-			
+
 			infiletext[99] <- "# Shrublands component:"
 			infiletext[100] <- "#Litter\tBiomass\t%Live\tLAI_conv"
 			infiletext[101] <- paste(format(object@MonthlyProductionValues_shrub[1,1]),"\t",format(object@MonthlyProductionValues_shrub[1,2]),"\t",format(object@MonthlyProductionValues_shrub[1,3]),"\t",format(object@MonthlyProductionValues_shrub[1,4]),"\t# January",sep="")
@@ -307,7 +307,7 @@ setMethod("swWriteLines", signature=c(object="swProd", file="character"), defini
 			infiletext[110] <- paste(format(object@MonthlyProductionValues_shrub[10,1]),"\t",format(object@MonthlyProductionValues_shrub[10,2]),"\t",format(object@MonthlyProductionValues_shrub[10,3]),"\t",format(object@MonthlyProductionValues_shrub[10,4]),"\t# October",sep="")
 			infiletext[111] <- paste(format(object@MonthlyProductionValues_shrub[11,1]),"\t",format(object@MonthlyProductionValues_shrub[11,2]),"\t",format(object@MonthlyProductionValues_shrub[11,3]),"\t",format(object@MonthlyProductionValues_shrub[11,4]),"\t# November",sep="")
 			infiletext[112] <- paste(format(object@MonthlyProductionValues_shrub[12,1]),"\t",format(object@MonthlyProductionValues_shrub[12,2]),"\t",format(object@MonthlyProductionValues_shrub[12,3]),"\t",format(object@MonthlyProductionValues_shrub[12,4]),"\t# December",sep="")
-			
+
 			infiletext[114] <- "# Forest component:"
 			infiletext[115] <- "#Litter\tBiomass\t%Live\tLAI_conv"
 			infiletext[116] <- paste(format(object@MonthlyProductionValues_tree[1,1]),"\t",format(object@MonthlyProductionValues_tree[1,2]),"\t",format(object@MonthlyProductionValues_tree[1,3]),"\t",format(object@MonthlyProductionValues_tree[1,4]),"\t# January",sep="")
@@ -322,7 +322,7 @@ setMethod("swWriteLines", signature=c(object="swProd", file="character"), defini
 			infiletext[125] <- paste(format(object@MonthlyProductionValues_tree[10,1]),"\t",format(object@MonthlyProductionValues_tree[10,2]),"\t",format(object@MonthlyProductionValues_tree[10,3]),"\t",format(object@MonthlyProductionValues_tree[10,4]),"\t# October",sep="")
 			infiletext[126] <- paste(format(object@MonthlyProductionValues_tree[11,1]),"\t",format(object@MonthlyProductionValues_tree[11,2]),"\t",format(object@MonthlyProductionValues_tree[11,3]),"\t",format(object@MonthlyProductionValues_tree[11,4]),"\t# November",sep="")
 			infiletext[127] <- paste(format(object@MonthlyProductionValues_tree[12,1]),"\t",format(object@MonthlyProductionValues_tree[12,2]),"\t",format(object@MonthlyProductionValues_tree[12,3]),"\t",format(object@MonthlyProductionValues_tree[12,4]),"\t# December",sep="")
-			
+
 			infiletext[129] <- "# FORB component:"
 			infiletext[130] <- "#Litter\tBiomass\t%Live\tLAI_conv"
 			infiletext[131] <- paste(format(object@MonthlyProductionValues_forb[1,1]),"\t",format(object@MonthlyProductionValues_forb[1,2]),"\t",format(object@MonthlyProductionValues_forb[1,3]),"\t",format(object@MonthlyProductionValues_forb[1,4]),"\t# January",sep="")
@@ -337,7 +337,7 @@ setMethod("swWriteLines", signature=c(object="swProd", file="character"), defini
 			infiletext[140] <- paste(format(object@MonthlyProductionValues_forb[10,1]),"\t",format(object@MonthlyProductionValues_forb[10,2]),"\t",format(object@MonthlyProductionValues_forb[10,3]),"\t",format(object@MonthlyProductionValues_forb[10,4]),"\t# October",sep="")
 			infiletext[141] <- paste(format(object@MonthlyProductionValues_forb[11,1]),"\t",format(object@MonthlyProductionValues_forb[11,2]),"\t",format(object@MonthlyProductionValues_forb[11,3]),"\t",format(object@MonthlyProductionValues_forb[11,4]),"\t# November",sep="")
 			infiletext[142] <- paste(format(object@MonthlyProductionValues_forb[12,1]),"\t",format(object@MonthlyProductionValues_forb[12,2]),"\t",format(object@MonthlyProductionValues_forb[12,3]),"\t",format(object@MonthlyProductionValues_forb[12,4]),"\t# December",sep="")
-			
+
 			infile <- file(infilename, "w+b")
 			writeLines(text = infiletext, con = infile, sep = "\n")
 			close(infile)

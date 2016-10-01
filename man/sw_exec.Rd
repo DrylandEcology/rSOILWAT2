@@ -77,7 +77,7 @@ sw_out <- sw_exec(inputData = sw_in)
 
 
 ## ------ Directory to a SOLWAT project used in the following examples
-path_demo <- dirname(system.file("extdata", "example1", "files_v31.in", package = "Rsoilwat31"))
+path_demo <- system.file("extdata", "example1", package = "Rsoilwat31")
 
 ## ------ Simulation with data read from disk during execution ------------
 ## Execute the simulation run
@@ -116,7 +116,7 @@ sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)
 sw_in4 <- sw_in3
 
 ## Set the vegetation composition to 40\% grass and 60\% shrubs
-swProd_Composition(sw_in4) <- c(0.4, 0.6, 0, 0, 0)	
+swProd_Composition(sw_in4) <- c(0.4, 0.6, 0, 0, 0)
 
 ## Execute the simulation run
 sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3)
@@ -125,7 +125,7 @@ sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3)
 ## ------ Simulation with weather generator ------------
 ## Currently, the Markov weather generator flag must be turned on prior to reading files to disk
 ## - otherwise, the Markov prob.in and covar.in are not being loaded (NOTE: this should be fixed)
-path_demo2 <- dirname(system.file("extdata", "example2", "files_v31.in", package = "Rsoilwat31"))
+path_demo2 <- system.file("extdata", "example2", package = "Rsoilwat31")
 sw_in5 <- sw_inputDataFromFiles(dir = path_demo2, files.in = "files_v31.in")
 
 ## Turn on the Markov weather generator

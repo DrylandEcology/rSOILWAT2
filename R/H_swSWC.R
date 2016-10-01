@@ -18,7 +18,7 @@
 
 
 # TODO: Add comment
-# 
+#
 # Author: Ryan J. Murphy (2013)
 ###############################################################################
 
@@ -38,11 +38,11 @@ setMethod("swWriteLines", signature=c(object="swSWC_hist", file="character"), de
 			infiletext <- character(dim(object@data)[1]+2)
 			infiletext[1] <- paste("# SWC History for site: year =  ",object@year,sep="")
 			infiletext[2] <- paste("# DOY Layer SWC st_err")
-			
+
 			for(i in 1:dim(object@data)[1]) {
 				infiletext[i + 2] <- paste(format(object@data[i,1]),"\t",format(object@data[i,2]),"\t",format(object@data[i,3]),"\t",format(object@data[i,4]),sep="")
 			}
-			
+
 			infile <- file(infilename, "w+b")
 			writeLines(text = infiletext, con = infile, sep = "\n")
 			close(infile)})
@@ -80,7 +80,7 @@ setMethod("swSWC_prefix","swSWC",function(object) {return(object@DataFilePrefix)
 setMethod("swSWC_FirstYear","swSWC",function(object) {return(object@FirstYear)})
 setMethod("swSWC_Method","swSWC",function(object) {return(object@Method)})
 setMethod("swSWC_HistoricList","swSWC",function(object) {return(object@History)})
-setMethod("swSWC_HistoricData","swSWC",function(object,year) {
+setMethod("swSWC_HistoricData","swSWC",function(object, year) {
 			index<-which(names(object@History) == as.character(year))
 			if(length(index) != 1) {
 				print("swc historic data Index has wrong length.")
@@ -91,22 +91,22 @@ setMethod("swSWC_HistoricData","swSWC",function(object,year) {
 			return(object@History[[index]])
 		})
 
-setReplaceMethod(f="swSWC_use",signature=c(object="swSWC",UseSWC="logical"),function(object,UseSWC) {object@UseSWCHistoricData <- UseSWC; return(object)})
-setReplaceMethod(f="swSWC_prefix",signature=c(object="swSWC",SWCprefix="character"),function(object,SWCprefix) {object@UseSWCHistoricData <- SWCprefix; return(object)})
-setReplaceMethod(f="swSWC_FirstYear",signature=c(object="swSWC",SWCfirstYear="integer"),function(object,SWCfirstYear) {object@UseSWCHistoricData <- SWCfirstYear; return(object)})
-setReplaceMethod(f="swSWC_Method",signature=c(object="swSWC",SWCmethod="integer"),function(object,SWCmethod) {object@UseSWCHistoricData <- SWCmethod; return(object)})
-setReplaceMethod(f="swSWC_HistoricList",signature=c(object="swSWC",swSWC_HistoricList="list"),function(object,swSWC_HistoricList) {object@UseSWCHistoricData <- swSWC_HistoricList; return(object)})
-setReplaceMethod(f="swSWC_HistoricData",signature=c(object="swSWC",swSWCdata="swSWC_hist"),function(object,swSWCdata) {
-			index<-which(names(object@History) == as.character(swSWCdata@year))
+setReplaceMethod(f="swSWC_use",signature=c(object="swSWC", value="logical"),function(object, value) {object@UseSWCHistoricData <- value; return(object)})
+setReplaceMethod(f="swSWC_prefix",signature=c(object="swSWC", value="character"),function(object, value) {object@UseSWCHistoricData <- value; return(object)})
+setReplaceMethod(f="swSWC_FirstYear",signature=c(object="swSWC",value="integer"),function(object,value) {object@UseSWCHistoricData <- value; return(object)})
+setReplaceMethod(f="swSWC_Method",signature=c(object="swSWC", value="integer"),function(object, value) {object@UseSWCHistoricData <- value; return(object)})
+setReplaceMethod(f="swSWC_HistoricList",signature=c(object="swSWC", value="list"),function(object, value) {object@UseSWCHistoricData <- value; return(object)})
+setReplaceMethod(f="swSWC_HistoricData",signature=c(object="swSWC", value="swSWC_hist"),function(object, value) {
+			index<-which(names(object@History) == as.character(value@year))
 			if(length(index) == 0) {
-				object@History[[length(object@History)+1]] <- swSWCdata
+				object@History[[length(object@History)+1]] <- value
 				years <- unlist(lapply(object@History, function(x) {return(x@year)}))
 				object@History <- object@History[order(years)]
 				names(object@History)<- as.character(years[order(years)])
 				if(!all(years[order(years)] == cummax(years[order(years)])))
 					print("SWC data is Missing")
 			} else if(length(index) == 1) {
-				object@History[[index]] <- swSWCdata
+				object@History[[index]] <- value
 			} else {
 				print("To many index. Not set")
 			}

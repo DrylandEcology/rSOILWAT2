@@ -131,15 +131,15 @@ dbW_getScenariosTable <- function() {
 #'
 #' 	## Default data set without weather data.
 #' 	## Column Names are also turned on for output
-#' 	library(Rsoilwat)
+#' 	library(Rsoilwat31)
 #' 	library(RSQLite)
 #' 	drv <- dbDriver("SQLite")
-#' 	con <- dbConnect(drv, "/path/to/weather/database/lookupWeatherDB.sqlite3")
-#' 	inputData <- sw_inputDataFromFiles(dir="/path/to/project",files.in="files_v27.in") #Get the data set
-#' 	weatherData <- dbW_getWeatherData(con, Site_id=200)
-#' 	#Run the simulation
-#' 	run<-sw_exec(data=inputData, weatherList=weatherData, colNames=TRUE)
-#'
+#' 	\dontrun{
+#'    con <- dbConnect(drv, "/path/to/weather/database/lookupWeatherDB.sqlite3")
+#'    inputData <- sw_inputDataFromFiles(dir="/path/to/project",files.in="files_v27.in")
+#'    weatherData <- dbW_getWeatherData(con, Site_id=200)
+#'    run<-sw_exec(data=inputData, weatherList=weatherData, colNames=TRUE)
+#'	}
 dbW_getWeatherData <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startYear=NULL,endYear=NULL, Scenario="Current") {
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
@@ -616,7 +616,7 @@ dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
 #' \code{\link{getWeatherData_folders}} for weather data input }
 #' @examples
 #'
-#' path_demo <- dirname(system.file("extdata", "files_v31.in", package = "Rsoilwat31"))
+#' path_demo <- system.file("extdata", "example1", package = "Rsoilwat31")
 #'
 #' ## ------ Simulation with data prepared beforehand and separate weather data ------------
 #' ## Read inputs from files on disk

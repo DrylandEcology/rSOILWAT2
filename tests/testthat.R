@@ -1,4 +1,3 @@
 library(testthat)
-library(Rsoilwat31)
 
-test_check("Rsoilwat")
+test_check("Rsoilwat31")

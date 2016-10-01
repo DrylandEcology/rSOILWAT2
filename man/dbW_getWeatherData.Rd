@@ -52,15 +52,15 @@ data.
 
 	## Default data set without weather data.
 	## Column Names are also turned on for output
-	library(Rsoilwat)
+	library(Rsoilwat31)
 	library(RSQLite)
 	drv <- dbDriver("SQLite")
-	con <- dbConnect(drv, "/path/to/weather/database/lookupWeatherDB.sqlite3")
-	inputData <- sw_inputDataFromFiles(dir="/path/to/project",files.in="files_v27.in") #Get the data set
-	weatherData <- dbW_getWeatherData(con, Site_id=200)
-	#Run the simulation
-	run<-sw_exec(data=inputData, weatherList=weatherData, colNames=TRUE)
-
+	\dontrun{
+   con <- dbConnect(drv, "/path/to/weather/database/lookupWeatherDB.sqlite3")
+   inputData <- sw_inputDataFromFiles(dir="/path/to/project",files.in="files_v27.in")
+   weatherData <- dbW_getWeatherData(con, Site_id=200)
+   run<-sw_exec(data=inputData, weatherList=weatherData, colNames=TRUE)
+}
 }
 \author{
 Ryan Murphy

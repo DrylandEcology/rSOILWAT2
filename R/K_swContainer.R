@@ -18,12 +18,12 @@
 
 
 # TODO: Add comment
-# 
+#
 # Author: Ryan J. Murphy (2013)
 ###############################################################################
 
 print("swContainer")
-swInputData <- setClass(Class = "swInputData", 
+swInputData <- setClass(Class = "swInputData",
 						slots = list(files = "swFiles",
 									years = "swYears",
 									weather = "swWeather",
@@ -59,7 +59,7 @@ setMethod(f="swClear",
 			object@log=swClear(object@log)
 			return(object)
 		})
-	
+
 setMethod("get_swFiles", "swInputData", function(object) object@files)
 setMethod("swFiles_ProjDir", "swInputData", function(object) object@files@ProjDir)
 setMethod("swFiles_filesIn", "swInputData", function(object) object@files@InFiles[1])
@@ -283,7 +283,7 @@ setMethod("swSWC_prefix","swInputData",function(object) {return(object@swc@DataF
 setMethod("swSWC_FirstYear","swInputData",function(object) {return(object@swc@FirstYear)})
 setMethod("swSWC_Method","swInputData",function(object) {return(object@swc@Method)})
 setMethod("swSWC_HistoricList","swInputData",function(object) {return(object@swc@History)})
-setMethod("swSWC_HistoricData","swInputData",function(object,year) {
+setMethod("swSWC_HistoricData","swInputData",function(object, year) {
 			index<-which(names(object@swc@History) == as.character(year))
 			if(length(index) != 1) {
 				print("swc historic data Index has wrong length.")
@@ -294,23 +294,23 @@ setMethod("swSWC_HistoricData","swInputData",function(object,year) {
 			return(object@swc@History[[index]])
 		})
 
-setReplaceMethod(f="set_swSWC",signature=c(object="swInputData", swSWC="swSWC"), function(object, swSWC) {object@swc <- swSWC; return(object)})
-setReplaceMethod(f="swSWC_use",signature=c(object="swInputData",UseSWC="logical"),function(object,UseSWC) {object@swc@UseSWCHistoricData <- UseSWC; return(object)})
-setReplaceMethod(f="swSWC_prefix",signature=c(object="swInputData",SWCprefix="character"),function(object,SWCprefix) {object@swc@UseSWCHistoricData <- SWCprefix; return(object)})
-setReplaceMethod(f="swSWC_FirstYear",signature=c(object="swInputData",SWCfirstYear="integer"),function(object,SWCfirstYear) {object@swc@UseSWCHistoricData <- SWCfirstYear; return(object)})
-setReplaceMethod(f="swSWC_Method",signature=c(object="swInputData",SWCmethod="integer"),function(object,SWCmethod) {object@swc@UseSWCHistoricData <- SWCmethod; return(object)})
-setReplaceMethod(f="swSWC_HistoricList",signature=c(object="swInputData",swSWC_HistoricList="list"),function(object,swSWC_HistoricList) {object@swc@UseSWCHistoricData <- swSWC_HistoricList; return(object)})
-setReplaceMethod(f="swSWC_HistoricData",signature=c(object="swInputData",swSWCdata="swSWC_hist"),function(object,swSWCdata) {
-			index<-which(names(object@swc@History) == as.character(swSWCdata@year))
+setReplaceMethod(f="set_swSWC",signature=c(object="swInputData", value="swSWC"), function(object, value) {object@swc <- value; return(object)})
+setReplaceMethod(f="swSWC_use",signature=c(object="swInputData", value="logical"),function(object, value) {object@swc@UseSWCHistoricData <- value; return(object)})
+setReplaceMethod(f="swSWC_prefix",signature=c(object="swInputData", value="character"),function(object, value) {object@swc@UseSWCHistoricData <- value; return(object)})
+setReplaceMethod(f="swSWC_FirstYear",signature=c(object="swInputData", value="integer"),function(object, value) {object@swc@UseSWCHistoricData <- value; return(object)})
+setReplaceMethod(f="swSWC_Method",signature=c(object="swInputData", value="integer"),function(object, value) {object@swc@UseSWCHistoricData <- value; return(object)})
+setReplaceMethod(f="swSWC_HistoricList",signature=c(object="swInputData", value="list"),function(object, value) {object@swc@UseSWCHistoricData <- value; return(object)})
+setReplaceMethod(f="swSWC_HistoricData",signature=c(object="swInputData", value="swSWC_hist"),function(object, value) {
+			index<-which(names(object@swc@History) == as.character(value@year))
 			if(length(index) == 0) {
-				object@swc@History[[length(object@swc@History)+1]] <- swSWCdata
+				object@swc@History[[length(object@swc@History)+1]] <- value
 				years <- unlist(lapply(object@swc@History, function(x) {return(x@year)}))
 				object@swc@History <- object@swc@History[order(years)]
 				names(object@swc@History)<- as.character(years[order(years)])
 				if(!all(years[order(years)] == cummax(years[order(years)])))
 					print("SWC data is Missing")
 			} else if(length(index) == 1) {
-				object@swc@History[[index]] <- swSWCdata
+				object@swc@History[[index]] <- value
 			} else {
 				print("To many index. Not set")
 			}
@@ -327,9 +327,9 @@ setReplaceMethod(f="swOUT_TimeStep",signature="swInputData",function(object,valu
 setReplaceMethod(f="swOUT_OutputSeparator",signature="swInputData",function(object,value) { swOUT_OutputSeparator(object@output) <- value; return(object)})
 setReplaceMethod(f="swOUT_useTimeStep",signature="swInputData",function(object,value) { swOUT_useTimeStep(object@output) <- value; return(object)})
 ##
-setReplaceMethod(f="swLog_setLine", "swInputData", definition=function(object, line) {
+setReplaceMethod(f="swLog_setLine", "swInputData", definition=function(object, value) {
 			if(object@log@UsedLines <= object@log@MaxLines) {
-				object@log@LogData[object@log@UsedLines] <- line
+				object@log@LogData[object@log@UsedLines] <- value
 				object@log@UsedLines <- object@log@UsedLines + 1
 			}
 			return(object)
@@ -380,7 +380,7 @@ setMethod(f="swReadLines", signature=c(object="swInputData",file="character"), d
 					object@weatherHistory[[i]] <- wd
 				}
 			}
-			
+
 			object@cloud <- swReadLines(object@cloud,file.path(object@files@ProjDir, object@files@InFiles[9]))
 			if(all(file.exists(file.path(object@files@ProjDir, object@files@InFiles[7:8]))))
 				object@markov <- swReadLines(object@markov,file.path(object@files@ProjDir, object@files@InFiles[7:8]))

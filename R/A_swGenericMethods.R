@@ -18,7 +18,7 @@
 
 
 # TODO: Add comment
-# 
+#
 # Author: Ryan J. Murphy (2013)
 ###############################################################################
 
@@ -236,15 +236,15 @@ setGeneric(name="swSWC_prefix",function(object) {standardGeneric("swSWC_prefix")
 setGeneric(name="swSWC_FirstYear",function(object) {standardGeneric("swSWC_FirstYear")})
 setGeneric(name="swSWC_Method",function(object) {standardGeneric("swSWC_Method")})
 setGeneric(name="swSWC_HistoricList",function(object) {standardGeneric("swSWC_HistoricList")})
-setGeneric(name="swSWC_HistoricData",function(object,year) {standardGeneric("swSWC_HistoricData")})
+setGeneric(name="swSWC_HistoricData",function(object, year) {standardGeneric("swSWC_HistoricData")})
 
-setGeneric(name="set_swSWC<-",function(object, swSWC) {standardGeneric("set_swSWC<-")})
-setGeneric(name="swSWC_use<-",function(object, UseSWC) {standardGeneric("swSWC_use<-")})
-setGeneric(name="swSWC_prefix<-",function(object, SWCprefix) {standardGeneric("swSWC_prefix<-")})
-setGeneric(name="swSWC_FirstYear<-",function(object, SWCfirstYear) {standardGeneric("swSWC_FirstYear<-")})
-setGeneric(name="swSWC_Method<-",function(object, SWCmethod) {standardGeneric("swSWC_Method<-")})
-setGeneric(name="swSWC_HistoricList<-",function(object,swSWC_HistoricList) {standardGeneric("swSWC_HistoricList<-")})
-setGeneric(name="swSWC_HistoricData<-",function(object,swSWCdata) {standardGeneric("swSWC_HistoricData<-")})
+setGeneric(name="set_swSWC<-",function(object, value) {standardGeneric("set_swSWC<-")})
+setGeneric(name="swSWC_use<-",function(object, value) {standardGeneric("swSWC_use<-")})
+setGeneric(name="swSWC_prefix<-",function(object, value) {standardGeneric("swSWC_prefix<-")})
+setGeneric(name="swSWC_FirstYear<-",function(object, value) {standardGeneric("swSWC_FirstYear<-")})
+setGeneric(name="swSWC_Method<-",function(object, value) {standardGeneric("swSWC_Method<-")})
+setGeneric(name="swSWC_HistoricList<-",function(object, value) {standardGeneric("swSWC_HistoricList<-")})
+setGeneric(name="swSWC_HistoricData<-",function(object, value) {standardGeneric("swSWC_HistoricData<-")})
 ########################
 
 #######OUT###########
@@ -260,7 +260,7 @@ setGeneric(name="swOUT_useTimeStep<-",function(object,value) {standardGeneric("s
 ########################
 
 ########LOG#############
-setGeneric(name="swLog_setLine<-",function(object, line) {standardGeneric("swLog_setLine<-")})
+setGeneric(name="swLog_setLine<-",function(object, value) {standardGeneric("swLog_setLine<-")})
 ########################
 
 ########swOutput########
