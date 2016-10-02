@@ -103,7 +103,7 @@
 #'
 #' ## ------ Simulation with data read from disk during execution ------------
 #' ## Execute the simulation run
-#' sw_out1 <- sw_exec(dir = path_demo, files.in = "files_v31.in")
+#' \dontrun{sw_out1 <- sw_exec(dir = path_demo, files.in = "files_v31.in")
 #'
 #' ## Slots of the output object of class 'swOutput'
 #' str(sw_out1, max.level=2)
@@ -156,7 +156,7 @@
 #' ## Execute the simulation run
 #' sw_out5 <- sw_exec(inputData = sw_in5, weatherList = NULL)
 #'
-#'
+#' }
 #'
 #' ## See help(package = "Rsoilwat31") for a full list of functions
 #'
@@ -236,7 +236,7 @@ sw_exec <- function(inputData=NULL,weatherList=NULL,dir="", files.in="files_v31.
 #' str(sw_in2, max.level=2)
 #'
 #' ## Execute the simulation run
-#' sw_out2 <- sw_exec(inputData = sw_in2)
+#' \dontrun{sw_out2 <- sw_exec(inputData = sw_in2)}
 #'
 #'
 sw_inputDataFromFiles <- function(dir="", files.in="files_v30.in") {
@@ -315,7 +315,7 @@ sw_outputData <- function(inputData) {
 #' str(sw_in, max.level=2)
 #'
 #' ## Execute the simulation run
-#' sw_out <- sw_exec(inputData = sw_in)
+#' \dontrun{sw_out <- sw_exec(inputData = sw_in)}
 #'
 sw_inputData <- function() {
   temp <- swInputData()

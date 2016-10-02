@@ -633,7 +633,7 @@ dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
 #' str(sw_weath3, max.level=1)
 #'
 #' ## Execute the simulation run
-#' sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)
+#' \dontrun{sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)}
 #'
 getWeatherData_folders <- function(LookupWeatherFolder=NULL, weatherDirName=NULL,filebasename=NULL,startYear=NULL,endYear=NULL) {
 	if(is.null(LookupWeatherFolder) | is.null(weatherDirName) | is.null(filebasename))
