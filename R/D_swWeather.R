@@ -18,7 +18,7 @@
 
 
 # TODO: Add comment
-# 
+#
 # Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2016)
 ###############################################################################
 
@@ -28,7 +28,7 @@ print("swWeather")
 
 swMonthlyScalingParams <- setClass("swMonthlyScalingParams",
 									 slots = list(MonthlyScalingParams = "matrix"),
-									 prototype = list(MonthlyScalingParams = 
+									 prototype = list(MonthlyScalingParams =
 														matrix(data = c(rep(1, 12), rep(0, 12 * 3), rep(1, 12), rep(0, 12), rep(1, 12)),
 																nrow = 12, ncol = 7,
 																dimnames = list(month.name, c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "Transmissivity"))
@@ -44,12 +44,12 @@ setValidity("swMonthlyScalingParams", function(object) {
 	}
 })
 
-		
+
 setMethod("swClear", signature = "swMonthlyScalingParams", function(object) {
 	slot(object, "MonthlyScalingParams") <- matrix(data = c(rep(1, 12), rep(0, 12 * 3), rep(1, 12), rep(0, 12), rep(1, 12)),
 													nrow = 12, ncol = 7,
 													dimnames = list(month.name, c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "Transmissivity")))
-	
+
 	object
 })
 
@@ -71,9 +71,9 @@ swWeather <- setClass("swWeather",
 						contains = c("swMonthlyScalingParams")
 					)
 
-setValidity("swWeather", function(object){
+setValidity("swWeather", function(object) {
 	msg <- NULL
-	
+
 	if (length(object@UseSnow) != 1)
 		msg <- c(msg, "@UseSnow needs to be of length 1.")
 	if (length(object@pct_SnowDrift) != 1)
@@ -86,7 +86,7 @@ setValidity("swWeather", function(object){
 		msg <- c(msg, "@FirstYear_Historical needs to be of length 1.")
 	if (length(object@DaysRunningAverage) != 1)
 		msg <- c(msg, "@DaysRunningAverage needs to be of length 1.")
-	
+
 	if (is.null(msg)) TRUE else msg
 })
 
@@ -98,12 +98,12 @@ setMethod("swClear", signature = "swWeather", function(object) {
 	slot(object, "use_Markov") <- NA
 	slot(object, "FirstYear_Historical") <- NA_integer_
 	slot(object, "DaysRunningAverage") <- NA_integer_
-	
+
 	slot(object, "MonthlyScalingParams") <- swClear(slot(object, "MonthlyScalingParams"))
 
 	object
 })
-		
+
 setMethod("swWeather_DaysRunningAverage", "swWeather", function(object) object@DaysRunningAverage)
 setMethod("swWeather_FirstYearHistorical", "swWeather", function(object) object@FirstYear_Historical)
 setMethod("swWeather_pct_SnowDrift", "swWeather", function(object) object@pct_SnowDrift)
@@ -127,14 +127,14 @@ setMethod("swWriteLines", signature=c(object="swWeather", file="character"), def
 			infiletext[1] <- "# Weather setup parameters"
 			infiletext[2] <- paste("# Location: ")
 			infiletext[3] <- "#"
-			
+
 			infiletext[4] <- paste(ifelse(object@UseSnow,"1","0"), "\t# 1=allow snow accumulation,   0=no snow effects.", sep="")
 			infiletext[5] <- paste(object@pct_SnowDrift, "\t# % of snow drift per snow event (+ indicates snow addition, - indicates snow taken away from site)", sep="")
 			infiletext[6] <- paste(object@pct_SnowRunoff, "\t# % of snowmelt water as runoff/on per event (>0 indicates runoff, <0 indicates runon)", sep="")
 			infiletext[7] <- paste(ifelse(object@use_Markov,"1","0"), "\t# 0=use historical data only, 1=use markov process for missing weather.", sep="")
 			infiletext[8] <- paste(object@FirstYear_Historical, "\t# first year to begin historical weather.", sep="")
 			infiletext[9] <- paste(object@DaysRunningAverage, "\t# number of days to use in the running average of temperature.", sep="")
-			
+
 			infiletext[11] <- "# Monthly scaling parameters."
 			infiletext[12] <- "# Month 1 = January, Month 2 = February, etc."
 			infiletext[13] <- "# PPT = multiplicative for PPT (scale*ppt)."
@@ -145,14 +145,14 @@ setMethod("swWriteLines", signature=c(object="swWeather", file="character"), def
 			infiletext[18] <- "# rH = additive for mean monthly relative humidity [%]; min(100, max(0, scale + rel. Humidity))"
 			infiletext[19] <- "# Transmissivity = multiplicative for mean monthly relative transmissivity; min(1, max(0, scale * transmissivity))"
 			infiletext[20] <- "#Mon  PPT  MaxT  MinT	SkyCover	Wind	rH	Transmissivity"
-			
+
 			for(i in 21:32) {
 				infiletext[i] <- paste(format(i-20),"\t",format(object@MonthlyScalingParams[i-20,1]),"\t",
 						format(object@MonthlyScalingParams[i-20,2]),"\t",format(object@MonthlyScalingParams[i-20,3]),"\t",
 						format(object@MonthlyScalingParams[i-20,4]),"\t",format(object@MonthlyScalingParams[i-20,5]),"\t",
 						format(object@MonthlyScalingParams[i-20,6]),"\t",format(object@MonthlyScalingParams[i-20,7]),"\t",sep="")
 			}
-			
+
 			infile <- file(infilename, "w+b")
 			writeLines(text = infiletext, con = infile, sep = "\n")
 			close(infile)
@@ -161,14 +161,14 @@ setMethod("swWriteLines", signature=c(object="swWeather", file="character"), def
 
 setMethod("swReadLines", signature=c(object="swWeather",file="character"), definition=function(object,file) {
 			infiletext <- readLines(con = file)
-			
+
 			object@UseSnow = readLogical(infiletext[4])
 			object@pct_SnowDrift = readNumeric(infiletext[5])
 			object@pct_SnowRunoff = readNumeric(infiletext[6])
 			object@use_Markov = readLogical(infiletext[7])
 			object@FirstYear_Historical = readInteger(infiletext[8])
 			object@DaysRunningAverage = readInteger(infiletext[9])
-			
+
 			data=matrix(data=c(rep(1,12),rep(NA,12*6)),nrow=12,ncol=7)
 			colnames(data)<-c("PPT","MaxT","MinT","SkyCover","Wind","rH","Transmissivity")
 			rownames(data)<-c("January","February","March","April","May","June","July","August","September","October","November","December")
