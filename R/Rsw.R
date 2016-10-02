@@ -318,8 +318,9 @@ sw_outputData <- function(inputData) {
 #' sw_out <- sw_exec(inputData = sw_in)
 #'
 sw_inputData <- function() {
-	temp<-swInputData()
-	data(package="Rsoilwat31", weatherData)
-	slot(temp, "weatherHistory") <- weatherData
-	temp
+  temp <- swInputData()
+  data(package = "Rsoilwat31", "weatherData", envir = environment())
+  slot(temp, "weatherHistory") <- get("weatherData", envir = environment())
+
+  temp
 }

@@ -209,6 +209,7 @@ dbW_getWeatherData <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startY
 }
 
 dbW_getWeatherData_old <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startYear=NULL,endYear=NULL, Scenario="Current") {
+	.Deprecated("dbW_getWeatherData")
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
 	if(is.null(Site_id) && is.null(Label) && is.null(lat) && is.null(long)) {
@@ -390,6 +391,7 @@ dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderP
 }
 
 dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderPath=NULL, weatherData=NULL, label=NULL, ScenarioName="Current") {
+	.Deprecated("dbW_addWeatherData")
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
 	if( (is.null(weatherFolderPath) | ifelse(!is.null(weatherFolderPath), (weatherFolderPath == "" | !file.exists(weatherFolderPath)), FALSE)) & (is.null(weatherData) | !is.list(weatherData) | class(weatherData[[1]]) != "swWeatherData") ) stop("addWeatherDataToDataBase does not have folder path or weatherData to insert")
@@ -548,6 +550,7 @@ dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
 
 # Conversion: SQL-blob to object of class 'swWeatherData'
 dbW_blob_to_weatherData_old <- function(StartYear, EndYear, data_blob, type = "gzip") {
+	.Deprecated("dbW_blob_to_weatherData")
 	if (typeof(data_blob) == "list")
 		data_blob <- data_blob[[1]]
 	data <- strsplit(memDecompress(data_blob, type = type, asChar = TRUE), ";")[[1]]
@@ -569,6 +572,7 @@ dbW_blob_to_weatherData_old <- function(StartYear, EndYear, data_blob, type = "g
 
 # Conversion: object of class 'swWeatherData' to SQL-blob
 dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
+	.Deprecated("dbW_weatherData_to_blob")
 	string <- character(length = length(weatherData))
 	for(i in seq_along(weatherData)) {
 		zz <- textConnection("dataString", "w")
@@ -699,7 +703,7 @@ dbW_weatherData_to_monthly <- function(dailySW) {
 # Conversion: object of daily weather data.frame to matrix of monthly values (mean Tmax, mean Tmin, sum PPT)
 dbW_dataframe_to_monthly <- function(dailySW) {
 	month <- as.POSIXlt(apply(dailySW[, c("Year", "DOY")], 1, paste, collapse = "-"), format = "%Y-%j", tz = "UTC")$mon + 1
-	as.matrix(cbind(Year = tempT[, 2], Month = tempT[, 1],
+	as.matrix(cbind(Year = month[, 2], Month = month[, 1],
 		Tmax_C = as.vector(tapply(dailySW[, "Tmax_C"], INDEX = list(month, dailySW[, "Year"]), FUN = mean)),
 		Tmin_C = as.vector(tapply(dailySW[, "Tmin_C"], INDEX = list(month, dailySW[, "Year"]), FUN = mean)),
 		PPT_cm = as.vector(tapply(dailySW[, "PPT_cm"], INDEX = list(month, dailySW[, "Year"]), FUN = sum))
