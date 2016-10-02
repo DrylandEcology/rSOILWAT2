@@ -55,7 +55,7 @@ sw_in <- sw_inputData()
 str(sw_in, max.level=2)
 
 ## Execute the simulation run
-sw_out <- sw_exec(inputData = sw_in)
+\dontrun{sw_out <- sw_exec(inputData = sw_in)}
 
 }
 \author{
