@@ -1,2 +1,4 @@
 .git
-scr/.git
+src/.git
+src/*.o
+src/*.so
