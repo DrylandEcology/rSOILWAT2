@@ -3,3 +3,4 @@ src/.git
 src/*.o
 src/*.so
 ^\.travis\.yml$
+^appveyor\.yml$
