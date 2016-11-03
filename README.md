@@ -1,3 +1,5 @@
+[![Travis-CI Build Status](https://travis-ci.org/Burke-Lauenroth-Lab/Rsoilwat.svg?branch=master)](https://travis-ci.org/Burke-Lauenroth-Lab/Rsoilwat)
+
 # Rsoilwat
 A R package for SOILWAT.
 
