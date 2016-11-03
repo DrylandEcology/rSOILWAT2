@@ -11,6 +11,14 @@ install:
   ps: Bootstrap
 
 # Adapt as necessary starting from here
+environment:
+  global:
+    WARNINGS_ARE_ERRORS: 0
+  matrix:
+    - R_VERSION: release
+
+cache:
+  - C:\RLibrary
 
 build_script:
   - travis-tool.sh install_deps
