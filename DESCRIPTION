@@ -16,7 +16,8 @@ Imports:
   RSQLite (>= 1.0.0),
   DBI (>= 0.4.1),
 Suggests:
-  testthat
+  testthat,
+    covr
 NeedsCompilation: yes
 License: GPL (>= 3)
 URL: https://github.com/Burke-Lauenroth-Lab/Rsoilwat
