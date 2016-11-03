@@ -17,7 +17,7 @@ environment:
   global:
     WARNINGS_ARE_ERRORS:
   matrix:
-    R_VERSION: release
+    - R_VERSION: release
 
 cache:
   - C:\RLibrary
