@@ -108,38 +108,25 @@ dbW_getScenariosTable <- function() {
 #' The output from this function can be passed directly to sw_exec with input
 #' data.
 #'
-#' @param con RSQLite con object. A connection to the weather data database.
-#' requires(RSQLite)
 #' @param Site_id Numeric. Used to identify site and extract weather data.
 #' @param lat Numeric. Latitude used with longitude to identify site id if
 #' Site_id is missing.
 #' @param long Numeric. Longitude and Latitude are used to identify site if
 #' Site_id is missing.
-#' @param weatherDirName String. If Site_id, lat, and long is missing then this
-#' will be used to identify Site_id by parsing the lat and long out of the
-#' name.
+#' @param Label A character string.
 #' @param startYear Numeric. Extracted weather data will start with this year.
 #' @param endYear Numeric. Extracted weather data will end with this year.
+#' @param Scenario A character string.
+#'
 #' @return Returns weather data as list. Each element contains data for one
 #' year.
 #' @author Ryan Murphy
-#' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
-#' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
+#' @seealso \itemize{
+#'    \item \code{\link{sw_exec}} for running a simulation
+#'    \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
 #' data input \item \code{\link{dbW_getWeatherData}} and
-#' \code{\link{getWeatherData_folders}} for weather data input }
-#' @examples
-#'
-#' 	## Default data set without weather data.
-#' 	## Column Names are also turned on for output
-#' 	library(Rsoilwat31)
-#' 	library(RSQLite)
-#' 	drv <- dbDriver("SQLite")
-#' 	\dontrun{
-#'    con <- dbConnect(drv, "/path/to/weather/database/lookupWeatherDB.sqlite3")
-#'    inputData <- sw_inputDataFromFiles(dir="/path/to/project",files.in="files_v27.in")
-#'    weatherData <- dbW_getWeatherData(con, Site_id=200)
-#'    run<-sw_exec(data=inputData, weatherList=weatherData, colNames=TRUE)
-#'	}
+#' \code{\link{getWeatherData_folders}} for weather data input
+#' }
 dbW_getWeatherData <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startYear=NULL,endYear=NULL, Scenario="Current") {
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
@@ -573,8 +560,10 @@ dbW_blob_to_weatherData_old <- function(StartYear, EndYear, data_blob, type = "g
 # Conversion: object of class 'swWeatherData' to SQL-blob
 dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
 	.Deprecated("dbW_weatherData_to_blob")
+	dataString <- NULL
 	string <- character(length = length(weatherData))
 	for(i in seq_along(weatherData)) {
+		rm(dataString)
 		zz <- textConnection("dataString", "w")
 		write.table(x = weatherData[[i]]@data[, -1], file = zz, col.names = FALSE, sep = "," , row.names = FALSE)
 		close(zz)
@@ -626,8 +615,10 @@ dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
 #' ## Read inputs from files on disk
 #' sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files_v31.in")
 #'
-#' ## Read forcing weather data from files on disk (there are also functions to set up a SQLite database for the weather data)
-#' sw_weath3 <- getWeatherData_folders(LookupWeatherFolder=file.path(path_demo, "Input"), weatherDirName="data_weather", filebasename="weath", startYear=1979, endYear=2010)
+#' ## Read forcing weather data from files on disk (there are also functions to set up a
+#' ##   SQLite database for the weather data)
+#' sw_weath3 <- getWeatherData_folders(LookupWeatherFolder=file.path(path_demo, "Input"),
+#'    weatherDirName="data_weather", filebasename="weath", startYear=1979, endYear=2010)
 #'
 #' ## List of the slots of the input objects of class 'swWeatherData'
 #' str(sw_weath3, max.level=1)
