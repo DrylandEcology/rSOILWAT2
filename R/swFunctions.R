@@ -108,38 +108,25 @@ dbW_getScenariosTable <- function() {
 #' The output from this function can be passed directly to sw_exec with input
 #' data.
 #'
-#' @param con RSQLite con object. A connection to the weather data database.
-#' requires(RSQLite)
 #' @param Site_id Numeric. Used to identify site and extract weather data.
 #' @param lat Numeric. Latitude used with longitude to identify site id if
 #' Site_id is missing.
 #' @param long Numeric. Longitude and Latitude are used to identify site if
 #' Site_id is missing.
-#' @param weatherDirName String. If Site_id, lat, and long is missing then this
-#' will be used to identify Site_id by parsing the lat and long out of the
-#' name.
+#' @param Label A character string.
 #' @param startYear Numeric. Extracted weather data will start with this year.
 #' @param endYear Numeric. Extracted weather data will end with this year.
+#' @param Scenario A character string.
+#'
 #' @return Returns weather data as list. Each element contains data for one
 #' year.
 #' @author Ryan Murphy
-#' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
-#' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
+#' @seealso \itemize{
+#'    \item \code{\link{sw_exec}} for running a simulation
+#'    \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
 #' data input \item \code{\link{dbW_getWeatherData}} and
-#' \code{\link{getWeatherData_folders}} for weather data input }
-#' @examples
-#'
-#' 	## Default data set without weather data.
-#' 	## Column Names are also turned on for output
-#' 	library(Rsoilwat31)
-#' 	library(RSQLite)
-#' 	drv <- dbDriver("SQLite")
-#' 	\dontrun{
-#'    con <- dbConnect(drv, "/path/to/weather/database/lookupWeatherDB.sqlite3")
-#'    inputData <- sw_inputDataFromFiles(dir="/path/to/project",files.in="files_v27.in")
-#'    weatherData <- dbW_getWeatherData(con, Site_id=200)
-#'    run<-sw_exec(data=inputData, weatherList=weatherData, colNames=TRUE)
-#'	}
+#' \code{\link{getWeatherData_folders}} for weather data input
+#' }
 dbW_getWeatherData <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startYear=NULL,endYear=NULL, Scenario="Current") {
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
@@ -209,6 +196,7 @@ dbW_getWeatherData <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startY
 }
 
 dbW_getWeatherData_old <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startYear=NULL,endYear=NULL, Scenario="Current") {
+	.Deprecated("dbW_getWeatherData")
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
 	if(is.null(Site_id) && is.null(Label) && is.null(lat) && is.null(long)) {
@@ -390,6 +378,7 @@ dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderP
 }
 
 dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderPath=NULL, weatherData=NULL, label=NULL, ScenarioName="Current") {
+	.Deprecated("dbW_addWeatherData")
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
 	if( (is.null(weatherFolderPath) | ifelse(!is.null(weatherFolderPath), (weatherFolderPath == "" | !file.exists(weatherFolderPath)), FALSE)) & (is.null(weatherData) | !is.list(weatherData) | class(weatherData[[1]]) != "swWeatherData") ) stop("addWeatherDataToDataBase does not have folder path or weatherData to insert")
@@ -548,6 +537,7 @@ dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
 
 # Conversion: SQL-blob to object of class 'swWeatherData'
 dbW_blob_to_weatherData_old <- function(StartYear, EndYear, data_blob, type = "gzip") {
+	.Deprecated("dbW_blob_to_weatherData")
 	if (typeof(data_blob) == "list")
 		data_blob <- data_blob[[1]]
 	data <- strsplit(memDecompress(data_blob, type = type, asChar = TRUE), ";")[[1]]
@@ -569,8 +559,11 @@ dbW_blob_to_weatherData_old <- function(StartYear, EndYear, data_blob, type = "g
 
 # Conversion: object of class 'swWeatherData' to SQL-blob
 dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
+	.Deprecated("dbW_weatherData_to_blob")
+	dataString <- NULL
 	string <- character(length = length(weatherData))
 	for(i in seq_along(weatherData)) {
+		rm(dataString)
 		zz <- textConnection("dataString", "w")
 		write.table(x = weatherData[[i]]@data[, -1], file = zz, col.names = FALSE, sep = "," , row.names = FALSE)
 		close(zz)
@@ -622,14 +615,16 @@ dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
 #' ## Read inputs from files on disk
 #' sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files_v31.in")
 #'
-#' ## Read forcing weather data from files on disk (there are also functions to set up a SQLite database for the weather data)
-#' sw_weath3 <- getWeatherData_folders(LookupWeatherFolder=file.path(path_demo, "Input"), weatherDirName="data_weather", filebasename="weath", startYear=1979, endYear=2010)
+#' ## Read forcing weather data from files on disk (there are also functions to set up a
+#' ##   SQLite database for the weather data)
+#' sw_weath3 <- getWeatherData_folders(LookupWeatherFolder=file.path(path_demo, "Input"),
+#'    weatherDirName="data_weather", filebasename="weath", startYear=1979, endYear=2010)
 #'
 #' ## List of the slots of the input objects of class 'swWeatherData'
 #' str(sw_weath3, max.level=1)
 #'
 #' ## Execute the simulation run
-#' sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)
+#' \dontrun{sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)}
 #'
 getWeatherData_folders <- function(LookupWeatherFolder=NULL, weatherDirName=NULL,filebasename=NULL,startYear=NULL,endYear=NULL) {
 	if(is.null(LookupWeatherFolder) | is.null(weatherDirName) | is.null(filebasename))
@@ -699,7 +694,7 @@ dbW_weatherData_to_monthly <- function(dailySW) {
 # Conversion: object of daily weather data.frame to matrix of monthly values (mean Tmax, mean Tmin, sum PPT)
 dbW_dataframe_to_monthly <- function(dailySW) {
 	month <- as.POSIXlt(apply(dailySW[, c("Year", "DOY")], 1, paste, collapse = "-"), format = "%Y-%j", tz = "UTC")$mon + 1
-	as.matrix(cbind(Year = tempT[, 2], Month = tempT[, 1],
+	as.matrix(cbind(Year = month[, 2], Month = month[, 1],
 		Tmax_C = as.vector(tapply(dailySW[, "Tmax_C"], INDEX = list(month, dailySW[, "Year"]), FUN = mean)),
 		Tmin_C = as.vector(tapply(dailySW[, "Tmin_C"], INDEX = list(month, dailySW[, "Year"]), FUN = mean)),
 		PPT_cm = as.vector(tapply(dailySW[, "PPT_cm"], INDEX = list(month, dailySW[, "Year"]), FUN = sum))

@@ -18,7 +18,7 @@
 
 
 # TODO: Add comment
-# 
+#
 # Author: Ryan J. Murphy (2013)
 ###############################################################################
 
@@ -62,13 +62,16 @@ swOUT_key <- setClass(Class="swOUT_key",
 									last_orig=as.integer(c(0,rep(366,4),0,rep(366,13),0,rep(366,6),0,366)),
 									outfile=c("","temp_air","precip","infiltration","runoff","","vwc_bulk","vwc_matric","swc_bulk","swa_bulk","swa_matric","swp_matric","surface_water","transp","evap_soil","evap_surface","interception","percolation","hydred","","aet","pet","wetdays","snowpack","deep_drain","temp_soil","","estabs")
 				))
-swOUT_key_validity<-function(object){
-	temp<-c(length(mykey), length(myobj), length(period), length(sumtype), length(use), length(first), length(last), length(first_orig), length(last_orig), length(outfile))
-	if(length(unique(temp)) != 1)
-		return("Missing values...")
-	TRUE
-}
-setValidity("swOUT_key",swOUT_key_validity)
+
+setValidity("swOUT_key", function(object) {
+  temp <- c(object@mykey, object@myobj, object@period, object@sumtype, object@use,
+    object@first, object@last, object@first_orig, object@last_orig, object@outfile)
+
+  if (any(!lapply(temp, function(x) length(x) == 1)))
+    return("Missing values...")
+
+  TRUE
+})
 
 setMethod(f="swClear",
 		signature="swOUT_key",
@@ -187,7 +190,7 @@ setMethod("swWriteLines", signature=c(object="swOUT", file="character"), definit
 			infiletext[40] = "# in any order. For example: 'TIMESTEP mo wk' will output for month and week"
 			infiletext[41] = paste("OUTSEP ",ifelse(object@outputSeparator=="\t","t","s"),sep="")
 			if(object@useTimeStep)	infiletext[42] = paste("TIMESTEP ",paste(timePeriods[object@timePeriods + 1],collapse = " "),sep="")
-			
+
 			infiletext[44] = "# key			SUMTYPE		PERIOD		start		end		filename_prefix"
 			j=1
 			for(i in 1:28) {
@@ -201,7 +204,7 @@ setMethod("swWriteLines", signature=c(object="swOUT", file="character"), definit
 					j=j+1
 				}
 			}
-			
+
 			infile <- file(infilename, "w+b")
 			writeLines(text = infiletext, con = infile, sep = "\n")
 			close(infile)
@@ -215,7 +218,7 @@ setMethod("swReadLines", signature=c(object="swOUT",file="character"), definitio
 			} else {
 				object@outputSeparator="\t"
 			}
-			
+
 			if(infiletext[42]==""){
 				object@useTimeStep = FALSE
 			} else {
@@ -223,7 +226,7 @@ setMethod("swReadLines", signature=c(object="swOUT",file="character"), definitio
 				temp<-strsplit(x=infiletext[42],split=" ")[[1]][-1]
 				object@timePeriods = as.integer(sapply(1:length(temp), FUN=function(i) which(temp[i] == timePeriods))-1)
 			}
-			
+
 			for(i in 45:length(infiletext)) {
 				if(infiletext[i] != "") {
 					temp<-strsplit(x=infiletext[i],split="\t")[[1]]

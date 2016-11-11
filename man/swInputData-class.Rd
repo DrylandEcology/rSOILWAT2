@@ -173,16 +173,12 @@
 \alias{swYears_isNorth<-,swInputData-method}
 \title{Class \code{"swInputData"}}
 \description{
-%% ~~ A concise (1-5 lines) description of what the class is. ~~ This class
-is a container class to the input file S4 objects.  The generic functions
-listed work on this and the proper sw Class in the container's slots.
-}
-\note{
-%% ~~further notes~~
+This class is a container class to the input file S4 objects. The generic functions
+listed work on this and the proper sw classes in the container's slots.
 }
 \section{Objects from the Class}{
  Objects can be created by calls of the form
-\code{new("swInputData", ...)}. %% ~~ describe objects here ~~
+\code{new("swInputData", ...)}.
 }
 \examples{
 
@@ -190,15 +186,12 @@ showClass("swInputData")
 
 }
 \author{
-%% ~~who you are~~ Ryan Murphy
+Ryan Murphy
 }
 \references{
-%% ~~put references to the literature/web site here~~
 https://github.com/Burke-Lauenroth-Lab/Rsoilwat
 }
 \seealso{
-%% ~~objects to See Also as \code{\link{~~fun~~}}, ~~~ %% ~~or
-\code{\linkS4class{CLASSNAME}} for links to other classes ~~~
 \code{\linkS4class{swFiles}} \code{\linkS4class{swYears}}
 \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
 \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}

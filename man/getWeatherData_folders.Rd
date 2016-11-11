@@ -48,14 +48,16 @@ path_demo <- system.file("extdata", "example1", package = "Rsoilwat31")
 ## Read inputs from files on disk
 sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files_v31.in")
 
-## Read forcing weather data from files on disk (there are also functions to set up a SQLite database for the weather data)
-sw_weath3 <- getWeatherData_folders(LookupWeatherFolder=file.path(path_demo, "Input"), weatherDirName="data_weather", filebasename="weath", startYear=1979, endYear=2010)
+## Read forcing weather data from files on disk (there are also functions to set up a
+##   SQLite database for the weather data)
+sw_weath3 <- getWeatherData_folders(LookupWeatherFolder=file.path(path_demo, "Input"),
+   weatherDirName="data_weather", filebasename="weath", startYear=1979, endYear=2010)
 
 ## List of the slots of the input objects of class 'swWeatherData'
 str(sw_weath3, max.level=1)
 
 ## Execute the simulation run
-sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)
+\dontrun{sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)}
 
 }
 \author{

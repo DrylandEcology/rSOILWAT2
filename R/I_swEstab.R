@@ -18,7 +18,7 @@
 
 
 # TODO: Add comment
-# 
+#
 # Author: Ryan J. Murphy (2013)
 ###############################################################################
 
@@ -28,14 +28,19 @@ swEstabSpecies <- setClass(Class="swEstabSpecies",representation(fileName="chara
 				max_drydays_postgerm="integer",min_wetdays_for_estab="integer",min_days_germ2estab="integer",max_days_germ2estab="integer",min_temp_germ="numeric",max_temp_germ="numeric",min_temp_estab="numeric",max_temp_estab="numeric"),
 	prototype=prototype(fileName=c("Input/bouteloua.estab","Input/bromus.estab"), Name=c("bogr","brte"), estab_lyrs=c(2L,3L), barsGERM=c(10,10), barsESTAB=c(15,15), min_pregerm_days=c(60L,200L), max_pregerm_days=c(180L,365L), min_wetdays_for_germ=c(2L,6L),
 			max_drydays_postgerm=c(40L,45L), min_wetdays_for_estab=c(5L,6L), min_days_germ2estab=c(15L,15L), max_days_germ2estab=c(75L,90L), min_temp_germ=c(5,10), max_temp_germ=c(20,30), min_temp_estab=c(0,3), max_temp_estab=c(20,30)))
-swEstabSpecies_validity<-function(object){
-	temp<-c(length(fileName),length(Name), length(estab_lyrs), length(barsGERM), length(barsESTAB), length(min_pregerm_days), length(max_pregerm_days), length(min_wetdays_for_germ), 
-			length(max_drydays_postgerm), length(min_wetdays_for_estab), length(min_days_germ2estab), length(max_days_germ2estab), length(min_temp_germ), length(max_temp_germ), length(min_temp_estab), length(max_temp_estab))
-	if(length(unique(temp)) != 1)
-		return("Missing values...")
-	TRUE
-}
-setValidity("swEstabSpecies",swEstabSpecies_validity)
+
+setValidity("swEstabSpecies", function(object) {
+  temp <- c(object@fileName, object@Name, object@estab_lyrs, object@barsGERM,
+    object@barsESTAB, object@min_pregerm_days, object@max_pregerm_days,
+    object@min_wetdays_for_germ, object@max_drydays_postgerm, object@min_wetdays_for_estab,
+    object@min_days_germ2estab, object@max_days_germ2estab, object@min_temp_germ,
+    object@max_temp_germ, object@min_temp_estab, object@max_temp_estab)
+
+  if (any(!lapply(temp, function(x) length(x) == 1)))
+    return("Missing values...")
+
+  TRUE
+})
 
 setMethod(f="swClear",
 		signature="swEstabSpecies",

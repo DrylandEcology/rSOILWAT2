@@ -1,0 +1,13 @@
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+
+language: r
+r:
+  - oldrel
+  - release
+  - devel
+sudo: false
+warnings_are_errors: false # set to true: This option forces all WARNINGS from R CMD check to become build failures (default true). This is especially helpful when preparing your package for submission to CRAN
+cache: packages
+after_success:
+  - Rscript -e 'covr::coveralls()'
+

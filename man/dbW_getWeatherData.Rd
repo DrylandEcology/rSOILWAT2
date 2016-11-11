@@ -16,16 +16,13 @@ Site_id is missing.}
 \item{long}{Numeric. Longitude and Latitude are used to identify site if
 Site_id is missing.}
 
+\item{Label}{A character string.}
+
 \item{startYear}{Numeric. Extracted weather data will start with this year.}
 
 \item{endYear}{Numeric. Extracted weather data will end with this year.}
 
-\item{con}{RSQLite con object. A connection to the weather data database.
-requires(RSQLite)}
-
-\item{weatherDirName}{String. If Site_id, lat, and long is missing then this
-will be used to identify Site_id by parsing the lat and long out of the
-name.}
+\item{Scenario}{A character string.}
 }
 \value{
 Returns weather data as list. Each element contains data for one
@@ -48,27 +45,15 @@ you have to impute yourself or use the built-in Markov weather generator
 The output from this function can be passed directly to sw_exec with input
 data.
 }
-\examples{
-
-	## Default data set without weather data.
-	## Column Names are also turned on for output
-	library(Rsoilwat31)
-	library(RSQLite)
-	drv <- dbDriver("SQLite")
-	\dontrun{
-   con <- dbConnect(drv, "/path/to/weather/database/lookupWeatherDB.sqlite3")
-   inputData <- sw_inputDataFromFiles(dir="/path/to/project",files.in="files_v27.in")
-   weatherData <- dbW_getWeatherData(con, Site_id=200)
-   run<-sw_exec(data=inputData, weatherList=weatherData, colNames=TRUE)
-}
-}
 \author{
 Ryan Murphy
 }
 \seealso{
-\itemize{ \item \code{\link{sw_exec}} for running a simulation
-\item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
+\itemize{
+   \item \code{\link{sw_exec}} for running a simulation
+   \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
 data input \item \code{\link{dbW_getWeatherData}} and
-\code{\link{getWeatherData_folders}} for weather data input }
+\code{\link{getWeatherData_folders}} for weather data input
+}
 }
 

@@ -1,3 +1,7 @@
+[![Travis-CI Build Status](https://travis-ci.org/Burke-Lauenroth-Lab/Rsoilwat.svg?branch=master)](https://travis-ci.org/Burke-Lauenroth-Lab/Rsoilwat)
+  [![Build status](https://ci.appveyor.com/api/projects/status/kkmqcftbl24bwnqk?svg=true)](https://ci.appveyor.com/project/dschlaep/rsoilwat)
+  [![Coverage Status](https://img.shields.io/coveralls/Burke-Lauenroth-Lab/Rsoilwat.svg)](https://coveralls.io/r/Burke-Lauenroth-Lab/Rsoilwat?branch=master)
+
 # Rsoilwat
 A R package for SOILWAT.
 
