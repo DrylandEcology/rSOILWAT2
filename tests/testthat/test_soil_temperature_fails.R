@@ -27,19 +27,21 @@ for (it in tests) {
     expect_s4_class(rd <- sw_exec(inputData = sw_input, weatherList = sw_weather,
         echo = FALSE, quiet = FALSE), "swOutput")
 
-    soiltemp <- slot(rd, "SOILTEMP")
-    time_steps <- sw_TimeSteps[1 + soiltemp@TimeStep]
+    if (!.Call("tempError")) {
+      soiltemp <- slot(rd, "SOILTEMP")
+      time_steps <- sw_TimeSteps[1 + soiltemp@TimeStep]
 
-    for (k in seq_along(time_steps)) {
-      x1 <- slot(soiltemp, time_steps[k])
+      for (k in seq_along(time_steps)) {
+        x1 <- slot(soiltemp, time_steps[k])
 
-      if (all(dim(x1) > 0)) {
-        info <- paste("test-data", it, "- slot", time_steps[k])
-        x <- x1[, seq.int(ncol(x1) - soiltemp@Columns + 1, ncol(x1))]
+        if (all(dim(x1) > 0)) {
+          info <- paste("test-data", it, "- slot", time_steps[k])
+          x <- x1[, seq.int(ncol(x1) - soiltemp@Columns + 1, ncol(x1))]
 
-        expect_true(all(is.finite(x)), info = info)
-        expect_true(all(x > -100), info = info)
-        expect_true(all(x < +100), info = info)
+          expect_true(all(is.finite(x)), info = info)
+          expect_true(all(x > -100), info = info)
+          expect_true(all(x < +100), info = info)
+        }
       }
     }
   })
