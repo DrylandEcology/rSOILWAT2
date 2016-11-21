@@ -693,12 +693,18 @@ dbW_weatherData_to_monthly <- function(dailySW) {
 
 # Conversion: object of daily weather data.frame to matrix of monthly values (mean Tmax, mean Tmin, sum PPT)
 dbW_dataframe_to_monthly <- function(dailySW) {
-	month <- as.POSIXlt(apply(dailySW[, c("Year", "DOY")], 1, paste, collapse = "-"), format = "%Y-%j", tz = "UTC")$mon + 1
-	as.matrix(cbind(Year = month[, 2], Month = month[, 1],
-		Tmax_C = as.vector(tapply(dailySW[, "Tmax_C"], INDEX = list(month, dailySW[, "Year"]), FUN = mean)),
-		Tmin_C = as.vector(tapply(dailySW[, "Tmin_C"], INDEX = list(month, dailySW[, "Year"]), FUN = mean)),
-		PPT_cm = as.vector(tapply(dailySW[, "PPT_cm"], INDEX = list(month, dailySW[, "Year"]), FUN = sum))
-	))
+  temp <- apply(dailySW[, c("Year", "DOY")], 1, paste, collapse = "-")
+  temp <- as.POSIXlt(temp, format = "%Y-%j", tz = "UTC")
+  ytemp <- unique(temp$year)
+  year <- rep(1900L + ytemp, each = 12)
+  month <- rep(seq_len(12), times = length(ytemp))
+  ltemp <- list(1L + temp$mon, dailySW[, "Year"])
+
+  as.matrix(cbind(Year = year, Month = month,
+    Tmax_C = as.vector(tapply(dailySW[, "Tmax_C"], INDEX = ltemp, FUN = mean)),
+    Tmin_C = as.vector(tapply(dailySW[, "Tmin_C"], INDEX = ltemp, FUN = mean)),
+    PPT_cm = as.vector(tapply(dailySW[, "PPT_cm"], INDEX = ltemp, FUN = sum))
+  ))
 }
 
 
