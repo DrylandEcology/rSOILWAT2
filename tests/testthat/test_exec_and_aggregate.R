@@ -3,7 +3,7 @@ context("Rsoilwat annual aggregation")
 #---CONSTANTS
 tol <- 1e-6
 OutSum <- c("off", "sum", "mean", "fnl")
-tests <- c("Ex1")
+tests <- c("Ex1", "Ex2")
 
 for (it in tests) {
   #---INPUTS
@@ -32,6 +32,10 @@ for (it in tests) {
     expect_true(length(vars) == length(fun_agg))
 
     for (k in seq_along(vars)) {
+      if (vars[k] == "SWPMATRIC") {
+        next # SWP is not additive; SOILWAT uses pedotransfer functions
+      }
+
       x1 <- slot(rd, vars[k])
 
       if ("Year" %in% slotNames(x1) && nrow(x1@Year) > 0 &&
