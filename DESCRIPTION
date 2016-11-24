@@ -1,8 +1,8 @@
 Package: Rsoilwat31
-Version: 1.2.0
-Date: 2016-11-11
+Version: 1.2.1
+Date: 2016-11-24
 Title: An Ecohydrological Ecosystem-Scale Water Balance Simulation Model
-Description: Access to the C-based 'SOILWAT' v3.2.5 and functionality for
+Description: Access to the C-based 'SOILWAT' v3.2.6 and functionality for
   SQLite-database of weather data.
 Authors@R: c(person("Ryan", "Murphy", role = "aut"),
   person("Daniel", "Schlaepfer", role = c("aut", "cre"), email = "daniel.schlaepfer@unibas.ch"),
@@ -14,7 +14,7 @@ Imports:
   methods,
   utils,
   RSQLite (>= 1.0.0),
-  DBI (>= 0.4.1),
+  DBI (>= 0.5),
 Suggests:
   testthat,
   covr
