@@ -27,7 +27,6 @@ for (it in tests) {
     expect_s4_class(rd <- sw_exec(inputData = sw_input, weatherList = sw_weather,
         echo = FALSE, quiet = FALSE), "swOutput")
 
-    if (!.Call("tempError")) {
       soiltemp <- slot(rd, "SOILTEMP")
       time_steps <- sw_TimeSteps[1 + soiltemp@TimeStep]
 
@@ -43,6 +42,5 @@ for (it in tests) {
           expect_true(all(x < +100), info = info)
         }
       }
-    }
   })
 }
