@@ -2,20 +2,20 @@
 % Please edit documentation in R/Rsoilwat31-package.R
 \docType{class}
 \name{swYears-class}
-\alias{swClear,swYears-method}
-\alias{swReadLines,swYears-method}
-\alias{swWriteLines,swYears-method}
 \alias{swYears-class}
-\alias{swYears_EDOEY,swYears-method}
 \alias{swYears_EDOEY<-,swYears-method}
-\alias{swYears_EndYear,swYears-method}
+\alias{swYears_EDOEY,swYears-method}
 \alias{swYears_EndYear<-,swYears-method}
-\alias{swYears_FDOFY,swYears-method}
+\alias{swYears_EndYear,swYears-method}
 \alias{swYears_FDOFY<-,swYears-method}
-\alias{swYears_StartYear,swYears-method}
-\alias{swYears_StartYear<-,swYears-method}
-\alias{swYears_isNorth,swYears-method}
+\alias{swYears_FDOFY,swYears-method}
 \alias{swYears_isNorth<-,swYears-method}
+\alias{swYears_isNorth,swYears-method}
+\alias{swYears_StartYear<-,swYears-method}
+\alias{swYears_StartYear,swYears-method}
+\alias{swClear,swYears-method}
+\alias{swWriteLines,swYears-method}
+\alias{swReadLines,swYears-method}
 \title{Class \code{"swYears"}}
 \description{
 The generic functions listed work on this and the proper sw Class in the container's slots.
@@ -24,13 +24,11 @@ The generic functions listed work on this and the proper sw Class in the contain
  Objects can be created by calls of the form
 \code{new("swYears", ...)}.
 }
+
 \examples{
 
 showClass("swYears")
 
-}
-\author{
-Ryan Murphy
 }
 \references{
 https://github.com/Burke-Lauenroth-Lab/Rsoilwat
@@ -43,5 +41,7 @@ https://github.com/Burke-Lauenroth-Lab/Rsoilwat
 \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
 }
+\author{
+Ryan Murphy
+}
 \keyword{classes}
-

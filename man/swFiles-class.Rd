@@ -2,42 +2,42 @@
 % Please edit documentation in R/Rsoilwat31-package.R
 \docType{class}
 \name{swFiles-class}
-\alias{swClear,swFiles-method}
 \alias{swFiles-class}
-\alias{swFiles_Cloud,swFiles-method}
 \alias{swFiles_Cloud<-,swFiles-method}
-\alias{swFiles_Estab,swFiles-method}
+\alias{swFiles_Cloud,swFiles-method}
 \alias{swFiles_Estab<-,swFiles-method}
-\alias{swFiles_LogFile,swFiles-method}
-\alias{swFiles_LogFile<-,swFiles-method}
-\alias{swFiles_MarkovCov,swFiles-method}
-\alias{swFiles_MarkovCov<-,swFiles-method}
-\alias{swFiles_MarkovProbs,swFiles-method}
-\alias{swFiles_MarkovProbs<-,swFiles-method}
-\alias{swFiles_Output,swFiles-method}
-\alias{swFiles_Output<-,swFiles-method}
-\alias{swFiles_OutputPrefix,swFiles-method}
-\alias{swFiles_OutputPrefix<-,swFiles-method}
-\alias{swFiles_Prod,swFiles-method}
-\alias{swFiles_Prod<-,swFiles-method}
-\alias{swFiles_ProjDir,swFiles-method}
-\alias{swFiles_ProjDir<-,swFiles-method}
-\alias{swFiles_SWCsetup,swFiles-method}
-\alias{swFiles_SWCsetup<-,swFiles-method}
-\alias{swFiles_SiteParams,swFiles-method}
-\alias{swFiles_SiteParams<-,swFiles-method}
-\alias{swFiles_Soils,swFiles-method}
-\alias{swFiles_Soils<-,swFiles-method}
-\alias{swFiles_WeatherPrefix,swFiles-method}
-\alias{swFiles_WeatherPrefix<-,swFiles-method}
-\alias{swFiles_WeatherSetup,swFiles-method}
-\alias{swFiles_WeatherSetup<-,swFiles-method}
-\alias{swFiles_Years,swFiles-method}
-\alias{swFiles_Years<-,swFiles-method}
-\alias{swFiles_filesIn,swFiles-method}
+\alias{swFiles_Estab,swFiles-method}
 \alias{swFiles_filesIn<-,swFiles-method}
-\alias{swReadLines,swFiles-method}
+\alias{swFiles_filesIn,swFiles-method}
+\alias{swFiles_LogFile<-,swFiles-method}
+\alias{swFiles_LogFile,swFiles-method}
+\alias{swFiles_MarkovCov<-,swFiles-method}
+\alias{swFiles_MarkovCov,swFiles-method}
+\alias{swFiles_MarkovProbs<-,swFiles-method}
+\alias{swFiles_MarkovProbs,swFiles-method}
+\alias{swFiles_OutputPrefix<-,swFiles-method}
+\alias{swFiles_OutputPrefix,swFiles-method}
+\alias{swFiles_Output<-,swFiles-method}
+\alias{swFiles_Output,swFiles-method}
+\alias{swFiles_Prod<-,swFiles-method}
+\alias{swFiles_Prod,swFiles-method}
+\alias{swFiles_ProjDir<-,swFiles-method}
+\alias{swFiles_ProjDir,swFiles-method}
+\alias{swFiles_SiteParams<-,swFiles-method}
+\alias{swFiles_SiteParams,swFiles-method}
+\alias{swFiles_Soils<-,swFiles-method}
+\alias{swFiles_Soils,swFiles-method}
+\alias{swFiles_SWCsetup<-,swFiles-method}
+\alias{swFiles_SWCsetup,swFiles-method}
+\alias{swFiles_WeatherPrefix<-,swFiles-method}
+\alias{swFiles_WeatherPrefix,swFiles-method}
+\alias{swFiles_WeatherSetup<-,swFiles-method}
+\alias{swFiles_WeatherSetup,swFiles-method}
+\alias{swFiles_Years<-,swFiles-method}
+\alias{swFiles_Years,swFiles-method}
+\alias{swClear,swFiles-method}
 \alias{swWriteLines,swFiles-method}
+\alias{swReadLines,swFiles-method}
 \title{Class \code{"swFiles"}}
 \description{
 The generic functions listed work on this and the proper sw Class in the container's slots.
@@ -46,13 +46,11 @@ The generic functions listed work on this and the proper sw Class in the contain
  Objects can be created by calls of the form
 \code{new("swFiles", ...)}.
 }
+
 \examples{
 
 showClass("swFiles")
 
-}
-\author{
-Ryan Murphy
 }
 \references{
 https://github.com/Burke-Lauenroth-Lab/Rsoilwat
@@ -65,5 +63,7 @@ https://github.com/Burke-Lauenroth-Lab/Rsoilwat
 \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
 }
+\author{
+Ryan Murphy
+}
 \keyword{classes}
-

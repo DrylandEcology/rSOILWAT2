@@ -2,40 +2,40 @@
 % Please edit documentation in R/Rsoilwat31-package.R
 \docType{class}
 \name{swProd-class}
-\alias{swClear,swProd-method}
 \alias{swProd-class}
-\alias{swProd_Albedo,swProd-method}
 \alias{swProd_Albedo<-,swProd-method}
-\alias{swProd_CanopyHeight,swProd-method}
+\alias{swProd_Albedo,swProd-method}
 \alias{swProd_CanopyHeight<-,swProd-method}
-\alias{swProd_Composition,swProd-method}
+\alias{swProd_CanopyHeight,swProd-method}
 \alias{swProd_Composition<-,swProd-method}
-\alias{swProd_Cover_stcr,swProd-method}
+\alias{swProd_Composition,swProd-method}
 \alias{swProd_Cover_stcr<-,swProd-method}
-\alias{swProd_CritSoilWaterPotential,swProd-method}
+\alias{swProd_Cover_stcr,swProd-method}
 \alias{swProd_CritSoilWaterPotential<-,swProd-method}
-\alias{swProd_EsTpartitioning_param,swProd-method}
-\alias{swProd_EsTpartitioning_param<-,swProd-method}
-\alias{swProd_Es_param_limit,swProd-method}
+\alias{swProd_CritSoilWaterPotential,swProd-method}
 \alias{swProd_Es_param_limit<-,swProd-method}
-\alias{swProd_HydrRedstro,swProd-method}
+\alias{swProd_Es_param_limit,swProd-method}
+\alias{swProd_EsTpartitioning_param<-,swProd-method}
+\alias{swProd_EsTpartitioning_param,swProd-method}
 \alias{swProd_HydrRedstro<-,swProd-method}
-\alias{swProd_HydrRedstro_use,swProd-method}
+\alias{swProd_HydrRedstro,swProd-method}
 \alias{swProd_HydrRedstro_use<-,swProd-method}
-\alias{swProd_LitterInterParam,swProd-method}
+\alias{swProd_HydrRedstro_use,swProd-method}
 \alias{swProd_LitterInterParam<-,swProd-method}
-\alias{swProd_MonProd_grass,swProd-method}
+\alias{swProd_LitterInterParam,swProd-method}
 \alias{swProd_MonProd_grass<-,swProd-method}
-\alias{swProd_MonProd_shrub,swProd-method}
+\alias{swProd_MonProd_grass,swProd-method}
 \alias{swProd_MonProd_shrub<-,swProd-method}
-\alias{swProd_MonProd_tree,swProd-method}
+\alias{swProd_MonProd_shrub,swProd-method}
 \alias{swProd_MonProd_tree<-,swProd-method}
-\alias{swProd_Shade,swProd-method}
+\alias{swProd_MonProd_tree,swProd-method}
 \alias{swProd_Shade<-,swProd-method}
-\alias{swProd_VegInterParam,swProd-method}
+\alias{swProd_Shade,swProd-method}
 \alias{swProd_VegInterParam<-,swProd-method}
-\alias{swReadLines,swProd-method}
+\alias{swProd_VegInterParam,swProd-method}
+\alias{swClear,swProd-method}
 \alias{swWriteLines,swProd-method}
+\alias{swReadLines,swProd-method}
 \title{Class \code{"swProd"}}
 \description{
 The generic functions listed work on this and the proper sw Class in the container's slots.
@@ -44,13 +44,11 @@ The generic functions listed work on this and the proper sw Class in the contain
  Objects can be created by calls of the form
 \code{new("swProd", ...)}.
 }
+
 \examples{
 
 showClass("swProd")
 
-}
-\author{
-Ryan Murphy
 }
 \references{
 https://github.com/Burke-Lauenroth-Lab/Rsoilwat
@@ -63,5 +61,7 @@ https://github.com/Burke-Lauenroth-Lab/Rsoilwat
 \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
 }
+\author{
+Ryan Murphy
+}
 \keyword{classes}
-

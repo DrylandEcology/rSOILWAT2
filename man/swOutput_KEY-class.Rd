@@ -3,12 +3,12 @@
 \docType{class}
 \name{swOutput_KEY-class}
 \alias{swOutput_KEY-class}
-\alias{swOutput_KEY_Columns,swOUT-method}
-\alias{swOutput_KEY_Columns<-,swOUT-method}
-\alias{swOutput_KEY_Period,swOUT-method}
 \alias{swOutput_KEY_Period<-,swOUT-method}
-\alias{swOutput_KEY_TimeStep,swOUT-method}
+\alias{swOutput_KEY_Period,swOUT-method}
 \alias{swOutput_KEY_TimeStep<-,swOUT-method}
+\alias{swOutput_KEY_TimeStep,swOUT-method}
+\alias{swOutput_KEY_Columns<-,swOUT-method}
+\alias{swOutput_KEY_Columns,swOUT-method}
 \title{Class \code{"swOutput_KEY"}}
 \description{
 The generic functions listed work on this and the proper sw Class in the container's slots.
@@ -17,13 +17,11 @@ The generic functions listed work on this and the proper sw Class in the contain
  Objects can be created by calls of the form
 \code{new("swOutput_KEY", ...)}.
 }
+
 \examples{
 
 showClass("swOutput_KEY")
 
-}
-\author{
-Ryan Murphy
 }
 \references{
 https://github.com/Burke-Lauenroth-Lab/Rsoilwat
@@ -36,5 +34,7 @@ https://github.com/Burke-Lauenroth-Lab/Rsoilwat
 \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
 \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
 }
+\author{
+Ryan Murphy
+}
 \keyword{classes}
-

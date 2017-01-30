@@ -2,18 +2,18 @@
 % Please edit documentation in R/Rsoilwat31-package.R
 \docType{class}
 \name{swOUT-class}
-\alias{get_swOUT,swOUT-method}
-\alias{set_swOUT<-,swOUT-method}
-\alias{swClear,swOUT-method}
 \alias{swOUT-class}
-\alias{swOUT_OutputSeparator,swOUT-method}
+\alias{set_swOUT<-,swOUT-method}
+\alias{get_swOUT,swOUT-method}
 \alias{swOUT_OutputSeparator<-,swOUT-method}
-\alias{swOUT_TimeStep,swOUT-method}
+\alias{swOUT_OutputSeparator,swOUT-method}
 \alias{swOUT_TimeStep<-,swOUT-method}
-\alias{swOUT_useTimeStep,swOUT-method}
+\alias{swOUT_TimeStep,swOUT-method}
 \alias{swOUT_useTimeStep<-,swOUT-method}
-\alias{swReadLines,swOUT-method}
+\alias{swOUT_useTimeStep,swOUT-method}
+\alias{swClear,swOUT-method}
 \alias{swWriteLines,swOUT-method}
+\alias{swReadLines,swOUT-method}
 \title{Class \code{"swOUT"}}
 \description{
 The generic functions listed work on this and the proper sw Class in the container's slots.
@@ -22,13 +22,11 @@ The generic functions listed work on this and the proper sw Class in the contain
  Objects can be created by calls of the form
 \code{new("swOUT", ...)}.
 }
+
 \examples{
 
 showClass("swOUT")
 
-}
-\author{
-Ryan Murphy
 }
 \references{
 https://github.com/Burke-Lauenroth-Lab/Rsoilwat
@@ -41,5 +39,7 @@ https://github.com/Burke-Lauenroth-Lab/Rsoilwat
 \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
 \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
 }
+\author{
+Ryan Murphy
+}
 \keyword{classes}
-

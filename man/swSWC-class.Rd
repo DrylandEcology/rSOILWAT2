@@ -2,22 +2,22 @@
 % Please edit documentation in R/Rsoilwat31-package.R
 \docType{class}
 \name{swSWC-class}
-\alias{swClear,swSWC-method}
-\alias{swReadLines,swSWC-method}
 \alias{swSWC-class}
-\alias{swSWC_FirstYear,swSWC-method}
 \alias{swSWC_FirstYear<-,swSWC,integer-method}
-\alias{swSWC_HistoricData,swSWC-method}
+\alias{swSWC_FirstYear,swSWC-method}
 \alias{swSWC_HistoricData<-,swSWC-method}
-\alias{swSWC_HistoricList,swSWC-method}
+\alias{swSWC_HistoricData,swSWC-method}
 \alias{swSWC_HistoricList<-,swSWC,list-method}
-\alias{swSWC_Method,swSWC-method}
+\alias{swSWC_HistoricList,swSWC-method}
 \alias{swSWC_Method<-,swSWC,integer-method}
-\alias{swSWC_prefix,swSWC-method}
+\alias{swSWC_Method,swSWC-method}
 \alias{swSWC_prefix<-,swSWC,character-method}
-\alias{swSWC_use,swSWC-method}
+\alias{swSWC_prefix,swSWC-method}
 \alias{swSWC_use<-,swSWC,logical-method}
+\alias{swSWC_use,swSWC-method}
+\alias{swClear,swSWC-method}
 \alias{swWriteLines,swSWC-method}
+\alias{swReadLines,swSWC-method}
 \title{Class \code{"swSWC"}}
 \description{
 The generic functions listed work on this and the proper sw Class in the container's slots.
@@ -26,13 +26,11 @@ The generic functions listed work on this and the proper sw Class in the contain
  Objects can be created by calls of the form
 \code{new("swSWC", ...)}.
 }
+
 \examples{
 
 showClass("swSWC")
 
-}
-\author{
-Ryan Murphy
 }
 \references{
 https://github.com/Burke-Lauenroth-Lab/Rsoilwat
@@ -45,5 +43,7 @@ https://github.com/Burke-Lauenroth-Lab/Rsoilwat
 \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 \code{\linkS4class{swInputData}} \code{\linkS4class{swLog}}
 }
+\author{
+Ryan Murphy
+}
 \keyword{classes}
-

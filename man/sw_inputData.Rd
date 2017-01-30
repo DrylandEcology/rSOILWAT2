@@ -58,13 +58,12 @@ str(sw_in, max.level=2)
 \dontrun{sw_out <- sw_exec(inputData = sw_in)}
 
 }
-\author{
-Ryan Murphy
-}
 \seealso{
 \itemize{ \item \code{\link{sw_exec}} for running a simulation
 \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
 data input \item \code{\link{dbW_getWeatherData}} and
 \code{\link{getWeatherData_folders}} for weather data input }
 }
-
+\author{
+Ryan Murphy
+}

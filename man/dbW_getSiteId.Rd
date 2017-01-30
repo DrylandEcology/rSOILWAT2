@@ -23,4 +23,3 @@ Extract weather database key to connect a site with weather data
 The key (SiteId) can be located by either providing a \code{Label} or
 by providing \code{lat} and \code{long} of the requested site.
 }
-

@@ -20,4 +20,3 @@ which can be inserted into a SQLite DB.
 \seealso{
 \code{\link{memCompress}}, \code{\link{serialize}}
 }
-

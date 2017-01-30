@@ -23,4 +23,3 @@ A dataset containing complete daily weather values for maximum and minimum air t
  and precipitation for 62 years from 1949 to 2010 for a unspecified location.
 }
 \keyword{datasets}
-

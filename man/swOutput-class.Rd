@@ -3,8 +3,8 @@
 \docType{class}
 \name{swOutput-class}
 \alias{swOutput-class}
-\alias{swOutput_getKEY,swOutput-method}
 \alias{swOutput_getKEY<-,swOutput-method}
+\alias{swOutput_getKEY,swOutput-method}
 \title{Class \code{"swOutput"}}
 \description{
 The generic functions listed work on this and the proper sw Class in the container's slots.
@@ -13,13 +13,11 @@ The generic functions listed work on this and the proper sw Class in the contain
  Objects can be created by calls of the form
 \code{new("swOutput", ...)}.
 }
+
 \examples{
 
 showClass("swOutput")
 
-}
-\author{
-Ryan Murphy
 }
 \references{
 https://github.com/Burke-Lauenroth-Lab/Rsoilwat
@@ -32,5 +30,7 @@ https://github.com/Burke-Lauenroth-Lab/Rsoilwat
 \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
 \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
 }
+\author{
+Ryan Murphy
+}
 \keyword{classes}
-

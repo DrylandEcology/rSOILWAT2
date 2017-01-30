@@ -22,6 +22,6 @@ NeedsCompilation: yes
 License: GPL (>= 3)
 URL: https://github.com/Burke-Lauenroth-Lab/Rsoilwat
 BugReports: https://github.com/Burke-Lauenroth-Lab/Rsoilwat/issues
-RoxygenNote: 5.0.1
+RoxygenNote: 5.0.1.9000
 LazyData: true
 ByteCompile: true

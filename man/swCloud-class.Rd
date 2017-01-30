@@ -2,20 +2,20 @@
 % Please edit documentation in R/Rsoilwat31-package.R
 \docType{class}
 \name{swCloud-class}
-\alias{swClear,swCloud-method}
 \alias{swCloud-class}
-\alias{swCloud_Humidity,swCloud-method}
 \alias{swCloud_Humidity<-,swCloud-method}
-\alias{swCloud_SkyCover,swCloud-method}
+\alias{swCloud_Humidity,swCloud-method}
 \alias{swCloud_SkyCover<-,swCloud-method}
-\alias{swCloud_SnowDensity,swCloud-method}
+\alias{swCloud_SkyCover,swCloud-method}
 \alias{swCloud_SnowDensity<-,swCloud-method}
-\alias{swCloud_Transmissivity,swCloud-method}
+\alias{swCloud_SnowDensity,swCloud-method}
 \alias{swCloud_Transmissivity<-,swCloud-method}
-\alias{swCloud_WindSpeed,swCloud-method}
+\alias{swCloud_Transmissivity,swCloud-method}
 \alias{swCloud_WindSpeed<-,swCloud-method}
-\alias{swReadLines,swCloud-method}
+\alias{swCloud_WindSpeed,swCloud-method}
+\alias{swClear,swCloud-method}
 \alias{swWriteLines,swCloud-method}
+\alias{swReadLines,swCloud-method}
 \title{Class \code{"swCloud"}}
 \description{
 The generic functions listed work on this and the proper sw Class in the container's slots.
@@ -24,13 +24,11 @@ The generic functions listed work on this and the proper sw Class in the contain
  Objects can be created by calls of the form
 \code{new("swCloud", ...)}.
 }
+
 \examples{
 
 showClass("swCloud")
 
-}
-\author{
-Ryan Murphy
 }
 \references{
 https://github.com/Burke-Lauenroth-Lab/Rsoilwat
@@ -43,5 +41,7 @@ https://github.com/Burke-Lauenroth-Lab/Rsoilwat
 \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
 }
+\author{
+Ryan Murphy
+}
 \keyword{classes}
-

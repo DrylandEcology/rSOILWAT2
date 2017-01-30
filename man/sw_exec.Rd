@@ -141,9 +141,6 @@ sw_out5 <- sw_exec(inputData = sw_in5, weatherList = NULL)
 ## See help(package = "Rsoilwat31") for a full list of functions
 
 }
-\author{
-Ryan Murphy
-}
 \references{
 Bradford, J. B., D. R. Schlaepfer, and W. K. Lauenroth (2014)
 Ecohydrology of adjacent sagebrush and lodgepole pine ecosystems: The
@@ -166,4 +163,6 @@ dynamics in the shortgrass steppe.  \emph{Ecology} \bold{73}:1175--1181.
 data input \item \code{\link{dbW_getWeatherData}} and
 \code{\link{getWeatherData_folders}} for weather data input }
 }
-
+\author{
+Ryan Murphy
+}

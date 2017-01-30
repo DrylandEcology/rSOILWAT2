@@ -19,4 +19,3 @@ to convert the blob object to the object used by Rsoilwat's simulation functions
 \seealso{
 \code{\link{memDecompress}}, \code{\link{unserialize}}
 }
-

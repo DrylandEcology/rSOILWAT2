@@ -2,24 +2,24 @@
 % Please edit documentation in R/Rsoilwat31-package.R
 \docType{class}
 \name{swWeather-class}
-\alias{swClear,swWeather-method}
-\alias{swReadLines,swWeather-method}
 \alias{swWeather-class}
-\alias{swWeather_DaysRunningAverage,swWeather-method}
 \alias{swWeather_DaysRunningAverage<-,swWeather-method}
-\alias{swWeather_FirstYearHistorical,swWeather-method}
+\alias{swWeather_DaysRunningAverage,swWeather-method}
 \alias{swWeather_FirstYearHistorical<-,swWeather-method}
-\alias{swWeather_MonScalingParams,swWeather-method}
+\alias{swWeather_FirstYearHistorical,swWeather-method}
 \alias{swWeather_MonScalingParams<-,swWeather-method}
-\alias{swWeather_UseMarkov,swWeather-method}
-\alias{swWeather_UseMarkov<-,swWeather-method}
-\alias{swWeather_UseSnow,swWeather-method}
-\alias{swWeather_UseSnow<-,swWeather-method}
-\alias{swWeather_pct_SnowDrift,swWeather-method}
+\alias{swWeather_MonScalingParams,swWeather-method}
 \alias{swWeather_pct_SnowDrift<-,swWeather-method}
-\alias{swWeather_pct_SnowRunoff,swWeather-method}
+\alias{swWeather_pct_SnowDrift,swWeather-method}
 \alias{swWeather_pct_SnowRunoff<-,swWeather-method}
+\alias{swWeather_pct_SnowRunoff,swWeather-method}
+\alias{swWeather_UseMarkov<-,swWeather-method}
+\alias{swWeather_UseMarkov,swWeather-method}
+\alias{swWeather_UseSnow<-,swWeather-method}
+\alias{swWeather_UseSnow,swWeather-method}
+\alias{swClear,swWeather-method}
 \alias{swWriteLines,swWeather-method}
+\alias{swReadLines,swWeather-method}
 \title{Class \code{"swWeather"}}
 \description{
 The generic functions listed work on this and the proper sw Class in the container's slots.
@@ -28,13 +28,11 @@ The generic functions listed work on this and the proper sw Class in the contain
  Objects can be created by calls of the form
 \code{new("swWeather", ...)}.
 }
+
 \examples{
 
 showClass("swWeather")
 
-}
-\author{
-Ryan Murphy
 }
 \references{
 https://github.com/Burke-Lauenroth-Lab/Rsoilwat
@@ -47,5 +45,7 @@ https://github.com/Burke-Lauenroth-Lab/Rsoilwat
 \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
 }
+\author{
+Ryan Murphy
+}
 \keyword{classes}
-

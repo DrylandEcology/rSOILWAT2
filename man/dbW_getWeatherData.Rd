@@ -45,9 +45,6 @@ you have to impute yourself or use the built-in Markov weather generator
 The output from this function can be passed directly to sw_exec with input
 data.
 }
-\author{
-Ryan Murphy
-}
 \seealso{
 \itemize{
    \item \code{\link{sw_exec}} for running a simulation
@@ -56,4 +53,6 @@ data input \item \code{\link{dbW_getWeatherData}} and
 \code{\link{getWeatherData_folders}} for weather data input
 }
 }
-
+\author{
+Ryan Murphy
+}
