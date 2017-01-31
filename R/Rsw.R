@@ -347,3 +347,12 @@ sw_inputData <- function() {
 
   temp
 }
+
+
+#' Check if soil temperature simulation failed
+#'
+#' @return A logical value
+#' @export
+has_soilTemp_failed <- function() {
+  .Call("tempError", PACKAGE = "Rsoilwat31")
+}
