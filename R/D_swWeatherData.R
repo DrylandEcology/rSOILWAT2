@@ -17,8 +17,8 @@
 ###############################################################################
 
 
-# TODO: 
-# 
+# TODO:
+#
 # Author: Ryan Murphy
 ###############################################################################
 
@@ -26,7 +26,8 @@
 
 ##############################################################################
 
-swWeatherData<-setClass("swWeatherData",representation(data="matrix",year="integer"),prototype=prototype(data=matrix(data=c(1:366,rep(999,366*3)),nrow=366,ncol=4),year=as.integer(1987)))
+#' @export
+setClass("swWeatherData",representation(data="matrix",year="integer"),prototype=prototype(data=matrix(data=c(1:366,rep(999,366*3)),nrow=366,ncol=4),year=as.integer(1987)))
 swWeatherData_validity<-function(object){
 	if(length(object@year)!=1|is.na(object@year)|object@year<0)
 		return("@year needs to be length 1,not NA and positive.")
@@ -60,11 +61,11 @@ setMethod("swWriteLines", signature=c(object="swWeatherData", file="character"),
 			infiletext <- character(dim(object@data)[1]+2)
 			infiletext[1] <- paste("# weather for site: year =  ",object@year,sep="")
 			infiletext[2] <- paste("# DOY Tmax(C) Tmin(C) PPT(cm)")
-			
+
 			for(i in 1:dim(object@data)[1]) {
 				infiletext[i + 2] <- paste(format(object@data[i,1]),"\t",format(object@data[i,2]),"\t",format(object@data[i,3]),"\t",format(object@data[i,4]),sep="")
 			}
-			
+
 			infile <- file(infilename, "w+b")
 			writeLines(text = infiletext, con = infile, sep = "\n")
 			close(infile)

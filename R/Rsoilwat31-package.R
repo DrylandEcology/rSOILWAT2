@@ -10,7 +10,6 @@
 #' input data. Output data is in the form of lists.
 #'
 #'
-#' @aliases Rsoilwat31 Rsoilwat31-package
 #' @section Version: The version level of the package is given by the command
 #' \code{packageDescription("Rsoilwat31")}. The most recent version of the
 #' package can be obtained from github at
@@ -36,10 +35,20 @@
 #'
 #' @docType package
 #' @name Rsoilwat31
-#' @aliases Rsoilwat, SoilWat, SOILWAT, Rsoilwat-package
+#' @aliases Rsoilwat31 Rsoilwat31-package Rsoilwat SoilWat SOILWAT SOILWAT2 Rsoilwat-package
 NULL
 
 
+##------ Import from other packages
+## Package uses S3/S4 classes - they are defined in package:methods
+#' @importFrom methods slot slot<- as as<- initialize new slotNames validObject
+#' @importFrom stats aggregate na.exclude
+#' @importFrom utils data head packageDescription read.csv read.table str tail write.table
+NULL
+
+##------ Access SOILWAT2 C code
+#' @useDynLib Rsoilwat31
+NULL
 
 #' Class \code{"swInputData"}
 #'
@@ -49,174 +58,174 @@ NULL
 #'
 #' @name swInputData-class
 #' @aliases swInputData-class
-#' get_Markov,swInputData-method
-#' get_swCloud,swInputData-method
-#' get_swFiles,swInputData-method
-#' get_swOUT,swInputData-method
-#' get_swProd,swInputData-method
-#' get_swSite,swInputData-method
-#' get_swSoils,swInputData-method
-#' get_swSWC,swInputData-method
-#' get_swWeatherData,swInputData-method
-#' get_swWeather,swInputData-method
-#' get_swYears,swInputData-method
-#' get_WeatherHistory,swInputData-method
-#' set_Markov<-,swInputData-method
-#' set_swCloud<-,swInputData-method
-#' set_swFiles<-,swInputData-method
-#' set_swOUT<-,swInputData-method
-#' set_swProd<-,swInputData-method
-#' set_swSite<-,swInputData-method
-#' set_swSoils<-,swInputData,swSoils-method
-#' set_swSWC<-,swInputData,swSWC-method
-#' set_swWeatherData<-,swInputData,swWeatherData-method
-#' set_swWeather<-,swInputData-method
-#' set_swYears<-,swInputData-method
-#' set_WeatherHistory<-,swInputData,list-method
-#' swClear,swInputData-method
-#' swCloud_Humidity<-,swInputData-method
-#' swCloud_Humidity,swInputData-method
-#' swCloud_SkyCover<-,swInputData-method
-#' swCloud_SkyCover,swInputData-method
-#' swCloud_SnowDensity<-,swInputData-method
-#' swCloud_SnowDensity,swInputData-method
-#' swCloud_Transmissivity<-,swInputData-method
-#' swCloud_Transmissivity,swInputData-method
-#' swCloud_WindSpeed<-,swInputData-method
-#' swCloud_WindSpeed,swInputData-method
-#' swFiles_Cloud<-,swInputData-method
-#' swFiles_Cloud,swInputData-method
-#' swFiles_Estab<-,swInputData-method
-#' swFiles_Estab,swInputData-method
-#' swFiles_filesIn<-,swInputData-method
-#' swFiles_filesIn,swInputData-method
-#' swFiles_LogFile<-,swInputData-method
-#' swFiles_LogFile,swInputData-method
-#' swFiles_MarkovCov<-,swInputData-method
-#' swFiles_MarkovCov,swInputData-method
-#' swFiles_MarkovProbs<-,swInputData-method
-#' swFiles_MarkovProbs,swInputData-method
-#' swFiles_OutputPrefix<-,swInputData-method
-#' swFiles_OutputPrefix,swInputData-method
-#' swFiles_Output<-,swInputData-method
-#' swFiles_Output,swInputData-method
-#' swFiles_Prod<-,swInputData-method
-#' swFiles_Prod,swInputData-method
-#' swFiles_ProjDir<-,swInputData-method
-#' swFiles_ProjDir,swInputData-method
-#' swFiles_SiteParams<-,swInputData-method
-#' swFiles_SiteParams,swInputData-method
-#' swFiles_Soils<-,swInputData-method
-#' swFiles_Soils,swInputData-method
-#' swFiles_SWCsetup<-,swInputData-method
-#' swFiles_SWCsetup,swInputData-method
-#' swFiles_WeatherPrefix<-,swInputData-method
-#' swFiles_WeatherPrefix,swInputData-method
-#' swFiles_WeatherSetup<-,swInputData-method
-#' swFiles_WeatherSetup,swInputData-method
-#' swFiles_Years<-,swInputData-method
-#' swFiles_Years,swInputData-method
-#' swLog_setLine<-,swInputData-method
-#' swMarkov_Conv<-,swInputData-method
-#' swMarkov_Conv,swInputData-method
-#' swMarkov_Prob<-,swInputData-method
-#' swMarkov_Prob,swInputData-method
-#' swOUT_OutputSeparator<-,swInputData-method
-#' swOUT_OutputSeparator,swInputData-method
-#' swOUT_TimeStep<-,swInputData-method
-#' swOUT_TimeStep,swInputData-method
-#' swProd_Albedo<-,swInputData-method
-#' swProd_Albedo,swInputData-method
-#' swProd_CanopyHeight<-,swInputData-method
-#' swProd_CanopyHeight,swInputData-method
-#' swProd_Composition<-,swInputData-method
-#' swProd_Composition,swInputData-method
-#' swProd_Cover_stcr<-,swInputData-method
-#' swProd_Cover_stcr,swInputData-method
-#' swProd_CritSoilWaterPotential<-,swInputData-method
-#' swProd_CritSoilWaterPotential,swInputData-method
-#' swProd_Es_param_limit<-,swInputData-method
-#' swProd_Es_param_limit,swInputData-method
-#' swProd_EsTpartitioning_param<-,swInputData-method
-#' swProd_EsTpartitioning_param,swInputData-method
-#' swProd_HydrRedstro<-,swInputData-method
-#' swProd_HydrRedstro,swInputData-method
-#' swProd_HydrRedstro_use<-,swInputData-method
-#' swProd_HydrRedstro_use,swInputData-method
-#' swProd_LitterInterParam<-,swInputData-method
-#' swProd_LitterInterParam,swInputData-method
-#' swProd_MonProd_grass<-,swInputData-method
-#' swProd_MonProd_grass,swInputData-method
-#' swProd_MonProd_shrub<-,swInputData-method
-#' swProd_MonProd_shrub,swInputData-method
-#' swProd_MonProd_tree<-,swInputData-method
-#' swProd_MonProd_tree,swInputData-method
-#' swProd_Shade<-,swInputData-method
-#' swProd_Shade,swInputData-method
-#' swProd_VegInterParam<-,swInputData-method
-#' swProd_VegInterParam,swInputData-method
-#' swReadLines,swInputData,character-method
-#' swSite_DrainageCoefficient<-,swInputData-method
-#' swSite_DrainageCoefficient,swInputData-method
-#' swSite_EvapCoefficients<-,swInputData-method
-#' swSite_EvapCoefficients,swInputData-method
-#' swSite_IntrinsicSiteParams<-,swInputData-method
-#' swSite_IntrinsicSiteParams,swInputData-method
-#' swSite_ModelCoefficients<-,swInputData-method
-#' swSite_ModelCoefficients,swInputData-method
-#' swSite_ModelFlags<-,swInputData-method
-#' swSite_ModelFlags,swInputData-method
-#' swSite_SnowSimulationParams<-,swInputData-method
-#' swSite_SnowSimulationParams,swInputData-method
-#' swSite_SoilTemperatureConsts<-,swInputData-method
-#' swSite_SoilTemperatureConsts,swInputData-method
-#' swSite_SoilTemperatureFlag<-,swInputData-method
-#' swSite_SoilTemperatureFlag,swInputData-method
-#' swSite_SWClimits<-,swInputData-method
-#' swSite_SWClimits,swInputData-method
-#' swSite_TranspCoefficients<-,swInputData-method
-#' swSite_TranspCoefficients,swInputData-method
-#' swSite_TranspirationRegions<-,swInputData-method
-#' swSite_TranspirationRegions,swInputData-method
-#' swSoils_Layers<-,swInputData,matrix-method
-#' swSoils_Layers,swInputData-method
-#' swSWC_FirstYear<-,swInputData,integer-method
-#' swSWC_FirstYear,swInputData-method
-#' swSWC_HistoricData<-,swInputData,swSWC_hist-method
-#' swSWC_HistoricData,swInputData-method
-#' swSWC_HistoricList<-,swInputData,list-method
-#' swSWC_HistoricList,swInputData-method
-#' swSWC_Method<-,swInputData,integer-method
-#' swSWC_Method,swInputData-method
-#' swSWC_prefix<-,swInputData,character-method
-#' swSWC_prefix,swInputData-method
-#' swSWC_use<-,swInputData,logical-method
-#' swSWC_use,swInputData-method
-#' swWeather_DaysRunningAverage<-,swInputData-method
-#' swWeather_DaysRunningAverage,swInputData-method
-#' swWeather_FirstYearHistorical<-,swInputData-method
-#' swWeather_FirstYearHistorical,swInputData-method
-#' swWeather_MonScalingParams<-,swInputData-method
-#' swWeather_MonScalingParams,swInputData-method
-#' swWeather_pct_SnowDrift<-,swInputData-method
-#' swWeather_pct_SnowDrift,swInputData-method
-#' swWeather_pct_SnowRunoff<-,swInputData-method
-#' swWeather_pct_SnowRunoff,swInputData-method
-#' swWeather_UseMarkov<-,swInputData-method
-#' swWeather_UseMarkov,swInputData-method
-#' swWeather_UseSnow<-,swInputData-method
-#' swWeather_UseSnow,swInputData-method
-#' swWriteLines,swInputData,character-method
-#' swYears_EDOEY<-,swInputData-method
-#' swYears_EDOEY,swInputData-method
-#' swYears_EndYear<-,swInputData-method
-#' swYears_EndYear,swInputData-method
-#' swYears_FDOFY<-,swInputData-method
-#' swYears_FDOFY,swInputData-method
-#' swYears_isNorth<-,swInputData-method
-#' swYears_isNorth,swInputData-method
-#' swYears_StartYear<-,swInputData-method
-#' swYears_StartYear,swInputData-method
+#' get_Markov swInputData-method
+#' get_swCloud swInputData-method
+#' get_swFiles swInputData-method
+#' get_swOUT swInputData-method
+#' get_swProd swInputData-method
+#' get_swSite swInputData-method
+#' get_swSoils swInputData-method
+#' get_swSWC swInputData-method
+#' get_swWeatherData swInputData-method
+#' get_swWeather swInputData-method
+#' get_swYears swInputData-method
+#' get_WeatherHistory swInputData-method
+#' set_Markov<- swInputData-method
+#' set_swCloud<- swInputData-method
+#' set_swFiles<- swInputData-method
+#' set_swOUT<- swInputData-method
+#' set_swProd<- swInputData-method
+#' set_swSite<- swInputData-method
+#' set_swSoils<- swInputData swSoils-method
+#' set_swSWC<- swInputData swSWC-method
+#' set_swWeatherData<- swInputData swWeatherData-method
+#' set_swWeather<- swInputData-method
+#' set_swYears<- swInputData-method
+#' set_WeatherHistory<- swInputData list-method
+#' swClear swInputData-method
+#' swCloud_Humidity<- swInputData-method
+#' swCloud_Humidity swInputData-method
+#' swCloud_SkyCover<- swInputData-method
+#' swCloud_SkyCover swInputData-method
+#' swCloud_SnowDensity<- swInputData-method
+#' swCloud_SnowDensity swInputData-method
+#' swCloud_Transmissivity<- swInputData-method
+#' swCloud_Transmissivity swInputData-method
+#' swCloud_WindSpeed<- swInputData-method
+#' swCloud_WindSpeed swInputData-method
+#' swFiles_Cloud<- swInputData-method
+#' swFiles_Cloud swInputData-method
+#' swFiles_Estab<- swInputData-method
+#' swFiles_Estab swInputData-method
+#' swFiles_filesIn<- swInputData-method
+#' swFiles_filesIn swInputData-method
+#' swFiles_LogFile<- swInputData-method
+#' swFiles_LogFile swInputData-method
+#' swFiles_MarkovCov<- swInputData-method
+#' swFiles_MarkovCov swInputData-method
+#' swFiles_MarkovProbs<- swInputData-method
+#' swFiles_MarkovProbs swInputData-method
+#' swFiles_OutputPrefix<- swInputData-method
+#' swFiles_OutputPrefix swInputData-method
+#' swFiles_Output<- swInputData-method
+#' swFiles_Output swInputData-method
+#' swFiles_Prod<- swInputData-method
+#' swFiles_Prod swInputData-method
+#' swFiles_ProjDir<- swInputData-method
+#' swFiles_ProjDir swInputData-method
+#' swFiles_SiteParams<- swInputData-method
+#' swFiles_SiteParams swInputData-method
+#' swFiles_Soils<- swInputData-method
+#' swFiles_Soils swInputData-method
+#' swFiles_SWCsetup<- swInputData-method
+#' swFiles_SWCsetup swInputData-method
+#' swFiles_WeatherPrefix<- swInputData-method
+#' swFiles_WeatherPrefix swInputData-method
+#' swFiles_WeatherSetup<- swInputData-method
+#' swFiles_WeatherSetup swInputData-method
+#' swFiles_Years<- swInputData-method
+#' swFiles_Years swInputData-method
+#' swLog_setLine<- swInputData-method
+#' swMarkov_Conv<- swInputData-method
+#' swMarkov_Conv swInputData-method
+#' swMarkov_Prob<- swInputData-method
+#' swMarkov_Prob swInputData-method
+#' swOUT_OutputSeparator<- swInputData-method
+#' swOUT_OutputSeparator swInputData-method
+#' swOUT_TimeStep<- swInputData-method
+#' swOUT_TimeStep swInputData-method
+#' swProd_Albedo<- swInputData-method
+#' swProd_Albedo swInputData-method
+#' swProd_CanopyHeight<- swInputData-method
+#' swProd_CanopyHeight swInputData-method
+#' swProd_Composition<- swInputData-method
+#' swProd_Composition swInputData-method
+#' swProd_Cover_stcr<- swInputData-method
+#' swProd_Cover_stcr swInputData-method
+#' swProd_CritSoilWaterPotential<- swInputData-method
+#' swProd_CritSoilWaterPotential swInputData-method
+#' swProd_Es_param_limit<- swInputData-method
+#' swProd_Es_param_limit swInputData-method
+#' swProd_EsTpartitioning_param<- swInputData-method
+#' swProd_EsTpartitioning_param swInputData-method
+#' swProd_HydrRedstro<- swInputData-method
+#' swProd_HydrRedstro swInputData-method
+#' swProd_HydrRedstro_use<- swInputData-method
+#' swProd_HydrRedstro_use swInputData-method
+#' swProd_LitterInterParam<- swInputData-method
+#' swProd_LitterInterParam swInputData-method
+#' swProd_MonProd_grass<- swInputData-method
+#' swProd_MonProd_grass swInputData-method
+#' swProd_MonProd_shrub<- swInputData-method
+#' swProd_MonProd_shrub swInputData-method
+#' swProd_MonProd_tree<- swInputData-method
+#' swProd_MonProd_tree swInputData-method
+#' swProd_Shade<- swInputData-method
+#' swProd_Shade swInputData-method
+#' swProd_VegInterParam<- swInputData-method
+#' swProd_VegInterParam swInputData-method
+#' swReadLines swInputData character-method
+#' swSite_DrainageCoefficient<- swInputData-method
+#' swSite_DrainageCoefficient swInputData-method
+#' swSite_EvapCoefficients<- swInputData-method
+#' swSite_EvapCoefficients swInputData-method
+#' swSite_IntrinsicSiteParams<- swInputData-method
+#' swSite_IntrinsicSiteParams swInputData-method
+#' swSite_ModelCoefficients<- swInputData-method
+#' swSite_ModelCoefficients swInputData-method
+#' swSite_ModelFlags<- swInputData-method
+#' swSite_ModelFlags swInputData-method
+#' swSite_SnowSimulationParams<- swInputData-method
+#' swSite_SnowSimulationParams swInputData-method
+#' swSite_SoilTemperatureConsts<- swInputData-method
+#' swSite_SoilTemperatureConsts swInputData-method
+#' swSite_SoilTemperatureFlag<- swInputData-method
+#' swSite_SoilTemperatureFlag swInputData-method
+#' swSite_SWClimits<- swInputData-method
+#' swSite_SWClimits swInputData-method
+#' swSite_TranspCoefficients<- swInputData-method
+#' swSite_TranspCoefficients swInputData-method
+#' swSite_TranspirationRegions<- swInputData-method
+#' swSite_TranspirationRegions swInputData-method
+#' swSoils_Layers<- swInputData matrix-method
+#' swSoils_Layers swInputData-method
+#' swSWC_FirstYear<- swInputData integer-method
+#' swSWC_FirstYear swInputData-method
+#' swSWC_HistoricData<- swInputData swSWC_hist-method
+#' swSWC_HistoricData swInputData-method
+#' swSWC_HistoricList<- swInputData list-method
+#' swSWC_HistoricList swInputData-method
+#' swSWC_Method<- swInputData integer-method
+#' swSWC_Method swInputData-method
+#' swSWC_prefix<- swInputData character-method
+#' swSWC_prefix swInputData-method
+#' swSWC_use<- swInputData logical-method
+#' swSWC_use swInputData-method
+#' swWeather_DaysRunningAverage<- swInputData-method
+#' swWeather_DaysRunningAverage swInputData-method
+#' swWeather_FirstYearHistorical<- swInputData-method
+#' swWeather_FirstYearHistorical swInputData-method
+#' swWeather_MonScalingParams<- swInputData-method
+#' swWeather_MonScalingParams swInputData-method
+#' swWeather_pct_SnowDrift<- swInputData-method
+#' swWeather_pct_SnowDrift swInputData-method
+#' swWeather_pct_SnowRunoff<- swInputData-method
+#' swWeather_pct_SnowRunoff swInputData-method
+#' swWeather_UseMarkov<- swInputData-method
+#' swWeather_UseMarkov swInputData-method
+#' swWeather_UseSnow<- swInputData-method
+#' swWeather_UseSnow swInputData-method
+#' swWriteLines swInputData character-method
+#' swYears_EDOEY<- swInputData-method
+#' swYears_EDOEY swInputData-method
+#' swYears_EndYear<- swInputData-method
+#' swYears_EndYear swInputData-method
+#' swYears_FDOFY<- swInputData-method
+#' swYears_FDOFY swInputData-method
+#' swYears_isNorth<- swInputData-method
+#' swYears_isNorth swInputData-method
+#' swYears_StartYear<- swInputData-method
+#' swYears_StartYear swInputData-method
 #'
 #' @docType class
 #' @section Objects from the Class: Objects can be created by calls of the form
@@ -242,41 +251,41 @@ NULL
 #'
 #'
 #' @name swFiles-class
-#' @aliases swFiles_Cloud<-,swFiles-method
-#' swFiles_Cloud,swFiles-method
-#' swFiles_Estab<-,swFiles-method
-#' swFiles_Estab,swFiles-method
-#' swFiles_filesIn<-,swFiles-method
-#' swFiles_filesIn,swFiles-method
-#' swFiles_LogFile<-,swFiles-method
-#' swFiles_LogFile,swFiles-method
-#' swFiles_MarkovCov<-,swFiles-method
-#' swFiles_MarkovCov,swFiles-method
-#' swFiles_MarkovProbs<-,swFiles-method
-#' swFiles_MarkovProbs,swFiles-method
-#' swFiles_OutputPrefix<-,swFiles-method
-#' swFiles_OutputPrefix,swFiles-method
-#' swFiles_Output<-,swFiles-method
-#' swFiles_Output,swFiles-method
-#' swFiles_Prod<-,swFiles-method
-#' swFiles_Prod,swFiles-method
-#' swFiles_ProjDir<-,swFiles-method
-#' swFiles_ProjDir,swFiles-method
-#' swFiles_SiteParams<-,swFiles-method
-#' swFiles_SiteParams,swFiles-method
-#' swFiles_Soils<-,swFiles-method
-#' swFiles_Soils,swFiles-method
-#' swFiles_SWCsetup<-,swFiles-method
-#' swFiles_SWCsetup,swFiles-method
-#' swFiles_WeatherPrefix<-,swFiles-method
-#' swFiles_WeatherPrefix,swFiles-method
-#' swFiles_WeatherSetup<-,swFiles-method
-#' swFiles_WeatherSetup,swFiles-method
-#' swFiles_Years<-,swFiles-method
-#' swFiles_Years,swFiles-method
-#' swClear,swFiles-method
-#' swWriteLines,swFiles-method
-#' swReadLines,swFiles-method
+#' @aliases swFiles_Cloud<- swFiles-method
+#' swFiles_Cloud swFiles-method
+#' swFiles_Estab<- swFiles-method
+#' swFiles_Estab swFiles-method
+#' swFiles_filesIn<- swFiles-method
+#' swFiles_filesIn swFiles-method
+#' swFiles_LogFile<- swFiles-method
+#' swFiles_LogFile swFiles-method
+#' swFiles_MarkovCov<- swFiles-method
+#' swFiles_MarkovCov swFiles-method
+#' swFiles_MarkovProbs<- swFiles-method
+#' swFiles_MarkovProbs swFiles-method
+#' swFiles_OutputPrefix<- swFiles-method
+#' swFiles_OutputPrefix swFiles-method
+#' swFiles_Output<- swFiles-method
+#' swFiles_Output swFiles-method
+#' swFiles_Prod<- swFiles-method
+#' swFiles_Prod swFiles-method
+#' swFiles_ProjDir<- swFiles-method
+#' swFiles_ProjDir swFiles-method
+#' swFiles_SiteParams<- swFiles-method
+#' swFiles_SiteParams swFiles-method
+#' swFiles_Soils<- swFiles-method
+#' swFiles_Soils swFiles-method
+#' swFiles_SWCsetup<- swFiles-method
+#' swFiles_SWCsetup swFiles-method
+#' swFiles_WeatherPrefix<- swFiles-method
+#' swFiles_WeatherPrefix swFiles-method
+#' swFiles_WeatherSetup<- swFiles-method
+#' swFiles_WeatherSetup swFiles-method
+#' swFiles_Years<- swFiles-method
+#' swFiles_Years swFiles-method
+#' swClear swFiles-method
+#' swWriteLines swFiles-method
+#' swReadLines swFiles-method
 #'
 #' @docType class
 #' @section Objects from the Class: Objects can be created by calls of the form
@@ -303,15 +312,15 @@ NULL
 #'
 #'
 #' @name swYears-class
-#' @aliases swYears_EDOEY<-,swYears-method
-#' swYears_EDOEY,swYears-method swYears_EndYear<-,swYears-method
-#' swYears_EndYear,swYears-method swYears_FDOFY<-,swYears-method
-#' swYears_FDOFY,swYears-method swYears_isNorth<-,swYears-method
-#' swYears_isNorth,swYears-method swYears_StartYear<-,swYears-method
-#' swYears_StartYear,swYears-method
-#' swClear,swYears-method
-#' swWriteLines,swYears-method
-#' swReadLines,swYears-method
+#' @aliases swYears_EDOEY<- swYears-method
+#' swYears_EDOEY swYears-method swYears_EndYear<- swYears-method
+#' swYears_EndYear swYears-method swYears_FDOFY<- swYears-method
+#' swYears_FDOFY swYears-method swYears_isNorth<- swYears-method
+#' swYears_isNorth swYears-method swYears_StartYear<- swYears-method
+#' swYears_StartYear swYears-method
+#' swClear swYears-method
+#' swWriteLines swYears-method
+#' swReadLines swYears-method
 #'
 #' @docType class
 #' @section Objects from the Class: Objects can be created by calls of the form
@@ -338,7 +347,7 @@ NULL
 #'
 #'
 #' @name swMonthlyScalingParams-class
-#' @aliases swClear,swMonthlyScalingParams-method
+#' @aliases swClear swMonthlyScalingParams-method
 #'
 #' @docType class
 #' @section Objects from the Class: Objects can be created by calls of the form

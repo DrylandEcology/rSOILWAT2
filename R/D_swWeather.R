@@ -22,11 +22,10 @@
 # Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2016)
 ###############################################################################
 
-print("swWeather")
-
 #######################Monthly Scaling Params#################################
 
-swMonthlyScalingParams <- setClass("swMonthlyScalingParams",
+#' @export
+setClass("swMonthlyScalingParams",
 									 slots = list(MonthlyScalingParams = "matrix"),
 									 prototype = list(MonthlyScalingParams =
 														matrix(data = c(rep(1, 12), rep(0, 12 * 3), rep(1, 12), rep(0, 12), rep(1, 12)),
@@ -55,7 +54,8 @@ setMethod("swClear", signature = "swMonthlyScalingParams", function(object) {
 
 #####################WEATHERSETUP.IN###################################
 
-swWeather <- setClass("swWeather",
+#' @export
+setClass("swWeather",
 						slots = list(UseSnow = "logical",
 									pct_SnowDrift = "numeric",
 									pct_SnowRunoff = "numeric",

@@ -18,12 +18,13 @@
 
 
 # TODO: Add comment
-# 
+#
 # Author: ryan
 ###############################################################################
 
 ###############################################################SOILS#####################################################################
-swSoilLayers <- setClass("swSoils",representation(Layers="matrix"),
+#' @export
+setClass("swSoils",representation(Layers="matrix"),
 		prototype=prototype(Layers=matrix(data=c(5,10,20,30,40,60,80,85,				#depth
 								1.43,1.41,1.39,1.39,1.38,1.15,1.31,1.31,				#bulkden
 								0,0,0,0,0,0,0,0,										#gravel content
@@ -77,7 +78,7 @@ setMethod("swWriteLines", signature=c(object="swSoils", file="character"), defin
 			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)
 			infilename <- file.path(file)
 			infiletext <- character(17+nrow(object@Layers))
-			
+
 			infiletext[1] <- "# Soil layer definitions"
 			infiletext[2] <- "# Location: "
 			infiletext[3] <- "#"
@@ -99,7 +100,7 @@ setMethod("swWriteLines", signature=c(object="swSoils", file="character"), defin
 				infiletext[i+17] <- paste(format(object@Layers[i,1]),format(object@Layers[i,2]),format(object@Layers[i,3]),format(object@Layers[i,4]),format(object@Layers[i,5]),format(object@Layers[i,6]),
 						format(object@Layers[i,7]),format(object@Layers[i,8]),format(object@Layers[i,9]),format(object@Layers[i,10]),format(object@Layers[i,11]),format(object@Layers[i,12]),sep="\t")
 			}
-			
+
 			infile <- file(infilename, "w+b")
 			writeLines(text = infiletext, con = infile, sep = "\n")
 			close(infile)

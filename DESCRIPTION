@@ -11,12 +11,13 @@ Authors@R: c(person("Ryan", "Murphy", role = "aut"),
 Depends:
   R (>= 3.0.0)
 Imports:
-  methods,
-  utils,
   RSQLite (>= 1.0.0),
   DBI (>= 0.5),
+  methods,
+  testthat
 Suggests:
-  testthat,
+  knitr,
+  rmarkdown,
   covr
 NeedsCompilation: yes
 License: GPL (>= 3)

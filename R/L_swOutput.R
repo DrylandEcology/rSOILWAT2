@@ -18,7 +18,7 @@
 
 
 # This File is the object that will hold all the output from Soilwat.
-# 
+#
 # Author: Ryan Murphy
 ###############################################################################
 tLayers <- 8
@@ -26,7 +26,8 @@ tevapLayers <- 3
 tVegEstabCount <- 2
 numPeriods <- 4
 ###################Generic Class to Hold One Output KEY########################
-swOutput_KEY <- setClass(Class="swOutput_KEY",representation(Title="character",TimeStep="integer",Columns="integer",Day="matrix",Week="matrix",Month="matrix",Year="matrix"))
+#' @export
+setClass(Class="swOutput_KEY",representation(Title="character",TimeStep="integer",Columns="integer",Day="matrix",Week="matrix",Month="matrix",Year="matrix"))
 setMethod("swOutput_KEY_Period","swOutput_KEY", function(object,index) {slot(object,slotNames(object)[-(1:3)][index])})
 setMethod("swOutput_KEY_TimeStep","swOutput_KEY", function(object) { if(length(object@TimeStep)==1 & object@TimeStep <= 4) return(object@TimeStep) else stop("TimeStep for WTHR to long or out of Range.") })
 setMethod("swOutput_KEY_Columns","swOutput_KEY", function(object) { return(object@Columns) })
@@ -62,7 +63,8 @@ swOutput_SOILTEMP <- new("swOutput_KEY",Title="temp_soil",TimeStep=2L,Columns=as
 swOutput_ALLVEG <- new("swOutput_KEY",Title="",TimeStep=4L,Columns=0L)
 swOutput_ESTABL <- new("swOutput_KEY",Title="estabs",TimeStep=3L,Columns=as.integer(tVegEstabCount))
 ##################Main Storage##################
-swOutput <- setClass(Class="swOutput",representation(yr_nrow="integer",mo_nrow="integer",wk_nrow="integer",dy_nrow="integer",WTHR="swOutput_KEY",TEMP="swOutput_KEY",PRECIP="swOutput_KEY",SOILINFILT="swOutput_KEY",RUNOFF="swOutput_KEY",ALLH2O="swOutput_KEY",VWCBULK="swOutput_KEY",
+#' @export
+setClass(Class="swOutput",representation(yr_nrow="integer",mo_nrow="integer",wk_nrow="integer",dy_nrow="integer",WTHR="swOutput_KEY",TEMP="swOutput_KEY",PRECIP="swOutput_KEY",SOILINFILT="swOutput_KEY",RUNOFF="swOutput_KEY",ALLH2O="swOutput_KEY",VWCBULK="swOutput_KEY",
 				VWCMATRIC="swOutput_KEY",SWCBULK="swOutput_KEY",SWABULK="swOutput_KEY",SWAMATRIC="swOutput_KEY",SWPMATRIC="swOutput_KEY",SURFACEWATER="swOutput_KEY",TRANSP="swOutput_KEY",
 				EVAPSOIL="swOutput_KEY",EVAPSURFACE="swOutput_KEY",INTERCEPTION="swOutput_KEY",LYRDRAIN="swOutput_KEY",HYDRED="swOutput_KEY",ET="swOutput_KEY",AET="swOutput_KEY",PET="swOutput_KEY",WETDAY="swOutput_KEY",SNOWPACK="swOutput_KEY",
 				DEEPSWC="swOutput_KEY",SOILTEMP="swOutput_KEY",ALLVEG="swOutput_KEY",ESTABL="swOutput_KEY"), prototype(WTHR=swOutput_WTHR, TEMP=swOutput_TEMP, PRECIP=swOutput_PRECIP,SOILINFILT=swOutput_SOILINFILT,RUNOFF=swOutput_RUNOFF, ALLH2O=swOutput_ALLH2O, VWCBULK=swOutput_VWCBULK,
@@ -131,7 +133,7 @@ setMethod(f="initialize",signature="swOutput",definition=function(.Object,Layers
 			.Object@mo_nrow <- as.integer(mo_nrow)
 			.Object@wk_nrow <- as.integer(wk_nrow)
 			.Object@dy_nrow <- as.integer(dy_nrow)
-			
+
 			nrow <- c(dy_nrow,wk_nrow,mo_nrow,yr_nrow)
 			coladd <- c(2,2,2,1)
 			#Calculate the Columns
@@ -163,7 +165,7 @@ setMethod(f="initialize",signature="swOutput",definition=function(.Object,Layers
 			.Object@SOILTEMP@Columns <- Layers
 			.Object@ALLVEG@Columns <- 0L
 			.Object@ESTABL@Columns <- VegEstabCount
-			
+
 #			for(i in 1:28) {#loop through KEYS
 #				if(Key_use[i]) {
 #					#only create matrix for time periods used.
@@ -182,7 +184,7 @@ setMethod(f="initialize",signature="swOutput",definition=function(.Object,Layers
 #					}
 #				}
 #			}
-			
+
 			validObject(.Object)
 			return(.Object)
 		})

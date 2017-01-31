@@ -24,8 +24,8 @@
 ###############################################################################
 
 
-print("swProd")
-swProd <- setClass("swProd",representation(Composition="numeric",Albedo="numeric",Cover_stcr="numeric",CanopyHeight="matrix",VegetationInterceptionParameters="matrix",LitterInterceptionParameters="matrix", EsTpartitioning_param="numeric",Es_param_limit="numeric",Shade="matrix",HydraulicRedistribution_use="logical",HydraulicRedistribution="matrix",CriticalSoilWaterPotential="numeric",MonthlyProductionValues_grass="matrix",MonthlyProductionValues_shrub="matrix",MonthlyProductionValues_tree="matrix", MonthlyProductionValues_forb="matrix"),
+#' @export
+setClass("swProd",representation(Composition="numeric",Albedo="numeric",Cover_stcr="numeric",CanopyHeight="matrix",VegetationInterceptionParameters="matrix",LitterInterceptionParameters="matrix", EsTpartitioning_param="numeric",Es_param_limit="numeric",Shade="matrix",HydraulicRedistribution_use="logical",HydraulicRedistribution="matrix",CriticalSoilWaterPotential="numeric",MonthlyProductionValues_grass="matrix",MonthlyProductionValues_shrub="matrix",MonthlyProductionValues_tree="matrix", MonthlyProductionValues_forb="matrix"),
 		prototype=prototype(Composition=c(0,0,0,1,0),Albedo=c(0.167,0.143,0.106,0.167,0.15),Cover_stcr=c(3.0,2.22,5.0,3.0),
 				CanopyHeight=matrix(data=c(300,29.5,85,0.002,0, 0,5,100,0.003,50, 0,5,3000,0.00008,1200, 300,29.5,85,0.002,0),nrow=5,ncol=4,dimnames=list(c("xinflec","yinflec","range","slope","height_cm"),c("Grasses","Shrubs","Trees","Forbs"))),
 				VegetationInterceptionParameters=matrix(data=c(0.0182,0.0065,0.0019,0.0054, 0.,0.0026,0.,0.0033, 0.00461,0.01405,0.0383,0.0337, 0.0182,0.0065,0.0019,0.0054),nrow=4,ncol=4,dimnames=list(c("a","b","c","d"),c("Grasses","Shrubs","Trees","Forbs"))),

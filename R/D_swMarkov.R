@@ -18,14 +18,14 @@
 
 
 # TODO: Add comment
-# 
+#
 # Author: ryan
 ###############################################################################
 
 
 #######################Markov##########################################
-print("swMarkov")
-swMarkov <- setClass("swMarkov", representation(Prob="matrix",Conv="matrix"))
+#' @export
+setClass("swMarkov", representation(Prob="matrix",Conv="matrix"))
 setMethod(f="swClear",
 		signature="swMarkov",
 		definition=function(object) {
@@ -45,7 +45,7 @@ setMethod("swWriteLines", signature=c(object="swMarkov", file="character"), defi
 			infile <- file(infilename, "w+b")
 			writeLines(text = infiletext, con = infile, sep = "\n")
 			close(infile)
-			
+
 			infilename <- file.path(file[2])
 			infiletext <- character(53+2)
 			infiletext[1] = "# Markov Covariance In v1.0 (RJM) 2015 update"
@@ -62,17 +62,17 @@ setMethod("swReadLines", signature=c(object="swMarkov",file="character"), defini
 			infiletext <- infiletext[-(1:2)]
 			if(length(infiletext) != 366)
 				stop("Markov Prod wrong number of lines")
-			
+
 			object@Prob=matrix(0,366,5)
 			for(i in 1:366) {
 				object@Prob[i,]<- readNumerics(infiletext[i],5)
 			}
-			
+
 			infiletext <- readLines(con = file[2])
 			infiletext <- infiletext[-(1:2)]
 			if(length(infiletext) != 53)
 				stop("Markov Prod wrong number of lines")
-			
+
 			object@Conv=matrix(0,53,7)
 			for(i in 1:366) {
 				object@Conv[i,]<- readNumerics(infiletext[i],7)

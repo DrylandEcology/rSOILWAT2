@@ -162,6 +162,7 @@
 #'
 #' ## See help(package = "Rsoilwat31") for a full list of functions
 #'
+#' @export
 sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
   files.in = "files_v31.in", echo = FALSE, quiet = FALSE) {
 
@@ -262,6 +263,7 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
 #' \dontrun{sw_out2 <- sw_exec(inputData = sw_in2)}
 #'
 #'
+#' @export
 sw_inputDataFromFiles <- function(dir="", files.in="files_v30.in") {
 	echo=FALSE
 	quiet=FALSE
@@ -280,6 +282,8 @@ sw_inputDataFromFiles <- function(dir="", files.in="files_v30.in") {
 	return(data)
 }
 
+#' Return output data
+#' @export
 sw_outputData <- function(inputData) {
 	.Call("onGetOutput", inputData, PACKAGE = "Rsoilwat31")
 }
@@ -340,6 +344,7 @@ sw_outputData <- function(inputData) {
 #' ## Execute the simulation run
 #' \dontrun{sw_out <- sw_exec(inputData = sw_in)}
 #'
+#' @export
 sw_inputData <- function() {
   temp <- swInputData()
   data(package = "Rsoilwat31", "weatherData", envir = environment())

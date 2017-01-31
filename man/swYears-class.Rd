@@ -3,19 +3,20 @@
 \docType{class}
 \name{swYears-class}
 \alias{swYears-class}
-\alias{swYears_EDOEY<-,swYears-method}
-\alias{swYears_EDOEY,swYears-method}
-\alias{swYears_EndYear<-,swYears-method}
-\alias{swYears_EndYear,swYears-method}
-\alias{swYears_FDOFY<-,swYears-method}
-\alias{swYears_FDOFY,swYears-method}
-\alias{swYears_isNorth<-,swYears-method}
-\alias{swYears_isNorth,swYears-method}
-\alias{swYears_StartYear<-,swYears-method}
-\alias{swYears_StartYear,swYears-method}
-\alias{swClear,swYears-method}
-\alias{swWriteLines,swYears-method}
-\alias{swReadLines,swYears-method}
+\alias{swYears_EDOEY<-}
+\alias{swYears-method}
+\alias{swYears_EDOEY}
+\alias{swYears_EndYear<-}
+\alias{swYears_EndYear}
+\alias{swYears_FDOFY<-}
+\alias{swYears_FDOFY}
+\alias{swYears_isNorth<-}
+\alias{swYears_isNorth}
+\alias{swYears_StartYear<-}
+\alias{swYears_StartYear}
+\alias{swClear}
+\alias{swWriteLines}
+\alias{swReadLines}
 \title{Class \code{"swYears"}}
 \description{
 The generic functions listed work on this and the proper sw Class in the container's slots.

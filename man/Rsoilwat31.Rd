@@ -4,6 +4,11 @@
 \name{Rsoilwat31}
 \alias{Rsoilwat31}
 \alias{Rsoilwat31-package}
+\alias{Rsoilwat}
+\alias{SoilWat}
+\alias{SOILWAT}
+\alias{SOILWAT2}
+\alias{Rsoilwat-package}
 \alias{Rsoilwat31-package}
 \title{Package `Rsoilwat31': summary information}
 \description{

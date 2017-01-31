@@ -23,8 +23,8 @@
 ###############################################################################
 
 
-print("swSWC")
-swSWC_hist <- setClass(Class="swSWC_hist", representation(data="matrix", year="integer"), prototype=prototype(data=matrix(data=NA, nrow=366,ncol=4,dimnames=list(NULL,c("DOY","Layer","SWC","st_err"))),year=as.integer(1949)))
+#' @export
+setClass(Class="swSWC_hist", representation(data="matrix", year="integer"), prototype=prototype(data=matrix(data=NA, nrow=366,ncol=4,dimnames=list(NULL,c("DOY","Layer","SWC","st_err"))),year=as.integer(1949)))
 setMethod(f="swClear",
 		signature="swSWC_hist",
 		definition=function(object) {
@@ -62,18 +62,27 @@ setMethod("swReadLines", signature=c(object="swSWC_hist",file="character"), defi
 		})
 ##########################swcsetup.in#########################################
 
-swSWC <- setClass(Class="swSWC", representation(UseSWCHistoricData="logical",DataFilePrefix="character",FirstYear="integer",Method="integer",History="list"),
-		prototype=prototype(UseSWCHistoricData=FALSE,DataFilePrefix="swcdata",FirstYear=as.integer(1949),Method=as.integer(2),History=list(swSWC_hist())))
-setMethod(f="swClear",
-		signature="swSWC",
-		definition=function(object) {
-			object@UseSWCHistoricData=logical(1)
-			object@DataFilePrefix=character(1)
-			object@FirstYear=integer(1)
-			object@Method=integer(1)
-			object@History=list(swClear(new("swSWC_hist")))
-			return(object)
-		})
+#' @export
+setClass(Class = "swSWC",
+  representation(UseSWCHistoricData = "logical", DataFilePrefix = "character",
+    FirstYear = "integer", Method = "integer", History = "list"
+  ),
+  prototype = prototype(UseSWCHistoricData = FALSE, DataFilePrefix = "swcdata",
+    FirstYear = as.integer(1949), Method = as.integer(2),
+    History = list(swClear(new("swSWC_hist")))
+  )
+)
+
+setMethod(f = "swClear",
+    signature = "swSWC",
+    definition = function(object) {
+      object@UseSWCHistoricData = logical(1)
+      object@DataFilePrefix = character(1)
+      object@FirstYear = integer(1)
+      object@Method = integer(1)
+      object@History = list(swClear(new("swSWC_hist")))
+      return(object)
+    })
 
 setMethod("swSWC_use","swSWC",function(object) {return(object@UseSWCHistoricData)})
 setMethod("swSWC_prefix","swSWC",function(object) {return(object@DataFilePrefix)})

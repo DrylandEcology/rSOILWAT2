@@ -3,7 +3,8 @@
 \docType{class}
 \name{swMonthlyScalingParams-class}
 \alias{swMonthlyScalingParams-class}
-\alias{swClear,swMonthlyScalingParams-method}
+\alias{swClear}
+\alias{swMonthlyScalingParams-method}
 \title{Class \code{"swMonthlyScalingParams"}}
 \description{
 The generic functions listed work on this and the proper sw Class in the container's slots.

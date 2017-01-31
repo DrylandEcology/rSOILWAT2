@@ -23,7 +23,6 @@
 ###############################################################################
 
 
-print("swOut")
 #Remember this models the C code so index starts at 0 not 1
 ObjType = c("FileManagement","Model","Weather","Site","SoilWater","VegetationEstab","VegetationProduction","Output")
 OutKey = c("AllWthr","Temp","Precip","SoilInf","Runoff","AllH2O","VWCBulk","VWCMatrix","SWCBulk","SWABulk","SWAMatric","SWPMatric","SurfaceWater","Transp","EvapSoil","EvapSurface","Interception","LyrDrain","Hydred","ET","AET","PET","WetDays","SnowPack","DeepSWC","SoilTemp","AllVeg","Esab")
@@ -41,7 +40,8 @@ KeyComments <- c("","/* max., min, average temperature, surface temperature (C) 
 #######
 #Note I use 0 for keys which are not implemented.
 #######
-swOUT_key <- setClass(Class="swOUT_key",
+#' @export
+setClass(Class="swOUT_key",
 				representation(mykey="integer",
 								myobj="integer",
 								period="integer",
@@ -91,7 +91,8 @@ setMethod(f="swClear",
 
 ###########################OUTSETUP.IN########################################
 
-swOUT <- setClass(Class="swOUT",
+#' @export
+setClass(Class="swOUT",
 			representation(outputSeparator="character",timePeriods="integer",useTimeStep="logical"),
 			prototype=prototype(outputSeparator="\t",timePeriods=as.integer(c(0:3)), useTimeStep=TRUE),
 			contains="swOUT_key")

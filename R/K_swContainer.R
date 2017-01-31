@@ -22,8 +22,8 @@
 # Author: Ryan J. Murphy (2013)
 ###############################################################################
 
-print("swContainer")
-swInputData <- setClass(Class = "swInputData",
+#' @export
+setClass(Class = "swInputData",
 						slots = list(files = "swFiles",
 									years = "swYears",
 									weather = "swWeather",
@@ -113,7 +113,7 @@ setMethod("get_swCloud","swInputData",function(object) {return(object@cloud)})
 
 setReplaceMethod(f="set_swCloud",signature="swInputData",function(object,value) {object@cloud <- value; return(object)})
 ##
-setMethod("get_swWeather","swInputData",function(object) object@weather)
+setMethod("get_swWeather", "swInputData", function(object) object@weather)
 setMethod("swWeather_DaysRunningAverage","swInputData",function(object) {return(object@weather@DaysRunningAverage)})
 setMethod("swWeather_FirstYearHistorical","swInputData",function(object) {return(object@weather@FirstYear_Historical)})
 setMethod("swWeather_pct_SnowDrift","swInputData",function(object) {return(object@weather@pct_SnowDrift)})
@@ -122,7 +122,10 @@ setMethod("swWeather_UseMarkov","swInputData",function(object) {return(object@we
 setMethod("swWeather_UseSnow","swInputData",function(object) {return(object@weather@UseSnow)})
 setMethod("swWeather_MonScalingParams","swInputData",function(object) {return(object@weather@MonthlyScalingParams)})
 
-setReplaceMethod(f="set_swWeather",signature="swInputData",function(object,value) {slot(object, "weather") <- value; object})
+setReplaceMethod("set_swWeather", signature = "swInputData", function(object, value) {
+  slot(object, "weather") <- value
+  object
+})
 setReplaceMethod(f="swWeather_DaysRunningAverage",signature="swInputData",function(object,value) {object@weather@DaysRunningAverage <- as.integer(value); return(object)})
 setReplaceMethod(f="swWeather_FirstYearHistorical",signature="swInputData",function(object,value) {object@weather@FirstYear_Historical <- as.integer(value); return(object)})
 setReplaceMethod(f="swWeather_pct_SnowDrift",signature="swInputData",function(object,value) {object@weather@pct_SnowDrift <- value; return(object)})

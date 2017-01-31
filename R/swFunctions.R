@@ -26,12 +26,14 @@ con.env$dbW_version <- "3.1.0"
 con.env$default_blob_compression_type <- "gzip"
 con.env$blob_compression_type <- NULL
 
+#' @export
 dbW_version <- function() {
 	stopifnot(requireNamespace("RSQLite"))
 
 	numeric_version(as.character(DBI::dbGetQuery(con.env$con, "SELECT Value FROM Meta WHERE Desc=\'Version\'")[1, 1]))
 }
 
+#' @export
 dbW_compression <- function() {
 	stopifnot(requireNamespace("RSQLite"))
 
@@ -47,6 +49,7 @@ dbW_compression <- function() {
 #' @param long A numeric value or \code{NULL}. The longitude in decimal degrees of WGS84. Eastern longitudes are positive, sites on the western hemisphere have negative values.
 #' @param Label A character string or \code{NULL}.
 #' @return An integer value or \code{NULL}.
+#' @export
 dbW_getSiteId <- function(lat = NULL, long = NULL, Label = NULL) {
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
@@ -77,12 +80,14 @@ dbW_getSiteId <- function(lat = NULL, long = NULL, Label = NULL) {
 	Site_id
 }
 
+#' @export
 dbW_getSiteTable <- function() {
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
 	DBI::dbReadTable(con.env$con, "Sites")
 }
 
+#' @export
 dbW_getScenariosTable <- function() {
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
@@ -127,6 +132,7 @@ dbW_getScenariosTable <- function() {
 #' data input \item \code{\link{dbW_getWeatherData}} and
 #' \code{\link{getWeatherData_folders}} for weather data input
 #' }
+#' @export
 dbW_getWeatherData <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startYear=NULL,endYear=NULL, Scenario="Current") {
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
@@ -262,6 +268,7 @@ dbW_getWeatherData_old <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,st
 }
 
 
+#' @export
 dbW_addSite <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL) {
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
@@ -294,6 +301,7 @@ dbW_addSite <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL) {
 	Site_id
 }
 
+#' @export
 dbW_setConnection <- function(dbFilePath) {
 	stopifnot(requireNamespace("RSQLite"))
 
@@ -308,6 +316,7 @@ dbW_setConnection <- function(dbFilePath) {
 	#lapply(settings, function(x) DBI::dbGetQuery(con.env$con,x))
 }
 
+#' @export
 dbW_disconnectConnection <- function() {
 	stopifnot(requireNamespace("RSQLite"))
 
@@ -316,12 +325,14 @@ dbW_disconnectConnection <- function() {
 	con.env$blob_compression_type <- NULL
 }
 
+#' @export
 dbW_addSites <- function(dfLatitudeLongitudeLabel) {#lat #long #Label 1 .... 20165
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
 	RSQLite::dbGetPreparedQuery(con.env$con, "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)", bind.data = as.data.frame(dfLatitudeLongitudeLabel,stringsAsFactors=FALSE))
 }
 
+#' @export
 dbW_addScenarios <- function(dfScenario) {#names 1 ... 32
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
@@ -332,6 +343,7 @@ dbW_addWeatherDataNoCheck <- function(Site_id, Scenario_id, StartYear, EndYear, 
 	DBI::dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",Scenario_id,",",StartYear,",",EndYear,",",weather_blob,");",sep=""))
 }
 
+#' @export
 dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderPath=NULL, weatherData=NULL, label=NULL, ScenarioName="Current") {
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
@@ -424,6 +436,7 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 }
 
 
+#' @export
 dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = NULL, site_subset = NULL, scenarios = NULL, compression_type) {
 	stopifnot(requireNamespace("RSQLite"))
 
@@ -472,6 +485,7 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = 
 }
 
 #dataframe of columns folder, lat, long, label where label can equal folderName
+#' @export
 dbW_addFromFolders <- function(MetaData=NULL, FoldersPath, ScenarioName="Current") {
 	if(!is.null(MetaData)) {
 		temp <- apply(MetaData, MARGIN = 1, function(x) dbW_addWeatherData(Site_id = NULL, lat=x[2], long=x[3], weatherFolderPath = file.path(FoldersPath, x[1]), weatherData = NULL, label = x[4], ScenarioName = ScenarioName) )
@@ -481,12 +495,14 @@ dbW_addFromFolders <- function(MetaData=NULL, FoldersPath, ScenarioName="Current
 	}
 }
 
+#' @export
 dbW_deleteSite <- function(Site_id) {
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
 	DBI::dbGetQuery(con.env$con, paste("DELETE FROM \"Sites\" WHERE Site_id=",Site_id,";",sep=""))
 }
 
+#' @export
 dbW_deleteSiteData <- function(Site_id, Scenario=NULL) {
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
@@ -513,6 +529,7 @@ dbW_deleteSiteData <- function(Site_id, Scenario=NULL) {
 #' @param type A character string. One of c("gzip", "bzip2", "xz", "none").
 #'
 #' @seealso \code{\link{memDecompress}}, \code{\link{unserialize}}
+#' @export
 dbW_blob_to_weatherData <- function(data_blob, type = "gzip") {
 	if (inherits(data_blob, "list") && inherits(data_blob[[1]], "raw") && length(data_blob) == 1)
 			data_blob <- data_blob[[1]]
@@ -531,6 +548,7 @@ dbW_blob_to_weatherData <- function(data_blob, type = "gzip") {
 #' @param type A character string. One of c("gzip", "bzip2", "xz", "none").
 #'
 #' @seealso \code{\link{memCompress}}, \code{\link{serialize}}
+#' @export
 dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
 	paste0("x'", paste0(memCompress(serialize(weatherData, connection = NULL), type = type), collapse = ""), "'")
 }
@@ -626,6 +644,7 @@ dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
 #' ## Execute the simulation run
 #' \dontrun{sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)}
 #'
+#' @export
 getWeatherData_folders <- function(LookupWeatherFolder=NULL, weatherDirName=NULL,filebasename=NULL,startYear=NULL,endYear=NULL) {
 	if(is.null(LookupWeatherFolder) | is.null(weatherDirName) | is.null(filebasename))
 		stop("Need LookupWeatherFolder and weatherDirName information to get weather data")
@@ -667,6 +686,7 @@ getWeatherData_folders <- function(LookupWeatherFolder=NULL, weatherDirName=NULL
 }
 
 # Conversion: object of class 'swWeatherData' to data.frame
+#' @export
 dbW_weatherData_to_dataframe <- function(weatherData){
 	do.call(rbind, lapply(weatherData, FUN=function(x) {
 							temp <- x@data
@@ -676,6 +696,7 @@ dbW_weatherData_to_dataframe <- function(weatherData){
 }
 
 # Conversion: object of class 'swWeatherData' to matrix of monthly values (mean Tmax, mean Tmin, sum PPT)
+#' @export
 dbW_weatherData_to_monthly <- function(dailySW) {
 	monthly <- matrix(NA, nrow = length(dailySW) * 12, ncol = 5, dimnames = list(NULL, c("Year", "Month", "Tmax_C", "Tmin_C", "PPT_cm")))
 	for(y in seq_along(dailySW)){
@@ -692,6 +713,7 @@ dbW_weatherData_to_monthly <- function(dailySW) {
 }
 
 # Conversion: object of daily weather data.frame to matrix of monthly values (mean Tmax, mean Tmin, sum PPT)
+#' @export
 dbW_dataframe_to_monthly <- function(dailySW) {
   temp <- apply(dailySW[, c("Year", "DOY")], 1, paste, collapse = "-")
   temp <- as.POSIXlt(temp, format = "%Y-%j", tz = "UTC")
@@ -709,6 +731,7 @@ dbW_dataframe_to_monthly <- function(dailySW) {
 
 
 
+#' @export
 get_years_from_weatherDF <- function(weatherDF, years, weatherDF_dataColumns){
 	if(!is.null(years)){
 		if(length(years) == nrow(weatherDF)){
@@ -731,6 +754,7 @@ get_years_from_weatherDF <- function(weatherDF, years, weatherDF_dataColumns){
 
 
 # Conversion: data.frame to object of class 'swWeatherData'
+#' @export
 dbW_dataframe_to_weatherData <- function(weatherDF, years=NULL, weatherDF_dataColumns=c("DOY","Tmax_C","Tmin_C","PPT_cm"), round = 2){
 	if(!(length(weatherDF_dataColumns) == 4) || !all(weatherDF_dataColumns %in% colnames(weatherDF)))
 		stop("Not every required weatherDF_dataColumns is available in the 'weatherDF' object")
@@ -754,6 +778,7 @@ dbW_dataframe_to_weatherData <- function(weatherDF, years=NULL, weatherDF_dataCo
 
 
 # Conversion: object of class 'swWeatherData' or data.frame to SOILWAT input text files
+#' @export
 dbW_weather_to_SOILWATfiles <- function(path, site.label, weatherData=NULL, weatherDF=NULL, years=NULL, weatherDF_dataColumns=c("DOY","Tmax_C","Tmin_C","PPT_cm")){
 	stopifnot(is.null(weatherData) || is.null(weatherDF))
 	dir.create(path, recursive = TRUE, showWarnings = FALSE)

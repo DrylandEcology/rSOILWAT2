@@ -18,13 +18,13 @@
 
 
 # TODO: Add comment
-# 
+#
 # Author: Ryan J. Murphy (2013)
 ##############################################
 
 #################################
-print("swFiles")
-swFiles<-setClass("swFiles",representation(ProjDir="character",InFiles="character",WeatherPrefix="character",OutputPrefix="character"),prototype=prototype(ProjDir="",InFiles=c('files_v30.in','Input/years.in','Output/logfile.log','Input/siteparam_v26.in','Input/soils_v30.in','Input/weathsetup_v20.in','Input/mkv_prob.in','Input/mkv_covar.in','Input/cloud_v20.in','Input/sbe_prod_v31.in','Input/estab.in','Input/swcsetup.in','Input/outsetup_v30.in'),WeatherPrefix="Weather_Test/weath",OutputPrefix="Output/"))
+#' @export
+setClass("swFiles", representation(ProjDir="character",InFiles="character",WeatherPrefix="character",OutputPrefix="character"),prototype=prototype(ProjDir="",InFiles=c('files_v30.in','Input/years.in','Output/logfile.log','Input/siteparam_v26.in','Input/soils_v30.in','Input/weathsetup_v20.in','Input/mkv_prob.in','Input/mkv_covar.in','Input/cloud_v20.in','Input/sbe_prod_v31.in','Input/estab.in','Input/swcsetup.in','Input/outsetup_v30.in'),WeatherPrefix="Weather_Test/weath",OutputPrefix="Output/"))
 
 swFiles_validity<-function(object){
 	if(length(object@ProjDir)!=1)
@@ -97,34 +97,34 @@ setMethod("swWriteLines", signature=c(object="swFiles", file="character"), defin
 			infiletext <- character(28)
 			infiletext[1] <- "# List of input files for SOILWAT v32"
 			infiletext[2] <- paste("# This is the first file read. Simulation information = ")
-			
+
 			infiletext[4] <- "#Model"
-			infiletext[5] <- paste(object@InFiles[2], "\t# years for model operation", sep="")   
-			infiletext[6] <- paste(object@InFiles[3], "\t# errors or important info (can also be stdout)", sep="")   
-			
+			infiletext[5] <- paste(object@InFiles[2], "\t# years for model operation", sep="")
+			infiletext[6] <- paste(object@InFiles[3], "\t# errors or important info (can also be stdout)", sep="")
+
 			infiletext[8] <- "#Site"
-			infiletext[9] <- paste(object@InFiles[4], "\t# site parameters", sep="")   
+			infiletext[9] <- paste(object@InFiles[4], "\t# site parameters", sep="")
 			infiletext[10] <- paste(object@InFiles[5], "\t# soil layer definitions", sep="")
-			
+
 			infiletext[12] <- "#Weather"
 			infiletext[13] <- paste(object@InFiles[6], "\t# weather parameters", sep="")
 			infiletext[14] <- paste(object@WeatherPrefix, "\t# data file containing historical weather (can include path)", sep="")
 			infiletext[15] <- paste(object@InFiles[7], "\t# precip probs; required for markov weather", sep="")
 			infiletext[16] <- paste(object@InFiles[8], "\t# covariance table required for markov weather", sep="")
 			infiletext[17] <- paste(object@InFiles[9], "\t# general atmospheric params", sep="")
-			
+
 			infiletext[19] <- "#Vegetation"
 			infiletext[20] <- paste(object@InFiles[10], "\t# productivity values", sep="")
 			infiletext[21] <- paste(object@InFiles[11], "\t# plant establishment start file", sep="")
-			
+
 			infiletext[23] <- "#SWC measurements"
 
 			infiletext[24] <- paste(object@InFiles[12], "\t# params for handling measured swc", sep="")
-			
+
 			infiletext[26] <- "#Output"
-			infiletext[27] <- paste(object@OutputPrefix, "\t# 'relative' path for output files: / for same directory, or e.g., Output/", sep="")   
+			infiletext[27] <- paste(object@OutputPrefix, "\t# 'relative' path for output files: / for same directory, or e.g., Output/", sep="")
 			infiletext[28] <- paste(object@InFiles[13], "\t# define output quantities", sep="")
-			
+
 			infile <- file(infilename, "w+b")
 			writeLines(text = infiletext, con = infile, sep = "\n")
 			close(infile)
