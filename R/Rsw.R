@@ -346,7 +346,7 @@ sw_outputData <- function(inputData) {
 #'
 #' @export
 sw_inputData <- function() {
-  temp <- swInputData()
+  temp <- new("swInputData") # data are from prototypes
   data(package = "Rsoilwat31", "weatherData", envir = environment())
   slot(temp, "weatherHistory") <- get("weatherData", envir = environment())
 

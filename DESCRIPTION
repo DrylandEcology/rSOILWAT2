@@ -13,11 +13,11 @@ Depends:
 Imports:
   RSQLite (>= 1.0.0),
   DBI (>= 0.5),
-  methods,
-  testthat
+  methods
 Suggests:
   knitr,
   rmarkdown,
+  testthat,
   covr
 NeedsCompilation: yes
 License: GPL (>= 3)
