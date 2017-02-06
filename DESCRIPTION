@@ -1,6 +1,6 @@
 Package: Rsoilwat31
-Version: 1.2.3
-Date: 2017-01-31
+Version: 1.2.4
+Date: 2017-02-06
 Title: An Ecohydrological Ecosystem-Scale Water Balance Simulation Model
 Description: Access to the C-based 'SOILWAT' v3.2.6 and functionality for
   SQLite-database of weather data.
