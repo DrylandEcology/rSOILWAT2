@@ -2,8 +2,8 @@
   [![Build status](https://ci.appveyor.com/api/projects/status/kkmqcftbl24bwnqk?svg=true)](https://ci.appveyor.com/project/dschlaep/rSOILWAT2)
   [![Coverage Status](https://img.shields.io/coveralls/Burke-Lauenroth-Lab/rSOILWAT2.svg)](https://coveralls.io/r/Burke-Lauenroth-Lab/rSOILWAT2?branch=master)
 
-# Rsoilwat
-A R package for SOILWAT.
+# rSOILWAT2
+A R package for SOILWAT2.
 
 ## Note: repository renamed from Rsoilwat (Rsoilwat31) to rSOILWAT2 on Feb 23, 2017
 
@@ -13,7 +13,10 @@ Contributors are encouraged, however, to update local clones to [point to the ne
 ```
 git remote set-url origin https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git
 ```
-
+If you have installed a previous version as R package, then you may consider removing the old version with
+```{r}
+remove.packages("Rsoilwat31")
+```
 
 ## Considerations
 
@@ -92,7 +95,7 @@ tools::Rcmd(args = paste("INSTALL rSOILWAT2"))
 
 
 ### For contributors only
-Update the submodule 'SOILWAT' to the latest commit
+Update the submodule 'SOILWAT2' to the latest commit
 ```
 git clone https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git rSOILWAT2
 cd rSOILWAT2
