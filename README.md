@@ -5,6 +5,19 @@
 # Rsoilwat
 A R package for SOILWAT.
 
+## Note: repository renamed from Rsoilwat (Rsoilwat31) to rSOILWAT2 on Feb 23, 2017
+
+All existing information should [automatically be redirected](https://help.github.com/articles/renaming-a-repository/) to the new name.
+
+Contributors are encouraged, however, to update local clones to [point to the new URL](https://help.github.com/articles/changing-a-remote-s-url/), i.e., 
+```
+git remote set-url origin https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git
+```
+
+If using GitHub Desktop you may want to remove existing clones, update the local clones via command line, re-start GitHub Desktop and add a new clone of the updated repository.
+
+## Considerations
+
 We haven’t really published the code yet nor prepared it for sharing (though through our use of github made it openly accessible), it is actively and gradually being developed by the Lauenroth lab and affiliates, and there is no manual either - we cannot give you individual support in setting up and running the model except if we agreed on a collaboration or similar agreement.
 
 Not every part of the code has been extensively tested or is in a stable state. Similarly, not every combination of model inputs and options has been evaluated in depth and there is not guarantee for anything to work. The code comes with no warranty and no guarantees, expressed or implied, as to suitability, completeness, accuracy, and whatever other claim you would like to make.
