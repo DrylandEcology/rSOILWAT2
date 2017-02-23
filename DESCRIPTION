@@ -1,8 +1,8 @@
-Package: Rsoilwat31
-Version: 1.2.4
-Date: 2017-02-06
+Package: rSOILWAT2
+Version: 1.2.5
+Date: 2017-02-23
 Title: An Ecohydrological Ecosystem-Scale Water Balance Simulation Model
-Description: Access to the C-based 'SOILWAT' v3.2.6 and functionality for
+Description: Access to the C-based 'SOILWAT2' v3.2.6 and functionality for
   SQLite-database of weather data.
 Authors@R: c(person("Ryan", "Murphy", role = "aut"),
   person("Daniel", "Schlaepfer", role = c("aut", "cre"), email = "daniel.schlaepfer@unibas.ch"),
@@ -21,8 +21,8 @@ Suggests:
   covr
 NeedsCompilation: yes
 License: GPL (>= 3)
-URL: https://github.com/Burke-Lauenroth-Lab/Rsoilwat
-BugReports: https://github.com/Burke-Lauenroth-Lab/Rsoilwat/issues
+URL: https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+BugReports: https://github.com/Burke-Lauenroth-Lab/rSOILWAT2/issues
 RoxygenNote: 5.0.1.9000
 LazyData: true
 ByteCompile: true
