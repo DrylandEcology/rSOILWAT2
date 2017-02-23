@@ -1,5 +1,5 @@
 ###############################################################################
-#Rsoilwat and Rsoilwat31
+#rSOILWAT2
 #    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,8 @@
 ###############################################################################
 
 
-library(Rsoilwat31)
-packageVersion("Rsoilwat31")
+library(rSOILWAT2)
+packageVersion("rSOILWAT2")
 
 ##### Some of the important available functions
 #	- sw_inputData
@@ -26,7 +26,7 @@ packageVersion("Rsoilwat31")
 #	- sw_exec
 #	- getWeatherData_folders
 ##### For a complete list of available functions
-help(package = "Rsoilwat31")
+help(package = "rSOILWAT2")
 
 
 #obtain example input data
@@ -35,7 +35,7 @@ str(swIn1, max.level=2)
 
 
 #Or read input data from files
-setwd("~/Dropbox/Work_Stuff/2_Research/Software/GitHub_Projects/Rsoilwat/demo/IntroductionExample")
+setwd("~/Dropbox/Work_Stuff/2_Research/Software/GitHub_Projects/rSOILWAT2/demo/IntroductionExample")
 dir.sw <- getwd()
 swIn2 <- sw_inputDataFromFiles(dir=getwd(), files.in="files_v31.in")
 str(swIn2, max.level=2)

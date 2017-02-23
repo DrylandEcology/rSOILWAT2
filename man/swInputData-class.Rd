@@ -198,7 +198,7 @@ showClass("swInputData")
 
 }
 \references{
-https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 }
 \seealso{
 \code{\linkS4class{swFiles}} \code{\linkS4class{swYears}}

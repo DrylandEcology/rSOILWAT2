@@ -4,7 +4,7 @@ context("Test dbWeather compression types")
 do_benchmark <- FALSE
 year_start <- 1979
 year_end <- 2010
-path_demo <- system.file("extdata", "example1", package = "Rsoilwat31")
+path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 
 dbWs3 <- list(list(fname = "dbWeatherData_test1_gzip_old.sqlite3", type = "gzip", mode = "old"),
 			  list(fname = "dbWeatherData_test1_gzip_new.sqlite3", type = "gzip", mode = "new"),
@@ -39,7 +39,7 @@ for (it in seq_along(dbWs3)) {
 				weatherData = sw_weath,
 				ScenarioName = "Current")
 		} else {
-			Rsoilwat31:::dbW_addWeatherData_old(Site_id = iw,
+			rSOILWAT2:::dbW_addWeatherData_old(Site_id = iw,
 				weatherData = sw_weath,
 				ScenarioName = "Current")
 		}
@@ -71,7 +71,7 @@ test_that("Test weather object coherence", {
 									endYear = year_end,
 									Scenario = "Current")
 				} else {
-					Rsoilwat31:::dbW_getWeatherData_old(Site_id = iw,
+					rSOILWAT2:::dbW_getWeatherData_old(Site_id = iw,
 									startYear = year_start,
 									endYear = year_end,
 									Scenario = "Current")
@@ -98,7 +98,7 @@ test_that("Benchmark dbWeather retrieval speed", {
 									endYear = year_end,
 									Scenario = "Current")
 				} else {
-					Rsoilwat31:::dbW_getWeatherData_old(Site_id = iw,
+					rSOILWAT2:::dbW_getWeatherData_old(Site_id = iw,
 									startYear = year_start,
 									endYear = year_end,
 									Scenario = "Current")

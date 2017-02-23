@@ -12,9 +12,9 @@ dbW_blob_to_weatherData(data_blob, type = "gzip")
 \item{type}{A character string. One of c("gzip", "bzip2", "xz", "none").}
 }
 \description{
-The Rsoilwat SQlite-DB which manages daily weather data (each as a list of elements
+The rSOILWAT2 SQlite-DB which manages daily weather data (each as a list of elements
 of class 'swWeatherData'), uses internally (compressed) blobs. This function is used
-to convert the blob object to the object used by Rsoilwat's simulation functions.
+to convert the blob object to the object used by rSOILWAT2's simulation functions.
 }
 \seealso{
 \code{\link{memDecompress}}, \code{\link{unserialize}}

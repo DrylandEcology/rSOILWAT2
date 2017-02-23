@@ -1,5 +1,5 @@
 ###############################################################################
-#Rsoilwat and Rsoilwat31
+#rSOILWAT2
 #    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -521,9 +521,9 @@ dbW_deleteSiteData <- function(Site_id, Scenario=NULL) {
 ## ------ Conversion of weather data formats
 #' Conversion: (Compressed) raw vector (e.g., SQL-retrieved blob) to (uncompressed) object
 #'
-#' The Rsoilwat SQlite-DB which manages daily weather data (each as a list of elements
+#' The rSOILWAT2 SQlite-DB which manages daily weather data (each as a list of elements
 #' of class 'swWeatherData'), uses internally (compressed) blobs. This function is used
-#' to convert the blob object to the object used by Rsoilwat's simulation functions.
+#' to convert the blob object to the object used by rSOILWAT2's simulation functions.
 #'
 #' @param data_blob A raw vector
 #' @param type A character string. One of c("gzip", "bzip2", "xz", "none").
@@ -539,9 +539,9 @@ dbW_blob_to_weatherData <- function(data_blob, type = "gzip") {
 
 #' Conversion: R object to (compressed) SQL-blob-ready character vector
 #'
-#' The Rsoilwat SQLite-DB which manages daily weather data (each as a list of elements
+#' The rSOILWAT2 SQLite-DB which manages daily weather data (each as a list of elements
 #' of class 'swWeatherData'), uses internally (compressed) blobs. This function is used
-#' to a list of daily weather data used by Rsoilwat's simulation functions to a blob object
+#' to a list of daily weather data used by rSOILWAT2's simulation functions to a blob object
 #' which can be inserted into a SQLite DB.
 #'
 #' @param weatherData A list of elements of class 'swWeatherData' or any suitable object.
@@ -595,7 +595,7 @@ dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
 # Conversion: reading of SOILWAT input text files to object of class 'swWeatherData'
 
 
-#' Rsoilwat getWeatherData_folders
+#' rSOILWAT2 getWeatherData_folders
 #'
 #' Reads weather data from files.  Returns list of weather data.
 #'
@@ -627,7 +627,7 @@ dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
 #' \code{\link{getWeatherData_folders}} for weather data input }
 #' @examples
 #'
-#' path_demo <- system.file("extdata", "example1", package = "Rsoilwat31")
+#' path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 #'
 #' ## ------ Simulation with data prepared beforehand and separate weather data ------------
 #' ## Read inputs from files on disk

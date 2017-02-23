@@ -1,4 +1,4 @@
-context("Rsoilwat segfault")
+context("rSOILWAT2 segfault")
 
 # Running from command line --> segfaults
 #	r --slave -f Test_Rsoilwat31_SegmentationFault_v3.R
@@ -15,7 +15,7 @@ context("Rsoilwat segfault")
 
 
 # Create reference objects
-path_demo <- system.file("extdata", "example1", package = "Rsoilwat31")
+path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 
 a <- sw_inputDataFromFiles(dir = path_demo, files.in = file.path(path_demo, "files_v31.in"))
 

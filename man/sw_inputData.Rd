@@ -2,7 +2,7 @@
 % Please edit documentation in R/Rsw.R
 \name{sw_inputData}
 \alias{sw_inputData}
-\title{Rsoilwat sw_inputData}
+\title{rSOILWAT2 sw_inputData}
 \usage{
 sw_inputData()
 }

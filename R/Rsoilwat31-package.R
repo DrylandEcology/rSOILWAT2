@@ -1,6 +1,6 @@
-#' Package `Rsoilwat31': summary information
+#' Package `rSOILWAT2': summary information
 #'
-#' The package `Rsoilwat' / 'Rsoilwat31' is a R implementation of SoilWat
+#' The package `rSOILWAT2' is a R implementation of SoilWat
 #' Modeling Software.  The C code was converted into a library with
 #' input/output functions to R.  SoilWat is a simulator of the dynamics of soil
 #' water. Originally written in the 1900's by a highly trained team of Botany's
@@ -11,9 +11,9 @@
 #'
 #'
 #' @section Version: The version level of the package is given by the command
-#' \code{packageDescription("Rsoilwat31")}. The most recent version of the
+#' \code{packageDescription("rSOILWAT2")}. The most recent version of the
 #' package can be obtained from github at
-#' \url{https://github.com/Burke-Lauenroth-Lab/Rsoilwat}
+#' \url{https://github.com/Burke-Lauenroth-Lab/rSOILWAT2}
 #' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
 #' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
 #' data input \item \code{\link{dbW_getWeatherData}} and
@@ -34,8 +34,9 @@
 #' dynamics in the shortgrass steppe.  \emph{Ecology} \bold{73}:1175--1181.
 #'
 #' @docType package
-#' @name Rsoilwat31
-#' @aliases Rsoilwat31 Rsoilwat31-package Rsoilwat SoilWat SOILWAT SOILWAT2 Rsoilwat-package
+#' @name rSOILWAT2
+#' @aliases rSOILWAT2 rSOILWAT2-package rSOILWAT2 SoilWat SOILWAT SOILWAT2
+#   rSOILWAT2-package Rsoilwat Rsoilwat31
 NULL
 
 
@@ -47,7 +48,7 @@ NULL
 NULL
 
 ##------ Access SOILWAT2 C code
-#' @useDynLib Rsoilwat31
+#' @useDynLib rSOILWAT2
 NULL
 
 #' Class \code{"swInputData"}
@@ -237,7 +238,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -297,7 +298,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -332,7 +333,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -359,7 +360,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -403,7 +404,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -433,7 +434,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -473,7 +474,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -507,7 +508,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -567,7 +568,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -619,7 +620,7 @@ NULL
 #' \code{\linkS4class{swInputData}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -649,7 +650,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swInputData}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -681,7 +682,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swInputData}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -711,7 +712,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -749,7 +750,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -791,7 +792,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swInputData}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -821,7 +822,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -850,7 +851,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swInputData}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -883,7 +884,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -912,7 +913,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'

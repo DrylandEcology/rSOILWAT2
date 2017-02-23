@@ -1,4 +1,4 @@
-context("Rsoilwat soil temperature instability")
+context("rSOILWAT2 soil temperature instability")
 
 #---CONSTANTS
 sw_TimeSteps <- c("Day", "Week", "Month", "Year")

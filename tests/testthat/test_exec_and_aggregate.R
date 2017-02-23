@@ -1,4 +1,4 @@
-context("Rsoilwat annual aggregation")
+context("rSOILWAT2 annual aggregation")
 
 #---CONSTANTS
 tol <- 1e-6

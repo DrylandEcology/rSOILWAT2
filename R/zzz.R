@@ -1,5 +1,5 @@
 ###############################################################################
-#Rsoilwat and Rsoilwat31
+#rSOILWAT2
 #    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,11 @@
 ###############################################################################
 
 
-.onAttach <- function(library, pkg) {
+.onAttach <- function(library, pkgname) {
   if (interactive())  {
-    meta <- utils::packageDescription("Rsoilwat31")
-    packageStartupMessage("Package 'Rsoilwat_31', ", meta$Version, " (", meta$Date, ").")
+    meta <- utils::packageDescription(pkgname)
+    packageStartupMessage("Package ", shQuote(pkgname), " v", meta$Version, " (",
+      meta$Date,") attached/loaded.")
     packageStartupMessage("Daily weather database version ", con.env$dbW_version)
   }
 

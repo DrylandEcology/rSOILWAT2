@@ -1,5 +1,5 @@
 ###############################################################################
-#Rsoilwat and Rsoilwat31
+#rSOILWAT2
 #    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -99,7 +99,7 @@
 #'
 #'
 #' ## ------ Directory to a SOLWAT project used in the following examples
-#' path_demo <- system.file("extdata", "example1", package = "Rsoilwat31")
+#' path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 #'
 #' ## ------ Simulation with data read from disk during execution ------------
 #' ## Execute the simulation run
@@ -149,7 +149,7 @@
 #' ## ------ Simulation with weather generator ------------
 #' ## Currently, the Markov weather generator flag must be turned on prior to reading files to disk
 #' ## - otherwise, the Markov prob.in and covar.in are not being loaded (NOTE: this should be fixed)
-#' path_demo2 <- system.file("extdata", "example2", package = "Rsoilwat31")
+#' path_demo2 <- system.file("extdata", "example2", package = "rSOILWAT2")
 #' sw_in5 <- sw_inputDataFromFiles(dir = path_demo2, files.in = "files_v31.in")
 #'
 #' ## Turn on the Markov weather generator
@@ -160,7 +160,7 @@
 #'
 #' }
 #'
-#' ## See help(package = "Rsoilwat31") for a full list of functions
+#' ## See help(package = "rSOILWAT2") for a full list of functions
 #'
 #' @export
 sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
@@ -179,9 +179,9 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
     inputData <- sw_inputDataFromFiles(dir = dir, files.in = files.in)
   }
 
-  res <- .Call("start", input, inputData, weatherList, PACKAGE = "Rsoilwat31")
+  res <- .Call("start", input, inputData, weatherList, PACKAGE = "rSOILWAT2")
 
-  if (.Call("tempError", PACKAGE = "Rsoilwat31")) {
+  if (.Call("tempError", PACKAGE = "rSOILWAT2")) {
     # Error during soil temperature calculations
     # Re-initialize soil temperature output to 0
     tempd <- slot(res, "SOILTEMP")
@@ -204,7 +204,7 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
 
 
 
-#' Rsoilwat sw_inputDataFromFiles
+#' rSOILWAT2 sw_inputDataFromFiles
 #'
 #' Reads in a SoilWat Project's input data.  Returns swInputData Object.
 #'
@@ -249,7 +249,7 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
 #' \code{\link{getWeatherData_folders}} for weather data input }
 #' @examples
 #'
-#' path_demo <- system.file("extdata", "example1", package = "Rsoilwat31")
+#' path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 #'
 #'
 #' ## ------ Simulation with data prepared beforehand ------------
@@ -277,7 +277,7 @@ sw_inputDataFromFiles <- function(dir="", files.in="files_v30.in") {
 		input<-c(input,"-e")
 	if(quiet)
 		input<-c(input,"-q")
-	data <- .Call("onGetInputDataFromFiles", input, PACKAGE = "Rsoilwat31")
+	data <- .Call("onGetInputDataFromFiles", input, PACKAGE = "rSOILWAT2")
 
 	return(data)
 }
@@ -285,12 +285,12 @@ sw_inputDataFromFiles <- function(dir="", files.in="files_v30.in") {
 #' Return output data
 #' @export
 sw_outputData <- function(inputData) {
-	.Call("onGetOutput", inputData, PACKAGE = "Rsoilwat31")
+	.Call("onGetOutput", inputData, PACKAGE = "rSOILWAT2")
 }
 
 
 
-#' Rsoilwat sw_inputData
+#' rSOILWAT2 sw_inputData
 #'
 #' Default data Set for SoilWat.  Use this as a template or for testing the
 #' package.
@@ -347,7 +347,7 @@ sw_outputData <- function(inputData) {
 #' @export
 sw_inputData <- function() {
   temp <- new("swInputData") # data are from prototypes
-  data(package = "Rsoilwat31", "weatherData", envir = environment())
+  data(package = "rSOILWAT2", "weatherData", envir = environment())
   slot(temp, "weatherHistory") <- get("weatherData", envir = environment())
 
   temp
@@ -359,5 +359,5 @@ sw_inputData <- function() {
 #' @return A logical value
 #' @export
 has_soilTemp_failed <- function() {
-  .Call("tempError", PACKAGE = "Rsoilwat31")
+  .Call("tempError", PACKAGE = "rSOILWAT2")
 }

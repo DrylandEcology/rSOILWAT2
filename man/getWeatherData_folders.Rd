@@ -2,7 +2,7 @@
 % Please edit documentation in R/swFunctions.R
 \name{getWeatherData_folders}
 \alias{getWeatherData_folders}
-\title{Rsoilwat getWeatherData_folders}
+\title{rSOILWAT2 getWeatherData_folders}
 \usage{
 getWeatherData_folders(LookupWeatherFolder = NULL, weatherDirName = NULL,
   filebasename = NULL, startYear = NULL, endYear = NULL)
@@ -42,7 +42,7 @@ data.
 }
 \examples{
 
-path_demo <- system.file("extdata", "example1", package = "Rsoilwat31")
+path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 
 ## ------ Simulation with data prepared beforehand and separate weather data ------------
 ## Read inputs from files on disk

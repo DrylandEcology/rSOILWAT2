@@ -29,7 +29,7 @@ showClass("swOUT")
 
 }
 \references{
-https://github.com/Burke-Lauenroth-Lab/Rsoilwat
+https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 }
 \seealso{
 \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}

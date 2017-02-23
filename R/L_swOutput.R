@@ -1,5 +1,5 @@
 ###############################################################################
-#Rsoilwat and Rsoilwat31
+#rSOILWAT2
 #    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify

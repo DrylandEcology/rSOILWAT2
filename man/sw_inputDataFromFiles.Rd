@@ -2,7 +2,7 @@
 % Please edit documentation in R/Rsw.R
 \name{sw_inputDataFromFiles}
 \alias{sw_inputDataFromFiles}
-\title{Rsoilwat sw_inputDataFromFiles}
+\title{rSOILWAT2 sw_inputDataFromFiles}
 \usage{
 sw_inputDataFromFiles(dir = "", files.in = "files_v30.in")
 }
@@ -51,7 +51,7 @@ you have to impute yourself or use the built-in Markov weather generator
 }
 \examples{
 
-path_demo <- system.file("extdata", "example1", package = "Rsoilwat31")
+path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 
 
 ## ------ Simulation with data prepared beforehand ------------

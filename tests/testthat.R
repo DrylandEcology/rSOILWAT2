@@ -1,3 +1,3 @@
 library(testthat)
 
-test_check("Rsoilwat31")
+test_check("rSOILWAT2")
