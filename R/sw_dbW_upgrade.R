@@ -76,7 +76,7 @@ dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL, type_new = "gz
 
 			} else {
 				blob_new <- paste0("x'", paste0(memCompress(serialize(weatherData, connection = NULL), type = type_new), collapse = ""), "'")
-				DBI::dbGetQuery(con, paste0("UPDATE WeatherData SET data =", blob_new, "WHERE Site_id =", ids[i, 1], " AND Scenario =", ids[i, 2], ";"))
+				DBI::dbExecute(con, paste0("UPDATE WeatherData SET data =", blob_new, "WHERE Site_id =", ids[i, 1], " AND Scenario =", ids[i, 2], ";"))
 				rm(blob_new)
 
 			}
@@ -85,9 +85,9 @@ dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL, type_new = "gz
 
 
 	# Update version number
-	DBI::dbGetQuery(con, "UPDATE Meta SET Value = \'3.1.0\' WHERE Desc = \'Version\';")
+	DBI::dbExecute(con, "UPDATE Meta SET Value = \'3.1.0\' WHERE Desc = \'Version\';")
 	if (type_new != type_old)
-		DBI::dbGetQuery(con, paste0("UPDATE Meta SET Value = \'", type_new, "\' WHERE Desc = \'Compression_type\';"))
+		DBI::dbExecute(con, paste0("UPDATE Meta SET Value = \'", type_new, "\' WHERE Desc = \'Compression_type\';"))
 
 	# Checks and clean-up
 	check_updatedDB(con)
@@ -113,13 +113,17 @@ dbW_upgrade_v2to3 <- function(dbWeatherDataFile, fbackup = NULL) {
 	backup_copy(dbWeatherDataFile, fbackup)
 
 	# Add new table 'Meta'
-	DBI::dbGetQuery(con, "CREATE TABLE \"Meta\" (\"Desc\" TEXT PRIMARY KEY, \"Value\" TEXT);")
-	RSQLite::dbGetPreparedQuery(con, "INSERT INTO Meta VALUES(:Desc, :Value)",
-		bind.data = data.frame(Desc = c("Version", "Compression_type"),
-								Value = c("3.0.0", "gzip")))
+	DBI::dbExecute(con, "CREATE TABLE \"Meta\" (\"Desc\" TEXT PRIMARY KEY, \"Value\" TEXT);")
+
+	rs <- DBI::dbSendStatement(con, "INSERT INTO Meta VALUES(:Desc, :Value)")
+	DBI::dbBind(rs, param = list(
+		Desc = c("Version", "Compression_type"),
+		Value = c("3.0.0", "gzip")))
+	res <- DBI::dbFetch(rs)
+	DBI::dbClearResult(rs)
 
 	# Delete old table 'Version'
-	DBI::dbGetQuery(con, "DROP TABLE Version;")
+	DBI::dbExecute(con, "DROP TABLE Version;")
 
 	# Checks and clean-up
 	check_updatedDB(con)
@@ -147,11 +151,11 @@ dbW_upgrade_v1to2 <- function(dbWeatherDataFile, fbackup = NULL, SWRunInformatio
 	runIDs_sites <- which(SWRunInformation[, "Include_YN"] > 0)
 
 	# Rename table 'Sites' as 'Sites_old'
-	DBI::dbGetQuery(con, "ALTER TABLE Sites RENAME TO Sites_old;")
+	DBI::dbExecute(con, "ALTER TABLE Sites RENAME TO Sites_old;")
 
 
 	# Add new table 'Sites'
-	DBI::dbGetQuery(con, "CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, \"Latitude\" REAL, \"Longitude\" REAL, \"Label\" TEXT);")
+	DBI::dbExecute(con, "CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, \"Latitude\" REAL, \"Longitude\" REAL, \"Label\" TEXT);")
 
 	site_data <- data.frame(Site_id = SWRunInformation$site_id,
 					Latitude = SWRunInformation$Y_WGS84,
@@ -168,7 +172,10 @@ dbW_upgrade_v1to2 <- function(dbWeatherDataFile, fbackup = NULL, SWRunInformatio
 		im <- match(site_data[runIDs_sites, "Site_id"], MetaData[, "Site_id"])
 		MetaData[im, c("Latitude", "Longitude", "Label")] <- site_data[runIDs_sites, c("Latitude", "Longitude", "Label")]
 
-		RSQLite::dbGetPreparedQuery(con, "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)", bind.data = MetaData)
+		rs <- DBI::dbSendStatement(con, "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)")
+		DBI::dbBind(rs, param = as.list(MetaData))
+		res <- DBI::dbFetch(rs)
+		DBI::dbClearResult(rs)
 	}
 
 
@@ -187,7 +194,7 @@ dbW_upgrade_v1to2 <- function(dbWeatherDataFile, fbackup = NULL, SWRunInformatio
 
 				if (nrow(site_new) == 1) {
 					#DBI::dbGetQuery(con, paste("SELECT Site_id, Scenario, StartYear, EndYear FROM WeatherData WHERE Site_id =", iold, ";"))
-					DBI::dbGetQuery(con, paste("UPDATE WeatherData SET Site_id =", site_new$Site_id, "WHERE Site_id =", iold, ";"))
+					DBI::dbExecute(con, paste("UPDATE WeatherData SET Site_id =", site_new$Site_id, "WHERE Site_id =", iold, ";"))
 				} else {
 					str(site_new)
 					warning("No updated record for old site_id = ", iold)
@@ -200,12 +207,12 @@ dbW_upgrade_v1to2 <- function(dbWeatherDataFile, fbackup = NULL, SWRunInformatio
 
 		cur_ids <- DBI::dbGetQuery(con, "SELECT Site_id, Scenario FROM WeatherData;")
 	}
-	DBI::dbGetQuery(con, "DROP TABLE Sites_old;")
+	DBI::dbExecute(con, "DROP TABLE Sites_old;")
 
 	# Update version number
-	DBI::dbGetQuery(con, "DROP TABLE Version;")
-	DBI::dbGetQuery(con, "CREATE TABLE \"Version\" (\"Version\" TEXT);")
-	DBI::dbGetQuery(con, "INSERT INTO Version (Version) VALUES (\"2.0.0\");")
+	DBI::dbExecute(con, "DROP TABLE Version;")
+	DBI::dbExecute(con, "CREATE TABLE \"Version\" (\"Version\" TEXT);")
+	DBI::dbExecute(con, "INSERT INTO Version (Version) VALUES (\"2.0.0\");")
 
 	# Checks and clean-up
 	check_updatedDB(con)
@@ -218,10 +225,10 @@ dbW_upgrade_v1to2 <- function(dbWeatherDataFile, fbackup = NULL, SWRunInformatio
 #' @export
 check_updatedDB <- function(con) {
 	print(paste0(Sys.time(), ": check database integrity"))
-	print(DBI::dbGetQuery(con, "PRAGMA integrity_check;"))
+	print(DBI::dbExecute(con, "PRAGMA integrity_check;"))
 
-	print(DBI::dbGetQuery(con, "PRAGMA index_list(WeatherData);"))
-	print(DBI::dbGetQuery(con, "PRAGMA index_info(sqlite_autoindex_WeatherData_1);"))
+	print(DBI::dbExecute(con, "PRAGMA index_list(WeatherData);"))
+	print(DBI::dbExecute(con, "PRAGMA index_info(sqlite_autoindex_WeatherData_1);"))
 }
 
 

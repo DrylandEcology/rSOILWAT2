@@ -286,7 +286,7 @@ dbW_addSite <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL) {
 		Label <- if (is.null(Label)) "NULL" else paste("'", Label, "'", sep = "")
 		temp <- DBI::dbGetQuery(con.env$con, "SELECT MAX(Site_id) FROM Sites;")[1,1]
 		Site_id <- if(is.na(temp)) 1 else {temp + 1}
-		DBI::dbGetQuery(con.env$con, paste("INSERT INTO Sites VALUES(", Site_id, ",", lat, ",", long, ",", Label, ");", sep = ""))
+		DBI::dbExecute(con.env$con, paste("INSERT INTO Sites VALUES(", Site_id, ",", lat, ",", long, ",", Label, ");", sep = ""))
 
 	} else { #Site_id exists already
 		SiteData <- DBI::dbGetQuery(con.env$con, paste("SELECT * FROM Sites WHERE Site_id=", Site_id, sep = ""))
@@ -313,7 +313,7 @@ dbW_setConnection <- function(dbFilePath) {
 	con.env$blob_compression_type <- if (DBI::dbExistsTable(con.env$con, "Meta")) dbW_compression() else con.env$default_blob_compression_type
 
 	#settings <- c("PRAGMA page_size=8192","PRAGMA cache_size = 400000;","PRAGMA synchronous = OFF;","PRAGMA journal_mode = OFF;","PRAGMA locking_mode = EXCLUSIVE;","PRAGMA count_changes = OFF;","PRAGMA temp_store = MEMORY;","PRAGMA auto_vacuum = NONE;")
-	#lapply(settings, function(x) DBI::dbGetQuery(con.env$con,x))
+	#lapply(settings, function(x) DBI::dbExecute(con.env$con,x))
 }
 
 #' @export
@@ -329,18 +329,24 @@ dbW_disconnectConnection <- function() {
 dbW_addSites <- function(dfLatitudeLongitudeLabel) {#lat #long #Label 1 .... 20165
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
-	RSQLite::dbGetPreparedQuery(con.env$con, "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)", bind.data = as.data.frame(dfLatitudeLongitudeLabel,stringsAsFactors=FALSE))
+	rs <- DBI::dbSendStatement(con.env$con, "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)")
+	DBI::dbBind(rs, param = as.list(dfLatitudeLongitudeLabel))
+	res <- DBI::dbFetch(rs)
+	DBI::dbClearResult(rs)
 }
 
 #' @export
 dbW_addScenarios <- function(dfScenario) {#names 1 ... 32
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
-	RSQLite::dbGetPreparedQuery(con.env$con, "INSERT INTO Scenarios VALUES(NULL, :Scenario)", bind.data = as.data.frame(dfScenario,stringsAsFactors=FALSE))
+	rs <- DBI::dbSendStatement(con.env$con, "INSERT INTO Scenarios VALUES(NULL, :Scenario)")
+	DBI::dbBind(rs, param = as.list(dfScenario))
+	res <- DBI::dbFetch(rs)
+	DBI::dbClearResult(rs)
 }
 
 dbW_addWeatherDataNoCheck <- function(Site_id, Scenario_id, StartYear, EndYear, weather_blob) {
-	DBI::dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",Scenario_id,",",StartYear,",",EndYear,",",weather_blob,");",sep=""))
+	DBI::dbExecute(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",Scenario_id,",",StartYear,",",EndYear,",",weather_blob,");",sep=""))
 }
 
 #' @export
@@ -363,14 +369,14 @@ dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderP
 		temp <- DBI::dbGetQuery(con.env$con, "SELECT MAX(id) FROM \"Scenarios\";")[1,1]
 		scenarioID <- ifelse(is.na(temp),1,temp+1)
 		SQL <- paste("INSERT INTO \"Scenarios\" VALUES(",scenarioID,",'",ScenarioName,"');",sep="")
-		DBI::dbGetQuery(con.env$con, SQL)
+		DBI::dbExecute(con.env$con, SQL)
 	}
 
 	if(!is.null(weatherData)) {
 		data_blob <- dbW_weatherData_to_blob(weatherData, con.env$blob_compression_type)
 		StartYear <- head(as.integer(names(weatherData)),n=1)
 		EndYear <- tail(as.integer(names(weatherData)),n=1)
-		DBI::dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
+		DBI::dbExecute(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
 		#dbCommit(con.env$con)
 	} else {
 		weath <- list.files(weatherFolderPath)
@@ -384,7 +390,7 @@ dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderP
 		StartYear <- head(years,n=1)
 		EndYear <- tail(years,n=1)
 		data_blob <- dbW_weatherData_to_blob(weatherData, con.env$blob_compression_type)
-		DBI::dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
+		DBI::dbExecute(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
 		#dbCommit(con.env$con)
 	}
 }
@@ -409,14 +415,15 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 		temp <- DBI::dbGetQuery(con.env$con, "SELECT MAX(id) FROM \"Scenarios\";")[1,1]
 		scenarioID <- ifelse(is.na(temp),1,temp+1)
 		SQL <- paste("INSERT INTO \"Scenarios\" VALUES(",scenarioID,",'",ScenarioName,"');",sep="")
-		DBI::dbGetQuery(con.env$con, SQL)
+		DBI::dbExecute(con.env$con, SQL)
 	}
 
 	if(!is.null(weatherData)) {
 		data_blob <- dbW_weatherData_to_blob_old(weatherData, con.env$blob_compression_type)
-		StartYear <- head(as.integer(names(weatherData)),n=1)
-		EndYear <- tail(as.integer(names(weatherData)),n=1)
-		DBI::dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
+		temp <- as.integer(names(weatherData))
+		StartYear <- temp[1]
+		EndYear <- temp[length(temp)]
+		DBI::dbExecute(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
 		#dbCommit(con.env$con)
 	} else {
 		weath <- list.files(weatherFolderPath)
@@ -427,10 +434,10 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 			temp <-read.csv(file.path(weatherFolderPath,weath[j]),header=FALSE,skip=2,sep="\t")
 			weatherData[[j]] <- swReadLines(new("swWeatherData",year),file.path(weatherFolderPath,weath[j]))
 		}
-		StartYear <- head(years,n=1)
-		EndYear <- tail(years,n=1)
+		StartYear <- years[1]
+		EndYear <- years[length(years)]
 		data_blob <- dbW_weatherData_to_blob_old(weatherData, con.env$blob_compression_type)
-		DBI::dbGetQuery(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
+		DBI::dbExecute(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
 		#dbCommit(con.env$con)
 	}
 }
@@ -450,17 +457,22 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = 
 	con.env$blob_compression_type <- compression_type
 
 	stopifnot(DBI::dbIsValid(con.env$con))
-	DBI::dbGetQuery(con.env$con, "CREATE TABLE \"Meta\" (\"Desc\" TEXT PRIMARY KEY, \"Value\" TEXT);")
-	RSQLite::dbGetPreparedQuery(con.env$con, "INSERT INTO Meta VALUES(:Desc, :Value)",
-		bind.data = data.frame(Desc = c("Version", "Compression_type"),
-								Value = c(con.env$dbW_version, con.env$blob_compression_type)))
+	DBI::dbExecute(con.env$con, "CREATE TABLE \"Meta\" (\"Desc\" TEXT PRIMARY KEY, \"Value\" TEXT);")
+
+	rs <- DBI::dbSendStatement(con.env$con, "INSERT INTO Meta VALUES(:Desc, :Value)")
+	DBI::dbBind(rs, param = list(
+		Desc = c("Version", "Compression_type"),
+		Value = c(con.env$dbW_version, con.env$blob_compression_type)))
+	res <- DBI::dbFetch(rs)
+	DBI::dbClearResult(rs)
+
 
 	# Table of sites
-	DBI::dbGetQuery(con.env$con, "CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, \"Latitude\" REAL, \"Longitude\" REAL, \"Label\" TEXT);")
+	DBI::dbExecute(con.env$con, "CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, \"Latitude\" REAL, \"Longitude\" REAL, \"Label\" TEXT);")
 	# Table for weather data
-	DBI::dbGetQuery(con.env$con, "CREATE TABLE \"WeatherData\" (\"Site_id\" integer, \"Scenario\" integer,  \"StartYear\" integer, \"EndYear\" integer, \"data\" BLOB, PRIMARY KEY (\"Site_id\", \"Scenario\"));")
+	DBI::dbExecute(con.env$con, "CREATE TABLE \"WeatherData\" (\"Site_id\" integer, \"Scenario\" integer,  \"StartYear\" integer, \"EndYear\" integer, \"data\" BLOB, PRIMARY KEY (\"Site_id\", \"Scenario\"));")
 	# Table of scenario names
-	DBI::dbGetQuery(con.env$con, "CREATE TABLE \"Scenarios\" (\"id\" integer PRIMARY KEY, \"Scenario\" TEXT);")
+	DBI::dbExecute(con.env$con, "CREATE TABLE \"Scenarios\" (\"id\" integer PRIMARY KEY, \"Scenario\" TEXT);")
 
 	#---Add sites
 	if (NROW(site_data) > 0 && sapply(c("Site_id", "Latitude", "Longitude", "Label"), function(x) x %in% colnames(site_data))) {
@@ -499,7 +511,7 @@ dbW_addFromFolders <- function(MetaData=NULL, FoldersPath, ScenarioName="Current
 dbW_deleteSite <- function(Site_id) {
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
-	DBI::dbGetQuery(con.env$con, paste("DELETE FROM \"Sites\" WHERE Site_id=",Site_id,";",sep=""))
+	DBI::dbExecute(con.env$con, paste("DELETE FROM \"Sites\" WHERE Site_id=",Site_id,";",sep=""))
 }
 
 #' @export
@@ -507,10 +519,10 @@ dbW_deleteSiteData <- function(Site_id, Scenario=NULL) {
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
 	if(is.null(Scenario)) { #Remove all data for this site
-		DBI::dbGetQuery(con.env$con, paste("DELETE FROM \"WeatherData\" WHERE Site_id=",Site_id,";",sep=""))
+		DBI::dbExecute(con.env$con, paste("DELETE FROM \"WeatherData\" WHERE Site_id=",Site_id,";",sep=""))
 		dbW_deleteSite(Site_id)
 	} else {
-		DBI::dbGetQuery(con.env$con, paste("DELETE FROM \"WeatherData\" WHERE Site_id=",Site_id," AND Scenario='",Scenario,"';",sep=""))
+		DBI::dbExecute(con.env$con, paste("DELETE FROM \"WeatherData\" WHERE Site_id=",Site_id," AND Scenario='",Scenario,"';",sep=""))
 		if(!DBI::dbGetQuery(con.env$con, paste("SELECT COUNT(*) FROM Sites WHERE Site_id=",Site_id,sep=""))[1,1]) {
 			dbW_deleteSite(Site_id)
 		}
