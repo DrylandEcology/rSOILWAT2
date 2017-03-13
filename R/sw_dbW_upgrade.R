@@ -173,7 +173,7 @@ dbW_upgrade_v1to2 <- function(dbWeatherDataFile, fbackup = NULL, SWRunInformatio
 		MetaData[im, c("Latitude", "Longitude", "Label")] <- site_data[runIDs_sites, c("Latitude", "Longitude", "Label")]
 
 		rs <- DBI::dbSendStatement(con, "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)")
-		DBI::dbBind(rs, param = as.list(MetaData))
+		DBI::dbBind(rs, param = as.list(MetaData[, c("Latitude", "Longitude", "Label")]))
 		res <- DBI::dbFetch(rs)
 		DBI::dbClearResult(rs)
 	}

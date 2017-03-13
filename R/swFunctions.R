@@ -330,7 +330,7 @@ dbW_addSites <- function(dfLatitudeLongitudeLabel) {#lat #long #Label 1 .... 201
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
 	rs <- DBI::dbSendStatement(con.env$con, "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)")
-	DBI::dbBind(rs, param = as.list(dfLatitudeLongitudeLabel))
+	DBI::dbBind(rs, param = as.list(dfLatitudeLongitudeLabel[, c("Latitude", "Longitude", "Label")]))
 	res <- DBI::dbFetch(rs)
 	DBI::dbClearResult(rs)
 }
