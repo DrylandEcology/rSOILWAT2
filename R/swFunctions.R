@@ -657,9 +657,12 @@ dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
 #' \dontrun{sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)}
 #'
 #' @export
-getWeatherData_folders <- function(LookupWeatherFolder=NULL, weatherDirName=NULL,filebasename=NULL,startYear=NULL,endYear=NULL) {
+getWeatherData_folders <- function(LookupWeatherFolder = NULL, weatherDirName = NULL,
+	filebasename = NULL, startYear = NULL, endYear = NULL) {
+
 	if(is.null(LookupWeatherFolder) | is.null(weatherDirName) | is.null(filebasename))
 		stop("Need LookupWeatherFolder and weatherDirName information to get weather data")
+
 	useYears<-FALSE
 	useStart<-FALSE
 	useEnd  <-FALSE

@@ -4,3 +4,4 @@ src/*.o
 src/*.so
 ^\.travis\.yml$
 ^appveyor\.yml$
+^data-raw$
