@@ -1,6 +1,6 @@
 [![Travis-CI Build Status](https://travis-ci.org/Burke-Lauenroth-Lab/rSOILWAT2.svg?branch=master)](https://travis-ci.org/Burke-Lauenroth-Lab/rSOILWAT2)
   [![Build status](https://ci.appveyor.com/api/projects/status/kkmqcftbl24bwnqk?svg=true)](https://ci.appveyor.com/project/dschlaep/rSOILWAT2)
-  [![Coverage Status](https://img.shields.io/coveralls/Burke-Lauenroth-Lab/rSOILWAT2.svg)](https://coveralls.io/r/Burke-Lauenroth-Lab/rSOILWAT2?branch=master)
+  [![Coverage Status](https://coveralls.io/repos/github/Burke-Lauenroth-Lab/rSOILWAT2/badge.svg)](https://coveralls.io/github/Burke-Lauenroth-Lab/rSOILWAT2)
 
 # rSOILWAT2
 A R package for SOILWAT2.
