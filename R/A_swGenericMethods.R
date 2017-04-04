@@ -67,6 +67,8 @@ setGeneric(name="swFiles_Prod",function(object) {standardGeneric("swFiles_Prod")
 #' @export
 setGeneric(name="swFiles_Estab",function(object) {standardGeneric("swFiles_Estab")})
 #' @export
+setGeneric(name="swFiles_Carbon",function(object) {standardGeneric("swFiles_Carbon")})
+#' @export
 setGeneric(name="swFiles_SWCsetup",function(object) {standardGeneric("swFiles_SWCsetup")})
 #' @export
 setGeneric(name="swFiles_Output",function(object) {standardGeneric("swFiles_Output")})
@@ -103,6 +105,8 @@ setGeneric(name="swFiles_Cloud<-",function(object, value) {standardGeneric("swFi
 setGeneric(name="swFiles_Prod<-",function(object, value) {standardGeneric("swFiles_Prod<-")})
 #' @export
 setGeneric(name="swFiles_Estab<-",function(object, value) {standardGeneric("swFiles_Estab<-")})
+#' @export
+setGeneric(name="swFiles_Carbon<-",function(object, value) {standardGeneric("swFiles_Carbon<-")})
 #' @export
 setGeneric(name="swFiles_SWCsetup<-",function(object, value) {standardGeneric("swFiles_SWCsetup<-")})
 #' @export
@@ -394,6 +398,38 @@ setGeneric(name="set_swEstab<-",function(object, value) {standardGeneric("set_sw
 #' @export
 setGeneric(name="swEstab_useEstab<-",function(object, value) {standardGeneric("swEstab_useEstab<-")})
 #species here#
+########################
+
+#########CARBON##########
+#' @export
+setGeneric(name="get_swCarbon",function(object) {standardGeneric("get_swCarbon")})
+#' @export
+setGeneric(name="swCarbon_Future_Bio",function(object) {standardGeneric("swCarbon_Future_Bio")})
+#' @export
+setGeneric(name="swCarbon_Future_Sto",function(object) {standardGeneric("swCarbon_Future_Sto")})
+#' @export
+setGeneric(name="swCarbon_Retro_Bio",function(object) {standardGeneric("swCarbon_Retro_Bio")})
+#' @export
+setGeneric(name="swCarbon_Retro_Sto",function(object) {standardGeneric("swCarbon_Retro_Sto")})
+#' @export
+setGeneric(name="swCarbon_RCP",function(object) {standardGeneric("swCarbon_RCP")})
+#' @export
+setGeneric(name="swCarbon_Delta",function(object) {standardGeneric("swCarbon_Delta")})
+
+#' @export
+setGeneric(name="set_swCarbon<-",function(object, value) {standardGeneric("set_swCarbon<-")})
+#' @export
+setGeneric(name="swCarbon_Future_Bio<-",function(object, value) {standardGeneric("swCarbon_Future_Bio<-")})
+#' @export
+setGeneric(name="swCarbon_Future_Sto<-",function(object, value) {standardGeneric("swCarbon_Future_Sto<-")})
+#' @export
+setGeneric(name="swCarbon_Retro_Bio<-",function(object, value) {standardGeneric("swCarbon_Retro_Bio<-")})
+#' @export
+setGeneric(name="swCarbon_Retro_Sto<-",function(object, value) {standardGeneric("swCarbon_Retro_Sto<-")})
+#' @export
+setGeneric(name="swCarbon_RCP<-",function(object, value) {standardGeneric("swCarbon_RCP<-")})
+#' @export
+setGeneric(name="swCarbon_Delta<-",function(object, value) {standardGeneric("swCarbon_Delta<-")})
 ########################
 
 #########SWC############
