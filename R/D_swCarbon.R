@@ -19,15 +19,27 @@
 
 #############################CARBON DATA#########################################
 #' @export
-setClass(Class="swCarbon")
+setClass("swCarbon", 
+  
+  representation(CarbonFutureBio='integer', CarbonFutureSto='integer', CarbonRetroBio='integer', CarbonRetroSto='integer', RCP='integer', Delta='integer'),
+  
+  prototype=prototype(
+    CarbonFutureBio = as.integer(1),
+    CarbonFutureSto = as.integer(1),
+    CarbonRetroBio = as.integer(1),
+    CarbonRetroSto = as.integer(1),
+    RCP = as.integer(85),
+    Delta = as.integer(0)
+  ))
+
 setMethod(f="swClear",
           signature="swCarbon",
           definition=function(object) {
-            object@CarbonFutureBio = logical(0)
-            object@CarbonFutureSto = logical(0)
-            object@CarbonRetroBio  = logical(0)
-            object@CarbonRetroSto  = logical(0)
-            object@RCP = integer(85)
-            object@Delta = integer(0)
+            object@CarbonFutureBio = as.integer(0)
+            object@CarbonFutureSto = as.integer(0)
+            object@CarbonRetroBio  = as.integer(0)
+            object@CarbonRetroSto  = as.integer(0)
+            object@RCP = as.integer(85)
+            object@Delta = as.integer(0)
             return(object)
           })

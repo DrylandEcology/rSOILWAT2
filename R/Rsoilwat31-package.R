@@ -71,6 +71,8 @@ NULL
 #' get_swWeather swInputData-method
 #' get_swYears swInputData-method
 #' get_WeatherHistory swInputData-method
+#' get_swCarbon,swInputData-method
+#' set_swCarbon<-,swInputData-method
 #' set_Markov<- swInputData-method
 #' set_swCloud<- swInputData-method
 #' set_swFiles<- swInputData-method
@@ -98,6 +100,20 @@ NULL
 #' swFiles_Cloud swInputData-method
 #' swFiles_Estab<- swInputData-method
 #' swFiles_Estab swInputData-method
+#' swFiles_Carbon<-,swInputData-method
+#' swFiles_Carbon,swInputData-method
+#' swCarbon_Future_Bio,swInputData-method
+#' swCarbon_Future_Sto,swInputData-method
+#' swCarbon_Retro_Bio,swInputData-method
+#' swCarbon_Retro_Sto,swInputData-method
+#' swCarbon_RCP,swInputData-method
+#' swCarbon_Delta,swInputData-method
+#' swCarbon_Future_Bio<-,swInputData-method
+#' swCarbon_Future_Sto<-,swInputData-method
+#' swCarbon_Retro_Bio<-,swInputData-method
+#' swCarbon_Retro_Sto<-,swInputData-method
+#' swCarbon_RCP<-,swInputData-method
+#' swCarbon_Delta<-,swInputData-method
 #' swFiles_filesIn<- swInputData-method
 #' swFiles_filesIn swInputData-method
 #' swFiles_LogFile<- swInputData-method
@@ -238,6 +254,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#' \code{\linkS4class{swCarbon}}
 #' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
@@ -256,6 +273,8 @@ NULL
 #' swFiles_Cloud swFiles-method
 #' swFiles_Estab<- swFiles-method
 #' swFiles_Estab swFiles-method
+#' swFiles_Carbon<- swFiles-method
+#' swFiles_Carbon swFiles-method
 #' swFiles_filesIn<- swFiles-method
 #' swFiles_filesIn swFiles-method
 #' swFiles_LogFile<- swFiles-method
@@ -298,11 +317,46 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#' \code{\linkS4class{swCarbon}}
 #' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
 #' showClass("swFiles")
+#'
+NULL
+
+
+#' Class \code{"swCarbon"}
+#'
+#' The generic functions listed work on this and the proper sw Class in the container's slots.
+#'
+#'
+#' @name swCarbon-class
+#' @aliases
+#' swCarbon_Future_Bio,swCarbon-method
+#' swCarbon_Future_Sto,swCarbon-method
+#' swCarbon_Retro_Bio,swCarbon-method
+#' swCarbon_Retro_Sto,swCarbon-method
+#' swCarbon_RCP,swCarbon-method
+#' swCarbon_Delta,swCarbon-method
+#' swCarbon_Future_Bio<-,swCarbon-method
+#' swCarbon_Future_Sto<-,swCarbon-method
+#' swCarbon_Retro_Bio<-,swCarbon-method
+#' swCarbon_Retro_Sto<-,swCarbon-method
+#' swCarbon_RCP<-,swCarbon-method
+#' swCarbon_Delta<-,swCarbon-method
+#'
+#' @docType class
+#' @section Objects from the Class: Objects can be created by calls of the form
+#' \code{new("swCarbon", ...)}.
+#' @author Zach Kramer
+#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @keywords classes
+#' @examples
+#'
+#' showClass("swCarbon")
 #'
 NULL
 
