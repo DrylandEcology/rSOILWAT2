@@ -104,14 +104,14 @@ NULL
 #' swFiles_Carbon,swInputData-method
 #' swCarbon_Future_Bio,swInputData-method
 #' swCarbon_Future_Sto,swInputData-method
-#' swCarbon_Retro_Bio,swInputData-method
-#' swCarbon_Retro_Sto,swInputData-method
+#' swCarbon_Historical_Bio,swInputData-method
+#' swCarbon_Historical_Sto,swInputData-method
 #' swCarbon_RCP,swInputData-method
 #' swCarbon_Delta,swInputData-method
 #' swCarbon_Future_Bio<-,swInputData-method
 #' swCarbon_Future_Sto<-,swInputData-method
-#' swCarbon_Retro_Bio<-,swInputData-method
-#' swCarbon_Retro_Sto<-,swInputData-method
+#' swCarbon_Historical_Bio<-,swInputData-method
+#' swCarbon_Historical_Sto<-,swInputData-method
 #' swCarbon_RCP<-,swInputData-method
 #' swCarbon_Delta<-,swInputData-method
 #' swFiles_filesIn<- swInputData-method
@@ -336,14 +336,14 @@ NULL
 #' @aliases
 #' swCarbon_Future_Bio,swCarbon-method
 #' swCarbon_Future_Sto,swCarbon-method
-#' swCarbon_Retro_Bio,swCarbon-method
-#' swCarbon_Retro_Sto,swCarbon-method
+#' swCarbon_Historical_Bio,swCarbon-method
+#' swCarbon_Historical_Sto,swCarbon-method
 #' swCarbon_RCP,swCarbon-method
 #' swCarbon_Delta,swCarbon-method
 #' swCarbon_Future_Bio<-,swCarbon-method
 #' swCarbon_Future_Sto<-,swCarbon-method
-#' swCarbon_Retro_Bio<-,swCarbon-method
-#' swCarbon_Retro_Sto<-,swCarbon-method
+#' swCarbon_Historical_Bio<-,swCarbon-method
+#' swCarbon_Historical_Sto<-,swCarbon-method
 #' swCarbon_RCP<-,swCarbon-method
 #' swCarbon_Delta<-,swCarbon-method
 #'

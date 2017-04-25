@@ -21,13 +21,13 @@
 #' @export
 setClass("swCarbon", 
   
-  representation(CarbonFutureBio='integer', CarbonFutureSto='integer', CarbonRetroBio='integer', CarbonRetroSto='integer', RCP='integer', Delta='integer'),
+  representation(CarbonFutureBio='integer', CarbonFutureSto='integer', CarbonHistoricalBio='integer', CarbonHistoricalSto='integer', RCP='integer', Delta='integer'),
   
   prototype=prototype(
     CarbonFutureBio = as.integer(1),
     CarbonFutureSto = as.integer(1),
-    CarbonRetroBio = as.integer(1),
-    CarbonRetroSto = as.integer(1),
+    CarbonHistoricalBio = as.integer(1),
+    CarbonHistoricalSto = as.integer(1),
     RCP = as.integer(85),
     Delta = as.integer(0)
   ))
@@ -37,8 +37,8 @@ setMethod(f="swClear",
           definition=function(object) {
             object@CarbonFutureBio = as.integer(0)
             object@CarbonFutureSto = as.integer(0)
-            object@CarbonRetroBio  = as.integer(0)
-            object@CarbonRetroSto  = as.integer(0)
+            object@CarbonHistoricalBio = as.integer(0)
+            object@CarbonHistoricalSto = as.integer(0)
             object@RCP = as.integer(85)
             object@Delta = as.integer(0)
             return(object)
