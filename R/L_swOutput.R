@@ -34,7 +34,7 @@ setMethod("swOutput_KEY_Columns","swOutput_KEY", function(object) { return(objec
 
 setReplaceMethod(f="swOutput_KEY_Period", signature="swOutput_KEY", definition=function(object,index,value) {slot(object,slotNames(object)[-(1:3)][index]) <- value; return(object)})
 
-swOutput_BIOMASS <- new("swOutput_KEY",Title="biomass", TimeStep=1L, Columns=6L)
+swOutput_CO2EFFECTS <- new("swOutput_KEY",Title="co2_effects", TimeStep=1L, Columns=7L)
 swOutput_WTHR <- new("swOutput_KEY",Title="",TimeStep=4L,Columns=0L)
 swOutput_TEMP <- new("swOutput_KEY",Title="temp_air",TimeStep=1L,Columns=4L)
 swOutput_PRECIP <- new("swOutput_KEY",Title="precip",TimeStep=2L,Columns=5L)
@@ -68,10 +68,10 @@ swOutput_ESTABL <- new("swOutput_KEY",Title="estabs",TimeStep=3L,Columns=as.inte
 setClass(Class="swOutput",representation(yr_nrow="integer",mo_nrow="integer",wk_nrow="integer",dy_nrow="integer",WTHR="swOutput_KEY",TEMP="swOutput_KEY",PRECIP="swOutput_KEY",SOILINFILT="swOutput_KEY",RUNOFF="swOutput_KEY",ALLH2O="swOutput_KEY",VWCBULK="swOutput_KEY",
 				VWCMATRIC="swOutput_KEY",SWCBULK="swOutput_KEY",SWABULK="swOutput_KEY",SWAMATRIC="swOutput_KEY",SWPMATRIC="swOutput_KEY",SURFACEWATER="swOutput_KEY",TRANSP="swOutput_KEY",
 				EVAPSOIL="swOutput_KEY",EVAPSURFACE="swOutput_KEY",INTERCEPTION="swOutput_KEY",LYRDRAIN="swOutput_KEY",HYDRED="swOutput_KEY",ET="swOutput_KEY",AET="swOutput_KEY",PET="swOutput_KEY",WETDAY="swOutput_KEY",SNOWPACK="swOutput_KEY",
-				DEEPSWC="swOutput_KEY",SOILTEMP="swOutput_KEY",ALLVEG="swOutput_KEY",ESTABL="swOutput_KEY", BIOMASS="swOutput_KEY"), prototype(WTHR=swOutput_WTHR, TEMP=swOutput_TEMP, PRECIP=swOutput_PRECIP,SOILINFILT=swOutput_SOILINFILT,RUNOFF=swOutput_RUNOFF, ALLH2O=swOutput_ALLH2O, VWCBULK=swOutput_VWCBULK,
+				DEEPSWC="swOutput_KEY",SOILTEMP="swOutput_KEY",ALLVEG="swOutput_KEY",ESTABL="swOutput_KEY", CO2EFFECTS="swOutput_KEY"), prototype(WTHR=swOutput_WTHR, TEMP=swOutput_TEMP, PRECIP=swOutput_PRECIP,SOILINFILT=swOutput_SOILINFILT,RUNOFF=swOutput_RUNOFF, ALLH2O=swOutput_ALLH2O, VWCBULK=swOutput_VWCBULK,
 				VWCMATRIC=swOutput_VWCMATRIC, SWCBULK=swOutput_SWCBULK, SWPMATRIC=swOutput_SWPMATRIC, SWABULK=swOutput_SWABULK, SWAMATRIC=swOutput_SWAMATRIC, SURFACEWATER=swOutput_SURFACEWATER, TRANSP=swOutput_TRANSP,
 				EVAPSOIL=swOutput_EVAPSOIL,EVAPSURFACE=swOutput_EVAPSURFACE,INTERCEPTION=swOutput_INTERCEPTION,LYRDRAIN=swOutput_LYRDRAIN,HYDRED=swOutput_HYDRED,ET=swOutput_ET,AET=swOutput_AET,PET=swOutput_PET,WETDAY=swOutput_WETDAY,SNOWPACK=swOutput_SNOWPACK,
-				DEEPSWC=swOutput_DEEPSWC,SOILTEMP=swOutput_SOILTEMP,ALLVEG=swOutput_ALLVEG,ESTABL=swOutput_ESTABL,BIOMASS=swOutput_BIOMASS) )
+				DEEPSWC=swOutput_DEEPSWC,SOILTEMP=swOutput_SOILTEMP,ALLVEG=swOutput_ALLVEG,ESTABL=swOutput_ESTABL,CO2EFFECTS=swOutput_CO2EFFECTS) )
 
 setMethod("$","swOutput",function(x,name) {slot(x,name)})
 setMethod("swOutput_getKEY","swOutput", function(object,index) {slot(object,slotNames(object)[-(1:4)][index])})
@@ -166,7 +166,7 @@ setMethod(f="initialize",signature="swOutput",definition=function(.Object,Layers
 			.Object@SOILTEMP@Columns <- Layers
 			.Object@ALLVEG@Columns <- 0L
 			.Object@ESTABL@Columns <- VegEstabCount
-			.Object@BIOMASS@Columns <- 6L
+			.Object@CO2EFFECTS@Columns <- 7L
 
 #			for(i in 1:28) {#loop through KEYS
 #				if(Key_use[i]) {
