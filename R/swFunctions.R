@@ -331,7 +331,6 @@ dbW_addSites <- function(dfLatitudeLongitudeLabel) {#lat #long #Label 1 .... 201
 
 	rs <- DBI::dbSendStatement(con.env$con, "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)")
 	DBI::dbBind(rs, param = as.list(dfLatitudeLongitudeLabel[, c("Latitude", "Longitude", "Label")]))
-	res <- DBI::dbFetch(rs)
 	DBI::dbClearResult(rs)
 }
 
@@ -341,7 +340,6 @@ dbW_addScenarios <- function(dfScenario) {#names 1 ... 32
 
 	rs <- DBI::dbSendStatement(con.env$con, "INSERT INTO Scenarios VALUES(NULL, :Scenario)")
 	DBI::dbBind(rs, param = as.list(dfScenario))
-	res <- DBI::dbFetch(rs)
 	DBI::dbClearResult(rs)
 }
 
@@ -463,7 +461,6 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = 
 	DBI::dbBind(rs, param = list(
 		Desc = c("Version", "Compression_type"),
 		Value = c(con.env$dbW_version, con.env$blob_compression_type)))
-	res <- DBI::dbFetch(rs)
 	DBI::dbClearResult(rs)
 
 

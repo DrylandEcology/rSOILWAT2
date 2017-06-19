@@ -120,7 +120,6 @@ dbW_upgrade_v2to3 <- function(dbWeatherDataFile, fbackup = NULL) {
 	DBI::dbBind(rs, param = list(
 		Desc = c("Version", "Compression_type"),
 		Value = c("3.0.0", "gzip")))
-	res <- DBI::dbFetch(rs)
 	DBI::dbClearResult(rs)
 
 	# Delete old table 'Version'
@@ -175,7 +174,6 @@ dbW_upgrade_v1to2 <- function(dbWeatherDataFile, fbackup = NULL, SWRunInformatio
 
 		rs <- DBI::dbSendStatement(con, "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)")
 		DBI::dbBind(rs, param = as.list(MetaData[, c("Latitude", "Longitude", "Label")]))
-		res <- DBI::dbFetch(rs)
 		DBI::dbClearResult(rs)
 	}
 
