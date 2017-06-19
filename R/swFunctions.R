@@ -543,8 +543,13 @@ dbW_deleteSiteData <- function(Site_id, Scenario=NULL) {
 #' @seealso \code{\link{memDecompress}}, \code{\link{unserialize}}
 #' @export
 dbW_blob_to_weatherData <- function(data_blob, type = "gzip") {
-	if (inherits(data_blob, "list") && inherits(data_blob[[1]], "raw") && length(data_blob) == 1)
-			data_blob <- data_blob[[1]]
+	# RSQLite versions < 2.0 return a list of 'raw'; starting with v >= 2.0, the class changed
+	#	to 'blob'
+
+	if ((inherits(data_blob, "list") || inherits(data_blob, "blob")) &&
+		inherits(data_blob[[1]], "raw") && length(data_blob) == 1) {
+		data_blob <- data_blob[[1]]
+	}
 
 	unserialize(memDecompress(data_blob, type = type))
 }
@@ -568,8 +573,10 @@ dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
 # Conversion: SQL-blob to object of class 'swWeatherData'
 dbW_blob_to_weatherData_old <- function(StartYear, EndYear, data_blob, type = "gzip") {
 	.Deprecated("dbW_blob_to_weatherData")
-	if (typeof(data_blob) == "list")
+	if ((inherits(data_blob, "list") || inherits(data_blob, "blob")) &&
+		inherits(data_blob[[1]], "raw") && length(data_blob) == 1) {
 		data_blob <- data_blob[[1]]
+	}
 	data <- strsplit(memDecompress(data_blob, type = type, asChar = TRUE), ";")[[1]]
 	years <- StartYear:EndYear
 

@@ -45,8 +45,9 @@ dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL, type_new = "gz
 	n_ids <- NROW(ids)
 
 	blob_to_weatherData_old <- function(StartYear, EndYear, data_blob, type = "gzip") {
-		if (typeof(data_blob) == "list")
+		if (inherits(data_blob, "list") || inherits(data_blob, "blob")) {
 			data_blob <- data_blob[[1]]
+		}
 		data <- strsplit(memDecompress(data_blob, type = type, asChar = TRUE), ";")[[1]]
 		years <- StartYear:EndYear
 
