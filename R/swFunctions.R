@@ -339,7 +339,7 @@ dbW_addScenarios <- function(dfScenario) {#names 1 ... 32
 	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
 	rs <- DBI::dbSendStatement(con.env$con, "INSERT INTO Scenarios VALUES(NULL, :Scenario)")
-	DBI::dbBind(rs, param = as.list(dfScenario))
+	DBI::dbBind(rs, param = list(Scenario = dfScenario))
 	DBI::dbClearResult(rs)
 }
 
