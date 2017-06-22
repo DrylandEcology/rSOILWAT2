@@ -20,6 +20,90 @@
 ## ------SQLite weather database function: upgrade
 
 #' @export
+dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL) {
+	print(paste(Sys.time(), ": upgrading database", basename(dbWeatherDataFile),
+		"to package 'rSOILWAT2'"))
+
+	con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbWeatherDataFile)
+	on.exit(DBI::dbDisconnect(con), add = TRUE)
+
+	# Check database version
+	sql <- "SELECT Value FROM Meta WHERE Desc=\'Version\'"
+	temp <- DBI::dbGetQuery(con, sql)[1, 1]
+	v_dbW <- numeric_version(as.character(temp))
+	if (!identical(v_dbW, con.env$dbW_version)) {
+		stop("'dbW_upgrade_to_rSOILWAT2': requires database version ",
+			con.env$dbW_version, "; this database is version ", v_dbW)
+	}
+
+	# Extract compression type
+	sql <- "SELECT Value FROM Meta WHERE Desc=\'Compression_type\'"
+	type <- DBI::dbGetQuery(con, sql)[1, 1]
+
+	# Backup copy
+	backup_copy(dbWeatherDataFile, fbackup)
+
+	# Check what data are there
+	ids <- DBI::dbGetQuery(con, "SELECT Site_id, Scenario FROM WeatherData")
+	n_ids <- NROW(ids)
+
+	if (n_ids > 0) {
+	  for (k in seq_len(n_ids)) {
+			print(paste(Sys.time(), ": processing", k, "out of", n_ids))
+
+	    # extract old blob
+			sql <- paste("SELECT * FROM WeatherData WHERE Site_id =", ids[k, 1],
+				"AND Scenario =", ids[k, 2])
+			res <- DBI::dbGetQuery(con, sql)
+			wd <- rSOILWAT2::dbW_blob_to_weatherData(res$data, type)
+
+			# Check that the old package is available and load it
+      if (k == 1L) {
+        wd_class <- if (inherits(wd, "list")) class(wd[[1]]) else class(wd)
+        if (!(wd_class == "swWeatherData")) {
+		      stop("'dbW_upgrade_to_rSOILWAT2': cannot update a weather database with ",
+			      "data of class ", shQuote(wd_class), "; instead class 'swWeatherData' is ",
+            "required.")
+        }
+
+        wd_pkg <- attr(wd_class, "package")
+        if (wd_pkg == "rSOILWAT2") {
+          print(paste("Class of weather database data is already from package",
+            "'rSOILWAT2'; nothing to upgrade."))
+          return(invisible(NULL))
+        }
+
+        has_pkg <- suppressPackageStartupMessages(requireNamespace(wd_pkg))
+        if (!has_pkg) {
+          warning("The package ", shQuote(wd_pkg), " which created the weather data, is",
+            " not available on this system.")
+        }
+      }
+
+			# convert weather data to class of new package
+			wd_new <- lapply(wd, function(x) {
+			  x_data <- slot(x, "data")
+			  colnames(x_data) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+		    new("swWeatherData", year = slot(x, "year"), data = x_data)})
+		  names(wd_new) <- sapply(wd, slot, "year")
+
+		  # update data in weather database
+		  blob_new <- dbW_weatherData_to_blob(wd_new, type)
+		  sql <- paste("UPDATE WeatherData SET data =", blob_new, "WHERE Site_id =",
+		    ids[k, 1], " AND Scenario =", ids[k, 2])
+			DBI::dbExecute(con, sql)
+    }
+	}
+
+	# Checks and clean-up
+	check_updatedDB(con)
+
+	invisible(0)
+}
+
+
+
+#' @export
 dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL, type_new = "gzip") {
 	print(paste(Sys.time(), ": upgrading database", basename(dbWeatherDataFile), "to version 3.1.0"))
 

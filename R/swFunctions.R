@@ -179,6 +179,14 @@ dbW_getWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL, Label = 
 				shQuote(Scenario), "is corrupted."))
 		}
 
+		temp <- class(wd[[1]])
+		if (!(attr(temp, "package") == "rSOILWAT2")) {
+			print(paste("WARNING: The class of the extracted weather data object is",
+				shQuote(temp), "from package", shQuote(attr(temp, "package")), "which is",
+				"outdated. Please, upgrade weather database with function",
+				"'dbW_upgrade_to_rSOILWAT2'."))
+		}
+
 	} else {
 		stop("Site_id is 'NULL': no data not obtained.")
 	}
