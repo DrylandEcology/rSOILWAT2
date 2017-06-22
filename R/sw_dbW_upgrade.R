@@ -31,7 +31,7 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL) {
 	sql <- "SELECT Value FROM Meta WHERE Desc=\'Version\'"
 	temp <- DBI::dbGetQuery(con, sql)[1, 1]
 	v_dbW <- numeric_version(as.character(temp))
-	if (!identical(v_dbW, con.env$dbW_version)) {
+	if (!identical(v_dbW, numeric_version(con.env$dbW_version))) {
 		stop("'dbW_upgrade_to_rSOILWAT2': requires database version ",
 			con.env$dbW_version, "; this database is version ", v_dbW)
 	}
