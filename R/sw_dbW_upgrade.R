@@ -16,11 +16,28 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###############################################################################
 
-
 ## ------SQLite weather database function: upgrade
 
+#' Weather database upgrade functions
+#'
+#' @param dbWeatherDataFile A character string. The path to the weather database file.
+#' @param fbackup A character string. The path to where the weather database should be
+#'  backed up. If \code{NULL}, then '_copy' is appended to \code{dbWeatherDataFile}.
+#'
+#' @name dbW_upgrade
+NULL
+
+#' @rdname dbW_upgrade
+#'
+#' @section Details: \code{dbW_upgrade_to_rSOILWAT2} upgrades a weather database that was
+#' created under'Rsoilwat31' to the current package version 'rSOILWAT2'
+#'
+#' @inheritParams dbW_upgrade
+#' @param check_all A logical value. If \code{TRUE}, then every record is checked;
+#'  otherwise, only the first record is checked for the package version.
+#'
 #' @export
-dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL) {
+dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL, check_all = FALSE) {
 	print(paste(Sys.time(), ": upgrading database", basename(dbWeatherDataFile),
 		"to package 'rSOILWAT2'"))
 
@@ -44,8 +61,11 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL) {
 	backup_copy(dbWeatherDataFile, fbackup)
 
 	# Check what data are there
+	print(paste(Sys.time(), ": examine database", basename(dbWeatherDataFile)))
+
 	ids <- DBI::dbGetQuery(con, "SELECT Site_id, Scenario FROM WeatherData")
 	n_ids <- NROW(ids)
+	has_old_notloaded <- FALSE
 
 	if (n_ids > 0) {
 	  for (k in seq_len(n_ids)) {
@@ -58,7 +78,7 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL) {
 			wd <- rSOILWAT2::dbW_blob_to_weatherData(res$data, type)
 
 			# Check that the old package is available and load it
-      if (k == 1L) {
+      if (k == 1L || check_all) {
         wd_class <- if (inherits(wd, "list")) class(wd[[1]]) else class(wd)
         if (!(wd_class == "swWeatherData")) {
 		      stop("'dbW_upgrade_to_rSOILWAT2': cannot update a weather database with ",
@@ -67,31 +87,38 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL) {
         }
 
         wd_pkg <- attr(wd_class, "package")
-        if (wd_pkg == "rSOILWAT2") {
-          print(paste("Class of weather database data is already from package",
-            "'rSOILWAT2'; nothing to upgrade."))
-          return(invisible(NULL))
-        }
+        if (!has_old_notloaded) {
+          if (wd_pkg == "rSOILWAT2") {
+            if (!check_all) {
+              print(paste("Class of weather database data is already from package",
+                "'rSOILWAT2'; nothing to upgrade."))
+              return(invisible(NULL))
+            }
 
-        has_pkg <- suppressPackageStartupMessages(requireNamespace(wd_pkg))
-        if (!has_pkg) {
-          warning("The package ", shQuote(wd_pkg), " which created the weather data, is",
-            " not available on this system.")
+          } else {
+            has_old_notloaded <- !suppressPackageStartupMessages(requireNamespace(wd_pkg))
+            if (!has_old_notloaded) {
+              warning("The package ", shQuote(wd_pkg), " which created the weather data, is",
+                " not available on this system.")
+            }
+          }
         }
       }
 
-			# convert weather data to class of new package
-			wd_new <- lapply(wd, function(x) {
-			  x_data <- slot(x, "data")
-			  colnames(x_data) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
-		    new("swWeatherData", year = slot(x, "year"), data = x_data)})
-		  names(wd_new) <- sapply(wd, slot, "year")
+			if (!(wd_pkg == "rSOILWAT2")) {
+        # convert weather data to class of new package
+        wd_new <- lapply(wd, function(x) {
+          x_data <- slot(x, "data")
+          colnames(x_data) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+          new("swWeatherData", year = slot(x, "year"), data = x_data)})
+        names(wd_new) <- sapply(wd, slot, "year")
 
-		  # update data in weather database
-		  blob_new <- dbW_weatherData_to_blob(wd_new, type)
-		  sql <- paste("UPDATE WeatherData SET data =", blob_new, "WHERE Site_id =",
-		    ids[k, 1], " AND Scenario =", ids[k, 2])
-			DBI::dbExecute(con, sql)
+        # update data in weather database
+        blob_new <- dbW_weatherData_to_blob(wd_new, type)
+        sql <- paste("UPDATE WeatherData SET data =", blob_new, "WHERE Site_id =",
+          ids[k, 1], " AND Scenario =", ids[k, 2])
+        DBI::dbExecute(con, sql)
+      }
     }
 	}
 
@@ -103,6 +130,15 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL) {
 
 
 
+#' @rdname dbW_upgrade
+#'
+#' @section Details: \code{dbW_upgrade_v3to31} upgrades a weather database from version
+#'  '3.0.x' to '3.1.0'
+#'
+#' @inheritParams dbW_upgrade
+#' @param type_new The type of compression used to compress the weather blobs. See
+#'  \code{\link{memCompress}}.
+#'
 #' @export
 dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL, type_new = "gzip") {
 	print(paste(Sys.time(), ": upgrading database", basename(dbWeatherDataFile), "to version 3.1.0"))
@@ -182,6 +218,13 @@ dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL, type_new = "gz
 }
 
 
+#' @rdname dbW_upgrade
+#'
+#' @section Details: \code{dbW_upgrade_v2to3} upgrades a weather database from version
+#'  '2.x.y' to '3.0.0'
+#'
+#' @inheritParams dbW_upgrade
+#'
 #' @export
 dbW_upgrade_v2to3 <- function(dbWeatherDataFile, fbackup = NULL) {
 	con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbWeatherDataFile)
@@ -217,6 +260,13 @@ dbW_upgrade_v2to3 <- function(dbWeatherDataFile, fbackup = NULL) {
 }
 
 
+#' @rdname dbW_upgrade
+#'
+#' @section Details: \code{dbW_upgrade_v1to2} upgrades a weather database from version
+#'  '1.x.y' to '2.0.0'
+#'
+#' @inheritParams dbW_upgrade
+#'
 #' @export
 dbW_upgrade_v1to2 <- function(dbWeatherDataFile, fbackup = NULL, SWRunInformation) {
 	con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbWeatherDataFile)
@@ -315,8 +365,17 @@ check_updatedDB <- function(con) {
 }
 
 
+#' @rdname dbW_upgrade
+#'
+#' @section Details: \code{backup_copy} creates a backup copy of a weather database file
+#'  if not already present
+#'
+#' @inheritParams dbW_upgrade
+#'
 #' @export
 backup_copy <- function(dbWeatherDataFile, fbackup = NULL) {
+	print(paste(Sys.time(), ": backup database", basename(dbWeatherDataFile)))
+
 	dbWeatherDataFile <- normalizePath(dbWeatherDataFile)
 
 	dir_old <- getwd()
