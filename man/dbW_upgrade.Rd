@@ -10,7 +10,7 @@
 \title{Weather database upgrade functions}
 \usage{
 dbW_upgrade_to_rSOILWAT2(dbWeatherDataFile, fbackup = NULL,
-  check_all = FALSE)
+  check_all = FALSE, with_resume = TRUE, clean_cache = TRUE)
 
 dbW_upgrade_v3to31(dbWeatherDataFile, fbackup = NULL, type_new = "gzip")
 
@@ -28,6 +28,16 @@ backed up. If \code{NULL}, then '_copy' is appended to \code{dbWeatherDataFile}.
 
 \item{check_all}{A logical value. If \code{TRUE}, then every record is checked;
 otherwise, only the first record is checked for the package version.}
+
+\item{with_resume}{A logical value. If \code{TRUE}, then digest of call and progress
+status are stored in a temporary file on disk on the same path as \code{dbWeatherDataFile}.
+If such a temporary file is present, then upgrade is resumed from where progress
+status indicates. Otherwise, ignore temporary disk files and attempt to upgrade every
+database record.}
+
+\item{clean_cache}{A logical value. If \code{TRUE}, then temporary file generated
+with \code{with_resume} set to \code{TRUE}, if present, is removed once upgrade
+completed successfully.}
 
 \item{type_new}{The type of compression used to compress the weather blobs. See
 \code{\link{memCompress}}.}
