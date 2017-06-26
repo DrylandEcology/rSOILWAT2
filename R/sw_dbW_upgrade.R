@@ -58,10 +58,14 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
   fbackup <- backup_copy(dbWeatherDataFile, fbackup)
 
   # Prepare call objects
-  call_id <- list(f = match.call()[[1]],
+  temp <- strsplit(basename(dbWeatherDataFile), split = ".", fixed = TRUE)
+  temp <- paste0(temp[[1]][-length(temp[[1]])], collapse = ".")
+
+  call_id <- list(f = "rSOILWAT2::dbW_upgrade_to_rSOILWAT2",
     dbWeatherDataFile = dbWeatherDataFile,
     fbackup = fbackup,
-    f_cache = file.path(dirname(dbWeatherDataFile), ".cache_dbW_upgrade_to_rSOILWAT2"))
+    f_cache = file.path(dirname(dbWeatherDataFile), paste0(
+      ".cache_dbW_upgrade_to_rSOILWAT2__", temp)))
 
   call_cache <- list(v_dbW = NULL, type = NULL, ids = NULL, n_ids = NULL, seq_ids = NULL,
     k = NULL)
@@ -125,7 +129,8 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
   call_cache[["seq_ids"]] <- if (is.null(call_cache[["k"]])) {
       seq_len(call_cache[["n_ids"]])
     } else {
-      call_cache[["k"]]:call_cache[["n_ids"]]
+      # subtract 1 in case the last for-loop didn't finish properly
+      max(1L, call_cache[["k"]] - 1L):call_cache[["n_ids"]]
     }
 
   has_old_notloaded <- FALSE
@@ -139,55 +144,60 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
 
       print(paste(Sys.time(), ": processing", k, "out of", call_cache[["n_ids"]]))
 
-      # extract old blob
-      sql <- paste("SELECT data FROM WeatherData WHERE Site_id =",
-        call_cache[["ids"]][k, 1], "AND Scenario =", call_cache[["ids"]][k, 2])
-      res <- DBI::dbGetQuery(con, sql)[1, 1]
-      wd <- rSOILWAT2::dbW_blob_to_weatherData(res, call_cache[["type"]])
+      # Upgrade weather data within a DBI-transaction in case something goes awry
+      res <- DBI::dbWithTransaction(con, {
 
-      # Check that the old package is available and load it
-      if (check_all || is.null(wd_pkg) || k == call_cache[["seq_ids"]][1]) {
+        # extract old blob
+        sql <- paste("SELECT data FROM WeatherData WHERE Site_id =",
+          call_cache[["ids"]][k, 1], "AND Scenario =", call_cache[["ids"]][k, 2])
+        res <- DBI::dbGetQuery(con, sql)[1, 1]
+        wd <- rSOILWAT2::dbW_blob_to_weatherData(res, call_cache[["type"]])
 
-        wd_class <- if (inherits(wd, "list")) class(wd[[1]]) else class(wd)
-        if (!(wd_class == "swWeatherData")) {
-          stop(shQuote(call_id[["f"]]), ": cannot update a weather database with ",
-            "data of class ", shQuote(wd_class), "; instead class 'swWeatherData' is ",
-            "required.")
-        }
+        # Check that the old package is available and load it
+        if (check_all || is.null(wd_pkg) || k == call_cache[["seq_ids"]][1]) {
 
-        wd_pkg <- attr(wd_class, "package")
-        if (!has_old_notloaded) {
-          if (wd_pkg == "rSOILWAT2") {
-            if (!check_all) {
-              print(paste("Class of weather database data is already from package",
-                "'rSOILWAT2'; nothing to upgrade."))
-              return(invisible(NULL))
-            }
+          wd_class <- if (inherits(wd, "list")) class(wd[[1]]) else class(wd)
+          if (!(wd_class == "swWeatherData")) {
+            stop(shQuote(call_id[["f"]]), ": cannot update a weather database with ",
+              "data of class ", shQuote(wd_class), "; instead class 'swWeatherData' is ",
+              "required.")
+          }
 
-          } else {
-            has_old_notloaded <- !suppressPackageStartupMessages(requireNamespace(wd_pkg))
-            if (!has_old_notloaded) {
-              warning("The package ", shQuote(wd_pkg), " which created the weather data,",
-                " is not available on this system.")
+          wd_pkg <- attr(wd_class, "package")
+          if (!has_old_notloaded) {
+            if (wd_pkg == "rSOILWAT2") {
+              if (!check_all) {
+                print(paste("Class of weather database data is already from package",
+                  "'rSOILWAT2'; nothing to upgrade."))
+                return(invisible(NULL))
+              }
+
+            } else {
+              has_old_notloaded <- !suppressPackageStartupMessages(requireNamespace(wd_pkg))
+              if (!has_old_notloaded) {
+                warning("The package ", shQuote(wd_pkg), " which created the weather data,",
+                  " is not available on this system.")
+              }
             }
           }
         }
-      }
 
-      if (!(wd_pkg == "rSOILWAT2")) {
-        # convert weather data to class of new package
-        wd_new <- lapply(wd, function(x) {
-          x_data <- slot(x, "data")
-          colnames(x_data) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
-          new("swWeatherData", year = slot(x, "year"), data = x_data)})
-        names(wd_new) <- sapply(wd, slot, "year")
+        if (!(wd_pkg == "rSOILWAT2")) {
+          # convert weather data to class of new package
+          wd_new <- lapply(wd, function(x) {
+            x_data <- slot(x, "data")
+            colnames(x_data) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+            new("swWeatherData", year = slot(x, "year"), data = x_data)})
+          names(wd_new) <- sapply(wd, slot, "year")
 
-        # update data in weather database
-        blob_new <- rSOILWAT2::dbW_weatherData_to_blob(wd_new, type)
-        sql <- paste("UPDATE WeatherData SET data =", blob_new, "WHERE Site_id =",
-          call_cache[["ids"]][k, 1], " AND Scenario =", call_cache[["ids"]][k, 2])
-        DBI::dbExecute(con, sql)
-      }
+          # update data in weather database
+          blob_new <- rSOILWAT2::dbW_weatherData_to_blob(wd_new, call_cache[["type"]])
+          sql <- paste("UPDATE WeatherData SET data =", blob_new, "WHERE Site_id =",
+            call_cache[["ids"]][k, 1], " AND Scenario =", call_cache[["ids"]][k, 2])
+          DBI::dbExecute(con, sql)
+        }
+
+      })
     }
   }
 
