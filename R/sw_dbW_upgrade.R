@@ -35,97 +35,187 @@ NULL
 #' @inheritParams dbW_upgrade
 #' @param check_all A logical value. If \code{TRUE}, then every record is checked;
 #'  otherwise, only the first record is checked for the package version.
+#' @param with_resume A logical value. If \code{TRUE}, then digest of call and progress
+#'  status are stored in a temporary file on disk on the same path as \code{dbWeatherDataFile}.
+#'  If such a temporary file is present, then upgrade is resumed from where progress
+#'  status indicates. Otherwise, ignore temporary disk files and attempt to upgrade
+#'  database records from scratch.
+#' @param clean_cache A logical value. If \code{TRUE}, then temporary file generated
+#'  with \code{with_resume} set to \code{TRUE}, if present, is removed once upgrade
+#'  completed successfully.
 #'
 #' @export
-dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL, check_all = FALSE) {
-	print(paste(Sys.time(), ": upgrading database", basename(dbWeatherDataFile),
-		"to package 'rSOILWAT2'"))
+dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
+  check_all = FALSE, with_resume = TRUE, clean_cache = TRUE) {
 
-	con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbWeatherDataFile)
-	on.exit(DBI::dbDisconnect(con), add = TRUE)
+  print(paste(Sys.time(), ": upgrading database", basename(dbWeatherDataFile),
+    "to package 'rSOILWAT2'"))
 
-	# Check database version
-	sql <- "SELECT Value FROM Meta WHERE Desc=\'Version\'"
-	temp <- DBI::dbGetQuery(con, sql)[1, 1]
-	v_dbW <- numeric_version(as.character(temp))
-	if (!identical(v_dbW, numeric_version(con.env$dbW_version))) {
-		stop("'dbW_upgrade_to_rSOILWAT2': requires database version ",
-			con.env$dbW_version, "; this database is version ", v_dbW)
-	}
+  dbWeatherDataFile <- normalizePath(dbWeatherDataFile)
+  con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbWeatherDataFile)
+  on.exit(DBI::dbDisconnect(con), add = TRUE)
 
-	# Extract compression type
-	sql <- "SELECT Value FROM Meta WHERE Desc=\'Compression_type\'"
-	type <- DBI::dbGetQuery(con, sql)[1, 1]
+  # Backup copy
+  fbackup <- backup_copy(dbWeatherDataFile, fbackup)
 
-	# Backup copy
-	backup_copy(dbWeatherDataFile, fbackup)
+  # Prepare call objects
+  temp <- strsplit(basename(dbWeatherDataFile), split = ".", fixed = TRUE)
+  temp <- paste0(temp[[1]][-length(temp[[1]])], collapse = ".")
 
-	# Check what data are there
-	print(paste(Sys.time(), ": examine database", basename(dbWeatherDataFile)))
+  call_id <- list(f = "rSOILWAT2::dbW_upgrade_to_rSOILWAT2",
+    dbWeatherDataFile = basename(dbWeatherDataFile),
+    fbackup = basename(fbackup),
+    f_cache = paste0(".cache_dbW_upgrade_to_rSOILWAT2__", temp))
 
-	ids <- DBI::dbGetQuery(con, "SELECT Site_id, Scenario FROM WeatherData")
-	n_ids <- NROW(ids)
-	has_old_notloaded <- FALSE
+  call_cache <- list(v_dbW = NULL, type = NULL, ids = NULL, n_ids = NULL, seq_ids = NULL,
+    k = NULL)
 
-	if (n_ids > 0) {
-	  for (k in seq_len(n_ids)) {
-			print(paste(Sys.time(), ": processing", k, "out of", n_ids))
+  if (with_resume) {
+    stopifnot(requireNamespace("digest"))
 
-	    # extract old blob
-			sql <- paste("SELECT * FROM WeatherData WHERE Site_id =", ids[k, 1],
-				"AND Scenario =", ids[k, 2])
-			res <- DBI::dbGetQuery(con, sql)
-			wd <- rSOILWAT2::dbW_blob_to_weatherData(res$data, type)
+    # Create hash of current call
+    call_hash <- digest::digest(call_id, algo = "sha512", errormode = "silent")
 
-			# Check that the old package is available and load it
-      if (k == 1L || check_all) {
-        wd_class <- if (inherits(wd, "list")) class(wd[[1]]) else class(wd)
-        if (!(wd_class == "swWeatherData")) {
-		      stop("'dbW_upgrade_to_rSOILWAT2': cannot update a weather database with ",
-			      "data of class ", shQuote(wd_class), "; instead class 'swWeatherData' is ",
-            "required.")
-        }
+    # Check hash with previous call
+    ftemp_cache <- file.path(dirname(dbWeatherDataFile), call_id[["f_cache"]])
+    if (file.exists(ftemp_cache)) {
+      temp <- try(readRDS(ftemp_cache), silent = TRUE)
 
-        wd_pkg <- attr(wd_class, "package")
-        if (!has_old_notloaded) {
-          if (wd_pkg == "rSOILWAT2") {
-            if (!check_all) {
-              print(paste("Class of weather database data is already from package",
-                "'rSOILWAT2'; nothing to upgrade."))
-              return(invisible(NULL))
-            }
+      if (inherits(temp, "try-error")) {
+        # remove corrupt temporary file
+        unlink(ftemp_cache)
 
-          } else {
-            has_old_notloaded <- !suppressPackageStartupMessages(requireNamespace(wd_pkg))
-            if (!has_old_notloaded) {
-              warning("The package ", shQuote(wd_pkg), " which created the weather data, is",
-                " not available on this system.")
+      } else if (identical(call_hash, temp[["call_hash"]])) {
+        # if identical hash, load cache from previous call
+        call_cache <- temp[["call_cache"]]
+        print(paste0(shQuote(call_id[["f"]]), ": located cache from a previous call; ",
+          "upgrade will continue at record #", call_cache[["k"]]))
+      }
+    }
+
+    # Write cache and hash to file on exit
+    on.exit(saveRDS(list(call_hash = call_hash, call_cache = call_cache),
+      file = ftemp_cache), add = TRUE)
+  }
+
+  # Check database version
+  if (is.null(call_cache[["v_dbW"]])) {
+    sql <- "SELECT Value FROM Meta WHERE Desc=\'Version\'"
+    temp <- DBI::dbGetQuery(con, sql)[1, 1]
+    call_cache[["v_dbW"]] <- numeric_version(as.character(temp))
+  }
+
+  if (!identical(call_cache[["v_dbW"]], numeric_version(con.env$dbW_version))) {
+    stop(shQuote(call_id[["f"]]), ": requires database version ",
+      con.env$dbW_version, "; this database is version ", call_cache[["v_dbW"]])
+  }
+
+  # Extract compression type
+  if (is.null(call_cache[["type"]])) {
+    sql <- "SELECT Value FROM Meta WHERE Desc=\'Compression_type\'"
+    call_cache[["type"]] <- DBI::dbGetQuery(con, sql)[1, 1]
+  }
+
+  # Check what data are there
+  print(paste(Sys.time(), ": examine database", basename(dbWeatherDataFile)))
+
+  if (is.null(call_cache[["ids"]])) {
+    call_cache[["ids"]] <- DBI::dbGetQuery(con, "SELECT Site_id, Scenario FROM WeatherData")
+  }
+
+  if (is.null(call_cache[["n_ids"]])) {
+    call_cache[["n_ids"]] <- NROW(call_cache[["ids"]])
+  }
+
+  call_cache[["seq_ids"]] <- if (is.null(call_cache[["k"]])) {
+      seq_len(call_cache[["n_ids"]])
+    } else {
+      # subtract 1 in case the last for-loop didn't finish properly
+      max(1L, call_cache[["k"]] - 1L):call_cache[["n_ids"]]
+    }
+
+  has_old_notloaded <- FALSE
+  wd_pkg <- NULL
+
+  if (length(call_cache[["seq_ids"]]) > 0) {
+    for (k in call_cache[["seq_ids"]]) {
+      # (drs): it appears that for-loops cannot use a list-element as iterator variable,
+      #   but we need to store k in our cache
+      call_cache[["k"]] <- k
+
+      print(paste(Sys.time(), ": processing", k, "out of", call_cache[["n_ids"]]))
+
+      # Upgrade weather data within a DBI-transaction in case something goes awry
+      res <- DBI::dbWithTransaction(con, {
+
+        # extract old blob
+        sql <- paste("SELECT data FROM WeatherData WHERE Site_id =",
+          call_cache[["ids"]][k, 1], "AND Scenario =", call_cache[["ids"]][k, 2])
+        res <- DBI::dbGetQuery(con, sql)[1, 1]
+        wd <- rSOILWAT2::dbW_blob_to_weatherData(res, call_cache[["type"]])
+
+        # Check that the old package is available and load it
+        if (check_all || is.null(wd_pkg) || k == call_cache[["seq_ids"]][1]) {
+
+          wd_class <- if (inherits(wd, "list")) class(wd[[1]]) else class(wd)
+          if (!(wd_class == "swWeatherData")) {
+            stop(shQuote(call_id[["f"]]), ": cannot update a weather database with ",
+              "data of class ", shQuote(wd_class), "; instead class 'swWeatherData' is ",
+              "required.")
+          }
+
+          wd_pkg <- attr(wd_class, "package")
+          if (!has_old_notloaded) {
+            if (wd_pkg == "rSOILWAT2") {
+              if (!check_all) {
+                print(paste("Class of weather database data is already from package",
+                  "'rSOILWAT2'; nothing to upgrade."))
+                return(invisible(NULL))
+              }
+
+            } else {
+              has_old_notloaded <- !suppressPackageStartupMessages(requireNamespace(wd_pkg))
+              if (!has_old_notloaded) {
+                warning("The package ", shQuote(wd_pkg), " which created the weather data,",
+                  " is not available on this system.")
+              }
             }
           }
         }
-      }
 
-			if (!(wd_pkg == "rSOILWAT2")) {
-        # convert weather data to class of new package
-        wd_new <- lapply(wd, function(x) {
-          x_data <- slot(x, "data")
-          colnames(x_data) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
-          new("swWeatherData", year = slot(x, "year"), data = x_data)})
-        names(wd_new) <- sapply(wd, slot, "year")
+        if (!(wd_pkg == "rSOILWAT2")) {
+          # convert weather data to class of new package
+          wd_new <- lapply(wd, function(x) {
+            x_data <- slot(x, "data")
+            colnames(x_data) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+            new("swWeatherData", year = slot(x, "year"), data = x_data)})
+          names(wd_new) <- sapply(wd, slot, "year")
 
-        # update data in weather database
-        blob_new <- dbW_weatherData_to_blob(wd_new, type)
-        sql <- paste("UPDATE WeatherData SET data =", blob_new, "WHERE Site_id =",
-          ids[k, 1], " AND Scenario =", ids[k, 2])
-        DBI::dbExecute(con, sql)
+          # update data in weather database
+          blob_new <- rSOILWAT2::dbW_weatherData_to_blob(wd_new, call_cache[["type"]])
+          sql <- paste("UPDATE WeatherData SET data =", blob_new, "WHERE Site_id =",
+            call_cache[["ids"]][k, 1], " AND Scenario =", call_cache[["ids"]][k, 2])
+          DBI::dbExecute(con, sql)
+        }
+      })
+
+      if (k %% 1000 == 0) {
+        # save cache to disk in case function is aborted and on.exit fails
+        saveRDS(list(call_hash = call_hash, call_cache = call_cache), file = ftemp_cache)
       }
     }
-	}
+  }
 
-	# Checks and clean-up
-	check_updatedDB(con)
+  # Checks and clean-up
+  check_updatedDB(con)
 
-	invisible(0)
+  if (clean_cache) {
+    print(paste0(shQuote(call_id[["f"]]), ": upgrade appears successful and will remove ",
+      "temporary cache file from disk"))
+    on.exit(unlink(ftemp_cache), add = TRUE)
+  }
+
+  invisible(0)
 }
 
 
@@ -357,9 +447,17 @@ dbW_upgrade_v1to2 <- function(dbWeatherDataFile, fbackup = NULL, SWRunInformatio
 
 #' @export
 check_updatedDB <- function(con) {
-	print(paste0(Sys.time(), ": check database integrity"))
-	print(DBI::dbExecute(con, "PRAGMA integrity_check;"))
+	print(paste0(Sys.time(), ": 'check_updatedDB' started with database integrity"))
 
+	print(paste0(Sys.time(), ": 'check_updatedDB' started 'quick check'"))
+	res <- DBI::dbExecute(con, "PRAGMA quick_check;")
+	print(res)
+	print(paste0(Sys.time(), ": 'check_updatedDB' started 'integrity check'"))
+	print(DBI::dbExecute(con, "PRAGMA integrity_check;"))
+	print(paste0(Sys.time(), ": 'check_updatedDB' started 'foreign key check'"))
+	print(DBI::dbExecute(con, "PRAGMA foreign_key_check;"))
+
+	print(paste0(Sys.time(), ": 'check_updatedDB' checks indices"))
 	print(DBI::dbExecute(con, "PRAGMA index_list(WeatherData);"))
 	print(DBI::dbExecute(con, "PRAGMA index_info(sqlite_autoindex_WeatherData_1);"))
 }
@@ -395,5 +493,5 @@ backup_copy <- function(dbWeatherDataFile, fbackup = NULL) {
 		system2("cp", args = c(fbackup, basename(dbWeatherDataFile)))
 	}
 
-	res
+	invisible(fbackup)
 }
