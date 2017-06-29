@@ -51,6 +51,7 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
   print(paste(Sys.time(), ": upgrading database", basename(dbWeatherDataFile),
     "to package 'rSOILWAT2'"))
 
+  dbWeatherDataFile <- normalizePath(dbWeatherDataFile)
   con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbWeatherDataFile)
   on.exit(DBI::dbDisconnect(con), add = TRUE)
 
@@ -62,10 +63,9 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
   temp <- paste0(temp[[1]][-length(temp[[1]])], collapse = ".")
 
   call_id <- list(f = "rSOILWAT2::dbW_upgrade_to_rSOILWAT2",
-    dbWeatherDataFile = dbWeatherDataFile,
-    fbackup = fbackup,
-    f_cache = file.path(dirname(dbWeatherDataFile), paste0(
-      ".cache_dbW_upgrade_to_rSOILWAT2__", temp)))
+    dbWeatherDataFile = basename(dbWeatherDataFile),
+    fbackup = basename(fbackup),
+    f_cache = paste0(".cache_dbW_upgrade_to_rSOILWAT2__", temp))
 
   call_cache <- list(v_dbW = NULL, type = NULL, ids = NULL, n_ids = NULL, seq_ids = NULL,
     k = NULL)
@@ -77,12 +77,13 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
     call_hash <- digest::digest(call_id, algo = "sha512", errormode = "silent")
 
     # Check hash with previous call
-    if (file.exists(call_id[["f_cache"]])) {
-      temp <- try(readRDS(call_id[["f_cache"]]), silent = TRUE)
+    ftemp_cache <- file.path(dirname(dbWeatherDataFile), call_id[["f_cache"]])
+    if (file.exists(ftemp_cache)) {
+      temp <- try(readRDS(ftemp_cache), silent = TRUE)
 
       if (inherits(temp, "try-error")) {
         # remove corrupt temporary file
-        unlink(call_id[["f_cache"]])
+        unlink(ftemp_cache)
 
       } else if (identical(call_hash, temp[["call_hash"]])) {
         # if identical hash, load cache from previous call
@@ -94,7 +95,7 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
 
     # Write cache and hash to file on exit
     on.exit(saveRDS(list(call_hash = call_hash, call_cache = call_cache),
-      file = call_id[["f_cache"]]), add = TRUE)
+      file = ftemp_cache), add = TRUE)
   }
 
   # Check database version
@@ -196,8 +197,12 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
             call_cache[["ids"]][k, 1], " AND Scenario =", call_cache[["ids"]][k, 2])
           DBI::dbExecute(con, sql)
         }
-
       })
+
+      if (k %% 1000 == 0) {
+        # save cache to disk in case function is aborted and on.exit fails
+        saveRDS(list(call_hash = call_hash, call_cache = call_cache), file = ftemp_cache)
+      }
     }
   }
 
@@ -207,7 +212,7 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
   if (clean_cache) {
     print(paste0(shQuote(call_id[["f"]]), ": upgrade appears successful and will remove ",
       "temporary cache file from disk"))
-    on.exit(unlink(call_id[["f_cache"]]), add = TRUE)
+    on.exit(unlink(ftemp_cache), add = TRUE)
   }
 
   invisible(0)
@@ -442,9 +447,17 @@ dbW_upgrade_v1to2 <- function(dbWeatherDataFile, fbackup = NULL, SWRunInformatio
 
 #' @export
 check_updatedDB <- function(con) {
-	print(paste0(Sys.time(), ": check database integrity"))
-	print(DBI::dbExecute(con, "PRAGMA integrity_check;"))
+	print(paste0(Sys.time(), ": 'check_updatedDB' started with database integrity"))
 
+	print(paste0(Sys.time(), ": 'check_updatedDB' started 'quick check'"))
+	res <- DBI::dbExecute(con, "PRAGMA quick_check;")
+	print(res)
+	print(paste0(Sys.time(), ": 'check_updatedDB' started 'integrity check'"))
+	print(DBI::dbExecute(con, "PRAGMA integrity_check;"))
+	print(paste0(Sys.time(), ": 'check_updatedDB' started 'foreign key check'"))
+	print(DBI::dbExecute(con, "PRAGMA foreign_key_check;"))
+
+	print(paste0(Sys.time(), ": 'check_updatedDB' checks indices"))
 	print(DBI::dbExecute(con, "PRAGMA index_list(WeatherData);"))
 	print(DBI::dbExecute(con, "PRAGMA index_info(sqlite_autoindex_WeatherData_1);"))
 }
