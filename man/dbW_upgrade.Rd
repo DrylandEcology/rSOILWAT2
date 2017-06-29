@@ -32,8 +32,8 @@ otherwise, only the first record is checked for the package version.}
 \item{with_resume}{A logical value. If \code{TRUE}, then digest of call and progress
 status are stored in a temporary file on disk on the same path as \code{dbWeatherDataFile}.
 If such a temporary file is present, then upgrade is resumed from where progress
-status indicates. Otherwise, ignore temporary disk files and attempt to upgrade every
-database record.}
+status indicates. Otherwise, ignore temporary disk files and attempt to upgrade
+database records from scratch.}
 
 \item{clean_cache}{A logical value. If \code{TRUE}, then temporary file generated
 with \code{with_resume} set to \code{TRUE}, if present, is removed once upgrade
