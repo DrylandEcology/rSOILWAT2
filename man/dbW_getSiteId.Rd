@@ -4,12 +4,15 @@
 \alias{dbW_getSiteId}
 \title{Extract weather database key to connect a site with weather data}
 \usage{
-dbW_getSiteId(lat = NULL, long = NULL, Label = NULL)
+dbW_getSiteId(lat = NULL, long = NULL, Label = NULL,
+  ignore.case = FALSE)
 }
 \arguments{
-\item{lat}{A numeric value or \code{NULL}. The latitude in decimal degrees of WGS84. Northern latitude are positive, sites on the southern hemisphere have negative values.}
+\item{lat}{A numeric value or \code{NULL}. The latitude in decimal degrees of WGS84.
+Northern latitude are positive, sites on the southern hemisphere have negative values.}
 
-\item{long}{A numeric value or \code{NULL}. The longitude in decimal degrees of WGS84. Eastern longitudes are positive, sites on the western hemisphere have negative values.}
+\item{long}{A numeric value or \code{NULL}. The longitude in decimal degrees of WGS84.
+Eastern longitudes are positive, sites on the western hemisphere have negative values.}
 
 \item{Label}{A character string or \code{NULL}.}
 }
