@@ -102,10 +102,8 @@ NULL
 #' swFiles_Estab swInputData-method
 #' swFiles_Carbon<-,swInputData-method
 #' swFiles_Carbon,swInputData-method
-#' swCarbon_Future_Bio,swInputData-method
-#' swCarbon_Future_Sto,swInputData-method
-#' swCarbon_Historical_Bio,swInputData-method
-#' swCarbon_Historical_Sto,swInputData-method
+#' swCarbon_Use_Bio,swInputData-method
+#' swCarbon_Use_Sto,swInputData-method
 #' swCarbon_RCP,swInputData-method
 #' swCarbon_Delta,swInputData-method
 #' swCarbon_Future_Bio<-,swInputData-method

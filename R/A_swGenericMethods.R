@@ -404,13 +404,9 @@ setGeneric(name="swEstab_useEstab<-",function(object, value) {standardGeneric("s
 #' @export
 setGeneric(name="get_swCarbon",function(object) {standardGeneric("get_swCarbon")})
 #' @export
-setGeneric(name="swCarbon_Future_Bio",function(object) {standardGeneric("swCarbon_Future_Bio")})
+setGeneric(name="swCarbon_Use_Bio",function(object) {standardGeneric("swCarbon_Use_Bio")})
 #' @export
-setGeneric(name="swCarbon_Future_Sto",function(object) {standardGeneric("swCarbon_Future_Sto")})
-#' @export
-setGeneric(name="swCarbon_Historical_Bio",function(object) {standardGeneric("swCarbon_Historical_Bio")})
-#' @export
-setGeneric(name="swCarbon_Historical_Sto",function(object) {standardGeneric("swCarbon_Historical_Sto")})
+setGeneric(name="swCarbon_Use_Sto",function(object) {standardGeneric("swCarbon_Use_Sto")})
 #' @export
 setGeneric(name="swCarbon_RCP",function(object) {standardGeneric("swCarbon_RCP")})
 #' @export
@@ -419,13 +415,9 @@ setGeneric(name="swCarbon_Delta",function(object) {standardGeneric("swCarbon_Del
 #' @export
 setGeneric(name="set_swCarbon<-",function(object, value) {standardGeneric("set_swCarbon<-")})
 #' @export
-setGeneric(name="swCarbon_Future_Bio<-",function(object, value) {standardGeneric("swCarbon_Future_Bio<-")})
+setGeneric(name="swCarbon_Use_Bio<-",function(object, value) {standardGeneric("swCarbon_Use_Bio<-")})
 #' @export
-setGeneric(name="swCarbon_Future_Sto<-",function(object, value) {standardGeneric("swCarbon_Future_Sto<-")})
-#' @export
-setGeneric(name="swCarbon_Historical_Bio<-",function(object, value) {standardGeneric("swCarbon_Historical_Bio<-")})
-#' @export
-setGeneric(name="swCarbon_Historical_Sto<-",function(object, value) {standardGeneric("swCarbon_Historical_Sto<-")})
+setGeneric(name="swCarbon_Use_Sto<-",function(object, value) {standardGeneric("swCarbon_Use_Sto<-")})
 #' @export
 setGeneric(name="swCarbon_RCP<-",function(object, value) {standardGeneric("swCarbon_RCP<-")})
 #' @export
