@@ -360,12 +360,14 @@ dbW_addSites <- function(dfLatitudeLongitudeLabel) {#lat #long #Label 1 .... 201
 }
 
 #' @export
-dbW_addScenarios <- function(dfScenario) {#names 1 ... 32
-	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
+dbW_addScenarios <- function(dfScenario) {
+	if (NROW(dfScenario) > 0) {
+		stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
 
-	rs <- DBI::dbSendStatement(con.env$con, "INSERT INTO Scenarios VALUES(NULL, :Scenario)")
-	DBI::dbBind(rs, param = list(Scenario = dfScenario))
-	DBI::dbClearResult(rs)
+		rs <- DBI::dbSendStatement(con.env$con, "INSERT INTO Scenarios VALUES(NULL, :Scenario)")
+		DBI::dbBind(rs, param = list(Scenario = unlist(dfScenario)))
+		DBI::dbClearResult(rs)
+	}
 }
 
 dbW_addWeatherDataNoCheck <- function(Site_id, Scenario_id, StartYear, EndYear, weather_blob) {
@@ -511,9 +513,7 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = 
 	}
 
 	#---Add scenario names
-	if (NROW(scenarios) > 0 && "Scenario" %in% colnames(scenarios)) {
-		dbW_addScenarios(dfScenario = scenarios)
-	}
+	dbW_addScenarios(dfScenario = scenarios)
 
 	invisible(0)
 }
