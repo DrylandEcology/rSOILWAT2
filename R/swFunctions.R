@@ -27,15 +27,20 @@ con.env$default_blob_compression_type <- "gzip"
 con.env$blob_compression_type <- NULL
 
 #' @export
+dbW_IsValid <- function() {
+	!is.null(con.env$con) && DBI::dbIsValid(con.env$con)
+}
+
+#' @export
 dbW_version <- function() {
-	stopifnot(requireNamespace("RSQLite"))
+	stopifnot(dbW_IsValid())
 
 	numeric_version(as.character(DBI::dbGetQuery(con.env$con, "SELECT Value FROM Meta WHERE Desc=\'Version\'")[1, 1]))
 }
 
 #' @export
 dbW_compression <- function() {
-	stopifnot(requireNamespace("RSQLite"))
+	stopifnot(dbW_IsValid())
 
 	as.character(DBI::dbGetQuery(con.env$con, "SELECT Value FROM Meta WHERE Desc=\'Compression_type\'")[1, 1])
 }
@@ -53,7 +58,7 @@ dbW_compression <- function() {
 #' @return An integer value or \code{NULL}.
 #' @export
 dbW_getSiteId <- function(lat = NULL, long = NULL, Label = NULL, ignore.case = FALSE) {
-	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
+	stopifnot(dbW_IsValid())
 
 	lat <- as.numeric(lat)
 	long <- as.numeric(long)
@@ -86,14 +91,14 @@ dbW_getSiteId <- function(lat = NULL, long = NULL, Label = NULL, ignore.case = F
 
 #' @export
 dbW_getSiteTable <- function() {
-	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
+	stopifnot(dbW_IsValid())
 
 	DBI::dbReadTable(con.env$con, "Sites")
 }
 
 #' @export
 dbW_getScenariosTable <- function() {
-	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
+	stopifnot(dbW_IsValid())
 
 	DBI::dbReadTable(con.env$con, "Scenarios")
 }
@@ -140,7 +145,7 @@ dbW_getScenariosTable <- function() {
 dbW_getWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL, Label = NULL,
 	startYear = NULL, endYear = NULL, Scenario = "Current", ignore.case = FALSE) {
 
-	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
+	stopifnot(dbW_IsValid())
 
 	if (all(sapply(list(Site_id, Label, lat, long), is.null))) {
 		stop("No way to locate weather data from input")
@@ -228,7 +233,7 @@ dbW_getWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL, Label = 
 
 dbW_getWeatherData_old <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startYear=NULL,endYear=NULL, Scenario="Current") {
 	.Deprecated("dbW_getWeatherData")
-	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
+	stopifnot(dbW_IsValid())
 
 	if(is.null(Site_id) && is.null(Label) && is.null(lat) && is.null(long)) {
 		stop("No way to locate weather data from input")
@@ -295,7 +300,7 @@ dbW_getWeatherData_old <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,st
 
 #' @export
 dbW_addSite <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL) {
-	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
+	stopifnot(dbW_IsValid())
 
 	#First See if Site_id exists
 	Site_id <- as.integer(Site_id)
@@ -328,46 +333,52 @@ dbW_addSite <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL) {
 
 #' @export
 dbW_setConnection <- function(dbFilePath) {
-	stopifnot(requireNamespace("RSQLite"))
-
-	dbFilePath <- file.path(dbFilePath)
+	dbFilePath <- normalizePath(dbFilePath)
 	if (!file.exists(dbFilePath)) {
-		print(paste("'dbW_setConnection':", basename(dbFilePath), "does not exist. Creating database."))
+		print(paste("'dbW_setConnection':", basename(dbFilePath), "does not exist.",
+			"Creating a new database."))
 	}
-	con.env$con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbFilePath)
-	con.env$blob_compression_type <- if (DBI::dbExistsTable(con.env$con, "Meta")) dbW_compression() else con.env$default_blob_compression_type
 
-	#settings <- c("PRAGMA page_size=8192","PRAGMA cache_size = 400000;","PRAGMA synchronous = OFF;","PRAGMA journal_mode = OFF;","PRAGMA locking_mode = EXCLUSIVE;","PRAGMA count_changes = OFF;","PRAGMA temp_store = MEMORY;","PRAGMA auto_vacuum = NONE;")
-	#lapply(settings, function(x) DBI::dbExecute(con.env$con,x))
+	con.env$con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbFilePath)
+	con.env$blob_compression_type <- if (DBI::dbExistsTable(con.env$con, "Meta")) {
+			dbW_compression()
+		} else {
+			con.env$default_blob_compression_type
+		}
+
+	invisible(TRUE)
 }
 
 #' @export
 dbW_disconnectConnection <- function() {
-	stopifnot(requireNamespace("RSQLite"))
-
-	DBI::dbDisconnect(con.env$con)
+	if (dbW_IsValid())
+		DBI::dbDisconnect(con.env$con)
 	con.env$con <- NULL
 	con.env$blob_compression_type <- NULL
+
+	invisible(TRUE)
 }
 
 #' @export
 dbW_addSites <- function(dfLatitudeLongitudeLabel) {#lat #long #Label 1 .... 20165
-	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
+	stopifnot(dbW_IsValid())
 
 	rs <- DBI::dbSendStatement(con.env$con, "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)")
 	DBI::dbBind(rs, param = as.list(dfLatitudeLongitudeLabel[, c("Latitude", "Longitude", "Label")]))
 	DBI::dbClearResult(rs)
+
+	invisible(TRUE)
 }
 
 #' @export
 dbW_addScenarios <- function(dfScenario) {
-	if (NROW(dfScenario) > 0) {
-		stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
+	stopifnot(dbW_IsValid())
 
-		rs <- DBI::dbSendStatement(con.env$con, "INSERT INTO Scenarios VALUES(NULL, :Scenario)")
-		DBI::dbBind(rs, param = list(Scenario = unlist(dfScenario)))
-		DBI::dbClearResult(rs)
-	}
+	rs <- DBI::dbSendStatement(con.env$con, "INSERT INTO Scenarios VALUES(NULL, :Scenario)")
+	DBI::dbBind(rs, param = list(Scenario = unlist(dfScenario)))
+	DBI::dbClearResult(rs)
+
+	invisible(TRUE)
 }
 
 dbW_addWeatherDataNoCheck <- function(Site_id, Scenario_id, StartYear, EndYear, weather_blob) {
@@ -376,7 +387,7 @@ dbW_addWeatherDataNoCheck <- function(Site_id, Scenario_id, StartYear, EndYear, 
 
 #' @export
 dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderPath=NULL, weatherData=NULL, label=NULL, ScenarioName="Current") {
-	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
+	stopifnot(dbW_IsValid())
 
 	if( (is.null(weatherFolderPath) | ifelse(!is.null(weatherFolderPath), (weatherFolderPath == "" | !file.exists(weatherFolderPath)), FALSE)) & (is.null(weatherData) | !is.list(weatherData) | class(weatherData[[1]]) != "swWeatherData") ) stop("addWeatherDataToDataBase does not have folder path or weatherData to insert")
 	if( (is.null(Site_id) & is.null(lat) & is.null(long) & is.null(weatherFolderPath) & (is.null(label))) | ((!is.null(Site_id) & !is.numeric(Site_id)) & (!is.null(lat) & !is.numeric(lat)) & (!is.null(long) & !is.numeric(long))) ) stop("addWeatherDataToDataBase not enough info to create Site in Sites table.")
@@ -418,11 +429,13 @@ dbW_addWeatherData <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderP
 		DBI::dbExecute(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
 		#dbCommit(con.env$con)
 	}
+
+	invisible(TRUE)
 }
 
 dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFolderPath=NULL, weatherData=NULL, label=NULL, ScenarioName="Current") {
 	.Deprecated("dbW_addWeatherData")
-	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
+	stopifnot(dbW_IsValid())
 
 	if( (is.null(weatherFolderPath) | ifelse(!is.null(weatherFolderPath), (weatherFolderPath == "" | !file.exists(weatherFolderPath)), FALSE)) & (is.null(weatherData) | !is.list(weatherData) | class(weatherData[[1]]) != "swWeatherData") ) stop("addWeatherDataToDataBase does not have folder path or weatherData to insert")
 	if( (is.null(Site_id) & is.null(lat) & is.null(long) & is.null(weatherFolderPath) & (is.null(label))) | ((!is.null(Site_id) & !is.numeric(Site_id)) & (!is.null(lat) & !is.numeric(lat)) & (!is.null(long) & !is.numeric(long))) ) stop("addWeatherDataToDataBase not enough info to create Site in Sites table.")
@@ -470,9 +483,9 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 
 #' @export
 dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = NULL, site_subset = NULL, scenarios = NULL, compression_type) {
-	stopifnot(requireNamespace("RSQLite"))
 
 	dbW_setConnection(dbFilePath)
+	stopifnot(dbW_IsValid())
 
 	#---Create tables
 	# Meta information
@@ -481,7 +494,6 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = 
 	}
 	con.env$blob_compression_type <- compression_type
 
-	stopifnot(DBI::dbIsValid(con.env$con))
 	DBI::dbExecute(con.env$con, "CREATE TABLE \"Meta\" (\"Desc\" TEXT PRIMARY KEY, \"Value\" TEXT);")
 
 	rs <- DBI::dbSendStatement(con.env$con, "INSERT INTO Meta VALUES(:Desc, :Value)")
@@ -515,7 +527,7 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = 
 	#---Add scenario names
 	dbW_addScenarios(dfScenario = scenarios)
 
-	invisible(0)
+	invisible(TRUE)
 }
 
 #dataframe of columns folder, lat, long, label where label can equal folderName
@@ -527,18 +539,20 @@ dbW_addFromFolders <- function(MetaData=NULL, FoldersPath, ScenarioName="Current
 		files <- list.files(path=FoldersPath)
 		temp <- lapply(files, function(x) dbW_addWeatherData(Site_id=NULL, lat=NULL, long=NULL, weatherFolderPath=file.path(FoldersPath, x), weatherData=NULL, ScenarioName = ScenarioName))
 	}
+
+	invisible(TRUE)
 }
 
 #' @export
 dbW_deleteSite <- function(Site_id) {
-	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
+	stopifnot(dbW_IsValid())
 
 	DBI::dbExecute(con.env$con, paste("DELETE FROM \"Sites\" WHERE Site_id=",Site_id,";",sep=""))
 }
 
 #' @export
 dbW_deleteSiteData <- function(Site_id, Scenario=NULL) {
-	stopifnot(requireNamespace("RSQLite"), DBI::dbIsValid(con.env$con))
+	stopifnot(dbW_IsValid())
 
 	if(is.null(Scenario)) { #Remove all data for this site
 		DBI::dbExecute(con.env$con, paste("DELETE FROM \"WeatherData\" WHERE Site_id=",Site_id,";",sep=""))
@@ -549,6 +563,8 @@ dbW_deleteSiteData <- function(Site_id, Scenario=NULL) {
 			dbW_deleteSite(Site_id)
 		}
 	}
+
+	invisible(TRUE)
 }
 
 
