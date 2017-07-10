@@ -346,7 +346,7 @@ dbW_setConnection <- function(dbFilePath) {
 			con.env$default_blob_compression_type
 		}
 
-	invisible(TRUE)
+	invisible(dbW_IsValid())
 }
 
 #' @export
