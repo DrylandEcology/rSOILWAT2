@@ -5,7 +5,7 @@ Title: An Ecohydrological Ecosystem-Scale Water Balance Simulation Model
 Description: Access to the C-based 'SOILWAT2' v3.2.6 and functionality for
   SQLite-database of weather data.
 Authors@R: c(person("Ryan", "Murphy", role = "aut"),
-  person("Daniel", "Schlaepfer", role = c("aut", "cre"), email = "daniel.schlaepfer@unibas.ch"),
+  person("Daniel", "Schlaepfer", role = c("aut", "cre"), email = "daniel.schlaepfer@yale.edu"),
   person("John", "Bradford", role = "ctb"),
   person("William", "Lauenroth", role = "ctb"))
 Depends:
