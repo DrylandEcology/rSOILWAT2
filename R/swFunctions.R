@@ -371,6 +371,23 @@ dbW_addSites <- function(dfLatitudeLongitudeLabel) {#lat #long #Label 1 .... 201
 }
 
 #' @export
+dbW_updateSites <- function(site_ids, new_data) {
+	stopifnot(dbW_IsValid())
+
+	sql <- paste("UPDATE Sites SET Latitude=:Latitude, Longitude=:Longitude, Label=:Label",
+		"WHERE Site_id=:id")
+	rs <- DBI::dbSendStatement(con.env$con, sql)
+	on.exit(DBI::dbClearResult(rs), add = TRUE)
+
+	for (k in seq_along(site_ids)) {
+		DBI::dbBind(rs, param = c(as.list(new_data[k, c("Latitude", "Longitude", "Label")]),
+			list(id = site_ids[k])))
+	}
+
+	invisible(TRUE)
+}
+
+#' @export
 dbW_addScenarios <- function(dfScenario) {
 	stopifnot(dbW_IsValid())
 
