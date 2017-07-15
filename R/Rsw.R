@@ -166,6 +166,9 @@
 sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
   files.in = "files_v31.in", echo = FALSE, quiet = FALSE) {
 
+  dir_prev <- getwd()
+  on.exit(setwd(dir_prev), add = TRUE)
+
   input <- c("sw_v27")
   if (dir != "")
     input <- c(input, "-d", dir)
@@ -265,6 +268,10 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
 #'
 #' @export
 sw_inputDataFromFiles <- function(dir="", files.in="files_v30.in") {
+
+  dir_prev <- getwd()
+  on.exit(setwd(dir_prev), add = TRUE)
+
 	echo=FALSE
 	quiet=FALSE
 
@@ -285,6 +292,10 @@ sw_inputDataFromFiles <- function(dir="", files.in="files_v30.in") {
 #' Return output data
 #' @export
 sw_outputData <- function(inputData) {
+
+  dir_prev <- getwd()
+  on.exit(setwd(dir_prev), add = TRUE)
+
 	.Call("onGetOutput", inputData, PACKAGE = "rSOILWAT2")
 }
 
@@ -346,6 +357,9 @@ sw_outputData <- function(inputData) {
 #'
 #' @export
 sw_inputData <- function() {
+  dir_prev <- getwd()
+  on.exit(setwd(dir_prev), add = TRUE)
+
   temp <- new("swInputData") # data are from prototypes
   data(package = "rSOILWAT2", "weatherData", envir = environment())
   slot(temp, "weatherHistory") <- get("weatherData", envir = environment())
