@@ -352,7 +352,8 @@ dbW_disconnectConnection <- function() {
 dbW_addSites <- function(dfLatitudeLongitudeLabel) {
 	stopifnot(dbW_IsValid())
 
-	dos_add <- !dbW_has_siteIDs(site_ids)
+	dos_add <- sapply(dfLatitudeLongitudeLabel[, "Label"], function(x)
+		is.null(suppressMessages(dbW_getSiteId(Label = x))))
 
 	if (any(dos_add)) {
 		sql <- "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)"
@@ -517,7 +518,7 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = 
 			Latitude = -999, Longitude = -999,
 			Label = NA)
 		# Fill in data
-		if (is.null(site_subset)) {
+		if (is.null(site_subset) || is.na(site_subset)) {
 			site_subset <- seq_len(nrow(site_data))
 		}
 		im <- match(site_data[site_subset, "Site_id"], MetaData[, "Site_id"])
