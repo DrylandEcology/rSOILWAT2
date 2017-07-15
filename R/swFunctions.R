@@ -560,7 +560,7 @@ dbW_deleteSite <- function(Site_id) {
 	stopifnot(dbW_IsValid())
 
 	DBI::dbExecute(con.env$con, paste0("DELETE FROM \"Sites\" WHERE Site_id=", Site_id))
-	dbW_deleteSiteData(Site_id, Scenario = NULL)
+	dbW_deleteSiteData(Site_id, Scenario_id = NULL)
 }
 
 #' @export
@@ -697,7 +697,7 @@ getWeatherData_folders <- function(LookupWeatherFolder, weatherDirName = NULL,
 		filebasename <- paste0(filebasename, ".")
 	}
 	years <- as.numeric(sub(pattern = filebasename, replacement = "", fweath))
-	stopifnot(anyNA(years))
+	stopifnot(!anyNA(years))
 	index <- select_years(years, startYear, endYear)
 
 	weathDataList <- list()
