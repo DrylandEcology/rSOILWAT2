@@ -5,7 +5,7 @@
 \title{Extract weather database key to connect a site with weather data}
 \usage{
 dbW_getSiteId(lat = NULL, long = NULL, Label = NULL,
-  ignore.case = FALSE)
+  ignore.case = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{lat}{A numeric value or \code{NULL}. The latitude in decimal degrees of WGS84.
@@ -23,6 +23,6 @@ An integer value or \code{NULL}.
 Extract weather database key to connect a site with weather data
 }
 \details{
-The key (SiteId) can be located by either providing a \code{Label} or
+The key (Site_id) can be located by either providing a \code{Label} or
 by providing \code{lat} and \code{long} of the requested site.
 }

@@ -22,7 +22,7 @@
 
 con.env <- new.env()
 con.env$con <- NULL
-con.env$dbW_version <- "3.1.0"
+con.env$dbW_version <- "3.1.1"
 con.env$default_blob_compression_type <- "gzip"
 con.env$blob_compression_type <- NULL
 
@@ -486,22 +486,7 @@ dbW_addWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL,
 }
 
 
-
-#' @export
-dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = NULL,
-	site_subset = NULL, scenarios = NULL, compression_type) {
-
-	stopifnot(!file.exists(dbFilePath))
-	stopifnot(dbW_setConnection(dbFilePath, create_if_missing = TRUE))
-
-	#---Create tables
-	# Meta information
-	temp <- eval(formals(memCompress)[[2]])
-	if (missing(compression_type) || !(compression_type %in% temp)) {
-		compression_type <- con.env$default_blob_compression_type
-	}
-	con.env$blob_compression_type <- compression_type
-
+.create_dbW <- function(site_data, scenarios, scen_ambient) {
 	sql <- "CREATE TABLE \"Meta\" (\"Desc\" TEXT PRIMARY KEY, \"Value\" TEXT)"
 	DBI::dbExecute(con.env$con, sql)
 
@@ -511,7 +496,6 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = 
 		Desc = c("Version", "Compression_type"),
 		Value = c(con.env$dbW_version, con.env$blob_compression_type)))
 	DBI::dbClearResult(rs)
-
 
 	# Table of sites
 	sql <- paste0("CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, ",
@@ -527,30 +511,92 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = 
 	DBI::dbExecute(con.env$con, sql)
 
 	#---Add sites
-	temp <- sapply(c("Site_id", "Latitude", "Longitude", "Label"),
-		function(x) x %in% colnames(site_data))
-	if (NROW(site_data) > 0 && temp) {
-		# Default values
-		MetaData <- data.frame(
-			Site_id = seq_len(max(site_data[, "Site_id"])),
-			Latitude = -999, Longitude = -999,
-			Label = NA)
-		# Fill in data
-		if (is.null(site_subset) || is.na(site_subset)) {
-			site_subset <- seq_len(nrow(site_data))
-		}
-		im <- match(site_data[site_subset, "Site_id"], MetaData[, "Site_id"])
-		MetaData[im, c("Latitude", "Longitude", "Label")] <- site_data[site_subset,
-			c("Latitude", "Longitude", "Label")]
-
-		stopifnot(dbW_addSites(dfLatitudeLongitudeLabel = MetaData))
+	req_cols <- c("Latitude", "Longitude", "Label")
+	temp <- sapply(req_cols, function(x) x %in% colnames(site_data))
+	N <- NROW(site_data)
+	if (N > 0 && temp) {
+		stopifnot(dbW_addSites(dfLatitudeLongitudeLabel = site_data[, req_cols]))
 	}
 
 	#---Add scenario names
+	scenarios <- c(scen_ambient, scenarios[!(scenarios == scen_ambient)])
 	stopifnot(dbW_addScenarios(dfScenario = scenarios, ignore.case = FALSE))
 
 	invisible(TRUE)
 }
+
+
+#' Create a weather database
+#'
+#' @section Details: A rSOILWAT2 weather database has the following format: \describe{
+#'   \item{Table 'Meta'}{contains two fields 'Desc' and 'Value' which contain \itemize{
+#'      \item the records 'Version' and 'Compression_type'}}
+#'   \item{Table 'Sites'}{contains four fields 'Site_id', 'Latitude', 'Longitude', and
+#'      'Label'}
+#'   \item{Table 'WeatherData'}{contains five fields 'Site_id', 'Scenario' (i.e., the ID
+#'      of the scenario), 'StartYear', 'EndYear', and 'data'}
+#'   \item{Table 'Scenarios'}{contains two fields 'id' and 'Scenario' (i.e., the scenario
+#'      name)}
+#' }
+#'
+#' @param dbFilePath A character string. The file path of the weather database. This will
+#'  be a file of type \code{sqlite3}. In-memory databases are not supported.
+#' @param site_data A data.frame. The site data with column names "Latitude", "Longitude",
+#'  and "Label".
+#' @param scenarios A vector of character strings. The climate scenarios of which the
+#'  first oneis enforced to be \code{scen_ambient}.
+#' @param scen_ambient A character string. The first/default climate scenario.
+#' @param compression_type A character string. The type of compression for the weather
+#'  blob. See \code{\link{memCompress }} for the available choices.
+#' @param verbose A logical value.
+#'
+#' @return \code{TRUE} on success; \code{FALSE} otherwise. If the file \code{dbFilePath}
+#'   didn't already exist, but creating it failed, then the attempt will be removed.
+#' @export
+dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite3", site_data,
+	scenarios, scen_ambient = "Current", compression_type = "gzip", verbose = FALSE) {
+
+	if (file.exists(dbFilePath)) {
+		if (verbose) {
+			print(paste("'dbW_createDatabase': cannot create a new database because the file",
+				basename(shQuote(dbFilePath)), "does already exist."))
+		}
+		return(FALSE)
+	}
+
+	temp <- dbW_setConnection(dbFilePath, create_if_missing = TRUE, verbose = verbose)
+	if (!temp) {
+		if (verbose) {
+			print(paste("'dbW_createDatabase': was not able to create a new database and",
+				"connect to the file", basename(shQuote(dbFilePath)), "."))
+		}
+		return(FALSE)
+	}
+
+	# Meta information
+	temp <- eval(formals(memCompress)[[2]])
+	if (missing(compression_type) || !(compression_type %in% temp)) {
+		compression_type <- con.env$default_blob_compression_type
+	}
+	con.env$blob_compression_type <- compression_type
+
+	# Create tables
+	temp <- try(.create_dbW(site_data, scenarios, scen_ambient), silent = TRUE)
+	res <- !inherits(temp, "try-error")
+
+	if (!res) {
+		if (verbose) {
+			print(paste("'dbW_createDatabase': was not able to create a new database",
+				basename(shQuote(dbFilePath)), "because of errors in the table data.",
+				"The file will be deleted."))
+		}
+		dbW_disconnectConnection()
+		unlink(dbFilePath)
+	}
+
+	res
+}
+
 
 #dataframe of columns folder, lat, long, label where label can equal folderName
 #' @export
