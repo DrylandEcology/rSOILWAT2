@@ -4,8 +4,8 @@
 \alias{getWeatherData_folders}
 \title{rSOILWAT2 getWeatherData_folders}
 \usage{
-getWeatherData_folders(LookupWeatherFolder = NULL, weatherDirName = NULL,
-  filebasename = NULL, startYear = NULL, endYear = NULL)
+getWeatherData_folders(LookupWeatherFolder, weatherDirName = NULL,
+  filebasename = "weath", startYear = NULL, endYear = NULL)
 }
 \arguments{
 \item{LookupWeatherFolder}{String Path. Path to the LookupWeatherFolder

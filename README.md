@@ -5,19 +5,6 @@
 # rSOILWAT2
 A R package for SOILWAT2.
 
-## Note: repository renamed from Rsoilwat (Rsoilwat31) to rSOILWAT2 on Feb 23, 2017
-
-All existing information should [automatically be redirected](https://help.github.com/articles/renaming-a-repository/) to the new name.
-
-Contributors are encouraged, however, to update local clones to [point to the new URL](https://help.github.com/articles/changing-a-remote-s-url/), i.e.,
-```
-git remote set-url origin https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git
-```
-If you have installed a previous version as R package, then you may consider removing the old version with
-```{r}
-remove.packages("Rsoilwat31")
-```
-
 ## Considerations
 
 We haven’t really published the code yet nor prepared it for sharing (though through our
@@ -44,47 +31,65 @@ hear about your particular study (especially a copy of any published paper).
 Some recent references
 
 * Bradford, J. B., D. R. Schlaepfer, and W. K. Lauenroth. 2014. Ecohydrology of adjacent
-sagebrush and lodgepole pine ecosystems: The consequences of climate change and
-disturbance. Ecosystems 17:590-605.
+  sagebrush and lodgepole pine ecosystems: The consequences of climate change and
+  disturbance. Ecosystems 17:590-605.
+* Palmquist, K.A., Schlaepfer, D.R., Bradford, J.B., and Lauenroth, W.K. 2016.
+  Mid-latitude shrub steppe plant communities: climate change consequences for soil water
+  resources. Ecology 97:2342–2354.
 * Schlaepfer, D. R., W. K. Lauenroth, and J. B. Bradford. 2012. Ecohydrological niche of
-sagebrush ecosystems. Ecohydrology 5:453-466.
+  sagebrush ecosystems. Ecohydrology 5:453-466.
 
 Original references
 
 * Parton, W.J. (1978). Abiotic section of ELM. In: Grassland simulation model
-(ed. Innis, G.S.). Springer New York, NY, pp. 31-53.
+  (ed. Innis, G.S.). Springer New York, NY, pp. 31-53.
 * Sala, O.E., Lauenroth, W.K. & Parton, W.J. (1992). Long-term soil-water dynamics in the
-shortgrass steppe. Ecology, 73, 1175-1181.
+  shortgrass steppe. Ecology, 73, 1175-1181.
 
 
 
-### Clone and get submodules
-```
-git clone -b master --single-branch --recursive https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git rSOILWAT2
-```
+### Obtain the source package
 
-### Clone and get submodules
-```
-git clone https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git rSOILWAT2
-cd rSOILWAT2/
-git checkout master
-git submodule init
-git submodule update ## --remote: uses the latest submodule commit; without --remote: uses a previously defined submodule commit
-cd src
-git checkout master
-git pull
-```
+There are several options:
 
-### Install
-After you downloaded the source code, use one of the bash scripts
+- Download the
+  [package zip file](https://github.com/Burke-Lauenroth-Lab/rSOILWAT2/archive/master.zip)
+  via your web browser.
+
+- Use git to clone and get submodules in one line
+  ```
+  git clone -b master --single-branch --recursive https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git rSOILWAT2
+  ```
+
+- Use git to clone and get submodules step by step
+  ```
+  git clone https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git rSOILWAT2
+  cd rSOILWAT2/
+  git checkout master
+  git submodule init
+  git submodule update ## --remote: uses the latest submodule commit; without --remote: uses a previously defined submodule commit
+  cd src
+  git checkout master
+  git pull
+  ```
+
+
+### Installation
+
+'rSOILWAT2' will compile the c code of SOILWAT2. Your computer must be set up adequately.
+- If you use a Windows OS, then you need the
+  [Rtools](http://cran.us.r-project.org/bin/windows/Rtools/)
+  installed that match your R version; please find further information for instance
+  [here](https://www.biostat.wisc.edu/~kbroman/Rintro/Rwinpack.html).
+- If you use a macOS, then you need [Xcode](https://developer.apple.com/xcode/) and
+  its [command-line tools](https://developer.apple.com/library/content/technotes/tn2339/_index.html)
+  installed; please find further information for instance
+  [here](https://railsapps.github.io/xcode-command-line-tools.html).
+
+
+After you downloaded the source package, run
 ```
-./TarAndInstall_31.sh
-./TarAndInstall_31n.sh
-```
-alternatively,
-```
-tar -pczf rSOILWAT2.tar.gz rSOILWAT2
-R CMD INSTALL rSOILWAT2.tar.gz
+R CMD INSTALL rSOILWAT2
 ```
 
 Or do all at once from within R:
@@ -93,8 +98,15 @@ system2(command = "git", args = "clone -b master --single-branch --recursive htt
 tools::Rcmd(args = paste("INSTALL rSOILWAT2"))
 ```
 
+If you want a binary version of the 'rSOILWAT2' package (e.g., to distribute to someone
+without development tools) for a platform to which you do not have access, then you may
+consider using one of the cloud services (no endorsements):
+- https://builder.r-hub.io offers different Linux, Windows, and mac OS flavors as targets
+- http://win-builder.r-project.org/ offers Windows OS as target
 
-### For contributors only
+
+
+### For code contributors only
 Update the submodule 'SOILWAT2' to the latest commit
 ```
 git clone https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git rSOILWAT2
@@ -131,3 +143,20 @@ You can help us in different ways:
 
 In order to contribute to the code base of this project, you should first contact the
 Lauenroth Lab. We retain any decision to accept your suggestions/contributions or not.
+
+
+## Notes
+
+__Repository renamed from Rsoilwat (Rsoilwat31) to rSOILWAT2 on Feb 23, 2017__
+
+All existing information should [automatically be redirected](https://help.github.com/articles/renaming-a-repository/) to the new name.
+
+Contributors are encouraged, however, to update local clones to [point to the new URL](https://help.github.com/articles/changing-a-remote-s-url/), i.e.,
+```
+git remote set-url origin https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git
+```
+If you have installed a previous version as R package, then you may consider removing the old version with
+```{r}
+remove.packages("Rsoilwat31")
+```
+
