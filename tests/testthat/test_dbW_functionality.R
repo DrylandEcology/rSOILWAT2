@@ -9,7 +9,7 @@ if (!dir.exists(path_extdata)) {
 fdbWeather <- tempfile(fileext = ".sqlite3")
 tests <- c("Ex1", "Ex2")
 sw_weather <- lapply(tests, function(it) readRDS(paste0(it, "_weather.rds")))
-scenarios <- paste0("TestScenario", tests)
+scenarios <- c("Current", paste0("TestScenario", tests))
 scenarios_added <- c(scenarios, paste0(scenarios[1], "_new"), tolower(scenarios[1]))
 
 site_N <- 5
@@ -41,7 +41,7 @@ test_that("dbW creation", {
 
   #--- Create weather database and check that connection
   expect_true(dbW_createDatabase(fdbWeather, site_data = site_data1,
-    scenarios = scenarios))
+    scenarios = scenarios, scen_ambient = scenarios[1]))
   expect_true(suppressMessages(dbW_setConnection(fdbWeather)))
   expect_true(dbW_IsValid())
   expect_true(dbW_disconnectConnection())
@@ -49,7 +49,7 @@ test_that("dbW creation", {
   expect_true(dbW_setConnection(fdbWeather))
 
   #--- Check on status of weather database
-  expect_equal(dbW_version(), numeric_version(rSOILWAT2:::con.env$dbW_version))
+  expect_equal(dbW_version(), numeric_version(con.env$dbW_version))
   expect_equal(dbW_compression(), con.env$default_blob_compression_type)
 
   #--- Check on site/scenario tables
@@ -57,6 +57,7 @@ test_that("dbW creation", {
   expect_equal(dbW_getScenariosTable()[, "Scenario"], scenarios)
 
   #--- Check on site/scenario table content
+  expect_true(all(dbW_has_sites(site_data1[, "Label"])))
   expect_true(all(dbW_has_siteIDs(site_ids)))
   expect_false(dbW_has_siteIDs(site_N + 1))
   expect_false(dbW_has_siteIDs(0))
