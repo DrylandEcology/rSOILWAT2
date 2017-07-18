@@ -47,6 +47,17 @@ dbW_compression <- function() {
 	as.character(DBI::dbGetQuery(con.env$con, sql)[1, 1])
 }
 
+
+#' @export
+dbW_has_sites <- function(Labels) {
+	sapply(Labels, function(x) {
+		sql <- paste0("SELECT COUNT(*) FROM Sites WHERE Label=", x)
+		DBI::dbGetQuery(con.env$con, sql)[1, 1] > 0
+	})
+}
+
+
+#' @export
 dbW_has_siteIDs <- function(Site_ids) {
 	sapply(Site_ids, function(id) {
 		sql <- paste0("SELECT COUNT(*) FROM Sites WHERE Site_id=", id)
@@ -55,6 +66,7 @@ dbW_has_siteIDs <- function(Site_ids) {
 }
 
 
+#' @export
 dbW_has_scenarioIDs <- function(scenario_ids) {
 	sapply(scenario_ids, function(x) {
 		sql <- paste0("SELECT COUNT(*) FROM Scenarios WHERE id=", x)
@@ -63,6 +75,7 @@ dbW_has_scenarioIDs <- function(scenario_ids) {
 }
 
 
+#' @export
 dbW_has_scenarios <- function(scenarios, ignore.case = FALSE) {
 	sapply(scenarios, function(x) {
 		sql <- paste0("SELECT COUNT(*) FROM Scenarios WHERE Scenario=", shQuote(x),
