@@ -87,7 +87,7 @@ dbW_has_scenarios <- function(scenarios, ignore.case = FALSE) {
 
 #' Extract weather database key to connect a site with weather data
 #'
-#' @details The key (SiteId) can be located by either providing a \code{Label} or
+#' @details The key (Site_id) can be located by either providing a \code{Label} or
 #' by providing \code{lat} and \code{long} of the requested site.
 #'
 #' @param lat A numeric value or \code{NULL}. The latitude in decimal degrees of WGS84.
@@ -97,7 +97,8 @@ dbW_has_scenarios <- function(scenarios, ignore.case = FALSE) {
 #' @param Label A character string or \code{NULL}.
 #' @return An integer value or \code{NULL}.
 #' @export
-dbW_getSiteId <- function(lat = NULL, long = NULL, Label = NULL, ignore.case = FALSE) {
+dbW_getSiteId <- function(lat = NULL, long = NULL, Label = NULL, ignore.case = FALSE,
+	verbose = FALSE) {
 	stopifnot(dbW_IsValid())
 
 	lat <- as.numeric(lat)
@@ -123,7 +124,7 @@ dbW_getSiteId <- function(lat = NULL, long = NULL, Label = NULL, ignore.case = F
 	if (!is.finite(Site_id) || Site_id < 0)
 		Site_id <- NULL
 
-	if (is.null(Site_id))
+	if (is.null(Site_id) && verbose)
 		message("'dbW_getSiteId': could not obtain site ID")
 
 	Site_id
@@ -180,6 +181,7 @@ select_years <- function(years, start_year = NULL, end_year = NULL) {
 	idx_start_year:idx_end_year
 }
 
+#' export
 get_years_from_weatherData <- function(wd) {
 	as.integer(unlist(lapply(wd, FUN = slot, "year")))
 }
@@ -328,15 +330,18 @@ dbW_addSite <- function(Site_id = NULL, lat = NULL, long = NULL, Label = NULL) {
 }
 
 #' @export
-dbW_setConnection <- function(dbFilePath, create_if_missing = FALSE) {
+dbW_setConnection <- function(dbFilePath, create_if_missing = FALSE, verbose = FALSE) {
 	dbFilePath <- try(normalizePath(dbFilePath, mustWork = FALSE), silent = TRUE)
 
 	if (inherits(dbFilePath, "try-error") || !file.exists(dbFilePath)) {
-		if (create_if_missing) {
-			message(paste("'dbW_setConnection':", basename(dbFilePath), "does not exist.",
-				"Creating a new database."))
-		} else {
+		if (verbose) {
 			message(paste("'dbW_setConnection':", basename(dbFilePath), "does not exist."))
+		}
+		if (create_if_missing) {
+			if (verbose) {
+				message(paste("'dbW_setConnection': creating a new database."))
+			}
+		} else {
 			return(invisible(FALSE))
 		}
 	}
