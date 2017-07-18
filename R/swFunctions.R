@@ -49,13 +49,13 @@ dbW_compression <- function() {
 
 
 #' @export
-dbW_has_sites <- function(Labels) {
+dbW_has_sites <- function(Labels, ignore.case = FALSE) {
 	sapply(Labels, function(x) {
-		sql <- paste0("SELECT COUNT(*) FROM Sites WHERE Label=", x)
+		sql <- paste0("SELECT COUNT(*) FROM Sites WHERE Label=", shQuote(x),
+			if (ignore.case) " COLLATE NOCASE")
 		DBI::dbGetQuery(con.env$con, sql)[1, 1] > 0
 	})
 }
-
 
 #' @export
 dbW_has_siteIDs <- function(Site_ids) {
