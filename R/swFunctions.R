@@ -554,7 +554,13 @@ dbW_addWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL,
 #'   didn't already exist, but creating it failed, then the attempt will be removed.
 #' @export
 dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite3", site_data,
-	scenarios, scen_ambient = "Current", compression_type = "gzip", verbose = FALSE) {
+	scenarios, scen_ambient = "Current", compression_type = "gzip", verbose = FALSE, ...) {
+
+	dots <- list(...)
+	if (length(dots)) {
+		print(paste("'dbW_createDatabase': arguments ignored/deprecated",
+			paste(shQuote(names(dots)), collapse = ", ")))
+	}
 
 	if (file.exists(dbFilePath)) {
 		if (verbose) {
