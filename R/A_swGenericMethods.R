@@ -408,9 +408,9 @@ setGeneric(name="swCarbon_Use_Bio",function(object) {standardGeneric("swCarbon_U
 #' @export
 setGeneric(name="swCarbon_Use_Sto",function(object) {standardGeneric("swCarbon_Use_Sto")})
 #' @export
-setGeneric(name="swCarbon_RCP",function(object) {standardGeneric("swCarbon_RCP")})
+setGeneric(name="swCarbon_Scenario",function(object) {standardGeneric("swCarbon_Scenario")})
 #' @export
-setGeneric(name="swCarbon_Delta",function(object) {standardGeneric("swCarbon_Delta")})
+setGeneric(name="swCarbon_DeltaYear",function(object) {standardGeneric("swCarbon_DeltaYear")})
 
 #' @export
 setGeneric(name="set_swCarbon<-",function(object, value) {standardGeneric("set_swCarbon<-")})
@@ -419,9 +419,9 @@ setGeneric(name="swCarbon_Use_Bio<-",function(object, value) {standardGeneric("s
 #' @export
 setGeneric(name="swCarbon_Use_Sto<-",function(object, value) {standardGeneric("swCarbon_Use_Sto<-")})
 #' @export
-setGeneric(name="swCarbon_RCP<-",function(object, value) {standardGeneric("swCarbon_RCP<-")})
+setGeneric(name="swCarbon_Scenario<-",function(object, value) {standardGeneric("swCarbon_Scenario<-")})
 #' @export
-setGeneric(name="swCarbon_Delta<-",function(object, value) {standardGeneric("swCarbon_Delta<-")})
+setGeneric(name="swCarbon_DeltaYear<-",function(object, value) {standardGeneric("swCarbon_DeltaYear<-")})
 ########################
 
 #########SWC############

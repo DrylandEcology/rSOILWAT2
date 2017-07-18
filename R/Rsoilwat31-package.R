@@ -104,14 +104,12 @@ NULL
 #' swFiles_Carbon,swInputData-method
 #' swCarbon_Use_Bio,swInputData-method
 #' swCarbon_Use_Sto,swInputData-method
-#' swCarbon_RCP,swInputData-method
-#' swCarbon_Delta,swInputData-method
-#' swCarbon_Future_Bio<-,swInputData-method
-#' swCarbon_Future_Sto<-,swInputData-method
-#' swCarbon_Historical_Bio<-,swInputData-method
-#' swCarbon_Historical_Sto<-,swInputData-method
-#' swCarbon_RCP<-,swInputData-method
-#' swCarbon_Delta<-,swInputData-method
+#' swCarbon_Scenario,swInputData-method
+#' swCarbon_DeltaYear,swInputData-method
+#' swCarbon_Scenario<-,swInputData-method
+#' swCarbon_DeltaYear<-,swInputData-method
+#' swCarbon_Use_Bio<-,swInputData-method
+#' swCarbon_Use_Sto<-,swInputData-method
 #' swFiles_filesIn<- swInputData-method
 #' swFiles_filesIn swInputData-method
 #' swFiles_LogFile<- swInputData-method
@@ -332,19 +330,15 @@ NULL
 #'
 #' @name swCarbon-class
 #' @aliases
-#' swCarbon_Future_Bio,swCarbon-method
-#' swCarbon_Future_Sto,swCarbon-method
-#' swCarbon_Historical_Bio,swCarbon-method
-#' swCarbon_Historical_Sto,swCarbon-method
-#' swCarbon_RCP,swCarbon-method
-#' swCarbon_Delta,swCarbon-method
-#' swCarbon_Future_Bio<-,swCarbon-method
-#' swCarbon_Future_Sto<-,swCarbon-method
-#' swCarbon_Historical_Bio<-,swCarbon-method
-#' swCarbon_Historical_Sto<-,swCarbon-method
-#' swCarbon_RCP<-,swCarbon-method
-#' swCarbon_Delta<-,swCarbon-method
-#'
+#' swCarbon_Use_Bio,swInputData-method
+#' swCarbon_Use_Sto,swInputData-method
+#' swCarbon_Scenario,swInputData-method
+#' swCarbon_DeltaYear,swInputData-method
+#' swCarbon_Scenario<-,swInputData-method
+#' swCarbon_DeltaYear<-,swInputData-method
+#' swCarbon_Use_Bio<-,swInputData-method
+#' swCarbon_Use_Sto<-,swInputData-method
+#' 
 #' @docType class
 #' @section Objects from the Class: Objects can be created by calls of the form
 #' \code{new("swCarbon", ...)}.

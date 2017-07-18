@@ -328,14 +328,14 @@ setReplaceMethod(f="swSWC_HistoricData",signature=c(object="swInputData", value=
 setMethod("get_swCarbon", "swInputData", definition=function(object) {return(object@carbon)})
 setMethod("swCarbon_Use_Bio","swInputData",function(object) {return(object@carbon@CarbonUseBio)})
 setMethod("swCarbon_Use_Sto","swInputData",function(object) {return(object@carbon@CarbonUseSto)})
-setMethod("swCarbon_RCP","swInputData",function(object) {return(object@carbon@RCP)})
-setMethod("swCarbon_Delta","swInputData",function(object) {return(object@carbon@Delta)})
+setMethod("swCarbon_Scenario","swInputData",function(object) {return(object@carbon@Scenario)})
+setMethod("swCarbon_DeltaYear","swInputData",function(object) {return(object@carbon@DeltaYear)})
 
 setReplaceMethod(f="set_swCarbon", signature="swInputData", definition=function(object,value) {object@carbon <- value; return(object)})
 setReplaceMethod(f="swCarbon_Use_Bio",signature=c(object="swInputData", value="integer"),function(object, value) {object@carbon@CarbonUseBio <- value; return(object)})
 setReplaceMethod(f="swCarbon_Use_Sto",signature=c(object="swInputData", value="integer"),function(object, value) {object@carbon@CarbonUseSto <- value; return(object)})
-setReplaceMethod(f="swCarbon_RCP",signature=c(object="swInputData", value="integer"),function(object, value) {object@carbon@RCP <- value; return(object)})
-setReplaceMethod(f="swCarbon_Delta",signature=c(object="swInputData", value="integer"),function(object, value) {object@carbon@Delta <- value; return(object)})
+setReplaceMethod(f="swCarbon_Scenario",signature=c(object="swInputData", value="character"),function(object, value) {object@carbon@Scenario <- value; return(object)})
+setReplaceMethod(f="swCarbon_DeltaYear",signature=c(object="swInputData", value="integer"),function(object, value) {object@carbon@DeltaYear <- value; return(object)})
 ##
 
 ##
