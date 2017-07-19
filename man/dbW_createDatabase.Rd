@@ -5,7 +5,8 @@
 \title{Create a weather database}
 \usage{
 dbW_createDatabase(dbFilePath = "dbWeatherData.sqlite3", site_data, scenarios,
-  scen_ambient = "Current", compression_type = "gzip", verbose = FALSE)
+  scen_ambient = "Current", compression_type = "gzip", verbose = FALSE,
+  ...)
 }
 \arguments{
 \item{dbFilePath}{A character string. The file path of the weather database. This will

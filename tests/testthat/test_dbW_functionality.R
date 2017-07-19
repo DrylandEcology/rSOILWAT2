@@ -7,6 +7,10 @@ if (!dir.exists(path_extdata)) {
 }
 
 fdbWeather <- tempfile(fileext = ".sqlite3")
+fdbWeather2 <- tempfile(fileext = ".txt")
+write(NA, file = fdbWeather2)
+fdbWeather3 <- file.path("/Fantasy", "Volume", "test.sqlite3")
+
 tests <- c("Ex1", "Ex2")
 sw_weather <- lapply(tests, function(it) readRDS(paste0(it, "_weather.rds")))
 scenarios <- c("Current", paste0("TestScenario", tests))
@@ -35,14 +39,44 @@ site_data3 <- data.frame(
 
 #---TESTS
 test_that("dbW creation", {
-  #--- No weather database
-  expect_false(suppressMessages(dbW_setConnection(fdbWeather, create_if_missing = FALSE)))
+  #--- Attempt to connect to (no) weather database
+  expect_false(dbW_setConnection(fdbWeather, create_if_missing = FALSE))
+  expect_message(dbW_setConnection(fdbWeather, create_if_missing = FALSE, 
+    verbose = TRUE), regexp = "does not exist")
+  expect_message(dbW_setConnection(fdbWeather, create_if_missing = TRUE, 
+    verbose = TRUE), regexp = "creating a new database")
+  unlink(fdbWeather)
+  expect_false(dbW_setConnection(fdbWeather2, create_if_missing = TRUE)) 
+  expect_message(dbW_setConnection(fdbWeather2, create_if_missing = TRUE, 
+    verbose = TRUE), regexp = "exists but is likely not a SQLite-database")
+  expect_false(dbW_setConnection(fdbWeather3, create_if_missing = TRUE)) 
+  expect_message(dbW_setConnection(fdbWeather3, create_if_missing = TRUE, 
+    verbose = TRUE), regexp = "cannot be created likely because the path does not exist")
   expect_false(dbW_IsValid())
 
   #--- Create weather database and check that connection
+  expect_message(dbW_createDatabase(fdbWeather, site_data = site_data1,
+    scenarios = scenarios, scen_ambient = scenarios[1], 
+    verbose = TRUE, ARG_DOESNT_EXIST = 1:3), regexp = "arguments ignored/deprecated")
+  expect_false(dbW_createDatabase(fdbWeather))
+  expect_message(dbW_createDatabase(fdbWeather, verbose = TRUE),
+    regexp = "does already exist")
+  unlink(fdbWeather)
+  expect_false(dbW_createDatabase(fdbWeather3, site_data = site_data1,
+    scenarios = scenarios, scen_ambient = scenarios[1]))
+  expect_message(dbW_createDatabase(fdbWeather3, site_data = site_data1,
+    scenarios = scenarios, scen_ambient = scenarios[1], verbose = TRUE),
+    regexp = "was not able to create a new database and connect to the file")
+  expect_false(dbW_createDatabase(fdbWeather, site_data = NA,
+    scenarios = scenarios, scen_ambient = scenarios[1]))
+  expect_message(dbW_createDatabase(fdbWeather, site_data = NA,
+    scenarios = scenarios, scen_ambient = scenarios[1], verbose = TRUE),
+    regexp = "because of errors in the table data")
+  
+  unlink(fdbWeather)
   expect_true(dbW_createDatabase(fdbWeather, site_data = site_data1,
     scenarios = scenarios, scen_ambient = scenarios[1]))
-  expect_true(suppressMessages(dbW_setConnection(fdbWeather)))
+  expect_true(dbW_setConnection(fdbWeather))
   expect_true(dbW_IsValid())
   expect_true(dbW_disconnectConnection())
   expect_false(dbW_IsValid())
@@ -176,6 +210,9 @@ test_that("dbW weather data manipulation", {
 #---CLEAN UP
 dbW_disconnectConnection()
 unlink(fdbWeather)
+unlink(fdbWeather2)
+unlink(fdbWeather3)
+
 
 #--- Non-dbW functions
 test_that("Manipulate weather data", {

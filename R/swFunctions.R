@@ -331,11 +331,13 @@ dbW_addSite <- function(Site_id = NULL, lat = NULL, long = NULL, Label = NULL) {
 
 #' @export
 dbW_setConnection <- function(dbFilePath, create_if_missing = FALSE, verbose = FALSE) {
+	con.env$con <- NULL
+	  
 	dbFilePath <- try(normalizePath(dbFilePath, mustWork = FALSE), silent = TRUE)
-
 	if (inherits(dbFilePath, "try-error") || !file.exists(dbFilePath)) {
 		if (verbose) {
-			message(paste("'dbW_setConnection':", basename(dbFilePath), "does not exist."))
+			message(paste("'dbW_setConnection':", shQuote(basename(dbFilePath)), 
+			  "does not exist."))
 		}
 		if (create_if_missing) {
 			if (verbose) {
@@ -346,7 +348,28 @@ dbW_setConnection <- function(dbFilePath, create_if_missing = FALSE, verbose = F
 		}
 	}
 
-	con.env$con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbFilePath)
+	# Check if 'dbFilePath' can be created
+	temp1 <- try(suppressWarnings(DBI::dbConnect(RSQLite::SQLite(), dbname = dbFilePath)),
+	  silent = TRUE)
+	if (inherits(temp1, "try-error")) {
+	  if (verbose) {
+			message(paste("'dbW_setConnection':", shQuote(dbFilePath), "cannot be created",
+			  "likely because the path does not exist."))
+	  }
+		return(invisible(FALSE))
+	}
+	
+	# Check if 'dbFilePath' is likely a good SQLite-database
+	temp2 <- try(DBI::dbExecute(temp1, "PRAGMA synchronous = off"), silent = TRUE)
+	if (inherits(temp2, "try-error")) {
+	  if (verbose) {
+			message(paste("'dbW_setConnection':", shQuote(basename(dbFilePath)), 
+			  "exists but is likely not a SQLite-database."))
+	  }
+		return(invisible(FALSE))
+	}
+	
+	con.env$con <- temp1
 	con.env$blob_compression_type <- if (DBI::dbExistsTable(con.env$con, "Meta")) {
 			dbW_compression()
 		} else {
@@ -516,6 +539,8 @@ dbW_addWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL,
 	N <- NROW(site_data)
 	if (N > 0 && temp) {
 		stopifnot(dbW_addSites(dfLatitudeLongitudeLabel = site_data[, req_cols]))
+	} else {
+	  stop("'site_data' contains insufficient data to create database.")
 	}
 
 	#---Add scenario names
@@ -558,14 +583,14 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite3", site_data,
 
 	dots <- list(...)
 	if (length(dots)) {
-		print(paste("'dbW_createDatabase': arguments ignored/deprecated",
+		message(paste("'dbW_createDatabase': arguments ignored/deprecated",
 			paste(shQuote(names(dots)), collapse = ", ")))
 	}
 
 	if (file.exists(dbFilePath)) {
 		if (verbose) {
-			print(paste("'dbW_createDatabase': cannot create a new database because the file",
-				basename(shQuote(dbFilePath)), "does already exist."))
+			message(paste("'dbW_createDatabase': cannot create a new database because the file",
+				shQuote(basename(dbFilePath)), "does already exist."))
 		}
 		return(FALSE)
 	}
@@ -573,8 +598,8 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite3", site_data,
 	temp <- dbW_setConnection(dbFilePath, create_if_missing = TRUE, verbose = verbose)
 	if (!temp) {
 		if (verbose) {
-			print(paste("'dbW_createDatabase': was not able to create a new database and",
-				"connect to the file", basename(shQuote(dbFilePath)), "."))
+			message(paste("'dbW_createDatabase': was not able to create a new database and",
+				"connect to the file", shQuote(basename(dbFilePath)), "."))
 		}
 		return(FALSE)
 	}
@@ -592,8 +617,8 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite3", site_data,
 
 	if (!res) {
 		if (verbose) {
-			print(paste("'dbW_createDatabase': was not able to create a new database",
-				basename(shQuote(dbFilePath)), "because of errors in the table data.",
+			message(paste("'dbW_createDatabase': was not able to create a new database",
+				shQuote(basename(dbFilePath)), "because of errors in the table data.",
 				"The file will be deleted."))
 		}
 		dbW_disconnectConnection()
