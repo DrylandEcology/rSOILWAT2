@@ -44,14 +44,14 @@ dbW_getWeatherData_old <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,st
 	if(length(Site_id) == 0) {
 		Site_id <- dbW_getSiteId(lat,long,Label)
 	} else {
-		if(!DBI::dbGetQuery(con.env$con, paste("SELECT COUNT(*) FROM WeatherData WHERE Site_id=",Site_id,";",sep=""))[1,1]) {
+		if(!DBI::dbGetQuery(rSW2_glovars$con, paste("SELECT COUNT(*) FROM WeatherData WHERE Site_id=",Site_id,";",sep=""))[1,1]) {
 			stop("Site_id does not exist.")
 		}
 	}
 	if(!is.null(Site_id) && is.integer(Site_id) && Site_id >= 0) {
-		Scenario <- DBI::dbGetQuery(con.env$con, paste("SELECT id FROM Scenarios WHERE Scenario='",Scenario,"';",sep=""))[1,1]
-		result <- DBI::dbGetQuery(con.env$con, paste("SELECT StartYear,EndYear,data FROM WeatherData WHERE Site_id=",Site_id, " AND Scenario=",Scenario,";",sep=""));
-		data <- dbW_blob_to_weatherData_old(result$StartYear, result$EndYear, result$data, con.env$blob_compression_type)
+		Scenario <- DBI::dbGetQuery(rSW2_glovars$con, paste("SELECT id FROM Scenarios WHERE Scenario='",Scenario,"';",sep=""))[1,1]
+		result <- DBI::dbGetQuery(rSW2_glovars$con, paste("SELECT StartYear,EndYear,data FROM WeatherData WHERE Site_id=",Site_id, " AND Scenario=",Scenario,";",sep=""));
+		data <- dbW_blob_to_weatherData_old(result$StartYear, result$EndYear, result$data, rSW2_glovars$blob_compression_type)
 		if(inherits(data, "try-error")) stop(paste("Weather data for Site_id", Site_id, "is corrupted"))
 	} else {
 		stop(paste("Site_id for", Label, "not obtained."))
@@ -96,23 +96,23 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 		long = long,
 		Label = if (!is.null(weatherFolderPath) && is.null(label)) basename(weatherFolderPath) else label)
 
-	Scenarios <- DBI::dbReadTable(con.env$con,"Scenarios")$Scenario
+	Scenarios <- DBI::dbReadTable(rSW2_glovars$con,"Scenarios")$Scenario
 	if(ScenarioName %in% Scenarios) {
 		scenarioID <- which(ScenarioName %in% Scenarios)
 	} else {
-		temp <- DBI::dbGetQuery(con.env$con, "SELECT MAX(id) FROM \"Scenarios\";")[1,1]
+		temp <- DBI::dbGetQuery(rSW2_glovars$con, "SELECT MAX(id) FROM \"Scenarios\";")[1,1]
 		scenarioID <- ifelse(is.na(temp),1,temp+1)
 		SQL <- paste("INSERT INTO \"Scenarios\" VALUES(",scenarioID,",'",ScenarioName,"');",sep="")
-		DBI::dbExecute(con.env$con, SQL)
+		DBI::dbExecute(rSW2_glovars$con, SQL)
 	}
 
 	if(!is.null(weatherData)) {
-		data_blob <- dbW_weatherData_to_blob_old(weatherData, con.env$blob_compression_type)
+		data_blob <- dbW_weatherData_to_blob_old(weatherData, rSW2_glovars$blob_compression_type)
 		temp <- as.integer(names(weatherData))
 		StartYear <- temp[1]
 		EndYear <- temp[length(temp)]
-		DBI::dbExecute(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
-		#dbCommit(con.env$con)
+		DBI::dbExecute(rSW2_glovars$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
+		#dbCommit(rSW2_glovars$con)
 	} else {
 		weath <- list.files(weatherFolderPath)
 		years <- as.numeric(sub(pattern="weath.",replacement="",weath))
@@ -124,9 +124,9 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 		}
 		StartYear <- years[1]
 		EndYear <- years[length(years)]
-		data_blob <- dbW_weatherData_to_blob_old(weatherData, con.env$blob_compression_type)
-		DBI::dbExecute(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
-		#dbCommit(con.env$con)
+		data_blob <- dbW_weatherData_to_blob_old(weatherData, rSW2_glovars$blob_compression_type)
+		DBI::dbExecute(rSW2_glovars$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
+		#dbCommit(rSW2_glovars$con)
 	}
 }
 

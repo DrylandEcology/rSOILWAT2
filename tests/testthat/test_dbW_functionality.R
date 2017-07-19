@@ -83,8 +83,8 @@ test_that("dbW creation", {
   expect_true(dbW_setConnection(fdbWeather))
 
   #--- Check on status of weather database
-  expect_equal(dbW_version(), numeric_version(con.env$dbW_version))
-  expect_equal(dbW_compression(), con.env$default_blob_compression_type)
+  expect_equal(dbW_version(), numeric_version(rSW2_glovars$dbW_version))
+  expect_equal(dbW_compression(), rSW2_glovars$default_blob_compression_type)
 
   #--- Check on site/scenario tables
   expect_equal(dbW_getSiteTable(), site_data1)
