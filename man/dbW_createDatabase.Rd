@@ -21,7 +21,7 @@ first oneis enforced to be \code{scen_ambient}.}
 \item{scen_ambient}{A character string. The first/default climate scenario.}
 
 \item{compression_type}{A character string. The type of compression for the weather
-blob. See \code{\link{memCompress }} for the available choices.}
+blob. See \code{\link[base]{memCompress}} for the available choices.}
 
 \item{verbose}{A logical value.}
 }

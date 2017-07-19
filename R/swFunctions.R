@@ -566,7 +566,7 @@ dbW_addWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL,
 #'  first oneis enforced to be \code{scen_ambient}.
 #' @param scen_ambient A character string. The first/default climate scenario.
 #' @param compression_type A character string. The type of compression for the weather
-#'  blob. See \code{\link{memCompress }} for the available choices.
+#'  blob. See \code{\link[base]{memCompress}} for the available choices.
 #' @param verbose A logical value.
 #'
 #' @return \code{TRUE} on success; \code{FALSE} otherwise. If the file \code{dbFilePath}
@@ -704,7 +704,7 @@ dbW_blob_to_weatherData <- function(data_blob, type = "gzip") {
 #' @param weatherData A list of elements of class 'swWeatherData' or any suitable object.
 #' @param type A character string. One of c("gzip", "bzip2", "xz", "none").
 #'
-#' @seealso \code{\link{memCompress}}, \code{\link{serialize}}
+#' @seealso \code{\link[base]{memCompress}}, \code{\link{serialize}}
 #' @export
 dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
 	paste0("x'", paste0(memCompress(serialize(weatherData, connection = NULL), type = type),
