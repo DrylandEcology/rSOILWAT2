@@ -37,7 +37,11 @@
 #' @name rSOILWAT2
 #' @aliases rSOILWAT2 rSOILWAT2-package rSOILWAT2 SoilWat SOILWAT SOILWAT2
 #   rSOILWAT2-package Rsoilwat Rsoilwat31
-NULL
+"_PACKAGE"
+
+
+##------ Package level variables
+rSW2_glovars <- new.env()
 
 
 ##------ Import from other packages
@@ -48,7 +52,7 @@ NULL
 NULL
 
 ##------ Access SOILWAT2 C code
-#' @useDynLib rSOILWAT2
+#' @useDynLib rSOILWAT2, .registration = TRUE, .fixes = "C_"
 NULL
 
 #' Class \code{"swInputData"}

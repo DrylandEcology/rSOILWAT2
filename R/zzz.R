@@ -22,8 +22,26 @@
     meta <- utils::packageDescription(pkgname)
     packageStartupMessage("Package ", shQuote(pkgname), " v", meta$Version, " (",
       meta$Date,") attached/loaded.")
-    packageStartupMessage("Daily weather database version ", con.env$dbW_version)
+    packageStartupMessage("Daily weather database version ", rSW2_glovars$dbW_version)
   }
+
+  invisible()
+}
+
+.onLoad <- function(libname, pkgname) {
+  #--- Define package level variables that should be hidden from package user
+  assign("con", NULL, envir = rSW2_glovars)
+  assign("dbW_version", "3.1.0", envir = rSW2_glovars)
+  assign("default_blob_compression_type", "gzip", envir = rSW2_glovars)
+  assign("blob_compression_type", NULL, envir = rSW2_glovars)
+
+  invisible()
+}
+
+
+.onUnload <- function(libpath) {
+  #--- Clean up C code
+  library.dynam.unload("rSOILWAT2", libpath)
 
   invisible()
 }

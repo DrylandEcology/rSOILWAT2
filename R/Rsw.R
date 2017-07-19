@@ -182,9 +182,9 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
     inputData <- sw_inputDataFromFiles(dir = dir, files.in = files.in)
   }
 
-  res <- .Call("start", input, inputData, weatherList, PACKAGE = "rSOILWAT2")
+  res <- .Call(C_start, input, inputData, weatherList)
 
-  if (.Call("tempError", PACKAGE = "rSOILWAT2")) {
+  if (.Call(C_tempError)) {
     # Error during soil temperature calculations
     # Re-initialize soil temperature output to 0
     tempd <- slot(res, "SOILTEMP")
@@ -284,7 +284,7 @@ sw_inputDataFromFiles <- function(dir="", files.in="files_v30.in") {
 		input<-c(input,"-e")
 	if(quiet)
 		input<-c(input,"-q")
-	data <- .Call("onGetInputDataFromFiles", input, PACKAGE = "rSOILWAT2")
+	data <- .Call(C_onGetInputDataFromFiles, input)
 
 	return(data)
 }
@@ -296,7 +296,7 @@ sw_outputData <- function(inputData) {
   dir_prev <- getwd()
   on.exit(setwd(dir_prev), add = TRUE)
 
-	.Call("onGetOutput", inputData, PACKAGE = "rSOILWAT2")
+	.Call(C_onGetOutput, inputData)
 }
 
 
@@ -373,5 +373,5 @@ sw_inputData <- function() {
 #' @return A logical value
 #' @export
 has_soilTemp_failed <- function() {
-  .Call("tempError", PACKAGE = "rSOILWAT2")
+  .Call(C_tempError)
 }

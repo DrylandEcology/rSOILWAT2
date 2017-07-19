@@ -20,15 +20,9 @@
 ## ------SQLite weather database functions
 # Daily weather data is stored in database as SQL-blob of a list of R objects of class 'swWeatherData'
 
-con.env <- new.env()
-con.env$con <- NULL
-con.env$dbW_version <- "3.1.0"
-con.env$default_blob_compression_type <- "gzip"
-con.env$blob_compression_type <- NULL
-
 #' @export
 dbW_IsValid <- function() {
-	!is.null(con.env$con) && DBI::dbIsValid(con.env$con)
+	!is.null(rSW2_glovars$con) && DBI::dbIsValid(rSW2_glovars$con)
 }
 
 #' @export
@@ -36,7 +30,7 @@ dbW_version <- function() {
 	stopifnot(dbW_IsValid())
 
 	sql <- "SELECT Value FROM Meta WHERE Desc=\'Version\'"
-	numeric_version(as.character(DBI::dbGetQuery(con.env$con, sql)[1, 1]))
+	numeric_version(as.character(DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1]))
 }
 
 #' @export
@@ -44,13 +38,13 @@ dbW_compression <- function() {
 	stopifnot(dbW_IsValid())
 
 	sql <- "SELECT Value FROM Meta WHERE Desc=\'Compression_type\'"
-	as.character(DBI::dbGetQuery(con.env$con, sql)[1, 1])
+	as.character(DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1])
 }
 
 dbW_has_siteIDs <- function(Site_ids) {
 	sapply(Site_ids, function(id) {
 		sql <- paste0("SELECT COUNT(*) FROM Sites WHERE Site_id=", id)
-		DBI::dbGetQuery(con.env$con, sql)[1, 1] > 0
+		DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1] > 0
 	})
 }
 
@@ -58,7 +52,7 @@ dbW_has_siteIDs <- function(Site_ids) {
 dbW_has_scenarioIDs <- function(scenario_ids) {
 	sapply(scenario_ids, function(x) {
 		sql <- paste0("SELECT COUNT(*) FROM Scenarios WHERE id=", x)
-		DBI::dbGetQuery(con.env$con, sql)[1, 1] > 0
+		DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1] > 0
 	})
 }
 
@@ -67,7 +61,7 @@ dbW_has_scenarios <- function(scenarios, ignore.case = FALSE) {
 	sapply(scenarios, function(x) {
 		sql <- paste0("SELECT COUNT(*) FROM Scenarios WHERE Scenario=", shQuote(x),
 			if (ignore.case) " COLLATE NOCASE")
-		DBI::dbGetQuery(con.env$con, sql)[1, 1] > 0
+		DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1] > 0
 	})
 }
 
@@ -104,7 +98,7 @@ dbW_getSiteId <- function(lat = NULL, long = NULL, Label = NULL, ignore.case = F
 	}
 
 	Site_id <- if (!is.null(SQL)) {
-			as.integer(DBI::dbGetQuery(con.env$con, SQL))
+			as.integer(DBI::dbGetQuery(rSW2_glovars$con, SQL))
 		} else NULL
 
 	if (!is.finite(Site_id) || Site_id < 0)
@@ -120,14 +114,14 @@ dbW_getSiteId <- function(lat = NULL, long = NULL, Label = NULL, ignore.case = F
 dbW_getSiteTable <- function() {
 	stopifnot(dbW_IsValid())
 
-	DBI::dbReadTable(con.env$con, "Sites")
+	DBI::dbReadTable(rSW2_glovars$con, "Sites")
 }
 
 #' @export
 dbW_getScenariosTable <- function() {
 	stopifnot(dbW_IsValid())
 
-	DBI::dbReadTable(con.env$con, "Scenarios")
+	DBI::dbReadTable(rSW2_glovars$con, "Scenarios")
 }
 
 
@@ -232,20 +226,20 @@ dbW_getWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL, Label = 
 
 	sql <- paste0("SELECT id FROM Scenarios WHERE Scenario =", shQuote(Scenario),
 		if (!ignore.case) " COLLATE NOCASE")
-	Scenario_id <- DBI::dbGetQuery(con.env$con, sql)[1, 1]
+	Scenario_id <- DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1]
 	if (is.na(Scenario_id)) {
 		stop(paste("Scenario", shQuote(Scenario), "does not exist in weather database."))
 	}
 
 	sql <- paste("SELECT data FROM WeatherData WHERE Site_id =", Site_id,
 		"AND Scenario =", Scenario_id)
-	res <- DBI::dbGetQuery(con.env$con, sql)[1, 1]
+	res <- DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1]
 	if (is.na(res)) {
 		stop(paste("Weather data for site", shQuote(Site_id), "and scenario",
 			shQuote(Scenario), "does not exist in weather database."))
 	}
 
-	wd <- try(dbW_blob_to_weatherData(res, con.env$blob_compression_type))
+	wd <- try(dbW_blob_to_weatherData(res, rSW2_glovars$blob_compression_type))
 	if (inherits(wd, "try-error")) {
 		stop(paste("Weather data for site", shQuote(Site_id), "and scenario",
 			shQuote(Scenario), "is corrupted."))
@@ -282,16 +276,16 @@ dbW_addSite <- function(Site_id = NULL, lat = NULL, long = NULL, Label = NULL) {
 		if (is.null(long)) long <- "NULL"
 		Label <- if (is.null(Label)) "NULL" else shQuote(Label)
 		sql <- "SELECT MAX(Site_id) FROM Sites"
-		temp <- DBI::dbGetQuery(con.env$con, sql)[1,1]
+		temp <- DBI::dbGetQuery(rSW2_glovars$con, sql)[1,1]
 		Site_id <- if (is.na(temp)) 1L else {temp + 1}
 		sql <- paste0("INSERT INTO Sites VALUES(", Site_id, ",", lat, ",", long, ",",
 			Label, ")")
-		DBI::dbExecute(con.env$con, sql)
+		DBI::dbExecute(rSW2_glovars$con, sql)
 
 	} else {
 		# Site_id exists already
 		sql <- paste("SELECT * FROM Sites WHERE Site_id=", Site_id)
-		SiteData <- DBI::dbGetQuery(con.env$con, sql)
+		SiteData <- DBI::dbGetQuery(rSW2_glovars$con, sql)
 
 		bad_lat <- !is.null(lat) &&
 			!(is.null(SiteData[1, "Latitude"]) || identical(SiteData[1, "Latitude"], "NULL")) &&
@@ -328,11 +322,11 @@ dbW_setConnection <- function(dbFilePath, create_if_missing = FALSE) {
 		}
 	}
 
-	con.env$con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbFilePath)
-	con.env$blob_compression_type <- if (DBI::dbExistsTable(con.env$con, "Meta")) {
+	rSW2_glovars$con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbFilePath)
+	rSW2_glovars$blob_compression_type <- if (DBI::dbExistsTable(rSW2_glovars$con, "Meta")) {
 			dbW_compression()
 		} else {
-			con.env$default_blob_compression_type
+			rSW2_glovars$default_blob_compression_type
 		}
 
 	invisible(dbW_IsValid())
@@ -341,9 +335,9 @@ dbW_setConnection <- function(dbFilePath, create_if_missing = FALSE) {
 #' @export
 dbW_disconnectConnection <- function() {
 	if (dbW_IsValid())
-		DBI::dbDisconnect(con.env$con)
-	con.env$con <- NULL
-	con.env$blob_compression_type <- NULL
+		DBI::dbDisconnect(rSW2_glovars$con)
+	rSW2_glovars$con <- NULL
+	rSW2_glovars$blob_compression_type <- NULL
 
 	invisible(TRUE)
 }
@@ -357,7 +351,7 @@ dbW_addSites <- function(dfLatitudeLongitudeLabel) {
 
 	if (any(dos_add)) {
 		sql <- "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)"
-		rs <- DBI::dbSendStatement(con.env$con, sql)
+		rs <- DBI::dbSendStatement(rSW2_glovars$con, sql)
 		DBI::dbBind(rs, param = as.list(dfLatitudeLongitudeLabel[dos_add,
 			c("Latitude", "Longitude", "Label")]))
 		DBI::dbClearResult(rs)
@@ -376,7 +370,7 @@ dbW_updateSites <- function(site_ids, new_data) {
 	if (any(dos_update)) {
 		sql <- paste("UPDATE Sites SET Latitude=:Latitude, Longitude=:Longitude, Label=:Label",
 			"WHERE Site_id=:id")
-		rs <- DBI::dbSendStatement(con.env$con, sql)
+		rs <- DBI::dbSendStatement(rSW2_glovars$con, sql)
 		on.exit(DBI::dbClearResult(rs), add = TRUE)
 
 		for (k in which(dos_update)) {
@@ -400,7 +394,7 @@ dbW_addScenarios <- function(dfScenario, ignore.case = FALSE) {
 
 	if (any(dos_add)) {
 		sql <- "INSERT INTO Scenarios VALUES(NULL, :sc)"
-		rs <- DBI::dbSendStatement(con.env$con, sql)
+		rs <- DBI::dbSendStatement(rSW2_glovars$con, sql)
 		DBI::dbBind(rs, param = list(sc = unlist(dfScenario[dos_add])))
 		DBI::dbClearResult(rs)
 	}
@@ -413,7 +407,7 @@ dbW_addWeatherDataNoCheck <- function(Site_id, Scenario_id, StartYear, EndYear,
 	sql <- paste0("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, ",
 		"data) VALUES (", Site_id, ",", Scenario_id, ",", StartYear, ",", EndYear, ",",
 		weather_blob, ")")
-	DBI::dbExecute(con.env$con, sql)
+	DBI::dbExecute(rSW2_glovars$con, sql)
 }
 
 #' @export
@@ -452,7 +446,7 @@ dbW_addWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL,
 		stopifnot(dbW_addScenarios(ScenarioName, ignore.case = ignore.case))
 		sql <- paste0("SELECT id FROM Scenarios WHERE Scenario=", shQuote(ScenarioName),
 				if (ignore.case) " COLLATE NOCASE")
-		Scenario_id <- as.integer(DBI::dbGetQuery(con.env$con, sql))
+		Scenario_id <- as.integer(DBI::dbGetQuery(rSW2_glovars$con, sql))
 	}
 
 	if (is.null(weatherData)) {
@@ -462,7 +456,7 @@ dbW_addWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL,
 
 	years <- get_years_from_weatherData(weatherData)
 	dbW_addWeatherDataNoCheck(Site_id, Scenario_id, years[1], years[length(years)],
-		weather_blob = dbW_weatherData_to_blob(weatherData, con.env$blob_compression_type))
+		weather_blob = dbW_weatherData_to_blob(weatherData, rSW2_glovars$blob_compression_type))
 
 	invisible(TRUE)
 }
@@ -480,33 +474,33 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite", site_data = 
 	# Meta information
 	temp <- eval(formals(memCompress)[[2]])
 	if (missing(compression_type) || !(compression_type %in% temp)) {
-		compression_type <- con.env$default_blob_compression_type
+		compression_type <- rSW2_glovars$default_blob_compression_type
 	}
-	con.env$blob_compression_type <- compression_type
+	rSW2_glovars$blob_compression_type <- compression_type
 
 	sql <- "CREATE TABLE \"Meta\" (\"Desc\" TEXT PRIMARY KEY, \"Value\" TEXT)"
-	DBI::dbExecute(con.env$con, sql)
+	DBI::dbExecute(rSW2_glovars$con, sql)
 
 	sql <- "INSERT INTO Meta VALUES(:Desc, :Value)"
-	rs <- DBI::dbSendStatement(con.env$con, sql)
+	rs <- DBI::dbSendStatement(rSW2_glovars$con, sql)
 	DBI::dbBind(rs, param = list(
 		Desc = c("Version", "Compression_type"),
-		Value = c(con.env$dbW_version, con.env$blob_compression_type)))
+		Value = c(rSW2_glovars$dbW_version, rSW2_glovars$blob_compression_type)))
 	DBI::dbClearResult(rs)
 
 
 	# Table of sites
 	sql <- paste0("CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, ",
 		"\"Latitude\" REAL, \"Longitude\" REAL, \"Label\" TEXT)")
-	DBI::dbExecute(con.env$con, sql)
+	DBI::dbExecute(rSW2_glovars$con, sql)
 	# Table for weather data
 	sql <- paste0("CREATE TABLE \"WeatherData\" (\"Site_id\" integer, ",
 		"\"Scenario\" integer, \"StartYear\" integer, \"EndYear\" integer, \"data\" BLOB, ",
 		"PRIMARY KEY (\"Site_id\", \"Scenario\"))")
-	DBI::dbExecute(con.env$con, sql)
+	DBI::dbExecute(rSW2_glovars$con, sql)
 	# Table of scenario names
 	sql <- "CREATE TABLE \"Scenarios\" (\"id\" integer PRIMARY KEY, \"Scenario\" TEXT)"
-	DBI::dbExecute(con.env$con, sql)
+	DBI::dbExecute(rSW2_glovars$con, sql)
 
 	#---Add sites
 	temp <- sapply(c("Site_id", "Latitude", "Longitude", "Label"),
@@ -559,7 +553,7 @@ dbW_addFromFolders <- function(MetaData = NULL, FoldersPath, ScenarioName = "Cur
 dbW_deleteSite <- function(Site_id) {
 	stopifnot(dbW_IsValid())
 
-	DBI::dbExecute(con.env$con, paste0("DELETE FROM \"Sites\" WHERE Site_id=", Site_id))
+	DBI::dbExecute(rSW2_glovars$con, paste0("DELETE FROM \"Sites\" WHERE Site_id=", Site_id))
 	dbW_deleteSiteData(Site_id, Scenario_id = NULL)
 }
 
@@ -575,7 +569,7 @@ dbW_deleteSiteData <- function(Site_id, Scenario_id = NULL) {
 			paste0("DELETE FROM \"WeatherData\" WHERE Site_id=", Site_id, " AND Scenario=",
 				shQuote(Scenario_id))
 		}
-	DBI::dbExecute(con.env$con, sql)
+	DBI::dbExecute(rSW2_glovars$con, sql)
 
 	invisible(TRUE)
 }
