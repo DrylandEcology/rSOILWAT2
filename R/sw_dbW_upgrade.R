@@ -105,9 +105,9 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
     call_cache[["v_dbW"]] <- numeric_version(as.character(temp))
   }
 
-  if (!identical(call_cache[["v_dbW"]], numeric_version(con.env$dbW_version))) {
+  if (!identical(call_cache[["v_dbW"]], numeric_version(rSW2_glovars$dbW_version))) {
     stop(shQuote(call_id[["f"]]), ": requires database version ",
-      con.env$dbW_version, "; this database is version ", call_cache[["v_dbW"]])
+      rSW2_glovars$dbW_version, "; this database is version ", call_cache[["v_dbW"]])
   }
 
   # Extract compression type
