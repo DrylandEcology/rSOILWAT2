@@ -40,7 +40,7 @@ with \code{with_resume} set to \code{TRUE}, if present, is removed once upgrade
 completed successfully.}
 
 \item{type_new}{The type of compression used to compress the weather blobs. See
-\code{\link{memCompress}}.}
+\code{\link[base]{memCompress}}.}
 }
 \description{
 Weather database upgrade functions

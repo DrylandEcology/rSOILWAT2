@@ -18,5 +18,5 @@ to a list of daily weather data used by rSOILWAT2's simulation functions to a bl
 which can be inserted into a SQLite DB.
 }
 \seealso{
-\code{\link{memCompress}}, \code{\link{serialize}}
+\code{\link[base]{memCompress}}, \code{\link{serialize}}
 }

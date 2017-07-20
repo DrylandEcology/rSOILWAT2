@@ -6,7 +6,7 @@
 \usage{
 dbW_getWeatherData(Site_id = NULL, lat = NULL, long = NULL,
   Label = NULL, startYear = NULL, endYear = NULL, Scenario = "Current",
-  ignore.case = FALSE)
+  Scenario_id = NULL, ignore.case = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{Site_id}{Numeric. Used to identify site and extract weather data.}

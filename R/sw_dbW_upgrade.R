@@ -227,7 +227,7 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
 #'
 #' @inheritParams dbW_upgrade
 #' @param type_new The type of compression used to compress the weather blobs. See
-#'  \code{\link{memCompress}}.
+#'  \code{\link[base]{memCompress}}.
 #'
 #' @export
 dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL, type_new = "gzip") {

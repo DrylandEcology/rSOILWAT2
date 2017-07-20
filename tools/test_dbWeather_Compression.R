@@ -30,14 +30,14 @@ for (it in seq_along(dbWs3)) {
 	dbW_createDatabase(dbFilePath = dbWs3[[it]]$fname,
 		site_data = site_data,
 		scenarios = data.frame(Scenario = "Current"),
-		compression_type = dbWs3[[it]]$type)	
+		compression_type = dbWs3[[it]]$type)
 	dbW_setConnection(dbFilePath = dbWs3[[it]]$fname)
-	
+
 	for (iw in site_ids) {
 		if (dbWs3[[it]]$mode == "new") {
 			dbW_addWeatherData(Site_id = iw,
 				weatherData = sw_weath,
-				ScenarioName = "Current")
+				Scenario = "Current")
 		} else {
 			rSOILWAT2:::dbW_addWeatherData_old(Site_id = iw,
 				weatherData = sw_weath,
@@ -62,7 +62,7 @@ test_that("Test weather object coherence", {
 
 	for (it in seq_along(dbWs3)) {
 		dbW_setConnection(dbFilePath = dbWs3[[it]]$fname)
-		
+
 		for (iw in site_ids) {
 			expect_equal(sw_weath,
 				if (dbWs3[[it]]$mode == "new") {
@@ -87,7 +87,7 @@ test_that("Benchmark dbWeather retrieval speed", {
 	skip_on_cran()
 	skip_if_not_installed("microbenchmark")
 	skip_if_not(do_benchmark, "Benchmarking is turned off.")
-	
+
 	retrievals <- function(path_dbW, site_ids, mode) {
 		dbW_setConnection(dbFilePath = path_dbW)
 
@@ -110,7 +110,7 @@ test_that("Benchmark dbWeather retrieval speed", {
 	to_bench <- lapply(dbWs3, function(dbW)
 			call("retrievals", path_dbW = dbW$fname, site_ids = site_ids, mode = dbW$mode))
 	names(to_bench) <- sapply(dbWs3, function(x) paste(x$type, x$mode, sep = "-"))
-	
+
 	expect_s3_class(bench <- microbenchmark::microbenchmark(list = to_bench, times = 200), "microbenchmark")
 	print(bench)
 })
