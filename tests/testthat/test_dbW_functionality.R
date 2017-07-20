@@ -119,14 +119,14 @@ test_that("dbW site/scenario tables manipulation", {
 
     #--- Attempt to add new site
     # Site already exists
-    expect_true(suppressMessages(dbW_addSites(site_data = site_data1[k, ])))
-    expect_message(dbW_addSites(site_data = site_data1[k, ]),
+    expect_true(dbW_addSites(site_data = site_data1[k, ], verbose = FALSE))
+    expect_message(dbW_addSites(site_data = site_data1[k, ], verbose = TRUE),
       regexp = "sites are already in database, labels")
     # Data missing
     expect_error(dbW_addSites(site_data = site_data1[k, "Site_id"]))
 
     #--- Add new sites
-    expect_true(suppressMessages(dbW_addSites(site_data = site_data3[k, ])))
+    expect_true(dbW_addSites(site_data = site_data3[k, ], verbose = FALSE))
   }
 
   #--- Update site information
@@ -140,8 +140,9 @@ test_that("dbW site/scenario tables manipulation", {
 
   #--- Add scenarios
   # Scenario already exists
-  expect_true(suppressMessages(dbW_addScenarios(scenarios[1])))
-  expect_message(dbW_addScenarios(scenarios[1]), "scenarios are already in database")
+  expect_true(dbW_addScenarios(scenarios[1], verbose = FALSE))
+  expect_message(dbW_addScenarios(scenarios[1], verbose = TRUE),
+    regexp = "scenarios are already in database")
   expect_true(dbW_addScenarios(tolower(scenarios[3]), ignore.case = TRUE))
   # New scenario
   expect_true(dbW_addScenarios(paste0(scenarios[1], "_new")))
@@ -166,15 +167,15 @@ test_that("dbW weather data manipulation", {
 
   # Check presence of weather data
   expect_true(dbW_has_weatherData(Site_id = 1, Scenario_id = 1))
-  expect_equal(as.vector(dbW_has_weatherData(Site_id = 1, Scenario_id = 1:2)), 
+  expect_equal(as.vector(dbW_has_weatherData(Site_id = 1, Scenario_id = 1:2)),
     c(TRUE, TRUE))
   expect_equal(as.vector(dbW_has_weatherData(Site_id = 1, Scenario_id = 1:3)),
     c(TRUE, TRUE, FALSE))
   res_exp <- matrix(c(TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, rep(FALSE, 6)),
-    nrow = 3, ncol = 4, dimnames = list(paste("Site", 1:3, sep = "_"), 
+    nrow = 3, ncol = 4, dimnames = list(paste("Site", 1:3, sep = "_"),
     paste("Scenario", 1:4, sep = "_")))
   expect_equal(dbW_has_weatherData(Site_id = 1:3, Scenario_id = 1:4), res_exp)
-  
+
   # Retrieve weather data
   expect_equal(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[1]), sw_weather[[1]])
   expect_equal(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[2]), sw_weather[[1]])

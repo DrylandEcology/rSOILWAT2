@@ -451,7 +451,7 @@ dbW_disconnectConnection <- function() {
 }
 
 #' @export
-dbW_addSites <- function(site_data, ignore.case = FALSE) {
+dbW_addSites <- function(site_data, ignore.case = FALSE, verbose = FALSE) {
 	stopifnot(dbW_IsValid())
 
 	req_cols <- c("Latitude", "Longitude", "Label")
@@ -467,7 +467,7 @@ dbW_addSites <- function(site_data, ignore.case = FALSE) {
 		DBI::dbExecute(rSW2_glovars$con, sql, params = as.list(site_data[dos_add, req_cols]))
 	}
 
-	if (any(has_sites)) {
+	if (any(has_sites) && verbose) {
 		message(paste("'dbW_addSites': sites are already in database, labels =",
 			paste(shQuote(site_data[has_sites, "Label"]), collapse = ", ")))
 	}
@@ -476,7 +476,7 @@ dbW_addSites <- function(site_data, ignore.case = FALSE) {
 }
 
 #' @export
-dbW_updateSites <- function(site_ids, new_data) {
+dbW_updateSites <- function(site_ids, new_data, ignore.case = FALSE, verbose = FALSE) {
 	stopifnot(dbW_IsValid())
 
 	dos_update <- dbW_has_siteIDs(site_ids)
@@ -495,14 +495,15 @@ dbW_updateSites <- function(site_ids, new_data) {
 	}
 
 	if (any(dos_add)) {
-		stopifnot(dbW_addSites(new_data[dos_add, ]))
+		stopifnot(dbW_addSites(new_data[dos_add, ], ignore.case = ignore.case,
+			verbose = verbose))
 	}
 
 	invisible(TRUE)
 }
 
 #' @export
-dbW_addScenarios <- function(dfScenario, ignore.case = FALSE) {
+dbW_addScenarios <- function(dfScenario, ignore.case = FALSE, verbose = FALSE) {
 	stopifnot(dbW_IsValid())
 
 	has_scenarios <- dbW_has_scenarios(dfScenario, ignore.case = ignore.case)
@@ -513,7 +514,7 @@ dbW_addScenarios <- function(dfScenario, ignore.case = FALSE) {
 		DBI::dbExecute(rSW2_glovars$con, sql, params = list(sc = unlist(dfScenario[dos_add])))
 	}
 
-	if (any(has_scenarios)) {
+	if (any(has_scenarios) && verbose) {
 		message(paste("'dbW_addScenarios': scenarios are already in database, scenarios =",
 			paste(shQuote(dfScenario[has_scenarios]), collapse = ", ")))
 	}
