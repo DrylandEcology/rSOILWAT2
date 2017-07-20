@@ -20,11 +20,15 @@
 ## ------SQLite weather database functions
 # Daily weather data is stored in database as SQL-blob of a list of R objects of class 'swWeatherData'
 
+#' Check whether registered weather database connection is valid
+#' @return A logical value.
 #' @export
 dbW_IsValid <- function() {
 	!is.null(rSW2_glovars$con) && DBI::dbIsValid(rSW2_glovars$con)
 }
 
+#' Query version number of registered weather database
+#' @return A numeric version number.
 #' @export
 dbW_version <- function() {
 	stopifnot(dbW_IsValid())
@@ -33,6 +37,8 @@ dbW_version <- function() {
 	numeric_version(as.character(DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1]))
 }
 
+#' Query compression type of registered weather database
+#' @return A character string.
 #' @export
 dbW_compression <- function() {
 	stopifnot(dbW_IsValid())
@@ -42,40 +48,81 @@ dbW_compression <- function() {
 }
 
 
+#' Check availability of content in registered weather database
+#'
+#' @param Site_ids An integer vector. The IDs/database keys of the queried site.
+#' @param Labels A vector of character strings. The names/labels of the queried sites.
+#' @param scenario_ids An integer vector. The IDs/database keys of the queried scenario.
+#' @param scenarios An integer vector. The IDs/database keys of the queried scenarios.
+#' @param ignore.case A vector of character strings. The names/labels of the queried scenarios.
+#' @name check_content
+NULL
+
+#' @rdname check_content
+#' @section Details: \code{dbW_has_siteIDs} checks whether sites are available.
+#' @return \code{dbW_has_siteIDs} returns a logical vector of the length of queried sites.
 #' @export
 dbW_has_sites <- function(Labels, ignore.case = FALSE) {
-	sapply(Labels, function(x) {
-		sql <- paste0("SELECT COUNT(*) FROM Sites WHERE Label=", shQuote(x),
-			if (ignore.case) " COLLATE NOCASE")
-		DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1] > 0
-	})
+	stopifnot(dbW_IsValid())
+	sql <- paste("SELECT COUNT(*) FROM Sites WHERE Label=:x",
+		if (ignore.case) "COLLATE NOCASE")
+	DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = Labels))[, 1] > 0
 }
 
+#' @rdname check_content
+#' @section Details: \code{dbW_has_siteIDs} checks whether sites are available.
+#' @return \code{dbW_has_siteIDs} returns a logical vector of the length of queried sites.
 #' @export
 dbW_has_siteIDs <- function(Site_ids) {
-	sapply(Site_ids, function(id) {
-		sql <- paste0("SELECT COUNT(*) FROM Sites WHERE Site_id=", id)
-		DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1] > 0
-	})
+	stopifnot(dbW_IsValid())
+	sql <- "SELECT COUNT(*) FROM Sites WHERE Site_id=:x"
+	DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = Site_ids))[, 1] > 0
 }
 
-
+#' @rdname check_content
+#' @section Details: \code{dbW_has_scenarios} checks whether scenarios are available.
+#' @return \code{dbW_has_scenarios} returns a logical vector of the length of queried
+#'  scenarios.
 #' @export
 dbW_has_scenarioIDs <- function(scenario_ids) {
-	sapply(scenario_ids, function(x) {
-		sql <- paste0("SELECT COUNT(*) FROM Scenarios WHERE id=", x)
-		DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1] > 0
-	})
+	stopifnot(dbW_IsValid())
+	sql <- "SELECT COUNT(*) FROM Scenarios WHERE id=:x"
+	DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = scenario_ids))[, 1] > 0
 }
 
-
+#' @rdname check_content
+#' @section Details: \code{dbW_has_scenarios} checks whether scenarios are available.
+#' @return \code{dbW_has_scenarios} returns a logical vector of the length of queried
+#'  scenarios.
 #' @export
 dbW_has_scenarios <- function(scenarios, ignore.case = FALSE) {
-	sapply(scenarios, function(x) {
-		sql <- paste0("SELECT COUNT(*) FROM Scenarios WHERE Scenario=", shQuote(x),
-			if (ignore.case) " COLLATE NOCASE")
-		DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1] > 0
-	})
+	stopifnot(dbW_IsValid())
+	sql <- paste("SELECT COUNT(*) FROM Scenarios WHERE Scenario=:x",
+		if (ignore.case) "COLLATE NOCASE")
+	DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = scenarios))[, 1] > 0
+}
+
+#' @rdname check_content
+#' @section Details: \code{dbW_has_weatherData} checks whether weather data are available.
+#' @return code{dbW_has_weatherData} returns a logical matrix with rows corresponding to
+#'  queried sites and columns to queried scenarios.
+#' @export
+dbW_has_weatherData <- function(Site_ids, Scenario_ids) {
+	stopifnot(dbW_IsValid())
+
+  sql <- "SELECT COUNT(*) FROM WeatherData WHERE Site_id = :x1 AND Scenario IN (:x2)"
+  scen_N <- length(Scenario_ids)
+  res <- sapply(Site_ids, function(x) {
+  	res <- DBI::dbGetQuery(rSW2_glovars$con, sql,
+  	  params = list(x1 = rep(x, scen_N), x2 = Scenario_ids))
+  	res[, 1] == 1L
+  })
+  if (!is.matrix(res)) {
+    res <- as.matrix(res)
+  }
+  dimnames(res) <- list(paste("Scenario", Scenario_ids, sep = "_"),
+    paste("Site", Site_ids, sep = "_"))
+  t(res)
 }
 
 
@@ -93,36 +140,120 @@ dbW_has_scenarios <- function(scenarios, ignore.case = FALSE) {
 #' @export
 dbW_getSiteId <- function(lat = NULL, long = NULL, Label = NULL, ignore.case = FALSE,
 	verbose = FALSE) {
+
 	stopifnot(dbW_IsValid())
 
-	lat <- as.numeric(lat)
-	long <- as.numeric(long)
-	SQL <- NULL
+	x <- if (is.character(Label)) {
+  		sql <- paste0("SELECT Site_id FROM Sites WHERE Label=:x",
+  			if (ignore.case) " COLLATE NOCASE")
+  		DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = Label))[1, 1]
 
-	if (!is.null(Label)) {
-		if (is.character(Label)) {
-			SQL <- paste0("SELECT Site_id FROM Sites WHERE Label=", shQuote(Label),
-				if (ignore.case) " COLLATE NOCASE")
-		}
-	} else if (!is.null(lat) && !is.null(long)) {
-		if (!is.na(lat) && !is.na(long) && length(lat) == 1 && length(long) == 1) {
-			SQL <- paste0("SELECT Site_id FROM Sites WHERE Latitude=", lat, " AND Longitude=",
-				long)
-		}
-	}
+  	} else if (is.numeric(lat) && is.numeric(long)) {
+  		sql <- "SELECT Site_id FROM Sites WHERE Latitude=:lat AND Longitude=:long"
+  		DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(lat = lat, long = long))[1, 1]
 
-	Site_id <- if (!is.null(SQL)) {
-			as.integer(DBI::dbGetQuery(rSW2_glovars$con, SQL))
-		} else NULL
+  	} else NULL
 
-	if (!is.finite(Site_id) || Site_id < 0)
-		Site_id <- NULL
+	Site_id <- if (is.null(x) || anyNA(x)) NULL else as.integer(x)
 
-	if (is.null(Site_id) && verbose)
+	if (is.null(Site_id) && verbose) {
 		message("'dbW_getSiteId': could not obtain site ID")
+	}
 
 	Site_id
 }
+
+dbW_getScenarioId <- function(Scenario, ignore.case = FALSE, verbose = FALSE) {
+	stopifnot(dbW_IsValid())
+
+	sql <- paste0("SELECT id FROM Scenarios WHERE Scenario = :x",
+		if (!ignore.case) " COLLATE NOCASE")
+	x <- DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = Scenario))
+
+	id <- if (is.null(x) || anyNA(x)) NULL else as.integer(x)
+
+	if (is.null(id) && verbose) {
+		message("'dbW_getScenarioId': could not obtain scenario ID")
+	}
+
+	id
+}
+
+#' Locate keys for weather database tables
+#'
+#' Obtain database table keys 'Site_id' and 'Scenario_id' using alternative information
+#' and optionally add missing sites and scenarios.
+#' A site will be identified alternatively
+#' by \itemize{
+#'    \item its identification number \code{site_id},
+#'    \item its name \code{site_label}, or
+#'    \item its geographic location \code{long} and \code{lat}.
+#' }
+#' A scenario will be identified alternatively
+#' by \itemize{
+#'    \item its identification number \code{scenario_id}, or
+#'    \item its name \code{scenario}.
+#' }
+#'
+#' @return A list with two elements \code{site_id} and \code{scenario_id}.
+#'
+#' extern
+dbW_getIDs <- function(site_id = NULL, site_label = NULL, long = NULL, lat = NULL,
+  scenario = NULL, scenario_id = NULL, add_if_missing = FALSE, ignore.case = FALSE,
+  verbose = FALSE) {
+
+  res <- list(site_id = site_id, scenario_id = scenario_id)
+
+  has_siteID <- is.numeric(res[["site_id"]]) && dbW_has_siteIDs(res[["site_id"]])
+  if (!has_siteID) {
+    res[["site_id"]] <- dbW_getSiteId(Label = site_label, lat = lat, long = long,
+      ignore.case = ignore.case)
+
+    if (is.null(res[["site_id"]]) && add_if_missing) {
+      temp <- if ((as.character(site_label) && nchar(site_label) > 0) ||
+        (as.numeric(lat) && as.numeric(long))) {
+          try(dbW_addSites(site_data = data.frame(Latitude = lat, Longitude = long,
+            Label = site_label, stringsAsFactors = FALSE), ignore.case = ignore.case),
+            silent = TRUE)
+        } else FALSE
+
+      if (!inherits(temp, "try-error") && temp) {
+        res[["site_id"]] <- dbW_getSiteId(Label = site_label, lat = lat, long = long,
+          ignore.case = ignore.case)
+      }
+    }
+
+    if (is.null(res[["site_id"]]) && verbose) {
+      message("'dbW_getIDs' has not enough info to identify/locate site.")
+    }
+  }
+
+  has_scenID <- is.numeric(res[["scenario_id"]]) &&
+    dbW_has_scenarioIDs(res[["scenario_id"]])
+  if (!has_scenID) {
+    res[["scenario_id"]] <- dbW_getScenarioId(Scenario = scenario,
+      ignore.case = ignore.case)
+
+    if (is.null(res[["scenario_id"]]) && add_if_missing) {
+      temp <- if (as.character(scenario) && nchar(scenario) > 0) {
+          try(dbW_addScenarios(dfScenario = scenario, ignore.case = ignore.case),
+            silent = TRUE)
+        } else FALSE
+
+      if (!inherits(temp, "try-error") && temp) {
+        res[["scenario_id"]] <- dbW_getScenarioId(Scenario = scenario,
+          ignore.case = ignore.case)
+      }
+    }
+
+    if (is.null(res[["scenario_id"]]) && verbose) {
+      message("'dbW_getIDs' has not enough info to identify/locate scenario.")
+    }
+  }
+
+  res
+}
+
 
 #' @export
 dbW_getSiteTable <- function() {
@@ -219,45 +350,29 @@ get_years_from_weatherData <- function(wd) {
 #' }
 #' @export
 dbW_getWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL, Label = NULL,
-	startYear = NULL, endYear = NULL, Scenario = "Current", ignore.case = FALSE) {
+	startYear = NULL, endYear = NULL, Scenario = "Current", Scenario_id = NULL,
+  ignore.case = FALSE, verbose = FALSE) {
 
 	stopifnot(dbW_IsValid())
+	IDs <- dbW_getIDs(site_id = Site_id, site_label = Label, long = long, lat = lat,
+    scenario = Scenario, scenario_id = Scenario_id, add_if_missing = FALSE,
+    ignore.case = ignore.case, verbose = verbose)
+  if (any(sapply(IDs, is.null))) {
+    stop("'dbW_getWeatherData': insufficient information to locate weather data.")
+  }
 
-	if (all(sapply(list(Site_id, Label, lat, long), is.null))) {
-		stop("No way to locate weather data from input")
-	}
-
-	Site_id <- as.integer(Site_id)
-	if (length(Site_id)  ==  0 || !is.finite(Site_id)) {
-		Site_id <- try(dbW_getSiteId(lat, long, Label, ignore.case = ignore.case),
-			silent = TRUE)
-
-		if (inherits(Site_id, "try_error")) {
-			stop(paste("Site_id for", Label, "not found in weather database."))
-		}
-	} else {
-		stopifnot(dbW_has_siteIDs(Site_id))
-	}
-
-	sql <- paste0("SELECT id FROM Scenarios WHERE Scenario =", shQuote(Scenario),
-		if (!ignore.case) " COLLATE NOCASE")
-	Scenario_id <- DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1]
-	if (is.na(Scenario_id)) {
-		stop(paste("Scenario", shQuote(Scenario), "does not exist in weather database."))
-	}
-
-	sql <- paste("SELECT data FROM WeatherData WHERE Site_id =", Site_id,
-		"AND Scenario =", Scenario_id)
-	res <- DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1]
+	sql <- "SELECT data FROM WeatherData WHERE Site_id = :x1 AND Scenario = :x2"
+	res <- DBI::dbGetQuery(rSW2_glovars$con, sql,
+		params = list(x1 = IDs[["site_id"]], x2 = IDs[["scenario_id"]]))[1, 1]
 	if (is.na(res)) {
-		stop(paste("Weather data for site", shQuote(Site_id), "and scenario",
-			shQuote(Scenario), "does not exist in weather database."))
+		stop(paste("Weather data for site", shQuote(IDs[["site_id"]]), "and scenario",
+			shQuote(IDs[["scenario_id"]]), "does not exist in weather database."))
 	}
 
 	wd <- try(dbW_blob_to_weatherData(res, rSW2_glovars$blob_compression_type))
 	if (inherits(wd, "try-error")) {
-		stop(paste("Weather data for site", shQuote(Site_id), "and scenario",
-			shQuote(Scenario), "is corrupted."))
+		stop(paste("Weather data for site", shQuote(IDs[["site_id"]]), "and scenario",
+			shQuote(IDs[["scenario_id"]]), "is corrupted."))
 	}
 
 	temp <- class(wd[[1]])
@@ -272,55 +387,6 @@ dbW_getWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL, Label = 
 	ids <- select_years(years, startYear, endYear)
 
 	wd[ids]
-}
-
-#' @export
-dbW_addSite <- function(Site_id = NULL, lat = NULL, long = NULL, Label = NULL) {
-	stopifnot(dbW_IsValid())
-
-	#Does Site_id exist
-	Site_id <- as.integer(Site_id)
-	if (length(Site_id) == 0) { #Site_id is NULL or integer(0)
-		Site_id <- dbW_getSiteId(lat, long, Label)
-	}
-	stopifnot(length(Site_id) == 1L)
-
-	if (!dbW_has_siteIDs(Site_id)) {
-		# Site_id does not exist in database: create it
-		if (is.null(lat)) lat <- "NULL"
-		if (is.null(long)) long <- "NULL"
-		Label <- if (is.null(Label)) "NULL" else shQuote(Label)
-		sql <- "SELECT MAX(Site_id) FROM Sites"
-		temp <- DBI::dbGetQuery(rSW2_glovars$con, sql)[1,1]
-		Site_id <- if (is.na(temp)) 1L else {temp + 1}
-		sql <- paste0("INSERT INTO Sites VALUES(", Site_id, ",", lat, ",", long, ",",
-			Label, ")")
-		DBI::dbExecute(rSW2_glovars$con, sql)
-
-	} else {
-		# Site_id exists already
-		sql <- paste("SELECT * FROM Sites WHERE Site_id=", Site_id)
-		SiteData <- DBI::dbGetQuery(rSW2_glovars$con, sql)
-
-		bad_lat <- !is.null(lat) &&
-			!(is.null(SiteData[1, "Latitude"]) || identical(SiteData[1, "Latitude"], "NULL")) &&
-			SiteData[1, "Latitude"] != lat
-		bad_long <- !is.null(long) &&
-			!(is.null(SiteData[1, "Longitude"]) || identical(SiteData[1, "Longitude"], "NULL")) &&
-			SiteData[1, "Longitude"] != long
-		bad_label <- !is.null(Label) && nchar(Label) > 0 &&
-			!(is.null(SiteData[1, "Label"]) || identical(SiteData[1, "Label"], "NULL")) &&
-			SiteData[1, "Label"] != Label
-		if (bad_lat || bad_long || bad_label) {
-				stop("Site_id: ", Site_id, " already existed in database, but data mismatch ",
-				"with NULL being ignored. Compare data (database:input) ",
-				"lat(", SiteData[1, "Latitude"], ":", lat, ") ",
-				"long(", SiteData[1, "Longitude"], ":", long, ") ",
-				"label(", SiteData[1, "Label"], ":", Label, ").")
-		}
-	}
-
-	Site_id
 }
 
 #' @export
@@ -377,6 +443,7 @@ dbW_setConnection <- function(dbFilePath, create_if_missing = FALSE, verbose = F
 dbW_disconnectConnection <- function() {
 	if (dbW_IsValid())
 		DBI::dbDisconnect(rSW2_glovars$con)
+
 	rSW2_glovars$con <- NULL
 	rSW2_glovars$blob_compression_type <- NULL
 
@@ -384,18 +451,25 @@ dbW_disconnectConnection <- function() {
 }
 
 #' @export
-dbW_addSites <- function(dfLatitudeLongitudeLabel) {
+dbW_addSites <- function(site_data, ignore.case = FALSE) {
 	stopifnot(dbW_IsValid())
 
-	dos_add <- sapply(dfLatitudeLongitudeLabel[, "Label"], function(x)
-		is.null(suppressMessages(dbW_getSiteId(Label = x))))
+	req_cols <- c("Latitude", "Longitude", "Label")
+	if (!all(req_cols %in% colnames(site_data))) {
+		stop("'dbW_addSites': argument misses required columns.")
+	}
+
+	has_sites <- dbW_has_sites(site_data[, "Label"], ignore.case = ignore.case)
+	dos_add <- !has_sites
 
 	if (any(dos_add)) {
 		sql <- "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)"
-		rs <- DBI::dbSendStatement(rSW2_glovars$con, sql)
-		DBI::dbBind(rs, param = as.list(dfLatitudeLongitudeLabel[dos_add,
-			c("Latitude", "Longitude", "Label")]))
-		DBI::dbClearResult(rs)
+		DBI::dbExecute(rSW2_glovars$con, sql, params = as.list(site_data[dos_add, req_cols]))
+	}
+
+	if (any(has_sites)) {
+		message(paste("'dbW_addSites': sites are already in database, labels =",
+			paste(shQuote(site_data[has_sites, "Label"]), collapse = ", ")))
 	}
 
 	invisible(TRUE)
@@ -431,13 +505,17 @@ dbW_updateSites <- function(site_ids, new_data) {
 dbW_addScenarios <- function(dfScenario, ignore.case = FALSE) {
 	stopifnot(dbW_IsValid())
 
-	dos_add <- !dbW_has_scenarios(dfScenario, ignore.case = ignore.case)
+	has_scenarios <- dbW_has_scenarios(dfScenario, ignore.case = ignore.case)
+	dos_add <- !has_scenarios
 
 	if (any(dos_add)) {
 		sql <- "INSERT INTO Scenarios VALUES(NULL, :sc)"
-		rs <- DBI::dbSendStatement(rSW2_glovars$con, sql)
-		DBI::dbBind(rs, param = list(sc = unlist(dfScenario[dos_add])))
-		DBI::dbClearResult(rs)
+		DBI::dbExecute(rSW2_glovars$con, sql, params = list(sc = unlist(dfScenario[dos_add])))
+	}
+
+	if (any(has_scenarios)) {
+		message(paste("'dbW_addScenarios': scenarios are already in database, scenarios =",
+			paste(shQuote(dfScenario[has_scenarios]), collapse = ", ")))
 	}
 
 	invisible(TRUE)
@@ -445,16 +523,19 @@ dbW_addScenarios <- function(dfScenario, ignore.case = FALSE) {
 
 dbW_addWeatherDataNoCheck <- function(Site_id, Scenario_id, StartYear, EndYear,
 	weather_blob) {
-	sql <- paste0("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, ",
-		"data) VALUES (", Site_id, ",", Scenario_id, ",", StartYear, ",", EndYear, ",",
-		weather_blob, ")")
-	DBI::dbExecute(rSW2_glovars$con, sql)
+
+	sql <- paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data)",
+		"VALUES (:Site_id, :Scenario_id, :StartYear, :EndYear, :weather_blob)")
+	DBI::dbExecute(rSW2_glovars$con, sql, params = list(Site_id = Site_id,
+		Scenario_id = Scenario_id, StartYear = StartYear, EndYear = EndYear,
+		weather_blob = weather_blob))
 }
 
 #' @export
 dbW_addWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL,
 	weatherFolderPath = NULL, weatherData = NULL, label = NULL, Scenario_id = NULL,
-	ScenarioName = "Current", weather_tag = "weath", ignore.case = FALSE) {
+	Scenario = "Current", weather_tag = "weath", ignore.case = FALSE, overwrite = FALSE,
+	verbose = FALSE) {
 
 	stopifnot(dbW_IsValid())
 
@@ -465,30 +546,31 @@ dbW_addWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL,
 		stop("'dbW_addWeatherData' requires either a folder path or weatherData.")
 	}
 
-	label <- if (!is.null(weatherFolderPath) && is.null(label)) {
+	Label <- if (!is.null(weatherFolderPath) && is.null(label)) {
 			basename(weatherFolderPath)
 		} else label
-	has_siteID <- (!is.null(Site_id) && is.numeric(Site_id)) || !is.null(label)
-	has_coords <- is.numeric(lat) && is.numeric(long)
-	if (!has_siteID && !has_coords) {
-		stop("'dbW_addWeatherData' has not enough info to identify/locate site.")
-	}
-	Site_id <- dbW_addSite(Site_id = Site_id, lat = lat, long = long, Label = label)
 
-	has_scenario_id <- !is.null(Scenario_id) && is.numeric(Scenario_id) && Scenario_id > 0
-	has_scenario_name <- inherits(ScenarioName, "character") && nchar(ScenarioName) > 0
-	if (!has_scenario_id && !has_scenario_name) {
-		stop("'dbW_addWeatherData' has not enough info to identify/locate scenario.")
-	}
-	if (has_scenario_id && !dbW_has_scenarioIDs(Scenario_id)) {
-		stop("'dbW_addWeatherData': 'Scenario_id' does not exist.")
-	}
-	if (!has_scenario_id && has_scenario_name) {
-		stopifnot(dbW_addScenarios(ScenarioName, ignore.case = ignore.case))
-		sql <- paste0("SELECT id FROM Scenarios WHERE Scenario=", shQuote(ScenarioName),
-				if (ignore.case) " COLLATE NOCASE")
-		Scenario_id <- as.integer(DBI::dbGetQuery(rSW2_glovars$con, sql))
-	}
+	IDs <- dbW_getIDs(site_id = Site_id, site_label = Label, long = long, lat = lat,
+    scenario = Scenario, scenario_id = Scenario_id, add_if_missing = TRUE,
+    ignore.case = ignore.case, verbose = verbose)
+  if (any(sapply(IDs, is.null))) {
+    stop("'dbW_addWeatherData': insufficient information to generate site/scenario.")
+  }
+
+  if (dbW_has_weatherData(IDs[["site_id"]], IDs[["scenario_id"]])) {
+    temp <- paste("'dbW_addWeatherData': weather data for site", IDs[["site_id"]],
+      "and scenario", IDs[["scenario_id"]], "already exists.")
+
+    if (overwrite) {
+      if (verbose) {
+        message(paste(temp, "Previous data will be overwritten with new data."))
+      }
+      stopifnot(dbW_deleteSiteData(IDs[["site_id"]], IDs[["scenario_id"]]))
+
+    } else {
+      stop(temp)
+    }
+  }
 
 	if (is.null(weatherData)) {
 		weatherData <- getWeatherData_folders(LookupWeatherFolder = weatherFolderPath,
@@ -496,8 +578,9 @@ dbW_addWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL,
 	}
 
 	years <- get_years_from_weatherData(weatherData)
-	dbW_addWeatherDataNoCheck(Site_id, Scenario_id, years[1], years[length(years)],
-		weather_blob = dbW_weatherData_to_blob(weatherData, rSW2_glovars$blob_compression_type))
+	blob <- dbW_weatherData_to_blob(weatherData, rSW2_glovars$blob_compression_type)
+	dbW_addWeatherDataNoCheck(IDs[["site_id"]], IDs[["scenario_id"]], years[1],
+	  years[length(years)], weather_blob = blob)
 
 	invisible(TRUE)
 }
@@ -508,11 +591,9 @@ dbW_addWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL,
 	DBI::dbExecute(rSW2_glovars$con, sql)
 
 	sql <- "INSERT INTO Meta VALUES(:Desc, :Value)"
-	rs <- DBI::dbSendStatement(rSW2_glovars$con, sql)
-	DBI::dbBind(rs, param = list(
+	DBI::dbExecute(rSW2_glovars$con, sql, params = list(
 		Desc = c("Version", "Compression_type"),
 		Value = c(rSW2_glovars$dbW_version, rSW2_glovars$blob_compression_type)))
-	DBI::dbClearResult(rs)
 
 	# Table of sites
 	sql <- paste0("CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, ",
@@ -528,13 +609,8 @@ dbW_addWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL,
 	DBI::dbExecute(rSW2_glovars$con, sql)
 
 	#---Add sites
-	req_cols <- c("Latitude", "Longitude", "Label")
-	temp <- sapply(req_cols, function(x) x %in% colnames(site_data))
-	N <- NROW(site_data)
-	if (N > 0 && temp) {
-		stopifnot(dbW_addSites(dfLatitudeLongitudeLabel = site_data[, req_cols]))
-	} else {
-	  stop("'site_data' contains insufficient data to create database.")
+	if (NROW(site_data)) {
+		stopifnot(dbW_addSites(site_data))
 	}
 
 	#---Add scenario names
@@ -632,13 +708,13 @@ dbW_addFromFolders <- function(MetaData = NULL, FoldersPath, ScenarioName = "Cur
 		temp <- apply(MetaData, MARGIN = 1, function(x)
 			dbW_addWeatherData(Site_id = NULL, lat = x[2], long = x[3],
 			weatherFolderPath = file.path(FoldersPath, x[1]), weatherData = NULL, label = x[4],
-			ScenarioName = ScenarioName, weather_tag = weather_tag))
+			Scenario = ScenarioName, weather_tag = weather_tag))
 	} else {
 		files <- list.files(path = FoldersPath, pattern = weather_tag)
 		temp <- lapply(files, function(x)
 			dbW_addWeatherData(Site_id = NULL, lat = NULL, long = NULL,
 			weatherFolderPath = file.path(FoldersPath, x), weatherData = NULL,
-			ScenarioName = ScenarioName, weather_tag = weather_tag))
+			Scenario = ScenarioName, weather_tag = weather_tag))
 	}
 
 	invisible(TRUE)
@@ -648,7 +724,8 @@ dbW_addFromFolders <- function(MetaData = NULL, FoldersPath, ScenarioName = "Cur
 dbW_deleteSite <- function(Site_id) {
 	stopifnot(dbW_IsValid())
 
-	DBI::dbExecute(rSW2_glovars$con, paste0("DELETE FROM \"Sites\" WHERE Site_id=", Site_id))
+	sql <- "DELETE FROM \"Sites\" WHERE Site_id=:x"
+	DBI::dbExecute(rSW2_glovars$con, sql, params = list(x = Site_id))
 	dbW_deleteSiteData(Site_id, Scenario_id = NULL)
 }
 
@@ -656,15 +733,16 @@ dbW_deleteSite <- function(Site_id) {
 dbW_deleteSiteData <- function(Site_id, Scenario_id = NULL) {
 	stopifnot(dbW_IsValid())
 
-	sql <- if (is.null(Scenario_id)) {
-			#Remove all data for this site
-			paste0("DELETE FROM \"WeatherData\" WHERE Site_id=", Site_id)
-		} else {
-			# Remove data for specific scenario
-			paste0("DELETE FROM \"WeatherData\" WHERE Site_id=", Site_id, " AND Scenario=",
-				shQuote(Scenario_id))
-		}
-	DBI::dbExecute(rSW2_glovars$con, sql)
+	if (is.null(Scenario_id)) {
+		#Remove all data for this site
+		sql <- "DELETE FROM \"WeatherData\" WHERE Site_id=:x"
+		DBI::dbExecute(rSW2_glovars$con, sql, params = list(x = Site_id))
+
+	} else {
+		# Remove data for specific scenario
+		sql <- "DELETE FROM \"WeatherData\" WHERE Site_id=:x1 AND Scenario=:x2"
+		DBI::dbExecute(rSW2_glovars$con, sql, params = list(x1 = Site_id, x2 = Scenario_id))
+	}
 
 	invisible(TRUE)
 }
@@ -683,8 +761,8 @@ dbW_deleteSiteData <- function(Site_id, Scenario_id = NULL) {
 #' @seealso \code{\link{memDecompress}}, \code{\link{unserialize}}
 #' @export
 dbW_blob_to_weatherData <- function(data_blob, type = "gzip") {
-	# RSQLite versions < 2.0 return a list of 'raw'; starting with v >= 2.0, the class changed
-	#	to 'blob'
+	# RSQLite versions < 2.0 return a list of 'raw'; starting with v >= 2.0, the class
+	#	changed to 'blob'
 
 	if ((inherits(data_blob, "list") || inherits(data_blob, "blob")) &&
 		inherits(data_blob[[1]], "raw") && length(data_blob) == 1) {
@@ -707,14 +785,12 @@ dbW_blob_to_weatherData <- function(data_blob, type = "gzip") {
 #' @seealso \code{\link[base]{memCompress}}, \code{\link{serialize}}
 #' @export
 dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
-	paste0("x'", paste0(memCompress(serialize(weatherData, connection = NULL), type = type),
-		collapse = ""), "'")
+  blob::as.blob(memCompress(serialize(weatherData, connection = NULL), type = type))
 }
 
 
 
-####################
-# Conversion: reading of SOILWAT input text files to object of class 'swWeatherData'
+#----- Conversion: reading of SOILWAT input text files to object of class 'swWeatherData'
 
 #' rSOILWAT2 getWeatherData_folders
 #'

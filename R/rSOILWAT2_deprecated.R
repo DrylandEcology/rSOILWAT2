@@ -171,3 +171,55 @@ dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
 
 	paste0("x'", paste0(memCompress(string, type = type), collapse = ""), "'")
 }
+
+
+
+#' @export
+dbW_addSite <- function(Site_id = NULL, lat = NULL, long = NULL, Label = NULL) {
+	.Deprecated("dbW_addSites")
+	stopifnot(dbW_IsValid())
+
+	#Does Site_id exist
+	Site_id <- as.integer(Site_id)
+	if (length(Site_id) == 0) { #Site_id is NULL or integer(0)
+		Site_id <- dbW_getSiteId(lat, long, Label)
+	}
+	stopifnot(length(Site_id) == 1L)
+
+	if (!dbW_has_siteIDs(Site_id)) {
+		# Site_id does not exist in database: create it
+		if (is.null(lat)) lat <- "NULL"
+		if (is.null(long)) long <- "NULL"
+		Label <- if (is.null(Label)) "NULL" else shQuote(Label)
+		sql <- "SELECT MAX(Site_id) FROM Sites"
+		temp <- DBI::dbGetQuery(rSW2_glovars$con, sql)[1,1]
+		Site_id <- if (is.na(temp)) 1L else {temp + 1}
+		sql <- paste0("INSERT INTO Sites VALUES(", Site_id, ",", lat, ",", long, ",",
+			Label, ")")
+		DBI::dbExecute(rSW2_glovars$con, sql)
+
+	} else {
+		# Site_id exists already
+		sql <- paste("SELECT * FROM Sites WHERE Site_id=", Site_id)
+		SiteData <- DBI::dbGetQuery(rSW2_glovars$con, sql)
+
+		bad_lat <- !is.null(lat) &&
+			!(is.null(SiteData[1, "Latitude"]) || identical(SiteData[1, "Latitude"], "NULL")) &&
+			SiteData[1, "Latitude"] != lat
+		bad_long <- !is.null(long) &&
+			!(is.null(SiteData[1, "Longitude"]) || identical(SiteData[1, "Longitude"], "NULL")) &&
+			SiteData[1, "Longitude"] != long
+		bad_label <- !is.null(Label) && nchar(Label) > 0 &&
+			!(is.null(SiteData[1, "Label"]) || identical(SiteData[1, "Label"], "NULL")) &&
+			SiteData[1, "Label"] != Label
+		if (bad_lat || bad_long || bad_label) {
+				stop("Site_id: ", Site_id, " already existed in database, but data mismatch ",
+				"with NULL being ignored. Compare data (database:input) ",
+				"lat(", SiteData[1, "Latitude"], ":", lat, ") ",
+				"long(", SiteData[1, "Longitude"], ":", long, ") ",
+				"label(", SiteData[1, "Label"], ":", Label, ").")
+		}
+	}
+
+	Site_id
+}
