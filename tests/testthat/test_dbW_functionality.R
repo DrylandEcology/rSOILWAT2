@@ -41,6 +41,7 @@ site_data3 <- data.frame(
 #---TESTS
 test_that("dbW creation", {
   #--- Attempt to connect to (no) weather database
+  unlink(fdbWeather)
   expect_false(dbW_setConnection(fdbWeather, create_if_missing = FALSE))
   expect_message(dbW_setConnection(fdbWeather, create_if_missing = FALSE,
     verbose = TRUE), regexp = "does not exist")
@@ -50,6 +51,7 @@ test_that("dbW creation", {
   expect_false(dbW_setConnection(fdbWeather2, create_if_missing = TRUE))
   expect_message(dbW_setConnection(fdbWeather2, create_if_missing = TRUE,
     verbose = TRUE), regexp = "exists but is likely not a SQLite-database")
+  unlink(fdbWeather3)
   expect_false(dbW_setConnection(fdbWeather3, create_if_missing = TRUE))
   expect_message(dbW_setConnection(fdbWeather3, create_if_missing = TRUE,
     verbose = TRUE), regexp = "cannot be created likely because the path does not exist")
