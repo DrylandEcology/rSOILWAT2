@@ -1,5 +1,5 @@
 [![Travis-CI Build Status](https://travis-ci.org/Burke-Lauenroth-Lab/rSOILWAT2.svg?branch=master)](https://travis-ci.org/Burke-Lauenroth-Lab/rSOILWAT2)
-  [![Build status](https://ci.appveyor.com/api/projects/status/kkmqcftbl24bwnqk?svg=true)](https://ci.appveyor.com/project/dschlaep/rSOILWAT2)
+  [![Build status](https://ci.appveyor.com/api/projects/status/v8w07o5hf8g6lriw?svg=true)](https://ci.appveyor.com/project/dschlaep/rSOILWAT2)
   [![Coverage Status](https://coveralls.io/repos/github/Burke-Lauenroth-Lab/rSOILWAT2/badge.svg)](https://coveralls.io/github/Burke-Lauenroth-Lab/rSOILWAT2)
 
 # rSOILWAT2
@@ -98,11 +98,19 @@ system2(command = "git", args = "clone -b master --single-branch --recursive htt
 tools::Rcmd(args = paste("INSTALL rSOILWAT2"))
 ```
 
+### Binary package version
 If you want a binary version of the 'rSOILWAT2' package (e.g., to distribute to someone
 without development tools) for a platform to which you do not have access, then you may
 consider using one of the cloud services (no endorsements):
 - https://builder.r-hub.io offers different Linux, Windows, and mac OS flavors as targets
 - http://win-builder.r-project.org/ offers Windows OS as target
+
+Alternatively, you may access the previous binary package version for Windows OS from our
+CI appveyor service if the build was successful and an artifact was generated for the
+binary package (this would be named 'rSOILWAT2_X.Y.Z.zip' with version number X.Y.Z) at
+- https://ci.appveyor.com/project/dschlaep/rSOILWAT2/build/artifacts
+If the latest build should have failed, then you may want to check out the 'History' tab
+for binaries of older versions.
 
 
 
