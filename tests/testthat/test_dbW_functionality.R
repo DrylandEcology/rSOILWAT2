@@ -37,6 +37,15 @@ site_data3 <- data.frame(
   Label = paste0("TestSite_id", site_N + site_ids),
   stringsAsFactors = FALSE)
 
+# This function is needed for appveyor: for some reason 'dbW_createDatabase' doesn't
+# remove (in any situation) failed disk files 'fdbWeather'; this is not a problem on
+# travis or my local macOS
+unlink_forcefully <- function(fdbWeather) {
+  if (file.exists(fdbWeather)) {
+    print("'fdbWeather' should not exists, but it does - so we delete it")
+    unlink(fdbWeather, force = TRUE)
+  }
+}
 
 #---TESTS
 test_that("dbW creation", {
@@ -62,10 +71,7 @@ test_that("dbW creation", {
     verbose = TRUE, ARG_DOESNT_EXIST = 1:3), regexp = "arguments ignored/deprecated")
   unlink(fdbWeather, force = TRUE)
   expect_false(dbW_createDatabase(fdbWeather))
-  if (file.exists(fdbWeather)) {
-    print("'fdbWeather' should not exists, but it does - so we delete it")
-    unlink(fdbWeather, force = TRUE)
-  }
+  unlink_forcefully(fdbWeather)
   expect_message(dbW_createDatabase(fdbWeather, verbose = TRUE),
     regexp = "errors in the table data")
   expect_false(dbW_createDatabase(fdbWeather3, site_data = site_data1,
@@ -73,8 +79,10 @@ test_that("dbW creation", {
   expect_message(dbW_createDatabase(fdbWeather3, site_data = site_data1,
     scenarios = scenarios, scen_ambient = scenarios[1], verbose = TRUE),
     regexp = "was not able to create a new database and connect to the file")
+  unlink_forcefully(fdbWeather)
   expect_false(dbW_createDatabase(fdbWeather, site_data = NA,
     scenarios = scenarios, scen_ambient = scenarios[1]))
+  unlink_forcefully(fdbWeather)
   expect_message(dbW_createDatabase(fdbWeather, site_data = NA,
     scenarios = scenarios, scen_ambient = scenarios[1], verbose = TRUE),
     regexp = "errors in the table data")
