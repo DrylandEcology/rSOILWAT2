@@ -41,13 +41,13 @@ site_data3 <- data.frame(
 #---TESTS
 test_that("dbW creation", {
   #--- Attempt to connect to (no) weather database
-  unlink(fdbWeather)
+  unlink(fdbWeather, force = TRUE)
   expect_false(dbW_setConnection(fdbWeather, create_if_missing = FALSE))
   expect_message(dbW_setConnection(fdbWeather, create_if_missing = FALSE,
     verbose = TRUE), regexp = "does not exist")
   expect_message(dbW_setConnection(fdbWeather, create_if_missing = TRUE,
     verbose = TRUE), regexp = "creating a new database")
-  unlink(fdbWeather)
+  unlink(fdbWeather, force = TRUE)
   expect_false(dbW_setConnection(fdbWeather2, create_if_missing = TRUE))
   expect_message(dbW_setConnection(fdbWeather2, create_if_missing = TRUE,
     verbose = TRUE), regexp = "exists but is likely not a SQLite-database")
@@ -60,8 +60,12 @@ test_that("dbW creation", {
   expect_message(dbW_createDatabase(fdbWeather, site_data = site_data1,
     scenarios = scenarios, scen_ambient = scenarios[1],
     verbose = TRUE, ARG_DOESNT_EXIST = 1:3), regexp = "arguments ignored/deprecated")
-  unlink(fdbWeather)
+  unlink(fdbWeather, force = TRUE)
   expect_false(dbW_createDatabase(fdbWeather))
+  if (file.exists(fdbWeather)) {
+    print("'fdbWeather' should not exists, but it does - so we delete it")
+    unlink(fdbWeather, force = TRUE)
+  }
   expect_message(dbW_createDatabase(fdbWeather, verbose = TRUE),
     regexp = "errors in the table data")
   expect_false(dbW_createDatabase(fdbWeather3, site_data = site_data1,
@@ -75,7 +79,7 @@ test_that("dbW creation", {
     scenarios = scenarios, scen_ambient = scenarios[1], verbose = TRUE),
     regexp = "errors in the table data")
 
-  unlink(fdbWeather)
+  unlink(fdbWeather, force = TRUE)
   expect_true(dbW_createDatabase(fdbWeather, site_data = site_data1,
     scenarios = scenarios, scen_ambient = scenarios[1]))
   expect_true(dbW_setConnection(fdbWeather))
@@ -205,9 +209,9 @@ test_that("dbW weather data manipulation", {
 
 #---CLEAN UP
 dbW_disconnectConnection()
-unlink(fdbWeather)
-unlink(fdbWeather2)
-unlink(fdbWeather3)
+unlink(fdbWeather, force = TRUE)
+unlink(fdbWeather2, force = TRUE)
+unlink(fdbWeather3, force = TRUE)
 
 
 #--- Non-dbW functions

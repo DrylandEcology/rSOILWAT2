@@ -697,7 +697,7 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite3", site_data,
 			message(paste("'dbW_createDatabase': was not able to create a new database and",
 				"connect to the file", shQuote(basename(dbFilePath)), "."))
 		}
-		unlink(dbFilePath)
+		unlink(dbFilePath, force = TRUE)
 		return(FALSE)
 	}
 
@@ -719,7 +719,7 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite3", site_data,
 				"The file will be deleted."))
 		}
 		dbW_disconnectConnection()
-		unlink(dbFilePath)
+		unlink(dbFilePath, force = TRUE)
 	}
 
 	res
