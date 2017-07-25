@@ -51,7 +51,6 @@ test_that("dbW creation", {
   expect_false(dbW_setConnection(fdbWeather2, create_if_missing = TRUE))
   expect_message(dbW_setConnection(fdbWeather2, create_if_missing = TRUE,
     verbose = TRUE), regexp = "exists but is likely not a SQLite-database")
-  unlink(fdbWeather3)
   expect_false(dbW_setConnection(fdbWeather3, create_if_missing = TRUE))
   expect_message(dbW_setConnection(fdbWeather3, create_if_missing = TRUE,
     verbose = TRUE), regexp = "cannot be created likely because the path does not exist")
@@ -61,10 +60,10 @@ test_that("dbW creation", {
   expect_message(dbW_createDatabase(fdbWeather, site_data = site_data1,
     scenarios = scenarios, scen_ambient = scenarios[1],
     verbose = TRUE, ARG_DOESNT_EXIST = 1:3), regexp = "arguments ignored/deprecated")
+  unlink(fdbWeather)
   expect_false(dbW_createDatabase(fdbWeather))
   expect_message(dbW_createDatabase(fdbWeather, verbose = TRUE),
-    regexp = "does already exist")
-  unlink(fdbWeather)
+    regexp = "errors in the table data")
   expect_false(dbW_createDatabase(fdbWeather3, site_data = site_data1,
     scenarios = scenarios, scen_ambient = scenarios[1]))
   expect_message(dbW_createDatabase(fdbWeather3, site_data = site_data1,
@@ -74,7 +73,7 @@ test_that("dbW creation", {
     scenarios = scenarios, scen_ambient = scenarios[1]))
   expect_message(dbW_createDatabase(fdbWeather, site_data = NA,
     scenarios = scenarios, scen_ambient = scenarios[1], verbose = TRUE),
-    regexp = "because of errors in the table data")
+    regexp = "errors in the table data")
 
   unlink(fdbWeather)
   expect_true(dbW_createDatabase(fdbWeather, site_data = site_data1,
@@ -168,15 +167,15 @@ test_that("dbW weather data manipulation", {
     Scenario = scenarios[2]))
 
   # Check presence of weather data
-  expect_true(dbW_has_weatherData(Site_id = 1, Scenario_id = 1))
-  expect_equal(as.vector(dbW_has_weatherData(Site_id = 1, Scenario_id = 1:2)),
+  expect_true(dbW_has_weatherData(Site_ids = 1, Scenario_ids = 1))
+  expect_equal(as.vector(dbW_has_weatherData(Site_ids = 1, Scenario_ids = 1:2)),
     c(TRUE, TRUE))
-  expect_equal(as.vector(dbW_has_weatherData(Site_id = 1, Scenario_id = 1:3)),
+  expect_equal(as.vector(dbW_has_weatherData(Site_ids = 1, Scenario_ids = 1:3)),
     c(TRUE, TRUE, FALSE))
   res_exp <- matrix(c(TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, rep(FALSE, 6)),
     nrow = 3, ncol = 4, dimnames = list(paste("Site", 1:3, sep = "_"),
     paste("Scenario", 1:4, sep = "_")))
-  expect_equal(dbW_has_weatherData(Site_id = 1:3, Scenario_id = 1:4), res_exp)
+  expect_equal(dbW_has_weatherData(Site_ids = 1:3, Scenario_ids = 1:4), res_exp)
 
   # Retrieve weather data
   expect_equal(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[1]), sw_weather[[1]])

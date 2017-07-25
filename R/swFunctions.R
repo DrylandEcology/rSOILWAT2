@@ -429,6 +429,15 @@ dbW_setConnection <- function(dbFilePath, create_if_missing = FALSE, verbose = F
 		return(invisible(FALSE))
 	}
 
+	# Check that foreign key constraints are supported or at least accepted
+	temp3 <- try(DBI::dbExecute(temp1, "PRAGMA foreign_keys = ON"), silent = TRUE)
+	if (inherits(temp3, "try-error")) {
+	  if (verbose) {
+			message(paste("'dbW_setConnection': foreign keys are not supported."))
+	  }
+		return(invisible(FALSE))
+	}
+
 	rSW2_glovars$con <- temp1
 	rSW2_glovars$blob_compression_type <- if (DBI::dbExistsTable(rSW2_glovars$con, "Meta")) {
 			dbW_compression()
@@ -588,33 +597,49 @@ dbW_addWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL,
 
 
 .create_dbW <- function(site_data, scenarios, scen_ambient) {
-	sql <- "CREATE TABLE \"Meta\" (\"Desc\" TEXT PRIMARY KEY, \"Value\" TEXT)"
+	sql <- "CREATE TABLE 'Meta' ('Desc' TEXT PRIMARY KEY, 'Value' TEXT)"
 	DBI::dbExecute(rSW2_glovars$con, sql)
 
-	sql <- "INSERT INTO Meta VALUES(:Desc, :Value)"
+	sql <- "INSERT INTO 'Meta' VALUES(:Desc, :Value)"
 	DBI::dbExecute(rSW2_glovars$con, sql, params = list(
 		Desc = c("Version", "Compression_type"),
 		Value = c(rSW2_glovars$dbW_version, rSW2_glovars$blob_compression_type)))
 
 	# Table of sites
-	sql <- paste0("CREATE TABLE \"Sites\" (\"Site_id\" integer PRIMARY KEY, ",
-		"\"Latitude\" REAL, \"Longitude\" REAL, \"Label\" TEXT)")
-	DBI::dbExecute(rSW2_glovars$con, sql)
-	# Table for weather data
-	sql <- paste0("CREATE TABLE \"WeatherData\" (\"Site_id\" integer, ",
-		"\"Scenario\" integer, \"StartYear\" integer, \"EndYear\" integer, \"data\" BLOB, ",
-		"PRIMARY KEY (\"Site_id\", \"Scenario\"))")
+	sql <- paste("CREATE TABLE 'Sites' ('Site_id' INTEGER PRIMARY KEY AUTOINCREMENT,",
+		"'Latitude' REAL, 'Longitude' REAL, 'Label' TEXT UNIQUE)")
 	DBI::dbExecute(rSW2_glovars$con, sql)
 	# Table of scenario names
-	sql <- "CREATE TABLE \"Scenarios\" (\"id\" integer PRIMARY KEY, \"Scenario\" TEXT)"
+	sql <- paste("CREATE TABLE 'Scenarios' ('id' INTEGER PRIMARY KEY AUTOINCREMENT,",
+		"'Scenario' TEXT UNIQUE NOT NULL)")
 	DBI::dbExecute(rSW2_glovars$con, sql)
+	# Table for weather data
+	DBI::dbExecute(rSW2_glovars$con, "PRAGMA foreign_keys = ON")
+	sql <- paste("CREATE TABLE 'WeatherData' ('wdid' INTEGER PRIMARY KEY AUTOINCREMENT,",
+		"'Site_id' INTEGER, 'Scenario' INTEGER, 'StartYear' INTEGER NOT NULL,",
+		"'EndYear' INTEGER NOT NULL, 'data' BLOB,",
+		"FOREIGN KEY(Site_id) REFERENCES Sites(Site_id),",
+		"FOREIGN KEY(Scenario) REFERENCES Scenarios(id))")
+	DBI::dbExecute(rSW2_glovars$con, sql)
+	DBI::dbExecute(rSW2_glovars$con, "CREATE INDEX wdindex ON WeatherData(Site_id, Scenario)")
+
+	# View all data
+	sql <- paste("CREATE VIEW 'wd_all' AS",
+		"SELECT 'Sites.Site_id', 'Sites.Latitude', 'Sites.Longitude',",
+			"'Sites.Label' AS 'Site_Label', 'Scenarios.id' AS 'Scenario_id',",
+			"'Scenarios.Scenario', 'WeatherData.StartYear', 'WeatherData.EndYear',",
+			"'WeatherData.data'",
+		"FROM 'Sites', 'Scenarios', 'WeatherData'",
+		"WHERE WeatherData.Site_id=Sites.Site_id AND WeatherData.Scenario=Scenarios.id")
+	DBI::dbExecute(rSW2_glovars$con, sql)
+
 
 	#---Add sites
 	if (NROW(site_data)) {
 		stopifnot(dbW_addSites(site_data))
 	}
 
-	#---Add scenario names
+	#---Add scenarios
 	scenarios <- c(scen_ambient, scenarios[!(scenarios == scen_ambient)])
 	stopifnot(dbW_addScenarios(dfScenario = scenarios, ignore.case = FALSE))
 
@@ -672,6 +697,7 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite3", site_data,
 			message(paste("'dbW_createDatabase': was not able to create a new database and",
 				"connect to the file", shQuote(basename(dbFilePath)), "."))
 		}
+		unlink(dbFilePath)
 		return(FALSE)
 	}
 
@@ -725,9 +751,14 @@ dbW_addFromFolders <- function(MetaData = NULL, FoldersPath, ScenarioName = "Cur
 dbW_deleteSite <- function(Site_id) {
 	stopifnot(dbW_IsValid())
 
+	# First delete all weather data (so that foreign key constraint is not violated)
+	stopifnot(dbW_deleteSiteData(Site_id, Scenario_id = NULL))
+
+	# Delete site entry in Sites table
 	sql <- "DELETE FROM \"Sites\" WHERE Site_id=:x"
 	DBI::dbExecute(rSW2_glovars$con, sql, params = list(x = Site_id))
-	dbW_deleteSiteData(Site_id, Scenario_id = NULL)
+
+	invisible(TRUE)
 }
 
 #' @export
