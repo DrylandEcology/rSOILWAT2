@@ -766,9 +766,17 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite3", site_data,
 		temp <- dbW_disconnectConnection()
 		if (!temp)
 			message("'dbW_createDatabase': attempted to disconnect from db-file but failed.")
-		unlink(dbFilePath)
+		gc() # sqlite3 on Windows OS may not be releasing the file until garbage collection
+		temp <- unlink(dbFilePath)
+		if (temp != 0)
+			message("'dbW_createDatabase': attempted to delete db-file but 'unlink' suggests a failure.")
+		if (file.exists(dbFilePath)) {
+			message("'dbW_createDatabase': attempted to delete db-file with 'unlink' but db-file is still present.")
+			file.remove(dbFilePath)
+		}
 		if (file.exists(dbFilePath))
-			message("'dbW_createDatabase': attempted to delete db-file but failed.")
+			message("'dbW_createDatabase': attempted to delete db-file with 'file.remove' but db-file is still present.")
+		}
 	}}, add = TRUE)
 
 	dots <- list(...)
