@@ -43,11 +43,11 @@ site_data3 <- data.frame(
 unlink_forcefully <- function(fdbWeather) {
   if (file.exists(fdbWeather)) {
     print("'fdbWeather' should not exists, but it does - so we delete it")
-    unlink(fdbWeather)
+    unlink(fdbWeather, recursive = TRUE, force = TRUE)
   }
   if (file.exists(fdbWeather)) {
     print(paste("'fdbWeather' should not exists because we just attempted to delete",
-      shQuote(fdbWeather)))
+      fdbWeather))
   }
 }
 
