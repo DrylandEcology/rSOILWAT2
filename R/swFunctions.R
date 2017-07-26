@@ -776,7 +776,6 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite3", site_data,
 		}
 		if (file.exists(dbFilePath))
 			message("'dbW_createDatabase': attempted to delete db-file with 'file.remove' but db-file is still present.")
-		}
 	}}, add = TRUE)
 
 	dots <- list(...)
