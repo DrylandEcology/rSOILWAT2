@@ -31,7 +31,7 @@
 .onLoad <- function(libname, pkgname) {
   #--- Define package level variables that should be hidden from package user
   assign("con", NULL, envir = rSW2_glovars)
-  assign("dbW_version", "3.1.1", envir = rSW2_glovars)
+  assign("dbW_version", "3.2.0", envir = rSW2_glovars)
   assign("default_blob_compression_type", "gzip", envir = rSW2_glovars)
   assign("blob_compression_type", NULL, envir = rSW2_glovars)
 

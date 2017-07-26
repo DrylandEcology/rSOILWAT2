@@ -219,6 +219,90 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
 }
 
 
+#' @rdname dbW_upgrade
+#'
+#' @section Details: \code{dbW_upgrade_v31to32} upgrades a weather database from version
+#'  '3.1.z' to '3.2.0'
+#'
+#' @inheritParams dbW_upgrade
+#'
+#' @export
+dbW_upgrade_v31to32 <- function(dbWeatherDataFile, fbackup = NULL) {
+
+	con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbWeatherDataFile)
+	on.exit(DBI::dbDisconnect(con), add = TRUE)
+
+	v_dbW <- try(numeric_version(as.character(DBI::dbGetQuery(con, "SELECT Value FROM Meta WHERE Desc=\'Version\'")[1, 1])), silent = TRUE)
+
+	if (inherits(v_dbW, "try-error") || v_dbW < "3.1.0" || v_dbW >= "3.2.0") {
+		warning("The function 'dbW_upgrade_v3to31' upgrades weather databases from version ",
+			"3.1.z to 3.2.0; this database is version ", v_dbW)
+		return(FALSE)
+	}
+	
+	req_tables <- c("Meta", "Sites", "Scenarios", "WeatherData")
+	temp <- req_tables %in% DBI::dbListTables(con)
+	if (any(!temp)) {
+	  warning("Missing tables:", paste(shQuote(req_tables[!temp]), collapse = "-"))
+	  return(FALSE)
+	}
+
+	print(paste(Sys.time(), ": upgrading database", shQuote(basename(dbWeatherDataFile)),
+		"to version 3.1.0; be patient, this may take considerable time depending on the",
+		"size of the database"))
+
+	# Backup copy
+	fbackup <- backup_copy(dbWeatherDataFile, fbackup)
+	fbackup <- file.path(dirname(dbWeatherDataFile), basename(fbackup))
+
+	# Retrieve meta information, sites and scenarios
+	Meta <- DBI::dbReadTable(con, "Meta")
+	Sites <- DBI::dbReadTable(con, "Sites")
+	Scenarios <- DBI::dbReadTable(con, "Scenarios")
+	wd_index <- DBI::dbGetQuery(con, "SELECT Site_id, Scenario FROM WeatherData")
+
+	# Create new database structure
+	DBI::dbDisconnect(con)
+	unlink(dbWeatherDataFile)
+	stopifnot(dbW_createDatabase(dbWeatherDataFile, site_data = Sites, 
+	  scenarios = Scenarios[["Scenario"]], 
+	  compression_type = Meta[Meta[["Desc"]] == "Compression_type", "Value"]))
+
+	# Copy weather data from old/backup to new database
+	con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbWeatherDataFile)
+	con_old <- DBI::dbConnect(RSQLite::SQLite(), dbname = fbackup)
+	on.exit(DBI::dbDisconnect(con_old), add = TRUE)
+
+	Sites2 <- DBI::dbReadTable(con, "Sites")
+	Scenarios2 <- DBI::dbReadTable(con, "Scenarios")
+	
+	wd_index2 <- data.frame(
+	  Site_id = {
+	    temp <- match(wd_index[, "Site_id"], Sites[, "Site_id"])
+	    temp <- match(Sites[temp, "Label"], Sites2[, "Label"])
+	    Sites2[temp, "Site_id"]},
+	  Scenario = {
+	    temp <- match(wd_index[, "Scenario"], Scenarios[, "id"])
+	    temp <- match(Scenarios[temp, "Scenario"], Scenarios2[, "Scenario"])
+	    Scenarios2[temp, "id"]})
+	
+	for (k in seq_len(dim(wd_index)[1])) {
+	  sql <- paste("SELECT StartYear, EndYear, data FROM WeatherData WHERE Site_id =", 
+	    wd_index[k, "Site_id"], "AND Scenario =", wd_index[k, "Scenario"])
+	  dat <- DBI::dbGetQuery(con_old, sql)
+	  
+	  dbW_addWeatherDataNoCheck(Site_id = wd_index2[k, "Site_id"], 
+	    Scenario_id = wd_index2[k, "Scenario"], StartYear = dat[1, "StartYear"], 
+	    EndYear = dat[1, "EndYear"], weather_blob = dat[1, "data"])
+	}
+
+	# Checks and clean-up
+	check_updatedDB(con)
+
+	invisible(TRUE)
+}
+
+
 
 #' @rdname dbW_upgrade
 #'
@@ -236,7 +320,7 @@ dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL, type_new = "gz
 	con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbWeatherDataFile)
 	v_dbW <- try(numeric_version(as.character(DBI::dbGetQuery(con, "SELECT Value FROM Meta WHERE Desc=\'Version\'")[1, 1])), silent = TRUE)
 
-	if (inherits(v_dbW, "try-error") || v_dbW >= "3.1.0" && v_dbW < "3.0.0") {
+	if (inherits(v_dbW, "try-error") || v_dbW >= "3.1.0" || v_dbW < "3.0.0") {
 		warning("The function 'dbW_upgrade_v3to31' upgrades weather databases from version 3.0.z to 3.1.0; this database is version ", v_dbW)
 		return(invisible(0))
 	}

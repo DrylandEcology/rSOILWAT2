@@ -37,6 +37,29 @@ dbW_version <- function() {
 	numeric_version(as.character(DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1]))
 }
 
+#' Check that version of dbWeather is up-to-date
+#' @return A logical value.
+#' @export
+dbW_check_version <- function(dbW_min_version = NULL) {
+	stopifnot(dbW_IsValid())
+
+  v_dbW <- dbW_version()
+
+  if (is.null(dbW_min_version)) {
+    dbW_min_version <- rSW2_glovars[["dbW_version"]]
+  }
+  success <- v_dbW >= dbW_min_version
+
+  if (!success) {
+    message(paste("The version", shQuote(v_dbW), "of the weather database",
+      shQuote(basename(slot(rSW2_glovars$con, "dbname"))), "is outdated;",
+      "minimal suggested version is", shQuote(dbW_min_version), "-- please update."))
+  }
+
+  success
+}
+
+
 #' Query compression type of registered weather database
 #' @return A character string.
 #' @export
@@ -390,7 +413,8 @@ dbW_getWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL, Label = 
 }
 
 #' @export
-dbW_setConnection <- function(dbFilePath, create_if_missing = FALSE, verbose = FALSE) {
+dbW_setConnection <- function(dbFilePath, create_if_missing = FALSE, check_version = FALSE,
+	verbose = FALSE) {
 	rSW2_glovars$con <- NULL
 
 	dbFilePath <- try(normalizePath(dbFilePath, mustWork = FALSE), silent = TRUE)
@@ -444,6 +468,10 @@ dbW_setConnection <- function(dbFilePath, create_if_missing = FALSE, verbose = F
 		} else {
 			rSW2_glovars$default_blob_compression_type
 		}
+
+	if (check_version) {
+		dbW_check_version()
+	}
 
 	invisible(dbW_IsValid())
 }
