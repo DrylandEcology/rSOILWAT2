@@ -239,7 +239,7 @@ dbW_upgrade_v31to32 <- function(dbWeatherDataFile, fbackup = NULL) {
 			"3.1.z to 3.2.0; this database is version ", v_dbW)
 		return(FALSE)
 	}
-	
+
 	req_tables <- c("Meta", "Sites", "Scenarios", "WeatherData")
 	temp <- req_tables %in% DBI::dbListTables(con)
 	if (any(!temp)) {
@@ -264,18 +264,20 @@ dbW_upgrade_v31to32 <- function(dbWeatherDataFile, fbackup = NULL) {
 	# Create new database structure
 	DBI::dbDisconnect(con)
 	unlink(dbWeatherDataFile)
-	stopifnot(dbW_createDatabase(dbWeatherDataFile, site_data = Sites, 
-	  scenarios = Scenarios[["Scenario"]], 
+	stopifnot(dbW_createDatabase(dbWeatherDataFile, site_data = Sites,
+	  Scenarios = Scenarios[["Scenario"]],
 	  compression_type = Meta[Meta[["Desc"]] == "Compression_type", "Value"]))
 
 	# Copy weather data from old/backup to new database
+	print(paste(Sys.time(), ": moving weather data from old to new database"))
+
 	con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbWeatherDataFile)
 	con_old <- DBI::dbConnect(RSQLite::SQLite(), dbname = fbackup)
 	on.exit(DBI::dbDisconnect(con_old), add = TRUE)
 
 	Sites2 <- DBI::dbReadTable(con, "Sites")
 	Scenarios2 <- DBI::dbReadTable(con, "Scenarios")
-	
+
 	wd_index2 <- data.frame(
 	  Site_id = {
 	    temp <- match(wd_index[, "Site_id"], Sites[, "Site_id"])
@@ -285,14 +287,14 @@ dbW_upgrade_v31to32 <- function(dbWeatherDataFile, fbackup = NULL) {
 	    temp <- match(wd_index[, "Scenario"], Scenarios[, "id"])
 	    temp <- match(Scenarios[temp, "Scenario"], Scenarios2[, "Scenario"])
 	    Scenarios2[temp, "id"]})
-	
+
 	for (k in seq_len(dim(wd_index)[1])) {
-	  sql <- paste("SELECT StartYear, EndYear, data FROM WeatherData WHERE Site_id =", 
+	  sql <- paste("SELECT StartYear, EndYear, data FROM WeatherData WHERE Site_id =",
 	    wd_index[k, "Site_id"], "AND Scenario =", wd_index[k, "Scenario"])
 	  dat <- DBI::dbGetQuery(con_old, sql)
-	  
-	  dbW_addWeatherDataNoCheck(Site_id = wd_index2[k, "Site_id"], 
-	    Scenario_id = wd_index2[k, "Scenario"], StartYear = dat[1, "StartYear"], 
+
+	  dbW_addWeatherDataNoCheck(Site_id = wd_index2[k, "Site_id"],
+	    Scenario_id = wd_index2[k, "Scenario"], StartYear = dat[1, "StartYear"],
 	    EndYear = dat[1, "EndYear"], weather_blob = dat[1, "data"])
 	}
 
