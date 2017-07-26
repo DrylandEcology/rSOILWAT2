@@ -677,6 +677,17 @@ dbW_addWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL,
 dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite3", site_data,
 	scenarios, scen_ambient = "Current", compression_type = "gzip", verbose = FALSE, ...) {
 
+	dbFilePath <- file.path(normalizePath(dirname(dbFilePath)), basename(dbFilePath))
+
+	rm_file <- FALSE
+	on.exit({if (rm_file && file.exists(dbFilePath)) {
+		if (verbose)
+			message("'dbW_createDatabase': deletes file due to failure.")
+		unlink(dbFilePath)
+		if (file.exists(dbFilePath))
+			message("'dbW_createDatabase': attempted to delete file but failed.")
+	}}, add = TRUE)
+
 	dots <- list(...)
 	if (length(dots)) {
 		message(paste("'dbW_createDatabase': arguments ignored/deprecated",
@@ -697,7 +708,7 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite3", site_data,
 			message(paste("'dbW_createDatabase': was not able to create a new database and",
 				"connect to the file", shQuote(basename(dbFilePath)), "."))
 		}
-		unlink(dbFilePath, force = TRUE)
+		rm_file <- TRUE
 		return(FALSE)
 	}
 
@@ -715,11 +726,9 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite3", site_data,
 	if (!res) {
 		if (verbose) {
 			message(paste("'dbW_createDatabase': was not able to create a new database",
-				shQuote(basename(dbFilePath)), "because of errors in the table data.",
-				"The file will be deleted."))
+				shQuote(basename(dbFilePath)), "because of errors in the table data."))
 		}
-		dbW_disconnectConnection()
-		unlink(dbFilePath, force = TRUE)
+		rm_file <- TRUE
 	}
 
 	res
