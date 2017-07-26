@@ -6,7 +6,12 @@ if (!dir.exists(path_extdata)) {
   path_extdata <- system.file("extdata", package = "rSOILWAT2")
 }
 
-fdbWeather <- tempfile(fileext = ".sqlite3")
+fdbWeather <- if (identical(tolower(Sys.getenv("APPVEYOR")), "true")) {
+    dir.create("C:/test")
+    "C:/test/testdb.sqlite3"
+  } else {
+    tempfile(fileext = ".sqlite3")
+  }
 fdbWeather2 <- tempfile(fileext = ".txt")
 write(NA, file = fdbWeather2)
 fdbWeather3 <- file.path("/Fantasy", "Volume", "test.sqlite3")
@@ -40,18 +45,27 @@ site_data3 <- data.frame(
 # This function is needed for appveyor: for some reason 'dbW_createDatabase' doesn't
 # remove (in any situation) failed disk files 'fdbWeather'; this is not a problem on
 # travis or my local macOS
-unlink_forcefully <- function(fdbWeather) {
-  if (file.exists(fdbWeather)) {
-    print("'fdbWeather' should not exists, but it does - so we delete it")
-    unlink(fdbWeather, recursive = TRUE, force = TRUE)
+unlink_forcefully <- function(x, recursive = TRUE, force = TRUE) {
+  if (file.exists(x)) {
+    print("'file' should not exists, but it does - so we delete it")
+    unlink(x, recursive = recursive, force = force)
   }
-  if (file.exists(fdbWeather)) {
-    print(paste("'fdbWeather' should not exists because we just attempted to delete",
-      fdbWeather))
+  if (file.exists(x)) {
+    print(paste("'file' should not exists because we just attempted to delete", x))
   }
 }
 
 #---TESTS
+test_that("Disk file write and delete permissions", {
+  temp <- try(write(NA, file = fdbWeather), silent = TRUE)
+  expect_true(!inherits(temp, "try-error") && file.exists(fdbWeather),
+    info = paste("Failed to create file", fdbWeather))
+
+  temp <- try(unlink_forcefully(fdbWeather), silent = TRUE)
+  expect_true(!inherits(temp, "try-error") && !file.exists(fdbWeather),
+    info = paste("Failed to delete file", fdbWeather))
+})
+
 test_that("dbW creation", {
   #--- Attempt to connect to (no) weather database
   unlink(fdbWeather)
