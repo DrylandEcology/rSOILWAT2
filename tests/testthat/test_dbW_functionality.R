@@ -6,12 +6,6 @@ if (!dir.exists(path_extdata)) {
   path_extdata <- system.file("extdata", package = "rSOILWAT2")
 }
 
-fdbWeather <- if (identical(tolower(Sys.getenv("APPVEYOR")), "true")) {
-    dir.create("C:/test")
-    "C:/test/testdb.sqlite3"
-  } else {
-    tempfile(fileext = ".sqlite3")
-  }
 fdbWeather <- tempfile(fileext = ".sqlite3")
 fdbWeather2 <- tempfile(fileext = ".txt")
 write(NA, file = fdbWeather2)
@@ -90,29 +84,32 @@ test_that("dbW creation", {
 
   #--- Create weather database and check that connection
   expect_message(dbW_createDatabase(fdbWeather, site_data = site_data1,
-    scenarios = scenarios, scen_ambient = scenarios[1],
+    Scenarios = scenarios, scen_ambient = scenarios[1],
     verbose = TRUE, ARG_DOESNT_EXIST = 1:3), regexp = "arguments ignored/deprecated")
   unlink(fdbWeather)
   expect_false(dbW_createDatabase(fdbWeather))
-  unlink_forcefully(fdbWeather, info = "2nd")
+  expect_message(unlink_forcefully(fdbWeather, info = "2nd"),
+    regexp = "sucessfully deleted")
   expect_message(dbW_createDatabase(fdbWeather, verbose = TRUE),
     regexp = "errors in the table data")
   # this is a warning coming from 'normalizePath':
   #   - on 'unix': regexp = "No such file or directory"
   #   - on 'windows': regexp = "The system cannot find the path specified" or similar
   expect_warning(dbW_createDatabase(fdbWeather3, site_data = site_data1,
-    scenarios = scenarios, scen_ambient = scenarios[1]))
-  unlink_forcefully(fdbWeather, info = "3rd")
+    Scenarios = scenarios, scen_ambient = scenarios[1]))
+  expect_message(unlink_forcefully(fdbWeather, info = "3rd"),
+    regexp = "sucessfully deleted")
   expect_false(dbW_createDatabase(fdbWeather, site_data = NA,
-    scenarios = scenarios, scen_ambient = scenarios[1]))
-  unlink_forcefully(fdbWeather, info = "4th")
+    Scenarios = scenarios, scen_ambient = scenarios[1]))
+  expect_message(unlink_forcefully(fdbWeather, info = "4th"),
+    regexp = "sucessfully deleted")
   expect_message(dbW_createDatabase(fdbWeather, site_data = NA,
-    scenarios = scenarios, scen_ambient = scenarios[1], verbose = TRUE),
+    Scenarios = scenarios, scen_ambient = scenarios[1], verbose = TRUE),
     regexp = "errors in the table data")
 
   unlink(fdbWeather)
   expect_true(dbW_createDatabase(fdbWeather, site_data = site_data1,
-    scenarios = scenarios, scen_ambient = scenarios[1]))
+    Scenarios = scenarios, scen_ambient = scenarios[1]))
   expect_true(dbW_setConnection(fdbWeather))
   expect_true(dbW_IsValid())
   expect_true(dbW_disconnectConnection())
@@ -167,18 +164,18 @@ test_that("dbW site/scenario tables manipulation", {
 
   #--- Update site information
   expect_equal(dbW_getSiteTable()[, req_cols], rbind(site_data1, site_data3)[, req_cols])
-  expect_true(dbW_updateSites(site_ids = i_update2, new_data = site_data2[i_update2, ]))
+  expect_true(dbW_updateSites(Site_ids = i_update2, site_data = site_data2[i_update2, ]))
   expect_equal(dbW_getSiteTable()[, req_cols], rbind(site_data2, site_data3)[, req_cols])
-  expect_true(dbW_updateSites(site_ids = i_update2, new_data = site_data1[i_update2, ]))
+  expect_true(dbW_updateSites(Site_ids = i_update2, site_data = site_data1[i_update2, ]))
   expect_equal(dbW_getSiteTable()[, req_cols], rbind(site_data1, site_data3)[, req_cols])
-  expect_true(dbW_updateSites(site_ids = -1, new_data = site_data1[i_update2, ]))
+  expect_true(dbW_updateSites(Site_ids = -1, site_data = site_data1[i_update2, ]))
   expect_equal(dbW_getSiteTable()[, req_cols], rbind(site_data1, site_data3)[, req_cols])
 
   #--- Add scenarios
   # Scenario already exists
   expect_true(dbW_addScenarios(scenarios[1], verbose = FALSE))
   expect_message(dbW_addScenarios(scenarios[1], verbose = TRUE),
-    regexp = "scenarios are already in database")
+    regexp = "Scenarios are already in database")
   expect_true(dbW_addScenarios(tolower(scenarios[3]), ignore.case = TRUE))
   # New scenario
   expect_true(dbW_addScenarios(paste0(scenarios[1], "_new")))
@@ -194,7 +191,7 @@ test_that("dbW weather data manipulation", {
   expect_true(dbW_addWeatherData(Site_id = 1, weatherData = sw_weather[[1]],
     Scenario = scenarios[2]))
   # Use 'Label' as identifier
-  expect_true(dbW_addWeatherData(label = site_data1[2, "Label"],
+  expect_true(dbW_addWeatherData(Label = site_data1[2, "Label"],
     weatherData = sw_weather[[2]], Scenario = scenarios[1]))
   # Use 'lat'/'long' as identifier
   expect_true(dbW_addWeatherData(lat = site_data1[3, "Latitude"],
@@ -225,7 +222,7 @@ test_that("dbW weather data manipulation", {
   #--- Remove data
   # Delete one site and all associated weather data
   expect_true(dbW_has_siteIDs(3))
-  expect_true(dbW_deleteSite(Site_id = 3))
+  expect_true(dbW_deleteSite(Site_ids = 3))
   expect_false(dbW_has_siteIDs(3))
   expect_error(dbW_getWeatherData(Site_id = 3, Scenario = scenarios[2]))
 

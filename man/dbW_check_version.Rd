@@ -2,7 +2,7 @@
 % Please edit documentation in R/swFunctions.R
 \name{dbW_check_version}
 \alias{dbW_check_version}
-\title{Check that version of dbWeather is up-to-date}
+\title{Check that version of registered weather database is up-to-date}
 \usage{
 dbW_check_version(dbW_min_version = NULL)
 }
@@ -10,5 +10,5 @@ dbW_check_version(dbW_min_version = NULL)
 A logical value.
 }
 \description{
-Check that version of dbWeather is up-to-date
+Check that version of registered weather database is up-to-date
 }

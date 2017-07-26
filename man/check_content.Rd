@@ -13,22 +13,22 @@ dbW_has_sites(Labels, ignore.case = FALSE)
 
 dbW_has_siteIDs(Site_ids)
 
-dbW_has_scenarioIDs(scenario_ids)
+dbW_has_scenarioIDs(Scenario_ids)
 
-dbW_has_scenarios(scenarios, ignore.case = FALSE)
+dbW_has_scenarios(Scenarios, ignore.case = FALSE)
 
 dbW_has_weatherData(Site_ids, Scenario_ids)
 }
 \arguments{
 \item{Labels}{A vector of character strings. The names/labels of the queried sites.}
 
-\item{ignore.case}{A vector of character strings. The names/labels of the queried scenarios.}
+\item{ignore.case}{A logical value.}
 
 \item{Site_ids}{An integer vector. The IDs/database keys of the queried site.}
 
-\item{scenario_ids}{An integer vector. The IDs/database keys of the queried scenario.}
+\item{Scenario_ids}{An integer vector. The IDs/database keys of the queried scenario.}
 
-\item{scenarios}{An integer vector. The IDs/database keys of the queried scenarios.}
+\item{Scenarios}{A vector of character strings. The names/labels of the queried scenarios.}
 }
 \value{
 \code{dbW_has_siteIDs} returns a logical vector of the length of queried sites.
@@ -36,10 +36,10 @@ dbW_has_weatherData(Site_ids, Scenario_ids)
 \code{dbW_has_siteIDs} returns a logical vector of the length of queried sites.
 
 \code{dbW_has_scenarios} returns a logical vector of the length of queried
- scenarios.
+ Scenarios.
 
 \code{dbW_has_scenarios} returns a logical vector of the length of queried
- scenarios.
+ Scenarios.
 
 code{dbW_has_weatherData} returns a logical matrix with rows corresponding to
  queried sites and columns to queried scenarios.
@@ -52,7 +52,7 @@ Check availability of content in registered weather database
 
  \code{dbW_has_siteIDs} checks whether sites are available.
 
- \code{dbW_has_scenarios} checks whether scenarios are available.
+ \code{dbW_has_scenarioIDs} checks whether scenarios are available.
 
  \code{dbW_has_scenarios} checks whether scenarios are available.
 
