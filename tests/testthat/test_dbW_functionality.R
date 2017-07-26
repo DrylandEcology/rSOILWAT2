@@ -44,14 +44,16 @@ site_data3 <- data.frame(
 
 # This function is needed for appveyor: for some reason 'dbW_createDatabase' doesn't
 # remove (in any situation) failed disk files 'fdbWeather'; this is not a problem on
-# travis or my local macOS
+# travis or on my local macOS
 unlink_forcefully <- function(x, recursive = TRUE, force = TRUE) {
   if (file.exists(x)) {
-    print("'file' should not exists, but it does - so we delete it")
+    print(paste("File", x, "should not exists, but it does - so we delete it."))
     unlink(x, recursive = recursive, force = force)
   }
   if (file.exists(x)) {
-    print(paste("'file' should not exists because we just attempted to delete", x))
+    print(paste("File", x, "should not exists because we just attempted to delete it."))
+  } else {
+    print(paste("File", x, "sucessfully deleted."))
   }
 }
 

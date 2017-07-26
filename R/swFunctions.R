@@ -711,6 +711,7 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite3", site_data,
 	on.exit({if (rm_file && file.exists(dbFilePath)) {
 		if (verbose)
 			message("'dbW_createDatabase': deletes file due to failure.")
+		dbW_disconnectConnection(dbFilePath)
 		unlink(dbFilePath)
 		if (file.exists(dbFilePath))
 			message("'dbW_createDatabase': attempted to delete file but failed.")
