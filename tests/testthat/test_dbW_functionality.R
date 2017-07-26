@@ -12,6 +12,7 @@ fdbWeather <- if (identical(tolower(Sys.getenv("APPVEYOR")), "true")) {
   } else {
     tempfile(fileext = ".sqlite3")
   }
+fdbWeather <- tempfile(fileext = ".sqlite3")
 fdbWeather2 <- tempfile(fileext = ".txt")
 write(NA, file = fdbWeather2)
 fdbWeather3 <- file.path("/Fantasy", "Volume", "test.sqlite3")
@@ -45,15 +46,16 @@ site_data3 <- data.frame(
 # This function is needed for appveyor: for some reason 'dbW_createDatabase' doesn't
 # remove (in any situation) failed disk files 'fdbWeather'; this is not a problem on
 # travis or on my local macOS
-unlink_forcefully <- function(x, recursive = TRUE, force = TRUE) {
+unlink_forcefully <- function(x, recursive = TRUE, force = TRUE, info = NULL) {
   if (file.exists(x)) {
-    print(paste("File", x, "should not exists, but it does - so we delete it."))
+    message(paste0(info, ": file ", x, " should not exists, but it does - so we delete it."))
     unlink(x, recursive = recursive, force = force)
   }
   if (file.exists(x)) {
-    print(paste("File", x, "should not exists because we just attempted to delete it."))
+    message(paste0(info, ": file ", x, " should not exists because we just attempted ",
+      "to delete it."))
   } else {
-    print(paste("File", x, "sucessfully deleted."))
+    message(paste0(info, ": file ", x, " sucessfully deleted."))
   }
 }
 
@@ -63,7 +65,8 @@ test_that("Disk file write and delete permissions", {
   expect_true(!inherits(temp, "try-error") && file.exists(fdbWeather),
     info = paste("Failed to create file", fdbWeather))
 
-  temp <- try(unlink_forcefully(fdbWeather), silent = TRUE)
+  expect_message(temp <- try(unlink_forcefully(fdbWeather, info = "1st"), silent = TRUE),
+    regexp = "sucessfully deleted")
   expect_true(!inherits(temp, "try-error") && !file.exists(fdbWeather),
     info = paste("Failed to delete file", fdbWeather))
 })
@@ -91,7 +94,7 @@ test_that("dbW creation", {
     verbose = TRUE, ARG_DOESNT_EXIST = 1:3), regexp = "arguments ignored/deprecated")
   unlink(fdbWeather)
   expect_false(dbW_createDatabase(fdbWeather))
-  unlink_forcefully(fdbWeather)
+  unlink_forcefully(fdbWeather, info = "2nd")
   expect_message(dbW_createDatabase(fdbWeather, verbose = TRUE),
     regexp = "errors in the table data")
   # this is a warning coming from 'normalizePath':
@@ -99,10 +102,10 @@ test_that("dbW creation", {
   #   - on 'windows': regexp = "The system cannot find the path specified" or similar
   expect_warning(dbW_createDatabase(fdbWeather3, site_data = site_data1,
     scenarios = scenarios, scen_ambient = scenarios[1]))
-  unlink_forcefully(fdbWeather)
+  unlink_forcefully(fdbWeather, info = "3rd")
   expect_false(dbW_createDatabase(fdbWeather, site_data = NA,
     scenarios = scenarios, scen_ambient = scenarios[1]))
-  unlink_forcefully(fdbWeather)
+  unlink_forcefully(fdbWeather, info = "4th")
   expect_message(dbW_createDatabase(fdbWeather, site_data = NA,
     scenarios = scenarios, scen_ambient = scenarios[1], verbose = TRUE),
     regexp = "errors in the table data")
