@@ -78,9 +78,11 @@ test_that("dbW creation", {
   unlink_forcefully(fdbWeather)
   expect_message(dbW_createDatabase(fdbWeather, verbose = TRUE),
     regexp = "errors in the table data")
+  # this is a warning coming from 'normalizePath':
+  #   - on 'unix': regexp = "No such file or directory"
+  #   - on 'windows': regexp = "The system cannot find the path specified" or similar
   expect_warning(dbW_createDatabase(fdbWeather3, site_data = site_data1,
-    scenarios = scenarios, scen_ambient = scenarios[1]),
-    regexp = "No such file or directory")
+    scenarios = scenarios, scen_ambient = scenarios[1]))
   unlink_forcefully(fdbWeather)
   expect_false(dbW_createDatabase(fdbWeather, site_data = NA,
     scenarios = scenarios, scen_ambient = scenarios[1]))
