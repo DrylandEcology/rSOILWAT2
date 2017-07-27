@@ -4,7 +4,7 @@
 \alias{dbW_createDatabase}
 \title{Create a weather database}
 \usage{
-dbW_createDatabase(dbFilePath = "dbWeatherData.sqlite3", site_data, scenarios,
+dbW_createDatabase(dbFilePath = "dbWeatherData.sqlite3", site_data, Scenarios,
   scen_ambient = "Current", compression_type = "gzip", verbose = FALSE,
   ...)
 }
@@ -15,8 +15,8 @@ be a file of type \code{sqlite3}. In-memory databases are not supported.}
 \item{site_data}{A data.frame. The site data with column names "Latitude", "Longitude",
 and "Label".}
 
-\item{scenarios}{A vector of character strings. The climate scenarios of which the
-first oneis enforced to be \code{scen_ambient}.}
+\item{Scenarios}{A vector of character strings. The climate scenarios of which the
+first one is enforced to be \code{scen_ambient}.}
 
 \item{scen_ambient}{A character string. The first/default climate scenario.}
 
@@ -24,10 +24,13 @@ first oneis enforced to be \code{scen_ambient}.}
 blob. See \code{\link[base]{memCompress}} for the available choices.}
 
 \item{verbose}{A logical value.}
+
+\item{...}{Additional/deprecated arguments which are currently ignored.}
 }
 \value{
 \code{TRUE} on success; \code{FALSE} otherwise. If the file \code{dbFilePath}
-  didn't already exist, but creating it failed, then the attempt will be removed.
+  didn't already exist, but creating it failed, then the attempt will be disconnected
+  and removed.
 }
 \description{
 Create a weather database
@@ -38,8 +41,9 @@ Create a weather database
      \item the records 'Version' and 'Compression_type'}}
   \item{Table 'Sites'}{contains four fields 'Site_id', 'Latitude', 'Longitude', and
      'Label'}
-  \item{Table 'WeatherData'}{contains five fields 'Site_id', 'Scenario' (i.e., the ID
-     of the scenario), 'StartYear', 'EndYear', and 'data'}
+  \item{Table 'WeatherData'}{contains six fields 'wdid' (the ID of the weather data
+     record), 'Site_id', 'Scenario' (i.e., the ID of the scenario), 'StartYear',
+     'EndYear', and 'data'}
   \item{Table 'Scenarios'}{contains two fields 'id' and 'Scenario' (i.e., the scenario
      name)}
 }

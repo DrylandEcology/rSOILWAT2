@@ -2,7 +2,7 @@
 % Please edit documentation in R/swFunctions.R
 \name{dbW_getIDs}
 \alias{dbW_getIDs}
-\title{Locate keys for weather database tables}
+\title{Locate keys for weather database tables in the registered weather database}
 \usage{
 dbW_getIDs(site_id = NULL, site_label = NULL, long = NULL, lat = NULL,
   scenario = NULL, scenario_id = NULL, add_if_missing = FALSE,
