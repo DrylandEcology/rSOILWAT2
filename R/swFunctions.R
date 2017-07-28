@@ -149,64 +149,70 @@ dbW_has_weatherData <- function(Site_ids, Scenario_ids) {
 }
 
 
-#' Extract table key to connect a site with weather data in the registered weather database
+#' Extract table keys to connect sites with weather data in the registered weather
+#' database
 #'
-#' @details The key (Site_id) can be located by either providing a \code{Label} or
-#' by providing \code{lat} and \code{long} of the requested site.
+#' @details The key(s) (Site_id) can be located by either providing a \code{Labels} or
+#' by providing \code{lat} and \code{long} of the requested site(s).
 #'
-#' @param lat A numeric value or \code{NULL}. The latitude in decimal degrees of WGS84.
+#' @param lat A numeric vector or \code{NULL}. The latitude in decimal degrees of WGS84.
 #'	Northern latitude are positive, sites on the southern hemisphere have negative values.
-#' @param long A numeric value or \code{NULL}. The longitude in decimal degrees of WGS84.
+#' @param long A numeric vector or \code{NULL}. The longitude in decimal degrees of WGS84.
 #'	Eastern longitudes are positive, sites on the western hemisphere have negative values.
 #' @inheritParams check_content
 #'
-#' @return An integer value or \code{NULL}.
+#' @return An integer vector with the values of the keys or \code{NA} if not located.
 #' @export
 dbW_getSiteId <- function(lat = NULL, long = NULL, Labels = NULL, ignore.case = FALSE,
-	verbose = FALSE) {
+  verbose = FALSE) {
 
-	stopifnot(dbW_IsValid())
+  stopifnot(dbW_IsValid(), identical(length(lat), length(long)))
 
-	x <- if (is.character(Labels)) {
-  		sql <- paste0("SELECT Site_id FROM Sites WHERE Label=:x",
-  			if (ignore.case) " COLLATE NOCASE")
-  		DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = Labels))[1, 1]
+  x <- if (is.character(Labels)) {
+      sql <- paste0("SELECT Site_id FROM Sites WHERE Label=:x",
+        if (ignore.case) " COLLATE NOCASE")
+      sapply(Labels, function(x) {
+        temp <- DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = x))[, 1]
+        if (is.null(temp)) NA else temp
+      })
 
-  	} else if (is.numeric(lat) && is.numeric(long)) {
-  		sql <- "SELECT Site_id FROM Sites WHERE Latitude=:lat AND Longitude=:long"
-  		DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(lat = lat, long = long))[1, 1]
+    } else if (is.numeric(lat) && is.numeric(long)) {
+      sql <- "SELECT Site_id FROM Sites WHERE Latitude=:lat AND Longitude=:long"
+      itemp <- seq_along(lat)
+      sapply(itemp, function(k) {
+        temp <- DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(lat = lat[k],
+          long = long[k]))[, 1]
+        if (is.null(temp)) NA else temp
+      })
 
-  	} else NULL
+    } else {
+      if (verbose) {
+        message("'dbW_getSiteId': not enough information to obtain site IDs")
+      }
+      rep(NA, max(length(Labels), length(long)))
+    }
 
-	Site_id <- if (is.null(x) || anyNA(x)) NULL else as.integer(x)
-
-	if (is.null(Site_id) && verbose) {
-		message("'dbW_getSiteId': could not obtain site ID")
-	}
-
-	Site_id
+  as.integer(x)
 }
 
-#' Extract table key to connect a scenario with weather data in the registered weather database
+#' Extract table keys to connect scenario(s) with weather data in the registered weather
+#' database
 #'
 #' @inheritParams check_content
 #'
-#' @return An integer value or \code{NULL}.
+#' @return An integer vector with the values of the keys or \code{NA} if not located.
 #' @export
 dbW_getScenarioId <- function(Scenario, ignore.case = FALSE, verbose = FALSE) {
-	stopifnot(dbW_IsValid())
+  stopifnot(dbW_IsValid())
 
-	sql <- paste0("SELECT id FROM Scenarios WHERE Scenario = :x",
-		if (!ignore.case) " COLLATE NOCASE")
-	x <- DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = Scenario))
+  sql <- paste0("SELECT id FROM Scenarios WHERE Scenario = :x",
+    if (ignore.case) " COLLATE NOCASE")
+  x <- sapply(Scenario, function(x) {
+    temp <- DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = x))[, 1]
+    if (is.null(temp)) NA else temp
+  })
 
-	id <- if (is.null(x) || anyNA(x)) NULL else as.integer(x)
-
-	if (is.null(id) && verbose) {
-		message("'dbW_getScenarioId': could not obtain scenario ID")
-	}
-
-	id
+  as.integer(x)
 }
 
 #' Locate keys for weather database tables in the registered weather database
@@ -236,25 +242,22 @@ dbW_getIDs <- function(site_id = NULL, site_label = NULL, long = NULL, lat = NUL
 
   has_siteID <- is.numeric(res[["site_id"]]) && dbW_has_siteIDs(res[["site_id"]])
   if (!has_siteID) {
-    res[["site_id"]] <- dbW_getSiteId(Label = site_label, lat = lat, long = long,
-      ignore.case = ignore.case)
+    res[["site_id"]] <- dbW_getSiteId(Labels = site_label, lat = lat, long = long,
+      ignore.case = ignore.case, verbose = verbose)
 
-    if (is.null(res[["site_id"]]) && add_if_missing) {
-      temp <- if ((as.character(site_label) && nchar(site_label) > 0) ||
-        (as.numeric(lat) && as.numeric(long))) {
-          try(dbW_addSites(site_data = data.frame(Latitude = lat, Longitude = long,
-            Label = site_label, stringsAsFactors = FALSE), ignore.case = ignore.case),
-            silent = TRUE)
+    if (anyNA(res[["site_id"]]) && add_if_missing) {
+      iadd <- is.na(res[["site_id"]])
+      temp <- if ((is.character(site_label[iadd]) && all(nchar(site_label[iadd]) > 0)) ||
+        (as.numeric(lat[iadd]) && as.numeric(long[iadd]))) {
+          try(dbW_addSites(site_data = data.frame(Latitude = lat[iadd],
+            Longitude = long[iadd], Label = site_label[iadd], stringsAsFactors = FALSE),
+            ignore.case = ignore.case), silent = TRUE)
         } else FALSE
 
       if (!inherits(temp, "try-error") && temp) {
-        res[["site_id"]] <- dbW_getSiteId(Label = site_label, lat = lat, long = long,
-          ignore.case = ignore.case)
+        res[["site_id"]] <- dbW_getSiteId(Labels = site_label, lat = lat, long = long,
+          ignore.case = ignore.case, verbose = verbose)
       }
-    }
-
-    if (is.null(res[["site_id"]]) && verbose) {
-      message("'dbW_getIDs' has not enough info to identify/locate site.")
     }
   }
 
@@ -262,22 +265,19 @@ dbW_getIDs <- function(site_id = NULL, site_label = NULL, long = NULL, lat = NUL
     dbW_has_scenarioIDs(res[["scenario_id"]])
   if (!has_scenID) {
     res[["scenario_id"]] <- dbW_getScenarioId(Scenario = scenario,
-      ignore.case = ignore.case)
+      ignore.case = ignore.case, verbose = verbose)
 
-    if (is.null(res[["scenario_id"]]) && add_if_missing) {
-      temp <- if (as.character(scenario) && nchar(scenario) > 0) {
-          try(dbW_addScenarios(Scenarios = scenario, ignore.case = ignore.case),
+    if (anyNA(res[["scenario_id"]]) && add_if_missing) {
+      iadd <- is.na(res[["scenario_id"]])
+      temp <- if (as.character(scenario[iadd]) && all(nchar(scenario[iadd]) > 0)) {
+          try(dbW_addScenarios(Scenarios = scenario[iadd], ignore.case = ignore.case),
             silent = TRUE)
         } else FALSE
 
       if (!inherits(temp, "try-error") && temp) {
         res[["scenario_id"]] <- dbW_getScenarioId(Scenario = scenario,
-          ignore.case = ignore.case)
+          ignore.case = ignore.case, verbose = verbose)
       }
-    }
-
-    if (is.null(res[["scenario_id"]]) && verbose) {
-      message("'dbW_getIDs' has not enough info to identify/locate scenario.")
     }
   }
 
@@ -391,7 +391,7 @@ dbW_getWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL, Label = 
 	IDs <- dbW_getIDs(site_id = Site_id, site_label = Label, long = long, lat = lat,
     scenario = Scenario, scenario_id = Scenario_id, add_if_missing = FALSE,
     ignore.case = ignore.case, verbose = verbose)
-  if (any(sapply(IDs, is.null))) {
+  if (any(!sapply(IDs, function(x) length(x) > 0 && is.finite(x)))) {
     stop("'dbW_getWeatherData': insufficient information to locate weather data.")
   }
 
@@ -640,7 +640,7 @@ dbW_addWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL,
 	IDs <- dbW_getIDs(site_id = Site_id, site_label = Label, long = long, lat = lat,
     scenario = Scenario, scenario_id = Scenario_id, add_if_missing = TRUE,
     ignore.case = ignore.case, verbose = verbose)
-  if (any(sapply(IDs, is.null))) {
+  if (any(!sapply(IDs, function(x) length(x) > 0 && is.finite(x)))) {
     stop("'dbW_addWeatherData': insufficient information to generate site/scenario.")
   }
 

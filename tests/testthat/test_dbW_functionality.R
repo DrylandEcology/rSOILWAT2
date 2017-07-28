@@ -141,18 +141,32 @@ test_that("dbW creation", {
 test_that("dbW site/scenario tables manipulation", {
   skip_on_appveyor() #remove once issue #43 is fixed (unit tests for 'test_dbW_functionality.R' fail on appveyor but not on travis)
 
+  #--- Obtain site_id all at once
+  site_id1 <- dbW_getSiteId(lat = site_data1[, "Latitude"],
+    long = site_data1[, "Longitude"])
+  expect_error(dbW_getSiteId(lat = site_data1[, "Latitude"],
+    long = site_data1[site_ids[-1], "Longitude"]))
+  site_id2 <- dbW_getSiteId(Labels = site_data1[, "Label"], ignore.case = FALSE)
+  expect_equal(site_id1, site_id2)
+  site_id3 <- dbW_getSiteId(Labels = tolower(site_data1[, "Label"]),
+    ignore.case = TRUE)
+  expect_equal(site_id1, site_id3)
+  site_id4 <- dbW_getSiteId(Labels = tolower(site_data1[, "Label"]),
+    ignore.case = FALSE)
+  expect_equal(site_id4, rep(NA_integer_, site_N))
+
   for (k in seq_len(site_N)) {
-    #--- Obtain site_id
+    #--- Obtain site_id one by one
     site_id1 <- dbW_getSiteId(lat = site_data1[k, "Latitude"],
       long = site_data1[k, "Longitude"])
-    site_id2 <- dbW_getSiteId(Label = site_data1[k, "Label"], ignore.case = FALSE)
+    site_id2 <- dbW_getSiteId(Labels = site_data1[k, "Label"], ignore.case = FALSE)
     expect_equal(site_id1, site_id2)
-    site_id3 <- dbW_getSiteId(Label = tolower(site_data1[k, "Label"]),
+    site_id3 <- dbW_getSiteId(Labels = tolower(site_data1[k, "Label"]),
       ignore.case = TRUE)
     expect_equal(site_id1, site_id3)
-    site_id4 <- dbW_getSiteId(Label = tolower(site_data1[k, "Label"]),
+    site_id4 <- dbW_getSiteId(Labels = tolower(site_data1[k, "Label"]),
       ignore.case = FALSE)
-    expect_equal(site_id4, NULL)
+    expect_equal(site_id4, NA_integer_)
 
     #--- Attempt to add new site
     # Site already exists
@@ -176,6 +190,12 @@ test_that("dbW site/scenario tables manipulation", {
   expect_equal(dbW_getSiteTable()[, req_cols], rbind(site_data1, site_data3)[, req_cols])
 
   #--- Add scenarios
+  # Obtain scenario id
+  expect_equal(dbW_getScenarioId(scenarios_added),
+    c(seq_along(scenarios), rep(NA_integer_, length(scenarios_added) - length(scenarios))))
+  for (k in seq_along(scenarios)) {
+    expect_equal(dbW_getScenarioId(scenarios[k]), k)
+  }
   # Scenario already exists
   expect_true(dbW_addScenarios(scenarios[1], verbose = FALSE))
   expect_message(dbW_addScenarios(scenarios[1], verbose = TRUE),
@@ -185,6 +205,29 @@ test_that("dbW site/scenario tables manipulation", {
   expect_true(dbW_addScenarios(paste0(scenarios[1], "_new")))
   expect_true(dbW_addScenarios(tolower(scenarios[3]), ignore.case = FALSE))
   expect_equal(dbW_getScenariosTable()[, "Scenario"], scenarios_added)
+  # Obtain scenario id
+  expect_equal(dbW_getScenarioId(scenarios_added), seq_along(scenarios_added))
+  expect_equal(dbW_getScenarioId(NULL), integer(0))
+
+  #--- Obtain site and scenario IDs
+  site_id1 <- dbW_getSiteId(lat = site_data1[, "Latitude"],
+    long = site_data1[, "Longitude"])
+  expect_error(dbW_getSiteId(lat = site_data1[, "Latitude"],
+    long = site_data1[site_ids[-1], "Longitude"]))
+  site_id2 <- dbW_getSiteId(Labels = site_data1[, "Label"], ignore.case = FALSE)
+  expect_equal(site_id1, site_id2)
+  site_id3 <- dbW_getSiteId(Labels = tolower(site_data1[, "Label"]),
+    ignore.case = TRUE)
+  expect_equal(site_id1, site_id3)
+  site_id4 <- dbW_getSiteId(Labels = tolower(site_data1[, "Label"]),
+    ignore.case = FALSE)
+  expect_equal(site_id4, rep(NA_integer_, site_N))
+
+  id1 <- dbW_getIDs(long = site_data1[, "Longitude"], lat = site_data1[, "Latitude"],
+    scenario = scenarios_added, add_if_missing = FALSE)
+  id2 <- dbW_getIDs(site_label = site_data1[, "Label"],
+    scenario_id = seq_along(scenarios_added), add_if_missing = FALSE)
+  expect_equal(id1, id2)
 })
 
 test_that("dbW weather data manipulation", {
