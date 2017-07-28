@@ -208,6 +208,26 @@ test_that("dbW site/scenario tables manipulation", {
   # Obtain scenario id
   expect_equal(dbW_getScenarioId(scenarios_added), seq_along(scenarios_added))
   expect_equal(dbW_getScenarioId(NULL), integer(0))
+
+  #--- Obtain site and scenario IDs
+  site_id1 <- dbW_getSiteId(lat = site_data1[, "Latitude"],
+    long = site_data1[, "Longitude"])
+  expect_error(dbW_getSiteId(lat = site_data1[, "Latitude"],
+    long = site_data1[site_ids[-1], "Longitude"]))
+  site_id2 <- dbW_getSiteId(Labels = site_data1[, "Label"], ignore.case = FALSE)
+  expect_equal(site_id1, site_id2)
+  site_id3 <- dbW_getSiteId(Labels = tolower(site_data1[, "Label"]),
+    ignore.case = TRUE)
+  expect_equal(site_id1, site_id3)
+  site_id4 <- dbW_getSiteId(Labels = tolower(site_data1[, "Label"]),
+    ignore.case = FALSE)
+  expect_equal(site_id4, rep(NA_integer_, site_N))
+
+  id1 <- dbW_getIDs(long = site_data1[, "Longitude"], lat = site_data1[, "Latitude"],
+    scenario = scenarios_added, add_if_missing = FALSE)
+  id2 <- dbW_getIDs(site_label = site_data1[, "Label"],
+    scenario_id = seq_along(scenarios_added), add_if_missing = FALSE)
+  expect_equal(id1, id2)
 })
 
 test_that("dbW weather data manipulation", {

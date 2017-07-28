@@ -243,7 +243,7 @@ dbW_getIDs <- function(site_id = NULL, site_label = NULL, long = NULL, lat = NUL
   has_siteID <- is.numeric(res[["site_id"]]) && dbW_has_siteIDs(res[["site_id"]])
   if (!has_siteID) {
     res[["site_id"]] <- dbW_getSiteId(Labels = site_label, lat = lat, long = long,
-      ignore.case = ignore.case)
+      ignore.case = ignore.case, verbose = verbose)
 
     if (anyNA(res[["site_id"]]) && add_if_missing) {
       iadd <- is.na(res[["site_id"]])
@@ -256,12 +256,8 @@ dbW_getIDs <- function(site_id = NULL, site_label = NULL, long = NULL, lat = NUL
 
       if (!inherits(temp, "try-error") && temp) {
         res[["site_id"]] <- dbW_getSiteId(Labels = site_label, lat = lat, long = long,
-          ignore.case = ignore.case)
+          ignore.case = ignore.case, verbose = verbose)
       }
-    }
-
-    if (is.null(res[["site_id"]]) && verbose) {
-      message("'dbW_getIDs' has not enough info to identify/locate site.")
     }
   }
 
@@ -269,22 +265,19 @@ dbW_getIDs <- function(site_id = NULL, site_label = NULL, long = NULL, lat = NUL
     dbW_has_scenarioIDs(res[["scenario_id"]])
   if (!has_scenID) {
     res[["scenario_id"]] <- dbW_getScenarioId(Scenario = scenario,
-      ignore.case = ignore.case)
+      ignore.case = ignore.case, verbose = verbose)
 
-    if (is.null(res[["scenario_id"]]) && add_if_missing) {
-      temp <- if (as.character(scenario) && nchar(scenario) > 0) {
-          try(dbW_addScenarios(Scenarios = scenario, ignore.case = ignore.case),
+    if (anyNA(res[["scenario_id"]]) && add_if_missing) {
+      iadd <- is.na(res[["scenario_id"]])
+      temp <- if (as.character(scenario[iadd]) && all(nchar(scenario[iadd]) > 0)) {
+          try(dbW_addScenarios(Scenarios = scenario[iadd], ignore.case = ignore.case),
             silent = TRUE)
         } else FALSE
 
       if (!inherits(temp, "try-error") && temp) {
         res[["scenario_id"]] <- dbW_getScenarioId(Scenario = scenario,
-          ignore.case = ignore.case)
+          ignore.case = ignore.case, verbose = verbose)
       }
-    }
-
-    if (is.null(res[["scenario_id"]]) && verbose) {
-      message("'dbW_getIDs' has not enough info to identify/locate scenario.")
     }
   }
 
@@ -398,7 +391,7 @@ dbW_getWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL, Label = 
 	IDs <- dbW_getIDs(site_id = Site_id, site_label = Label, long = long, lat = lat,
     scenario = Scenario, scenario_id = Scenario_id, add_if_missing = FALSE,
     ignore.case = ignore.case, verbose = verbose)
-  if (any(sapply(IDs, is.null))) {
+  if (any(!sapply(IDs, function(x) length(x) > 0 && is.finite(x)))) {
     stop("'dbW_getWeatherData': insufficient information to locate weather data.")
   }
 
@@ -647,7 +640,7 @@ dbW_addWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL,
 	IDs <- dbW_getIDs(site_id = Site_id, site_label = Label, long = long, lat = lat,
     scenario = Scenario, scenario_id = Scenario_id, add_if_missing = TRUE,
     ignore.case = ignore.case, verbose = verbose)
-  if (any(sapply(IDs, is.null))) {
+  if (any(!sapply(IDs, function(x) length(x) > 0 && is.finite(x)))) {
     stop("'dbW_addWeatherData': insufficient information to generate site/scenario.")
   }
 
