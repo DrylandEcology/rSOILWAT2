@@ -190,6 +190,12 @@ test_that("dbW site/scenario tables manipulation", {
   expect_equal(dbW_getSiteTable()[, req_cols], rbind(site_data1, site_data3)[, req_cols])
 
   #--- Add scenarios
+  # Obtain scenario id
+  expect_equal(dbW_getScenarioId(scenarios_added),
+    c(seq_along(scenarios), rep(NA_integer_, length(scenarios_added) - length(scenarios))))
+  for (k in seq_along(scenarios)) {
+    expect_equal(dbW_getScenarioId(scenarios[k]), k)
+  }
   # Scenario already exists
   expect_true(dbW_addScenarios(scenarios[1], verbose = FALSE))
   expect_message(dbW_addScenarios(scenarios[1], verbose = TRUE),
@@ -199,6 +205,9 @@ test_that("dbW site/scenario tables manipulation", {
   expect_true(dbW_addScenarios(paste0(scenarios[1], "_new")))
   expect_true(dbW_addScenarios(tolower(scenarios[3]), ignore.case = FALSE))
   expect_equal(dbW_getScenariosTable()[, "Scenario"], scenarios_added)
+  # Obtain scenario id
+  expect_equal(dbW_getScenarioId(scenarios_added), seq_along(scenarios_added))
+  expect_equal(dbW_getScenarioId(NULL), integer(0))
 })
 
 test_that("dbW weather data manipulation", {

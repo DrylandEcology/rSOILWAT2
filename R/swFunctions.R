@@ -195,26 +195,24 @@ dbW_getSiteId <- function(lat = NULL, long = NULL, Labels = NULL, ignore.case = 
   as.integer(x)
 }
 
-#' Extract table key to connect a scenario with weather data in the registered weather database
+#' Extract table keys to connect scenario(s) with weather data in the registered weather
+#' database
 #'
 #' @inheritParams check_content
 #'
-#' @return An integer value or \code{NULL}.
+#' @return An integer vector with the values of the keys or \code{NA} if not located.
 #' @export
 dbW_getScenarioId <- function(Scenario, ignore.case = FALSE, verbose = FALSE) {
-	stopifnot(dbW_IsValid())
+  stopifnot(dbW_IsValid())
 
-	sql <- paste0("SELECT id FROM Scenarios WHERE Scenario = :x",
-		if (!ignore.case) " COLLATE NOCASE")
-	x <- DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = Scenario))
+  sql <- paste0("SELECT id FROM Scenarios WHERE Scenario = :x",
+    if (ignore.case) " COLLATE NOCASE")
+  x <- sapply(Scenario, function(x) {
+    temp <- DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = x))[, 1]
+    if (is.null(temp)) NA else temp
+  })
 
-	id <- if (is.null(x) || anyNA(x)) NULL else as.integer(x)
-
-	if (is.null(id) && verbose) {
-		message("'dbW_getScenarioId': could not obtain scenario ID")
-	}
-
-	id
+  as.integer(x)
 }
 
 #' Locate keys for weather database tables in the registered weather database
