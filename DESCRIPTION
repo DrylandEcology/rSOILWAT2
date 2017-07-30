@@ -22,7 +22,7 @@ Suggests:
   testthat,
   covr
 NeedsCompilation: yes
-License: GPL (>= 3)
+License: GPL-3 + file LICENSE
 URL: https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 BugReports: https://github.com/Burke-Lauenroth-Lab/rSOILWAT2/issues
 RoxygenNote: 6.0.1
