@@ -2,27 +2,31 @@
 % Please edit documentation in R/swFunctions.R
 \name{dbW_getSiteId}
 \alias{dbW_getSiteId}
-\title{Extract weather database key to connect a site with weather data}
+\title{Extract table keys to connect sites with weather data in the registered weather
+database}
 \usage{
-dbW_getSiteId(lat = NULL, long = NULL, Label = NULL,
-  ignore.case = FALSE)
+dbW_getSiteId(lat = NULL, long = NULL, Labels = NULL,
+  ignore.case = FALSE, verbose = FALSE)
 }
 \arguments{
-\item{lat}{A numeric value or \code{NULL}. The latitude in decimal degrees of WGS84.
+\item{lat}{A numeric vector or \code{NULL}. The latitude in decimal degrees of WGS84.
 Northern latitude are positive, sites on the southern hemisphere have negative values.}
 
-\item{long}{A numeric value or \code{NULL}. The longitude in decimal degrees of WGS84.
+\item{long}{A numeric vector or \code{NULL}. The longitude in decimal degrees of WGS84.
 Eastern longitudes are positive, sites on the western hemisphere have negative values.}
 
-\item{Label}{A character string or \code{NULL}.}
+\item{Labels}{A vector of character strings. The names/labels of the queried sites.}
+
+\item{ignore.case}{A logical value.}
 }
 \value{
-An integer value or \code{NULL}.
+An integer vector with the values of the keys or \code{NA} if not located.
 }
 \description{
-Extract weather database key to connect a site with weather data
+Extract table keys to connect sites with weather data in the registered weather
+database
 }
 \details{
-The key (SiteId) can be located by either providing a \code{Label} or
-by providing \code{lat} and \code{long} of the requested site.
+The key(s) (Site_id) can be located by either providing a \code{Labels} or
+by providing \code{lat} and \code{long} of the requested site(s).
 }

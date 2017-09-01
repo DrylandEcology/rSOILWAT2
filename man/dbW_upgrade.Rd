@@ -3,6 +3,7 @@
 \name{dbW_upgrade}
 \alias{dbW_upgrade}
 \alias{dbW_upgrade_to_rSOILWAT2}
+\alias{dbW_upgrade_v31to32}
 \alias{dbW_upgrade_v3to31}
 \alias{dbW_upgrade_v2to3}
 \alias{dbW_upgrade_v1to2}
@@ -11,6 +12,8 @@
 \usage{
 dbW_upgrade_to_rSOILWAT2(dbWeatherDataFile, fbackup = NULL,
   check_all = FALSE, with_resume = TRUE, clean_cache = TRUE)
+
+dbW_upgrade_v31to32(dbWeatherDataFile, fbackup = NULL)
 
 dbW_upgrade_v3to31(dbWeatherDataFile, fbackup = NULL, type_new = "gzip")
 
@@ -40,7 +43,7 @@ with \code{with_resume} set to \code{TRUE}, if present, is removed once upgrade
 completed successfully.}
 
 \item{type_new}{The type of compression used to compress the weather blobs. See
-\code{\link{memCompress}}.}
+\code{\link[base]{memCompress}}.}
 }
 \description{
 Weather database upgrade functions
@@ -48,6 +51,9 @@ Weather database upgrade functions
 \section{Details}{
  \code{dbW_upgrade_to_rSOILWAT2} upgrades a weather database that was
 created under'Rsoilwat31' to the current package version 'rSOILWAT2'
+
+ \code{dbW_upgrade_v31to32} upgrades a weather database from version
+ '3.1.z' to '3.2.0'
 
  \code{dbW_upgrade_v3to31} upgrades a weather database from version
  '3.0.x' to '3.1.0'

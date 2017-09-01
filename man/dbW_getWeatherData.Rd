@@ -2,11 +2,11 @@
 % Please edit documentation in R/swFunctions.R
 \name{dbW_getWeatherData}
 \alias{dbW_getWeatherData}
-\title{Extracts daily weather data from a SQLite database}
+\title{Extracts daily weather data from a registered weather database}
 \usage{
 dbW_getWeatherData(Site_id = NULL, lat = NULL, long = NULL,
   Label = NULL, startYear = NULL, endYear = NULL, Scenario = "Current",
-  ignore.case = FALSE)
+  Scenario_id = NULL, ignore.case = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{Site_id}{Numeric. Used to identify site and extract weather data.}
@@ -17,7 +17,7 @@ Site_id is missing.}
 \item{long}{Numeric. Longitude and Latitude are used to identify site if
 Site_id is missing.}
 
-\item{Label}{A character string.}
+\item{Label}{A character string. A site label.}
 
 \item{startYear}{Numeric. Extracted weather data will start with this year.}
 
@@ -53,7 +53,4 @@ data.
 data input \item \code{\link{dbW_getWeatherData}} and
 \code{\link{getWeatherData_folders}} for weather data input
 }
-}
-\author{
-Ryan Murphy
 }

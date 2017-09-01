@@ -44,14 +44,14 @@ dbW_getWeatherData_old <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,st
 	if(length(Site_id) == 0) {
 		Site_id <- dbW_getSiteId(lat,long,Label)
 	} else {
-		if(!DBI::dbGetQuery(con.env$con, paste("SELECT COUNT(*) FROM WeatherData WHERE Site_id=",Site_id,";",sep=""))[1,1]) {
+		if(!DBI::dbGetQuery(rSW2_glovars$con, paste("SELECT COUNT(*) FROM WeatherData WHERE Site_id=",Site_id,";",sep=""))[1,1]) {
 			stop("Site_id does not exist.")
 		}
 	}
 	if(!is.null(Site_id) && is.integer(Site_id) && Site_id >= 0) {
-		Scenario <- DBI::dbGetQuery(con.env$con, paste("SELECT id FROM Scenarios WHERE Scenario='",Scenario,"';",sep=""))[1,1]
-		result <- DBI::dbGetQuery(con.env$con, paste("SELECT StartYear,EndYear,data FROM WeatherData WHERE Site_id=",Site_id, " AND Scenario=",Scenario,";",sep=""));
-		data <- dbW_blob_to_weatherData_old(result$StartYear, result$EndYear, result$data, con.env$blob_compression_type)
+		Scenario <- DBI::dbGetQuery(rSW2_glovars$con, paste("SELECT id FROM Scenarios WHERE Scenario='",Scenario,"';",sep=""))[1,1]
+		result <- DBI::dbGetQuery(rSW2_glovars$con, paste("SELECT StartYear,EndYear,data FROM WeatherData WHERE Site_id=",Site_id, " AND Scenario=",Scenario,";",sep=""));
+		data <- dbW_blob_to_weatherData_old(result$StartYear, result$EndYear, result$data, rSW2_glovars$blob_compression_type)
 		if(inherits(data, "try-error")) stop(paste("Weather data for Site_id", Site_id, "is corrupted"))
 	} else {
 		stop(paste("Site_id for", Label, "not obtained."))
@@ -96,23 +96,23 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 		long = long,
 		Label = if (!is.null(weatherFolderPath) && is.null(label)) basename(weatherFolderPath) else label)
 
-	Scenarios <- DBI::dbReadTable(con.env$con,"Scenarios")$Scenario
+	Scenarios <- DBI::dbReadTable(rSW2_glovars$con,"Scenarios")$Scenario
 	if(ScenarioName %in% Scenarios) {
 		scenarioID <- which(ScenarioName %in% Scenarios)
 	} else {
-		temp <- DBI::dbGetQuery(con.env$con, "SELECT MAX(id) FROM \"Scenarios\";")[1,1]
+		temp <- DBI::dbGetQuery(rSW2_glovars$con, "SELECT MAX(id) FROM \"Scenarios\";")[1,1]
 		scenarioID <- ifelse(is.na(temp),1,temp+1)
 		SQL <- paste("INSERT INTO \"Scenarios\" VALUES(",scenarioID,",'",ScenarioName,"');",sep="")
-		DBI::dbExecute(con.env$con, SQL)
+		DBI::dbExecute(rSW2_glovars$con, SQL)
 	}
 
 	if(!is.null(weatherData)) {
-		data_blob <- dbW_weatherData_to_blob_old(weatherData, con.env$blob_compression_type)
+		data_blob <- dbW_weatherData_to_blob_old(weatherData, rSW2_glovars$blob_compression_type)
 		temp <- as.integer(names(weatherData))
 		StartYear <- temp[1]
 		EndYear <- temp[length(temp)]
-		DBI::dbExecute(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
-		#dbCommit(con.env$con)
+		DBI::dbExecute(rSW2_glovars$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
+		#dbCommit(rSW2_glovars$con)
 	} else {
 		weath <- list.files(weatherFolderPath)
 		years <- as.numeric(sub(pattern="weath.",replacement="",weath))
@@ -124,9 +124,9 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 		}
 		StartYear <- years[1]
 		EndYear <- years[length(years)]
-		data_blob <- dbW_weatherData_to_blob_old(weatherData, con.env$blob_compression_type)
-		DBI::dbExecute(con.env$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
-		#dbCommit(con.env$con)
+		data_blob <- dbW_weatherData_to_blob_old(weatherData, rSW2_glovars$blob_compression_type)
+		DBI::dbExecute(rSW2_glovars$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
+		#dbCommit(rSW2_glovars$con)
 	}
 }
 
@@ -170,4 +170,56 @@ dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
 	string <- paste(string, collapse=";")
 
 	paste0("x'", paste0(memCompress(string, type = type), collapse = ""), "'")
+}
+
+
+
+#' @export
+dbW_addSite <- function(Site_id = NULL, lat = NULL, long = NULL, Label = NULL) {
+	.Deprecated("dbW_addSites")
+	stopifnot(dbW_IsValid())
+
+	#Does Site_id exist
+	Site_id <- as.integer(Site_id)
+	if (length(Site_id) == 0) { #Site_id is NULL or integer(0)
+		Site_id <- dbW_getSiteId(lat, long, Label)
+	}
+	stopifnot(length(Site_id) == 1L)
+
+	if (!dbW_has_siteIDs(Site_id)) {
+		# Site_id does not exist in database: create it
+		if (is.null(lat)) lat <- "NULL"
+		if (is.null(long)) long <- "NULL"
+		Label <- if (is.null(Label)) "NULL" else shQuote(Label)
+		sql <- "SELECT MAX(Site_id) FROM Sites"
+		temp <- DBI::dbGetQuery(rSW2_glovars$con, sql)[1,1]
+		Site_id <- if (is.na(temp)) 1L else {temp + 1}
+		sql <- paste0("INSERT INTO Sites VALUES(", Site_id, ",", lat, ",", long, ",",
+			Label, ")")
+		DBI::dbExecute(rSW2_glovars$con, sql)
+
+	} else {
+		# Site_id exists already
+		sql <- paste("SELECT * FROM Sites WHERE Site_id=", Site_id)
+		SiteData <- DBI::dbGetQuery(rSW2_glovars$con, sql)
+
+		bad_lat <- !is.null(lat) &&
+			!(is.null(SiteData[1, "Latitude"]) || identical(SiteData[1, "Latitude"], "NULL")) &&
+			SiteData[1, "Latitude"] != lat
+		bad_long <- !is.null(long) &&
+			!(is.null(SiteData[1, "Longitude"]) || identical(SiteData[1, "Longitude"], "NULL")) &&
+			SiteData[1, "Longitude"] != long
+		bad_label <- !is.null(Label) && nchar(Label) > 0 &&
+			!(is.null(SiteData[1, "Label"]) || identical(SiteData[1, "Label"], "NULL")) &&
+			SiteData[1, "Label"] != Label
+		if (bad_lat || bad_long || bad_label) {
+				stop("Site_id: ", Site_id, " already existed in database, but data mismatch ",
+				"with NULL being ignored. Compare data (database:input) ",
+				"lat(", SiteData[1, "Latitude"], ":", lat, ") ",
+				"long(", SiteData[1, "Longitude"], ":", long, ") ",
+				"label(", SiteData[1, "Label"], ":", Label, ").")
+		}
+	}
+
+	Site_id
 }

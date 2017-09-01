@@ -1,6 +1,21 @@
-[![Travis-CI Build Status](https://travis-ci.org/Burke-Lauenroth-Lab/rSOILWAT2.svg?branch=master)](https://travis-ci.org/Burke-Lauenroth-Lab/rSOILWAT2)
-  [![Build status](https://ci.appveyor.com/api/projects/status/kkmqcftbl24bwnqk?svg=true)](https://ci.appveyor.com/project/dschlaep/rSOILWAT2)
-  [![Coverage Status](https://coveralls.io/repos/github/Burke-Lauenroth-Lab/rSOILWAT2/badge.svg)](https://coveralls.io/github/Burke-Lauenroth-Lab/rSOILWAT2)
+
+| Unix | Windows | Release | License | Coverage | Downloads |
+| :---- | :---- | :---- | :---- | :---- | :---- |
+[ ![Travis build status][1]][2] | [![Appveyor build status][3]][4] | [ ![github release][5]][6] | [![license][7]][8] | [![coveralls status][9]][10] | [![github downloads][11]][12] |
+
+[1]: https://travis-ci.org/Burke-Lauenroth-Lab/rSOILWAT2.svg?branch=master
+[2]: https://travis-ci.org/Burke-Lauenroth-Lab/rSOILWAT2
+[3]: https://ci.appveyor.com/api/projects/status/3bgvcsokr27bo1uh/branch/master?svg=true
+[4]: https://ci.appveyor.com/project/dschlaep/rSOILWAT2/branch/master
+[5]: https://img.shields.io/github/release/Burke-Lauenroth-Lab/rSOILWAT2.svg?label=current+release
+[6]: https://github.com/Burke-Lauenroth-Lab/rSOILWAT2/releases
+[7]: https://img.shields.io/github/license/Burke-Lauenroth-Lab/rSOILWAT2.svg
+[8]: https://www.gnu.org/licenses/gpl.html
+[9]: https://coveralls.io/repos/github/Burke-Lauenroth-Lab/rSOILWAT2/badge.svg
+[10]: https://coveralls.io/github/Burke-Lauenroth-Lab/rSOILWAT2
+[11]: https://img.shields.io/github/downloads/Burke-Lauenroth-Lab/rSOILWAT2/total.svg
+[12]: https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+
 
 # rSOILWAT2
 A R package for SOILWAT2.
@@ -98,11 +113,19 @@ system2(command = "git", args = "clone -b master --single-branch --recursive htt
 tools::Rcmd(args = paste("INSTALL rSOILWAT2"))
 ```
 
+### Binary package version
 If you want a binary version of the 'rSOILWAT2' package (e.g., to distribute to someone
 without development tools) for a platform to which you do not have access, then you may
 consider using one of the cloud services (no endorsements):
 - https://builder.r-hub.io offers different Linux, Windows, and mac OS flavors as targets
 - http://win-builder.r-project.org/ offers Windows OS as target
+
+Alternatively, you may access the previous binary package version for Windows OS from our
+CI appveyor service if the build was successful and an artifact was generated for the
+binary package (this would be named 'rSOILWAT2_X.Y.Z.zip' with version number X.Y.Z) at
+- https://ci.appveyor.com/project/dschlaep/rSOILWAT2/build/artifacts
+If the latest build should have failed, then you may want to check out the 'History' tab
+for binaries of older versions.
 
 
 
@@ -145,7 +168,26 @@ In order to contribute to the code base of this project, you should first contac
 Lauenroth Lab. We retain any decision to accept your suggestions/contributions or not.
 
 
-## Notes
+
+
+# Code of conduct
+Please note that this project is released with a
+[Contributor Code of Conduct](CONDUCT.md). By participating in this project you agree
+to abide by its terms.
+
+
+# License
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, [version 3 of the License](LICENSE).
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+
+# Notes
 
 __Repository renamed from Rsoilwat (Rsoilwat31) to rSOILWAT2 on Feb 23, 2017__
 
