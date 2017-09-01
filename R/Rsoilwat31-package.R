@@ -103,13 +103,13 @@ NULL
 #' swFiles_Carbon<-,swInputData-method
 #' swFiles_Carbon,swInputData-method
 #' swCarbon_Use_Bio,swInputData-method
-#' swCarbon_Use_Sto,swInputData-method
+#' swCarbon_Use_WUE,swInputData-method
 #' swCarbon_Scenario,swInputData-method
 #' swCarbon_DeltaYear,swInputData-method
 #' swCarbon_Scenario<-,swInputData-method
 #' swCarbon_DeltaYear<-,swInputData-method
 #' swCarbon_Use_Bio<-,swInputData-method
-#' swCarbon_Use_Sto<-,swInputData-method
+#' swCarbon_Use_WUE<-,swInputData-method
 #' swFiles_filesIn<- swInputData-method
 #' swFiles_filesIn swInputData-method
 #' swFiles_LogFile<- swInputData-method
@@ -331,13 +331,13 @@ NULL
 #' @name swCarbon-class
 #' @aliases
 #' swCarbon_Use_Bio,swInputData-method
-#' swCarbon_Use_Sto,swInputData-method
+#' swCarbon_Use_WUE,swInputData-method
 #' swCarbon_Scenario,swInputData-method
 #' swCarbon_DeltaYear,swInputData-method
 #' swCarbon_Scenario<-,swInputData-method
 #' swCarbon_DeltaYear<-,swInputData-method
 #' swCarbon_Use_Bio<-,swInputData-method
-#' swCarbon_Use_Sto<-,swInputData-method
+#' swCarbon_Use_WUE<-,swInputData-method
 #' 
 #' @docType class
 #' @section Objects from the Class: Objects can be created by calls of the form

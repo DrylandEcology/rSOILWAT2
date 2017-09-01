@@ -406,7 +406,7 @@ setGeneric(name="get_swCarbon",function(object) {standardGeneric("get_swCarbon")
 #' @export
 setGeneric(name="swCarbon_Use_Bio",function(object) {standardGeneric("swCarbon_Use_Bio")})
 #' @export
-setGeneric(name="swCarbon_Use_Sto",function(object) {standardGeneric("swCarbon_Use_Sto")})
+setGeneric(name="swCarbon_Use_WUE",function(object) {standardGeneric("swCarbon_Use_WUE")})
 #' @export
 setGeneric(name="swCarbon_Scenario",function(object) {standardGeneric("swCarbon_Scenario")})
 #' @export
@@ -417,7 +417,7 @@ setGeneric(name="set_swCarbon<-",function(object, value) {standardGeneric("set_s
 #' @export
 setGeneric(name="swCarbon_Use_Bio<-",function(object, value) {standardGeneric("swCarbon_Use_Bio<-")})
 #' @export
-setGeneric(name="swCarbon_Use_Sto<-",function(object, value) {standardGeneric("swCarbon_Use_Sto<-")})
+setGeneric(name="swCarbon_Use_WUE<-",function(object, value) {standardGeneric("swCarbon_Use_WUE<-")})
 #' @export
 setGeneric(name="swCarbon_Scenario<-",function(object, value) {standardGeneric("swCarbon_Scenario<-")})
 #' @export
