@@ -14,10 +14,16 @@ install:
 
 # Adapt as necessary starting from here
 environment:
+  USE_RTOOLS: true
   global:
     WARNINGS_ARE_ERRORS:
   matrix:
     - R_VERSION: release
+    - R_ARCH: i386
+    - R_ARCH: x64
+
+matrix:
+  fast_finish: true
 
 cache:
   - C:\RLibrary
