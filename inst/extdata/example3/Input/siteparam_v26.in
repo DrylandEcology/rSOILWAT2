@@ -64,9 +64,9 @@
 
 # ---- CO2 Settings ----
 # Use biomass multiplier
-0
+1
 # Use water-usage efficiency multiplier
-0
+1
 # Scenario
 RCP85
 

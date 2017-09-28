@@ -3,7 +3,7 @@
 dir_in <- file.path("inst", "extdata")
 dir_out <- file.path("tests", "testthat")
 
-tests <- 1:2
+tests <- 1:3
 examples <- paste0("example", tests)
 
 for (it in seq_along(tests)) {

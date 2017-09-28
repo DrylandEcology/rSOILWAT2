@@ -1,0 +1,5 @@
+71.0 61.0 61.0 51.0 41.0 31.0 23.0 23.0 31.0 41.0 61.0 61.0 	# (site:	002_-119.415_39.046	), sky cover (sunrise-sunset),%,Climate Atlas of the US,http://cdo.ncdc.noaa.gov/cgi-bin/climaps/climaps.pl
+1.3 2.9 3.3 3.8 3.8 3.8 3.3 3.3 2.9 1.3 1.3 1.3 	# Wind speed (m/s),Climate Atlas of the US,http://cdo.ncdc.noaa.gov/cgi-bin/climaps/climaps.pl
+61.0 61.0 61.0 51.0 51.0 51.0 41.0 41.0 51.0 51.0 61.0 61.0 	# rel. Humidity (%),Climate Atlas of the US,http://cdo.ncdc.noaa.gov/cgi-bin/climaps/climaps.pl
+1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 	# transmissivity (rel), only used in petfunc, but falls out of the equations (a = trans * b, c = a / trans)
+213.7 241.6 261.0 308.0 398.1 464.5 0.0 0.0 0.0 140.0 161.6 185.1 	# snow density (kg/m3): Brown, R. D. and P. W. Mote. 2009. The response of Northern Hemisphere snow cover to a changing climate. Journal of Climate 22:2124-2145.
