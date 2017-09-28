@@ -16,6 +16,8 @@
 \alias{get_swWeather}
 \alias{get_swYears}
 \alias{get_WeatherHistory}
+\alias{get_swCarbon,swInputData-method}
+\alias{set_swCarbon<-,swInputData-method}
 \alias{set_Markov<-}
 \alias{set_swCloud<-}
 \alias{set_swFiles<-}
@@ -48,6 +50,16 @@
 \alias{swFiles_Cloud}
 \alias{swFiles_Estab<-}
 \alias{swFiles_Estab}
+\alias{swFiles_Carbon<-,swInputData-method}
+\alias{swFiles_Carbon,swInputData-method}
+\alias{swCarbon_Use_Bio,swInputData-method}
+\alias{swCarbon_Use_WUE,swInputData-method}
+\alias{swCarbon_Scenario,swInputData-method}
+\alias{swCarbon_DeltaYear,swInputData-method}
+\alias{swCarbon_Scenario<-,swInputData-method}
+\alias{swCarbon_DeltaYear<-,swInputData-method}
+\alias{swCarbon_Use_Bio<-,swInputData-method}
+\alias{swCarbon_Use_WUE<-,swInputData-method}
 \alias{swFiles_filesIn<-}
 \alias{swFiles_filesIn}
 \alias{swFiles_LogFile<-}
@@ -207,6 +219,7 @@ https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+\code{\linkS4class{swCarbon}}
 }
 \author{
 Ryan Murphy
