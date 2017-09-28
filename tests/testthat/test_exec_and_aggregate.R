@@ -23,7 +23,7 @@ for (it in tests) {
   test_that("Simulate and aggregate", {
     # Run SOILWAT
     expect_s4_class(rd <- sw_exec(inputData = sw_input, weatherList = sw_weather,
-        echo = FALSE, quiet = FALSE), "swOutput")
+      echo = FALSE, quiet = FALSE), "swOutput")
 
     # Loop through output
     temp <- slotNames(rd)
