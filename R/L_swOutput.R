@@ -34,7 +34,7 @@ setMethod("swOutput_KEY_Columns","swOutput_KEY", function(object) { return(objec
 
 setReplaceMethod(f="swOutput_KEY_Period", signature="swOutput_KEY", definition=function(object,index,value) {slot(object,slotNames(object)[-(1:3)][index]) <- value; return(object)})
 
-swOutput_CO2EFFECTS <- new("swOutput_KEY",Title="co2_effects", TimeStep=2L, Columns=12L)
+swOutput_CO2EFFECTS <- new("swOutput_KEY",Title="co2_effects", TimeStep=4L, Columns=18L)
 swOutput_WTHR <- new("swOutput_KEY",Title="",TimeStep=4L,Columns=0L)
 swOutput_TEMP <- new("swOutput_KEY",Title="temp_air",TimeStep=1L,Columns=4L)
 swOutput_PRECIP <- new("swOutput_KEY",Title="precip",TimeStep=2L,Columns=5L)
@@ -166,7 +166,7 @@ setMethod(f="initialize",signature="swOutput",definition=function(.Object,Layers
 			.Object@SOILTEMP@Columns <- Layers
 			.Object@ALLVEG@Columns <- 0L
 			.Object@ESTABL@Columns <- VegEstabCount
-			.Object@CO2EFFECTS@Columns <- 12L
+			.Object@CO2EFFECTS@Columns <- 18L
 
 #			for(i in 1:28) {#loop through KEYS
 #				if(Key_use[i]) {
