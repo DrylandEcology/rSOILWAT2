@@ -272,6 +272,8 @@ setGeneric(name="swProd_HydrRedstro",function(object) {standardGeneric("swProd_H
 #' @export
 setGeneric(name="swProd_CritSoilWaterPotential",function(object) {standardGeneric("swProd_CritSoilWaterPotential")})
 #' @export
+setGeneric(name="swProd_CO2Coefficients",function(object) {standardGeneric("swProd_CO2Coefficients")})
+#' @export
 setGeneric(name="swProd_MonProd_grass",function(object) {standardGeneric("swProd_MonProd_grass")})
 #' @export
 setGeneric(name="swProd_MonProd_shrub",function(object) {standardGeneric("swProd_MonProd_shrub")})
@@ -308,6 +310,8 @@ setGeneric(name="swProd_HydrRedstro_use<-",function(object, value) {standardGene
 setGeneric(name="swProd_HydrRedstro<-",function(object, value) {standardGeneric("swProd_HydrRedstro<-")})
 #' @export
 setGeneric(name="swProd_CritSoilWaterPotential<-",function(object, value) {standardGeneric("swProd_CritSoilWaterPotential<-")})
+#' @export
+setGeneric(name="swProd_CO2Coefficients<-",function(object, value) {standardGeneric("swProd_CO2Coefficients<-")})
 #' @export
 setGeneric(name="swProd_MonProd_grass<-",function(object, value) {standardGeneric("swProd_MonProd_grass<-")})
 #' @export
