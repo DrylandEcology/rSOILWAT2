@@ -381,6 +381,7 @@ setMethod(f="swWriteLines",signature=c(object="swInputData",file="character"), d
 			swWriteLines(object@site, file.path(file,object@files@InFiles[4]))
 			swWriteLines(object@soils, file.path(file,object@files@InFiles[5]))
 			swWriteLines(object@estab, file.path(file,object@files@InFiles[11]))
+			swWriteLines(object@carbon, file.path(file,object@files@InFiles[12]))
 			if(object@estab@useEstab) {
 				for(i in 1:object@estab@count) {
 					swWriteLines(as(object=object@estab,Class="swEstabSpecies"), file.path(file, object@estab@fileName[i]))
@@ -416,5 +417,6 @@ setMethod(f="swReadLines", signature=c(object="swInputData",file="character"), d
 			}
 			object@output <- swReadLines(object@output,file.path(object@files@ProjDir, object@files@InFiles[14]))
 			object@swc <- swReadLines(object@swc,file.path(object@files@ProjDir, object@files@InFiles[13]))
+			object@carbon <- swReadLines(object@carbon, file.path(object@files@ProjDir, object@files@InFiles[12]))
 			return(object)
 		})
