@@ -2,4 +2,4 @@
 	path = src
 	url = https://github.com/Burke-Lauenroth-Lab/SOILWAT2
 [submodule "SOILWAT2"]
-	branch = master
+	branch = soilwat_co2_effects
