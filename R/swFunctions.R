@@ -1059,8 +1059,22 @@ dbW_dataframe_to_monthly <- function(dailySW) {
 }
 
 
-
+#' Assign years to weather data.frame
+#' @param weatherDF A data.frame. data.frame containing weather information for
+#' site.
+#' @param years A numeric or integer vector or \code{NULL}. Vector of year data
+#' where length is equal to either the number of years in the weather data.frame
+#' or the number of rows in the data.frame.
+#' @param weatherDF_dataColumns A vector of string values. Column names of the
+#' weather data.frame.
+#' @return A named list of length 2.
+#' \itemize{
+#'	\item \code{years} a vector of unique year values.
+#'  \item \code{year_ts} a vector of time series values for each row/day of the
+#' data.frame.
+#' }
 #' @export
+
 get_years_from_weatherDF <- function(weatherDF, years, weatherDF_dataColumns){
 	if(!is.null(years)){
 		if(length(years) == nrow(weatherDF)){
