@@ -316,17 +316,17 @@ test_that("Manipulate weather data", {
     
     datA_DF_result_con1 <- get_years_from_weatherDF(datA_DF, datA_yrs_ts, weatherDF_dataColumns) 
     expect_equal(datA_DF_result_con1[["years"]], datA_yrs)
-    expect_equal(datA_DF_result_con1[["years_ts"]], datA_yrs_ts)
+    expect_equal(datA_DF_result_con1[["year_ts"]], datA_yrs_ts)
     
     datA_DF_result_con2 <- get_years_from_weatherDF(datA_DF, datA_yrs, weatherDF_dataColumns) 
     expect_equal(datA_DF_result_con2[["years"]], datA_yrs)
-    expect_equal(datA_DF_result_con2[["years_ts"]], datA_yrs_ts)
+    expect_equal(datA_DF_result_con2[["year_ts"]], datA_yrs_ts)
     
     expect_error(get_years_from_weatherDF(datA_DF, datA_yrs[2:20], weatherDF_dataColumns)) #con 3
     
     datA_DF_result_con4 <- get_years_from_weatherDF(datA_DF, NULL, weatherDF_dataColumns) 
     expect_equal(datA_DF_result_con4[["years"]], datA_yrs)
-    expect_equal(datA_DF_result_con4[["years_ts"]], datA_yrs_ts)
+    expect_equal(datA_DF_result_con4[["year_ts"]], datA_yrs_ts)
     
     expect_error(get_years_from_weatherDF(datA_DF_noyrs, NULL, weatherDF_dataColumns)) #con 5
 

@@ -7,17 +7,22 @@
 get_years_from_weatherDF(weatherDF, years, weatherDF_dataColumns)
 }
 \arguments{
-\item{weatherDF}{A data.frame. data.frame containing weather information for site.}
+\item{weatherDF}{A data.frame. data.frame containing weather information for
+site.}
 
-\item{years}{A numeric or integer vector or \code{NULL}. Vector of year data where length is equal to either the number of years in the weather data.frame OR the number of rows in the data.frame.}
+\item{years}{A numeric or integer vector or \code{NULL}. Vector of year data
+where length is equal to either the number of years in the weather data.frame
+or the number of rows in the data.frame.}
 
-\item{weatherDF_dataColumns}{A vector of string values. Column names of the weather data.frame.}
+\item{weatherDF_dataColumns}{A vector of string values. Column names of the
+weather data.frame.}
 }
 \value{
 A named list of length 2.
 \itemize{
 \item \code{years} a vector of unique year values.
- \item \code{year_ts} a vector of time series values for each row/day of the data.frame.
+ \item \code{year_ts} a vector of time series values for each row/day of the
+data.frame.
 }
 }
 \description{
