@@ -110,8 +110,10 @@ NULL
 #' swCarbon_Use_WUE,swInputData-method
 #' swCarbon_Scenario,swInputData-method
 #' swCarbon_DeltaYear,swInputData-method
+#' swCarbon_CO2ppm,swInputData-method
 #' swCarbon_Scenario<-,swInputData-method
 #' swCarbon_DeltaYear<-,swInputData-method
+#' swCarbon_CO2ppm<-,swInputData-method
 #' swCarbon_Use_Bio<-,swInputData-method
 #' swCarbon_Use_WUE<-,swInputData-method
 #' swFiles_filesIn<- swInputData-method
@@ -338,8 +340,10 @@ NULL
 #' swCarbon_Use_WUE,swInputData-method
 #' swCarbon_Scenario,swInputData-method
 #' swCarbon_DeltaYear,swInputData-method
+#' swCarbon_CO2ppm,swInputData-method
 #' swCarbon_Scenario<-,swInputData-method
 #' swCarbon_DeltaYear<-,swInputData-method
+#' swCarbon_CO2ppm<-,swInputData-method
 #' swCarbon_Use_Bio<-,swInputData-method
 #' swCarbon_Use_WUE<-,swInputData-method
 #' 

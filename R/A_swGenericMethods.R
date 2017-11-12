@@ -415,6 +415,8 @@ setGeneric(name="swCarbon_Use_WUE",function(object) {standardGeneric("swCarbon_U
 setGeneric(name="swCarbon_Scenario",function(object) {standardGeneric("swCarbon_Scenario")})
 #' @export
 setGeneric(name="swCarbon_DeltaYear",function(object) {standardGeneric("swCarbon_DeltaYear")})
+#' @export
+setGeneric(name="swCarbon_CO2ppm", function(object) {standardGeneric("swCarbon_CO2ppm")})
 
 #' @export
 setGeneric(name="set_swCarbon<-",function(object, value) {standardGeneric("set_swCarbon<-")})
@@ -426,6 +428,8 @@ setGeneric(name="swCarbon_Use_WUE<-",function(object, value) {standardGeneric("s
 setGeneric(name="swCarbon_Scenario<-",function(object, value) {standardGeneric("swCarbon_Scenario<-")})
 #' @export
 setGeneric(name="swCarbon_DeltaYear<-",function(object, value) {standardGeneric("swCarbon_DeltaYear<-")})
+#' @export
+setGeneric(name="swCarbon_CO2ppm<-",function(object, value) {standardGeneric("swCarbon_CO2ppm<-")})
 ########################
 
 #########SWC############

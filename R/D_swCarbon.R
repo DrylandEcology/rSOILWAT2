@@ -21,13 +21,14 @@
 #' @export
 setClass("swCarbon", 
   
-  representation(CarbonUseBio='integer', CarbonUseWUE='integer', Scenario='character', DeltaYear='integer'),
+  representation(CarbonUseBio='integer', CarbonUseWUE='integer', Scenario='character', DeltaYear='integer', CO2ppm='vector'),
   
   prototype=prototype(
     CarbonUseBio = as.integer(0),
     CarbonUseWUE = as.integer(0),
-    Scenario = as.character("RCP85"),
-    DeltaYear = as.integer(0)
+    Scenario = as.character("Default"),  # This is not used in rSOILWAT2, but it's useful to see what scenario was used in the input object
+    DeltaYear = as.integer(0),
+    CO2ppm = c(rep(360.0, 2500))  # Index of value represents the year; we make the implicit assumption that the input biomass is at 360 ppm
   ))
 
 setMethod(f="swClear",
@@ -35,7 +36,8 @@ setMethod(f="swClear",
           definition=function(object) {
             object@CarbonUseBio = as.integer(0)
             object@CarbonUseWUE = as.integer(0)
-            object@Scenario = as.character("RCP85")
+            object@Scenario = as.character("Default")
             object@DeltaYear = as.integer(0)
+            object@CO2ppm = c(rep(360.0, 2500))
             return(object)
           })
