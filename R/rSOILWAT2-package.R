@@ -336,16 +336,16 @@ NULL
 #'
 #' @name swCarbon-class
 #' @aliases
-#' swCarbon_Use_Bio,swInputData-method
-#' swCarbon_Use_WUE,swInputData-method
-#' swCarbon_Scenario,swInputData-method
-#' swCarbon_DeltaYear,swInputData-method
-#' swCarbon_CO2ppm,swInputData-method
-#' swCarbon_Scenario<-,swInputData-method
-#' swCarbon_DeltaYear<-,swInputData-method
-#' swCarbon_CO2ppm<-,swInputData-method
-#' swCarbon_Use_Bio<-,swInputData-method
-#' swCarbon_Use_WUE<-,swInputData-method
+#' swCarbon_Use_Bio,swCarbon-method
+#' swCarbon_Use_WUE,swCarbon-method
+#' swCarbon_Scenario,swCarbon-method
+#' swCarbon_DeltaYear,swCarbon-method
+#' swCarbon_CO2ppm,swCarbon-method
+#' swCarbon_Scenario<-,swCarbon-method
+#' swCarbon_DeltaYear<-,swCarbon-method
+#' swCarbon_CO2ppm<-,swCarbon-method
+#' swCarbon_Use_Bio<-,swCarbon-method
+#' swCarbon_Use_WUE<-,swCarbon-method
 #' 
 #' @docType class
 #' @section Objects from the Class: Objects can be created by calls of the form
