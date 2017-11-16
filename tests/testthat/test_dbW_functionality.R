@@ -37,6 +37,10 @@ site_data3 <- data.frame(
   Label = paste0("TestSite_id", site_N + site_ids),
   stringsAsFactors = FALSE)
 
+weatherDF_dataColumns <- c("DOY","Tmax_C","Tmin_C","PPT_cm")
+
+
+
 # This function is needed for appveyor: for some reason 'dbW_createDatabase' doesn't
 # remove (in any situation) failed disk files 'fdbWeather'; this is not a problem on
 # travis or on my local macOS
@@ -292,7 +296,9 @@ unlink(fdbWeather2, force = TRUE)
 
 #--- Non-dbW functions
 test_that("Manipulate weather data", {
+  
   for (k in seq_along(tests)) {
+    
     datA <- getWeatherData_folders(LookupWeatherFolder = file.path(path_extdata,
       paste0("example", k), "Input"), weatherDirName = "data_weather",
       filebasename = "weath")
@@ -302,6 +308,27 @@ test_that("Manipulate weather data", {
     yrs_joint <- intersect(datA_yrs, datB_yrs)
     expect_equal(datA[select_years(datA_yrs, min(yrs_joint), max(yrs_joint))],
       datB[select_years(datB_yrs, min(yrs_joint), max(yrs_joint))], tol = 1e-3)
+    
+    # Unit tests for function 'get_years_from_weatherDF'
+    datA_DF <- dbW_weatherData_to_dataframe(datA)
+    datA_DF_noyrs  <- datA_DF[, -1]
+    datA_yrs_ts <- datA_DF[, 1]
+    
+    datA_DF_result_con1 <- get_years_from_weatherDF(datA_DF, datA_yrs_ts, weatherDF_dataColumns) 
+    expect_equal(datA_DF_result_con1[["years"]], datA_yrs)
+    expect_equal(datA_DF_result_con1[["year_ts"]], datA_yrs_ts)
+    
+    datA_DF_result_con2 <- get_years_from_weatherDF(datA_DF, datA_yrs, weatherDF_dataColumns) 
+    expect_equal(datA_DF_result_con2[["years"]], datA_yrs)
+    expect_equal(datA_DF_result_con2[["year_ts"]], datA_yrs_ts)
+    
+    expect_error(get_years_from_weatherDF(datA_DF, datA_yrs[2:20], weatherDF_dataColumns)) #con 3
+    
+    datA_DF_result_con4 <- get_years_from_weatherDF(datA_DF, NULL, weatherDF_dataColumns) 
+    expect_equal(datA_DF_result_con4[["years"]], datA_yrs)
+    expect_equal(datA_DF_result_con4[["year_ts"]], datA_yrs_ts)
+    
+    expect_error(get_years_from_weatherDF(datA_DF_noyrs, NULL, weatherDF_dataColumns)) #con 5
+
   }
 })
-
