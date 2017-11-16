@@ -327,19 +327,28 @@ setReplaceMethod(f="swSWC_HistoricData",signature=c(object="swInputData", value=
 		})
 
 ##
-setMethod("get_swCarbon", "swInputData", definition=function(object) {return(object@carbon)})
+setMethod("get_swCarbon", "swInputData", function(object) {return(object@carbon)})
 setMethod("swCarbon_Use_Bio","swInputData",function(object) {return(object@carbon@CarbonUseBio)})
 setMethod("swCarbon_Use_WUE","swInputData",function(object) {return(object@carbon@CarbonUseWUE)})
 setMethod("swCarbon_Scenario","swInputData",function(object) {return(object@carbon@Scenario)})
 setMethod("swCarbon_DeltaYear","swInputData",function(object) {return(object@carbon@DeltaYear)})
-setMethod("swCarbon_CO2ppm","swInputData",function(object) {return(object@carbon@CO2ppm)})
+setMethod("swCarbon_CO2ppm", "swInputData", function(object) {return(object@carbon@CO2ppm)})
 
-setReplaceMethod(f="set_swCarbon", signature="swInputData", definition=function(object,value) {object@carbon <- value; return(object)})
+setReplaceMethod(f = "set_swCarbon", signature = "swInputData", function(object,value) {
+    slot(object, "carbon") <- value
+    validObject(slot(object, "carbon"))
+    return(object)
+  })
 setReplaceMethod(f="swCarbon_Use_Bio",signature=c(object="swInputData", value="integer"),function(object, value) {object@carbon@CarbonUseBio <- value; return(object)})
 setReplaceMethod(f="swCarbon_Use_WUE",signature=c(object="swInputData", value="integer"),function(object, value) {object@carbon@CarbonUseWUE <- value; return(object)})
 setReplaceMethod(f="swCarbon_Scenario",signature=c(object="swInputData", value="character"),function(object, value) {object@carbon@Scenario <- value; return(object)})
 setReplaceMethod(f="swCarbon_DeltaYear",signature=c(object="swInputData", value="integer"),function(object, value) {object@carbon@DeltaYear <- value; return(object)})
-setReplaceMethod(f="swCarbon_CO2ppm",signature=c(object="swInputData", value="numeric"),function(object, value) {object@carbon@CO2ppm <- value; return(object)})
+setReplaceMethod(f = "swCarbon_CO2ppm",
+  signature = c(object = "swInputData", value = "list"), function(object, value) {
+    slot(slot(object, "carbon"), "CO2ppm") <- value
+    validObject(slot(object, "carbon"))
+    return(object)
+  })
 ##
 
 ##
