@@ -92,10 +92,10 @@
 #' sw_in <- sw_inputData()
 #'
 #' ## Slots of the input object of class 'swInputData'
-#' str(sw_in, max.level=2)
+#' str(sw_in, max.level = 2)
 #'
 #' ## Execute the simulation run
-#' sw_out <- sw_exec(inputData = sw_in)
+#' \dontrun{sw_out <- sw_exec(inputData = sw_in)}
 #'
 #'
 #' ## ------ Directory to a SOLWAT project used in the following examples
@@ -103,7 +103,7 @@
 #'
 #' ## ------ Simulation with data read from disk during execution ------------
 #' ## Execute the simulation run
-#' \dontrun{sw_out1 <- sw_exec(dir = path_demo, files.in = "files_v31.in")
+#' sw_out1 <- sw_exec(dir = path_demo, files.in = "files_v31.in")
 #'
 #' ## Slots of the output object of class 'swOutput'
 #' str(sw_out1, max.level=2)
@@ -158,7 +158,18 @@
 #' ## Execute the simulation run
 #' sw_out5 <- sw_exec(inputData = sw_in5, weatherList = NULL)
 #'
-#' }
+#'
+#' ## ------ Simulation with CO2-effects ------------
+#' ## Read inputs from files on disk (including daily weather forcing)
+#' path_demo3 <- system.file("extdata", "example3", package = "rSOILWAT2")
+#' sw_in6 <- sw_inputDataFromFiles(dir = path_demo3, files.in = "files_v31.in")
+#'
+#' ## Slots of the input object of class 'swInputData'
+#' str(sw_in6, max.level=2)
+#'
+#' ## Execute the simulation run
+#' sw_out6 <- sw_exec(inputData = sw_in6)
+#'
 #'
 #' ## See help(package = "rSOILWAT2") for a full list of functions
 #'

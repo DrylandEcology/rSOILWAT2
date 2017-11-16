@@ -3,14 +3,16 @@
 \docType{class}
 \name{swCarbon-class}
 \alias{swCarbon-class}
-\alias{swCarbon_Use_Bio,swInputData-method}
-\alias{swCarbon_Use_WUE,swInputData-method}
-\alias{swCarbon_Scenario,swInputData-method}
-\alias{swCarbon_DeltaYear,swInputData-method}
-\alias{swCarbon_Scenario<-,swInputData-method}
-\alias{swCarbon_DeltaYear<-,swInputData-method}
-\alias{swCarbon_Use_Bio<-,swInputData-method}
-\alias{swCarbon_Use_WUE<-,swInputData-method}
+\alias{swCarbon_Use_Bio,swCarbon-method}
+\alias{swCarbon_Use_WUE,swCarbon-method}
+\alias{swCarbon_Scenario,swCarbon-method}
+\alias{swCarbon_DeltaYear,swCarbon-method}
+\alias{swCarbon_CO2ppm,swCarbon-method}
+\alias{swCarbon_Scenario<-,swCarbon-method}
+\alias{swCarbon_DeltaYear<-,swCarbon-method}
+\alias{swCarbon_CO2ppm<-,swCarbon-method}
+\alias{swCarbon_Use_Bio<-,swCarbon-method}
+\alias{swCarbon_Use_WUE<-,swCarbon-method}
 \title{Class \code{"swCarbon"}}
 \description{
 The generic functions listed work on this and the proper sw Class in the container's slots.

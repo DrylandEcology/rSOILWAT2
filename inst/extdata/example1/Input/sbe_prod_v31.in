@@ -1,5 +1,5 @@
 # Plant production data file for SOILWAT
-# Location:  
+# Location:
 
 # ---- Composition of vegetation type components (0-1; must add up to 1)
 # Grasses	Shrubs		Trees		Forbs		Bare Ground
@@ -22,7 +22,7 @@
 29.5		5.0			5.0     	29.5	# yinflec
 85.			100.		3000.		85.		# range
 0.002		0.003		0.00008 	0.002	# slope
-0.			50.			1200.		0.		# if > 0 then constant canopy height (cm)		
+0.			50.			1200.		0.		# if > 0 then constant canopy height (cm)
 
 
 # --- Vegetation interception parameters for equation: intercepted rain = (a + b*veg) + (c+d*veg) * ppt; Grasses+Shrubs: veg=vegcov, Trees: veg=LAI
@@ -48,10 +48,10 @@
 
 # ---- Parameter for scaling and limiting bare soil evaporation rate: if totagb (g/m2) > param then no bare-soil evaporation
 # Grasses	Shrubs		Trees		Forbs
-999.		999.		2099.		999.	# 
+999.		999.		2099.		999.	#
 
 
-# --- Shade effects on transpiration based on live and dead biomass 
+# --- Shade effects on transpiration based on live and dead biomass
 # Grasses	Shrubs		Trees		Forbs
 0.3			0.3			0.3			0.3		# shade scale
 150.		150.		150.		150.	# shade maximal dead biomass
@@ -73,6 +73,15 @@
 # Grasses	Shrubs		Trees		Forbs
 -3.5		-3.9		-2.0		-2.0
 
+# CO2 Coefficients: Coeff1 * ppm^Coeff2
+# Biomass
+# Grasses  Shrubs  Trees  Forbs
+  0.127    0.127   0.127  0.127  # Coeff1
+  0.3501   0.3501  0.3501 0.3501 # Coeff2
+# WUE
+# Grasses  Shrubs  Trees  Forbs
+  22.464   22.464  22.464 22.464 # Coeff1
+  -0.531   -0.531  -0.531 -0.531 # Coeff2
 
 # Grasslands component:
 # -------------- Monthly production values ------------

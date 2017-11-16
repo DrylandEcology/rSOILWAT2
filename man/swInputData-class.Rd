@@ -56,8 +56,10 @@
 \alias{swCarbon_Use_WUE,swInputData-method}
 \alias{swCarbon_Scenario,swInputData-method}
 \alias{swCarbon_DeltaYear,swInputData-method}
+\alias{swCarbon_CO2ppm,swInputData-method}
 \alias{swCarbon_Scenario<-,swInputData-method}
 \alias{swCarbon_DeltaYear<-,swInputData-method}
+\alias{swCarbon_CO2ppm<-,swInputData-method}
 \alias{swCarbon_Use_Bio<-,swInputData-method}
 \alias{swCarbon_Use_WUE<-,swInputData-method}
 \alias{swFiles_filesIn<-}

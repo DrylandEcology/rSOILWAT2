@@ -66,3 +66,4 @@ SNOWPACK		avg		WK		1		end		snowpack		/* snowpack water equivalent (cm), snowdept
 DEEPSWC			sum		MO		1		end		deep_drain		/* deep drainage into lowest layer (cm) */
 SOILTEMP		avg		MO		1		end		temp_soil		/* soil temperature from each soil layer (in celsius)
 ESTABL			off		YR		1		end		estabs			/* yearly establishment results */
+CO2EFFECTS 		avg 	DY 		1 		end 		co2_effects 		/* 4 columns (grasses, shrubs, trees, forbs) for each category described here: biomass (g/m^2), biolive (g/m^2), biomass multiplier (decimal percent), water-usage efficiency multiplier (decimal percent) */
