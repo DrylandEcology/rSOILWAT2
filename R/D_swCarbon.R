@@ -52,9 +52,16 @@ setValidity("swCarbon", function(object) {
     val <- if (isTRUE(val)) msg else c(val, msg)
 
   } else {
-    is_bad <- any(is.na(object@CO2ppm[, "Year"])) || !is.integer(object@CO2ppm[, "Year"])
+    is_bad <- any(is.na(object@CO2ppm[, "Year"]) |
+      round(object@CO2ppm[, "Year"]) != object@CO2ppm[, "Year"])
     if (is_bad) {
       msg <- "@CO2ppm: has missing and/or non-integer years"
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    is_bad <- !all(diff(object@CO2ppm[, "Year"]) == 1)
+    if (is_bad) {
+      msg <- "@CO2ppm: years are not consecutive"
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 

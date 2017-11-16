@@ -45,10 +45,16 @@ test_that("Manipulate swCarbon", {
   swCarbon_CO2ppm(xinput2) <- swCarbon_CO2ppm(xinput)
   expect_equal(swCarbon_CO2ppm(xinput2), swCarbon_CO2ppm(xinput))
   expect_error(swCarbon_CO2ppm(xinput2) <- 0.5)
-  # Fail validity
+
+  # Fail CO2 slot validity checks
+  co2_ok <- co2
   co2[10, ] <- NA
   co2[20, "CO2ppm"] <- -5
   expect_error(swCarbon_CO2ppm(xinput2) <- co2)
+  co2 <- co2_ok
   colnames(co2) <- c("year", "co2")
+  expect_error(swCarbon_CO2ppm(xinput2) <- co2)
+  co2 <- co2_ok
+  co2[10, "Year"] <- 1789
   expect_error(swCarbon_CO2ppm(xinput2) <- co2)
 })
