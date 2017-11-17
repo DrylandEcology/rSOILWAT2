@@ -28,3 +28,4 @@ BugReports: https://github.com/Burke-Lauenroth-Lab/rSOILWAT2/issues
 RoxygenNote: 6.0.1
 LazyData: true
 ByteCompile: true
+VignetteBuilder: knitr
