@@ -3,7 +3,7 @@ context("rSOILWAT2 annual aggregation")
 #---CONSTANTS
 tol <- 1e-6
 OutSum <- c("off", "sum", "mean", "fnl")
-tests <- c("Ex1", "Ex2")
+tests <- c("Ex1", "Ex2", "Ex3")
 
 for (it in tests) {
   #---INPUTS

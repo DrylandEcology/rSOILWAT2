@@ -2,7 +2,7 @@ context("rSOILWAT2 soil temperature instability")
 
 #---CONSTANTS
 sw_TimeSteps <- c("Day", "Week", "Month", "Year")
-tests <- c("Ex1", "Ex2")
+tests <- c("Ex1", "Ex2", "Ex3")
 
 for (it in tests) {
   #---INPUTS
