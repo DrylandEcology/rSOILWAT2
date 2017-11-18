@@ -334,7 +334,7 @@ setMethod("swCarbon_Scenario","swInputData",function(object) {return(object@carb
 setMethod("swCarbon_DeltaYear","swInputData",function(object) {return(object@carbon@DeltaYear)})
 setMethod("swCarbon_CO2ppm", "swInputData", function(object) {return(object@carbon@CO2ppm)})
 
-setReplaceMethod(f = "set_swCarbon", signature = "swInputData", function(object,value) {
+setReplaceMethod(f = "set_swCarbon", signature = "swInputData", function(object, value) {
     slot(object, "carbon") <- value
     validObject(slot(object, "carbon"))
     return(object)
@@ -344,7 +344,7 @@ setReplaceMethod(f="swCarbon_Use_WUE",signature=c(object="swInputData", value="i
 setReplaceMethod(f="swCarbon_Scenario",signature=c(object="swInputData", value="character"),function(object, value) {object@carbon@Scenario <- value; return(object)})
 setReplaceMethod(f="swCarbon_DeltaYear",signature=c(object="swInputData", value="integer"),function(object, value) {object@carbon@DeltaYear <- value; return(object)})
 setReplaceMethod(f = "swCarbon_CO2ppm",
-  signature = c(object = "swInputData", value = "list"), function(object, value) {
+  signature = c(object = "swInputData", value = "matrix"), function(object, value) {
     slot(slot(object, "carbon"), "CO2ppm") <- value
     validObject(slot(object, "carbon"))
     return(object)

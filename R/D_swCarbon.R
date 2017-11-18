@@ -21,14 +21,14 @@
 #' @export
 setClass("swCarbon",
   representation(CarbonUseBio = 'integer', CarbonUseWUE = 'integer',
-    Scenario = 'character', DeltaYear = 'integer', CO2ppm = 'data.frame'),
+    Scenario = 'character', DeltaYear = 'integer', CO2ppm = 'matrix'),
 
   prototype = prototype(
     CarbonUseBio = as.integer(0),
     CarbonUseWUE = as.integer(0),
     Scenario = as.character("Default"),  # This is not used in rSOILWAT2, but it's useful to see what scenario was used in the input object
     DeltaYear = as.integer(0),
-    CO2ppm = data.frame(Year = as.integer(1979:2010), CO2ppm = rep(360.0, 32))
+    CO2ppm = as.matrix(data.frame(Year = 1979:2010, CO2ppm = rep(360, 32)))
   )
 )
 
@@ -37,7 +37,7 @@ setMethod(f = "swClear", signature = "swCarbon", definition = function(object) {
   object@CarbonUseWUE = as.integer(0)
   object@Scenario = as.character("Default")
   object@DeltaYear = as.integer(0)
-  object@CO2ppm = data.frame(Year = as.integer(1979:2010), CO2ppm = rep(360.0, 32))
+  object@CO2ppm = as.matrix(data.frame(Year = 1979:2010, CO2ppm = rep(360, 32)))
 
   object
 })
@@ -46,7 +46,7 @@ setMethod(f = "swClear", signature = "swCarbon", definition = function(object) {
 setValidity("swCarbon", function(object) {
   val <- TRUE
 
-  if (!all(c("Year", "CO2ppm") %in% colnames(object@CO2ppm)) ||
+  if (!all(c("Year", "CO2ppm") == colnames(object@CO2ppm)) ||
     length(colnames(object@CO2ppm)) != 2) {
     msg <- "@CO2ppm: column names must be 'Year' and 'CO2ppm'"
     val <- if (isTRUE(val)) msg else c(val, msg)
@@ -55,7 +55,7 @@ setValidity("swCarbon", function(object) {
     is_bad <- any(is.na(object@CO2ppm[, "Year"]) |
       round(object@CO2ppm[, "Year"]) != object@CO2ppm[, "Year"])
     if (is_bad) {
-      msg <- "@CO2ppm: has missing and/or non-integer years"
+      msg <- "@CO2ppm: has missing and/or non-integer-like years"
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 

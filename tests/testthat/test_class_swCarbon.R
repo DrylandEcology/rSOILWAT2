@@ -10,6 +10,19 @@ test_that("Manipulate swCarbon", {
   # All these methods operate on the 'swCarbon' slot of signature 'swInputData'
   xinput <- xinput2 <- new("swInputData")
   expect_s4_class(get_swCarbon(xinput), "swCarbon")
+  co2 <- as.matrix(data.frame(Year = 1951:2000, CO2ppm = 360 + seq_len(50) / 2))
+  swCarbon_CO2ppm(xinput) <- co2
+  swCarbon_CO2ppm(xinput2) <- co2
+  expect_equal(xinput, xinput2)
+
+  # Get/set entire carbon class object
+  cco2 <- get_swCarbon(xinput)
+  cco2_new <- new("swCarbon")
+  expect_false(isTRUE(all.equal(cco2, cco2_new)))
+  cco2_new <- new("swCarbon", cco2)
+  expect_equal(cco2, cco2_new)
+  set_swCarbon(xinput2) <- cco2_new
+  expect_equal(xinput, xinput2)
 
   # Set/querry flags
   swCarbon_Use_Bio(xinput2) <- 1L
@@ -39,7 +52,6 @@ test_that("Manipulate swCarbon", {
   expect_error(swCarbon_DeltaYear(xinput2) <- 0.5)
 
   # Set/querry CO2 concentration
-  co2 <- data.frame(Year = as.integer(1951:2000), CO2ppm = 360 + seq_len(50) / 2)
   swCarbon_CO2ppm(xinput2) <- co2
   expect_equal(swCarbon_CO2ppm(xinput2), co2)
   swCarbon_CO2ppm(xinput2) <- swCarbon_CO2ppm(xinput)
@@ -49,6 +61,8 @@ test_that("Manipulate swCarbon", {
   # Fail CO2 slot validity checks
   co2_ok <- co2
   co2[10, ] <- NA
+  expect_error(swCarbon_CO2ppm(xinput2) <- co2)
+  co2 <- co2_ok
   co2[20, "CO2ppm"] <- -5
   expect_error(swCarbon_CO2ppm(xinput2) <- co2)
   co2 <- co2_ok
