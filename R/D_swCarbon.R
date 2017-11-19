@@ -17,8 +17,22 @@
 ###############################################################################
 
 
-#############################CARBON DATA#########################################
-#' @export
+#' Class "swCarbon"
+#' 
+#' Class \code{swCarbon} defines variables that allow \code{SOILWAT2} to simulate the effects of atmospheric carbon dioxide.
+#' 
+#' @section Slots:
+#'   \describe{
+#'     \item{\code{CarbonUseBio}}{Object of class \code{"integer"}, where a value of 1 enables the CO2 biomass multiplier.}
+#'     \item{\code{CarbonUseWUE}}{Object of class \code{"integer"}, where a value of 1 enables the CO2 WUE multipler.}
+#'     \item{\code{Scenario}}{Object of class \code{"character"}, that represents the name of the scenario that is being simulated.}
+#'     \item{\code{DeltaYear}}{Object of class \code{"integer"}, that represents the number of years in the future that this simulation is being run.}
+#'     \item{\code{CO2ppm}}{Object of class \code{"matrix"}, that holds years in the first column and CO2 ppm concentrations in the second column.}
+#'   }
+#'
+#' @name swCarbon-class
+#' @rdname swCarbon-class
+#' @exportClass swCarbon
 setClass("swCarbon",
   representation(CarbonUseBio = 'integer', CarbonUseWUE = 'integer',
     Scenario = 'character', DeltaYear = 'integer', CO2ppm = 'matrix'),

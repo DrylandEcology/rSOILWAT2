@@ -405,30 +405,64 @@ setGeneric(name="swEstab_useEstab<-",function(object, value) {standardGeneric("s
 ########################
 
 #########CARBON##########
-#' @export
+#' @name swInputData-class
+#' @rdname swInputData-class
+#' @exportMethod get_swCarbon
 setGeneric(name="get_swCarbon",function(object) {standardGeneric("get_swCarbon")})
-#' @export
+
+#' @name swCarbon-class
+#' @rdname swCarbon-class
+#' @exportMethod swCarbon_Use_Bio
 setGeneric(name="swCarbon_Use_Bio",function(object) {standardGeneric("swCarbon_Use_Bio")})
-#' @export
+
+#' @name swCarbon-class
+#' @rdname swCarbon-class
+#' @exportMethod swCarbon_Use_WUE
 setGeneric(name="swCarbon_Use_WUE",function(object) {standardGeneric("swCarbon_Use_WUE")})
-#' @export
+
+#' @name swCarbon-class
+#' @rdname swCarbon-class
+#' @exportMethod swCarbon_Scenario
 setGeneric(name="swCarbon_Scenario",function(object) {standardGeneric("swCarbon_Scenario")})
-#' @export
+
+#' @name swCarbon-class
+#' @rdname swCarbon-class
+#' @exportMethod swCarbon_DeltaYear
 setGeneric(name="swCarbon_DeltaYear",function(object) {standardGeneric("swCarbon_DeltaYear")})
-#' @export
+
+#' @name swCarbon-class
+#' @rdname swCarbon-class
+#' @exportMethod swCarbon_CO2ppm
 setGeneric(name="swCarbon_CO2ppm", function(object) {standardGeneric("swCarbon_CO2ppm")})
 
-#' @export
+#' @name swInputData-class
+#' @rdname swInputData-class
+#' @exportMethod set_swCarbon<-
 setGeneric(name="set_swCarbon<-",function(object, value) {standardGeneric("set_swCarbon<-")})
-#' @export
+
+#' @name swCarbon-class
+#' @rdname swCarbon-class
+#' @exportMethod swCarbon_Use_Bio<-
 setGeneric(name="swCarbon_Use_Bio<-",function(object, value) {standardGeneric("swCarbon_Use_Bio<-")})
-#' @export
+
+#' @name swCarbon-class
+#' @rdname swCarbon-class
+#' @exportMethod swCarbon_Use_WUE<-
 setGeneric(name="swCarbon_Use_WUE<-",function(object, value) {standardGeneric("swCarbon_Use_WUE<-")})
-#' @export
+
+#' @name swCarbon-class
+#' @rdname swCarbon-class
+#' @exportMethod swCarbon_Scenario<-
 setGeneric(name="swCarbon_Scenario<-",function(object, value) {standardGeneric("swCarbon_Scenario<-")})
-#' @export
+
+#' @name swCarbon-class
+#' @rdname swCarbon-class
+#' @exportMethod swCarbon_DeltaYear<-
 setGeneric(name="swCarbon_DeltaYear<-",function(object, value) {standardGeneric("swCarbon_DeltaYear<-")})
-#' @export
+
+#' @name swCarbon-class
+#' @rdname swCarbon-class
+#' @exportMethod swCarbon_CO2ppm<-
 setGeneric(name="swCarbon_CO2ppm<-",function(object, value) {standardGeneric("swCarbon_CO2ppm<-")})
 ########################
 
