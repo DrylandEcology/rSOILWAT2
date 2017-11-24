@@ -80,6 +80,6 @@ https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
 }
 \author{
-Zach Kramer
+Zachary Kramer
 }
 \keyword{classes}

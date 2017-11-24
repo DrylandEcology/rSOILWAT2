@@ -42,16 +42,17 @@ setClass("swCarbon",
     CarbonUseWUE = as.integer(0),
     Scenario = as.character("Default"),  # This is not used in rSOILWAT2, but it's useful to see what scenario was used in the input object
     DeltaYear = as.integer(0),
-    CO2ppm = as.matrix(data.frame(Year = 1979:2010, CO2ppm = rep(360, 32)))
+    CO2ppm = as.matrix(data.frame(Year = 1979:2010, CO2ppm = rep(360.0, 32)))
   )
 )
+
 
 setMethod(f = "swClear", signature = "swCarbon", definition = function(object) {
   object@CarbonUseBio = as.integer(0)
   object@CarbonUseWUE = as.integer(0)
   object@Scenario = as.character("Default")
   object@DeltaYear = as.integer(0)
-  object@CO2ppm = as.matrix(data.frame(Year = 1979:2010, CO2ppm = rep(360, 32)))
+  object@CO2ppm = as.matrix(data.frame(Year = 1979:2010, CO2ppm = rep(360.0, 32)))
 
   object
 })
