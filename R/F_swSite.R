@@ -26,7 +26,7 @@
 ###############################################################SITE#####################################################################
 #' @export
 setClass("swSite",representation(SWClimits="numeric",ModelFlags="logical",ModelCoefficients="numeric",SnowSimulationParameters="numeric",DrainageCoefficient="numeric",EvaporationCoefficients="numeric",TranspirationCoefficients="numeric",IntrinsicSiteParams="numeric",SoilTemperatureFlag="logical",SoilTemperatureConstants="numeric",TranspirationRegions="matrix"),
-		prototype=prototype(SWClimits=c(-1,15,15),ModelFlags=c(FALSE,TRUE),ModelCoefficients=c(1,0.0),SnowSimulationParameters=c(.61,1.54,.1,0,.27),DrainageCoefficient=0.02,
+		prototype=prototype(SWClimits=c(-1,15,15),ModelFlags=c(FALSE,TRUE),ModelCoefficients=c(1,0.0, 0.0),SnowSimulationParameters=c(.61,1.54,.1,0,.27),DrainageCoefficient=0.02,
 				EvaporationCoefficients=c(45,0.1,0.25,0.5),TranspirationCoefficients=c(45,0.1,0.50,1.10),IntrinsicSiteParams=c(0.681,1651,0,-1),SoilTemperatureFlag=TRUE,SoilTemperatureConstants=c(300,15,-4,600,0.00070,0.00030,0.18,6.69,15,990),
 				TranspirationRegions=matrix(data=c(1,2,3,6,9,11),nrow=3,ncol=2,dimnames=list(NULL,c("ndx","layer")))) )
 
@@ -35,8 +35,8 @@ swSite_validity<-function(object){
 		return("@SWClimits length != 3.")
 	if(length(object@ModelFlags) != 2)
 		return("@ModelFlags length != 2.")
-	if(length(object@ModelCoefficients) != 2)
-		return("@ModelCoefficients length != 2.")
+	if(length(object@ModelCoefficients) != 3)
+		return("@ModelCoefficients length != 3.")
 	if(length(object@SnowSimulationParameters) != 5)
 		return("@SnowSimulationParameters length != 5.")
 	if(length(object@DrainageCoefficient) != 1)
@@ -56,14 +56,14 @@ swSite_validity<-function(object){
 	TRUE
 }
 setValidity("swSite",swSite_validity)
-setMethod(f="initialize",signature="swSite",definition=function(.Object,SWClimits=c(-1,15,15),ModelFlags=c(FALSE,TRUE),ModelCoefficients=c(1,0.0),SnowSimulationParameters=c(.61,1.54,.1,0,.27),DrainageCoefficient=0.02,
+setMethod(f="initialize",signature="swSite",definition=function(.Object,SWClimits=c(-1,15,15),ModelFlags=c(FALSE,TRUE),ModelCoefficients=c(1,0.0, 0.0),SnowSimulationParameters=c(.61,1.54,.1,0,.27),DrainageCoefficient=0.02,
 				EvaporationCoefficients=c(45,0.1,0.25,0.5),TranspirationCoefficients=c(45,0.1,0.50,1.10),IntrinsicSiteParams=c(0.681,1651,0,-1),SoilTemperatureFlag=FALSE,SoilTemperatureConstants=c(300,15,-4,600,0.00070,0.00030,0.18,6.69,15,990),TranspirationRegions=NULL ){
 			if(is.null(TranspirationRegions))
 				TranspirationRegions<-matrix(data=c(1,2,3,6,9,11),nrow=3,ncol=2)
 			colnames(TranspirationRegions)<-c("ndx","layer")
 			names(SWClimits) <- c("swc_min", "swc_init", "swc_wet")
 			names(ModelFlags) <- c("Reset", "DeepDrain")
-			names(ModelCoefficients) <- c("PETmultiplier", "DailyRunoff")
+			names(ModelCoefficients) <- c("PETmultiplier", "DailyRunoff", "DailyRunon")
 			names(SnowSimulationParameters) <- c("TminAccu2", "TmaxCrit", "lambdaSnow", "RmeltMin", "RmeltMax")
 			names(DrainageCoefficient) <- c("SlowDrainCoefficientPerYear_cm/dy")
 			names(EvaporationCoefficients) <- c("RateShift", "RateSlope", "InflectionPoint", "Range")
@@ -90,7 +90,7 @@ setMethod(f="swClear",
 		definition=function(object) {
 			SWClimits=numeric(3)
 			ModelFlags=logical(2)
-			ModelCoefficients=numeric(2)
+			ModelCoefficients=numeric(3)
 			SnowSimulationParameters=numeric(5)
 			DrainageCoefficient=numeric(1)
 			EvaporationCoefficients=numeric(4)
@@ -102,7 +102,7 @@ setMethod(f="swClear",
 			colnames(TranspirationRegions)<-c("ndx","layer")
 			names(SWClimits) <- c("swc_min", "swc_init", "swc_wet")
 			names(ModelFlags) <- c("Reset", "DeepDrain")
-			names(ModelCoefficients) <- c("PETmultiplier", "DailyRunoff")
+			names(ModelCoefficients) <- c("PETmultiplier", "DailyRunoff", "DailyRunon")
 			names(SnowSimulationParameters) <- c("TminAccu2", "TmaxCrit", "lambdaSnow", "RmeltMin", "RmeltMax")
 			names(DrainageCoefficient) <- c("SlowDrainCoefficientPerYear_cm/dy")
 			names(EvaporationCoefficients) <- c("RateShift", "RateSlope", "InflectionPoint", "Range")
@@ -165,7 +165,8 @@ setMethod("swWriteLines", signature=c(object="swSite", file="character"), defini
 			infiletext[8] <- paste(format(as.integer(object@ModelFlags[2])),"\t# deepdrain (1/0): allow/disallow deep drainage function.",sep="")
 			infiletext[9] <- "\t\t#   if deepdrain == 1, model expects extra layer in soils file."
 			infiletext[10] <- paste(format(object@ModelCoefficients[1]),"\t# multiplier for PET (eg for climate change).",sep="")
-			infiletext[11] <- paste(format(object@ModelCoefficients[2]),"\t#proportion of ponded surface water removed as runoff daily (value ranges between 0 and 1; 0=no loss of surface water, 1=all ponded water lost via runoff)",sep="")
+			infiletext[11] <- paste(format(object@ModelCoefficients[2]),"\t# proportion of ponded surface water removed as daily runoff (value ranges between 0 and 1; 0=no loss of surface water, 1=all ponded water lost via runoff)",sep="")
+			infiletext[13] <- paste(format(object@ModelCoefficients[3]),"\t# proportion of water that arrives at surface added as daily runon [from a hypothetical identical neighboring site] (value ranges between 0 and +inf; 0=no runon, >0: runon is occuring)",sep="")
 
 			infiletext[13] <- "# ---- Snow simulation parameters (SWAT2K model): Neitsch S, Arnold J, Kiniry J, Williams J. 2005. Soil and water assessment tool (SWAT) theoretical documentation. version 2005. Blackland Research Center, Texas Agricultural Experiment Station: Temple, TX."
 			infiletext[14] <- "# these parameters are RMSE optimized values for 10 random SNOTEL sites for western US"
@@ -241,6 +242,7 @@ setMethod("swReadLines", signature=c(object="swSite",file="character"), definiti
 			object@ModelFlags[2] = readLogical(infiletext[8])
 			object@ModelCoefficients[1] = readNumeric(infiletext[10])
 			object@ModelCoefficients[2] = readNumeric(infiletext[11])
+			object@ModelCoefficients[3] = readNumeric(infiletext[12])
 			object@SnowSimulationParameters[1] = readNumeric(infiletext[15])
 			object@SnowSimulationParameters[2] = readNumeric(infiletext[16])
 			object@SnowSimulationParameters[3] = readNumeric(infiletext[17])

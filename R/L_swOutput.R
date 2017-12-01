@@ -38,7 +38,7 @@ swOutput_WTHR <- new("swOutput_KEY",Title="",TimeStep=4L,Columns=0L)
 swOutput_TEMP <- new("swOutput_KEY",Title="temp_air",TimeStep=1L,Columns=4L)
 swOutput_PRECIP <- new("swOutput_KEY",Title="precip",TimeStep=2L,Columns=5L)
 swOutput_SOILINFILT <- new("swOutput_KEY",Title="infiltration",TimeStep=3L,Columns=1L)
-swOutput_RUNOFF <- new("swOutput_KEY",Title="runoff",TimeStep=1L,Columns=3L)
+swOutput_RUNOFF <- new("swOutput_KEY",Title="runoff",TimeStep=1L,Columns=4L)
 swOutput_ALLH2O <- new("swOutput_KEY",Title="",TimeStep=4L,Columns=0L)
 swOutput_VWCBULK <- new("swOutput_KEY",Title="vwc_bulk",TimeStep=2L,Columns=as.integer(tLayers))
 swOutput_VWCMATRIC <- new("swOutput_KEY",Title="vwc_matric",TimeStep=3L,Columns=as.integer(tLayers))
@@ -141,7 +141,7 @@ setMethod(f="initialize",signature="swOutput",definition=function(.Object,Layers
 			.Object@TEMP@Columns <- 4L
 			.Object@PRECIP@Columns <- 5L
 			.Object@SOILINFILT@Columns <- 1L
-			.Object@RUNOFF@Columns <- 3L
+			.Object@RUNOFF@Columns <- 4L
 			.Object@ALLH2O@Columns <- 0L
 			.Object@VWCBULK@Columns <- Layers
 			.Object@VWCMATRIC@Columns <- Layers
