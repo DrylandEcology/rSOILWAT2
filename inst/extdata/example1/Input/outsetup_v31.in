@@ -45,7 +45,7 @@ TIMESTEP dy wk mo yr
 TEMP			avg		WK		1		end		temp_air		/* max., min, average air temperature, soil-surface temperature (C) */
 PRECIP			sum		MO		1		end		precip			/* total precip = sum(rain, snow), rain, snow-fall, snowmelt, and snowloss (cm)     */
 SOILINFILT		sum		YR		1		end		infiltration		/* water to infiltrate in top soil layer (cm), runoff (cm); (not-intercepted rain)+(snowmelt-runoff) */
-RUNOFF 			sum 	 	WK		1 		end 		runoff			/* runoff (cm): total runoff, runoff from ponded water, runoff from snowmelt */
+RUNOFF 			sum 	 	WK		1 		end 		runoff			/* runoff/runon (cm): net runoff, runoff from ponded water, runoff from snowmelt, runon of surface water from hypothetical upslope neighbor */
 VWCBULK			avg		MO		1		end		vwc_bulk		/* bulk volumetric soilwater (cm / layer)
 VWCMATRIC		avg		YR		1		end		vwc_matric		/* matric volumetric soilwater (cm / layer)
 SWCBULK			avg		DY		1		end		swc_bulk		/* bulk soilwater content (cm / cm layer); swc.l1(today) = swc.l1(yesterday)+inf_soil-lyrdrain.l1-transp.l1-evap_soil.l1; swc.li(today) = swc.li(yesterday)+lyrdrain.l(i-1)-lyrdrain.li-transp.li-evap_soil.li; swc.llast(today) = swc.llast(yesterday)+lyrdrain.l(last-1)-deepswc-transp.llast-evap_soil.llast  */

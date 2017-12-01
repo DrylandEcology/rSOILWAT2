@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+library("methods")
+
 dir_in <- file.path("inst", "extdata")
 dir_out <- file.path("tests", "testthat")
 
@@ -15,6 +17,6 @@ for (it in seq_along(tests)) {
   slot(sw_input, "weatherHistory") <- slot(sw_input, "weatherHistory")[1]
 
   #---OUTPUTS
-  saveRDS(sw_weather, file = file.path(dir_out, paste0("Ex", tests, "_weather.rds")))
-  saveRDS(sw_input, file = file.path(dir_out, paste0("Ex", tests, "_input.rds")))
+  saveRDS(sw_weather, file = file.path(dir_out, paste0("Ex", tests[it], "_weather.rds")))
+  saveRDS(sw_input, file = file.path(dir_out, paste0("Ex", tests[it], "_input.rds")))
 }

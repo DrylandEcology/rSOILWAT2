@@ -1,14 +1,15 @@
 # ---- SWC limits ----
 -1			# swc_min : cm/cm if 0 - <1.0, -bars if >= 1.0.; if < 0. then estimate residual water content for each layer
-15.          # swc_init: cm/cm if < 1.0, -bars if >= 1.0. 
-15.          # swc_wet : cm/cm if < 1.0, -bars if >= 1.0. 
+15.          # swc_init: cm/cm if < 1.0, -bars if >= 1.0.
+15.          # swc_wet : cm/cm if < 1.0, -bars if >= 1.0.
 
 # ---- Model flags and coefficients ----
 0			# reset (1/0): reset/don't reset swc each new year
-1			# deepdrain (1/0): allow/disallow deep drainage function. 
+1			# deepdrain (1/0): allow/disallow deep drainage function.
 			#   if deepdrain == 1, model expects extra layer in soils file.
-1          	# multiplier for PET (eg for climate change).
-0			#proportion of ponded surface water removed as runoff daily (value ranges between 0 and 1; 0=no loss of surface water, 1=all ponded water lost via runoff)
+1.0			# multiplier for PET (eg for climate change).
+0.0			#proportion of ponded surface water removed as daily runoff (value ranges between 0 and 1; 0=no loss of surface water, 1=all ponded water lost via runoff)
+0.0			#proportion of water that arrives at surface added as daily runon [from a hypothetical identical neighboring site] (value ranges between 0 and +inf; 0=no runon, >0: runon is occuring)
 
 # ---- Snow simulation parameters (SWAT2K model): Neitsch S, Arnold J, Kiniry J, Williams J. 2005. Soil and water assessment tool (SWAT) theoretical documentation. version 2005. Blackland Research Center, Texas Agricultural Experiment Station: Temple, TX.
 # these parameters are RMSE optimized values for 10 random SNOTEL sites for western US
@@ -24,13 +25,13 @@
              # (Q=.02 in ELM doc, .06 in FORTRAN version).
 
 # ---- Evaporation coefficients ----
-# These control the tangent function (tanfunc) which affects the amount of soil 
+# These control the tangent function (tanfunc) which affects the amount of soil
 # water extractable by evaporation and transpiration.
 # These constants aren't documented by the ELM doc.
-45.          # rate shift (x value of inflection point).  lower value shifts curve 
+45.          # rate shift (x value of inflection point).  lower value shifts curve
              # leftward, meaning less water lost to evap at a given swp.  effectively
              # shortens/extends high rate.
-.1          # rate slope: lower value (eg .01) straightens S shape meaning more gradual 
+.1          # rate slope: lower value (eg .01) straightens S shape meaning more gradual
              # reduction effect; higher value (.5) makes abrupt transition
 .25           # inflection point (y-value of inflection point)
 0.5          # range: diff btw upper and lower rates at the limits
@@ -65,7 +66,7 @@
 
 # ---- Transpiration regions ----
 # ndx  : 1=shallow, 2=medium, 3=deep, 4=very deep
-# layer: deepest layer number of the region. 
+# layer: deepest layer number of the region.
 #        Layers are defined in soils.in.
 # ndx    layer
 	1		6
