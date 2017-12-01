@@ -1,5 +1,4 @@
-[submodule "src"]
-	path = src
+[submodule "src/SOILWAT2"]
+	path = src/SOILWAT2
 	url = https://github.com/Burke-Lauenroth-Lab/SOILWAT2
-[submodule "SOILWAT2"]
-	branch = soilwat_co2_effects
+        branch = soilwat_co2_effects
