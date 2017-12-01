@@ -1,5 +1,4 @@
-[submodule "src"]
+[submodule "SOILWAT2"]
 	path = src
 	url = https://github.com/Burke-Lauenroth-Lab/SOILWAT2
-[submodule "SOILWAT2"]
-	branch = master
+	branch = feature_runon
