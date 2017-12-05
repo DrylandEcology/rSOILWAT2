@@ -83,9 +83,10 @@ There are several options:
   git checkout master
   git submodule init
   git submodule update ## --remote: uses the latest submodule commit; without --remote: uses a previously defined submodule commit
-  cd src
+  cd src/SOILWAT2
   git checkout master
   git pull
+  cd ../..
   ```
 
 
@@ -140,12 +141,12 @@ git checkout master
 
 git submodule init
 git submodule update --remote #--remote: uses the latest commit; without --remote: uses the previously defined commit
-cd src
+cd src/SOILWAT2
 
-git checkout master
+git checkout master # or whatever branch you are working on
 git pull
 
-cd ..
+cd ../..
 git commit -am "Pulled down latest commit 'COMMIT-FLAG' to submodule SOILWAT2"
 git push
 ```
