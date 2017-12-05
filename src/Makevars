@@ -4,7 +4,7 @@ path_target = SOILWAT2
 
 PKG_CPPFLAGS = -DRSOILWAT
 
-PKG_LIBS = -L$(path_target) -l$(target) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+PKG_LIBS = -L$(path_target) -l$(target)  # $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
 $(SHLIB): $(path_target)/$(lib_target)
 
