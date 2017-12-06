@@ -247,32 +247,73 @@ setReplaceMethod(f="swProd_MonProd_grass", signature="swInputData", definition=f
 setReplaceMethod(f="swProd_MonProd_shrub", signature="swInputData", definition=function(object,value) {object@prod@MonthlyProductionValues_shrub <- value; return(object)})
 setReplaceMethod(f="swProd_MonProd_tree", signature="swInputData", definition=function(object,value) {object@prod@MonthlyProductionValues_tree <- value; return(object)})
 setReplaceMethod(f="swProd_MonProd_forb", signature="swInputData", definition=function(object,value) {object@prod@MonthlyProductionValues_forb <- value; return(object)})
-##
-setMethod("get_swSite", "swInputData", function(object) {return(object@site)})
-setMethod("swSite_SWClimits", "swInputData", function(object) {return(object@site@SWClimits)})
-setMethod("swSite_ModelFlags", "swInputData", function(object) {return(object@site@ModelFlags)})
-setMethod("swSite_ModelCoefficients", "swInputData", function(object) {return(object@site@ModelCoefficients)})
-setMethod("swSite_SnowSimulationParams", "swInputData", function(object) {return(object@site@SnowSimulationParameters)})
-setMethod("swSite_DrainageCoefficient", "swInputData", function(object) {return(object@site@DrainageCoefficient)})
-setMethod("swSite_EvapCoefficients", "swInputData", function(object) {return(object@site@EvaporationCoefficients)})
-setMethod("swSite_TranspCoefficients", "swInputData", function(object) {return(object@site@TranspirationCoefficients)})
-setMethod("swSite_IntrinsicSiteParams", "swInputData", function(object) {return(object@site@IntrinsicSiteParams)})
-setMethod("swSite_SoilTemperatureFlag", "swInputData", function(object) {return(object@site@SoilTemperatureFlag)})
-setMethod("swSite_SoilTemperatureConsts", "swInputData", function(object) {return(object@site@SoilTemperatureConstants)})
-setMethod("swSite_TranspirationRegions", "swInputData", function(object) {return(object@site@TranspirationRegions)})
 
-setReplaceMethod(f="set_swSite", signature="swInputData", definition=function(object,value) {object@site <- value; return(object)})
-setReplaceMethod(f="swSite_SWClimits", signature="swInputData", definition=function(object,value) {object@site@SWClimits <- value; return(object)})
-setReplaceMethod(f="swSite_ModelFlags", signature="swInputData", definition=function(object,value) {object@site@ModelFlags <- value; return(object)})
-setReplaceMethod(f="swSite_ModelCoefficients", signature="swInputData", definition=function(object,value) {object@site@ModelCoefficients <- value; return(object)})
-setReplaceMethod(f="swSite_SnowSimulationParams", signature="swInputData", definition=function(object,value) {object@site@SnowSimulationParameters <- value; return(object)})
-setReplaceMethod(f="swSite_DrainageCoefficient", signature="swInputData", definition=function(object,value) {object@site@DrainageCoefficient <- value; return(object)})
-setReplaceMethod(f="swSite_EvapCoefficients", signature="swInputData", definition=function(object,value) {object@site@EvaporationCoefficients <- value; return(object)})
-setReplaceMethod(f="swSite_TranspCoefficients", signature="swInputData", definition=function(object,value) {object@site@TranspirationCoefficients <- value; return(object)})
-setReplaceMethod(f="swSite_IntrinsicSiteParams", signature="swInputData", definition=function(object,value) {object@site@IntrinsicSiteParams <- value; return(object)})
-setReplaceMethod(f="swSite_SoilTemperatureFlag", signature="swInputData", definition=function(object,value) {object@site@SoilTemperatureFlag <- value; return(object)})
-setReplaceMethod(f="swSite_SoilTemperatureConsts", signature="swInputData", definition=function(object,value) {object@site@SoilTemperatureConstants <- value; return(object)})
-setReplaceMethod(f="swSite_TranspirationRegions", signature="swInputData", definition=function(object,value) {object@site@TranspirationRegions <- value*1; return(object)})
+##
+setMethod("get_swSite", "swInputData", function(object) slot(object, "site"))
+setMethod("swSite_SWClimits", "swInputData", function(object) slot(slot(object, "site"), "SWClimits"))
+setMethod("swSite_ModelFlags", "swInputData", function(object) slot(slot(object, "site"), "ModelFlags"))
+setMethod("swSite_ModelCoefficients", "swInputData", function(object) slot(slot(object, "site"), "ModelCoefficients"))
+setMethod("swSite_SnowSimulationParams", "swInputData", function(object) slot(slot(object, "site"), "SnowSimulationParameters"))
+setMethod("swSite_DrainageCoefficient", "swInputData", function(object) slot(slot(object, "site"), "DrainageCoefficient"))
+setMethod("swSite_EvapCoefficients", "swInputData", function(object) slot(slot(object, "site"), "EvaporationCoefficients"))
+setMethod("swSite_TranspCoefficients", "swInputData", function(object) slot(slot(object, "site"), "TranspirationCoefficients"))
+setMethod("swSite_IntrinsicSiteParams", "swInputData", function(object) slot(slot(object, "site"), "IntrinsicSiteParams"))
+setMethod("swSite_SoilTemperatureFlag", "swInputData", function(object) slot(slot(object, "site"), "SoilTemperatureFlag"))
+setMethod("swSite_SoilTemperatureConsts", "swInputData", function(object) slot(slot(object, "site"), "SoilTemperatureConstants"))
+setMethod("swSite_TranspirationRegions", "swInputData", function(object) slot(slot(object, "site"), "TranspirationRegions"))
+
+
+setReplaceMethod(f = "set_swSite", signature = "swInputData", definition = function(object, value) {
+  slot(object, "site") <- value
+  validObject(object)
+  object
+})
+setReplaceMethod(f = "swSite_SWClimits", signature = "swInputData", definition = function(object, value) {
+  swSite_SWClimits(slot(object, "site")) <- value
+  object
+})
+setReplaceMethod(f = "swSite_ModelFlags", signature = "swInputData", definition = function(object, value) {
+  swSite_ModelFlags(slot(object, "site")) <- value
+  object
+})
+setReplaceMethod(f = "swSite_ModelCoefficients", signature = "swInputData", definition = function(object, value) {
+  swSite_ModelCoefficients(slot(object, "site")) <- value
+  object
+})
+setReplaceMethod(f = "swSite_SnowSimulationParams", signature = "swInputData", definition = function(object, value) {
+  swSite_SnowSimulationParams(slot(object, "site")) <- value
+  object
+})
+setReplaceMethod(f = "swSite_DrainageCoefficient", signature = "swInputData", definition = function(object, value) {
+  swSite_DrainageCoefficient(slot(object, "site")) <- value
+  object
+})
+setReplaceMethod(f = "swSite_EvapCoefficients", signature = "swInputData", definition = function(object, value) {
+  swSite_EvapCoefficients(slot(object, "site")) <- value
+  object
+})
+setReplaceMethod(f = "swSite_TranspCoefficients", signature = "swInputData", definition = function(object, value) {
+  swSite_TranspCoefficients(slot(object, "site")) <- value
+  object
+})
+setReplaceMethod(f = "swSite_IntrinsicSiteParams", signature = "swInputData", definition = function(object, value) {
+  swSite_IntrinsicSiteParams(slot(object, "site")) <- value
+  object
+})
+setReplaceMethod(f = "swSite_SoilTemperatureFlag", signature = "swInputData", definition = function(object, value) {
+  swSite_SoilTemperatureFlag(slot(object, "site")) <- value
+  object
+})
+setReplaceMethod(f = "swSite_SoilTemperatureConsts", signature = "swInputData", definition = function(object, value) {
+  swSite_SoilTemperatureConsts(slot(object, "site")) <- value
+  object
+})
+setReplaceMethod(f = "swSite_TranspirationRegions", signature = "swInputData", definition = function(object, value) {
+  swSite_TranspirationRegions(slot(object, "site")) <- value*1
+  object
+})
+
+
 ##
 setMethod("get_swSoils", "swInputData", function(object) {return(object@soils)})
 setMethod("swSoils_Layers", "swInputData", function(object) {return(object@soils@Layers)})
