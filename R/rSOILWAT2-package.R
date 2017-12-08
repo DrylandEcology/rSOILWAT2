@@ -46,7 +46,7 @@ rSW2_glovars <- new.env()
 
 ##------ Import from other packages
 ## Package uses S3/S4 classes - they are defined in package:methods
-#' @importFrom methods slot slot<- as as<- initialize new slotNames validObject
+#' @importFrom methods slot slot<- as as<- initialize new slotNames validObject callNextMethod
 #' @importFrom stats aggregate na.exclude
 #' @importFrom utils data head packageDescription read.csv read.table str tail write.table
 NULL
@@ -346,7 +346,7 @@ NULL
 #' swCarbon_CO2ppm<-,swCarbon-method
 #' swCarbon_Use_Bio<-,swCarbon-method
 #' swCarbon_Use_WUE<-,swCarbon-method
-#' 
+#'
 #' @docType class
 #' @section Objects from the Class: Objects can be created by calls of the form
 #' \code{new("swCarbon", ...)}.
