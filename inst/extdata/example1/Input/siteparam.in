@@ -8,7 +8,8 @@
 1			# deepdrain (1/0): allow/disallow deep drainage function.
 			#   if deepdrain == 1, model expects extra layer in soils file.
 1.0			# multiplier for PET (eg for climate change).
-0.0			#proportion of ponded surface water removed as runoff daily (value ranges between 0 and 1; 0=no loss of surface water, 1=all ponded water lost via runoff)
+0.0			#proportion of ponded surface water removed as daily runoff (value ranges between 0 and 1; 0=no loss of surface water, 1=all ponded water lost via runoff)
+0.0			#proportion of water that arrives at surface added as daily runon [from a hypothetical identical neighboring site] (value ranges between 0 and +inf; 0=no runon, >0: runon is occuring)
 
 # ---- Snow simulation parameters (SWAT2K model): Neitsch S, Arnold J, Kiniry J, Williams J. 2005. Soil and water assessment tool (SWAT) theoretical documentation. version 2005. Blackland Research Center, Texas Agricultural Experiment Station: Temple, TX.
 # these parameters are RMSE optimized values for 10 random SNOTEL sites for western US

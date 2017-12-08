@@ -384,7 +384,7 @@ SEXP onGetOutput(SEXP inputData) {
 	char *Chydred_names[] = { "total_", "tree_", "shrub_", "forbs_", "grass_" };
 	char *Cinterception_names[] = { "total", "tree", "shrub", "forbs", "grass", "litter" };
 	char *Cprecip_names[] = { "ppt", "rain", "snow_fall", "snowmelt", "snowloss" };
-	char *Crunoff_names[] = { "total", "ponded", "snowmelt" };
+	char *Crunoff_names[] = { "net", "ponded_runoff", "snowmelt_runoff", "ponded_runon" };
 	char *Csnowpack_names[] = { "snowpackWaterEquivalent_cm", "snowdepth_cm" };
 	char *Ctemp_names[] = { "max_C", "min_C", "avg_C","surfaceTemp_C" };
 	char *Ctransp_names[] = { "transp_total_", "transp_tree_", "transp_shrub_", "transp_forbs_", "transp_grass_" };
@@ -491,7 +491,7 @@ SEXP onGetOutput(SEXP inputData) {
 	Rtemp_columns = 4;
 	Rprecip_columns = 5;
 	Rinfiltration_columns = 1;
-	Rrunoff_columns = 3;
+	Rrunoff_columns = 4;
 	RallH2O_columns = 0;
 	RvwcBulk_columns = tLayers;
 	RvwcMatric_columns = tLayers;
