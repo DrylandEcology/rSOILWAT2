@@ -25,6 +25,7 @@ for (it in tests) {
     rd <- sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE,
       quiet = TRUE)
     expect_s4_class(rd, "swOutput")
+    expect_false(has_soilTemp_failed())
 
     # Run silently/verbosely
     expect_silent(sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE,
