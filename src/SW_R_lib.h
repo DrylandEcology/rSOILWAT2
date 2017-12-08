@@ -28,7 +28,7 @@ void init_args(int argc, char **argv);
 void usage(void);
 
 SEXP onGetInputDataFromFiles(SEXP input);
-SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList);
+SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet);
 SEXP onGetOutput(SEXP inputData);
 
 #endif /* SW_R_LIB_H_ */

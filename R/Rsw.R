@@ -182,7 +182,7 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
     inputData <- sw_inputDataFromFiles(dir = dir, files.in = files.in)
   }
 
-  res <- .Call(C_start, input, inputData, weatherList)
+  res <- .Call(C_start, input, inputData, weatherList, as.logical(quiet))
 
   if (.Call(C_tempError)) {
     # Error during soil temperature calculations
