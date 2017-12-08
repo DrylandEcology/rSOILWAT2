@@ -139,6 +139,10 @@ git commit -am "Changed to branch 'branch' commit 'COMMIT-FLAG' for submodule SO
 git push
 ```
 
+Run the script `data-raw/prepare_testInput_objects.R` if the `SOILWAT2` updated included
+changes to the input files.
+
+
 ### Version numbers
 
 We attempt to follow guidelines of [semantic versioning](http://semver.org/) with version

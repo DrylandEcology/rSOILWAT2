@@ -1,20 +1,80 @@
 #!/usr/bin/env Rscript
 
+dSOILWAT2_inputs <- "testing"
+dir_orig <- file.path("src", "SOILWAT2", dSOILWAT2_inputs)
 dir_in <- file.path("inst", "extdata")
 dir_out <- file.path("tests", "testthat")
 
-tests <- 1:2
+tests <- 1:3
 examples <- paste0("example", tests)
 
+
+#-----------------------
+#--- BACKUP PREVIOUS FILES
+dir.create(dir_backup, showWarnings = FALSE)
+stopifnot(dir.exists(dir_backup))
+file.copy(from = dir_in, to = dir_backup, recursive = TRUE, copy.mode = TRUE,
+  copy.date = TRUE)
+
+unlink(dir_in, recursive = TRUE)
+dir.create(dir_in, showWarnings = FALSE)
+stopifnot(dir.exists(dir_in))
+
+
+#-----------------------
+#--- COPY AND CREATE EXTDATA EXAMPLES FROM ORIGINAL SOILWAT2 INPUTS
 for (it in seq_along(tests)) {
-  #---INPUTS
+  file.copy(from = dir_orig, to = dir_in, recursive = TRUE, copy.mode = TRUE,
+    copy.date = TRUE)
+  file.rename(from = file.path(dir_in, dSOILWAT2_inputs), to = file.path(dir_in,
+    examples[it]))
+}
+
+# example1: default run
+  # nothing to do
+
+# example2: use Markov weather generator
+  # Turn on weather generator
+  ftemp <- file.path(dir_in, examples[2], "Input", "weathsetup.in")
+  fin <- readLines(ftemp)
+  line <- grep("markov process for missing weather", fin)
+  stopifnot(length(line) == 1, line > 0, line < length(fin))
+  substr(fin[line], 1, 1) <- "1"
+  writeLines(fin, con = ftemp)
+
+  # Delete weather data
+  ftemp <- list.files(file.path(dir_in, examples[2], "Input", "data_weather"),
+    full.names = TRUE, pattern = "weath")
+  N <- length(ftemp)
+  stopifnot(N > 1)
+  n_delete <- min(10, N)
+  unlink(ftemp[(N - n_delete + 1):N])
+
+# example3: use soil temperature
+  ftemp <- file.path(dir_in, examples[3], "Input", "siteparam.in")
+  fin <- readLines(ftemp)
+  line <- grep("flag, 1 to calculate soil_temperature", fin)
+  stopifnot(length(line) == 1, line > 0, line < length(fin))
+  substr(fin[line], 1, 1) <- "1"
+  writeLines(fin, con = ftemp)
+
+
+#-----------------------
+#--- USE EXTDATA EXAMPLES AS BASIS FOR UNIT-TESTS
+for (it in seq_along(tests)) {
+  #---rSOILWAT2 inputs
   sw_input <- rSOILWAT2::sw_inputDataFromFiles(file.path(dir_in, examples[it]),
-    files.in = "files_v31.in")
+    files.in = "files.in")
 
   sw_weather <- slot(sw_input, "weatherHistory")
   slot(sw_input, "weatherHistory") <- slot(sw_input, "weatherHistory")[1]
 
-  #---OUTPUTS
-  saveRDS(sw_weather, file = file.path(dir_out, paste0("Ex", tests, "_weather.rds")))
-  saveRDS(sw_input, file = file.path(dir_out, paste0("Ex", tests, "_input.rds")))
+  #---Files for unit testing
+  saveRDS(sw_weather, file = file.path(dir_out, paste0("Ex", tests[it], "_weather.rds")))
+  saveRDS(sw_input, file = file.path(dir_out, paste0("Ex", tests[it], "_input.rds")))
 }
+
+
+#-----------------------
+print(paste("NOTE: Remove", shQuote(dir_backup), "before pushing to repository if",
+  "script worked well."))
