@@ -11,7 +11,7 @@ fdbWeather2 <- tempfile(fileext = ".txt")
 write(NA, file = fdbWeather2)
 fdbWeather3 <- file.path("/Fantasy", "Volume", "test.sqlite3")
 
-tests <- c("Ex1", "Ex2", "Ex3")
+tests <- c("Ex1", "Ex2", "Ex3", "Ex4")
 sw_weather <- lapply(tests, function(it) readRDS(paste0(it, "_weather.rds")))
 scenarios <- c("Current", paste0("TestScenario", tests))
 scenarios_added <- c(scenarios, paste0(scenarios[1], "_new"), tolower(scenarios[3]))

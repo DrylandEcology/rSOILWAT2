@@ -3,7 +3,7 @@ context("rSOILWAT2 annual aggregation")
 #---CONSTANTS
 tol <- 1e-6
 OutSum <- c("off", "sum", "mean", "fnl")
-tests <- c("Ex1", "Ex2", "Ex3")
+tests <- c("Ex1", "Ex2", "Ex3", "Ex4")
 
 for (it in tests) {
   #---INPUTS
@@ -22,8 +22,16 @@ for (it in tests) {
 
   test_that("Simulate and aggregate", {
     # Run SOILWAT
-    expect_s4_class(rd <- sw_exec(inputData = sw_input, weatherList = sw_weather,
-      echo = FALSE, quiet = FALSE), "swOutput")
+    rd <- sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE,
+      quiet = TRUE)
+    expect_s4_class(rd, "swOutput")
+
+    # Run silently/verbosely
+    expect_silent(sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE,
+      quiet = TRUE))
+
+    # This doesn't work; apparently, testthat::expect_message and similar functions don't capture text written by LogError directly to the console.
+    # expect_message(sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE, quiet = FALSE))
 
     # Loop through output
     temp <- slotNames(rd)

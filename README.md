@@ -76,19 +76,6 @@ There are several options:
   git clone -b master --single-branch --recursive https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git rSOILWAT2
   ```
 
-- Use git to clone and get submodules step by step
-  ```
-  git clone https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git rSOILWAT2
-  cd rSOILWAT2/
-  git checkout master
-  git submodule init
-  git submodule update ## --remote: uses the latest submodule commit; without --remote: uses a previously defined submodule commit
-  cd src/SOILWAT2
-  git checkout master
-  git pull
-  cd ../..
-  ```
-
 
 ### Installation
 
@@ -127,6 +114,10 @@ binary package (this would be named 'rSOILWAT2_X.Y.Z.zip' with version number X.
 - https://ci.appveyor.com/project/dschlaep/rSOILWAT2/build/artifacts
 If the latest build should have failed, then you may want to check out the 'History' tab
 for binaries of older versions.
+- After you downloaded the binary package, open R, and run
+```{r}
+install.packages(pkgs = "path/to/downloaded/zipfile.zip", repos = NULL)
+```
 
 
 
@@ -155,23 +146,24 @@ __Tests, documentation, and code__ form a trinity
 
 __How to update the submodule 'SOILWAT2'__ to the latest commit
 ```
-git clone https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git rSOILWAT2
-cd rSOILWAT2
-git checkout master
-# if you want to change to the branch 'XXX' of the submodule 'SOILWAT2'
-# git config -f .gitmodules submodule.SOILWAT2.branch XXX
+git submodule update --remote #--remote: uses the latest commit; without --remote: uses the previously defined commit
+git commit -am "Pulled down latest commit 'COMMIT-FLAG' for submodule SOILWAT2"
+git push
+```
+
+Change branch of submodule `SOILWAT2`
+```
+nano .gitmodules # and change branch = <branch> to the desired <branch>
 
 git submodule init
 git submodule update --remote #--remote: uses the latest commit; without --remote: uses the previously defined commit
-cd src/SOILWAT2
-
-git checkout master # or whatever branch you are working on
-git pull
-
-cd ../..
-git commit -am "Pulled down latest commit 'COMMIT-FLAG' to submodule SOILWAT2"
+git commit -am "Changed to branch 'branch' commit 'COMMIT-FLAG' for submodule SOILWAT2"
 git push
 ```
+
+Run the script `./data-raw/prepare_testInput_objects.R` from within `rSOILWAT2/`
+if the `SOILWAT2` updated included changes to the input files.
+
 
 ### Version numbers
 

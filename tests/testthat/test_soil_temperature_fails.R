@@ -2,7 +2,7 @@ context("rSOILWAT2 soil temperature instability")
 
 #---CONSTANTS
 sw_TimeSteps <- c("Day", "Week", "Month", "Year")
-tests <- c("Ex1", "Ex2", "Ex3")
+tests <- c("Ex1", "Ex2", "Ex3", "Ex4")
 
 for (it in tests) {
   #---INPUTS
@@ -25,7 +25,7 @@ for (it in tests) {
   test_that("Check soil temperature", {
     # Run SOILWAT
     expect_s4_class(rd <- sw_exec(inputData = sw_input, weatherList = sw_weather,
-        echo = FALSE, quiet = FALSE), "swOutput")
+        echo = FALSE, quiet = TRUE), "swOutput")
 
       soiltemp <- slot(rd, "SOILTEMP")
       time_steps <- sw_TimeSteps[1 + soiltemp@TimeStep]

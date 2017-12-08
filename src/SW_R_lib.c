@@ -117,8 +117,9 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 	return SW_DataList;
 }
 
-SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
-	int tYears = 0, tevapLayers = 0, tVegEstabCount = 0, pYearUse = 0, pMonthUse = 0, pWeekUse = 0, pDayUse = 0;
+SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
+	int tYears = 0, tevapLayers = 0, tVegEstabCount = 0, pYearUse = 0, pMonthUse = 0,
+	  pWeekUse = 0, pDayUse = 0;
 	int i;
 	SEXP outputData;
 
@@ -127,7 +128,12 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
 	SEXP oRlogfile;
 
 	logged = FALSE;
-	logfp = NULL;
+	if (LOGICAL(coerceVector(quiet, LGLSXP))[0]) {
+	  logfp = NULL; // so that 'LogError' knows that R should NOT print messages to the console
+	} else {
+	  logfp = stdin; // just any non-NULL FILE pointer so that 'LogError' knows that R should print messages to the console
+	}
+
 	int argc = length(inputOptions);
 	char *argv[7];
 	collectInData = FALSE;
@@ -391,7 +397,7 @@ SEXP onGetOutput(SEXP inputData) {
 	char *Chydred_names[] = { "total_", "tree_", "shrub_", "forbs_", "grass_" };
 	char *Cinterception_names[] = { "total", "tree", "shrub", "forbs", "grass", "litter" };
 	char *Cprecip_names[] = { "ppt", "rain", "snow_fall", "snowmelt", "snowloss" };
-	char *Crunoff_names[] = { "total", "ponded", "snowmelt" };
+	char *Crunoff_names[] = { "net", "ponded_runoff", "snowmelt_runoff", "ponded_runon" };
 	char *Csnowpack_names[] = { "snowpackWaterEquivalent_cm", "snowdepth_cm" };
 	char *Ctemp_names[] = { "max_C", "min_C", "avg_C","surfaceTemp_C" };
 	char *Ctransp_names[] = { "transp_total_", "transp_tree_", "transp_shrub_", "transp_forbs_", "transp_grass_" };
@@ -500,7 +506,7 @@ SEXP onGetOutput(SEXP inputData) {
 	Rtemp_columns = 4;
 	Rprecip_columns = 5;
 	Rinfiltration_columns = 1;
-	Rrunoff_columns = 3;
+	Rrunoff_columns = 4;
 	RallH2O_columns = 0;
 	RvwcBulk_columns = tLayers;
 	RvwcMatric_columns = tLayers;

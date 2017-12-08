@@ -6,13 +6,13 @@
 /* .C calls */
 
 /* .Call calls */
-extern SEXP start(SEXP, SEXP, SEXP);
+extern SEXP start(SEXP, SEXP, SEXP, SEXP);
 extern SEXP tempError();
 extern SEXP onGetInputDataFromFiles(SEXP);
 extern SEXP onGetOutput(SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-  {"start",                   (DL_FUNC) &start,                   3},
+  {"start",                   (DL_FUNC) &start,                   4},
   {"tempError",               (DL_FUNC) &tempError,               0},
   {"onGetInputDataFromFiles", (DL_FUNC) &onGetInputDataFromFiles, 1},
   {"onGetOutput",             (DL_FUNC) &onGetOutput,             1},
