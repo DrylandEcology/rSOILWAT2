@@ -1,0 +1,7 @@
+# Model time definition file
+
+1980			# first year of simulation (but see weather and swc inputs)
+2010			# last year of simulation
+1			# first day of first year
+365			# last day of last year
+N			# hemisphere (N, S)

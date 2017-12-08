@@ -103,7 +103,7 @@
 #'
 #' ## ------ Simulation with data read from disk during execution ------------
 #' ## Execute the simulation run
-#' \dontrun{sw_out1 <- sw_exec(dir = path_demo, files.in = "files.in")
+#' \dontrun{sw_out1 <- sw_exec(dir = path_demo, files.in = "files.in")}
 #'
 #' ## Slots of the output object of class 'swOutput'
 #' str(sw_out1, max.level=2)
