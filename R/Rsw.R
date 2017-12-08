@@ -103,7 +103,7 @@
 #'
 #' ## ------ Simulation with data read from disk during execution ------------
 #' ## Execute the simulation run
-#' \dontrun{sw_out1 <- sw_exec(dir = path_demo, files.in = "files.in")}
+#' sw_out1 <- sw_exec(dir = path_demo, files.in = "files.in", quiet = TRUE)
 #'
 #' ## Slots of the output object of class 'swOutput'
 #' str(sw_out1, max.level=2)
@@ -114,10 +114,10 @@
 #' sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 #'
 #' ## Slots of the input object of class 'swInputData'
-#' str(sw_in2, max.level=2)
+#' str(sw_in2, max.level = 2)
 #'
 #' ## Execute the simulation run
-#' sw_out2 <- sw_exec(inputData = sw_in2)
+#' sw_out2 <- sw_exec(inputData = sw_in2, quiet = TRUE)
 #'
 #'
 #' ## ------ Simulation with data prepared beforehand and separate weather data ------------
@@ -127,13 +127,14 @@
 #' ## Read forcing weather data from files on disk (there are also functions to set up a
 #' ##   SQLite database for the weather data)
 #' sw_weath3 <- getWeatherData_folders(LookupWeatherFolder=file.path(path_demo, "Input"),
-#'    weatherDirName="data_weather", filebasename="weath", startYear=1979, endYear=2010)
+#'    weatherDirName = "data_weather", filebasename = "weath", startYear = 1979,
+#'    endYear = 2010)
 #'
 #' ## List of the slots of the input objects of class 'swWeatherData'
-#' str(sw_weath3, max.level=1)
+#' str(sw_weath3, max.level = 1)
 #'
 #' ## Execute the simulation run
-#' sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)
+#' sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3, quiet = TRUE)
 #'
 #'
 #' ## ------ Simulation with manipulated input data ------------
@@ -143,7 +144,7 @@
 #' swProd_Composition(sw_in4) <- c(0.4, 0.6, 0, 0, 0)
 #'
 #' ## Execute the simulation run
-#' sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3)
+#' sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3, quiet = TRUE)
 #'
 #'
 #' ## ------ Simulation with weather generator ------------
@@ -156,19 +157,19 @@
 #' # swWeather_UseMarkov(sw_in5) <- TRUE
 #'
 #' ## Execute the simulation run
-#' sw_out5 <- sw_exec(inputData = sw_in5, weatherList = NULL)
+#' sw_out5 <- sw_exec(inputData = sw_in5, weatherList = NULL, quiet = TRUE)
 #'
 #'
 #' ## ------ Simulation with CO2-effects ------------
 #' ## Read inputs from files on disk (including daily weather forcing)
-#' path_demo3 <- system.file("extdata", "example3", package = "rSOILWAT2")
-#' sw_in6 <- sw_inputDataFromFiles(dir = path_demo3, files.in = "files_v31.in")
+#' path_demo3 <- system.file("extdata", "example4", package = "rSOILWAT2")
+#' sw_in6 <- sw_inputDataFromFiles(dir = path_demo3, files.in = "files.in")
 #'
 #' ## Slots of the input object of class 'swInputData'
-#' str(sw_in6, max.level=2)
+#' str(sw_in6, max.level = 2)
 #'
 #' ## Execute the simulation run
-#' sw_out6 <- sw_exec(inputData = sw_in6)
+#' sw_out6 <- sw_exec(inputData = sw_in6, quiet = TRUE)
 #'
 #'
 #' ## See help(package = "rSOILWAT2") for a full list of functions
