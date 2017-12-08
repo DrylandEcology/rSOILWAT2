@@ -56,7 +56,7 @@ path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 
 ## ------ Simulation with data prepared beforehand ------------
 ## Read inputs from files on disk (including daily weather forcing)
-sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files_v31.in")
+sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 
 ## Slots of the input object of class 'swInputData'
 str(sw_in2, max.level=2)

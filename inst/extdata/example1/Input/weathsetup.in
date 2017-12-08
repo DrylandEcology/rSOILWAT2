@@ -1,0 +1,31 @@
+# Weather setup parameters
+#
+1			# 1 = simulate snow processes; 0 = no snow effects
+0.0			# % of snow drift per snow event (+ indicates snow addition, - indicates snow taken away from site)
+0.0			# % of snowmelt water as runoff/on per event (>0 indicates runoff, <0 indicates runon)
+0			# 0 = use historical data only; 1 = use markov process for missing weather
+1980			# first year to begin historical weather.
+5			# number of days to use in the running average of temperature.
+
+# Monthly scaling parameters:
+# Month 1 = January, Month 2 = February, etc.
+# PPT = multiplicative for daily PPT; max(0, scale * ppt)
+# MaxT = additive for daily max temperature [C]; scale + maxtemp
+# MinT = additive for daily min temperature [C]; scale + mintemp
+# SkyCover = additive for mean monthly sky cover [%]; min(100, max(0, scale + sky cover))
+# Wind = multiplicative for mean monthly wind speed; max(0, scale * wind speed)
+# rH = additive for mean monthly relative humidity [%]; min(100, max(0, scale + rel. Humidity))
+# Transmissivity = multiplicative for mean monthly relative transmissivity; min(1, max(0, scale * transmissivity))
+#Mon   PPT    MaxT    MinT  SkyCover   Wind    rH    Transmissivity
+1    1.000    0.00    0.00       0.0    1.0   0.0               1.0
+2    1.000    0.00    0.00       0.0    1.0   0.0               1.0
+3    1.000    0.00    0.00       0.0    1.0   0.0               1.0
+4    1.000    0.00    0.00       0.0    1.0   0.0               1.0
+5    1.000    0.00    0.00       0.0    1.0   0.0               1.0
+6    1.000    0.00    0.00       0.0    1.0   0.0               1.0
+7    1.000    0.00    0.00       0.0    1.0   0.0               1.0
+8    1.000    0.00    0.00       0.0    1.0   0.0               1.0
+9    1.000    0.00    0.00       0.0    1.0   0.0               1.0
+10   1.000    0.00    0.00       0.0    1.0   0.0               1.0
+11   1.000    0.00    0.00       0.0    1.0   0.0               1.0
+12   1.000    0.00    0.00       0.0    1.0   0.0               1.0

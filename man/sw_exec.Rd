@@ -5,7 +5,7 @@
 \title{Execute a SOILWAT simulation run}
 \usage{
 sw_exec(inputData = NULL, weatherList = NULL, dir = "",
-  files.in = "files_v31.in", echo = FALSE, quiet = FALSE)
+  files.in = "files.in", echo = FALSE, quiet = FALSE)
 }
 \arguments{
 \item{inputData}{an object of the S4 class \code{swInputData} which is
@@ -81,7 +81,7 @@ path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 
 ## ------ Simulation with data read from disk during execution ------------
 ## Execute the simulation run
-\dontrun{sw_out1 <- sw_exec(dir = path_demo, files.in = "files_v31.in")
+\dontrun{sw_out1 <- sw_exec(dir = path_demo, files.in = "files.in")
 
 ## Slots of the output object of class 'swOutput'
 str(sw_out1, max.level=2)
@@ -89,7 +89,7 @@ str(sw_out1, max.level=2)
 
 ## ------ Simulation with data prepared beforehand ------------
 ## Read inputs from files on disk (including daily weather forcing)
-sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files_v31.in")
+sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 
 ## Slots of the input object of class 'swInputData'
 str(sw_in2, max.level=2)
@@ -100,7 +100,7 @@ sw_out2 <- sw_exec(inputData = sw_in2)
 
 ## ------ Simulation with data prepared beforehand and separate weather data ------------
 ## Read inputs from files on disk
-sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files_v31.in")
+sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 
 ## Read forcing weather data from files on disk (there are also functions to set up a
 ##   SQLite database for the weather data)
@@ -128,7 +128,7 @@ sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3)
 ## Currently, the Markov weather generator flag must be turned on prior to reading files to disk
 ## - otherwise, the Markov prob.in and covar.in are not being loaded (NOTE: this should be fixed)
 path_demo2 <- system.file("extdata", "example2", package = "rSOILWAT2")
-sw_in5 <- sw_inputDataFromFiles(dir = path_demo2, files.in = "files_v31.in")
+sw_in5 <- sw_inputDataFromFiles(dir = path_demo2, files.in = "files.in")
 
 ## Turn on the Markov weather generator
 # swWeather_UseMarkov(sw_in5) <- TRUE

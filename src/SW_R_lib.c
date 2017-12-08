@@ -116,8 +116,9 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 	return SW_DataList;
 }
 
-SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
-	int tYears = 0, tevapLayers = 0, tVegEstabCount = 0, pYearUse = 0, pMonthUse = 0, pWeekUse = 0, pDayUse = 0;
+SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
+	int tYears = 0, tevapLayers = 0, tVegEstabCount = 0, pYearUse = 0, pMonthUse = 0,
+	  pWeekUse = 0, pDayUse = 0;
 	int i;
 	SEXP outputData;
 
@@ -126,7 +127,12 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
 	SEXP oRlogfile;
 
 	logged = FALSE;
-	logfp = NULL;
+	if (LOGICAL(coerceVector(quiet, LGLSXP))[0]) {
+	  logfp = NULL; // so that 'LogError' knows that R should NOT print messages to the console
+	} else {
+	  logfp = stdin; // just any non-NULL FILE pointer so that 'LogError' knows that R should print messages to the console
+	}
+
 	int argc = length(inputOptions);
 	char *argv[7];
 	collectInData = FALSE;

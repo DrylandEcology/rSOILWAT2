@@ -25,7 +25,7 @@ for (it in tests) {
   test_that("Check soil temperature", {
     # Run SOILWAT
     expect_s4_class(rd <- sw_exec(inputData = sw_input, weatherList = sw_weather,
-        echo = FALSE, quiet = FALSE), "swOutput")
+        echo = FALSE, quiet = TRUE), "swOutput")
 
       soiltemp <- slot(rd, "SOILTEMP")
       time_steps <- sw_TimeSteps[1 + soiltemp@TimeStep]

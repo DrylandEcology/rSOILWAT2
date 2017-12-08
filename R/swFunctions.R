@@ -967,7 +967,7 @@ dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
 #'
 #' ## ------ Simulation with data prepared beforehand and separate weather data ------------
 #' ## Read inputs from files on disk
-#' sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files_v31.in")
+#' sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 #'
 #' ## Read forcing weather data from files on disk (there are also functions to set up a
 #' ##   SQLite database for the weather data)

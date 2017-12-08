@@ -103,7 +103,7 @@
 #'
 #' ## ------ Simulation with data read from disk during execution ------------
 #' ## Execute the simulation run
-#' \dontrun{sw_out1 <- sw_exec(dir = path_demo, files.in = "files_v31.in")
+#' \dontrun{sw_out1 <- sw_exec(dir = path_demo, files.in = "files.in")
 #'
 #' ## Slots of the output object of class 'swOutput'
 #' str(sw_out1, max.level=2)
@@ -111,7 +111,7 @@
 #'
 #' ## ------ Simulation with data prepared beforehand ------------
 #' ## Read inputs from files on disk (including daily weather forcing)
-#' sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files_v31.in")
+#' sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 #'
 #' ## Slots of the input object of class 'swInputData'
 #' str(sw_in2, max.level=2)
@@ -122,7 +122,7 @@
 #'
 #' ## ------ Simulation with data prepared beforehand and separate weather data ------------
 #' ## Read inputs from files on disk
-#' sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files_v31.in")
+#' sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 #'
 #' ## Read forcing weather data from files on disk (there are also functions to set up a
 #' ##   SQLite database for the weather data)
@@ -150,7 +150,7 @@
 #' ## Currently, the Markov weather generator flag must be turned on prior to reading files to disk
 #' ## - otherwise, the Markov prob.in and covar.in are not being loaded (NOTE: this should be fixed)
 #' path_demo2 <- system.file("extdata", "example2", package = "rSOILWAT2")
-#' sw_in5 <- sw_inputDataFromFiles(dir = path_demo2, files.in = "files_v31.in")
+#' sw_in5 <- sw_inputDataFromFiles(dir = path_demo2, files.in = "files.in")
 #'
 #' ## Turn on the Markov weather generator
 #' # swWeather_UseMarkov(sw_in5) <- TRUE
@@ -164,7 +164,7 @@
 #'
 #' @export
 sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
-  files.in = "files_v31.in", echo = FALSE, quiet = FALSE) {
+  files.in = "files.in", echo = FALSE, quiet = FALSE) {
 
   dir_prev <- getwd()
   on.exit(setwd(dir_prev), add = TRUE)
@@ -182,7 +182,7 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
     inputData <- sw_inputDataFromFiles(dir = dir, files.in = files.in)
   }
 
-  res <- .Call(C_start, input, inputData, weatherList)
+  res <- .Call(C_start, input, inputData, weatherList, as.logical(quiet))
 
   if (.Call(C_tempError)) {
     # Error during soil temperature calculations
@@ -257,7 +257,7 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
 #'
 #' ## ------ Simulation with data prepared beforehand ------------
 #' ## Read inputs from files on disk (including daily weather forcing)
-#' sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files_v31.in")
+#' sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 #'
 #' ## Slots of the input object of class 'swInputData'
 #' str(sw_in2, max.level=2)
