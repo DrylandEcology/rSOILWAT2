@@ -1,8 +1,16 @@
 #!/usr/bin/env Rscript
 
+#--- rSOILWAT2: use development version
+library("methods")  # in case this code is run via 'Rscript'
+library("devtools")
+devtools::load_all()
+
+
+#--- INPUTS
 dSOILWAT2_inputs <- "testing"
 dir_orig <- file.path("src", "SOILWAT2", dSOILWAT2_inputs)
 dir_in <- file.path("inst", "extdata")
+dir_backup <- sub("extdata", "extdata_copy", dir_in)
 dir_out <- file.path("tests", "testthat")
 
 tests <- 1:3
@@ -11,6 +19,7 @@ examples <- paste0("example", tests)
 
 #-----------------------
 #--- BACKUP PREVIOUS FILES
+print(paste("Create backup of 'inst/extdata/' as", shQuote(dir_backup)))
 dir.create(dir_backup, showWarnings = FALSE)
 stopifnot(dir.exists(dir_backup))
 file.copy(from = dir_in, to = dir_backup, recursive = TRUE, copy.mode = TRUE,
@@ -62,8 +71,8 @@ for (it in seq_along(tests)) {
 #-----------------------
 #--- USE EXTDATA EXAMPLES AS BASIS FOR UNIT-TESTS
 for (it in seq_along(tests)) {
-  #---rSOILWAT2 inputs
-  sw_input <- rSOILWAT2::sw_inputDataFromFiles(file.path(dir_in, examples[it]),
+  #---rSOILWAT2 inputs using development version
+  sw_input <- sw_inputDataFromFiles(file.path(dir_in, examples[it]),
     files.in = "files.in")
 
   sw_weather <- slot(sw_input, "weatherHistory")
