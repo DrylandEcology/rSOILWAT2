@@ -118,8 +118,6 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 }
 
 SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
-	int tYears = 0, tevapLayers = 0, tVegEstabCount = 0, pYearUse = 0, pMonthUse = 0,
-	  pWeekUse = 0, pDayUse = 0;
 	int i;
 	SEXP outputData;
 
@@ -331,7 +329,7 @@ SEXP onGetOutput(SEXP inputData) {
 	                           "TRANSP","EVAPSOIL","EVAPSURFACE","INTERCEPTION","LYRDRAIN","HYDRED","ET","AET","PET","WETDAY","SNOWPACK","DEEPSWC","SOILTEMP","ALLVEG","ESTABL", "CO2EFFECTS"};
 
 	SEXP swOutput_KEY;
-	char *cSWoutput_KEY_Names[] = {"Title","TimeStep","Columns","Day","Week","Month","Year"};
+//	char *cSWoutput_KEY_Names[] = {"Title","TimeStep","Columns","Day","Week","Month","Year"};
 	SEXP swOutput_KEY_WTHR, swOutput_KEY_TEMP, swOutput_KEY_PRECIP, swOutput_KEY_SOILINFILT, swOutput_KEY_RUNOFF, swOutput_KEY_ALLH2O, swOutput_KEY_VWCBULK, swOutput_KEY_VWCMATRIC, swOutput_KEY_SWCBULK,
 		swOutput_KEY_SWPMATRIC, swOutput_KEY_SWABULK, swOutput_KEY_SWAMATRIC, swOutput_KEY_SURFACEWATER, swOutput_KEY_TRANSP, swOutput_KEY_EVAPSOIL, swOutput_KEY_EVAPSURFACE, swOutput_KEY_INTERCEPTION,
 		swOutput_KEY_LYRDRAIN, swOutput_KEY_HYDRED, swOutput_KEY_ET, swOutput_KEY_AET, swOutput_KEY_PET, swOutput_KEY_WETDAY, swOutput_KEY_SNOWPACK, swOutput_KEY_DEEPSWC,
@@ -363,7 +361,7 @@ SEXP onGetOutput(SEXP inputData) {
 	Revap_surface_names_yr, Revap_surface_names_y_yr, Rhydred_names_yr, Rhydred_names_y_yr, Rinfiltration_names_yr, Rinfiltration_names_y_yr, Rinterception_names_yr,
 	Rinterception_names_y_yr, Rpercolation_names_yr, Rpercolation_names_y_yr, Rpet_names_yr, Rpet_names_y_yr, Rprecip_names_yr, Rprecip_names_y_yr, Rrunoff_names_yr,
 	Rrunoff_names_y_yr, Rsnowpack_names_yr, Rsnowpack_names_y_yr, Rsoil_temp_names_yr, Rsoil_temp_names_y_yr, Rsurface_water_names_yr, Rsurface_water_names_y_yr,
-	Rsw_pot_names_yr, Rsw_pot_names_y_yr, RswaBulk_names_yr, RswaBulk_names_y_yr, RswaMatric_names_yr, RswaMatric_names_y_yr, RswcBulk_names_yr, RswcBulk_names_y_yr, Rtemp_names_yr, Rtemp_names_y_yr, Rtransp_names_yr,
+	RswaBulk_names_yr, RswaBulk_names_y_yr, RswaMatric_names_yr, RswaMatric_names_y_yr, RswcBulk_names_yr, RswcBulk_names_y_yr, Rtemp_names_yr, Rtemp_names_y_yr, Rtransp_names_yr,
 	Rtransp_names_y_yr, RvwcBulk_names_yr, RvwcBulk_names_y_yr, RvwcMatric_names_yr, RvwcMatric_names_y_yr, Rwetdays_names_yr, Rwetdays_names_y_yr, RswpMatric_names_yr, RswpMatric_names_y_yr,
 	Rco2effects_names_y_yr, Rco2effects_names_yr;
 
@@ -371,7 +369,7 @@ SEXP onGetOutput(SEXP inputData) {
 	Revap_surface_names_mo, Revap_surface_names_y_mo, Rhydred_names_mo, Rhydred_names_y_mo, Rinfiltration_names_mo, Rinfiltration_names_y_mo, Rinterception_names_mo,
 	Rinterception_names_y_mo, Rpercolation_names_mo, Rpercolation_names_y_mo, Rpet_names_mo, Rpet_names_y_mo, Rprecip_names_mo, Rprecip_names_y_mo, Rrunoff_names_mo,
 	Rrunoff_names_y_mo, Rsnowpack_names_mo, Rsnowpack_names_y_mo, Rsoil_temp_names_mo, Rsoil_temp_names_y_mo, Rsurface_water_names_mo, Rsurface_water_names_y_mo,
-	Rsw_pot_names_mo, Rsw_pot_names_y_mo, RswaBulk_names_mo, RswaBulk_names_y_mo, RswaMatric_names_mo, RswaMatric_names_y_mo, RswcBulk_names_mo, RswcBulk_names_y_mo, Rtemp_names_mo, Rtemp_names_y_mo, Rtransp_names_mo,
+	RswaBulk_names_mo, RswaBulk_names_y_mo, RswaMatric_names_mo, RswaMatric_names_y_mo, RswcBulk_names_mo, RswcBulk_names_y_mo, Rtemp_names_mo, Rtemp_names_y_mo, Rtransp_names_mo,
 	Rtransp_names_y_mo, RvwcBulk_names_mo, RvwcBulk_names_y_mo, RvwcMatric_names_mo, RvwcMatric_names_y_mo, Rwetdays_names_mo, Rwetdays_names_y_mo, RswpMatric_names_mo, RswpMatric_names_y_mo,
 	Rco2effects_names_y_mo, Rco2effects_names_mo;
 
@@ -379,7 +377,7 @@ SEXP onGetOutput(SEXP inputData) {
 	Revap_surface_names_wk, Revap_surface_names_y_wk, Rhydred_names_wk, Rhydred_names_y_wk, Rinfiltration_names_wk, Rinfiltration_names_y_wk, Rinterception_names_wk,
 	Rinterception_names_y_wk, Rpercolation_names_wk, Rpercolation_names_y_wk, Rpet_names_wk, Rpet_names_y_wk, Rprecip_names_wk, Rprecip_names_y_wk, Rrunoff_names_wk,
 	Rrunoff_names_y_wk, Rsnowpack_names_wk, Rsnowpack_names_y_wk, Rsoil_temp_names_wk, Rsoil_temp_names_y_wk, Rsurface_water_names_wk, Rsurface_water_names_y_wk,
-	Rsw_pot_names_wk, Rsw_pot_names_y_wk, RswaBulk_names_wk, RswaBulk_names_y_wk, RswaMatric_names_wk, RswaMatric_names_y_wk, RswcBulk_names_wk, RswcBulk_names_y_wk, Rtemp_names_wk, Rtemp_names_y_wk, Rtransp_names_wk,
+	RswaBulk_names_wk, RswaBulk_names_y_wk, RswaMatric_names_wk, RswaMatric_names_y_wk, RswcBulk_names_wk, RswcBulk_names_y_wk, Rtemp_names_wk, Rtemp_names_y_wk, Rtransp_names_wk,
 	Rtransp_names_y_wk, RvwcBulk_names_wk, RvwcBulk_names_y_wk, RvwcMatric_names_wk, RvwcMatric_names_y_wk, Rwetdays_names_wk, Rwetdays_names_y_wk, RswpMatric_names_wk, RswpMatric_names_y_wk,
 	Rco2effects_names_y_wk, Rco2effects_names_wk;
 
@@ -387,7 +385,7 @@ SEXP onGetOutput(SEXP inputData) {
 	Revap_surface_names_dy, Revap_surface_names_y_dy, Rhydred_names_dy, Rhydred_names_y_dy, Rinfiltration_names_dy, Rinfiltration_names_y_dy, Rinterception_names_dy,
 	Rinterception_names_y_dy, Rpercolation_names_dy, Rpercolation_names_y_dy, Rpet_names_dy, Rpet_names_y_dy, Rprecip_names_dy, Rprecip_names_y_dy, Rrunoff_names_dy,
 	Rrunoff_names_y_dy, Rsnowpack_names_dy, Rsnowpack_names_y_dy, Rsoil_temp_names_dy, Rsoil_temp_names_y_dy, Rsurface_water_names_dy, Rsurface_water_names_y_dy,
-	Rsw_pot_names_dy, Rsw_pot_names_y_dy, RswaBulk_names_dy, RswaBulk_names_y_dy, RswaMatric_names_dy, RswaMatric_names_y_dy, RswcBulk_names_dy, RswcBulk_names_y_dy, Rtemp_names_dy, Rtemp_names_y_dy, Rtransp_names_dy,
+	RswaBulk_names_dy, RswaBulk_names_y_dy, RswaMatric_names_dy, RswaMatric_names_y_dy, RswcBulk_names_dy, RswcBulk_names_y_dy, Rtemp_names_dy, Rtemp_names_y_dy, Rtransp_names_dy,
 	Rtransp_names_y_dy, RvwcBulk_names_dy, RvwcBulk_names_y_dy, RvwcMatric_names_dy, RvwcMatric_names_y_dy, Rwetdays_names_dy, Rwetdays_names_y_dy, RswpMatric_names_dy, RswpMatric_names_y_dy,
 	Rco2effects_names_y_dy, Rco2effects_names_dy;
 
@@ -592,9 +590,9 @@ SEXP onGetOutput(SEXP inputData) {
 			SET_SLOT(swOutput_KEY_WTHR, install("Year"), Rwthr_yr);
 			UNPROTECT(1);
 		}
-		PROTECT(r_WETDAY_COLUMNS = NEW_INTEGER(1));
-		INTEGER(r_WETDAY_COLUMNS)[0]=Rwthr_columns;
-		SET_SLOT(swOutput_KEY_WTHR, install("Columns"), r_WETDAY_COLUMNS);
+		PROTECT(r_WTHR_COLUMNS = NEW_INTEGER(1));
+		INTEGER(r_WTHR_COLUMNS)[0]=Rwthr_columns;
+		SET_SLOT(swOutput_KEY_WTHR, install("Columns"), r_WTHR_COLUMNS);
 		SET_SLOT(swOutput_Object, install(cSWoutput_Names[4]), swOutput_KEY_WTHR);
 		UNPROTECT(3);
 	}
@@ -2060,32 +2058,51 @@ SEXP onGetOutput(SEXP inputData) {
 			UNPROTECT(1);
 		}
 		if(periodUse[19][0]) {
+			if(debug) swprintf("\tdy\n");
 			PROTECT(Ret_dy = allocMatrix(REALSXP, dy_nrow, Ret_columns+2));
-
+			PROTECT(Ret_names_dy = allocVector(VECSXP, 2));
+			PROTECT(Ret_names_y_dy = allocVector(STRSXP, Ret_columns + 2));
+			SET_STRING_ELT(Ret_names_y_dy, 0, mkChar("Year"));
+			SET_STRING_ELT(Ret_names_y_dy, 1, mkChar("DOY"));
+			SET_VECTOR_ELT(Ret_names_dy, 1, Ret_names_y_dy);
 			setAttrib(Ret_dy, R_DimNamesSymbol, Ret_names_dy);
 			SET_SLOT(swOutput_KEY_ET, install("Day"), Ret_dy);
-			UNPROTECT(1);
+			UNPROTECT(3);
 		}
 		if(periodUse[19][1]) {
+			if(debug) swprintf("\twk\n");
 			PROTECT(Ret_wk = allocMatrix(REALSXP, wk_nrow, Ret_columns+2));
-
-			setAttrib(Ret_wk, R_DimNamesSymbol, Ret_names_dy);
+			PROTECT(Ret_names_wk = allocVector(VECSXP, 2));
+			PROTECT(Ret_names_y_wk = allocVector(STRSXP, Ret_columns + 2));
+			SET_STRING_ELT(Ret_names_y_wk, 0, mkChar("Year"));
+			SET_STRING_ELT(Ret_names_y_wk, 1, mkChar("Week"));
+			SET_VECTOR_ELT(Ret_names_wk, 1, Ret_names_y_wk);
+			setAttrib(Ret_wk, R_DimNamesSymbol, Ret_names_wk);
 			SET_SLOT(swOutput_KEY_ET, install("Week"), Ret_wk);
-			UNPROTECT(1);
+			UNPROTECT(3);
 		}
 		if(periodUse[19][2]) {
+			if(debug) swprintf("\tmo\n");
 			PROTECT(Ret_mo = allocMatrix(REALSXP, mo_nrow, Ret_columns+2));
-
-			setAttrib(Ret_mo, R_DimNamesSymbol, Ret_names_dy);
+			PROTECT(Ret_names_mo = allocVector(VECSXP, 2));
+			PROTECT(Ret_names_y_mo = allocVector(STRSXP, Ret_columns + 2));
+			SET_STRING_ELT(Ret_names_y_mo, 0, mkChar("Year"));
+			SET_STRING_ELT(Ret_names_y_mo, 1, mkChar("Month"));
+			SET_VECTOR_ELT(Ret_names_mo, 1, Ret_names_y_mo);
+			setAttrib(Ret_mo, R_DimNamesSymbol, Ret_names_mo);
 			SET_SLOT(swOutput_KEY_ET, install("Month"), Ret_mo);
-			UNPROTECT(1);
+			UNPROTECT(3);
 		}
 		if(periodUse[19][3]) {
+			if(debug) swprintf("\tyr\n");
 			PROTECT(Ret_yr = allocMatrix(REALSXP, yr_nrow, Ret_columns+1));
-
-			setAttrib(Ret_yr, R_DimNamesSymbol, Ret_names_dy);
+			PROTECT(Ret_names_yr = allocVector(VECSXP, 2));
+			PROTECT(Ret_names_y_yr = allocVector(STRSXP, Ret_columns + 1));
+			SET_STRING_ELT(Ret_names_y_yr, 0, mkChar("Year"));
+			SET_VECTOR_ELT(Ret_names_yr, 1, Ret_names_y_yr);
+			setAttrib(Ret_yr, R_DimNamesSymbol, Ret_names_yr);
 			SET_SLOT(swOutput_KEY_ET, install("Year"), Ret_yr);
-			UNPROTECT(1);
+			UNPROTECT(3);
 		}
 		PROTECT(r_ET_COLUMNS = NEW_INTEGER(1));
 		INTEGER(r_ET_COLUMNS)[0]=Ret_columns;
