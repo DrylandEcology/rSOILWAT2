@@ -83,10 +83,11 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 	PROTECT(oRlogfile = NEW_OBJECT(swLog));
 	PROTECT(Rlogfile = GET_SLOT(oRlogfile,install("LogData")));
 
-	if (debug) swprintf("Construct variables\n");
+	if (debug) swprintf("Set call arguments\n");
 	init_args(argc, argv);
+	if (debug) swprintf("Construct variables\n");
 	SW_CTL_init_model(_firstfile);
-
+	if (debug) swprintf("Read from disk\n");
 	SW_CTL_read_inputs_from_disk();
 
   if (debug) swprintf("Copy data to classes\n");
