@@ -2,7 +2,11 @@ context("rSOILWAT2 soil temperature instability")
 
 #---CONSTANTS
 sw_TimeSteps <- c("Day", "Week", "Month", "Year")
-tests <- c("Ex1", "Ex2", "Ex3", "Ex4")
+temp <- list.files(".", pattern = "Ex")
+temp <- sapply(strsplit(temp, "_"), function(x) x[[1]])
+tests <- unique(temp)
+test_that("Test data availability", expect_gt(length(tests), 0))
+
 
 for (it in tests) {
   #---INPUTS

@@ -97,5 +97,11 @@ for (it in seq_along(tests)) {
 
 
 #-----------------------
+#--- DELETE ALL BUT DEFAULT EXAMPLE FROM PACKAGE (to minimize space)
+for (it in seq_along(tests)[-1]) {
+  unlink(file.path(dir_in, examples[it]), recursive = TRUE)
+}
+
+#-----------------------
 print(paste("NOTE: Remove", shQuote(dir_backup), "before pushing to repository if",
   "script worked well."))

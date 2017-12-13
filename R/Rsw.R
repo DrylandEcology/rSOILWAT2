@@ -147,29 +147,17 @@
 #' sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3, quiet = TRUE)
 #'
 #'
-#' ## ------ Simulation with weather generator ------------
-#' ## Currently, the Markov weather generator flag must be turned on prior to reading files to disk
-#' ## - otherwise, the Markov prob.in and covar.in are not being loaded (NOTE: this should be fixed)
-#' path_demo2 <- system.file("extdata", "example2", package = "rSOILWAT2")
-#' sw_in5 <- sw_inputDataFromFiles(dir = path_demo2, files.in = "files.in")
-#'
-#' ## Turn on the Markov weather generator
-#' # swWeather_UseMarkov(sw_in5) <- TRUE
-#'
-#' ## Execute the simulation run
-#' sw_out5 <- sw_exec(inputData = sw_in5, weatherList = NULL, quiet = TRUE)
-#'
 #'
 #' ## ------ Simulation with CO2-effects ------------
-#' ## Read inputs from files on disk (including daily weather forcing)
-#' path_demo3 <- system.file("extdata", "example4", package = "rSOILWAT2")
-#' sw_in6 <- sw_inputDataFromFiles(dir = path_demo3, files.in = "files.in")
+#' sw_in5 <- sw_in3
 #'
-#' ## Slots of the input object of class 'swInputData'
-#' str(sw_in6, max.level = 2)
+#' ## Turn on the CO2-effects and set the CO2-concentration scenario
+#' swCarbon_Scenario(sw_in5) <- "RCP85"
+#' swCarbon_Use_Bio(sw_in5) <- 1L
+#' swCarbon_Use_WUE(sw_in5) <- 1L
 #'
 #' ## Execute the simulation run
-#' sw_out6 <- sw_exec(inputData = sw_in6, quiet = TRUE)
+#' sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3, quiet = TRUE)
 #'
 #'
 #' ## See help(package = "rSOILWAT2") for a full list of functions
