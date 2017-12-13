@@ -5,6 +5,11 @@ tol <- 1e-6
 OutSum <- c("off", "sum", "mean", "fnl")
 tests <- c("Ex1", "Ex2", "Ex3", "Ex4")
 
+var_SumNotZero <- c("TEMP", "PRECIP", "SOILINFILT", "VWCBULK", "VWCMATRIC", "SWCBULK",
+  "SWABULK", "SWAMATRIC", "SWPMATRIC", "TRANSP", "EVAPSOIL", "EVAPSURFACE",
+  "INTERCEPTION", "LYRDRAIN", "HYDRED", "ET", "AET", "PET", "WETDAY", "SNOWPACK",
+  "DEEPSWC")
+
 for (it in tests) {
   #---INPUTS
   sw_input <- readRDS(paste0(it, "_input.rds"))
@@ -50,9 +55,15 @@ for (it in tests) {
         fun_agg[k] %in% c("mean", "sum")) {
 
         info2 <- paste(info1, "- slot", vars[k])
-        res_true <- matrix(TRUE, nrow = rd@yr_nrow, ncol = x1@Columns)
+
+        # Output is not all zero
+        if (vars[k] %in% var_SumNotZero) {
+          expect_true(sum(abs(x1@Day[, -(1:2)])) > 0, info = info2)
+          expect_true(sum(abs(x1@Year[, -1])) > 0, info = info2)
+        }
 
         # Compare aggregated daily against yearly output
+        res_true <- matrix(TRUE, nrow = rd@yr_nrow, ncol = x1@Columns)
         expect_equivalent({
             temp1d <- aggregate(x1@Day[, -(1:2)], by = list(x1@Day[, 1]), FUN = fun_agg[k])
             diff1d <- data.matrix(x1@Year[, -1]) - data.matrix(temp1d[, -1])
