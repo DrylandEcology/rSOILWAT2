@@ -2752,7 +2752,7 @@ SEXP onGetOutput(SEXP inputData) {
 			PROTECT(Rco2effects_names_dy = allocVector(VECSXP, 2));
 			PROTECT(Rco2effects_names_y_dy = allocVector(STRSXP, Rco2effects_columns + 2));
 			SET_STRING_ELT(Rco2effects_names_y_dy, 0, mkChar("Year"));
-			SET_STRING_ELT(Rco2effects_names_y_dy, 1, mkChar("Week"));
+			SET_STRING_ELT(Rco2effects_names_y_dy, 1, mkChar("DOY"));
 			SET_STRING_ELT(Rco2effects_names_y_dy, 2, mkChar("GrassBiomass"));
 			SET_STRING_ELT(Rco2effects_names_y_dy, 3, mkChar("ShrubBiomass"));
 			SET_STRING_ELT(Rco2effects_names_y_dy, 4, mkChar("TreeBiomass"));
