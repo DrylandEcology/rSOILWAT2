@@ -3,7 +3,10 @@ context("rSOILWAT2 annual aggregation")
 #---CONSTANTS
 tol <- 1e-6
 OutSum <- c("off", "sum", "mean", "fnl")
-tests <- c("Ex1", "Ex2")
+temp <- list.files(".", pattern = "Ex")
+temp <- sapply(strsplit(temp, "_"), function(x) x[[1]])
+tests <- unique(temp)
+test_that("Test data availability", expect_gt(length(tests), 0))
 
 var_SumNotZero <- c("TEMP", "PRECIP", "SOILINFILT", "VWCBULK", "VWCMATRIC", "SWCBULK",
   "SWABULK", "SWAMATRIC", "SWPMATRIC", "TRANSP", "EVAPSOIL", "EVAPSURFACE",

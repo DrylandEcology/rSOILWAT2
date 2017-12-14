@@ -74,6 +74,16 @@
 	-3.5	-3.9	-2.0	-2.0
 
 
+# ---- CO2 Coefficients: multiplier = Coeff1 * x^Coeff2
+# Coefficients assume that monthly biomass inputs reflect values for conditions at
+# 360 ppm CO2, i.e., multiplier = 1 for x = 360 ppm CO2
+# Grasses  Shrubs  Trees  Forbs
+	0.1319	0.1319	0.1319	0.1319	# Biomass Coeff1
+	0.3442	0.3442	0.3442	0.3442	# Biomass Coeff2
+	25.158	25.158	25.158	25.158	# WUE Coeff1
+	-0.548	-0.548	-0.548	-0.548	# WUE Coeff2
+
+
 # Grasslands component:
 # -------------- Monthly production values ------------
 # Litter   - dead leafy material on the ground (g/m^2 ).
@@ -140,4 +150,3 @@
  65.0    180.0    0.20  300.     # October
  70.0    170.0    0.10  300.     # November
  75.0    160.0    0.00  300.     # December
-

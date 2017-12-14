@@ -24,19 +24,9 @@
 
 
 #Remember this models the C code so index starts at 0 not 1
-ObjType = c("FileManagement","Model","Weather","Site","SoilWater","VegetationEstab","VegetationProduction","Output")
-OutKey = c("AllWthr","Temp","Precip","SoilInf","Runoff","AllH2O","VWCBulk","VWCMatrix","SWCBulk","SWABulk","SWAMatric","SWPMatric","SurfaceWater","Transp","EvapSoil","EvapSurface","Interception","LyrDrain","Hydred","ET","AET","PET","WetDays","SnowPack","DeepSWC","SoilTemp","AllVeg","Esab")
-KEY =  c("WTHR", "TEMP", "PRECIP", "SOILINFILT", "RUNOFF", "ALLH2O", "VWCBULK", "VWCMATRIC", "SWCBULK", "SWABULK", "SWAMATRIC", "SWPMATRIC","SURFACEWATER", "TRANSP", "EVAPSOIL",
-		"EVAPSURFACE", "INTERCEPTION", "LYRDRAIN", "HYDRED", "ET", "AET", "PET", "WETDAY", "SNOWPACK", "DEEPSWC", "SOILTEMP", "ALLVEG", "ESTABL")
-OutPeriod = c("Day","Week","Month","Year")
-timePeriods <- c("dy","wk","mo","yr")
-OutSum = c("off","sum","avg","fnl")
-KeyComments <- c("","/* max., min, average temperature, surface temperature (C) */", "/* total precip = sum(rain, snow), rain, snow-fall, snowmelt, and snowloss (cm)     */","/* water to infiltrate in top soil layer (cm), runoff (cm); (not-intercepted rain)+(snowmelt-runoff) */",
-		"/* runoff (cm): total runoff, runoff from ponded water, runoff from snowmelt */","","/* bulk volumetric soilwater (cm / layer) */","/* matric volumetric soilwater (cm / layer) */","/* bulk soilwater content (cm / cm layer); swc.l1(today) = swc.l1(yesterday)+inf_soil-lyrdrain.l1-transp.l1-evap_soil.l1; swc.li(today) = swc.li(yesterday)+lyrdrain.l(i-1)-lyrdrain.li-transp.li-evap_soil.li; swc.llast(today) = swc.llast(yesterday)+lyrdrain.l(last-1)-deepswc-transp.llast-evap_soil.llast  */",
-		"/* matric soilwater potential (-bars) */","/* bulk available soil water (cm/layer) = swc - wilting point */","/* matric available soil water (cm/layer) = swc - wilting point */","/* surface water (cm)   */","/* transpiration from each soil layer (cm): total, trees, shrubs, forbs, grasses     */","/* bare-soil evaporation from each soil layer (cm)   */",
-		"/* evaporation (cm): total, trees, shrubs, forbs, grasses, litter, surface water   */","/* intercepted rain (cm): total, trees, shrubs, forbs, grasses, and litter (cm) */","/* water percolated from each layer (cm) */","/* hydraulic redistribution from each layer (cm): total, trees, shrubs, forbs, grasses */",
-		"","/* actual evapotr. (cm)   */","/* potential evaptr (cm)  */","/* days above swc_wet */","/* snowpack water equivalent (cm), snowdepth (cm); since snowpack is already summed, use avg - sum sums the sums = nonsense   */","/* deep drainage into lowest layer (cm) */","/* soil temperature from each soil layer (in celsius)",
-		"","/* yearly establishment results */")
+timePeriods <- c("dy", "wk", "mo", "yr")
+OutSum <- c("off", "sum", "avg", "fnl") # only used for 'swReadLines' and 'swWriteLines'
+
 #######
 #Note I use 0 for keys which are not implemented.
 #######
@@ -191,6 +181,17 @@ setMethod("swWriteLines", signature=c(object="swOUT", file="character"), definit
 			infiletext[40] = "# in any order. For example: 'TIMESTEP mo wk' will output for month and week"
 			infiletext[41] = paste("OUTSEP ",ifelse(object@outputSeparator=="\t","t","s"),sep="")
 			if(object@useTimeStep)	infiletext[42] = paste("TIMESTEP ",paste(timePeriods[object@timePeriods + 1],collapse = " "),sep="")
+
+			KEY <- c("WTHR", "TEMP", "PRECIP", "SOILINFILT", "RUNOFF", "ALLH2O", "VWCBULK",
+				"VWCMATRIC", "SWCBULK", "SWABULK", "SWAMATRIC", "SWPMATRIC","SURFACEWATER", "TRANSP",
+				"EVAPSOIL", "EVAPSURFACE", "INTERCEPTION", "LYRDRAIN", "HYDRED", "ET", "AET", "PET",
+				"WETDAY", "SNOWPACK", "DEEPSWC", "SOILTEMP", "ALLVEG", "ESTABL")
+			KeyComments <- c("","/* max., min, average temperature, surface temperature (C) */", "/* total precip = sum(rain, snow), rain, snow-fall, snowmelt, and snowloss (cm)     */","/* water to infiltrate in top soil layer (cm), runoff (cm); (not-intercepted rain)+(snowmelt-runoff) */",
+					"/* runoff (cm): total runoff, runoff from ponded water, runoff from snowmelt */","","/* bulk volumetric soilwater (cm / layer) */","/* matric volumetric soilwater (cm / layer) */","/* bulk soilwater content (cm / cm layer); swc.l1(today) = swc.l1(yesterday)+inf_soil-lyrdrain.l1-transp.l1-evap_soil.l1; swc.li(today) = swc.li(yesterday)+lyrdrain.l(i-1)-lyrdrain.li-transp.li-evap_soil.li; swc.llast(today) = swc.llast(yesterday)+lyrdrain.l(last-1)-deepswc-transp.llast-evap_soil.llast  */",
+					"/* matric soilwater potential (-bars) */","/* bulk available soil water (cm/layer) = swc - wilting point */","/* matric available soil water (cm/layer) = swc - wilting point */","/* surface water (cm)   */","/* transpiration from each soil layer (cm): total, trees, shrubs, forbs, grasses     */","/* bare-soil evaporation from each soil layer (cm)   */",
+					"/* evaporation (cm): total, trees, shrubs, forbs, grasses, litter, surface water   */","/* intercepted rain (cm): total, trees, shrubs, forbs, grasses, and litter (cm) */","/* water percolated from each layer (cm) */","/* hydraulic redistribution from each layer (cm): total, trees, shrubs, forbs, grasses */",
+					"","/* actual evapotr. (cm)   */","/* potential evaptr (cm)  */","/* days above swc_wet */","/* snowpack water equivalent (cm), snowdepth (cm); since snowpack is already summed, use avg - sum sums the sums = nonsense   */","/* deep drainage into lowest layer (cm) */","/* soil temperature from each soil layer (in celsius)",
+					"","/* yearly establishment results */")
 
 			infiletext[44] = "# key			SUMTYPE		PERIOD		start		end		filename_prefix"
 			j=1

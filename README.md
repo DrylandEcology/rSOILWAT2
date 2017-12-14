@@ -122,7 +122,29 @@ install.packages(pkgs = "path/to/downloaded/zipfile.zip", repos = NULL)
 
 
 ### For code contributors only
-Update submodule 'SOILWAT2' to the latest commit of defined branch
+
+__Follow our guidelines__ as detailed [here](https://github.com/Burke-Lauenroth-Lab/workflow_guidelines)
+
+__Tests, documentation, and code__ form a trinity
+- Code documentation
+  * Read the [section 'Object documentation' in Wickham's book 'R packages'](http://r-pkgs.had.co.nz/man.html)
+  * Use [roxygen2](https://cran.r-project.org/web/packages/roxygen2/vignettes/formatting.html)
+    to write inline code documentation
+  * Update help pages and NAMESPACE with the command `devtools::document()`
+  * Ideally, add examples to function documentation and check these examples with the
+    command `devtools::run_examples()`
+- Code tests
+  * Read the [section 'Testing' in Wickham's book 'R packages'](http://r-pkgs.had.co.nz/tests.html)
+  * Use [testthat](https://github.com/hadley/testthat) to add unit tests to the existing
+    framework
+  * Run unit tests locally with the command `devtools::test()`
+  * These unit tests will also be run on the command-line with `R CMD check .`
+  * The command-line check will be run on the continuous integration frameworks 'travis'
+    and 'appveyor' when commits are pushed
+  * Development/feature branches can only be merged into master if they pass all checks
+
+
+__How to update the submodule 'SOILWAT2'__ to the latest commit
 ```
 git submodule update --remote #--remote: uses the latest commit; without --remote: uses the previously defined commit
 git commit -am "Pulled down latest commit 'COMMIT-FLAG' for submodule SOILWAT2"

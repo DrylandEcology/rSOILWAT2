@@ -13,7 +13,7 @@ dir_in <- file.path("inst", "extdata")
 dir_backup <- sub("extdata", "extdata_copy", dir_in)
 dir_out <- file.path("tests", "testthat")
 
-tests <- 1:3
+tests <- 1:4
 examples <- paste0("example", tests)
 
 
@@ -67,6 +67,18 @@ for (it in seq_along(tests)) {
   substr(fin[line], 1, 1) <- "1"
   writeLines(fin, con = ftemp)
 
+# example4: turn on CO2-effects
+  ftemp <- file.path(dir_in, examples[4], "Input", "siteparam.in")
+  fin <- readLines(ftemp)
+  line <- grep("Use biomass multiplier", fin)
+  stopifnot(length(line) == 1, line > 0, line < length(fin))
+  substr(fin[line + 1], 1, 1) <- "1"
+  line <- grep("Use water-usage efficiency multiplier", fin)
+  stopifnot(length(line) == 1, line > 0, line < length(fin))
+  substr(fin[line + 1], 1, 1) <- "1"
+  writeLines(fin, con = ftemp)
+
+
 
 #-----------------------
 #--- USE EXTDATA EXAMPLES AS BASIS FOR UNIT-TESTS
@@ -83,6 +95,12 @@ for (it in seq_along(tests)) {
   saveRDS(sw_input, file = file.path(dir_out, paste0("Ex", tests[it], "_input.rds")))
 }
 
+
+#-----------------------
+#--- DELETE ALL BUT DEFAULT EXAMPLE FROM PACKAGE (to minimize space)
+for (it in seq_along(tests)[-1]) {
+  unlink(file.path(dir_in, examples[it]), recursive = TRUE)
+}
 
 #-----------------------
 print(paste("NOTE: Remove", shQuote(dir_backup), "before pushing to repository if",

@@ -46,7 +46,7 @@ rSW2_glovars <- new.env()
 
 ##------ Import from other packages
 ## Package uses S3/S4 classes - they are defined in package:methods
-#' @importFrom methods slot slot<- as as<- initialize new slotNames validObject
+#' @importFrom methods slot slot<- as as<- initialize new slotNames validObject callNextMethod
 #' @importFrom stats aggregate na.exclude
 #' @importFrom utils data head packageDescription read.csv read.table str tail write.table
 NULL
@@ -75,6 +75,8 @@ NULL
 #' get_swWeather swInputData-method
 #' get_swYears swInputData-method
 #' get_WeatherHistory swInputData-method
+#' get_swCarbon,swInputData-method
+#' set_swCarbon<-,swInputData-method
 #' set_Markov<- swInputData-method
 #' set_swCloud<- swInputData-method
 #' set_swFiles<- swInputData-method
@@ -102,6 +104,18 @@ NULL
 #' swFiles_Cloud swInputData-method
 #' swFiles_Estab<- swInputData-method
 #' swFiles_Estab swInputData-method
+#' swFiles_Carbon<-,swInputData-method
+#' swFiles_Carbon,swInputData-method
+#' swCarbon_Use_Bio,swCarbon-method
+#' swCarbon_Use_WUE,swCarbon-method
+#' swCarbon_Scenario,swCarbon-method
+#' swCarbon_DeltaYear,swCarbon-method
+#' swCarbon_CO2ppm,swCarbon-method
+#' swCarbon_Scenario<-,swCarbon-method
+#' swCarbon_DeltaYear<-,swCarbon-method
+#' swCarbon_CO2ppm<-,swCarbon-method
+#' swCarbon_Use_Bio<-,swCarbon-method
+#' swCarbon_Use_WUE<-,swCarbon-method
 #' swFiles_filesIn<- swInputData-method
 #' swFiles_filesIn swInputData-method
 #' swFiles_LogFile<- swInputData-method
@@ -242,6 +256,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#' \code{\linkS4class{swCarbon}}
 #' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
@@ -260,6 +275,8 @@ NULL
 #' swFiles_Cloud swFiles-method
 #' swFiles_Estab<- swFiles-method
 #' swFiles_Estab swFiles-method
+#' swFiles_Carbon<- swFiles-method
+#' swFiles_Carbon swFiles-method
 #' swFiles_filesIn<- swFiles-method
 #' swFiles_filesIn swFiles-method
 #' swFiles_LogFile<- swFiles-method
@@ -302,11 +319,44 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#' \code{\linkS4class{swCarbon}}
 #' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
 #' showClass("swFiles")
+#'
+NULL
+
+
+#' Class \code{"swCarbon"}
+#'
+#' The generic functions listed work on this and the proper sw Class in the container's slots.
+#'
+#'
+#' @name swCarbon-class
+#' @aliases
+#' swCarbon_Use_Bio,swCarbon-method
+#' swCarbon_Use_WUE,swCarbon-method
+#' swCarbon_Scenario,swCarbon-method
+#' swCarbon_DeltaYear,swCarbon-method
+#' swCarbon_CO2ppm,swCarbon-method
+#' swCarbon_Scenario<-,swCarbon-method
+#' swCarbon_DeltaYear<-,swCarbon-method
+#' swCarbon_CO2ppm<-,swCarbon-method
+#' swCarbon_Use_Bio<-,swCarbon-method
+#' swCarbon_Use_WUE<-,swCarbon-method
+#'
+#' @docType class
+#' @section Objects from the Class: Objects can be created by calls of the form
+#' \code{new("swCarbon", ...)}.
+#' @author Zachary Kramer
+#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
+#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @keywords classes
+#' @examples
+#'
+#' showClass("swCarbon")
 #'
 NULL
 

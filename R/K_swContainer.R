@@ -34,6 +34,7 @@ setClass(Class = "swInputData",
 									site = "swSite",
 									soils = "swSoils",
 									estab = "swEstab",
+									carbon = "swCarbon",
 									output = "swOUT",
 									swc = "swSWC",
 									log = "swLog")
@@ -54,6 +55,7 @@ setMethod(f="swClear",
 			object@prod=swClear(object@prod)
 			object@site=swClear(object@site)
 			object@estab=swClear(object@estab)
+			object@carbon=swClear(object@carbon)
 			object@output=swClear(object@output)
 			object@swc=swClear(object@swc)
 			object@log=swClear(object@log)
@@ -73,8 +75,9 @@ setMethod("swFiles_MarkovCov", "swInputData", function(object) object@files@InFi
 setMethod("swFiles_Cloud", "swInputData", function(object) object@files@InFiles[9])
 setMethod("swFiles_Prod", "swInputData", function(object) object@files@InFiles[10])
 setMethod("swFiles_Estab", "swInputData", function(object) object@files@InFiles[11])
-setMethod("swFiles_SWCsetup", "swInputData", function(object) object@files@InFiles[12])
-setMethod("swFiles_Output", "swInputData", function(object) object@files@InFiles[13])
+setMethod("swFiles_Carbon", "swInputData", function(object) object@files@InFiles[12])
+setMethod("swFiles_SWCsetup", "swInputData", function(object) object@files@InFiles[13])
+setMethod("swFiles_Output", "swInputData", function(object) object@files@InFiles[14])
 setMethod("swFiles_WeatherPrefix", "swInputData", function(object) object@files@WeatherPrefix)
 setMethod("swFiles_OutputPrefix", "swInputData", function(object) object@files@OutputPrefix)
 
@@ -91,8 +94,9 @@ setReplaceMethod(f="swFiles_MarkovCov", signature="swInputData", definition=func
 setReplaceMethod(f="swFiles_Cloud", signature="swInputData", definition=function(object,value) {object@files@InFiles[9] <- value; return(object)})
 setReplaceMethod(f="swFiles_Prod", signature="swInputData", definition=function(object,value) {object@files@InFiles[10] <- value; return(object)})
 setReplaceMethod(f="swFiles_Estab", signature="swInputData", definition=function(object,value) {object@files@InFiles[11] <- value; return(object)})
-setReplaceMethod(f="swFiles_SWCsetup", signature="swInputData", definition=function(object,value) {object@files@InFiles[12] <- value; return(object)})
-setReplaceMethod(f="swFiles_Output", signature="swInputData", definition=function(object,value) {object@files@InFiles[13] <- value; return(object)})
+setReplaceMethod(f="swFiles_Carbon", signature="swInputData", definition=function(object,value) {object@files@InFiles[12] <- value; return(object)})
+setReplaceMethod(f="swFiles_SWCsetup", signature="swInputData", definition=function(object,value) {object@files@InFiles[13] <- value; return(object)})
+setReplaceMethod(f="swFiles_Output", signature="swInputData", definition=function(object,value) {object@files@InFiles[14] <- value; return(object)})
 setReplaceMethod(f="swFiles_WeatherPrefix", signature="swInputData", definition=function(object,value) {object@files@WeatherPrefix <- value; return(object)})
 setReplaceMethod(f="swFiles_OutputPrefix", signature="swInputData", definition=function(object,value) {object@files@OutputPrefix <- value; return(object)})
 ##
@@ -225,6 +229,7 @@ setMethod("swProd_Shade", "swInputData", function(object) {return(object@prod@Sh
 setMethod("swProd_HydrRedstro_use", "swInputData", function(object) {return(object@prod@HydraulicRedistribution_use)})
 setMethod("swProd_HydrRedstro", "swInputData", function(object) {return(object@prod@HydraulicRedistribution)})
 setMethod("swProd_CritSoilWaterPotential", "swInputData", function(object) {return(object@prod@CriticalSoilWaterPotential)})
+setMethod("swProd_CO2Coefficients", "swInputData", function(object) {return(object@prod@CO2Coefficients)})
 setMethod("swProd_MonProd_grass", "swInputData", function(object) {return(object@prod@MonthlyProductionValues_grass)})
 setMethod("swProd_MonProd_shrub", "swInputData", function(object) {return(object@prod@MonthlyProductionValues_shrub)})
 setMethod("swProd_MonProd_tree", "swInputData", function(object) {return(object@prod@MonthlyProductionValues_tree)})
@@ -243,6 +248,7 @@ setReplaceMethod(f="swProd_Shade", signature="swInputData", definition=function(
 setReplaceMethod(f="swProd_HydrRedstro_use", signature="swInputData", definition=function(object,value) {object@prod@HydraulicRedistribution_use <- value; return(object)})
 setReplaceMethod(f="swProd_HydrRedstro", signature="swInputData", definition=function(object,value) {object@prod@HydraulicRedistribution <- value; return(object)})
 setReplaceMethod(f="swProd_CritSoilWaterPotential", signature="swInputData", definition=function(object,value) {object@prod@CriticalSoilWaterPotential <- value; return(object)})
+setReplaceMethod(f="swProd_CO2Coefficients", signature="swInputData", definition=function(object,value) {object@prod@CO2Coefficients <- value; return(object)})
 setReplaceMethod(f="swProd_MonProd_grass", signature="swInputData", definition=function(object,value) {object@prod@MonthlyProductionValues_grass <- value; return(object)})
 setReplaceMethod(f="swProd_MonProd_shrub", signature="swInputData", definition=function(object,value) {object@prod@MonthlyProductionValues_shrub <- value; return(object)})
 setReplaceMethod(f="swProd_MonProd_tree", signature="swInputData", definition=function(object,value) {object@prod@MonthlyProductionValues_tree <- value; return(object)})
@@ -360,6 +366,32 @@ setReplaceMethod(f="swSWC_HistoricData",signature=c(object="swInputData", value=
 			}
 			return(object)
 		})
+
+##
+setMethod("get_swCarbon", "swInputData", function(object) {return(object@carbon)})
+setMethod("swCarbon_Use_Bio","swInputData",function(object) {return(object@carbon@CarbonUseBio)})
+setMethod("swCarbon_Use_WUE","swInputData",function(object) {return(object@carbon@CarbonUseWUE)})
+setMethod("swCarbon_Scenario","swInputData",function(object) {return(object@carbon@Scenario)})
+setMethod("swCarbon_DeltaYear","swInputData",function(object) {return(object@carbon@DeltaYear)})
+setMethod("swCarbon_CO2ppm", "swInputData", function(object) {return(object@carbon@CO2ppm)})
+
+setReplaceMethod(f = "set_swCarbon", signature = "swInputData", function(object, value) {
+    slot(object, "carbon") <- value
+    validObject(slot(object, "carbon"))
+    return(object)
+  })
+setReplaceMethod(f="swCarbon_Use_Bio",signature=c(object="swInputData", value="integer"),function(object, value) {object@carbon@CarbonUseBio <- value; return(object)})
+setReplaceMethod(f="swCarbon_Use_WUE",signature=c(object="swInputData", value="integer"),function(object, value) {object@carbon@CarbonUseWUE <- value; return(object)})
+setReplaceMethod(f="swCarbon_Scenario",signature=c(object="swInputData", value="character"),function(object, value) {object@carbon@Scenario <- value; return(object)})
+setReplaceMethod(f="swCarbon_DeltaYear",signature=c(object="swInputData", value="integer"),function(object, value) {object@carbon@DeltaYear <- value; return(object)})
+setReplaceMethod(f = "swCarbon_CO2ppm",
+  signature = c(object = "swInputData", value = "matrix"), function(object, value) {
+    slot(slot(object, "carbon"), "CO2ppm") <- value
+    validObject(slot(object, "carbon"))
+    return(object)
+  })
+##
+
 ##
 setMethod("get_swOUT", "swInputData", function(object) {return(object@output)})
 setMethod("swOUT_TimeStep","swInputData",function(object) {return(swOUT_TimeStep(get_swOUT(object)))})
@@ -401,13 +433,14 @@ setMethod(f="swWriteLines",signature=c(object="swInputData",file="character"), d
 			swWriteLines(object@site, file.path(file,object@files@InFiles[4]))
 			swWriteLines(object@soils, file.path(file,object@files@InFiles[5]))
 			swWriteLines(object@estab, file.path(file,object@files@InFiles[11]))
+			swWriteLines(object@carbon, file.path(file,object@files@InFiles[12]))
 			if(object@estab@useEstab) {
 				for(i in 1:object@estab@count) {
 					swWriteLines(as(object=object@estab,Class="swEstabSpecies"), file.path(file, object@estab@fileName[i]))
 				}
 			}
-			swWriteLines(object@output, file.path(file,object@files@InFiles[13]))
-			swWriteLines(object@swc, file.path(file,object@files@InFiles[12]))
+			swWriteLines(object@output, file.path(file,object@files@InFiles[14]))
+			swWriteLines(object@swc, file.path(file,object@files@InFiles[13]))
 			#swWriteLines(object@log, file.path(file,object@files@InFiles[3]))
 		})
 setMethod(f="swReadLines", signature=c(object="swInputData",file="character"), definition=function(object,file) {
@@ -434,7 +467,8 @@ setMethod(f="swReadLines", signature=c(object="swInputData",file="character"), d
 			if(file.exists(file.path(object@files@ProjDir, object@files@InFiles[11]))) {#Optional File
 				object@estab <- swReadLines(object@estab,c(file.path(object@files@ProjDir, object@files@InFiles[11]),object@files@ProjDir))
 			}
-			object@output <- swReadLines(object@output,file.path(object@files@ProjDir, object@files@InFiles[13]))
-			object@swc <- swReadLines(object@swc,file.path(object@files@ProjDir, object@files@InFiles[12]))
+			object@output <- swReadLines(object@output,file.path(object@files@ProjDir, object@files@InFiles[14]))
+			object@swc <- swReadLines(object@swc,file.path(object@files@ProjDir, object@files@InFiles[13]))
+			object@carbon <- swReadLines(object@carbon, file.path(object@files@ProjDir, object@files@InFiles[12]))
 			return(object)
 		})

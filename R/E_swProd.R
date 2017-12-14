@@ -25,7 +25,7 @@
 
 
 #' @export
-setClass("swProd",representation(Composition="numeric",Albedo="numeric",Cover_stcr="numeric",CanopyHeight="matrix",VegetationInterceptionParameters="matrix",LitterInterceptionParameters="matrix", EsTpartitioning_param="numeric",Es_param_limit="numeric",Shade="matrix",HydraulicRedistribution_use="logical",HydraulicRedistribution="matrix",CriticalSoilWaterPotential="numeric",MonthlyProductionValues_grass="matrix",MonthlyProductionValues_shrub="matrix",MonthlyProductionValues_tree="matrix", MonthlyProductionValues_forb="matrix"),
+setClass("swProd",representation(Composition="numeric",Albedo="numeric",Cover_stcr="numeric",CanopyHeight="matrix",VegetationInterceptionParameters="matrix",LitterInterceptionParameters="matrix", EsTpartitioning_param="numeric",Es_param_limit="numeric",Shade="matrix",HydraulicRedistribution_use="logical",HydraulicRedistribution="matrix",CriticalSoilWaterPotential="numeric",CO2Coefficients="matrix",MonthlyProductionValues_grass="matrix",MonthlyProductionValues_shrub="matrix",MonthlyProductionValues_tree="matrix", MonthlyProductionValues_forb="matrix"),
 		prototype=prototype(Composition=c(0,0,0,1,0),Albedo=c(0.167,0.143,0.106,0.167,0.15),Cover_stcr=c(3.0,2.22,5.0,3.0),
 				CanopyHeight=matrix(data=c(300,29.5,85,0.002,0, 0,5,100,0.003,50, 0,5,3000,0.00008,1200, 300,29.5,85,0.002,0),nrow=5,ncol=4,dimnames=list(c("xinflec","yinflec","range","slope","height_cm"),c("Grasses","Shrubs","Trees","Forbs"))),
 				VegetationInterceptionParameters=matrix(data=c(0.0182,0.0065,0.0019,0.0054, 0.,0.0026,0.,0.0033, 0.00461,0.01405,0.0383,0.0337, 0.0182,0.0065,0.0019,0.0054),nrow=4,ncol=4,dimnames=list(c("a","b","c","d"),c("Grasses","Shrubs","Trees","Forbs"))),
@@ -38,7 +38,8 @@ setClass("swProd",representation(Composition="numeric",Albedo="numeric",Cover_st
 				MonthlyProductionValues_grass=matrix(data=c(75,80,85,90,50,50,50,55,60,65,70,75,150,150,150,170,190,220,250,220,190,180,170,160,0.0,0.0,0.10,0.20,0.40,0.60,0.40,0.60,0.40,0.20,0.10,0.0,300,300,300,300,300,300,300,300,300,300,300,300),nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv"))),
 				MonthlyProductionValues_shrub=matrix(data=c(85.40,88.20,95.30,100.50,166.40,186.00,177.10,212.20,157.40,124.90,110.40,104.30,210.00,212.00,228.00,272.00,400.00,404.00,381.00,352.00,286.00,235.00,218.00,214.00,0.06,0.08,0.20,0.33,0.57,0.55,0.50,0.46,0.32,0.15,0.08,0.06,372,372,372,372,372,372,372,372,372,372,372,372),nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv"))),
 				MonthlyProductionValues_tree=matrix(data=c(2000.000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,15000,15000,15000,15000,15000,15000,15000,15000,15000,15000,15000,15000,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,500,500,500,500,500,500,500,500,500,500,500,500),nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv"))),
-				MonthlyProductionValues_forb=matrix(data=c(85.40,88.20,95.30,100.50,166.40,186.00,177.10,212.20,157.40,124.90,110.40,104.30,210.00,212.00,228.00,272.00,400.00,404.00,381.00,352.00,286.00,235.00,218.00,214.00,0.06,0.08,0.20,0.33,0.57,0.55,0.50,0.46,0.32,0.15,0.08,0.06,372,372,372,372,372,372,372,372,372,372,372,372),nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))))
+				MonthlyProductionValues_forb=matrix(data=c(85.40,88.20,95.30,100.50,166.40,186.00,177.10,212.20,157.40,124.90,110.40,104.30,210.00,212.00,228.00,272.00,400.00,404.00,381.00,352.00,286.00,235.00,218.00,214.00,0.06,0.08,0.20,0.33,0.57,0.55,0.50,0.46,0.32,0.15,0.08,0.06,372,372,372,372,372,372,372,372,372,372,372,372),nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv"))),
+		    CO2Coefficients=matrix(data=c(0.127, 0.127, 0.127, 0.127, 0.3501, 0.3501, 0.3501, 0.3501, 22.464, 22.464, 22.464, 22.464, -0.531, -0.531, -0.531, -0.531), nrow=4, ncol=4, dimnames=list(c("BioCoeff1", "BioCoeff2", "WUECoeff1", "WUECoeff2"), c("Grasses", "Shrubs", "Trees", "Forbs")))))
 
 swProd_validity<-function(object){
 	if(length(object@Composition)!=5)
@@ -73,10 +74,12 @@ swProd_validity<-function(object){
 		return("@MonthlyProductionValues_tree dim of c(12,4) needed.")
 	if(dim(object@MonthlyProductionValues_forb)[1] != 12 | dim(object@MonthlyProductionValues_forb)[2] != 4)
 		return("@MonthlyProductionValues_forb dim of c(12,4) needed.")
+  if(dim(object@CO2Coefficients)[1] != 4 | dim(object@CO2Coefficients)[2] != 4)
+    return("@CO2Coefficients dim of c(4,4) needed.")
 }
 setValidity("swProd",swProd_validity)
 setMethod(f="initialize",signature="swProd",definition=function(.Object,Composition=c(0,0,0,1,0),Albedo=c(0.167,0.143,0.106,0.167,0.15),Cover_stcr=c(3.0,2.22,5.0,3.0),CanopyHeight=NULL,VegetationInterceptionParameters=NULL,LitterInterceptionParameters=NULL, EsTpartitioning_param=c(1,1,0.41,1),Es_param_limit=c(999,999,2099,999),Shade=NULL,
-				HydraulicRedistribution_use=c(TRUE,TRUE,TRUE,TRUE),HydraulicRedistribution=NULL,CriticalSoilWaterPotential=c(-3.5,-3.9,-2.0,-2.0),MonthlyProductionValues_grass=NULL,MonthlyProductionValues_shrub=NULL,MonthlyProductionValues_tree=NULL,MonthlyProductionValues_forb=NULL) {
+				HydraulicRedistribution_use=c(TRUE,TRUE,TRUE,TRUE),HydraulicRedistribution=NULL,CriticalSoilWaterPotential=c(-3.5,-3.9,-2.0,-2.0),CO2Coefficients=NULL,MonthlyProductionValues_grass=NULL,MonthlyProductionValues_shrub=NULL,MonthlyProductionValues_tree=NULL,MonthlyProductionValues_forb=NULL) {
 
 			if(is.null(CanopyHeight))
 				CanopyHeight<-matrix(data=c(300,29.5,85,0.002,0, 0,5,100,0.003,50, 0,5,3000,0.00008,1200, 300,29.5,85,0.002,0),nrow=5,ncol=4,dimnames=list(c("xinflec","yinflec","range","slope","height_cm"),c("Grasses","Shrubs","Trees","Forbs")))
@@ -88,6 +91,8 @@ setMethod(f="initialize",signature="swProd",definition=function(.Object,Composit
 				Shade<-matrix(data=c(0.3,150,300,12,34,0.002,  0.3,150,300,12,34,0.002,  0.3,150,0,0,2,0.0002, 0.3,150,300,12,34,0.002),nrow=6,ncol=4,dimnames=list(c("scale","maxDeadBiomass","tanfuncXinflec","yinflec","range","slope"),c("Grasses","Shrubs","Trees","Forbs")))
 			if(is.null(HydraulicRedistribution))
 				HydraulicRedistribution<-matrix(data=c(-0.2328,10,3.22, -0.2328,10,3.22, -0.2328,10,3.22, -0.2328,10,3.22),nrow=3,ncol=4,dimnames=list(c("MaxCondRoot","SoilWaterPotential50","ShapeCond"),c("Grasses","Shrubs","Trees","Forbs")))
+			if(is.null(CO2Coefficients))
+			  CO2Coefficients=matrix(data=c(0.127, 0.127, 0.127, 0.127, 0.3501, 0.3501, 0.3501, 0.3501, 22.464, 22.464, 22.464, 22.464, -0.531, -0.531, -0.531, -0.531), nrow=4, ncol=4, dimnames=list(c("BioCoeff1", "BioCoeff2", "WUECoeff1", "WUECoeff2"), c("Grasses", "Shrubs", "Trees", "Forbs")))
 			if(is.null(MonthlyProductionValues_grass))
 				MonthlyProductionValues_grass<-matrix(data=c(75,80,85,90,50,50,50,55,60,65,70,75,150,150,150,170,190,220,250,220,190,180,170,160,0.0,0.0,0.10,0.20,0.40,0.60,0.40,0.60,0.40,0.20,0.10,0.0,300,300,300,300,300,300,300,300,300,300,300,300),nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
 			if(is.null(MonthlyProductionValues_shrub))
@@ -120,6 +125,7 @@ setMethod(f="initialize",signature="swProd",definition=function(.Object,Composit
 			.Object@MonthlyProductionValues_grass=MonthlyProductionValues_grass
 			.Object@MonthlyProductionValues_shrub=MonthlyProductionValues_shrub
 			.Object@MonthlyProductionValues_tree=MonthlyProductionValues_tree
+			.Object@CO2Coefficients
 
 			validObject(.Object)
 			return(.Object)
@@ -132,6 +138,7 @@ setMethod(f="swClear",
 			LitterInterceptionParameters<-matrix(data=NA,nrow=4,ncol=4,dimnames=list(c("a","b","c","d"),c("Grasses","Shrubs","Trees","Forbs")))
 			Shade<-matrix(data=NA,nrow=6,ncol=4,dimnames=list(c("scale","maxDeadBiomass","tanfuncXinflec","yinflec","range","slope"),c("Grasses","Shrubs","Trees","Forbs")))
 			HydraulicRedistribution<-matrix(data=NA,nrow=3,ncol=4,dimnames=list(c("MaxCondRoot","SoilWaterPotential50","ShapeCond"),c("Grasses","Shrubs","Trees","Forbs")))
+			CO2Coefficients<-matrix(data=NA,nrow=4,ncol=4,dimnames=list(c("BioCoeff1", "BioCoeff2", "WUECoeff1", "WUECoeff2"), c("Grasses", "Shrubs", "Trees", "Forbs")))
 			MonthlyProductionValues_grass<-matrix(data=NA,nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
 			MonthlyProductionValues_shrub<-matrix(data=NA,nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
 			MonthlyProductionValues_tree<-matrix(data=NA,nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
@@ -162,9 +169,11 @@ setMethod(f="swClear",
 			object@HydraulicRedistribution_use=HydraulicRedistribution_use
 			object@HydraulicRedistribution=HydraulicRedistribution
 			object@CriticalSoilWaterPotential=CriticalSoilWaterPotential
+			object@CO2Coefficients
 			object@MonthlyProductionValues_grass=MonthlyProductionValues_grass
 			object@MonthlyProductionValues_shrub=MonthlyProductionValues_shrub
 			object@MonthlyProductionValues_tree=MonthlyProductionValues_tree
+			object@MonthlyProductionValues_forb=MonthlyProductionValues_forb
 			return(object)
 		})
 setMethod("swProd_Composition", "swProd", function(object) {return(object@Composition)})
@@ -179,6 +188,7 @@ setMethod("swProd_Shade", "swProd", function(object) {return(object@Shade)})
 setMethod("swProd_HydrRedstro_use", "swProd", function(object) {return(object@HydraulicRedistribution_use)})
 setMethod("swProd_HydrRedstro", "swProd", function(object) {return(object@HydraulicRedistribution)})
 setMethod("swProd_CritSoilWaterPotential", "swProd", function(object) {return(object@CriticalSoilWaterPotential)})
+setMethod("swProd_CO2Coefficients", "swProd", function(object) {return(object@CO2Coefficients)})
 setMethod("swProd_MonProd_grass", "swProd", function(object) {return(object@MonthlyProductionValues_grass)})
 setMethod("swProd_MonProd_shrub", "swProd", function(object) {return(object@MonthlyProductionValues_shrub)})
 setMethod("swProd_MonProd_tree", "swProd", function(object) {return(object@MonthlyProductionValues_tree)})
@@ -196,6 +206,7 @@ setReplaceMethod(f="swProd_Shade", signature="swProd", definition=function(objec
 setReplaceMethod(f="swProd_HydrRedstro_use", signature="swProd", definition=function(object,value) {object@HydraulicRedistribution_use <- value; return(object)})
 setReplaceMethod(f="swProd_HydrRedstro", signature="swProd", definition=function(object,value) {object@HydraulicRedistribution <- value; return(object)})
 setReplaceMethod(f="swProd_CritSoilWaterPotential", signature="swProd", definition=function(object,value) {object@CriticalSoilWaterPotential <- value; return(object)})
+setReplaceMethod(f="swProd_CO2Coefficients", signature="swProd", definition=function(object, value) {object@CO2Coefficients <- value; return(object)})
 setReplaceMethod(f="swProd_MonProd_grass", signature="swProd", definition=function(object,value) {object@MonthlyProductionValues_grass <- value; return(object)})
 setReplaceMethod(f="swProd_MonProd_shrub", signature="swProd", definition=function(object,value) {object@MonthlyProductionValues_shrub <- value; return(object)})
 setReplaceMethod(f="swProd_MonProd_tree", signature="swProd", definition=function(object,value) {object@MonthlyProductionValues_tree <- value; return(object)})
@@ -204,7 +215,7 @@ setReplaceMethod(f="swProd_MonProd_forb", signature="swProd", definition=functio
 setMethod("swWriteLines", signature=c(object="swProd", file="character"), definition=function(object, file) {
 			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)
 			infilename <- file.path(file)
-			infiletext <- character(142)
+			infiletext <- character(150)
 
 			infiletext[1] <- "# Plant production data file for SOILWAT"
 			infiletext[2] <- "# Location: "
@@ -271,72 +282,79 @@ setMethod("swWriteLines", signature=c(object="swProd", file="character"), defini
 			infiletext[73] <- "# Grasses\tShrubs\tTrees\tForbs"
 			infiletext[74] <- paste(format(object@CriticalSoilWaterPotential[1]),"\t",format(object@CriticalSoilWaterPotential[2]),"\t",format(object@CriticalSoilWaterPotential[3]),"\t",format(object@CriticalSoilWaterPotential[4]),sep="")
 
-			infiletext[77] <- "# Grasslands component:"
-			infiletext[78] <- "# -------------- Monthly production values ------------"
-			infiletext[79] <- "# Litter   - dead leafy material on the ground (g/m^2 )."
-			infiletext[80] <- "# Biomass  - living and dead/woody aboveground standing biomass (g/m^2)."
-			infiletext[81] <- "# %Live    - proportion of Biomass that is actually living (0-1.0)."
-			infiletext[82] <- "# LAI_conv - monthly amount of biomass needed to produce LAI=1.0 (g/m^2)."
-			infiletext[83] <- "# There should be 12 rows, one for each month, starting with January."
-			infiletext[84] <- "#"
-			infiletext[85] <- "#Litter\tBiomass\t%Live\tLAI_conv"
-			infiletext[86] <- paste(format(object@MonthlyProductionValues_grass[1,1]),"\t",format(object@MonthlyProductionValues_grass[1,2]),"\t",format(object@MonthlyProductionValues_grass[1,3]),"\t",format(object@MonthlyProductionValues_grass[1,4]),"\t# January",sep="")
-			infiletext[87] <- paste(format(object@MonthlyProductionValues_grass[2,1]),"\t",format(object@MonthlyProductionValues_grass[2,2]),"\t",format(object@MonthlyProductionValues_grass[2,3]),"\t",format(object@MonthlyProductionValues_grass[2,4]),"\t# February",sep="")
-			infiletext[88] <- paste(format(object@MonthlyProductionValues_grass[3,1]),"\t",format(object@MonthlyProductionValues_grass[3,2]),"\t",format(object@MonthlyProductionValues_grass[3,3]),"\t",format(object@MonthlyProductionValues_grass[3,4]),"\t# March",sep="")
-			infiletext[89] <- paste(format(object@MonthlyProductionValues_grass[4,1]),"\t",format(object@MonthlyProductionValues_grass[4,2]),"\t",format(object@MonthlyProductionValues_grass[4,3]),"\t",format(object@MonthlyProductionValues_grass[4,4]),"\t# April",sep="")
-			infiletext[90] <- paste(format(object@MonthlyProductionValues_grass[5,1]),"\t",format(object@MonthlyProductionValues_grass[5,2]),"\t",format(object@MonthlyProductionValues_grass[5,3]),"\t",format(object@MonthlyProductionValues_grass[5,4]),"\t# May",sep="")
-			infiletext[91] <- paste(format(object@MonthlyProductionValues_grass[6,1]),"\t",format(object@MonthlyProductionValues_grass[6,2]),"\t",format(object@MonthlyProductionValues_grass[6,3]),"\t",format(object@MonthlyProductionValues_grass[6,4]),"\t# June",sep="")
-			infiletext[92] <- paste(format(object@MonthlyProductionValues_grass[7,1]),"\t",format(object@MonthlyProductionValues_grass[7,2]),"\t",format(object@MonthlyProductionValues_grass[7,3]),"\t",format(object@MonthlyProductionValues_grass[7,4]),"\t# July",sep="")
-			infiletext[93] <- paste(format(object@MonthlyProductionValues_grass[8,1]),"\t",format(object@MonthlyProductionValues_grass[8,2]),"\t",format(object@MonthlyProductionValues_grass[8,3]),"\t",format(object@MonthlyProductionValues_grass[8,4]),"\t# August",sep="")
-			infiletext[94] <- paste(format(object@MonthlyProductionValues_grass[9,1]),"\t",format(object@MonthlyProductionValues_grass[9,2]),"\t",format(object@MonthlyProductionValues_grass[9,3]),"\t",format(object@MonthlyProductionValues_grass[9,4]),"\t# September",sep="")
-			infiletext[95] <- paste(format(object@MonthlyProductionValues_grass[10,1]),"\t",format(object@MonthlyProductionValues_grass[10,2]),"\t",format(object@MonthlyProductionValues_grass[10,3]),"\t",format(object@MonthlyProductionValues_grass[10,4]),"\t# October",sep="")
-			infiletext[96] <- paste(format(object@MonthlyProductionValues_grass[11,1]),"\t",format(object@MonthlyProductionValues_grass[11,2]),"\t",format(object@MonthlyProductionValues_grass[11,3]),"\t",format(object@MonthlyProductionValues_grass[11,4]),"\t# November",sep="")
-			infiletext[97] <- paste(format(object@MonthlyProductionValues_grass[12,1]),"\t",format(object@MonthlyProductionValues_grass[12,2]),"\t",format(object@MonthlyProductionValues_grass[12,3]),"\t",format(object@MonthlyProductionValues_grass[12,4]),"\t# December",sep="")
+			infiletext[77] <- "# CO2 Coefficients: Coeff1 * ppm^Coeff2"
+      infiletext[78] <- "# Grasses  Shrubs  Trees  Forbs"
+      infiletext[79] <- paste(format(object@CO2COefficients[1, 1]),"\t",format(object@CO2COefficients[1, 2]),"\t",format(object@CO2COefficients[1, 3]),"\t",format(object@CO2COefficients[1, 4]),"\t# Biomass Coeff1",sep="")
+      infiletext[80] <- paste(format(object@CO2COefficients[2, 1]),"\t",format(object@CO2COefficients[2, 2]),"\t",format(object@CO2COefficients[2, 3]),"\t",format(object@CO2COefficients[2, 4]),"\t# Biomass Coeff2",sep="")
+      infiletext[81] <- paste(format(object@CO2COefficients[3, 1]),"\t",format(object@CO2COefficients[3, 2]),"\t",format(object@CO2COefficients[2, 3]),"\t",format(object@CO2COefficients[3, 4]),"\t# WUE Coeff1",sep="")
+      infiletext[82] <- paste(format(object@CO2COefficients[4, 1]),"\t",format(object@CO2COefficients[4, 2]),"\t",format(object@CO2COefficients[2, 3]),"\t",format(object@CO2COefficients[4, 4]),"\t# WUE Coeff2",sep="")
 
-			infiletext[99] <- "# Shrublands component:"
-			infiletext[100] <- "#Litter\tBiomass\t%Live\tLAI_conv"
-			infiletext[101] <- paste(format(object@MonthlyProductionValues_shrub[1,1]),"\t",format(object@MonthlyProductionValues_shrub[1,2]),"\t",format(object@MonthlyProductionValues_shrub[1,3]),"\t",format(object@MonthlyProductionValues_shrub[1,4]),"\t# January",sep="")
-			infiletext[102] <- paste(format(object@MonthlyProductionValues_shrub[2,1]),"\t",format(object@MonthlyProductionValues_shrub[2,2]),"\t",format(object@MonthlyProductionValues_shrub[2,3]),"\t",format(object@MonthlyProductionValues_shrub[2,4]),"\t# February",sep="")
-			infiletext[103] <- paste(format(object@MonthlyProductionValues_shrub[3,1]),"\t",format(object@MonthlyProductionValues_shrub[3,2]),"\t",format(object@MonthlyProductionValues_shrub[3,3]),"\t",format(object@MonthlyProductionValues_shrub[3,4]),"\t# March",sep="")
-			infiletext[104] <- paste(format(object@MonthlyProductionValues_shrub[4,1]),"\t",format(object@MonthlyProductionValues_shrub[4,2]),"\t",format(object@MonthlyProductionValues_shrub[4,3]),"\t",format(object@MonthlyProductionValues_shrub[4,4]),"\t# April",sep="")
-			infiletext[105] <- paste(format(object@MonthlyProductionValues_shrub[5,1]),"\t",format(object@MonthlyProductionValues_shrub[5,2]),"\t",format(object@MonthlyProductionValues_shrub[5,3]),"\t",format(object@MonthlyProductionValues_shrub[5,4]),"\t# May",sep="")
-			infiletext[106] <- paste(format(object@MonthlyProductionValues_shrub[6,1]),"\t",format(object@MonthlyProductionValues_shrub[6,2]),"\t",format(object@MonthlyProductionValues_shrub[6,3]),"\t",format(object@MonthlyProductionValues_shrub[6,4]),"\t# June",sep="")
-			infiletext[107] <- paste(format(object@MonthlyProductionValues_shrub[7,1]),"\t",format(object@MonthlyProductionValues_shrub[7,2]),"\t",format(object@MonthlyProductionValues_shrub[7,3]),"\t",format(object@MonthlyProductionValues_shrub[7,4]),"\t# July",sep="")
-			infiletext[108] <- paste(format(object@MonthlyProductionValues_shrub[8,1]),"\t",format(object@MonthlyProductionValues_shrub[8,2]),"\t",format(object@MonthlyProductionValues_shrub[8,3]),"\t",format(object@MonthlyProductionValues_shrub[8,4]),"\t# August",sep="")
-			infiletext[109] <- paste(format(object@MonthlyProductionValues_shrub[9,1]),"\t",format(object@MonthlyProductionValues_shrub[9,2]),"\t",format(object@MonthlyProductionValues_shrub[9,3]),"\t",format(object@MonthlyProductionValues_shrub[9,4]),"\t# September",sep="")
-			infiletext[110] <- paste(format(object@MonthlyProductionValues_shrub[10,1]),"\t",format(object@MonthlyProductionValues_shrub[10,2]),"\t",format(object@MonthlyProductionValues_shrub[10,3]),"\t",format(object@MonthlyProductionValues_shrub[10,4]),"\t# October",sep="")
-			infiletext[111] <- paste(format(object@MonthlyProductionValues_shrub[11,1]),"\t",format(object@MonthlyProductionValues_shrub[11,2]),"\t",format(object@MonthlyProductionValues_shrub[11,3]),"\t",format(object@MonthlyProductionValues_shrub[11,4]),"\t# November",sep="")
-			infiletext[112] <- paste(format(object@MonthlyProductionValues_shrub[12,1]),"\t",format(object@MonthlyProductionValues_shrub[12,2]),"\t",format(object@MonthlyProductionValues_shrub[12,3]),"\t",format(object@MonthlyProductionValues_shrub[12,4]),"\t# December",sep="")
+			infiletext[85] <- "# Grasslands component:"
+			infiletext[86] <- "# -------------- Monthly production values ------------"
+			infiletext[87] <- "# Litter   - dead leafy material on the ground (g/m^2 )."
+			infiletext[88] <- "# Biomass  - living and dead/woody aboveground standing biomass (g/m^2)."
+			infiletext[89] <- "# %Live    - proportion of Biomass that is actually living (0-1.0)."
+			infiletext[90] <- "# LAI_conv - monthly amount of biomass needed to produce LAI=1.0 (g/m^2)."
+			infiletext[91] <- "# There should be 12 rows, one for each month, starting with January."
+			infiletext[92] <- "#"
+			infiletext[93] <- "#Litter\tBiomass\t%Live\tLAI_conv"
+			infiletext[94] <- paste(format(object@MonthlyProductionValues_grass[1,1]),"\t",format(object@MonthlyProductionValues_grass[1,2]),"\t",format(object@MonthlyProductionValues_grass[1,3]),"\t",format(object@MonthlyProductionValues_grass[1,4]),"\t# January",sep="")
+			infiletext[95] <- paste(format(object@MonthlyProductionValues_grass[2,1]),"\t",format(object@MonthlyProductionValues_grass[2,2]),"\t",format(object@MonthlyProductionValues_grass[2,3]),"\t",format(object@MonthlyProductionValues_grass[2,4]),"\t# February",sep="")
+			infiletext[96] <- paste(format(object@MonthlyProductionValues_grass[3,1]),"\t",format(object@MonthlyProductionValues_grass[3,2]),"\t",format(object@MonthlyProductionValues_grass[3,3]),"\t",format(object@MonthlyProductionValues_grass[3,4]),"\t# March",sep="")
+			infiletext[97] <- paste(format(object@MonthlyProductionValues_grass[4,1]),"\t",format(object@MonthlyProductionValues_grass[4,2]),"\t",format(object@MonthlyProductionValues_grass[4,3]),"\t",format(object@MonthlyProductionValues_grass[4,4]),"\t# April",sep="")
+			infiletext[98] <- paste(format(object@MonthlyProductionValues_grass[5,1]),"\t",format(object@MonthlyProductionValues_grass[5,2]),"\t",format(object@MonthlyProductionValues_grass[5,3]),"\t",format(object@MonthlyProductionValues_grass[5,4]),"\t# May",sep="")
+			infiletext[99] <- paste(format(object@MonthlyProductionValues_grass[6,1]),"\t",format(object@MonthlyProductionValues_grass[6,2]),"\t",format(object@MonthlyProductionValues_grass[6,3]),"\t",format(object@MonthlyProductionValues_grass[6,4]),"\t# June",sep="")
+			infiletext[100] <- paste(format(object@MonthlyProductionValues_grass[7,1]),"\t",format(object@MonthlyProductionValues_grass[7,2]),"\t",format(object@MonthlyProductionValues_grass[7,3]),"\t",format(object@MonthlyProductionValues_grass[7,4]),"\t# July",sep="")
+			infiletext[101] <- paste(format(object@MonthlyProductionValues_grass[8,1]),"\t",format(object@MonthlyProductionValues_grass[8,2]),"\t",format(object@MonthlyProductionValues_grass[8,3]),"\t",format(object@MonthlyProductionValues_grass[8,4]),"\t# August",sep="")
+			infiletext[102] <- paste(format(object@MonthlyProductionValues_grass[9,1]),"\t",format(object@MonthlyProductionValues_grass[9,2]),"\t",format(object@MonthlyProductionValues_grass[9,3]),"\t",format(object@MonthlyProductionValues_grass[9,4]),"\t# September",sep="")
+			infiletext[103] <- paste(format(object@MonthlyProductionValues_grass[10,1]),"\t",format(object@MonthlyProductionValues_grass[10,2]),"\t",format(object@MonthlyProductionValues_grass[10,3]),"\t",format(object@MonthlyProductionValues_grass[10,4]),"\t# October",sep="")
+			infiletext[104] <- paste(format(object@MonthlyProductionValues_grass[11,1]),"\t",format(object@MonthlyProductionValues_grass[11,2]),"\t",format(object@MonthlyProductionValues_grass[11,3]),"\t",format(object@MonthlyProductionValues_grass[11,4]),"\t# November",sep="")
+			infiletext[105] <- paste(format(object@MonthlyProductionValues_grass[12,1]),"\t",format(object@MonthlyProductionValues_grass[12,2]),"\t",format(object@MonthlyProductionValues_grass[12,3]),"\t",format(object@MonthlyProductionValues_grass[12,4]),"\t# December",sep="")
 
-			infiletext[114] <- "# Forest component:"
-			infiletext[115] <- "#Litter\tBiomass\t%Live\tLAI_conv"
-			infiletext[116] <- paste(format(object@MonthlyProductionValues_tree[1,1]),"\t",format(object@MonthlyProductionValues_tree[1,2]),"\t",format(object@MonthlyProductionValues_tree[1,3]),"\t",format(object@MonthlyProductionValues_tree[1,4]),"\t# January",sep="")
-			infiletext[117] <- paste(format(object@MonthlyProductionValues_tree[2,1]),"\t",format(object@MonthlyProductionValues_tree[2,2]),"\t",format(object@MonthlyProductionValues_tree[2,3]),"\t",format(object@MonthlyProductionValues_tree[2,4]),"\t# February",sep="")
-			infiletext[118] <- paste(format(object@MonthlyProductionValues_tree[3,1]),"\t",format(object@MonthlyProductionValues_tree[3,2]),"\t",format(object@MonthlyProductionValues_tree[3,3]),"\t",format(object@MonthlyProductionValues_tree[3,4]),"\t# March",sep="")
-			infiletext[119] <- paste(format(object@MonthlyProductionValues_tree[4,1]),"\t",format(object@MonthlyProductionValues_tree[4,2]),"\t",format(object@MonthlyProductionValues_tree[4,3]),"\t",format(object@MonthlyProductionValues_tree[4,4]),"\t# April",sep="")
-			infiletext[120] <- paste(format(object@MonthlyProductionValues_tree[5,1]),"\t",format(object@MonthlyProductionValues_tree[5,2]),"\t",format(object@MonthlyProductionValues_tree[5,3]),"\t",format(object@MonthlyProductionValues_tree[5,4]),"\t# May",sep="")
-			infiletext[121] <- paste(format(object@MonthlyProductionValues_tree[6,1]),"\t",format(object@MonthlyProductionValues_tree[6,2]),"\t",format(object@MonthlyProductionValues_tree[6,3]),"\t",format(object@MonthlyProductionValues_tree[6,4]),"\t# June",sep="")
-			infiletext[122] <- paste(format(object@MonthlyProductionValues_tree[7,1]),"\t",format(object@MonthlyProductionValues_tree[7,2]),"\t",format(object@MonthlyProductionValues_tree[7,3]),"\t",format(object@MonthlyProductionValues_tree[7,4]),"\t# July",sep="")
-			infiletext[123] <- paste(format(object@MonthlyProductionValues_tree[8,1]),"\t",format(object@MonthlyProductionValues_tree[8,2]),"\t",format(object@MonthlyProductionValues_tree[8,3]),"\t",format(object@MonthlyProductionValues_tree[8,4]),"\t# August",sep="")
-			infiletext[124] <- paste(format(object@MonthlyProductionValues_tree[9,1]),"\t",format(object@MonthlyProductionValues_tree[9,2]),"\t",format(object@MonthlyProductionValues_tree[9,3]),"\t",format(object@MonthlyProductionValues_tree[9,4]),"\t# September",sep="")
-			infiletext[125] <- paste(format(object@MonthlyProductionValues_tree[10,1]),"\t",format(object@MonthlyProductionValues_tree[10,2]),"\t",format(object@MonthlyProductionValues_tree[10,3]),"\t",format(object@MonthlyProductionValues_tree[10,4]),"\t# October",sep="")
-			infiletext[126] <- paste(format(object@MonthlyProductionValues_tree[11,1]),"\t",format(object@MonthlyProductionValues_tree[11,2]),"\t",format(object@MonthlyProductionValues_tree[11,3]),"\t",format(object@MonthlyProductionValues_tree[11,4]),"\t# November",sep="")
-			infiletext[127] <- paste(format(object@MonthlyProductionValues_tree[12,1]),"\t",format(object@MonthlyProductionValues_tree[12,2]),"\t",format(object@MonthlyProductionValues_tree[12,3]),"\t",format(object@MonthlyProductionValues_tree[12,4]),"\t# December",sep="")
+			infiletext[107] <- "# Shrublands component:"
+			infiletext[108] <- "#Litter\tBiomass\t%Live\tLAI_conv"
+			infiletext[109] <- paste(format(object@MonthlyProductionValues_shrub[1,1]),"\t",format(object@MonthlyProductionValues_shrub[1,2]),"\t",format(object@MonthlyProductionValues_shrub[1,3]),"\t",format(object@MonthlyProductionValues_shrub[1,4]),"\t# January",sep="")
+			infiletext[110] <- paste(format(object@MonthlyProductionValues_shrub[2,1]),"\t",format(object@MonthlyProductionValues_shrub[2,2]),"\t",format(object@MonthlyProductionValues_shrub[2,3]),"\t",format(object@MonthlyProductionValues_shrub[2,4]),"\t# February",sep="")
+			infiletext[111] <- paste(format(object@MonthlyProductionValues_shrub[3,1]),"\t",format(object@MonthlyProductionValues_shrub[3,2]),"\t",format(object@MonthlyProductionValues_shrub[3,3]),"\t",format(object@MonthlyProductionValues_shrub[3,4]),"\t# March",sep="")
+			infiletext[112] <- paste(format(object@MonthlyProductionValues_shrub[4,1]),"\t",format(object@MonthlyProductionValues_shrub[4,2]),"\t",format(object@MonthlyProductionValues_shrub[4,3]),"\t",format(object@MonthlyProductionValues_shrub[4,4]),"\t# April",sep="")
+			infiletext[113] <- paste(format(object@MonthlyProductionValues_shrub[5,1]),"\t",format(object@MonthlyProductionValues_shrub[5,2]),"\t",format(object@MonthlyProductionValues_shrub[5,3]),"\t",format(object@MonthlyProductionValues_shrub[5,4]),"\t# May",sep="")
+			infiletext[114] <- paste(format(object@MonthlyProductionValues_shrub[6,1]),"\t",format(object@MonthlyProductionValues_shrub[6,2]),"\t",format(object@MonthlyProductionValues_shrub[6,3]),"\t",format(object@MonthlyProductionValues_shrub[6,4]),"\t# June",sep="")
+			infiletext[115] <- paste(format(object@MonthlyProductionValues_shrub[7,1]),"\t",format(object@MonthlyProductionValues_shrub[7,2]),"\t",format(object@MonthlyProductionValues_shrub[7,3]),"\t",format(object@MonthlyProductionValues_shrub[7,4]),"\t# July",sep="")
+			infiletext[116] <- paste(format(object@MonthlyProductionValues_shrub[8,1]),"\t",format(object@MonthlyProductionValues_shrub[8,2]),"\t",format(object@MonthlyProductionValues_shrub[8,3]),"\t",format(object@MonthlyProductionValues_shrub[8,4]),"\t# August",sep="")
+			infiletext[117] <- paste(format(object@MonthlyProductionValues_shrub[9,1]),"\t",format(object@MonthlyProductionValues_shrub[9,2]),"\t",format(object@MonthlyProductionValues_shrub[9,3]),"\t",format(object@MonthlyProductionValues_shrub[9,4]),"\t# September",sep="")
+			infiletext[118] <- paste(format(object@MonthlyProductionValues_shrub[10,1]),"\t",format(object@MonthlyProductionValues_shrub[10,2]),"\t",format(object@MonthlyProductionValues_shrub[10,3]),"\t",format(object@MonthlyProductionValues_shrub[10,4]),"\t# October",sep="")
+			infiletext[119] <- paste(format(object@MonthlyProductionValues_shrub[11,1]),"\t",format(object@MonthlyProductionValues_shrub[11,2]),"\t",format(object@MonthlyProductionValues_shrub[11,3]),"\t",format(object@MonthlyProductionValues_shrub[11,4]),"\t# November",sep="")
+			infiletext[120] <- paste(format(object@MonthlyProductionValues_shrub[12,1]),"\t",format(object@MonthlyProductionValues_shrub[12,2]),"\t",format(object@MonthlyProductionValues_shrub[12,3]),"\t",format(object@MonthlyProductionValues_shrub[12,4]),"\t# December",sep="")
 
-			infiletext[129] <- "# FORB component:"
-			infiletext[130] <- "#Litter\tBiomass\t%Live\tLAI_conv"
-			infiletext[131] <- paste(format(object@MonthlyProductionValues_forb[1,1]),"\t",format(object@MonthlyProductionValues_forb[1,2]),"\t",format(object@MonthlyProductionValues_forb[1,3]),"\t",format(object@MonthlyProductionValues_forb[1,4]),"\t# January",sep="")
-			infiletext[132] <- paste(format(object@MonthlyProductionValues_forb[2,1]),"\t",format(object@MonthlyProductionValues_forb[2,2]),"\t",format(object@MonthlyProductionValues_forb[2,3]),"\t",format(object@MonthlyProductionValues_forb[2,4]),"\t# February",sep="")
-			infiletext[133] <- paste(format(object@MonthlyProductionValues_forb[3,1]),"\t",format(object@MonthlyProductionValues_forb[3,2]),"\t",format(object@MonthlyProductionValues_forb[3,3]),"\t",format(object@MonthlyProductionValues_forb[3,4]),"\t# March",sep="")
-			infiletext[134] <- paste(format(object@MonthlyProductionValues_forb[4,1]),"\t",format(object@MonthlyProductionValues_forb[4,2]),"\t",format(object@MonthlyProductionValues_forb[4,3]),"\t",format(object@MonthlyProductionValues_forb[4,4]),"\t# April",sep="")
-			infiletext[135] <- paste(format(object@MonthlyProductionValues_forb[5,1]),"\t",format(object@MonthlyProductionValues_forb[5,2]),"\t",format(object@MonthlyProductionValues_forb[5,3]),"\t",format(object@MonthlyProductionValues_forb[5,4]),"\t# May",sep="")
-			infiletext[136] <- paste(format(object@MonthlyProductionValues_forb[6,1]),"\t",format(object@MonthlyProductionValues_forb[6,2]),"\t",format(object@MonthlyProductionValues_forb[6,3]),"\t",format(object@MonthlyProductionValues_forb[6,4]),"\t# June",sep="")
-			infiletext[137] <- paste(format(object@MonthlyProductionValues_forb[7,1]),"\t",format(object@MonthlyProductionValues_forb[7,2]),"\t",format(object@MonthlyProductionValues_forb[7,3]),"\t",format(object@MonthlyProductionValues_forb[7,4]),"\t# July",sep="")
-			infiletext[138] <- paste(format(object@MonthlyProductionValues_forb[8,1]),"\t",format(object@MonthlyProductionValues_forb[8,2]),"\t",format(object@MonthlyProductionValues_forb[8,3]),"\t",format(object@MonthlyProductionValues_forb[8,4]),"\t# August",sep="")
-			infiletext[139] <- paste(format(object@MonthlyProductionValues_forb[9,1]),"\t",format(object@MonthlyProductionValues_forb[9,2]),"\t",format(object@MonthlyProductionValues_forb[9,3]),"\t",format(object@MonthlyProductionValues_forb[9,4]),"\t# September",sep="")
-			infiletext[140] <- paste(format(object@MonthlyProductionValues_forb[10,1]),"\t",format(object@MonthlyProductionValues_forb[10,2]),"\t",format(object@MonthlyProductionValues_forb[10,3]),"\t",format(object@MonthlyProductionValues_forb[10,4]),"\t# October",sep="")
-			infiletext[141] <- paste(format(object@MonthlyProductionValues_forb[11,1]),"\t",format(object@MonthlyProductionValues_forb[11,2]),"\t",format(object@MonthlyProductionValues_forb[11,3]),"\t",format(object@MonthlyProductionValues_forb[11,4]),"\t# November",sep="")
-			infiletext[142] <- paste(format(object@MonthlyProductionValues_forb[12,1]),"\t",format(object@MonthlyProductionValues_forb[12,2]),"\t",format(object@MonthlyProductionValues_forb[12,3]),"\t",format(object@MonthlyProductionValues_forb[12,4]),"\t# December",sep="")
+			infiletext[122] <- "# Forest component:"
+			infiletext[123] <- "#Litter\tBiomass\t%Live\tLAI_conv"
+			infiletext[124] <- paste(format(object@MonthlyProductionValues_tree[1,1]),"\t",format(object@MonthlyProductionValues_tree[1,2]),"\t",format(object@MonthlyProductionValues_tree[1,3]),"\t",format(object@MonthlyProductionValues_tree[1,4]),"\t# January",sep="")
+			infiletext[125] <- paste(format(object@MonthlyProductionValues_tree[2,1]),"\t",format(object@MonthlyProductionValues_tree[2,2]),"\t",format(object@MonthlyProductionValues_tree[2,3]),"\t",format(object@MonthlyProductionValues_tree[2,4]),"\t# February",sep="")
+			infiletext[126] <- paste(format(object@MonthlyProductionValues_tree[3,1]),"\t",format(object@MonthlyProductionValues_tree[3,2]),"\t",format(object@MonthlyProductionValues_tree[3,3]),"\t",format(object@MonthlyProductionValues_tree[3,4]),"\t# March",sep="")
+			infiletext[127] <- paste(format(object@MonthlyProductionValues_tree[4,1]),"\t",format(object@MonthlyProductionValues_tree[4,2]),"\t",format(object@MonthlyProductionValues_tree[4,3]),"\t",format(object@MonthlyProductionValues_tree[4,4]),"\t# April",sep="")
+			infiletext[128] <- paste(format(object@MonthlyProductionValues_tree[5,1]),"\t",format(object@MonthlyProductionValues_tree[5,2]),"\t",format(object@MonthlyProductionValues_tree[5,3]),"\t",format(object@MonthlyProductionValues_tree[5,4]),"\t# May",sep="")
+			infiletext[129] <- paste(format(object@MonthlyProductionValues_tree[6,1]),"\t",format(object@MonthlyProductionValues_tree[6,2]),"\t",format(object@MonthlyProductionValues_tree[6,3]),"\t",format(object@MonthlyProductionValues_tree[6,4]),"\t# June",sep="")
+			infiletext[130] <- paste(format(object@MonthlyProductionValues_tree[7,1]),"\t",format(object@MonthlyProductionValues_tree[7,2]),"\t",format(object@MonthlyProductionValues_tree[7,3]),"\t",format(object@MonthlyProductionValues_tree[7,4]),"\t# July",sep="")
+			infiletext[131] <- paste(format(object@MonthlyProductionValues_tree[8,1]),"\t",format(object@MonthlyProductionValues_tree[8,2]),"\t",format(object@MonthlyProductionValues_tree[8,3]),"\t",format(object@MonthlyProductionValues_tree[8,4]),"\t# August",sep="")
+			infiletext[132] <- paste(format(object@MonthlyProductionValues_tree[9,1]),"\t",format(object@MonthlyProductionValues_tree[9,2]),"\t",format(object@MonthlyProductionValues_tree[9,3]),"\t",format(object@MonthlyProductionValues_tree[9,4]),"\t# September",sep="")
+			infiletext[133] <- paste(format(object@MonthlyProductionValues_tree[10,1]),"\t",format(object@MonthlyProductionValues_tree[10,2]),"\t",format(object@MonthlyProductionValues_tree[10,3]),"\t",format(object@MonthlyProductionValues_tree[10,4]),"\t# October",sep="")
+			infiletext[134] <- paste(format(object@MonthlyProductionValues_tree[11,1]),"\t",format(object@MonthlyProductionValues_tree[11,2]),"\t",format(object@MonthlyProductionValues_tree[11,3]),"\t",format(object@MonthlyProductionValues_tree[11,4]),"\t# November",sep="")
+			infiletext[135] <- paste(format(object@MonthlyProductionValues_tree[12,1]),"\t",format(object@MonthlyProductionValues_tree[12,2]),"\t",format(object@MonthlyProductionValues_tree[12,3]),"\t",format(object@MonthlyProductionValues_tree[12,4]),"\t# December",sep="")
+
+			infiletext[137] <- "# FORB component:"
+			infiletext[138] <- "#Litter\tBiomass\t%Live\tLAI_conv"
+			infiletext[139] <- paste(format(object@MonthlyProductionValues_forb[1,1]),"\t",format(object@MonthlyProductionValues_forb[1,2]),"\t",format(object@MonthlyProductionValues_forb[1,3]),"\t",format(object@MonthlyProductionValues_forb[1,4]),"\t# January",sep="")
+			infiletext[140] <- paste(format(object@MonthlyProductionValues_forb[2,1]),"\t",format(object@MonthlyProductionValues_forb[2,2]),"\t",format(object@MonthlyProductionValues_forb[2,3]),"\t",format(object@MonthlyProductionValues_forb[2,4]),"\t# February",sep="")
+			infiletext[141] <- paste(format(object@MonthlyProductionValues_forb[3,1]),"\t",format(object@MonthlyProductionValues_forb[3,2]),"\t",format(object@MonthlyProductionValues_forb[3,3]),"\t",format(object@MonthlyProductionValues_forb[3,4]),"\t# March",sep="")
+			infiletext[142] <- paste(format(object@MonthlyProductionValues_forb[4,1]),"\t",format(object@MonthlyProductionValues_forb[4,2]),"\t",format(object@MonthlyProductionValues_forb[4,3]),"\t",format(object@MonthlyProductionValues_forb[4,4]),"\t# April",sep="")
+			infiletext[143] <- paste(format(object@MonthlyProductionValues_forb[5,1]),"\t",format(object@MonthlyProductionValues_forb[5,2]),"\t",format(object@MonthlyProductionValues_forb[5,3]),"\t",format(object@MonthlyProductionValues_forb[5,4]),"\t# May",sep="")
+			infiletext[144] <- paste(format(object@MonthlyProductionValues_forb[6,1]),"\t",format(object@MonthlyProductionValues_forb[6,2]),"\t",format(object@MonthlyProductionValues_forb[6,3]),"\t",format(object@MonthlyProductionValues_forb[6,4]),"\t# June",sep="")
+			infiletext[145] <- paste(format(object@MonthlyProductionValues_forb[7,1]),"\t",format(object@MonthlyProductionValues_forb[7,2]),"\t",format(object@MonthlyProductionValues_forb[7,3]),"\t",format(object@MonthlyProductionValues_forb[7,4]),"\t# July",sep="")
+			infiletext[146] <- paste(format(object@MonthlyProductionValues_forb[8,1]),"\t",format(object@MonthlyProductionValues_forb[8,2]),"\t",format(object@MonthlyProductionValues_forb[8,3]),"\t",format(object@MonthlyProductionValues_forb[8,4]),"\t# August",sep="")
+			infiletext[147] <- paste(format(object@MonthlyProductionValues_forb[9,1]),"\t",format(object@MonthlyProductionValues_forb[9,2]),"\t",format(object@MonthlyProductionValues_forb[9,3]),"\t",format(object@MonthlyProductionValues_forb[9,4]),"\t# September",sep="")
+			infiletext[148] <- paste(format(object@MonthlyProductionValues_forb[10,1]),"\t",format(object@MonthlyProductionValues_forb[10,2]),"\t",format(object@MonthlyProductionValues_forb[10,3]),"\t",format(object@MonthlyProductionValues_forb[10,4]),"\t# October",sep="")
+			infiletext[149] <- paste(format(object@MonthlyProductionValues_forb[11,1]),"\t",format(object@MonthlyProductionValues_forb[11,2]),"\t",format(object@MonthlyProductionValues_forb[11,3]),"\t",format(object@MonthlyProductionValues_forb[11,4]),"\t# November",sep="")
+			infiletext[150] <- paste(format(object@MonthlyProductionValues_forb[12,1]),"\t",format(object@MonthlyProductionValues_forb[12,2]),"\t",format(object@MonthlyProductionValues_forb[12,3]),"\t",format(object@MonthlyProductionValues_forb[12,4]),"\t# December",sep="")
 
 			infile <- file(infilename, "w+b")
 			writeLines(text = infiletext, con = infile, sep = "\n")
@@ -373,9 +391,10 @@ setMethod("swReadLines", signature=c(object="swProd",file="character"), definiti
 			object@HydraulicRedistribution[2,] = readNumerics(infiletext[68],4)
 			object@HydraulicRedistribution[3,] = readNumerics(infiletext[69],4)
 			object@CriticalSoilWaterPotential = readNumerics(infiletext[74],4)
-			for(i in 1:12) object@MonthlyProductionValues_grass[i,] = readNumerics(infiletext[85+i],4)
-			for(i in 1:12) object@MonthlyProductionValues_shrub[i,] = readNumerics(infiletext[100+i],4)
-			for(i in 1:12) object@MonthlyProductionValues_tree[i,] = readNumerics(infiletext[115+i],4)
-			for(i in 1:12) object@MonthlyProductionValues_forb[i,] = readNumerics(infiletext[130+i],4)
+			for(i in 1:4)  object@CO2Coefficients[i, ] = readNumerics(infiletext[79 + i], 4)
+			for(i in 1:12) object@MonthlyProductionValues_grass[i,] = readNumerics(infiletext[94+i],4)
+			for(i in 1:12) object@MonthlyProductionValues_shrub[i,] = readNumerics(infiletext[109+i],4)
+			for(i in 1:12) object@MonthlyProductionValues_tree[i,] = readNumerics(infiletext[124+i],4)
+			for(i in 1:12) object@MonthlyProductionValues_forb[i,] = readNumerics(infiletext[139+i],4)
 			return(object)
 		})

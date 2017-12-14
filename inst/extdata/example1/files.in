@@ -20,6 +20,9 @@ Input/climate.in	# general atmospheric params
 Input/veg.in	# productivity values
 Input/estab.in	# plant establishment start file
 
+#CO2
+Input/carbon.in
+
 #SWC measurements
 Input/swcsetup.in	# params for handling measured swc
 

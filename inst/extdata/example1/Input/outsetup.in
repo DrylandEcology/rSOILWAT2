@@ -66,3 +66,4 @@ TIMESTEP dy yr
       DEEPSWC     SUM       MO       1     end      deep_drain      /* deep drainage into lowest layer (cm) */
      SOILTEMP     AVG       MO       1     end       temp_soil      /* soil temperature from each soil layer (in celsius) */
        ESTABL     OFF       YR       1     end          estabs      /* yearly establishment results */
+   CO2EFFECTS     AVG       DY       1     end      vegetation      /* vegetation biomass: biomass (g/m2) for grasses, shrubs, trees, forbs, and total; live biomass (g/m2) fgrasses, shrubs, trees, forbs, and total; biomass CO2-effect (multiplier) for grasses, shrubs, trees, and forbs; WUE CO2-effect (multiplier) for grasses, shrubs, trees, and forbs

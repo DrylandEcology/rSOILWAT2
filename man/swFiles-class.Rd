@@ -8,6 +8,8 @@
 \alias{swFiles_Cloud}
 \alias{swFiles_Estab<-}
 \alias{swFiles_Estab}
+\alias{swFiles_Carbon<-}
+\alias{swFiles_Carbon}
 \alias{swFiles_filesIn<-}
 \alias{swFiles_filesIn}
 \alias{swFiles_LogFile<-}
@@ -63,6 +65,7 @@ https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
 \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+\code{\linkS4class{swCarbon}}
 }
 \author{
 Ryan Murphy

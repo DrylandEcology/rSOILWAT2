@@ -70,10 +70,10 @@ code to estimate these values.
 sw_in <- sw_inputData()
 
 ## Slots of the input object of class 'swInputData'
-str(sw_in, max.level=2)
+str(sw_in, max.level = 2)
 
 ## Execute the simulation run
-sw_out <- sw_exec(inputData = sw_in)
+\dontrun{sw_out <- sw_exec(inputData = sw_in)}
 
 
 ## ------ Directory to a SOLWAT project used in the following examples
@@ -81,7 +81,7 @@ path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 
 ## ------ Simulation with data read from disk during execution ------------
 ## Execute the simulation run
-\dontrun{sw_out1 <- sw_exec(dir = path_demo, files.in = "files.in")
+sw_out1 <- sw_exec(dir = path_demo, files.in = "files.in", quiet = TRUE)
 
 ## Slots of the output object of class 'swOutput'
 str(sw_out1, max.level=2)
@@ -92,10 +92,10 @@ str(sw_out1, max.level=2)
 sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 
 ## Slots of the input object of class 'swInputData'
-str(sw_in2, max.level=2)
+str(sw_in2, max.level = 2)
 
 ## Execute the simulation run
-sw_out2 <- sw_exec(inputData = sw_in2)
+sw_out2 <- sw_exec(inputData = sw_in2, quiet = TRUE)
 
 
 ## ------ Simulation with data prepared beforehand and separate weather data ------------
@@ -105,13 +105,14 @@ sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 ## Read forcing weather data from files on disk (there are also functions to set up a
 ##   SQLite database for the weather data)
 sw_weath3 <- getWeatherData_folders(LookupWeatherFolder=file.path(path_demo, "Input"),
-   weatherDirName="data_weather", filebasename="weath", startYear=1979, endYear=2010)
+   weatherDirName = "data_weather", filebasename = "weath", startYear = 1979,
+   endYear = 2010)
 
 ## List of the slots of the input objects of class 'swWeatherData'
-str(sw_weath3, max.level=1)
+str(sw_weath3, max.level = 1)
 
 ## Execute the simulation run
-sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)
+sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3, quiet = TRUE)
 
 
 ## ------ Simulation with manipulated input data ------------
@@ -121,22 +122,21 @@ sw_in4 <- sw_in3
 swProd_Composition(sw_in4) <- c(0.4, 0.6, 0, 0, 0)
 
 ## Execute the simulation run
-sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3)
+sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3, quiet = TRUE)
 
 
-## ------ Simulation with weather generator ------------
-## Currently, the Markov weather generator flag must be turned on prior to reading files to disk
-## - otherwise, the Markov prob.in and covar.in are not being loaded (NOTE: this should be fixed)
-path_demo2 <- system.file("extdata", "example2", package = "rSOILWAT2")
-sw_in5 <- sw_inputDataFromFiles(dir = path_demo2, files.in = "files.in")
 
-## Turn on the Markov weather generator
-# swWeather_UseMarkov(sw_in5) <- TRUE
+## ------ Simulation with CO2-effects ------------
+sw_in5 <- sw_in3
+
+## Turn on the CO2-effects and set the CO2-concentration scenario
+swCarbon_Scenario(sw_in5) <- "RCP85"
+swCarbon_Use_Bio(sw_in5) <- 1L
+swCarbon_Use_WUE(sw_in5) <- 1L
 
 ## Execute the simulation run
-sw_out5 <- sw_exec(inputData = sw_in5, weatherList = NULL)
+sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3, quiet = TRUE)
 
-}
 
 ## See help(package = "rSOILWAT2") for a full list of functions
 

@@ -67,6 +67,8 @@ setGeneric(name="swFiles_Prod",function(object) {standardGeneric("swFiles_Prod")
 #' @export
 setGeneric(name="swFiles_Estab",function(object) {standardGeneric("swFiles_Estab")})
 #' @export
+setGeneric(name="swFiles_Carbon",function(object) {standardGeneric("swFiles_Carbon")})
+#' @export
 setGeneric(name="swFiles_SWCsetup",function(object) {standardGeneric("swFiles_SWCsetup")})
 #' @export
 setGeneric(name="swFiles_Output",function(object) {standardGeneric("swFiles_Output")})
@@ -103,6 +105,8 @@ setGeneric(name="swFiles_Cloud<-",function(object, value) {standardGeneric("swFi
 setGeneric(name="swFiles_Prod<-",function(object, value) {standardGeneric("swFiles_Prod<-")})
 #' @export
 setGeneric(name="swFiles_Estab<-",function(object, value) {standardGeneric("swFiles_Estab<-")})
+#' @export
+setGeneric(name="swFiles_Carbon<-",function(object, value) {standardGeneric("swFiles_Carbon<-")})
 #' @export
 setGeneric(name="swFiles_SWCsetup<-",function(object, value) {standardGeneric("swFiles_SWCsetup<-")})
 #' @export
@@ -268,6 +272,8 @@ setGeneric(name="swProd_HydrRedstro",function(object) {standardGeneric("swProd_H
 #' @export
 setGeneric(name="swProd_CritSoilWaterPotential",function(object) {standardGeneric("swProd_CritSoilWaterPotential")})
 #' @export
+setGeneric(name="swProd_CO2Coefficients",function(object) {standardGeneric("swProd_CO2Coefficients")})
+#' @export
 setGeneric(name="swProd_MonProd_grass",function(object) {standardGeneric("swProd_MonProd_grass")})
 #' @export
 setGeneric(name="swProd_MonProd_shrub",function(object) {standardGeneric("swProd_MonProd_shrub")})
@@ -304,6 +310,8 @@ setGeneric(name="swProd_HydrRedstro_use<-",function(object, value) {standardGene
 setGeneric(name="swProd_HydrRedstro<-",function(object, value) {standardGeneric("swProd_HydrRedstro<-")})
 #' @export
 setGeneric(name="swProd_CritSoilWaterPotential<-",function(object, value) {standardGeneric("swProd_CritSoilWaterPotential<-")})
+#' @export
+setGeneric(name="swProd_CO2Coefficients<-",function(object, value) {standardGeneric("swProd_CO2Coefficients<-")})
 #' @export
 setGeneric(name="swProd_MonProd_grass<-",function(object, value) {standardGeneric("swProd_MonProd_grass<-")})
 #' @export
@@ -394,6 +402,56 @@ setGeneric(name="set_swEstab<-",function(object, value) {standardGeneric("set_sw
 #' @export
 setGeneric(name="swEstab_useEstab<-",function(object, value) {standardGeneric("swEstab_useEstab<-")})
 #species here#
+########################
+
+#########CARBON##########
+#' @name swInputData-class
+#' @export
+setGeneric(name="get_swCarbon",function(object) {standardGeneric("get_swCarbon")})
+
+#' @name swCarbon-class
+#' @export
+setGeneric(name="swCarbon_Use_Bio",function(object) {standardGeneric("swCarbon_Use_Bio")})
+
+#' @name swCarbon-class
+#' @export
+setGeneric(name="swCarbon_Use_WUE",function(object) {standardGeneric("swCarbon_Use_WUE")})
+
+#' @name swCarbon-class
+#' @export
+setGeneric(name="swCarbon_Scenario",function(object) {standardGeneric("swCarbon_Scenario")})
+
+#' @name swCarbon-class
+#' @export
+setGeneric(name="swCarbon_DeltaYear",function(object) {standardGeneric("swCarbon_DeltaYear")})
+
+#' @name swCarbon-class
+#' @export
+setGeneric(name="swCarbon_CO2ppm", function(object) {standardGeneric("swCarbon_CO2ppm")})
+
+#' @name swInputData-class
+#' @export
+setGeneric(name="set_swCarbon<-",function(object, value) {standardGeneric("set_swCarbon<-")})
+
+#' @name swCarbon-class
+#' @export
+setGeneric(name="swCarbon_Use_Bio<-",function(object, value) {standardGeneric("swCarbon_Use_Bio<-")})
+
+#' @name swCarbon-class
+#' @export
+setGeneric(name="swCarbon_Use_WUE<-",function(object, value) {standardGeneric("swCarbon_Use_WUE<-")})
+
+#' @name swCarbon-class
+#' @export
+setGeneric(name="swCarbon_Scenario<-",function(object, value) {standardGeneric("swCarbon_Scenario<-")})
+
+#' @name swCarbon-class
+#' @export
+setGeneric(name="swCarbon_DeltaYear<-",function(object, value) {standardGeneric("swCarbon_DeltaYear<-")})
+
+#' @name swCarbon-class
+#' @export
+setGeneric(name="swCarbon_CO2ppm<-",function(object, value) {standardGeneric("swCarbon_CO2ppm<-")})
 ########################
 
 #########SWC############
