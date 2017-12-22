@@ -135,6 +135,13 @@ setReplaceMethod(f="swOUT_TimeStep",signature="swOUT",function(object,value) {va
 setReplaceMethod(f="swOUT_OutputSeparator",signature="swOUT",function(object,value) {object@outputSeparator <- value; return(object)})
 setReplaceMethod(f="swOUT_useTimeStep",signature="swOUT",function(object,value) {object@useTimeStep <- value; return(object)})
 
+
+# used by swWriteLines and swReadLines
+			KEY <- c("WTHR", "TEMP", "PRECIP", "SOILINFILT", "RUNOFF", "ALLH2O", "VWCBULK",
+				"VWCMATRIC", "SWCBULK", "SWABULK", "SWAMATRIC", "SWPMATRIC","SURFACEWATER", "TRANSP",
+				"EVAPSOIL", "EVAPSURFACE", "INTERCEPTION", "LYRDRAIN", "HYDRED", "ET", "AET", "PET",
+				"WETDAY", "SNOWPACK", "DEEPSWC", "SOILTEMP", "ALLVEG", "ESTABL")
+
 setMethod("swWriteLines", signature=c(object="swOUT", file="character"), definition=function(object, file) {
 			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)
 			infilename <- file.path(file)
@@ -182,10 +189,6 @@ setMethod("swWriteLines", signature=c(object="swOUT", file="character"), definit
 			infiletext[41] = paste("OUTSEP ",ifelse(object@outputSeparator=="\t","t","s"),sep="")
 			if(object@useTimeStep)	infiletext[42] = paste("TIMESTEP ",paste(timePeriods[object@timePeriods + 1],collapse = " "),sep="")
 
-			KEY <- c("WTHR", "TEMP", "PRECIP", "SOILINFILT", "RUNOFF", "ALLH2O", "VWCBULK",
-				"VWCMATRIC", "SWCBULK", "SWABULK", "SWAMATRIC", "SWPMATRIC","SURFACEWATER", "TRANSP",
-				"EVAPSOIL", "EVAPSURFACE", "INTERCEPTION", "LYRDRAIN", "HYDRED", "ET", "AET", "PET",
-				"WETDAY", "SNOWPACK", "DEEPSWC", "SOILTEMP", "ALLVEG", "ESTABL")
 			KeyComments <- c("","/* max., min, average temperature, surface temperature (C) */", "/* total precip = sum(rain, snow), rain, snow-fall, snowmelt, and snowloss (cm)     */","/* water to infiltrate in top soil layer (cm), runoff (cm); (not-intercepted rain)+(snowmelt-runoff) */",
 					"/* runoff (cm): total runoff, runoff from ponded water, runoff from snowmelt */","","/* bulk volumetric soilwater (cm / layer) */","/* matric volumetric soilwater (cm / layer) */","/* bulk soilwater content (cm / cm layer); swc.l1(today) = swc.l1(yesterday)+inf_soil-lyrdrain.l1-transp.l1-evap_soil.l1; swc.li(today) = swc.li(yesterday)+lyrdrain.l(i-1)-lyrdrain.li-transp.li-evap_soil.li; swc.llast(today) = swc.llast(yesterday)+lyrdrain.l(last-1)-deepswc-transp.llast-evap_soil.llast  */",
 					"/* matric soilwater potential (-bars) */","/* bulk available soil water (cm/layer) = swc - wilting point */","/* matric available soil water (cm/layer) = swc - wilting point */","/* surface water (cm)   */","/* transpiration from each soil layer (cm): total, trees, shrubs, forbs, grasses     */","/* bare-soil evaporation from each soil layer (cm)   */",

@@ -24,7 +24,7 @@
 tLayers <- 8
 tevapLayers <- 3
 tVegEstabCount <- 2
-numPeriods <- 4
+numPeriods <- 4 # this has to be identical to 'SW_OUTNPERIODS' defined by SW_Output.h
 
 #' Slot names of \linkS4class{swOutput}
 #' @return Standardized named vector for easier access to slots of class
@@ -83,7 +83,7 @@ swOutput_SURFACEWATER <- new("swOutput_KEY",Title="surface_water",TimeStep=0L,Co
 swOutput_TRANSP <- new("swOutput_KEY",Title="transp",TimeStep=3L,Columns=as.integer(tLayers)*5L)
 swOutput_EVAPSOIL <- new("swOutput_KEY",Title="evap_soil",TimeStep=0L,Columns=as.integer(tevapLayers))
 swOutput_EVAPSURFACE <- new("swOutput_KEY",Title="evap_surface",TimeStep=1L,Columns=7L)
-swOutput_INTERCEPTION <- new("swOutput_KEY",Title="interception",TimeStep=2L,Columns=7L) # was 6L
+swOutput_INTERCEPTION <- new("swOutput_KEY",Title="interception",TimeStep=2L,Columns=6L)
 swOutput_LYRDRAIN <- new("swOutput_KEY",Title="percolation",TimeStep=0L,Columns=as.integer(tLayers-1))
 swOutput_HYDRED <- new("swOutput_KEY",Title="hydred",TimeStep=1L,Columns=as.integer(tLayers*5))
 swOutput_ET <- new("swOutput_KEY",Title="",TimeStep=4L,Columns=0L)
@@ -187,7 +187,7 @@ setMethod(f="initialize",signature="swOutput",definition=function(.Object,Layers
 			.Object@TRANSP@Columns <- Layers*5L
 			.Object@EVAPSOIL@Columns <- EvapLayers
 			.Object@EVAPSURFACE@Columns <- 7L
-			.Object@INTERCEPTION@Columns <- 7L	# was 6L
+			.Object@INTERCEPTION@Columns <- 6L
 			.Object@LYRDRAIN@Columns <- Layers-1L
 			.Object@HYDRED@Columns <- Layers*5L
 			.Object@ET@Columns <- 0L

@@ -5,19 +5,36 @@
  *      Author: Ryan Murphy
  */
 
-#include "SW_R_lib.h"
+#include "SOILWAT2/generic.h"
+
 #include "SOILWAT2/SW_Files.h"
 #include "SOILWAT2/SW_Carbon.h"
-#include "SOILWAT2/generic.h"
+
+#include "rSW_Files.h"
+#include "rSW_Model.h"
+#include "rSW_Weather.h"
+#include "rSW_Markov.h"
+#include "rSW_Sky.h"
+#include "rSW_VegProd.h"
+#include "rSW_Site.h"
+#include "rSW_VegEstab.h"
+#include "rSW_Output.h"
+#include "rSW_Carbon.h"
+#include "rSW_SoilWater.h"
+#include "rSW_Control.h"
+
+#include "SW_R_lib.h"
+
+#include <R.h>
+#include <Rinternals.h>
+#include <Rdefines.h>
 
 /* =================================================== */
 /*                  Global Declarations                */
 /* external by other routines elsewhere in the program */
 /* --------------------------------------------------- */
 
-int logNote = 1;
-int logWarn = 1;
-int logFatl = 1;
+
 int RlogIndex;
 SEXP Rlogfile;
 SEXP InputData;
@@ -42,12 +59,11 @@ RealD *p_Raet_dy, *p_Rdeep_drain_dy, *p_Restabs_dy, *p_Revap_soil_dy, *p_Revap_s
 unsigned int yr_nrow = 0, mo_nrow = 0, wk_nrow = 0, dy_nrow = 0;
 
 extern char _firstfile[1024];
-//extern int timeSteps[SW_OUTNKEYS][4];
-//extern int numPeriod;
+
 extern SW_MODEL SW_Model;
-//extern SW_SITE SW_Site;
+extern SW_SOILWAT SW_Soilwat;
 extern SW_VEGESTAB SW_VegEstab;
-static   int periodUse[29][4];
+static int periodUse[SW_OUTNKEYS][SW_OUTNPERIODS];
 
 
 /* =================================================== */
@@ -55,6 +71,27 @@ static   int periodUse[29][4];
 /* --------------------------------------------------- */
 
 void SW_FLW_construct(void);
+
+/**
+ * Determines if a constant in the Parton equation 2.21 is invalid and would
+ * thus cause extreme soil temperature values (see SW_Flow_lib.c ~1770)
+ *
+ * @param  none
+ * @return an R boolean that denotes an error (TRUE) or lack of (FALSE)
+ *
+ */
+SEXP tempError(void) {
+	SEXP swR_temp_error;
+	PROTECT(swR_temp_error = NEW_LOGICAL(1));
+	if (SW_Soilwat.partsError == 1) {
+		LOGICAL_POINTER(swR_temp_error)[0] = TRUE;
+	} else {
+		LOGICAL_POINTER(swR_temp_error)[0] = FALSE;
+	}
+	UNPROTECT(1);
+	return swR_temp_error;
+}
+
 
 SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 	int i, debug = 0;
@@ -87,6 +124,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 	init_args(argc, argv);
 	if (debug) swprintf("Construct variables\n");
 	SW_CTL_init_model(_firstfile);
+	rSW_CTL_init_model2();
 	if (debug) swprintf("Read from disk\n");
 	SW_CTL_read_inputs_from_disk();
 
@@ -119,7 +157,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 }
 
 SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
-	int i;
+	int i, debug = 0;
 	SEXP outputData;
 
 	//Main Output
@@ -150,6 +188,7 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 		WeatherList = weatherList;
 	}
 
+  if (debug) swprintf("'start': input arguments ...");
 	PROTECT(inputOptions = AS_CHARACTER(inputOptions));
 	for (i = 0; i < argc; i++) {
 		argv[i] = R_alloc(strlen(CHAR(STRING_ELT(inputOptions, i))), sizeof(char));
@@ -157,19 +196,24 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 	for (i = 0; i < argc; i++) {
 		strcpy(argv[i], CHAR(STRING_ELT(inputOptions, i)));
 	}
+
+  if (debug) swprintf(" create log ...");
 	RlogIndex = 0;
 	// logfile
 	PROTECT(swLog = MAKE_CLASS("swLog"));
 	PROTECT(oRlogfile = NEW_OBJECT(swLog));
 	PROTECT(Rlogfile = GET_SLOT(oRlogfile,install("LogData")));
 
+  if (debug) swprintf(" initialize SOILWAT ...");
 	//Set the input data either from files or from memory
 	init_args(argc, argv);
 	SW_CTL_init_model(_firstfile);
-	SW_CTL_obtain_inputs();
+	rSW_CTL_init_model2();
+	rSW_CTL_obtain_inputs();
 
+
+  if (debug) swprintf(" setup output variables ...");
 	PROTECT(outputData = onGetOutput(inputData));
-
 	yr_nrow = INTEGER(GET_SLOT(outputData, install("yr_nrow")))[0];
 	mo_nrow = INTEGER(GET_SLOT(outputData, install("mo_nrow")))[0];
 	wk_nrow = INTEGER(GET_SLOT(outputData, install("wk_nrow")))[0];
@@ -301,11 +345,14 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 	if(periodUse[eSW_WetDays][1]) p_Rwetdays_wk = REAL(GET_SLOT(GET_SLOT(outputData, install("WETDAY")),install("Week")));
 	if(periodUse[eSW_WetDays][0]) p_Rwetdays_dy = REAL(GET_SLOT(GET_SLOT(outputData, install("WETDAY")),install("Day")));
 
+  if (debug) swprintf(" run SOILWAT ...");
 	SW_CTL_main();
 
+  if (debug) swprintf(" clean up ...");
 	SW_SIT_clear_layers();
 	SW_WTH_clear_runavg_list();
 	SW_VES_clear();
+  if (debug) swprintf(" completed.\n");
 
 	UNPROTECT(5);
 
@@ -322,7 +369,7 @@ SEXP onGetOutput(SEXP inputData) {
 					Rpet_columns, Rprecip_columns, Rrunoff_columns, Rsnowpack_columns, Rsoil_temp_columns, Rsurface_water_columns, RvwcBulk_columns, RvwcMatric_columns, RswcBulk_columns, RswpMatric_columns, RswaBulk_columns,
 					RswaMatric_columns, Rtemp_columns, Rtransp_columns, Rwetdays_columns, Rco2effects_columns, /*NOT USED ->*/ Rwthr_columns,RallH2O_columns,Ret_columns,Rallveg_columns;
 	int i,j, k, pCount=0;
-	int use[29];
+	int use[SW_OUTNKEYS];
 	Bool useTimeStep;
 
 	SEXP swOutput, swOutput_Object;
@@ -422,10 +469,10 @@ SEXP onGetOutput(SEXP inputData) {
 
 	if(debug) swprintf("tYears: %d, tLayers: %d, tEvapLayers: %d \n", tYears, tLayers, tevapLayers);
 
-	PROTECT(TimeSteps = GET_SLOT(GET_SLOT(inputData, install("output")),install("timePeriods")));
-	useTimeStep = LOGICAL(GET_SLOT(GET_SLOT(inputData, install("output")),install("useTimeStep")))[0];
+	PROTECT(TimeSteps = GET_SLOT(GET_SLOT(inputData, install("output")), install("timePeriods")));
+	useTimeStep = LOGICAL(GET_SLOT(GET_SLOT(inputData, install("output")), install("useTimeStep")))[0];
 	if(useTimeStep) {
-		PROTECT(Periods = GET_SLOT(GET_SLOT(inputData, install("output")),install("timePeriods")));
+		PROTECT(Periods = GET_SLOT(GET_SLOT(inputData, install("output")), install("timePeriods")));
 		for (i = 0; i < LENGTH(TimeSteps); i++) {
 			switch (INTEGER(TimeSteps)[i]) {
 				case eSW_Day:
@@ -443,8 +490,8 @@ SEXP onGetOutput(SEXP inputData) {
 			}
 		}
 	} else {
-		PROTECT(Periods = GET_SLOT(GET_SLOT(inputData, install("output")),install("period")));
-		for(i=0; i<29; i++) {
+		PROTECT(Periods = GET_SLOT(GET_SLOT(inputData, install("output")), install("period")));
+		for (i = 0; i < SW_OUTNKEYS; i++) {
 			switch (INTEGER(Periods)[i]) {
 				case eSW_Day:
 				pDayUse = 1;
@@ -487,10 +534,13 @@ SEXP onGetOutput(SEXP inputData) {
 
 	if(debug) swprintf("Year Rows: %d, Month Rows: %d, Week Rows: %d, Day Rows: %d\n",yr_nrow, mo_nrow, wk_nrow, dy_nrow);
 
-	for(i=0; i<29; i++) {
-		periodUse[i][0]=periodUse[i][1]=periodUse[i][2]=periodUse[i][3]=0;
-		if(useTimeStep) {
-			for(j=0; j<length(Periods); j++) {
+	for (i = 0; i < SW_OUTNKEYS; i++) {
+	  for (j = 0; j < length(Periods); j++) {
+		  periodUse[i][j] = 0;
+		}
+
+		if (useTimeStep) {
+			for (j = 0; j < length(Periods); j++) {
 				periodUse[i][INTEGER(Periods)[j]] = 1;
 				//pCount+=3;
 			}
