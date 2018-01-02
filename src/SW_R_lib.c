@@ -6,9 +6,11 @@
  */
 
 #include "SOILWAT2/generic.h"
+#include "SOILWAT2/SW_Defines.h"
 
 #include "SOILWAT2/SW_Files.h"
 #include "SOILWAT2/SW_Carbon.h"
+#include "SOILWAT2/SW_Output.h"
 
 #include "rSW_Files.h"
 #include "rSW_Model.h"
@@ -358,6 +360,93 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 
 	return(outputData);
 }
+
+
+/** Expose SOILWAT2 constants and defines to internal R code of rSOILWAT2
+  @return A list with four elements: one element `kINT` for integer constants;
+    other elements contain output keys, `OutKeys`; output periods, `OutPeriods`; and
+    output aggregation types, `OutAggs`.
+ */
+SEXP sw_consts(void) {
+  SEXP ret, ret_int, ret_str1, ret_str2, ret_str3;
+  SEXP cret_names, cint_names, cstr_names1, cstr_names2, cstr_names3;
+  int i, nINT = 7;
+  int *pvINT;
+  char *cret[] = {"kINT", "OutKeys", "OutPeriods", "OutAggs"};
+  int vINT[] = {MAX_LAYERS, MAX_TRANSP_REGIONS, MAX_NYEAR, SW_MISSING,
+    SW_OUTNPERIODS, SW_OUTNKEYS, SW_NSUMTYPES};
+  char *cINT[] = {"MAX_LAYERS", "MAX_TRANSP_REGIONS", "MAX_NYEAR", "SW_MISSING",
+    "SW_OUTNPERIODS", "SW_OUTNKEYS", "SW_NSUMTYPES"};
+  char *vSTR1[] = {SW_WETHR, SW_TEMP, SW_PRECIP, SW_SOILINF, SW_RUNOFF,
+    SW_ALLH2O, SW_VWCBULK, SW_VWCMATRIC, SW_SWCBULK, SW_SWABULK,
+    SW_SWAMATRIC, SW_SWPMATRIC, SW_SURFACEW, SW_TRANSP, SW_EVAPSOIL,
+    SW_EVAPSURFACE, SW_INTERCEPTION, SW_LYRDRAIN, SW_HYDRED, SW_ET, SW_AET,
+    SW_PET, SW_WETDAY, SW_SNOWPACK, SW_DEEPSWC, SW_SOILTEMP, SW_ALLVEG,
+    SW_ESTAB, SW_CO2EFFECTS};
+  char *cSTR1[] = {"SW_WETHR", "SW_TEMP", "SW_PRECIP", "SW_SOILINF", "SW_RUNOFF",
+    "SW_ALLH2O", "SW_VWCBULK", "SW_VWCMATRIC", "SW_SWCBULK", "SW_SWABULK",
+    "SW_SWAMATRIC", "SW_SWPMATRIC", "SW_SURFACEW", "SW_TRANSP", "SW_EVAPSOIL",
+    "SW_EVAPSURFACE", "SW_INTERCEPTION", "SW_LYRDRAIN", "SW_HYDRED", "SW_ET", "SW_AET",
+    "SW_PET", "SW_WETDAY", "SW_SNOWPACK", "SW_DEEPSWC", "SW_SOILTEMP", "SW_ALLVEG",
+    "SW_ESTAB", "SW_CO2EFFECTS"};
+  char *vSTR2[] = {SW_DAY, SW_WEEK, SW_MONTH, SW_YEAR};
+  char *cSTR2[] = {"SW_DAY", "SW_WEEK", "SW_MONTH", "SW_YEAR"};
+  char *vSTR3[] = {SW_SUM_OFF, SW_SUM_SUM, SW_SUM_AVG, SW_SUM_FNL};
+  char *cSTR3[] = {"SW_SUM_OFF", "SW_SUM_SUM", "SW_SUM_AVG", "SW_SUM_FNL"};
+
+  // create vector of integer constants
+  PROTECT(ret_int = allocVector(INTSXP, nINT));
+  pvINT = INTEGER(ret_int);
+  PROTECT(cint_names = allocVector(STRSXP, nINT));
+  for (i = 0; i < nINT; i++) {
+    pvINT[i] = vINT[i];
+    SET_STRING_ELT(cint_names, i, mkChar(cINT[i]));
+  }
+  namesgets(ret_int, cint_names);
+
+  // create vector of output key constants
+  PROTECT(ret_str1 = allocVector(STRSXP, SW_OUTNKEYS));
+  PROTECT(cstr_names1 = allocVector(STRSXP, SW_OUTNKEYS));
+  for (i = 0; i < SW_OUTNKEYS; i++) {
+    SET_STRING_ELT(ret_str1, i, mkChar(vSTR1[i]));
+    SET_STRING_ELT(cstr_names1, i, mkChar(cSTR1[i]));
+  }
+  namesgets(ret_str1, cstr_names1);
+
+  // create vector of output period constants
+  PROTECT(ret_str2 = allocVector(STRSXP, SW_OUTNPERIODS));
+  PROTECT(cstr_names2 = allocVector(STRSXP, SW_OUTNPERIODS));
+  for (i = 0; i < SW_OUTNPERIODS; i++) {
+    SET_STRING_ELT(ret_str2, i, mkChar(vSTR2[i]));
+    SET_STRING_ELT(cstr_names2, i, mkChar(cSTR2[i]));
+  }
+  namesgets(ret_str2, cstr_names2);
+
+  // create vector of output summary constants
+  PROTECT(ret_str3 = allocVector(STRSXP, SW_NSUMTYPES));
+  PROTECT(cstr_names3 = allocVector(STRSXP, SW_NSUMTYPES));
+  for (i = 0; i < SW_NSUMTYPES; i++) {
+    SET_STRING_ELT(ret_str3, i, mkChar(vSTR3[i]));
+    SET_STRING_ELT(cstr_names3, i, mkChar(cSTR3[i]));
+  }
+  namesgets(ret_str3, cstr_names3);
+
+  // combine vectors into a list and return
+  PROTECT(ret = allocVector(VECSXP, 4));
+  PROTECT(cret_names = allocVector(STRSXP, 4));
+  for (i = 0; i < 4; i++)
+    SET_STRING_ELT(cret_names, i, mkChar(cret[i]));
+  namesgets(ret, cret_names);
+  SET_VECTOR_ELT(ret, 0, ret_int);
+  SET_VECTOR_ELT(ret, 1, ret_str1);
+  SET_VECTOR_ELT(ret, 2, ret_str2);
+  SET_VECTOR_ELT(ret, 3, ret_str3);
+
+  UNPROTECT(10);
+
+  return ret;
+}
+
 
 /* Experience has shown that generating the Output Data structure in R is slow compared to C
  * This will generate the OUTPUT data Structure and Names*/

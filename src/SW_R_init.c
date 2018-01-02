@@ -10,12 +10,14 @@ extern SEXP start(SEXP, SEXP, SEXP, SEXP);
 extern SEXP tempError();
 extern SEXP onGetInputDataFromFiles(SEXP);
 extern SEXP onGetOutput(SEXP);
+extern SEXP sw_consts();
 
 static const R_CallMethodDef CallEntries[] = {
   {"start",                   (DL_FUNC) &start,                   4},
   {"tempError",               (DL_FUNC) &tempError,               0},
   {"onGetInputDataFromFiles", (DL_FUNC) &onGetInputDataFromFiles, 1},
   {"onGetOutput",             (DL_FUNC) &onGetOutput,             1},
+  {"sw_consts",               (DL_FUNC) &sw_consts,               0},
   {NULL, NULL, 0}
 };
 

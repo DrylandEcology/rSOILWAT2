@@ -17,6 +17,21 @@
 ###############################################################################
 
 
+sw_args <- function(dir, files.in, echo, quiet) {
+  input <- c("SOILWAT2")
+
+  if (dir != "")
+    input <- c(input, "-d", dir)
+  if (files.in != "")
+    input <- c(input, "-f", files.in)
+  if (echo)
+    input <- c(input, "-e")
+  if (quiet)
+    input <- c(input, "-q")
+
+  input
+}
+
 
 
 #' Execute a SOILWAT simulation run
@@ -169,15 +184,8 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
   dir_prev <- getwd()
   on.exit(setwd(dir_prev), add = TRUE)
 
-  input <- c("sw_v27")
-  if (dir != "")
-    input <- c(input, "-d", dir)
-  if (files.in != "")
-    input <- c(input, "-f", files.in)
-  if (echo)
-    input <- c(input, "-e")
-  if (quiet)
-    input <- c(input, "-q")
+  input <- sw_args(dir, files.in, echo, quiet)
+
   if (is.null(inputData)) {
     inputData <- sw_inputDataFromFiles(dir = dir, files.in = files.in)
   }
@@ -187,7 +195,8 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
   if (.Call(C_tempError)) {
     # Error during soil temperature calculations
     # Re-initialize soil temperature output to 0
-    tempd <- slot(res, "SOILTEMP")
+    st_name <- kSOILWAT2()[["OutKeys"]][["SW_SOILTEMP"]]
+    tempd <- slot(res, st_name)
 
     for (k in c("Day", "Week", "Month", "Year")) {
       temp <- slot(tempd, k)
@@ -199,7 +208,7 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
       }
     }
 
-    slot(res, "SOILTEMP") <- tempd
+    slot(res, st_name) <- tempd
   }
 
   res
@@ -267,27 +276,16 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
 #'
 #'
 #' @export
-sw_inputDataFromFiles <- function(dir="", files.in="files_v30.in") {
+sw_inputDataFromFiles <- function(dir = "", files.in = "files.in") {
 
   dir_prev <- getwd()
   on.exit(setwd(dir_prev), add = TRUE)
 
-	echo=FALSE
-	quiet=FALSE
+  input <- sw_args(dir, files.in, echo = FALSE, quiet = FALSE)
 
-	input <- c("sw_v27")
-	if(dir!="")
-		input<-c(input,"-d", dir)
-	if(files.in!="")
-		input<-c(input,"-f", files.in)
-	if(echo)
-		input<-c(input,"-e")
-	if(quiet)
-		input<-c(input,"-q")
-	data <- .Call(C_onGetInputDataFromFiles, input)
-
-	return(data)
+  .Call(C_onGetInputDataFromFiles, input)
 }
+
 
 #' Return output data
 #' @export
@@ -374,4 +372,10 @@ sw_inputData <- function() {
 #' @export
 has_soilTemp_failed <- function() {
   .Call(C_tempError)
+}
+
+
+#' Access C-level constants
+kSOILWAT2 <- function() {
+  .Call(C_sw_consts)
 }

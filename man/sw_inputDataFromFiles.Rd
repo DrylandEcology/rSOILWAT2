@@ -4,7 +4,7 @@
 \alias{sw_inputDataFromFiles}
 \title{rSOILWAT2 sw_inputDataFromFiles}
 \usage{
-sw_inputDataFromFiles(dir = "", files.in = "files_v30.in")
+sw_inputDataFromFiles(dir = "", files.in = "files.in")
 }
 \arguments{
 \item{dir}{String. The path to the Project Directory. Use with files.in}
