@@ -20,6 +20,6 @@ weatherData
 }
 \description{
 A dataset containing complete daily weather values for maximum and minimum air temperature
- and precipitation for 62 years from 1949 to 2010 for a unspecified location.
+ and precipitation for 62 years from 1949 to 2010 for an unspecified location.
 }
 \keyword{datasets}

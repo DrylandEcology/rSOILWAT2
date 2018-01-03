@@ -97,6 +97,12 @@ for (it in seq_along(tests)) {
 
 
 #-----------------------
+#--- USE DEFAULT EXTDATA EXAMPLE AS PACKAGE DATA
+inputData <- sw_inputDataFromFiles(file.path(dir_in, examples[1]), files.in = "files.in")
+devtools::use_data(inputData, internal = FALSE, overwrite = TRUE)
+
+
+#-----------------------
 #--- DELETE ALL BUT DEFAULT EXAMPLE FROM PACKAGE (to minimize space)
 for (it in seq_along(tests)[-1]) {
   unlink(file.path(dir_in, examples[it]), recursive = TRUE)
