@@ -36,23 +36,22 @@ swCloud_validity<-function(object){
 	TRUE
 }
 setValidity("swCloud",swCloud_validity)
-setMethod(f="initialize",signature="swCloud",definition=function(.Object,Cloud=NULL){
-			if(is.null(Cloud))
-				Cloud=matrix(data=c(71,61,61,51,41,31,23,23,31,41,61,61,1.3,2.9,3.3,3.8,3.8,3.8,3.3,3.3,2.9,1.3,1.3,1.3,61,61,61,51,51,51,41,41,51,51,61,61,1,1,1,1,1,1,1,1,1,1,1,1,213.7,241.6,261,308,398.1,464.5,0,0,0,140,161.6,185.1),nrow=5,ncol=12,byrow=T)
-			colnames(Cloud)<-c("January","February","March","April","May","June","July","August","September","October","November","December")
-			rownames(Cloud)<-c("SkyCoverPCT","WindSpeed_m/s","HumidityPCT","Transmissivity","SnowDensity_kg/m^3")
-			.Object@Cloud<-Cloud
-			validObject(.Object)
-			return(.Object)
-		})
-setMethod(f="swClear",
-		signature="swCloud",
-		definition=function(object) {
-			object@Cloud=matrix(data=NA,nrow=5,ncol=12,byrow=T)
-			colnames(object@Cloud)<-c("January","February","March","April","May","June","July","August","September","October","November","December")
-			rownames(object@Cloud)<-c("SkyCoverPCT","WindSpeed_m/s","HumidityPCT","Transmissivity","SnowDensity_kg/m^3")
-			return(object)
-		})
+
+setMethod("initialize", signature = "swCloud", function(.Object, ...) {
+  def <- slot(inputData, "cloud")
+
+  # We don't set values for slot `Cloud`; this is to prevent simulation runs with
+  # accidentally incorrect values
+  temp <- def@Cloud
+  temp[] <- NA_real_
+  .Object@Cloud <- temp
+
+  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  validObject(.Object)
+  .Object
+})
+
+
 
 setMethod("get_swCloud","swCloud",function(object) {return(object)})
 setMethod("swCloud_SkyCover","swCloud",function(object) {return(object@Cloud[1,])})

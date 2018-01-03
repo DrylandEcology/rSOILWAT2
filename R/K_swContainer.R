@@ -32,23 +32,6 @@ setValidity("swInputData", function(object){
 	TRUE
 })
 
-setMethod(f="swClear",
-		signature="swInputData",
-		definition=function(object) {
-			object@files=swClear(object@files)
-			object@years=swClear(object@years)
-			object@cloud=swClear(object@cloud)
-			object@weather=swClear(object@weather)
-			object@weatherHistory=list()
-			object@prod=swClear(object@prod)
-			object@site=swClear(object@site)
-			object@estab=swClear(object@estab)
-			object@carbon=swClear(object@carbon)
-			object@output=swClear(object@output)
-			object@swc=swClear(object@swc)
-			object@log=swClear(object@log)
-			return(object)
-		})
 
 setMethod("get_swFiles", "swInputData", function(object) object@files)
 setMethod("swFiles_ProjDir", "swInputData", function(object) object@files@ProjDir)

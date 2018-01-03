@@ -44,21 +44,25 @@ setValidity("swOUT_key", function(object) {
   TRUE
 })
 
-setMethod(f="swClear",
-		signature="swOUT_key",
-		definition=function(object) {
-			object@mykey=integer(28)
-			object@myobj=integer(28)
-			object@period=integer(28)
-			object@sumtype=integer(28)
-			object@use=logical(28)
-			object@first=integer(28)
-			object@last=integer(28)
-			object@first_orig=integer(28)
-			object@last_orig=integer(28)
-			object@outfile=character(28)
-			return(object)
-		})
+setMethod("initialize", signature = "swOUT_key", function(.Object, ...) {
+  def <- slot(inputData, "output")
+
+  .Object@mykey <- def@mykey
+  .Object@myobj <- def@myobj
+  .Object@period <- def@period
+  .Object@sumtype <- def@sumtype
+  .Object@use <- def@use
+  .Object@first <- def@first
+  .Object@last <- def@last
+  .Object@first_orig <- def@first_orig
+  .Object@last_orig <- def@last_orig
+  .Object@outfile <- def@outfile
+
+  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  validObject(.Object)
+  .Object
+})
+
 
 ###########################OUTSETUP.IN########################################
 
@@ -76,33 +80,19 @@ swOUT_validity<-function(object){
 }
 setValidity("swOUT", swOUT_validity)
 
-setMethod("initialize","swOUT",function(.Object,outputSeparator="\t",timePeriods=as.integer(c(0:3)), useTimeStep=TRUE){
-			.Object@outputSeparator=outputSeparator
-			.Object@timePeriods=timePeriods
-			.Object@useTimeStep=useTimeStep
-			validObject(.Object)
-			return(.Object)
-		})
 
+setMethod("initialize", signature = "swOUT", function(.Object, ...) {
+  def <- slot(inputData, "output")
 
-setMethod(f="swClear",
-		signature="swOUT",
-		definition=function(object) {
-			object@outputSeparator="\t"
-			object@timePeriods=integer(4)
-			object@useTimeStep=TRUE
-			object@mykey=integer(28)
-			object@myobj=integer(28)
-			object@period=integer(28)
-			object@sumtype=integer(28)
-			object@use=logical(28)
-			object@first=integer(28)
-			object@last=integer(28)
-			object@first_orig=integer(28)
-			object@last_orig=integer(28)
-			object@outfile=character(28)
-			return(object)
-		})
+  .Object@outputSeparator <- def@outputSeparator
+  .Object@timePeriods <- def@timePeriods
+  .Object@useTimeStep <- def@useTimeStep
+
+  .Object <- callNextMethod(.Object, ...)
+  validObject(.Object)
+  .Object
+})
+
 
 setMethod("get_swOUT", "swOUT", function(object) {return(object)})
 setMethod("swOUT_TimeStep","swOUT",function(object) {return(object@timePeriods)})

@@ -6,6 +6,7 @@
  */
 
 #include "SOILWAT2/generic.h"
+#include "SOILWAT2/Times.h"
 #include "SOILWAT2/SW_Defines.h"
 
 #include "SOILWAT2/SW_Files.h"
@@ -472,7 +473,7 @@ SEXP onGetOutput(SEXP inputData) {
 		swOutput_KEY_LYRDRAIN, swOutput_KEY_HYDRED, swOutput_KEY_ET, swOutput_KEY_AET, swOutput_KEY_PET, swOutput_KEY_WETDAY, swOutput_KEY_SNOWPACK, swOutput_KEY_DEEPSWC,
 		swOutput_KEY_SOILTEMP, swOutput_KEY_ALLVEG, swOutput_KEY_ESTABL, swOutput_KEY_CO2EFFECTS;
 	char *cSWoutput_KEY_Titles[] = {"","temp_air","precip","infiltration","runoff","","vwc_bulk","vwc_matric","swc_bulk","swa_bulk","swa_matric","swp_matric","surface_water","transp","evap_soil","evap_surface",
-		"interception","percolation","hydred","","aet","pet","wetdays","snowpack","deep_drain","temp_soil","","estabs", "co2_effects"};
+		"interception","percolation","hydred","","aet","pet","wetdays","snowpack","deep_drain","temp_soil","","estabs", "vegetation"};
 
 	SEXP Periods, TimeSteps;
 	SEXP r_dy_nrow, r_wk_nrow, r_mo_nrow, r_yr_nrow;
@@ -603,8 +604,8 @@ SEXP onGetOutput(SEXP inputData) {
 	//tVegEstabCount = SW_VegEstab.count;
 
 	yr_nrow = tYears * pYearUse;
-	mo_nrow = tYears * 12 * pMonthUse;
-	wk_nrow = tYears * 53 * pWeekUse;
+	mo_nrow = tYears * MAX_MONTHS * pMonthUse;
+	wk_nrow = tYears * MAX_WEEKS * pWeekUse;
 	if (pDayUse == 1) {
 		dy_nrow = 0;
 		for (i = INTEGER(GET_SLOT(GET_SLOT(inputData, install("years")), install("StartYear")))[0]; i <= INTEGER(GET_SLOT(GET_SLOT(inputData, install("years")), install("EndYear")))[0]; i++) {

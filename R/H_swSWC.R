@@ -34,6 +34,30 @@ setMethod(f="swClear",
 			return(object)
 		})
 
+setMethod("initialize", signature = "swSWC_hist", function(.Object, ..., year = 0L,
+  data = NULL) {
+  # We don't set values; this is to prevent simulation runs with
+  # accidentally incorrect values
+
+  # We have to explicitly give column names (as defined in `onGet_SW_SWC_hist`)
+  # because they are not read in by C code if the historical soil moisture data are not
+  # provided as input
+  ctemp <- c("doy", "lyr", "swc", "st_err")
+  if (is.null(data)) {
+    data <- matrix(NA_real_, nrow = 366, ncol = length(ctemp))
+    data[, "doy"] <- 1:366
+  }
+  colnames(data) <- ctemp
+  .Object@data <- data
+
+  .Object@year <- as.integer(year)
+
+  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  validObject(.Object)
+  .Object
+})
+
+
 
 setMethod("swReadLines", signature=c(object="swSWC_hist",file="character"), definition=function(object,file) {
 			object@year = as.integer(strsplit(x=file,split=".",fixed=TRUE)[[1]][2])
@@ -55,16 +79,22 @@ setMethod("swReadLines", signature=c(object="swSWC_hist",file="character"), defi
 setClass("swSWC", slot = c(UseSWCHistoricData = "logical", DataFilePrefix = "character",
   FirstYear = "integer", Method = "integer", History = "list"))
 
-setMethod(f = "swClear",
-    signature = "swSWC",
-    definition = function(object) {
-      object@UseSWCHistoricData = logical(1)
-      object@DataFilePrefix = character(1)
-      object@FirstYear = integer(1)
-      object@Method = integer(1)
-      object@History = list(swClear(new("swSWC_hist")))
-      return(object)
-    })
+setMethod("initialize", signature = "swSWC", function(.Object, ...) {
+  def <- slot(inputData, "swc")
+
+  # We don't set values for slot `History`; this is to prevent simulation runs with
+  # accidentally incorrect values
+  .Object@History <- list()
+
+  .Object@UseSWCHistoricData <- def@UseSWCHistoricData
+  .Object@DataFilePrefix <- def@DataFilePrefix
+  .Object@FirstYear <- def@FirstYear
+  .Object@Method <- def@Method
+
+  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  validObject(.Object)
+  .Object
+})
 
 setMethod("swSWC_use","swSWC",function(object) {return(object@UseSWCHistoricData)})
 setMethod("swSWC_prefix","swSWC",function(object) {return(object@DataFilePrefix)})
@@ -78,7 +108,7 @@ setMethod("swSWC_HistoricData","swSWC",function(object, year) {
 				return(NULL)
 			}
 			if(object@History[[index]]@year != as.integer(year))
-				print("Somethings wrong with the weather data.")
+				print("Somethings wrong with the historical soil moisture data.")
 			return(object@History[[index]])
 		})
 

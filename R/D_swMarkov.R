@@ -27,13 +27,29 @@
 #' @export
 setClass("swMarkov", slots = c(Prob = "matrix", Conv = "matrix"))
 
-setMethod(f="swClear",
-		signature="swMarkov",
-		definition=function(object) {
-			object@Prob=matrix(numeric(0),0,0)
-			object@Conv=matrix(numeric(0),0,0)
-			return(object)
-		})
+setMethod("initialize", signature = "swMarkov", function(.Object, ...) {
+  def <- slot(inputData, "markov")
+
+  # We don't set values for slots `Prob` and `Conv`; this is to prevent simulation runs with
+  # accidentally incorrect values
+
+  # We have to explicitly give column names (as defined in `onGet_MKV_prob` and
+  # `onGet_MKV_conv`) because they are not read in by C code if the weather generator is
+  # turned off
+  ctemp <- c("day", "wet", "dry", "avg_ppt", "std_ppt")
+  temp <- matrix(NA_real_, nrow = 366, ncol = length(ctemp), dimnames = list(NULL, ctemp))
+  temp[, "day"] <- 1:366
+  .Object@Prob <- temp
+
+  ctemp <- c("week", "t1", "t2", "t3", "t4", "t5", "t6")
+  temp <- matrix(NA_real_, nrow = 53, ncol = length(ctemp), dimnames = list(NULL, ctemp))
+  temp[, "week"] <- 1:53
+  .Object@Conv <- temp
+
+  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  validObject(.Object)
+  .Object
+})
 
 
 setMethod("swReadLines", signature=c(object="swMarkov",file="character"), definition=function(object,file) {

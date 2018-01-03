@@ -34,33 +34,21 @@ swSoilLayers_validity<-function(object){
 	TRUE
 }
 setValidity("swSoils",swSoilLayers_validity)
-setMethod(f="initialize",signature="swSoils",definition=function(.Object,Layers=NULL){
-			if(is.null(Layers))
-				Layers<-matrix(data=c(5,10,20,30,40,60,80,85,				#depth
-								1.43,1.41,1.39,1.39,1.38,1.15,1.31,1.31,				#bulkden
-								0,0,0,0,0,0,0,0,										#gravel content
-								.8122,.1534,.0344,0,0,0,0,0,							#EvapBarSoil
-								.0333,.0333,.0667,.0667,.0667,.1333,.1333,.1333,		#tran grass
-								.1336,.0936,.1762,.1746,.1098,.1787,.1011,.1011,		#tran shrub
-								.0333,.0333,.0667,.0667,.0667,.1333,.1333,.1333,		#tran tree
-								.1336,.0936,.1762,.1746,.1098,.1787,.1011,.1011,		#trco forb
-								.51,.44,.35,.32,.31,.32,.57,.57,						#sand
-								.15,.26,.41,.45,.47,.47,.28,.28,						#clay
-								0,0,0,0,0,0,0,0,										#imperm
-								0.1860,0.3719,0.7438,1.1158,1.4877,2.2315,2.9754,2.9754), nrow=8,ncol=12)
-			colnames(Layers)<-c("depth_cm","bulkDensity_g/cm^3","gravel_content","EvapBareSoil_frac","transpGrass_frac","transpShrub_frac","transpTree_frac","transpForb_frac","sand_frac","clay_frac","impermeability_frac","soilTemp_c")
-			.Object@Layers<-Layers
-			validObject(.Object)
-			return(.Object)
-		})
-setMethod(f="swClear",
-		signature="swSoils",
-		definition=function(object) {
-			Layers<-matrix(data=NA, nrow=8,ncol=12)
-			colnames(Layers)<-c("depth_cm","bulkDensity_g/cm^3","gravel_content","EvapBareSoil_frac","transpGrass_frac","transpShrub_frac","transpTree_frac","transpForb_frac","sand_frac","clay_frac","impermeability_frac","soilTemp_c")
-			object@Layers<-Layers
-			return(object)
-		})
+
+setMethod("initialize", signature = "swSoils", function(.Object, ...) {
+  def <- slot(inputData, "soils")
+
+  # We don't set values for slot `Layers`; this is to prevent simulation runs with
+  # accidentally incorrect values
+  temp <- def@Layers
+  temp[] <- NA_real_
+  .Object@Layers <- temp[1, ]
+
+  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  validObject(.Object)
+  .Object
+})
+
 
 setMethod("swReadLines", signature=c(object="swSoils",file="character"), definition=function(object,file) {
 			infiletext <- readLines(con = file)

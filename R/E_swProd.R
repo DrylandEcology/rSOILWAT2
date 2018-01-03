@@ -72,104 +72,39 @@ swProd_validity<-function(object){
     return("@CO2Coefficients dim of c(4,4) needed.")
 }
 setValidity("swProd",swProd_validity)
-setMethod(f="initialize",signature="swProd",definition=function(.Object,Composition=c(0,0,0,1,0),Albedo=c(0.167,0.143,0.106,0.167,0.15),Cover_stcr=c(3.0,2.22,5.0,3.0),CanopyHeight=NULL,VegetationInterceptionParameters=NULL,LitterInterceptionParameters=NULL, EsTpartitioning_param=c(1,1,0.41,1),Es_param_limit=c(999,999,2099,999),Shade=NULL,
-				HydraulicRedistribution_use=c(TRUE,TRUE,TRUE,TRUE),HydraulicRedistribution=NULL,CriticalSoilWaterPotential=c(-3.5,-3.9,-2.0,-2.0),CO2Coefficients=NULL,MonthlyProductionValues_grass=NULL,MonthlyProductionValues_shrub=NULL,MonthlyProductionValues_tree=NULL,MonthlyProductionValues_forb=NULL) {
 
-			if(is.null(CanopyHeight))
-				CanopyHeight<-matrix(data=c(300,29.5,85,0.002,0, 0,5,100,0.003,50, 0,5,3000,0.00008,1200, 300,29.5,85,0.002,0),nrow=5,ncol=4,dimnames=list(c("xinflec","yinflec","range","slope","height_cm"),c("Grasses","Shrubs","Trees","Forbs")))
-			if(is.null(VegetationInterceptionParameters))
-				VegetationInterceptionParameters=matrix(data=c(0.0182,0.0065,0.0019,0.0054, 0.,0.0026,0.,0.0033, 0.00461,0.01405,0.0383,0.0337, 0.0182,0.0065,0.0019,0.0054),nrow=4,ncol=4,dimnames=list(c("a","b","c","d"),c("Grasses","Shrubs","Trees","Forbs")))
-			if(is.null(LitterInterceptionParameters))
-				LitterInterceptionParameters=matrix(data=c(0.0151,0.00005,0.0116,0.00002, 0.0151,0.00005,0.0116,0.00002, 0.0151,0.00005,0.0116,0.00002, 0.0151,0.00005,0.0116,0.00002),nrow=4,ncol=4,dimnames=list(c("a","b","c","d"),c("Grasses","Shrubs","Trees","Forbs")))
-			if(is.null(Shade))
-				Shade<-matrix(data=c(0.3,150,300,12,34,0.002,  0.3,150,300,12,34,0.002,  0.3,150,0,0,2,0.0002, 0.3,150,300,12,34,0.002),nrow=6,ncol=4,dimnames=list(c("scale","maxDeadBiomass","tanfuncXinflec","yinflec","range","slope"),c("Grasses","Shrubs","Trees","Forbs")))
-			if(is.null(HydraulicRedistribution))
-				HydraulicRedistribution<-matrix(data=c(-0.2328,10,3.22, -0.2328,10,3.22, -0.2328,10,3.22, -0.2328,10,3.22),nrow=3,ncol=4,dimnames=list(c("MaxCondRoot","SoilWaterPotential50","ShapeCond"),c("Grasses","Shrubs","Trees","Forbs")))
-			if(is.null(CO2Coefficients))
-			  CO2Coefficients=matrix(data=c(0.127, 0.127, 0.127, 0.127, 0.3501, 0.3501, 0.3501, 0.3501, 22.464, 22.464, 22.464, 22.464, -0.531, -0.531, -0.531, -0.531), nrow=4, ncol=4, dimnames=list(c("BioCoeff1", "BioCoeff2", "WUECoeff1", "WUECoeff2"), c("Grasses", "Shrubs", "Trees", "Forbs")))
-			if(is.null(MonthlyProductionValues_grass))
-				MonthlyProductionValues_grass<-matrix(data=c(75,80,85,90,50,50,50,55,60,65,70,75,150,150,150,170,190,220,250,220,190,180,170,160,0.0,0.0,0.10,0.20,0.40,0.60,0.40,0.60,0.40,0.20,0.10,0.0,300,300,300,300,300,300,300,300,300,300,300,300),nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
-			if(is.null(MonthlyProductionValues_shrub))
-				MonthlyProductionValues_shrub<-matrix(data=c(85.40,88.20,95.30,100.50,166.40,186.00,177.10,212.20,157.40,124.90,110.40,104.30,210.00,212.00,228.00,272.00,400.00,404.00,381.00,352.00,286.00,235.00,218.00,214.00,0.06,0.08,0.20,0.33,0.57,0.55,0.50,0.46,0.32,0.15,0.08,0.06,372,372,372,372,372,372,372,372,372,372,372,372),nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
-			if(is.null(MonthlyProductionValues_tree))
-				MonthlyProductionValues_tree<-matrix(data=c(2000.000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,15000,15000,15000,15000,15000,15000,15000,15000,15000,15000,15000,15000,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,500,500,500,500,500,500,500,500,500,500,500,500),nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
-			if(is.null(MonthlyProductionValues_forb))
-				MonthlyProductionValues_forb<-matrix(data=c(85.40,88.20,95.30,100.50,166.40,186.00,177.10,212.20,157.40,124.90,110.40,104.30,210.00,212.00,228.00,272.00,400.00,404.00,381.00,352.00,286.00,235.00,218.00,214.00,0.06,0.08,0.20,0.33,0.57,0.55,0.50,0.46,0.32,0.15,0.08,0.06,372,372,372,372,372,372,372,372,372,372,372,372),nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
+setMethod("initialize", signature = "swProd", function(.Object, ...) {
+  def <- slot(inputData, "prod")
 
-			names(Composition) <- c("Grasses", "Shrubs", "Trees", "Forbs", "BareGround");
-			names(Albedo) <- c("Grasses", "Shrubs", "Trees","Forbs","BareGround");
-			names(Cover_stcr) <- c("Grasses", "Shrubs", "Trees","Forbs");
-			names(EsTpartitioning_param) <- c("Grasses", "Shrubs", "Trees","Forbs");
-			names(Es_param_limit) <- c("Grasses", "Shrubs", "Trees","Forbs");
-			names(HydraulicRedistribution_use) <- c("Grasses", "Shrubs", "Trees","Forbs");
-			names(CriticalSoilWaterPotential) <- c("Grasses", "Shrubs", "Trees","Forbs");
+  # We don't set values for slot `Composition`; this is to prevent simulation runs with
+  # accidentally incorrect values
+  temp <- def@Composition
+  temp[] <- NA_real_
+  .Object@Composition <- temp
 
-			.Object@Composition=Composition
-			.Object@Albedo=Albedo
-			.Object@Cover_stcr=Cover_stcr
-			.Object@CanopyHeight=CanopyHeight
-			.Object@VegetationInterceptionParameters=VegetationInterceptionParameters
-			.Object@LitterInterceptionParameters=LitterInterceptionParameters
-			.Object@EsTpartitioning_param=EsTpartitioning_param
-			.Object@Es_param_limit=Es_param_limit
-			.Object@Shade=Shade
-			.Object@HydraulicRedistribution_use=HydraulicRedistribution_use
-			.Object@HydraulicRedistribution=HydraulicRedistribution
-			.Object@CriticalSoilWaterPotential=CriticalSoilWaterPotential
-			.Object@MonthlyProductionValues_grass=MonthlyProductionValues_grass
-			.Object@MonthlyProductionValues_shrub=MonthlyProductionValues_shrub
-			.Object@MonthlyProductionValues_tree=MonthlyProductionValues_tree
-			.Object@CO2Coefficients
+  .Object@Albedo <- def@Albedo
+  .Object@Cover_stcr <- def@Cover_stcr
+  .Object@CanopyHeight <- def@CanopyHeight
+  .Object@VegetationInterceptionParameters <- def@VegetationInterceptionParameters
+  .Object@LitterInterceptionParameters <- def@LitterInterceptionParameters
+  .Object@EsTpartitioning_param <- def@EsTpartitioning_param
+  .Object@Es_param_limit <- def@Es_param_limit
+  .Object@Shade <- def@Shade
+  .Object@HydraulicRedistribution_use <- def@HydraulicRedistribution_use
+  .Object@HydraulicRedistribution <- def@HydraulicRedistribution
+  .Object@CriticalSoilWaterPotential <- def@CriticalSoilWaterPotential
+  .Object@CO2Coefficients <- def@CO2Coefficients
+  .Object@MonthlyProductionValues_grass <- def@MonthlyProductionValues_grass
+  .Object@MonthlyProductionValues_shrub <- def@MonthlyProductionValues_shrub
+  .Object@MonthlyProductionValues_tree <- def@MonthlyProductionValues_tree
+  .Object@MonthlyProductionValues_forb <- def@MonthlyProductionValues_forb
 
-			validObject(.Object)
-			return(.Object)
-		})
-setMethod(f="swClear",
-		signature="swProd",
-		definition=function(object) {
-			CanopyHeight<-matrix(data=NA,nrow=5,ncol=4,dimnames=list(c("xinflec","yinflec","range","slope","height_cm"),c("Grasses","Shrubs","Trees","Forbs")))
-			VegetationInterceptionParameters<-matrix(data=NA,nrow=4,ncol=4,dimnames=list(c("a","b","c","d"),c("Grasses","Shrubs","Trees","Forbs")))
-			LitterInterceptionParameters<-matrix(data=NA,nrow=4,ncol=4,dimnames=list(c("a","b","c","d"),c("Grasses","Shrubs","Trees","Forbs")))
-			Shade<-matrix(data=NA,nrow=6,ncol=4,dimnames=list(c("scale","maxDeadBiomass","tanfuncXinflec","yinflec","range","slope"),c("Grasses","Shrubs","Trees","Forbs")))
-			HydraulicRedistribution<-matrix(data=NA,nrow=3,ncol=4,dimnames=list(c("MaxCondRoot","SoilWaterPotential50","ShapeCond"),c("Grasses","Shrubs","Trees","Forbs")))
-			CO2Coefficients<-matrix(data=NA,nrow=4,ncol=4,dimnames=list(c("BioCoeff1", "BioCoeff2", "WUECoeff1", "WUECoeff2"), c("Grasses", "Shrubs", "Trees", "Forbs")))
-			MonthlyProductionValues_grass<-matrix(data=NA,nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
-			MonthlyProductionValues_shrub<-matrix(data=NA,nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
-			MonthlyProductionValues_tree<-matrix(data=NA,nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
-			MonthlyProductionValues_forb<-matrix(data=NA,nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv")))
-			Composition=numeric(5)
-			Albedo=numeric(5)
-			Cover_stcr=numeric(4)
-			EsTpartitioning_param=numeric(4)
-			Es_param_limit=numeric(4)
-			HydraulicRedistribution_use=logical(4)
-			CriticalSoilWaterPotential=numeric(4)
-			names(Composition) <- c("Grasses", "Shrubs", "Trees", "Forbs", "BareGround");
-			names(Albedo) <- c("Grasses", "Shrubs", "Trees","Forbs","BareGround");
-			names(Cover_stcr) <- c("Grasses", "Shrubs", "Trees","Forbs");
-			names(EsTpartitioning_param) <- c("Grasses", "Shrubs", "Trees","Forbs");
-			names(Es_param_limit) <- c("Grasses", "Shrubs", "Trees","Forbs");
-			names(HydraulicRedistribution_use) <- c("Grasses", "Shrubs", "Trees","Forbs");
-			names(CriticalSoilWaterPotential) <- c("Grasses", "Shrubs", "Trees","Forbs");
-			object@Composition=Composition
-			object@Albedo=Albedo
-			object@Cover_stcr=Cover_stcr
-			object@CanopyHeight=CanopyHeight
-			object@VegetationInterceptionParameters=VegetationInterceptionParameters
-			object@LitterInterceptionParameters=LitterInterceptionParameters
-			object@EsTpartitioning_param=EsTpartitioning_param
-			object@Es_param_limit=Es_param_limit
-			object@Shade=Shade
-			object@HydraulicRedistribution_use=HydraulicRedistribution_use
-			object@HydraulicRedistribution=HydraulicRedistribution
-			object@CriticalSoilWaterPotential=CriticalSoilWaterPotential
-			object@CO2Coefficients
-			object@MonthlyProductionValues_grass=MonthlyProductionValues_grass
-			object@MonthlyProductionValues_shrub=MonthlyProductionValues_shrub
-			object@MonthlyProductionValues_tree=MonthlyProductionValues_tree
-			object@MonthlyProductionValues_forb=MonthlyProductionValues_forb
-			return(object)
-		})
+  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  validObject(.Object)
+  .Object
+})
+
+
 setMethod("swProd_Composition", "swProd", function(object) {return(object@Composition)})
 setMethod("swProd_Albedo", "swProd", function(object) {return(object@Albedo)})
 setMethod("swProd_Cover_stcr", "swProd", function(object) {return(object@Cover_stcr)})

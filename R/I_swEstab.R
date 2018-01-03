@@ -45,27 +45,31 @@ setValidity("swEstabSpecies", function(object) {
   TRUE
 })
 
-setMethod(f="swClear",
-		signature="swEstabSpecies",
-		definition=function(object) {
-			object@fileName = character(0)
-			object@Name=character(0)
-			object@estab_lyrs = integer(0)
-			object@barsGERM = numeric(0)
-			object@barsESTAB = numeric(0)
-			object@min_pregerm_days = integer(0)
-			object@max_pregerm_days = integer(0)
-			object@min_wetdays_for_germ = integer(0)
-			object@max_drydays_postgerm = integer(0)
-			object@min_wetdays_for_estab = integer(0)
-			object@min_days_germ2estab = integer(0)
-			object@max_days_germ2estab = integer(0)
-			object@min_temp_germ = numeric(0)
-			object@max_temp_germ = numeric(0)
-			object@min_temp_estab = numeric(0)
-			object@max_temp_estab = numeric(0)
-			return(object)
-		})
+setMethod("initialize", signature = "swEstabSpecies", function(.Object, ...) {
+  def <- slot(inputData, "estab")
+
+  .Object@fileName <- def@fileName
+  .Object@Name <- def@Name
+  .Object@estab_lyrs <- def@estab_lyrs
+  .Object@barsGERM <- def@barsGERM
+  .Object@barsESTAB <- def@barsESTAB
+  .Object@min_pregerm_days <- def@min_pregerm_days
+  .Object@max_pregerm_days <- def@max_pregerm_days
+  .Object@min_wetdays_for_germ <- def@min_wetdays_for_germ
+  .Object@max_drydays_postgerm <- def@max_drydays_postgerm
+  .Object@min_wetdays_for_estab <- def@min_wetdays_for_estab
+  .Object@min_days_germ2estab <- def@min_days_germ2estab
+  .Object@max_days_germ2estab <- def@max_days_germ2estab
+  .Object@min_temp_germ <- def@min_temp_germ
+  .Object@max_temp_germ <- def@max_temp_germ
+  .Object@min_temp_estab <- def@min_temp_estab
+  .Object@max_temp_estab <- def@max_temp_estab
+
+  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  validObject(.Object)
+  .Object
+})
+
 
 setMethod("swReadLines", signature=c(object="swEstabSpecies",file="character"), definition=function(object,file) {
 			infiletext <- readLines(con = file)
@@ -93,28 +97,17 @@ setMethod("swReadLines", signature=c(object="swEstabSpecies",file="character"), 
 setClass("swEstab", slot = c(useEstab = "logical", count = "integer"),
   contains = "swEstabSpecies")
 
-setMethod(f="swClear",
-		signature="swEstab",
-		definition=function(object) {
-			object@useEstab = logical(1)
-			object@fileName = character(0)
-			object@Name = character(0)
-			object@estab_lyrs = integer(0)
-			object@barsGERM = numeric(0)
-			object@barsESTAB = numeric(0)
-			object@min_pregerm_days = integer(0)
-			object@max_pregerm_days = integer(0)
-			object@min_wetdays_for_germ = integer(0)
-			object@max_drydays_postgerm = integer(0)
-			object@min_wetdays_for_estab = integer(0)
-			object@min_days_germ2estab = integer(0)
-			object@max_days_germ2estab = integer(0)
-			object@min_temp_germ = integer(0)
-			object@max_temp_germ = numeric(0)
-			object@min_temp_estab = numeric(0)
-			object@max_temp_estab = numeric(0)
-			return(object)
-		})
+setMethod("initialize", signature = "swEstab", function(.Object, ...) {
+  def <- slot(inputData, "estab")
+
+  .Object@useEstab <- def@useEstab
+  .Object@count <- def@count
+
+  .Object <- callNextMethod(.Object, ...)
+  validObject(.Object)
+  .Object
+})
+
 setMethod("swEstab_useEstab", "swEstab", function(object) {return(object@useEstab)})
 setReplaceMethod(f="swEstab_useEstab", signature="swEstab", definition=function(object,value) {object@useEstab <- value; return(object)})
 

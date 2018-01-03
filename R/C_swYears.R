@@ -39,26 +39,28 @@ swYears_validity<-function(object){
 		return("@isNorthneedstobelength1.")
 	TRUE
 }
-setValidity("swYears",swYears_validity)
-setMethod("initialize","swYears",function(.Object,StartYear=as.integer(1982),EndYear=as.integer(1990),FDOFY=as.integer(1),EDOEY=as.integer(365),isNorth=TRUE){
-			.Object@StartYear=StartYear
-			.Object@EndYear=EndYear
-			.Object@FDOFY=FDOFY
-			.Object@EDOEY=EDOEY
-			.Object@isNorth=isNorth
-			validObject(.Object)
-			return(.Object)
-		})
-setMethod(f="swClear",
-		signature="swYears",
-		definition=function(object) {
-			object@StartYear=integer(1)
-			object@EndYear=integer(1)
-			object@FDOFY=integer(1)
-			object@EDOEY=integer(1)
-			object@isNorth=logical(1)
-			return(object)
-		})
+setValidity("swYears", swYears_validity)
+
+setMethod("initialize", signature = "swYears", function(.Object, ...) {
+  def <- slot(inputData, "years")
+
+  # We don't set values for slots `StartYear` and `EndYear`; this is to prevent simulation runs with
+  # accidentally incorrect values
+  .Object@StartYear <- NA_integer_
+  .Object@EndYear <- NA_integer_
+
+  .Object@FDOFY <- def@FDOFY
+  .Object@EDOEY <- def@EDOEY
+  .Object@isNorth <- def@isNorth
+
+  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  validObject(.Object)
+  .Object
+})
+
+
+
+
 setMethod("swYears_StartYear", "swYears", function(object) {return(object@StartYear)})
 setMethod("swYears_EndYear", "swYears", function(object) {return(object@EndYear)})
 setMethod("swYears_FDOFY", "swYears", function(object) {return(object@FDOFY)})

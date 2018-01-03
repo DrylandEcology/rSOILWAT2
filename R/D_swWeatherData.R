@@ -39,24 +39,27 @@ swWeatherData_validity<-function(object){
 	TRUE
 }
 setValidity("swWeatherData",swWeatherData_validity)
-setMethod(f="initialize",signature="swWeatherData",definition=function(.Object,year,data=NULL){
-			if(is.null(data))
-				data=matrix(data=c(1:366,rep(999,366*3)),nrow=366,ncol=4)
-			colnames(data)<-c("DOY","Tmax_C","Tmin_C","PPT_cm")
-			.Object@data<-data
-			.Object@year<-as.integer(year)
-			validObject(.Object)
-			return(.Object)
-		})
-setMethod(f="swClear",
-		signature="swWeatherData",
-		definition=function(object) {
-			object@data=matrix(data=c(1:366,rep(999,366*3)),nrow=366,ncol=4)
-			colnames(object@data)<-c("DOY","Tmax_C","Tmin_C","PPT_cm")
-			object@year=integer(1)
-			return(object)
-		})
 
+setMethod("initialize", signature = "swWeatherData", function(.Object, ...,
+  year = 0L, data = NULL) {
+
+  def <- slot(inputData, "weatherHistory")[[1]] # first year of weather data
+  # We don't set values for slots `year` and `data`; this is to prevent simulation runs with
+  # accidentally incorrect values
+
+  if (is.null(data)) {
+    data <- matrix(c(1:366, rep(kSOILWAT2()[["kINT"]][["SW_MISSING"]], 366 * 3)),
+      nrow = 366, ncol = 4)
+  }
+  colnames(data) <- colnames(slot(def, "data"))
+  .Object@data <- data
+
+  .Object@year <- as.integer(year)
+
+  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  validObject(.Object)
+  .Object
+})
 
 setMethod("swReadLines", signature=c(object="swWeatherData",file="character"), definition=function(object,file) {
 			object@year = as.integer(strsplit(x=basename(file),split=".",fixed=TRUE)[[1]][2])

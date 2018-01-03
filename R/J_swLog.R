@@ -36,3 +36,16 @@ setMethod(f="swClear",
 			return(object)
 		})
 
+setMethod("initialize", signature = "swLog", function(.Object, ...) {
+  def <- slot(inputData, "log")
+
+  # We don't set values for any slots; this is to prevent simulation runs with
+  # accidentally incorrect values
+  .Object@MaxLines <- 150L
+  .Object@LogData <- character(.Object@MaxLines)
+  .Object@UsedLines <- 1L
+
+  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  validObject(.Object)
+  .Object
+})

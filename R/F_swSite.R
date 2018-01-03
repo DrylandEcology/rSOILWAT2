@@ -101,63 +101,33 @@ setValidity("swSite", function(object) {
   val
 })
 
-setMethod(f = "initialize", signature = "swSite", definition = function(.Object,
-  SWClimits = c(-1, 15, 15), ModelFlags = c(FALSE, TRUE),
-  ModelCoefficients = c(1, 0.0, 0.0), SnowSimulationParameters = c(.61, 1.54, .1, 0, .27),
-  DrainageCoefficient = 0.02, EvaporationCoefficients = c(45, 0.1, 0.25, 0.5),
-  TranspirationCoefficients = c(45, 0.1, 0.50, 1.10),
-  IntrinsicSiteParams = c(0.681, 1651, 0, -1), SoilTemperatureFlag = FALSE,
-  SoilTemperatureConstants = c(300, 15, -4, 600, 0.00070, 0.00030, 0.18, 6.69, 15, 990),
-  TranspirationRegions = matrix(data = c(1, 2, 3, 6, 9, 11), nrow = 3, ncol = 2,
-  dimnames = list(NULL, c("ndx", "layer"))), ...) {
+setMethod(f = "initialize", signature = "swSite", function(.Object, ...) {
+  def <- slot(inputData, "site")
 
-  .Object <- callNextMethod(.Object, ...)
+  # We don't set values for slots `IntrinsicSiteParams` and `TranspirationRegions`; this is to
+  # prevent simulation runs with accidentally incorrect values
+  temp <- def@IntrinsicSiteParams
+  temp[c("Latitude", "Altitude")] <- NA_real_
+  .Object@IntrinsicSiteParams <- def@IntrinsicSiteParams
 
-  slot(.Object, "SWClimits") <- SWClimits
-  slot(.Object, "ModelFlags") <- ModelFlags
-  slot(.Object, "ModelCoefficients") <- ModelCoefficients
-  slot(.Object, "SnowSimulationParameters") <- SnowSimulationParameters
-  slot(.Object, "DrainageCoefficient") <- DrainageCoefficient
-  slot(.Object, "EvaporationCoefficients") <- EvaporationCoefficients
-  slot(.Object, "TranspirationCoefficients") <- TranspirationCoefficients
-  slot(.Object, "IntrinsicSiteParams") <- IntrinsicSiteParams
-  slot(.Object, "SoilTemperatureFlag") <- SoilTemperatureFlag
-  slot(.Object, "SoilTemperatureConstants") <- SoilTemperatureConstants
-  slot(.Object, "TranspirationRegions") <- TranspirationRegions
+  temp <- def@TranspirationRegions
+  temp[, "layer"] <- NA_integer_
+  .Object@TranspirationRegions <- def@TranspirationRegions
 
+  .Object@SWClimits <- def@SWClimits
+  .Object@ModelFlags <- def@ModelFlags
+  .Object@ModelCoefficients <- def@ModelCoefficients
+  .Object@SnowSimulationParameters <- def@SnowSimulationParameters
+  .Object@DrainageCoefficient <- def@DrainageCoefficient
+  .Object@EvaporationCoefficients <- def@EvaporationCoefficients
+  .Object@TranspirationCoefficients <- def@TranspirationCoefficients
+  .Object@SoilTemperatureFlag <- def@SoilTemperatureFlag
+  .Object@SoilTemperatureConstants <- def@SoilTemperatureConstants
+
+  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
   validObject(.Object)
-
-  # Use standardized names
-  colnames(slot(.Object, "TranspirationRegions")) <- c("ndx", "layer")
-  names(slot(.Object, "SWClimits")) <- c("swc_min", "swc_init", "swc_wet")
-  names(slot(.Object, "ModelFlags")) <- c("Reset", "DeepDrain")
-  names(slot(.Object, "ModelCoefficients")) <- c("PETmultiplier", "DailyRunoff", "DailyRunon")
-  names(slot(.Object, "SnowSimulationParameters")) <- c("TminAccu2", "TmaxCrit", "lambdaSnow",
-    "RmeltMin", "RmeltMax")
-  names(slot(.Object, "DrainageCoefficient")) <- c("SlowDrainCoefficientPerYear_cm/dy")
-  names(slot(.Object, "TranspirationCoefficients")) <-
-    names(slot(.Object, "EvaporationCoefficients")) <-
-    c("RateShift", "RateSlope", "InflectionPoint", "Range")
-  names(slot(.Object, "IntrinsicSiteParams")) <- c("Latitude", "Altitude", "Slope", "Aspect")
-  names(slot(.Object, "SoilTemperatureFlag")) <- c("CalculateSoilTemp")
-  names(slot(.Object, "SoilTemperatureConstants")) <- c("BiomassLimiter_g/m^2", "T1constant_a",
-    "T1constant_b", "T1constant_c", "cs_constant_SoilThermCondct", "cs_constant",
-    "sh_constant_SpecificHeatCapacity", "ConstMeanAirTemp", "deltaX_Param", "MaxDepth")
-
   .Object
 })
-
-setMethod(f = "swClear", signature = "swSite", definition = function(object) {
-  initialize(object,
-    SWClimits = rep(NA_real_, 3), ModelFlags = rep(NA, 2),
-    ModelCoefficients = rep(NA_real_, 3),
-    SnowSimulationParameters = rep(NA_real_, 5), DrainageCoefficient = NA_real_,
-    EvaporationCoefficients = rep(NA_real_, 4),
-    TranspirationCoefficients = rep(NA_real_, 4), IntrinsicSiteParams = rep(NA_real_, 4),
-    SoilTemperatureFlag = NA, SoilTemperatureConstants = rep(NA_real_, 10),
-    TranspirationRegions = matrix(data = NA_integer_, nrow = 3, ncol = 2))
-})
-
 
 
 setMethod("swSite_SWClimits", "swSite", function(object) slot(object, "SWClimits"))

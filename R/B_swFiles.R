@@ -27,38 +27,36 @@
 setClass("swFiles", slots = c(ProjDir = "character", InFiles = "character",
   WeatherPrefix = "character", OutputPrefix = "character"))
 
-swFiles_validity <- function(object){
-	if(length(object@ProjDir)!=1)
+swFiles_validity <- function(object) {
+  x <- slot(inputData, "files")
+
+	if (length(object@ProjDir) != 1)
 		return("ProjectFolder@ProjectFolderneedstobeoflengthone.")
-	if(length(object@InFiles)!=13)
-		return("InFiles@InFilesneedstobeoflength13.")
-	if(length(object@WeatherPrefix)!=1)
+	if (length(object@InFiles) != length(slot(x, "InFiles")))
+		return("InFiles@InFilesiswronglength.")
+	if (length(object@WeatherPrefix) != 1)
 		return("WeatherPrefix@WeatherPrefixneedstobeoflength1.")
-	if(length(object@OutputPrefix)!=1)
+	if (length(object@OutputPrefix) != 1)
 		return("OutputPrefix@OutputPrefixneedstobeoflength1.")
 	#ShouldwechecksizelimitretrictionsinC?
 	TRUE
 }
-setValidity("swFiles",swFiles_validity)
-setMethod("initialize","swFiles",function(.Object,ProjDir="",InFiles=c('files_v30.in','Input/years.in','Output/logfile.log','Input/siteparam_v26.in','Input/soils_v30.in','Input/weathsetup_v20.in','Input/mkv_prob.in','Input/mkv_covar.in','Input/cloud_v20.in','Input/sbe_prod_v31.in','Input/estab.in','Input/swcsetup.in','Input/outsetup_v30.in'),WeatherPrefix="Weather_Test/weath",OutputPrefix="Output/"){
-			names(InFiles) <- c("InputFilesForSimulation","Model_Years","Model_LogFile","Site_Params","Site_Soils","Weather_setup","Markov_precip_probs","Markov_covarianceTable","Weather_atmosphericParams","Vegetation_Productivity","Vegetation_Establishment","SWC_setup","Output_setup")
-			.Object@ProjDir=ProjDir
-			.Object@InFiles=InFiles
-			.Object@WeatherPrefix=WeatherPrefix
-			.Object@OutputPrefix=OutputPrefix
-			validObject(.Object)
-			return(.Object)
-		})
-setMethod(f="swClear",
-		signature="swFiles",
-		definition=function(object) {
-			object@ProjDir<-character(1)
-			object@InFiles<-character(13)
-			names(object@InFiles) <- c("InputFilesForSimulation","Model_Years","Model_LogFile","Site_Params","Site_Soils","Weather_setup","Markov_precip_probs","Markov_covarianceTable","Weather_atmosphericParams","Vegetation_Productivity","Vegetation_Establishment","SWC_setup","Output_setup")
-			object@WeatherPrefix<-character(1)
-			object@OutputPrefix<-character(1)
-			return(object)
-		})
+setValidity("swFiles", swFiles_validity)
+
+setMethod("initialize", signature = "swFiles", function(.Object, ...) {
+  def <- slot(inputData, "files")
+
+  .Object@ProjDir <- def@ProjDir
+  .Object@InFiles <- def@InFiles
+  .Object@WeatherPrefix <- def@WeatherPrefix
+  .Object@OutputPrefix <- def@OutputPrefix
+
+  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  validObject(.Object)
+  .Object
+})
+
+
 setMethod("swFiles_ProjDir", "swFiles", function(object) {return(object@ProjDir)})
 setMethod("swFiles_filesIn", "swFiles", function(object) {return(object@InFiles[1])})
 setMethod("swFiles_Years", "swFiles", function(object) {return(object@InFiles[2])})

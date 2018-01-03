@@ -19,13 +19,20 @@
 
 #' Class "swCarbon"
 #'
-#' Class \code{swCarbon} defines variables that allow \code{SOILWAT2} to simulate the effects of atmospheric carbon dioxide.
+#' Class \code{swCarbon} defines variables that allow \code{SOILWAT2} to simulate the
+#' effects of atmospheric carbon dioxide.
 #'
-#' @slot CarbonUseBio Object of class \code{"integer"}, where a value of 1 enables the CO2 biomass multiplier.
-#' @slot CarbonUseWUE Object of class \code{"integer"}, where a value of 1 enables the CO2 WUE multipler.
-#' @slot Scenario Object of class \code{"character"}, that represents the name of the scenario that is being simulated.
-#' @slot DeltaYear Object of class \code{"integer"}, that represents the number of years in the future that this simulation is being run.
-#' @slot CO2ppm Object of class \code{"matrix"}, that holds years in the first column and CO2 ppm concentrations in the second column.
+#' @slot CarbonUseBio Object of class \code{"integer"}, where a value of 1 enables the
+#'   CO2 biomass multiplier.
+#' @slot CarbonUseWUE Object of class \code{"integer"}, where a value of 1 enables the
+#'   CO2 WUE multipler.
+#' @slot Scenario Object of class \code{"character"}, that represents the name of the
+#'   scenario that is being simulated. This slot is not used in rSOILWAT2, but it's
+#'   useful to see what scenario was used in the SOILWAT2 input object.
+#' @slot DeltaYear Object of class \code{"integer"}, that represents the number of years
+#'   in the future that this simulation is being run.
+#' @slot CO2ppm Object of class \code{"matrix"}, that holds years in the first column and
+#'   CO2 ppm concentrations in the second column.
 #'
 #' @name swCarbon-class
 #' @export
@@ -33,17 +40,19 @@ setClass("swCarbon",
   slots = c(CarbonUseBio = 'integer', CarbonUseWUE = 'integer',
     Scenario = 'character', DeltaYear = 'integer', CO2ppm = 'matrix'))
 
+setMethod("initialize", signature = "swCarbon", function(.Object, ...) {
+  def <- slot(inputData, "carbon")
 
-setMethod(f = "swClear", signature = "swCarbon", definition = function(object) {
-  object@CarbonUseBio = as.integer(0)
-  object@CarbonUseWUE = as.integer(0)
-  object@Scenario = as.character("Default")  # This is not used in rSOILWAT2, but it's useful to see what scenario was used in the input object
-  object@DeltaYear = as.integer(0)
-  object@CO2ppm = as.matrix(data.frame(Year = 1979:2010, CO2ppm = rep(360.0, 32)))
+  .Object@CarbonUseBio <- def@CarbonUseBio
+  .Object@CarbonUseWUE <- def@CarbonUseWUE
+  .Object@Scenario <- def@Scenario
+  .Object@DeltaYear <- def@DeltaYear
+  .Object@CO2ppm <- def@CO2ppm
 
-  object
+  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  validObject(.Object)
+  .Object
 })
-
 
 setValidity("swCarbon", function(object) {
   val <- TRUE
