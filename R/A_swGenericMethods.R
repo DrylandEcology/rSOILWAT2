@@ -32,10 +32,6 @@ setGeneric(
 )
 #' @export
 setGeneric(
-		name="swWriteLines",
-		def=function(object, file) {standardGeneric("swWriteLines")})
-#' @export
-setGeneric(
 		name="swReadLines",
 		def=function(object, file) {standardGeneric("swReadLines")})
 

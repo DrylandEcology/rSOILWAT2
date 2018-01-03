@@ -70,23 +70,7 @@ setReplaceMethod(f="swYears_FDOFY", signature="swYears", definition=function(obj
 setReplaceMethod(f="swYears_EDOEY", signature="swYears", definition=function(object,value) {object@EDOEY <- value; return(object)})
 setReplaceMethod(f="swYears_isNorth", signature="swYears", definition=function(object,value) {object@isNorth <- value; return(object)})
 
-setMethod("swWriteLines", signature=c(object="swYears", file="character"), definition=function(object, file) {
-			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)
-			infilename <- file.path(file)
-			infiletext <- character(8)
-			infiletext[1] <- "# Model time definition file"
-			infiletext[2] <- paste("# Location: ")
 
-			infiletext[4] <- paste(object@StartYear, "\t# starting year (but see weather and swc inputs)", sep="")
-			infiletext[5] <- paste(object@EndYear, "\t# ending year", sep="")
-			infiletext[6] <- paste(object@FDOFY, "\t# first day of first year", sep="")
-			infiletext[7] <- paste(object@EDOEY, "\t# ending day of last year", sep="")
-			infiletext[8] <- paste(ifelse(object@isNorth,"N","S"), "\t# ending day of last year", sep="")
-
-			infile <- file(infilename, "w+b")
-			writeLines(text = infiletext, con = infile, sep = "\n")
-			close(infile)
-		})
 setMethod("swReadLines", signature=c(object="swYears",file="character"), definition=function(object,file) {
 			infiletext <- readLines(con = file)
 			object@StartYear = readInteger(infiletext[4])

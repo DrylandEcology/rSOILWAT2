@@ -56,21 +56,8 @@ setMethod(f="swClear",
 			object@year=integer(1)
 			return(object)
 		})
-setMethod("swWriteLines", signature=c(object="swWeatherData", file="character"), definition=function(object, file) {
-			dir.create(dirname(file),showWarnings = FALSE, recursive=TRUE)
-			infilename <- file.path(dirname(file), paste(basename(file),object@year,sep="."))
-			infiletext <- character(dim(object@data)[1]+2)
-			infiletext[1] <- paste("# weather for site: year =  ",object@year,sep="")
-			infiletext[2] <- paste("# DOY Tmax(C) Tmin(C) PPT(cm)")
 
-			for(i in 1:dim(object@data)[1]) {
-				infiletext[i + 2] <- paste(format(object@data[i,1]),"\t",format(object@data[i,2]),"\t",format(object@data[i,3]),"\t",format(object@data[i,4]),sep="")
-			}
 
-			infile <- file(infilename, "w+b")
-			writeLines(text = infiletext, con = infile, sep = "\n")
-			close(infile)
-		})
 setMethod("swReadLines", signature=c(object="swWeatherData",file="character"), definition=function(object,file) {
 			object@year = as.integer(strsplit(x=basename(file),split=".",fixed=TRUE)[[1]][2])
 			#data <-read.csv(file,header=FALSE,skip=2,sep="\t")

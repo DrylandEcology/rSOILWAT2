@@ -12,7 +12,6 @@
 \alias{swOUT_useTimeStep<-,swOUT-method}
 \alias{swOUT_useTimeStep,swOUT-method}
 \alias{swClear,swOUT-method}
-\alias{swWriteLines,swOUT-method}
 \alias{swReadLines,swOUT-method}
 \title{Class \code{"swOUT"}}
 \description{

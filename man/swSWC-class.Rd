@@ -16,7 +16,6 @@
 \alias{swSWC_use<-,swSWC,logical-method}
 \alias{swSWC_use,swSWC-method}
 \alias{swClear,swSWC-method}
-\alias{swWriteLines,swSWC-method}
 \alias{swReadLines,swSWC-method}
 \title{Class \code{"swSWC"}}
 \description{

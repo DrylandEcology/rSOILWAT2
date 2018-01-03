@@ -26,7 +26,6 @@
 \alias{swSite_TranspirationRegions<-,swSite-method}
 \alias{swSite_TranspirationRegions,swSite-method}
 \alias{swClear,swSite-method}
-\alias{swWriteLines,swSite-method}
 \alias{swReadLines,swSite-method}
 \title{Class \code{"swSite"}}
 \description{

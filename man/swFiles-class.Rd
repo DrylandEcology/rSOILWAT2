@@ -39,7 +39,6 @@
 \alias{swFiles_Years<-}
 \alias{swFiles_Years}
 \alias{swClear}
-\alias{swWriteLines}
 \alias{swReadLines}
 \title{Class \code{"swFiles"}}
 \description{

@@ -15,7 +15,6 @@
 \alias{swYears_StartYear<-}
 \alias{swYears_StartYear}
 \alias{swClear}
-\alias{swWriteLines}
 \alias{swReadLines}
 \title{Class \code{"swYears"}}
 \description{

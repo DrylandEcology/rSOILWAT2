@@ -4,7 +4,6 @@
 \name{swSWC_hist-class}
 \alias{swSWC_hist-class}
 \alias{swClear,swSWC_hist-method}
-\alias{swWriteLines,swSWC_hist-method}
 \alias{swReadLines,swSWC_hist-method}
 \title{Class \code{"swSWC_hist"}}
 \description{

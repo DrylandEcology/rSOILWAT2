@@ -187,7 +187,6 @@
 \alias{swWeather_UseMarkov}
 \alias{swWeather_UseSnow<-}
 \alias{swWeather_UseSnow}
-\alias{swWriteLines}
 \alias{swYears_EDOEY<-}
 \alias{swYears_EDOEY}
 \alias{swYears_EndYear<-}

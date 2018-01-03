@@ -4,7 +4,6 @@
 \name{swEstabSpecies-class}
 \alias{swEstabSpecies-class}
 \alias{swClear,swEstabSpecies-method}
-\alias{swWriteLines,swEstabSpecies-method}
 \alias{swReadLines,swEstabSpecies-method}
 \title{Class \code{"swEstabSpecies"}}
 \description{

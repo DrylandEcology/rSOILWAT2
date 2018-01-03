@@ -18,7 +18,6 @@
 \alias{swWeather_UseSnow<-,swWeather-method}
 \alias{swWeather_UseSnow,swWeather-method}
 \alias{swClear,swWeather-method}
-\alias{swWriteLines,swWeather-method}
 \alias{swReadLines,swWeather-method}
 \title{Class \code{"swWeather"}}
 \description{

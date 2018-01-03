@@ -34,7 +34,6 @@
 \alias{swProd_VegInterParam<-,swProd-method}
 \alias{swProd_VegInterParam,swProd-method}
 \alias{swClear,swProd-method}
-\alias{swWriteLines,swProd-method}
 \alias{swReadLines,swProd-method}
 \title{Class \code{"swProd"}}
 \description{

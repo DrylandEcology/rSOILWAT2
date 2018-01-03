@@ -6,7 +6,6 @@
 \alias{swEstab_useEstab,swEstab-method}
 \alias{swEstab_useEstab<-,swEstab-method}
 \alias{swClear,swEstab-method}
-\alias{swWriteLines,swEstab-method}
 \alias{swReadLines,swEstab-method}
 \title{Class \code{"swEstab"}}
 \description{

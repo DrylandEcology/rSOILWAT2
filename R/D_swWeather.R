@@ -101,43 +101,6 @@ setReplaceMethod("swWeather_UseMarkov", signature = "swWeather",function(object,
 setReplaceMethod("swWeather_UseSnow", signature = "swWeather",function(object,value) initialize(object, UseSnow = value))
 setReplaceMethod("swWeather_MonScalingParams", signature = "swWeather", function(object, value) initialize(object, MonthlyScalingParams = value))
 
-setMethod("swWriteLines", signature=c(object="swWeather", file="character"), definition=function(object, file) {
-			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)
-			infilename <- file.path(file)
-			infiletext <- character(28)
-			infiletext[1] <- "# Weather setup parameters"
-			infiletext[2] <- paste("# Location: ")
-			infiletext[3] <- "#"
-
-			infiletext[4] <- paste(ifelse(object@UseSnow,"1","0"), "\t# 1=allow snow accumulation,   0=no snow effects.", sep="")
-			infiletext[5] <- paste(object@pct_SnowDrift, "\t# % of snow drift per snow event (+ indicates snow addition, - indicates snow taken away from site)", sep="")
-			infiletext[6] <- paste(object@pct_SnowRunoff, "\t# % of snowmelt water as runoff/on per event (>0 indicates runoff, <0 indicates runon)", sep="")
-			infiletext[7] <- paste(ifelse(object@use_Markov,"1","0"), "\t# 0=use historical data only, 1=use markov process for missing weather.", sep="")
-			infiletext[8] <- paste(object@FirstYear_Historical, "\t# first year to begin historical weather.", sep="")
-			infiletext[9] <- paste(object@DaysRunningAverage, "\t# number of days to use in the running average of temperature.", sep="")
-
-			infiletext[11] <- "# Monthly scaling parameters."
-			infiletext[12] <- "# Month 1 = January, Month 2 = February, etc."
-			infiletext[13] <- "# PPT = multiplicative for PPT (scale*ppt)."
-			infiletext[14] <- "# MaxT = additive for max temp (scale+maxtemp)."
-			infiletext[15] <- "# MinT = additive for min temp (scale+mintemp)."
-			infiletext[16] <- "# SkyCover = additive for mean monthly sky cover [%]; min(100, max(0, scale + sky cover))"
-			infiletext[17] <- "# Wind = multiplicative for mean monthly wind speed; max(0, scale * wind speed)"
-			infiletext[18] <- "# rH = additive for mean monthly relative humidity [%]; min(100, max(0, scale + rel. Humidity))"
-			infiletext[19] <- "# Transmissivity = multiplicative for mean monthly relative transmissivity; min(1, max(0, scale * transmissivity))"
-			infiletext[20] <- "#Mon  PPT  MaxT  MinT	SkyCover	Wind	rH	Transmissivity"
-
-			for(i in 21:32) {
-				infiletext[i] <- paste(format(i-20),"\t",format(object@MonthlyScalingParams[i-20,1]),"\t",
-						format(object@MonthlyScalingParams[i-20,2]),"\t",format(object@MonthlyScalingParams[i-20,3]),"\t",
-						format(object@MonthlyScalingParams[i-20,4]),"\t",format(object@MonthlyScalingParams[i-20,5]),"\t",
-						format(object@MonthlyScalingParams[i-20,6]),"\t",format(object@MonthlyScalingParams[i-20,7]),"\t",sep="")
-			}
-
-			infile <- file(infilename, "w+b")
-			writeLines(text = infiletext, con = infile, sep = "\n")
-			close(infile)
-		})
 
 
 setMethod("swReadLines", signature=c(object="swWeather",file="character"), definition=function(object,file) {

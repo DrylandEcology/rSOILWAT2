@@ -8,7 +8,6 @@
 \alias{swMarkov_Prob<-,swMarkov-method}
 \alias{swMarkov_Prob,swMarkov-method}
 \alias{swClear,swMarkov-method}
-\alias{swWriteLines,swMarkov-method}
 \alias{swReadLines,swMarkov-method}
 \title{Class \code{"swMarkov"}}
 \description{

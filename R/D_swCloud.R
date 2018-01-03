@@ -68,31 +68,7 @@ setReplaceMethod(f="swCloud_Humidity",signature="swCloud",function(object,value)
 setReplaceMethod(f="swCloud_Transmissivity",signature="swCloud",function(object,value) {object@Cloud[4,] <- value; return(object)})
 setReplaceMethod(f="swCloud_SnowDensity",signature="swCloud",function(object,value) {object@Cloud[5,] <- value; return(object)})
 
-setMethod("swWriteLines", signature=c(object="swCloud", file="character"), definition=function(object, file) {
-			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)
-			infilename <- file.path(file)
-			infiletext <- character(5)
 
-			infiletext[1] <- paste(format(object@Cloud[1,1]),format(object@Cloud[1,2]),format(object@Cloud[1,3]),format(object@Cloud[1,4]),format(object@Cloud[1,5]),
-					format(object@Cloud[1,6]),format(object@Cloud[1,7]),format(object@Cloud[1,8]),format(object@Cloud[1,9]),format(object@Cloud[1,10]),format(object@Cloud[1,11]),
-					format(object@Cloud[1,12]),"\t# sky cover (sunrise-sunset),%,Climate Atlas of the US,http://cdo.ncdc.noaa.gov/cgi-bin/climaps/climaps.pl",sep=" ")
-			infiletext[2] <- paste(format(object@Cloud[2,1]),format(object@Cloud[2,2]),format(object@Cloud[2,3]),format(object@Cloud[2,4]),format(object@Cloud[2,5]),
-					format(object@Cloud[2,6]),format(object@Cloud[2,7]),format(object@Cloud[2,8]),format(object@Cloud[2,9]),format(object@Cloud[2,10]),format(object@Cloud[2,11]),
-					format(object@Cloud[2,12]),"\t# Wind speed (m/s),Climate Atlas of the US,http://cdo.ncdc.noaa.gov/cgi-bin/climaps/climaps.pl",sep=" ")
-			infiletext[3] <- paste(format(object@Cloud[3,1]),format(object@Cloud[3,2]),format(object@Cloud[3,3]),format(object@Cloud[3,4]),format(object@Cloud[3,5]),
-					format(object@Cloud[3,6]),format(object@Cloud[3,7]),format(object@Cloud[3,8]),format(object@Cloud[3,9]),format(object@Cloud[3,10]),format(object@Cloud[3,11]),
-					format(object@Cloud[3,12]),"\t# rel. Humidity (%),Climate Atlas of the US,http://cdo.ncdc.noaa.gov/cgi-bin/climaps/climaps.pl",sep=" ")
-			infiletext[4] <- paste(format(object@Cloud[4,1]),format(object@Cloud[4,2]),format(object@Cloud[4,3]),format(object@Cloud[4,4]),format(object@Cloud[4,5]),
-					format(object@Cloud[4,6]),format(object@Cloud[4,7]),format(object@Cloud[4,8]),format(object@Cloud[4,9]),format(object@Cloud[4,10]),format(object@Cloud[4,11]),
-					format(object@Cloud[4,12]),"\t# transmissivity (rel), only used in petfunc, but falls out of the equations (a = trans * b, c = a / trans)",sep=" ")
-			infiletext[5] <- paste(format(object@Cloud[5,1]),format(object@Cloud[5,2]),format(object@Cloud[5,3]),format(object@Cloud[5,4]),format(object@Cloud[5,5]),
-					format(object@Cloud[5,6]),format(object@Cloud[5,7]),format(object@Cloud[5,8]),format(object@Cloud[5,9]),format(object@Cloud[5,10]),format(object@Cloud[5,11]),
-					format(object@Cloud[5,12]),"\t# snow density (kg/m3): for alpine conditions form Brown, R. D. and P. W. Mote. 2009. The response of Northern Hemisphere snow cover to a changing climate. Journal of Climate 22:2124-2145.",sep=" ")
-
-			infile <- file(infilename, "w+b")
-			writeLines(text = infiletext, con = infile, sep = "\n")
-			close(infile)
-		})
 setMethod("swReadLines", signature=c(object="swCloud",file="character"), definition=function(object,file) {
 			infiletext <- readLines(con = file)
 			#should be no empty lines

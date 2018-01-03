@@ -25,7 +25,6 @@
 
 #Remember this models the C code so index starts at 0 not 1
 timePeriods <- c("dy", "wk", "mo", "yr")
-OutSum <- c("off", "sum", "avg", "fnl") # only used for 'swReadLines' and 'swWriteLines'
 
 #######
 #Note I use 0 for keys which are not implemented.
@@ -116,84 +115,14 @@ setReplaceMethod(f="swOUT_OutputSeparator",signature="swOUT",function(object,val
 setReplaceMethod(f="swOUT_useTimeStep",signature="swOUT",function(object,value) {object@useTimeStep <- value; return(object)})
 
 
-# used by swWriteLines and swReadLines
+# used by swReadLines
 			KEY <- c("WTHR", "TEMP", "PRECIP", "SOILINFILT", "RUNOFF", "ALLH2O", "VWCBULK",
 				"VWCMATRIC", "SWCBULK", "SWABULK", "SWAMATRIC", "SWPMATRIC","SURFACEWATER", "TRANSP",
 				"EVAPSOIL", "EVAPSURFACE", "INTERCEPTION", "LYRDRAIN", "HYDRED", "ET", "AET", "PET",
 				"WETDAY", "SNOWPACK", "DEEPSWC", "SOILTEMP", "ALLVEG", "ESTABL")
+OutSum <- c("off", "sum", "avg", "fnl") # only used for 'swReadLines'
 
-setMethod("swWriteLines", signature=c(object="swOUT", file="character"), definition=function(object, file) {
-			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)
-			infilename <- file.path(file)
-			infiletext <- character(44+sum(object@use))
-			infiletext[1] = "# Output setup file for SOILWAT v27 compiled on Ubuntu (07122013)"
-			infiletext[2] = "#"
-			infiletext[3] = "# Notes:"
-			infiletext[4] = "# Time periods available:  DY,WK,MO,YR "
-			infiletext[5] = "#   eg, if DY is chosen then 100,200 would mean to use the second hundred days"
-			infiletext[6] = "#   But if YR is chosen, start and end numbers are in days so only those days"
-			infiletext[7] = "#   are reported for the yearly average."
-			infiletext[8] = "# Some keys from older versions (fortran and the c versions mimicking the fortran"
-			infiletext[9] = "#   version) are not currently implemented:"
-			infiletext[10] = "#   ALLH20, WTHR."
-			infiletext[11] = "#"
-			infiletext[12] = "# ESTABL only produces yearly output, namely, DOY for each species requested."
-			infiletext[13] = "#   Thus, to minimize typo errors, all flags are ignored except the filename."
-			infiletext[14] = "#   Output is simply the day of the year establishment occurred for each species"
-			infiletext[15] = "#   in each year of the model run.  Refer to the estabs.in file for more info."
-			infiletext[16] = "#"
-			infiletext[17] = "# DEEPSWC produces output only if the deepdrain flag is set in siteparam.in."
-			infiletext[18] = "#"
-			infiletext[19] = "# Filename prefixes should not have a file extension."
-			infiletext[20] = "# Case is unimportant."
-			infiletext[21] = "#"
-			infiletext[22] = "# SUMTYPEs are one of the following:"
-			infiletext[23] = "#  OFF - no output for this variable"
-			infiletext[24] = "#  SUM - sum the variable for each day in the output period"
-			infiletext[25] = "#  AVG - average the variable over the output period"
-			infiletext[26] = "#  FIN - output value of final day in the period; soil water variables only."
-			infiletext[27] = "# Note that SUM and AVG are the same if timeperiod = dy."
-			infiletext[28] = "#"
-			infiletext[29] = "# (3-Sep-03) OUTSEP key indicates the output separator.  This method"
-			infiletext[30] = "# allows older files to work with the new version.  The default is a "
-			infiletext[31] = "# tab.  Other options are 's' or 't' for space or tab (no quotes)"
-			infiletext[32] = "# or any other printable character as itself (eg, :;| etc).  The given"
-			infiletext[33] = "# separator will apply to all of the output files.  Note that only lowercase"
-			infiletext[34] = "# letters 's' or 't' are synonyms."
-			infiletext[35] = "#"
-			infiletext[36] = "# (01/17/2013) TIMESTEP key indicates which periods you want to output."
-			infiletext[37] = "# You can output all the periods at a time, just one, or however many"
-			infiletext[38] = "# you want. To change which periods to output type 'dy' for day,"
-			infiletext[39] = "# 'wk' for week, 'mo' for month, and 'yr' for year after TIMESTEP"
-			infiletext[40] = "# in any order. For example: 'TIMESTEP mo wk' will output for month and week"
-			infiletext[41] = paste("OUTSEP ",ifelse(object@outputSeparator=="\t","t","s"),sep="")
-			if(object@useTimeStep)	infiletext[42] = paste("TIMESTEP ",paste(timePeriods[object@timePeriods + 1],collapse = " "),sep="")
 
-			KeyComments <- c("","/* max., min, average temperature, surface temperature (C) */", "/* total precip = sum(rain, snow), rain, snow-fall, snowmelt, and snowloss (cm)     */","/* water to infiltrate in top soil layer (cm), runoff (cm); (not-intercepted rain)+(snowmelt-runoff) */",
-					"/* runoff (cm): total runoff, runoff from ponded water, runoff from snowmelt */","","/* bulk volumetric soilwater (cm / layer) */","/* matric volumetric soilwater (cm / layer) */","/* bulk soilwater content (cm / cm layer); swc.l1(today) = swc.l1(yesterday)+inf_soil-lyrdrain.l1-transp.l1-evap_soil.l1; swc.li(today) = swc.li(yesterday)+lyrdrain.l(i-1)-lyrdrain.li-transp.li-evap_soil.li; swc.llast(today) = swc.llast(yesterday)+lyrdrain.l(last-1)-deepswc-transp.llast-evap_soil.llast  */",
-					"/* matric soilwater potential (-bars) */","/* bulk available soil water (cm/layer) = swc - wilting point */","/* matric available soil water (cm/layer) = swc - wilting point */","/* surface water (cm)   */","/* transpiration from each soil layer (cm): total, trees, shrubs, forbs, grasses     */","/* bare-soil evaporation from each soil layer (cm)   */",
-					"/* evaporation (cm): total, trees, shrubs, forbs, grasses, litter, surface water   */","/* intercepted rain (cm): total, trees, shrubs, forbs, grasses, and litter (cm) */","/* water percolated from each layer (cm) */","/* hydraulic redistribution from each layer (cm): total, trees, shrubs, forbs, grasses */",
-					"","/* actual evapotr. (cm)   */","/* potential evaptr (cm)  */","/* days above swc_wet */","/* snowpack water equivalent (cm), snowdepth (cm); since snowpack is already summed, use avg - sum sums the sums = nonsense   */","/* deep drainage into lowest layer (cm) */","/* soil temperature from each soil layer (in celsius)",
-					"","/* yearly establishment results */")
-
-			infiletext[44] = "# key			SUMTYPE		PERIOD		start		end		filename_prefix"
-			j=1
-			for(i in 1:28) {
-				if(object@use[i]) {
-					if(nchar(KEY[object@mykey[i]+1]) <= 7) {
-						Space <- "\t\t\t"
-					} else {
-						Space <- "\t\t"
-					}
-					infiletext[44+j] = paste(KEY[object@mykey[i]+1],Space,OutSum[object@sumtype[i]+1],"\t\t",timePeriods[object@period[i] + 1],"\t\t",as.character(object@first_orig[i]),"\t\t",ifelse(object@last_orig[i]==366,"end",as.character(object@last_orig[i])),"\t\t",object@outfile[i],Space,KeyComments[object@mykey[i]+1],sep="")
-					j=j+1
-				}
-			}
-
-			infile <- file(infilename, "w+b")
-			writeLines(text = infiletext, con = infile, sep = "\n")
-			close(infile)
-		})
 setMethod("swReadLines", signature=c(object="swOUT",file="character"), definition=function(object,file) {
 			infiletext <- readLines(con = file)
 			if(temp<-strsplit(infiletext[41],split=" ")[[1]][2] == "t") {

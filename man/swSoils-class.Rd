@@ -4,7 +4,6 @@
 \name{swSoils-class}
 \alias{swSoils-class}
 \alias{swClear,swSoils-method}
-\alias{swWriteLines,swSoils-method}
 \alias{swReadLines,swSoils-method}
 \title{Class \code{"swSoils"}}
 \description{

@@ -400,37 +400,7 @@ setReplaceMethod(f="swLog_setLine", "swInputData", definition=function(object, v
 		})
 ##
 
-setMethod(f="swWriteLines",signature=c(object="swInputData",file="character"), definition=function(object,file) {
-			#Create directory to write into
-			dir.create(file.path(file),showWarnings = FALSE, recursive=TRUE)
-			dir.create(file.path(file,object@files@OutputPrefix),showWarnings = FALSE)
-			#Just use files files_v30.in
-			#log="swLog"
-			swWriteLines(object@files,file.path(file,object@files@InFiles[1]))
-			swWriteLines(object@years,file.path(file,object@files@InFiles[2]))
-			swWriteLines(object@weather, file.path(file,object@files@InFiles[6]))
-			if(length(object@weatherHistory) > 0) {
-				for(i in 1:length(object@weatherHistory)) {
-					swWriteLines(object@weatherHistory[[i]],file=file.path(file,object@files@WeatherPrefix))
-				}
-			}
-			swWriteLines(object@cloud, file.path(file,object@files@InFiles[9]))
-			if(object@weather@use_Markov)
-				swWriteLines(object@markov, file.path(file,object@files@InFiles[7:8]))
-			swWriteLines(object@prod, file.path(file,object@files@InFiles[10]))
-			swWriteLines(object@site, file.path(file,object@files@InFiles[4]))
-			swWriteLines(object@soils, file.path(file,object@files@InFiles[5]))
-			swWriteLines(object@estab, file.path(file,object@files@InFiles[11]))
-			swWriteLines(object@carbon, file.path(file,object@files@InFiles[12]))
-			if(object@estab@useEstab) {
-				for(i in 1:object@estab@count) {
-					swWriteLines(as(object=object@estab,Class="swEstabSpecies"), file.path(file, object@estab@fileName[i]))
-				}
-			}
-			swWriteLines(object@output, file.path(file,object@files@InFiles[14]))
-			swWriteLines(object@swc, file.path(file,object@files@InFiles[13]))
-			#swWriteLines(object@log, file.path(file,object@files@InFiles[3]))
-		})
+
 setMethod(f="swReadLines", signature=c(object="swInputData",file="character"), definition=function(object,file) {
 			object@files <- swReadLines(object@files,file)
 			object@files@ProjDir <- dirname(file)

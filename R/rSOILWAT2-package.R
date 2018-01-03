@@ -234,7 +234,6 @@ NULL
 #' swWeather_UseMarkov swInputData-method
 #' swWeather_UseSnow<- swInputData-method
 #' swWeather_UseSnow swInputData-method
-#' swWriteLines swInputData character-method
 #' swYears_EDOEY<- swInputData-method
 #' swYears_EDOEY swInputData-method
 #' swYears_EndYear<- swInputData-method
@@ -306,7 +305,6 @@ NULL
 #' swFiles_Years<- swFiles-method
 #' swFiles_Years swFiles-method
 #' swClear swFiles-method
-#' swWriteLines swFiles-method
 #' swReadLines swFiles-method
 #'
 #' @docType class
@@ -374,7 +372,6 @@ NULL
 #' swYears_isNorth swYears-method swYears_StartYear<- swYears-method
 #' swYears_StartYear swYears-method
 #' swClear swYears-method
-#' swWriteLines swYears-method
 #' swReadLines swYears-method
 #'
 #' @docType class
@@ -445,7 +442,6 @@ NULL
 #' swWeather_UseSnow<-,swWeather-method
 #' swWeather_UseSnow,swWeather-method
 #' swClear,swWeather-method
-#' swWriteLines,swWeather-method
 #' swReadLines,swWeather-method
 #'
 #' @docType class
@@ -475,7 +471,6 @@ NULL
 #' @name swWeatherData-class
 #' @aliases
 #' swClear,swWeatherData-method
-#' swWriteLines,swWeatherData-method
 #' swReadLines,swWeatherData-method
 #'
 #' @docType class
@@ -515,7 +510,6 @@ NULL
 #' swCloud_WindSpeed<-,swCloud-method
 #' swCloud_WindSpeed,swCloud-method
 #' swClear,swCloud-method
-#' swWriteLines,swCloud-method
 #' swReadLines,swCloud-method
 #'
 #' @docType class
@@ -549,7 +543,6 @@ NULL
 #' swMarkov_Prob<-,swMarkov-method
 #' swMarkov_Prob,swMarkov-method
 #' swClear,swMarkov-method
-#' swWriteLines,swMarkov-method
 #' swReadLines,swMarkov-method
 #'
 #' @docType class
@@ -609,7 +602,6 @@ NULL
 #' swProd_VegInterParam<-,swProd-method
 #' swProd_VegInterParam,swProd-method
 #' swClear,swProd-method
-#' swWriteLines,swProd-method
 #' swReadLines,swProd-method
 #'
 #' @docType class
@@ -661,7 +653,6 @@ NULL
 #' swSite_TranspirationRegions<-,swSite-method
 #' swSite_TranspirationRegions,swSite-method
 #' swClear,swSite-method
-#' swWriteLines,swSite-method
 #' swReadLines,swSite-method
 #'
 #' @docType class
@@ -691,7 +682,6 @@ NULL
 #' @name swSoils-class
 #' @aliases
 #' swClear,swSoils-method
-#' swWriteLines,swSoils-method
 #' swReadLines,swSoils-method
 #'
 #' @docType class
@@ -723,7 +713,6 @@ NULL
 #' swEstab_useEstab,swEstab-method
 #' swEstab_useEstab<-,swEstab-method
 #' swClear,swEstab-method
-#' swWriteLines,swEstab-method
 #' swReadLines,swEstab-method
 #'
 #' @docType class
@@ -753,7 +742,6 @@ NULL
 #' @name swEstabSpecies-class
 #' @aliases
 #' swClear,swEstabSpecies-method
-#' swWriteLines,swEstabSpecies-method
 #' swReadLines,swEstabSpecies-method
 #'
 #' @docType class
@@ -791,7 +779,6 @@ NULL
 #' swOUT_useTimeStep<-,swOUT-method
 #' swOUT_useTimeStep,swOUT-method
 #' swClear,swOUT-method
-#' swWriteLines,swOUT-method
 #' swReadLines,swOUT-method
 #'
 #' @docType class
@@ -833,7 +820,6 @@ NULL
 #' swSWC_use<-,swSWC,logical-method
 #' swSWC_use,swSWC-method
 #' swClear,swSWC-method
-#' swWriteLines,swSWC-method
 #' swReadLines,swSWC-method
 #'
 #' @docType class
@@ -863,7 +849,6 @@ NULL
 #' @name swSWC_hist-class
 #' @aliases
 #' swClear,swSWC_hist-method
-#' swWriteLines,swSWC_hist-method
 #' swReadLines,swSWC_hist-method
 #'
 #' @docType class

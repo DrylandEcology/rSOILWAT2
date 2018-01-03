@@ -4,7 +4,6 @@
 \name{swWeatherData-class}
 \alias{swWeatherData-class}
 \alias{swClear,swWeatherData-method}
-\alias{swWriteLines,swWeatherData-method}
 \alias{swReadLines,swWeatherData-method}
 \title{Class \code{"swWeatherData"}}
 \description{

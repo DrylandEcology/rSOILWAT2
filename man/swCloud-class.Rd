@@ -14,7 +14,6 @@
 \alias{swCloud_WindSpeed<-,swCloud-method}
 \alias{swCloud_WindSpeed,swCloud-method}
 \alias{swClear,swCloud-method}
-\alias{swWriteLines,swCloud-method}
 \alias{swReadLines,swCloud-method}
 \title{Class \code{"swCloud"}}
 \description{

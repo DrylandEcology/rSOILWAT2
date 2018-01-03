@@ -61,37 +61,7 @@ setMethod(f="swClear",
 			object@Layers<-Layers
 			return(object)
 		})
-setMethod("swWriteLines", signature=c(object="swSoils", file="character"), definition=function(object, file) {
-			dir.create(path=dirname(file),showWarnings = FALSE, recursive = TRUE)
-			infilename <- file.path(file)
-			infiletext <- character(17+nrow(object@Layers))
 
-			infiletext[1] <- "# Soil layer definitions"
-			infiletext[2] <- "# Location: "
-			infiletext[3] <- "#"
-			infiletext[4] <- "# depth = (cm) lower limit of layer; layers must be in order of depth."
-			infiletext[5] <- "# matricd = (g/cm^3) density of soil matric component of this layer (will be converted to bulk density with eq. 20 from from Saxton and Rawls 2006 SSAJ)."
-			infiletext[6] <- "# fieldc = (cm^3/cm^3) field capacity soil water volume/volume soil."
-			infiletext[7] <- "# wiltpt = (cm^3/cm^3) wilting point water volume/volume soil."
-			infiletext[8] <- "# evco = (frac) proportion of total baresoil evap from this layer."
-			infiletext[9] <- "# trco = (frac) proportion of total transpiration from this layer for each vegetation type (tree, shrub, grass)"
-			infiletext[10] <- "# %sand = (frac) proportion of sand in layer (0-1.0)."
-			infiletext[11] <- "# %clay = (frac) proportion of clay in layer (0-1.0)."
-			infiletext[12] <- "# imperm = (frac) proportion of 'impermeability' to water percolation(/infiltration/drainage) in layer (0-1.0)"
-			infiletext[13] <- "# soiltemp = the initial temperature of each soil layer (in celcius), from the day before the simulation starts"
-			infiletext[14] <- "# Note that the evco and trco columns must sum to 1.0 or they will"
-			infiletext[15] <- "# be normalized."
-			infiletext[16] <- "#"
-			infiletext[17] <- "# depth matricd	gravel_content	evco	trco_grass	trco_shrub	trco_tree	trco_forb	%sand	%clay	imperm	soiltemp"
-			for(i in 1:nrow(object@Layers)) {
-				infiletext[i+17] <- paste(format(object@Layers[i,1]),format(object@Layers[i,2]),format(object@Layers[i,3]),format(object@Layers[i,4]),format(object@Layers[i,5]),format(object@Layers[i,6]),
-						format(object@Layers[i,7]),format(object@Layers[i,8]),format(object@Layers[i,9]),format(object@Layers[i,10]),format(object@Layers[i,11]),format(object@Layers[i,12]),sep="\t")
-			}
-
-			infile <- file(infilename, "w+b")
-			writeLines(text = infiletext, con = infile, sep = "\n")
-			close(infile)
-		})
 setMethod("swReadLines", signature=c(object="swSoils",file="character"), definition=function(object,file) {
 			infiletext <- readLines(con = file)
 			infiletext <- infiletext[infiletext!=""]#get rid of extra spaces
