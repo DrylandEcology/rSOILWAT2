@@ -23,22 +23,10 @@
 ###############################################################################
 
 #' @export
-setClass(Class = "swInputData",
-						slots = list(files = "swFiles",
-									years = "swYears",
-									weather = "swWeather",
-									cloud = "swCloud",
-									weatherHistory = "list",
-									markov = "swMarkov",
-									prod = "swProd",
-									site = "swSite",
-									soils = "swSoils",
-									estab = "swEstab",
-									carbon = "swCarbon",
-									output = "swOUT",
-									swc = "swSWC",
-									log = "swLog")
-						)
+setClass("swInputData", slots = list(files = "swFiles", years = "swYears",
+  weather = "swWeather", cloud = "swCloud", weatherHistory = "list", markov = "swMarkov",
+  prod = "swProd", site = "swSite", soils = "swSoils", estab = "swEstab",
+  carbon = "swCarbon", output = "swOUT", swc = "swSWC", log = "swLog"))
 
 setValidity("swInputData", function(object){
 	TRUE

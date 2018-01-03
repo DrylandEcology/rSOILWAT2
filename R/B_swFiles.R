@@ -24,9 +24,10 @@
 
 #################################
 #' @export
-setClass("swFiles", representation(ProjDir="character",InFiles="character",WeatherPrefix="character",OutputPrefix="character"),prototype=prototype(ProjDir="",InFiles=c('files_v30.in','Input/years.in','Output/logfile.log','Input/siteparam_v26.in','Input/soils_v30.in','Input/weathsetup_v20.in','Input/mkv_prob.in','Input/mkv_covar.in','Input/cloud_v20.in','Input/sbe_prod_v31.in','Input/estab.in','Input/swcsetup.in','Input/outsetup_v30.in'),WeatherPrefix="Weather_Test/weath",OutputPrefix="Output/"))
+setClass("swFiles", slots = c(ProjDir = "character", InFiles = "character",
+  WeatherPrefix = "character", OutputPrefix = "character"))
 
-swFiles_validity<-function(object){
+swFiles_validity <- function(object){
 	if(length(object@ProjDir)!=1)
 		return("ProjectFolder@ProjectFolderneedstobeoflengthone.")
 	if(length(object@InFiles)!=13)

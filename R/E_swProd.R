@@ -25,21 +25,15 @@
 
 
 #' @export
-setClass("swProd",representation(Composition="numeric",Albedo="numeric",Cover_stcr="numeric",CanopyHeight="matrix",VegetationInterceptionParameters="matrix",LitterInterceptionParameters="matrix", EsTpartitioning_param="numeric",Es_param_limit="numeric",Shade="matrix",HydraulicRedistribution_use="logical",HydraulicRedistribution="matrix",CriticalSoilWaterPotential="numeric",CO2Coefficients="matrix",MonthlyProductionValues_grass="matrix",MonthlyProductionValues_shrub="matrix",MonthlyProductionValues_tree="matrix", MonthlyProductionValues_forb="matrix"),
-		prototype=prototype(Composition=c(0,0,0,1,0),Albedo=c(0.167,0.143,0.106,0.167,0.15),Cover_stcr=c(3.0,2.22,5.0,3.0),
-				CanopyHeight=matrix(data=c(300,29.5,85,0.002,0, 0,5,100,0.003,50, 0,5,3000,0.00008,1200, 300,29.5,85,0.002,0),nrow=5,ncol=4,dimnames=list(c("xinflec","yinflec","range","slope","height_cm"),c("Grasses","Shrubs","Trees","Forbs"))),
-				VegetationInterceptionParameters=matrix(data=c(0.0182,0.0065,0.0019,0.0054, 0.,0.0026,0.,0.0033, 0.00461,0.01405,0.0383,0.0337, 0.0182,0.0065,0.0019,0.0054),nrow=4,ncol=4,dimnames=list(c("a","b","c","d"),c("Grasses","Shrubs","Trees","Forbs"))),
-				LitterInterceptionParameters=matrix(data=c(0.0151,0.00005,0.0116,0.00002, 0.0151,0.00005,0.0116,0.00002, 0.0151,0.00005,0.0116,0.00002, 0.0151,0.00005,0.0116,0.00002),nrow=4,ncol=4,dimnames=list(c("a","b","c","d"),c("Grasses","Shrubs","Trees","Forbs"))),
-				EsTpartitioning_param=c(1,1,0.41,1),Es_param_limit=c(999,999,2099,999),
-				Shade=matrix(data=c(0.3,150,300,12,34,0.002,  0.3,150,300,12,34,0.002,  0.3,150,0,0,2,0.0002, .3,150,300,12,34,0.002),nrow=6,ncol=4,dimnames=list(c("scale","maxDeadBiomass","tanfuncXinflec","yinflec","range","slope"),c("Grasses","Shrubs","Trees","Forbs"))),
-				HydraulicRedistribution_use=c(TRUE,TRUE,TRUE,TRUE),
-				HydraulicRedistribution=matrix(data=c(-0.2328,10,3.22, -0.2328,10,3.22, -0.2328,10,3.22, -0.2328,10,3.22),nrow=3,ncol=4,dimnames=list(c("MaxCondRoot","SoilWaterPotential50","ShapeCond"),c("Grasses","Shrubs","Trees","Forbs"))),
-				CriticalSoilWaterPotential=c(-3.5,-3.9,-2.0,-2.0),
-				MonthlyProductionValues_grass=matrix(data=c(75,80,85,90,50,50,50,55,60,65,70,75,150,150,150,170,190,220,250,220,190,180,170,160,0.0,0.0,0.10,0.20,0.40,0.60,0.40,0.60,0.40,0.20,0.10,0.0,300,300,300,300,300,300,300,300,300,300,300,300),nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv"))),
-				MonthlyProductionValues_shrub=matrix(data=c(85.40,88.20,95.30,100.50,166.40,186.00,177.10,212.20,157.40,124.90,110.40,104.30,210.00,212.00,228.00,272.00,400.00,404.00,381.00,352.00,286.00,235.00,218.00,214.00,0.06,0.08,0.20,0.33,0.57,0.55,0.50,0.46,0.32,0.15,0.08,0.06,372,372,372,372,372,372,372,372,372,372,372,372),nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv"))),
-				MonthlyProductionValues_tree=matrix(data=c(2000.000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,15000,15000,15000,15000,15000,15000,15000,15000,15000,15000,15000,15000,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,0.083,500,500,500,500,500,500,500,500,500,500,500,500),nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv"))),
-				MonthlyProductionValues_forb=matrix(data=c(85.40,88.20,95.30,100.50,166.40,186.00,177.10,212.20,157.40,124.90,110.40,104.30,210.00,212.00,228.00,272.00,400.00,404.00,381.00,352.00,286.00,235.00,218.00,214.00,0.06,0.08,0.20,0.33,0.57,0.55,0.50,0.46,0.32,0.15,0.08,0.06,372,372,372,372,372,372,372,372,372,372,372,372),nrow=12,ncol=4,dimnames=list(c("January","February","March","April","May","June","July","August","September","October","November","December"),c("Litter","Biomass","live_pct","LAI_conv"))),
-		    CO2Coefficients=matrix(data=c(0.127, 0.127, 0.127, 0.127, 0.3501, 0.3501, 0.3501, 0.3501, 22.464, 22.464, 22.464, 22.464, -0.531, -0.531, -0.531, -0.531), nrow=4, ncol=4, dimnames=list(c("BioCoeff1", "BioCoeff2", "WUECoeff1", "WUECoeff2"), c("Grasses", "Shrubs", "Trees", "Forbs")))))
+setClass("swProd", slots = c(Composition = "numeric", Albedo = "numeric",
+  Cover_stcr = "numeric", CanopyHeight = "matrix",
+  VegetationInterceptionParameters = "matrix",
+  LitterInterceptionParameters = "matrix",
+  EsTpartitioning_param = "numeric", Es_param_limit = "numeric", Shade = "matrix",
+  HydraulicRedistribution_use = "logical", HydraulicRedistribution = "matrix",
+  CriticalSoilWaterPotential = "numeric", CO2Coefficients = "matrix",
+  MonthlyProductionValues_grass = "matrix", MonthlyProductionValues_shrub = "matrix",
+  MonthlyProductionValues_tree = "matrix", MonthlyProductionValues_forb = "matrix"))
 
 swProd_validity<-function(object){
 	if(length(object@Composition)!=5)

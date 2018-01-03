@@ -27,7 +27,8 @@
 ##############################################################################
 
 #' @export
-setClass("swWeatherData",representation(data="matrix",year="integer"),prototype=prototype(data=matrix(data=c(1:366,rep(999,366*3)),nrow=366,ncol=4),year=as.integer(1987)))
+setClass("swWeatherData", slots = c(data = "matrix", year = "integer"))
+
 swWeatherData_validity<-function(object){
 	if(length(object@year)!=1|is.na(object@year)|object@year<0)
 		return("@year needs to be length 1,not NA and positive.")

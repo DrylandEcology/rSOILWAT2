@@ -24,20 +24,7 @@
 
 ###############################################################SOILS#####################################################################
 #' @export
-setClass("swSoils",representation(Layers="matrix"),
-		prototype=prototype(Layers=matrix(data=c(5,10,20,30,40,60,80,85,				#depth
-								1.43,1.41,1.39,1.39,1.38,1.15,1.31,1.31,				#bulkden
-								0,0,0,0,0,0,0,0,										#gravel content
-								.8122,.1534,.0344,0,0,0,0,0,							#EvapBarSoil
-								.0333,.0333,.0667,.0667,.0667,.1333,.1333,.1333,		#trco grass
-								.1336,.0936,.1762,.1746,.1098,.1787,.1011,.1011,		#trco shrub
-								.0333,.0333,.0667,.0667,.0667,.1333,.1333,.1333,		#trco tree
-								.1336,.0936,.1762,.1746,.1098,.1787,.1011,.1011,		#trco forb
-								.51,.44,.35,.32,.31,.32,.57,.57,						#sand
-								.15,.26,.41,.45,.47,.47,.28,.28,						#clay
-								0,0,0,0,0,0,0,0,										#imperm
-								0.1860,0.3719,0.7438,1.1158,1.4877,2.2315,2.9754,2.9754), nrow=8,ncol=12,dimnames=list(NULL,c("depth_cm","bulkDensity_g/cm^3",
-										"gravel_content","EvapBareSoil_frac","transpGrass_frac","transpShrub_frac","transpTree_frac","transpForb_frac","sand_frac","clay_frac","impermeability_frac","soilTemp_c")))))
+setClass("swSoils", slots = c(Layers = "matrix"))
 
 swSoilLayers_validity<-function(object){
 	if(dim(object@Layers)[1]==0)

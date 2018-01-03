@@ -25,7 +25,8 @@
 
 #######################Markov##########################################
 #' @export
-setClass("swMarkov", representation(Prob="matrix",Conv="matrix"))
+setClass("swMarkov", slots = c(Prob = "matrix", Conv = "matrix"))
+
 setMethod(f="swClear",
 		signature="swMarkov",
 		definition=function(object) {

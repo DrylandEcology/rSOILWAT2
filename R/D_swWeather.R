@@ -25,15 +25,7 @@
 #######################Monthly Scaling Params#################################
 
 #' @export
-setClass("swMonthlyScalingParams",
-									 slots = list(MonthlyScalingParams = "matrix"),
-									 prototype = list(MonthlyScalingParams =
-														matrix(data = c(rep(1, 12), rep(0, 12 * 3), rep(1, 12), rep(0, 12), rep(1, 12)),
-																nrow = 12, ncol = 7,
-																dimnames = list(month.name, c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "Transmissivity"))
-															)
-									 				)
-									)
+setClass("swMonthlyScalingParams", slots = c(MonthlyScalingParams = "matrix"))
 
 setValidity("swMonthlyScalingParams", function(object) {
 	if (identical(dim(object@MonthlyScalingParams), c(12L, 7L))) {
@@ -55,21 +47,10 @@ setMethod("swClear", signature = "swMonthlyScalingParams", function(object) {
 #####################WEATHERSETUP.IN###################################
 
 #' @export
-setClass("swWeather",
-						slots = list(UseSnow = "logical",
-									pct_SnowDrift = "numeric",
-									pct_SnowRunoff = "numeric",
-									use_Markov = "logical",
-									FirstYear_Historical = "integer",
-									DaysRunningAverage = "integer"),
-						prototype = list(UseSnow = TRUE,
-										pct_SnowDrift = 0.0,
-										pct_SnowRunoff = 0.0,
-										use_Markov = FALSE,
-										FirstYear_Historical = 1982L,
-										DaysRunningAverage = 5L),
-						contains = c("swMonthlyScalingParams")
-					)
+setClass("swWeather", slots = c(UseSnow = "logical", pct_SnowDrift = "numeric",
+  pct_SnowRunoff = "numeric", use_Markov = "logical", FirstYear_Historical = "integer",
+  DaysRunningAverage = "integer"),
+  contains = c("swMonthlyScalingParams"))
 
 setValidity("swWeather", function(object) {
 	msg <- NULL

@@ -18,9 +18,9 @@
 
 
 #' Class "swCarbon"
-#' 
+#'
 #' Class \code{swCarbon} defines variables that allow \code{SOILWAT2} to simulate the effects of atmospheric carbon dioxide.
-#' 
+#'
 #' @slot CarbonUseBio Object of class \code{"integer"}, where a value of 1 enables the CO2 biomass multiplier.
 #' @slot CarbonUseWUE Object of class \code{"integer"}, where a value of 1 enables the CO2 WUE multipler.
 #' @slot Scenario Object of class \code{"character"}, that represents the name of the scenario that is being simulated.
@@ -30,23 +30,14 @@
 #' @name swCarbon-class
 #' @export
 setClass("swCarbon",
-  representation(CarbonUseBio = 'integer', CarbonUseWUE = 'integer',
-    Scenario = 'character', DeltaYear = 'integer', CO2ppm = 'matrix'),
-
-  prototype = prototype(
-    CarbonUseBio = as.integer(0),
-    CarbonUseWUE = as.integer(0),
-    Scenario = as.character("Default"),  # This is not used in rSOILWAT2, but it's useful to see what scenario was used in the input object
-    DeltaYear = as.integer(0),
-    CO2ppm = as.matrix(data.frame(Year = 1979:2010, CO2ppm = rep(360.0, 32)))
-  )
-)
+  slots = c(CarbonUseBio = 'integer', CarbonUseWUE = 'integer',
+    Scenario = 'character', DeltaYear = 'integer', CO2ppm = 'matrix'))
 
 
 setMethod(f = "swClear", signature = "swCarbon", definition = function(object) {
   object@CarbonUseBio = as.integer(0)
   object@CarbonUseWUE = as.integer(0)
-  object@Scenario = as.character("Default")
+  object@Scenario = as.character("Default")  # This is not used in rSOILWAT2, but it's useful to see what scenario was used in the input object
   object@DeltaYear = as.integer(0)
   object@CO2ppm = as.matrix(data.frame(Year = 1979:2010, CO2ppm = rep(360.0, 32)))
 

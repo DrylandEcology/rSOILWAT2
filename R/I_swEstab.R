@@ -24,10 +24,13 @@
 
 
 #' @export
-setClass(Class="swEstabSpecies",representation(fileName="character",Name="character",estab_lyrs="integer",barsGERM="numeric",barsESTAB="numeric",min_pregerm_days="integer",max_pregerm_days="integer",min_wetdays_for_germ="integer",
-				max_drydays_postgerm="integer",min_wetdays_for_estab="integer",min_days_germ2estab="integer",max_days_germ2estab="integer",min_temp_germ="numeric",max_temp_germ="numeric",min_temp_estab="numeric",max_temp_estab="numeric"),
-	prototype=prototype(fileName=c("Input/bouteloua.estab","Input/bromus.estab"), Name=c("bogr","brte"), estab_lyrs=c(2L,3L), barsGERM=c(10,10), barsESTAB=c(15,15), min_pregerm_days=c(60L,200L), max_pregerm_days=c(180L,365L), min_wetdays_for_germ=c(2L,6L),
-			max_drydays_postgerm=c(40L,45L), min_wetdays_for_estab=c(5L,6L), min_days_germ2estab=c(15L,15L), max_days_germ2estab=c(75L,90L), min_temp_germ=c(5,10), max_temp_germ=c(20,30), min_temp_estab=c(0,3), max_temp_estab=c(20,30)))
+setClass("swEstabSpecies", slot = c(fileName = "character", Name = "character",
+  estab_lyrs = "integer", barsGERM = "numeric", barsESTAB = "numeric",
+  min_pregerm_days = "integer", max_pregerm_days = "integer",
+  min_wetdays_for_germ = "integer", max_drydays_postgerm = "integer",
+  min_wetdays_for_estab = "integer", min_days_germ2estab = "integer",
+  max_days_germ2estab = "integer", min_temp_germ = "numeric", max_temp_germ = "numeric",
+  min_temp_estab = "numeric", max_temp_estab = "numeric"))
 
 setValidity("swEstabSpecies", function(object) {
   temp <- c(object@fileName, object@Name, object@estab_lyrs, object@barsGERM,
@@ -113,7 +116,9 @@ setMethod("swReadLines", signature=c(object="swEstabSpecies",file="character"), 
 
 #############################ESTAB.IN#########################################
 #' @export
-setClass(Class="swEstab",representation(useEstab="logical",count="integer"),prototype=prototype(useEstab=TRUE,count=2L),contains="swEstabSpecies")
+setClass("swEstab", slot = c(useEstab = "logical", count = "integer"),
+  contains = "swEstabSpecies")
+
 setMethod(f="swClear",
 		signature="swEstab",
 		definition=function(object) {

@@ -24,7 +24,9 @@
 
 
 #' @export
-setClass(Class="swLog", representation(LogData="character",MaxLines="integer",UsedLines="integer"), prototype=prototype(LogData=character(150),MaxLines=as.integer(150),UsedLines=as.integer(1)))
+setClass("swLog", slot = c(LogData = "character", MaxLines = "integer",
+  UsedLines = "integer"))
+
 setMethod(f="swClear",
 		signature="swLog",
 		definition=function(object) {
