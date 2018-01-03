@@ -31,12 +31,12 @@ timePeriods <- c("dy", "wk", "mo", "yr")
 #######
 #' @export
 setClass("swOUT_key", slots = c(mykey = "integer", myobj = "integer", period = "integer",
-  sumtype = "integer", use = "logical", first = "integer", last = "integer",
-  first_orig = "integer", last_orig = "integer", outfile = "character"))
+  sumtype = "integer", use = "logical", first_orig = "integer", last_orig = "integer",
+  outfile = "character"))
 
 setValidity("swOUT_key", function(object) {
   temp <- c(object@mykey, object@myobj, object@period, object@sumtype, object@use,
-    object@first, object@last, object@first_orig, object@last_orig, object@outfile)
+    object@first_orig, object@last_orig, object@outfile)
 
   if (any(!lapply(temp, function(x) length(x) == 1)))
     return("Missing values...")
@@ -52,8 +52,6 @@ setMethod("initialize", signature = "swOUT_key", function(.Object, ...) {
   .Object@period <- def@period
   .Object@sumtype <- def@sumtype
   .Object@use <- def@use
-  .Object@first <- def@first
-  .Object@last <- def@last
   .Object@first_orig <- def@first_orig
   .Object@last_orig <- def@last_orig
   .Object@outfile <- def@outfile
