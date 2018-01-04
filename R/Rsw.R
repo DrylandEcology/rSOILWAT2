@@ -195,7 +195,7 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
   if (.Call(C_tempError)) {
     # Error during soil temperature calculations
     # Re-initialize soil temperature output to 0
-    st_name <- kSOILWAT2()[["OutKeys"]][["SW_SOILTEMP"]]
+    st_name <- rSW2_glovars[["kSOILWAT2"]][["OutKeys"]][["SW_SOILTEMP"]]
     tempd <- slot(res, st_name)
 
     for (k in c("Day", "Week", "Month", "Year")) {
@@ -372,10 +372,4 @@ sw_inputData <- function() {
 #' @export
 has_soilTemp_failed <- function() {
   .Call(C_tempError)
-}
-
-
-#' Access C-level constants
-kSOILWAT2 <- function() {
-  .Call(C_sw_consts)
 }

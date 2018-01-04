@@ -30,10 +30,17 @@
 
 .onLoad <- function(libname, pkgname) {
   #--- Define package level variables that should be hidden from package user
+  # 'rSW2_glovars' is defined in rSOILWAT2-package.R
+
+  # Variables for interaction with SOILWAT2
+  assign("kSOILWAT2", .Call(C_sw_consts), envir = rSW2_glovars)
+
+  # Variables for weather database functionality
   assign("con", NULL, envir = rSW2_glovars)
   assign("dbW_version", "3.2.0", envir = rSW2_glovars)
   assign("default_blob_compression_type", "gzip", envir = rSW2_glovars)
   assign("blob_compression_type", NULL, envir = rSW2_glovars)
+
 
   invisible()
 }
