@@ -41,6 +41,31 @@ swCloud_validity <- function(object) {
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
+  if (!all(is.na(object@Cloud[1, ])) && (any(object@Cloud[1, ] < 0) || any(object@Cloud[1, ] > 100))) {
+    msg <- paste("@Cloud['SkyCoverPCT', ] must be values between 0 and 100%.")
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  if (!all(is.na(object@Cloud[2, ])) && (any(object@Cloud[2, ] < 0))) {
+    msg <- paste("@Cloud['WindSpeed_m/s', ] must be values >= 0.")
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  if (!all(is.na(object@Cloud[3, ])) && (any(object@Cloud[3, ] < 0) || any(object@Cloud[3, ] > 100))) {
+    msg <- paste("@Cloud['HumidityPCT', ] must be values between 0 and 100%.")
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  if (!all(is.na(object@Cloud[4, ])) && (any(object@Cloud[4, ] < 0) || any(object@Cloud[4, ] > 1))) {
+    msg <- paste("@Cloud['Transmissivity', ] must be values between 0 and 1.")
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  if (!all(is.na(object@Cloud[5, ])) && any(object@Cloud[5, ] < 0)) {
+    msg <- paste("@Cloud['SnowDensity_kg/m^3', ] must be values >= 0.")
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
   val
 }
 setValidity("swCloud", swCloud_validity)

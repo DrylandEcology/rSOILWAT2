@@ -27,6 +27,7 @@ setClass("swSoils", slots = c(Layers = "matrix"))
 swSoilLayers_validity <- function(object) {
   val <- TRUE
   temp <- dim(object@Layers)
+  dtol1 <- 1 + temp[1] * rSW2_glovars[["tol"]]
 
   if (temp[1] == 0) {
     msg <- "@Layers must have at least one row/soil layer."
@@ -37,6 +38,21 @@ swSoilLayers_validity <- function(object) {
       "depth_cm, bulkDensity_g/cm^3, gravel_content, EvapBareSoil_frac, transpGrass_frac,",
       "transpShrub_frac, transpTree_frac, transpForb_frac, sand_frac, clay_frac,",
       "impermeability_frac, soilTemp_c")
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+  if (!all(is.na(object@Layers[, 1])) && (any(object@Layers[, 1] <= 0) ||
+    any(diff(object@Layers[, 1]) < rSW2_glovars[["tol"]]))) {
+    msg <- "@Layers['depth_cm', ] must be positive increasing depths."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+  if (!all(is.na(object@Layers[, 3:11])) && (any(object@Layers[, 3:11] < 0) ||
+    any(object@Layers[, 3:11] > dtol1))) {
+    msg <- "@Layers values of gravel, evco, trcos, sand, clay, and impermeability must be between 0 and 1."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+  temp <- colSums(object@Layers[, 4:8, drop = FALSE])
+  if (any(temp > dtol1, na.rm = TRUE)) {
+    msg <- "@Layers values of profile sums of evco and trcos must be between 0 and 1."
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
