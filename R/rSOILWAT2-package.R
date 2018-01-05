@@ -13,7 +13,7 @@
 #' @section Version: The version level of the package is given by the command
 #' \code{packageDescription("rSOILWAT2")}. The most recent version of the
 #' package can be obtained from github at
-#' \url{https://github.com/Burke-Lauenroth-Lab/rSOILWAT2}
+#' \url{https://github.com/DrylandEcology/rSOILWAT2}
 #' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
 #' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
 #' data input \item \code{\link{dbW_getWeatherData}} and
@@ -46,7 +46,7 @@ rSW2_glovars <- new.env()
 
 ##------ Import from other packages
 ## Package uses S3/S4 classes - they are defined in package:methods
-#' @importFrom methods slot slot<- as as<- initialize new slotNames validObject callNextMethod
+#' @importFrom methods slot slot<- as as<- initialize new slotNames inheritedSlotNames getSlots validObject callNextMethod
 #' @importFrom stats aggregate na.exclude
 #' @importFrom utils data head packageDescription read.csv read.table str tail write.table
 NULL
@@ -89,7 +89,6 @@ NULL
 #' set_swWeather<- swInputData-method
 #' set_swYears<- swInputData-method
 #' set_WeatherHistory<- swInputData list-method
-#' swClear swInputData-method
 #' swCloud_Humidity<- swInputData-method
 #' swCloud_Humidity swInputData-method
 #' swCloud_SkyCover<- swInputData-method
@@ -256,7 +255,7 @@ NULL
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
 #' \code{\linkS4class{swCarbon}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -304,7 +303,6 @@ NULL
 #' swFiles_WeatherSetup swFiles-method
 #' swFiles_Years<- swFiles-method
 #' swFiles_Years swFiles-method
-#' swClear swFiles-method
 #' swReadLines swFiles-method
 #'
 #' @docType class
@@ -318,7 +316,7 @@ NULL
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
 #' \code{\linkS4class{swCarbon}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -350,7 +348,7 @@ NULL
 #' \code{new("swCarbon", ...)}.
 #' @author Zachary Kramer
 #' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -371,7 +369,6 @@ NULL
 #' swYears_FDOFY swYears-method swYears_isNorth<- swYears-method
 #' swYears_isNorth swYears-method swYears_StartYear<- swYears-method
 #' swYears_StartYear swYears-method
-#' swClear swYears-method
 #' swReadLines swYears-method
 #'
 #' @docType class
@@ -384,7 +381,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -399,7 +396,7 @@ NULL
 #'
 #'
 #' @name swMonthlyScalingParams-class
-#' @aliases swClear swMonthlyScalingParams-method
+#' @aliases swMonthlyScalingParams-method
 #'
 #' @docType class
 #' @section Objects from the Class: Objects can be created by calls of the form
@@ -411,7 +408,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -441,7 +438,6 @@ NULL
 #' swWeather_UseMarkov,swWeather-method
 #' swWeather_UseSnow<-,swWeather-method
 #' swWeather_UseSnow,swWeather-method
-#' swClear,swWeather-method
 #' swReadLines,swWeather-method
 #'
 #' @docType class
@@ -454,7 +450,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -470,7 +466,6 @@ NULL
 #'
 #' @name swWeatherData-class
 #' @aliases
-#' swClear,swWeatherData-method
 #' swReadLines,swWeatherData-method
 #'
 #' @docType class
@@ -483,7 +478,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -509,7 +504,6 @@ NULL
 #' swCloud_Transmissivity,swCloud-method
 #' swCloud_WindSpeed<-,swCloud-method
 #' swCloud_WindSpeed,swCloud-method
-#' swClear,swCloud-method
 #' swReadLines,swCloud-method
 #'
 #' @docType class
@@ -522,7 +516,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -542,7 +536,6 @@ NULL
 #' swMarkov_Conv,swMarkov-method
 #' swMarkov_Prob<-,swMarkov-method
 #' swMarkov_Prob,swMarkov-method
-#' swClear,swMarkov-method
 #' swReadLines,swMarkov-method
 #'
 #' @docType class
@@ -555,7 +548,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -601,7 +594,6 @@ NULL
 #' swProd_Shade,swProd-method
 #' swProd_VegInterParam<-,swProd-method
 #' swProd_VegInterParam,swProd-method
-#' swClear,swProd-method
 #' swReadLines,swProd-method
 #'
 #' @docType class
@@ -614,7 +606,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -652,7 +644,6 @@ NULL
 #' swSite_TranspCoefficients,swSite-method
 #' swSite_TranspirationRegions<-,swSite-method
 #' swSite_TranspirationRegions,swSite-method
-#' swClear,swSite-method
 #' swReadLines,swSite-method
 #'
 #' @docType class
@@ -665,7 +656,7 @@ NULL
 #' \code{\linkS4class{swInputData}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -681,7 +672,6 @@ NULL
 #'
 #' @name swSoils-class
 #' @aliases
-#' swClear,swSoils-method
 #' swReadLines,swSoils-method
 #'
 #' @docType class
@@ -694,7 +684,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swInputData}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -712,7 +702,6 @@ NULL
 #' @aliases
 #' swEstab_useEstab,swEstab-method
 #' swEstab_useEstab<-,swEstab-method
-#' swClear,swEstab-method
 #' swReadLines,swEstab-method
 #'
 #' @docType class
@@ -725,7 +714,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swInputData}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -741,7 +730,6 @@ NULL
 #'
 #' @name swEstabSpecies-class
 #' @aliases
-#' swClear,swEstabSpecies-method
 #' swReadLines,swEstabSpecies-method
 #'
 #' @docType class
@@ -754,7 +742,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -763,12 +751,28 @@ NULL
 NULL
 
 
-#' Class \code{"swOUT"}
+#' Class \code{swOUT}
 #'
 #' The generic functions listed work on this and the proper sw Class in the container's slots.
 #'
-#'
 #' @name swOUT-class
+#'
+#' @slot outputSeparator A character string. Currently, only "\\t" is functional.
+#' @slot timeSteps An integer matrix. See details.
+#'
+#' @details Output can be generated for four different time steps: daily (DY),
+#'  weekly (WK), monthly (MO), and yearly (YR) periods.
+#'  We have two options to specify time steps:\itemize{
+#'    \item The same time step(s) for every output; this option corresponds to specifying
+#'        a line with `TIMESTEP ...` in the SOILWAT2 input file `outsetup.in`. The matrix
+#'        in slot `timeSteps` should have `SW_OUTNKEYS` rows and `used_SW_OUTNPERIODS`
+#'        columns where each row contains identical values.
+#'    \item A different time step for each output; however, only one time step per
+#'        output variable can be specified. this option corresponds to specifying the
+#'        time step in the column `PERIOD` in the SOILWAT2 input file `outsetup.in`. The
+#'        matrix in slot `timeSteps` should have `SW_OUTNKEYS` rows and 1 column.
+#' }
+#'
 #' @aliases
 #' set_swOUT<-,swOUT-method
 #' get_swOUT,swOUT-method
@@ -776,22 +780,14 @@ NULL
 #' swOUT_OutputSeparator,swOUT-method
 #' swOUT_TimeStep<-,swOUT-method
 #' swOUT_TimeStep,swOUT-method
-#' swOUT_useTimeStep<-,swOUT-method
-#' swOUT_useTimeStep,swOUT-method
-#' swClear,swOUT-method
 #' swReadLines,swOUT-method
 #'
 #' @docType class
 #' @section Objects from the Class: Objects can be created by calls of the form
 #' \code{new("swOUT", ...)}.
 #' @author Ryan Murphy
-#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
-#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @seealso \code{\linkS4class{swInputData}}
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -819,7 +815,6 @@ NULL
 #' swSWC_prefix,swSWC-method
 #' swSWC_use<-,swSWC,logical-method
 #' swSWC_use,swSWC-method
-#' swClear,swSWC-method
 #' swReadLines,swSWC-method
 #'
 #' @docType class
@@ -832,7 +827,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swInputData}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -848,7 +843,6 @@ NULL
 #'
 #' @name swSWC_hist-class
 #' @aliases
-#' swClear,swSWC_hist-method
 #' swReadLines,swSWC_hist-method
 #'
 #' @docType class
@@ -861,7 +855,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -878,7 +872,6 @@ NULL
 #' @name swLog-class
 #' @aliases
 #' swLog_setLine<-,swLog-method
-#' swClear,swLog-method
 #'
 #' @docType class
 #' @section Objects from the Class: Objects can be created by calls of the form
@@ -890,7 +883,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swInputData}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -923,7 +916,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
@@ -952,7 +945,7 @@ NULL
 #' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
 #' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
-#' @references https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+#' @references https://github.com/DrylandEcology/rSOILWAT2
 #' @keywords classes
 #' @examples
 #'
