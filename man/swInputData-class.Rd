@@ -37,7 +37,6 @@
 \alias{set_swYears<-}
 \alias{set_WeatherHistory<-}
 \alias{list-method}
-\alias{swClear}
 \alias{swCloud_Humidity<-}
 \alias{swCloud_Humidity}
 \alias{swCloud_SkyCover<-}
@@ -218,7 +217,7 @@ showClass("swInputData")
 
 }
 \references{
-https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+https://github.com/DrylandEcology/rSOILWAT2
 }
 \seealso{
 \code{\linkS4class{swFiles}} \code{\linkS4class{swYears}}

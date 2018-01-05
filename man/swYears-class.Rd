@@ -14,7 +14,6 @@
 \alias{swYears_isNorth}
 \alias{swYears_StartYear<-}
 \alias{swYears_StartYear}
-\alias{swClear}
 \alias{swReadLines}
 \title{Class \code{"swYears"}}
 \description{
@@ -31,7 +30,7 @@ showClass("swYears")
 
 }
 \references{
-https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+https://github.com/DrylandEcology/rSOILWAT2
 }
 \seealso{
 \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}

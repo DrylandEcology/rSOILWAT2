@@ -1,6 +1,6 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,14 +27,6 @@
 setClass("swLog", slot = c(LogData = "character", MaxLines = "integer",
   UsedLines = "integer"))
 
-setMethod(f="swClear",
-		signature="swLog",
-		definition=function(object) {
-			object@LogData=character(150)
-			object@MaxLines=as.integer(150)
-			object@UsedLines=integer(1)
-			return(object)
-		})
 
 setMethod("initialize", signature = "swLog", function(.Object, ...) {
   def <- slot(inputData, "log")

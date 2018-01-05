@@ -17,7 +17,6 @@
 \alias{swWeather_UseMarkov,swWeather-method}
 \alias{swWeather_UseSnow<-,swWeather-method}
 \alias{swWeather_UseSnow,swWeather-method}
-\alias{swClear,swWeather-method}
 \alias{swReadLines,swWeather-method}
 \title{Class \code{"swWeather"}}
 \description{
@@ -34,7 +33,7 @@ showClass("swWeather")
 
 }
 \references{
-https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+https://github.com/DrylandEcology/rSOILWAT2
 }
 \seealso{
 \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}

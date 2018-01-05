@@ -1,6 +1,6 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -1098,7 +1098,7 @@ get_years_from_weatherDF <- function(weatherDF, years, weatherDF_dataColumns){
 
 # Conversion: data.frame to object of class 'swWeatherData'
 #' @export
-dbW_dataframe_to_weatherData <- function(weatherDF, years=NULL, weatherDF_dataColumns=c("DOY","Tmax_C","Tmin_C","PPT_cm"), round = 2){
+dbW_dataframe_to_weatherData <- function(weatherDF, years=NULL, weatherDF_dataColumns=c("DOY", "Tmax_C", "Tmin_C", "PPT_cm"), round = 2){
 	if(!(length(weatherDF_dataColumns) == 4) || !all(weatherDF_dataColumns %in% colnames(weatherDF)))
 		stop("Not every required weatherDF_dataColumns is available in the 'weatherDF' object")
 
@@ -1122,7 +1122,7 @@ dbW_dataframe_to_weatherData <- function(weatherDF, years=NULL, weatherDF_dataCo
 
 # Conversion: object of class 'swWeatherData' or data.frame to SOILWAT input text files
 #' @export
-dbW_weather_to_SOILWATfiles <- function(path, site.label, weatherData=NULL, weatherDF=NULL, years=NULL, weatherDF_dataColumns=c("DOY","Tmax_C","Tmin_C","PPT_cm")){
+dbW_weather_to_SOILWATfiles <- function(path, site.label, weatherData=NULL, weatherDF=NULL, years=NULL, weatherDF_dataColumns=c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")){
 	stopifnot(is.null(weatherData) || is.null(weatherDF))
 	dir.create(path, recursive = TRUE, showWarnings = FALSE)
 

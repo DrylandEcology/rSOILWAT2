@@ -5,7 +5,6 @@
 \alias{swEstab-class}
 \alias{swEstab_useEstab,swEstab-method}
 \alias{swEstab_useEstab<-,swEstab-method}
-\alias{swClear,swEstab-method}
 \alias{swReadLines,swEstab-method}
 \title{Class \code{"swEstab"}}
 \description{
@@ -22,7 +21,7 @@ showClass("swEstab")
 
 }
 \references{
-https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+https://github.com/DrylandEcology/rSOILWAT2
 }
 \seealso{
 \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}

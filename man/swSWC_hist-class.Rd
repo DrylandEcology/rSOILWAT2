@@ -3,7 +3,6 @@
 \docType{class}
 \name{swSWC_hist-class}
 \alias{swSWC_hist-class}
-\alias{swClear,swSWC_hist-method}
 \alias{swReadLines,swSWC_hist-method}
 \title{Class \code{"swSWC_hist"}}
 \description{
@@ -20,7 +19,7 @@ showClass("swSWC_hist")
 
 }
 \references{
-https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+https://github.com/DrylandEcology/rSOILWAT2
 }
 \seealso{
 \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}

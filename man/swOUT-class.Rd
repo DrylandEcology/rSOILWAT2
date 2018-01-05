@@ -9,14 +9,33 @@
 \alias{swOUT_OutputSeparator,swOUT-method}
 \alias{swOUT_TimeStep<-,swOUT-method}
 \alias{swOUT_TimeStep,swOUT-method}
-\alias{swOUT_useTimeStep<-,swOUT-method}
-\alias{swOUT_useTimeStep,swOUT-method}
-\alias{swClear,swOUT-method}
 \alias{swReadLines,swOUT-method}
-\title{Class \code{"swOUT"}}
+\title{Class \code{swOUT}}
 \description{
 The generic functions listed work on this and the proper sw Class in the container's slots.
 }
+\details{
+Output can be generated for four different time steps: daily (DY),
+ weekly (WK), monthly (MO), and yearly (YR) periods.
+ We have two options to specify time steps:\itemize{
+   \item The same time step(s) for every output; this option corresponds to specifying
+       a line with `TIMESTEP ...` in the SOILWAT2 input file `outsetup.in`. The matrix
+       in slot `timeSteps` should have `SW_OUTNKEYS` rows and `used_SW_OUTNPERIODS`
+       columns where each row contains identical values.
+   \item A different time step for each output; however, only one time step per
+       output variable can be specified. this option corresponds to specifying the
+       time step in the column `PERIOD` in the SOILWAT2 input file `outsetup.in`. The
+       matrix in slot `timeSteps` should have `SW_OUTNKEYS` rows and 1 column.
+}
+}
+\section{Slots}{
+
+\describe{
+\item{\code{outputSeparator}}{A character string. Currently, only "\\t" is functional.}
+
+\item{\code{timeSteps}}{An integer matrix. See details.}
+}}
+
 \section{Objects from the Class}{
  Objects can be created by calls of the form
 \code{new("swOUT", ...)}.
@@ -28,15 +47,10 @@ showClass("swOUT")
 
 }
 \references{
-https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+https://github.com/DrylandEcology/rSOILWAT2
 }
 \seealso{
-\code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
-\code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
-\code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
-\code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
-\code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
-\code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+\code{\linkS4class{swInputData}}
 }
 \author{
 Ryan Murphy
