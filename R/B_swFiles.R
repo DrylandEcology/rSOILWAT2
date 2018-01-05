@@ -1,6 +1,6 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,9 +17,7 @@
 ###############################################################################
 
 
-# TODO: Add comment
-#
-# Author: Ryan J. Murphy (2013)
+# Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2013-2018)
 ##############################################
 
 #################################
@@ -27,70 +25,180 @@
 setClass("swFiles", slots = c(ProjDir = "character", InFiles = "character",
   WeatherPrefix = "character", OutputPrefix = "character"))
 
-swFiles_validity <- function(object) {
-  x <- slot(inputData, "files")
-
-	if (length(object@ProjDir) != 1)
-		return("ProjectFolder@ProjectFolderneedstobeoflengthone.")
-	if (length(object@InFiles) != length(slot(x, "InFiles")))
-		return("InFiles@InFilesiswronglength.")
-	if (length(object@WeatherPrefix) != 1)
-		return("WeatherPrefix@WeatherPrefixneedstobeoflength1.")
-	if (length(object@OutputPrefix) != 1)
-		return("OutputPrefix@OutputPrefixneedstobeoflength1.")
-	#ShouldwechecksizelimitretrictionsinC?
-	TRUE
-}
-setValidity("swFiles", swFiles_validity)
-
 setMethod("initialize", signature = "swFiles", function(.Object, ...) {
   def <- slot(inputData, "files")
+  sns <- slotNames(def)
+  dots <- list(...)
+  dns <- names(dots)
 
-  .Object@ProjDir <- def@ProjDir
-  .Object@InFiles <- def@InFiles
-  .Object@WeatherPrefix <- def@WeatherPrefix
-  .Object@OutputPrefix <- def@OutputPrefix
+  for (sn in sns) {
+    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  }
 
   #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
   validObject(.Object)
   .Object
 })
 
+swFiles_validity <- function(object) {
+  val <- TRUE
 
-setMethod("swFiles_ProjDir", "swFiles", function(object) {return(object@ProjDir)})
-setMethod("swFiles_filesIn", "swFiles", function(object) {return(object@InFiles[1])})
-setMethod("swFiles_Years", "swFiles", function(object) {return(object@InFiles[2])})
-setMethod("swFiles_LogFile", "swFiles", function(object) {return(object@InFiles[3])})
-setMethod("swFiles_SiteParams", "swFiles", function(object) {return(object@InFiles[4])})
-setMethod("swFiles_Soils", "swFiles", function(object) {return(object@InFiles[5])})
-setMethod("swFiles_WeatherSetup", "swFiles", function(object) {return(object@InFiles[6])})
-setMethod("swFiles_MarkovProbs", "swFiles", function(object) {return(object@InFiles[7])})
-setMethod("swFiles_MarkovCov", "swFiles", function(object) {return(object@InFiles[8])})
-setMethod("swFiles_Cloud", "swFiles", function(object) {return(object@InFiles[9])})
-setMethod("swFiles_Prod", "swFiles", function(object) {return(object@InFiles[10])})
-setMethod("swFiles_Estab", "swFiles", function(object) {return(object@InFiles[11])})
-setMethod("swFiles_SWCsetup", "swFiles", function(object) {return(object@InFiles[12])})
-setMethod("swFiles_Output", "swFiles", function(object) {return(object@InFiles[13])})
-setMethod("swFiles_WeatherPrefix", "swFiles", function(object) {return(object@WeatherPrefix)})
-setMethod("swFiles_OutputPrefix", "swFiles", function(object) {return(object@OutputPrefix)})
-setReplaceMethod(f="swFiles_ProjDir", signature="swFiles", definition=function(object,value) {object@ProjDir <- value; return(object)})
-setReplaceMethod(f="swFiles_filesIn", signature="swFiles", definition=function(object,value) {object@InFiles[1] <- value; return(object)})
-setReplaceMethod(f="swFiles_Years", signature="swFiles", definition=function(object,value) {object@InFiles[2] <- value; return(object)})
-setReplaceMethod(f="swFiles_LogFile", signature="swFiles", definition=function(object,value) {object@InFiles[3] <- value; return(object)})
-setReplaceMethod(f="swFiles_SiteParams", signature="swFiles", definition=function(object,value) {object@InFiles[4] <- value; return(object)})
-setReplaceMethod(f="swFiles_Soils", signature="swFiles", definition=function(object,value) {object@InFiles[5] <- value; return(object)})
-setReplaceMethod(f="swFiles_WeatherSetup", signature="swFiles", definition=function(object,value) {object@InFiles[6] <- value; return(object)})
-setReplaceMethod(f="swFiles_MarkovProbs", signature="swFiles", definition=function(object,value) {object@InFiles[7] <- value; return(object)})
-setReplaceMethod(f="swFiles_MarkovCov", signature="swFiles", definition=function(object,value) {object@InFiles[8] <- value; return(object)})
-setReplaceMethod(f="swFiles_Cloud", signature="swFiles", definition=function(object,value) {object@InFiles[9] <- value; return(object)})
-setReplaceMethod(f="swFiles_Prod", signature="swFiles", definition=function(object,value) {object@InFiles[10] <- value; return(object)})
-setReplaceMethod(f="swFiles_Estab", signature="swFiles", definition=function(object,value) {object@InFiles[11] <- value; return(object)})
-setReplaceMethod(f="swFiles_SWCsetup", signature="swFiles", definition=function(object,value) {object@InFiles[12] <- value; return(object)})
-setReplaceMethod(f="swFiles_Output", signature="swFiles", definition=function(object,value) {object@InFiles[13] <- value; return(object)})
-setReplaceMethod(f="swFiles_WeatherPrefix", signature="swFiles", definition=function(object,value) {object@WeatherPrefix <- value; return(object)})
-setReplaceMethod(f="swFiles_OutputPrefix", signature="swFiles", definition=function(object,value) {object@OutputPrefix <- value; return(object)})
+  if (length(object@ProjDir) != 1) {
+    msg <- "There must be exactly one @ProjDir value."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
 
-setMethod("swReadLines", signature=c(object="swFiles",file="character"), definition=function(object,file) {
+  if (length(object@InFiles) != rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_NFILES"]]) {
+    msg <- "The number of (non-empty) @InFiles must be SW_NFILES."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  if (length(object@WeatherPrefix) != 1 || nchar(object@WeatherPrefix) == 0) {
+    msg <- "There must be exactly one non-empty @WeatherPrefix value."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  if (length(object@OutputPrefix) != 1) {
+    msg <- "There must be exactly one @OutputPrefix value."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  val
+}
+setValidity("swFiles", swFiles_validity)
+
+
+setMethod("swFiles_ProjDir", "swFiles", function(object) {
+  object@ProjDir
+})
+setMethod("swFiles_WeatherPrefix", "swFiles", function(object) {
+  object@WeatherPrefix
+})
+setMethod("swFiles_OutputPrefix", "swFiles", function(object) {
+  object@OutputPrefix
+})
+
+setMethod("swFiles_filesIn", "swFiles", function(object) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eFirst"]]]
+})
+setMethod("swFiles_Years", "swFiles", function(object) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eModel"]]]
+})
+setMethod("swFiles_LogFile", "swFiles", function(object) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eLog"]]]
+})
+setMethod("swFiles_SiteParams", "swFiles", function(object) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eSite"]]]
+})
+setMethod("swFiles_Soils", "swFiles", function(object) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eLayers"]]]
+})
+setMethod("swFiles_WeatherSetup", "swFiles", function(object) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eWeather"]]]
+})
+setMethod("swFiles_MarkovProbs", "swFiles", function(object) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eMarkovProb"]]]
+})
+setMethod("swFiles_MarkovCov", "swFiles", function(object) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eMarkovCov"]]]
+})
+setMethod("swFiles_Cloud", "swFiles", function(object) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eSky"]]]
+})
+setMethod("swFiles_Prod", "swFiles", function(object) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eVegProd"]]]
+})
+setMethod("swFiles_Estab", "swFiles", function(object) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eVegEstab"]]]
+})
+setMethod("swFiles_SWCsetup", "swFiles", function(object) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eSoilwat"]]]
+})
+setMethod("swFiles_Carbon", "swFiles", function(object) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eCarbon"]]]
+})
+setMethod("swFiles_Output", "swFiles", function(object) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eOutput"]]]
+})
+
+
+setReplaceMethod("swFiles_ProjDir", signature = "swFiles", function(object, value) {
+  object@ProjDir <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swFiles_WeatherPrefix", signature = "swFiles", function(object, value) {
+  object@WeatherPrefix <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swFiles_OutputPrefix", signature = "swFiles", function(object, value) {
+  object@OutputPrefix <- value
+  validObject(object)
+  object
+})
+
+setReplaceMethod("swFiles_filesIn", signature = "swFiles", function(object, value) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eFirst"]]] <- value
+  object
+})
+setReplaceMethod("swFiles_Years", signature = "swFiles", function(object, value) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eModel"]]] <- value
+  object
+})
+setReplaceMethod("swFiles_LogFile", signature = "swFiles", function(object, value) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eLog"]]] <- value
+  object
+})
+setReplaceMethod("swFiles_SiteParams", signature = "swFiles", function(object, value) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eSite"]]] <- value
+  object
+})
+setReplaceMethod("swFiles_Soils", signature = "swFiles", function(object, value) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eLayers"]]] <- value
+  object
+})
+setReplaceMethod("swFiles_WeatherSetup", signature = "swFiles", function(object, value) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eWeather"]]] <- value
+  object
+})
+setReplaceMethod("swFiles_MarkovProbs", signature = "swFiles", function(object, value) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eMarkovProb"]]] <- value
+  object
+})
+setReplaceMethod("swFiles_MarkovCov", signature = "swFiles", function(object, value) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eMarkovCov"]]] <- value
+  object
+})
+setReplaceMethod("swFiles_Cloud", signature = "swFiles", function(object, value) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eSky"]]] <- value
+  object
+})
+setReplaceMethod("swFiles_Prod", signature = "swFiles", function(object, value) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eVegProd"]]] <- value
+  object
+})
+setReplaceMethod("swFiles_Estab", signature = "swFiles", function(object, value) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eVegEstab"]]] <- value
+  object
+})
+setReplaceMethod("swFiles_SWCsetup", signature = "swFiles", function(object, value) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eSoilwat"]]] <- value
+  object
+})
+setReplaceMethod("swFiles_Carbon", signature = "swFiles", function(object, value) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eCarbon"]]] <- value
+  object
+})
+setReplaceMethod("swFiles_Output", signature = "swFiles", function(object, value) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eOutput"]]] <- value
+  object
+})
+
+
+setMethod("swReadLines", signature=c(object="swFiles",file="character"), function(object,file) {
+  print("TODO: method 'swReadLines' is not up-to-date; hard-coded indices are incorrect")
+
 			infiletext <- readLines(con = file)
 			object@InFiles[1] = file
 			object@InFiles[2] = strsplit(x=infiletext[5],split="\t")[[1]][1]
@@ -108,5 +216,5 @@ setMethod("swReadLines", signature=c(object="swFiles",file="character"), definit
 			object@OutputPrefix = strsplit(x=infiletext[27],split="\t")[[1]][1]
 			object@InFiles[13] = strsplit(x=infiletext[28],split="\t")[[1]][1]
 			names(object@InFiles) <- c("InputFilesForSimulation","Model_Years","Model_LogFile","Site_Params","Site_Soils","Weather_setup","Markov_precip_probs","Markov_covarianceTable","Weather_atmosphericParams","Vegetation_Productivity","Vegetation_Establishment","SWC_setup","Output_setup")
-			return(object)
+			object
 		})

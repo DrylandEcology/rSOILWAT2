@@ -79,10 +79,6 @@ SEXP onGet_SW_F() {
 	SET_SLOT(SW_F_construct, install(cSW_F_construct_names[1]), FilesIn);
 	SET_SLOT(SW_F_construct, install(cSW_F_construct_names[2]), Rweather_prefix);
 	SET_SLOT(SW_F_construct, install(cSW_F_construct_names[3]), Routput_prefix);
-	//PROTECT(SW_F_construct_names = allocVector(STRSXP, 4));
-	//for (i = 0; i < 4; i++)
-	//	SET_STRING_ELT(SW_F_construct_names, i, mkChar(cSW_F_construct_names[i]));
-	//setAttrib(SW_F_construct, R_NamesSymbol, SW_F_construct_names);
 
 	UNPROTECT(6);
 	return SW_F_construct;
@@ -96,7 +92,6 @@ void onSet_SW_F(SEXP SW_F_construct) {
 	SEXP Routput_prefix;
 
 	PROTECT(ProjDir = GET_SLOT(SW_F_construct, install("ProjDir")));
-	//_ProjDir = R_alloc(strlen(CHAR(STRING_ELT(ProjDir,0))));
 	strcpy(_ProjDir, CHAR(STRING_ELT(ProjDir,0)));
 
 	PROTECT(FilesIn = GET_SLOT(SW_F_construct, install("InFiles")));
@@ -110,11 +105,9 @@ void onSet_SW_F(SEXP SW_F_construct) {
 	}
 
 	PROTECT(Rweather_prefix = GET_SLOT(SW_F_construct, install("WeatherPrefix")));
-	//weather_prefix = R_alloc(strlen(CHAR(STRING_ELT(Rweather_prefix,0))));
 	strcpy(weather_prefix, CHAR(STRING_ELT(Rweather_prefix,0)));
 
 	PROTECT(Routput_prefix = GET_SLOT(SW_F_construct, install("OutputPrefix")));
-	//output_prefix = R_alloc(strlen(CHAR(STRING_ELT(Routput_prefix,0))));
 	strcpy(output_prefix, CHAR(STRING_ELT(Routput_prefix,0)));
 	UNPROTECT(4);
 }
