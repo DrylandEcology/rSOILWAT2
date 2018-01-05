@@ -151,7 +151,7 @@ setReplaceMethod("swWeather_MonScalingParams", signature = "swWeather", function
 
 
 
-setMethod("swReadLines", signature=c(object="swWeather",file="character"), definition=function(object,file) {
+setMethod("swReadLines", signature = c(object="swWeather",file="character"), function(object,file) {
 			infiletext <- readLines(con = file)
 
 			object@UseSnow = readLogical(infiletext[4])

@@ -196,7 +196,7 @@ setReplaceMethod("swFiles_Output", signature = "swFiles", function(object, value
 })
 
 
-setMethod("swReadLines", signature=c(object="swFiles",file="character"), function(object,file) {
+setMethod("swReadLines", signature = c(object="swFiles",file="character"), function(object,file) {
   print("TODO: method 'swReadLines' is not up-to-date; hard-coded indices are incorrect")
 
 			infiletext <- readLines(con = file)

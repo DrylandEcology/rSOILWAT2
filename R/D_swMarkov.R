@@ -109,7 +109,7 @@ setReplaceMethod("swMarkov_Conv", signature = "swMarkov", function(object, value
 })
 
 
-setMethod("swReadLines", signature=c(object="swMarkov",file="character"), definition=function(object,file) {
+setMethod("swReadLines", signature = c(object="swMarkov",file="character"), function(object,file) {
 			infiletext <- readLines(con = file[1])
 			infiletext <- infiletext[-(1:2)]
 			if(length(infiletext) != 366)

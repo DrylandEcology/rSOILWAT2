@@ -1,6 +1,6 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,10 +17,7 @@
 ###############################################################################
 
 
-# TODO: Add comment
-#
-# Author: Ryan J. Murphy (2013)
-# Updated for v31 Forbs and Bare Ground
+# Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2013-2018); Zach Kramer (2017)
 ###############################################################################
 
 
@@ -35,69 +32,140 @@ setClass("swProd", slots = c(Composition = "numeric", Albedo = "numeric",
   MonthlyProductionValues_grass = "matrix", MonthlyProductionValues_shrub = "matrix",
   MonthlyProductionValues_tree = "matrix", MonthlyProductionValues_forb = "matrix"))
 
-swProd_validity<-function(object){
-	if(length(object@Composition)!=5)
-		return("@Composition needs length of 5.")
-	if(length(object@Albedo)!=5)
-		return("@Albedo needs length of 5.")
-	if(length(object@Cover_stcr)!=4)
-		return("@Cover_stcr needs length of 4.")
-	if(dim(object@CanopyHeight)[1] != 5 | dim(object@CanopyHeight)[2] != 4)
-		return("@CanopyHeight needs dim of c(5,4).")
-	if(dim(object@VegetationInterceptionParameters)[1] != 4 | dim(object@VegetationInterceptionParameters)[2] != 4)
-		return("@VegetationInterceptionParameters dim of c(4,4) needed.")
-	if(dim(object@LitterInterceptionParameters)[1] != 4 | dim(object@LitterInterceptionParameters)[2] != 4)
-		return("@LitterInterceptionParameters dim of c(4,4) needed.")
-	if(length(object@EsTpartitioning_param)!=4)
-		return("@EsTpartitioning_param needs length of 4.")
-	if(length(object@Es_param_limit)!=4)
-		return("@Es_param_limit needs length of 4.")
-	if(length(object@HydraulicRedistribution_use)!=4)
-		return("@HydraulicRedistribution_use needs length of 4.")
-	if(dim(object@Shade)[1] != 6 | dim(object@Shade)[2] != 4)
-		return("@Shade dim of c(6,4) needed.")
-	if(dim(object@HydraulicRedistribution)[1] != 3 | dim(object@HydraulicRedistribution)[2] != 4)
-		return("@HydraulicRedistribution dim of c(3,4) needed.")
-	if(length(object@CriticalSoilWaterPotential)!=4)
-		return("@CriticalSoilWaterPotential needs length of 4.")
-	if(dim(object@MonthlyProductionValues_grass)[1] != 12 | dim(object@MonthlyProductionValues_grass)[2] != 4)
-		return("@MonthlyProductionValues_grass dim of c(12,4) needed.")
-	if(dim(object@MonthlyProductionValues_shrub)[1] != 12 | dim(object@MonthlyProductionValues_shrub)[2] != 4)
-		return("@MonthlyProductionValues_shrub dim of c(12,4) needed.")
-	if(dim(object@MonthlyProductionValues_tree)[1] != 12 | dim(object@MonthlyProductionValues_tree)[2] != 4)
-		return("@MonthlyProductionValues_tree dim of c(12,4) needed.")
-	if(dim(object@MonthlyProductionValues_forb)[1] != 12 | dim(object@MonthlyProductionValues_forb)[2] != 4)
-		return("@MonthlyProductionValues_forb dim of c(12,4) needed.")
-  if(dim(object@CO2Coefficients)[1] != 4 | dim(object@CO2Coefficients)[2] != 4)
-    return("@CO2Coefficients dim of c(4,4) needed.")
+
+swProd_validity <- function(object) {
+  val <- TRUE
+  nvegs <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["NVEGTYPES"]]
+
+  if (length(object@Composition) != 1 + nvegs ||
+    !all(is.na(object@Composition) | (object@Composition >= 0 & object@Composition <= 1))) {
+    msg <- "@Composition must have 1 + NVEGTYPES values between 0 and 1 or NA."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  if (length(object@Albedo) != 1 + nvegs ||
+    !all(is.na(object@Albedo) | (object@Albedo >= 0 & object@Albedo <= 1))) {
+    msg <- "@Albedo must have 1 + NVEGTYPES values between 0 and 1 or NA."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  if (length(object@Cover_stcr) != nvegs || !all(object@Cover_stcr >= 0)) {
+    msg <- "@Cover_stcr must have NVEGTYPES non-negative values."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  temp <- dim(object@CanopyHeight)
+  if (identical(temp, c(5, nvegs))) {
+    msg <- "@CanopyHeight must be a 5xNVEGTYPES matrix."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  temp <- dim(object@VegetationInterceptionParameters)
+  if (identical(temp, c(4, nvegs))) {
+    msg <- "@VegetationInterceptionParameters must be a 4xNVEGTYPES matrix."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  temp <- dim(object@LitterInterceptionParameters)
+  if (identical(temp, c(4, nvegs))) {
+    msg <- "@LitterInterceptionParameters must be a 4xNVEGTYPES matrix."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  if (length(object@EsTpartitioning_param) != nvegs ||
+    !all(is.finite(object@EsTpartitioning_param))) {
+    msg <- "@EsTpartitioning_param must have NVEGTYPES finite values."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  if (length(object@Es_param_limit) != nvegs || !all(object@Es_param_limit >= 0)) {
+    msg <- "@Es_param_limit must have NVEGTYPES non-negative values."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  temp <- dim(object@Shade)
+  if (identical(temp, c(6, nvegs))) {
+    msg <- "@Shade must be a 6xNVEGTYPES matrix."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  if (length(object@HydraulicRedistribution_use) != nvegs) {
+    msg <- "@HydraulicRedistribution_use must have NVEGTYPES values."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  temp <- dim(object@HydraulicRedistribution)
+  if (identical(temp, c(3, nvegs))) {
+    msg <- "@HydraulicRedistribution must be a 3xNVEGTYPES matrix."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  if (length(object@CriticalSoilWaterPotential) != nvegs ||
+    !all(object@CriticalSoilWaterPotential < 0)) {
+    msg <- "@CriticalSoilWaterPotential must have NVEGTYPES negative values."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  temp <- dim(object@CO2Coefficients)
+  if (identical(temp, c(4, nvegs))) {
+    msg <- "@CO2Coefficients must be a 4xNVEGTYPES matrix."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  temp <- dim(object@MonthlyProductionValues_grass)
+  if (identical(temp, c(12, nvegs))) {
+    msg <- "@MonthlyProductionValues_grass must be a 12xNVEGTYPES matrix."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  temp <- dim(object@MonthlyProductionValues_shrub)
+  if (identical(temp, c(12, nvegs))) {
+    msg <- "@MonthlyProductionValues_shrub must be a 12xNVEGTYPES matrix."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  temp <- dim(object@MonthlyProductionValues_tree)
+  if (identical(temp, c(12, nvegs))) {
+    msg <- "@MonthlyProductionValues_tree must be a 12xNVEGTYPES matrix."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  temp <- dim(object@MonthlyProductionValues_forb)
+  if (identical(temp, c(12, nvegs))) {
+    msg <- "@MonthlyProductionValues_forb must be a 12xNVEGTYPES matrix."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  val
 }
-setValidity("swProd",swProd_validity)
+setValidity("swProd", swProd_validity)
 
 setMethod("initialize", signature = "swProd", function(.Object, ...) {
   def <- slot(inputData, "prod")
+  sns <- slotNames(def)
+  dots <- list(...)
+  dns <- names(dots)
 
   # We don't set values for slot `Composition`; this is to prevent simulation runs with
   # accidentally incorrect values
-  temp <- def@Composition
-  temp[] <- NA_real_
-  .Object@Composition <- temp
+  if (!("Composition" %in% dns)) {
+    def@Composition[] <- NA_real_
+  }
 
-  .Object@Albedo <- def@Albedo
-  .Object@Cover_stcr <- def@Cover_stcr
-  .Object@CanopyHeight <- def@CanopyHeight
-  .Object@VegetationInterceptionParameters <- def@VegetationInterceptionParameters
-  .Object@LitterInterceptionParameters <- def@LitterInterceptionParameters
-  .Object@EsTpartitioning_param <- def@EsTpartitioning_param
-  .Object@Es_param_limit <- def@Es_param_limit
-  .Object@Shade <- def@Shade
-  .Object@HydraulicRedistribution_use <- def@HydraulicRedistribution_use
-  .Object@HydraulicRedistribution <- def@HydraulicRedistribution
-  .Object@CriticalSoilWaterPotential <- def@CriticalSoilWaterPotential
-  .Object@CO2Coefficients <- def@CO2Coefficients
-  .Object@MonthlyProductionValues_grass <- def@MonthlyProductionValues_grass
-  .Object@MonthlyProductionValues_shrub <- def@MonthlyProductionValues_shrub
-  .Object@MonthlyProductionValues_tree <- def@MonthlyProductionValues_tree
-  .Object@MonthlyProductionValues_forb <- def@MonthlyProductionValues_forb
+  # Guarantee dimnames of dots arguments
+  gdns <- c("CanopyHeight", "VegetationInterceptionParameters", "LitterInterceptionParameters",
+    "HydraulicRedistribution", "CO2Coefficients", "MonthlyProductionValues_grass",
+    "MonthlyProductionValues_shrub", "MonthlyProductionValues_tree",
+    "MonthlyProductionValues_forb")
+
+  for (g in gdns) if (g %in% dns) {
+    dimnames(dots[[g]]) <- dimnames(slot(def, g))
+  }
+
+  # Initialize values
+  for (sn in sns) {
+    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  }
 
   #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
   validObject(.Object)
@@ -105,44 +173,118 @@ setMethod("initialize", signature = "swProd", function(.Object, ...) {
 })
 
 
-setMethod("swProd_Composition", "swProd", function(object) {return(object@Composition)})
-setMethod("swProd_Albedo", "swProd", function(object) {return(object@Albedo)})
-setMethod("swProd_Cover_stcr", "swProd", function(object) {return(object@Cover_stcr)})
-setMethod("swProd_CanopyHeight", "swProd", function(object) {return(object@CanopyHeight)})
-setMethod("swProd_VegInterParam", "swProd", function(object) {return(object@VegetationInterceptionParameters)})
-setMethod("swProd_LitterInterParam", "swProd", function(object) {return(object@LitterInterceptionParameters)})
-setMethod("swProd_EsTpartitioning_param", "swProd", function(object) {return(object@EsTpartitioning_param)})
-setMethod("swProd_Es_param_limit", "swProd", function(object) {return(object@Es_param_limit)})
-setMethod("swProd_Shade", "swProd", function(object) {return(object@Shade)})
-setMethod("swProd_HydrRedstro_use", "swProd", function(object) {return(object@HydraulicRedistribution_use)})
-setMethod("swProd_HydrRedstro", "swProd", function(object) {return(object@HydraulicRedistribution)})
-setMethod("swProd_CritSoilWaterPotential", "swProd", function(object) {return(object@CriticalSoilWaterPotential)})
-setMethod("swProd_CO2Coefficients", "swProd", function(object) {return(object@CO2Coefficients)})
-setMethod("swProd_MonProd_grass", "swProd", function(object) {return(object@MonthlyProductionValues_grass)})
-setMethod("swProd_MonProd_shrub", "swProd", function(object) {return(object@MonthlyProductionValues_shrub)})
-setMethod("swProd_MonProd_tree", "swProd", function(object) {return(object@MonthlyProductionValues_tree)})
-setMethod("swProd_MonProd_forb", "swProd", function(object) {return(object@MonthlyProductionValues_forb)})
+setMethod("get_swProd", "swProd", function(object) object)
+setMethod("swProd_Composition", "swProd", function(object) object@Composition)
+setMethod("swProd_Albedo", "swProd", function(object) object@Albedo)
+setMethod("swProd_Cover_stcr", "swProd", function(object) object@Cover_stcr)
+setMethod("swProd_CanopyHeight", "swProd", function(object) object@CanopyHeight)
+setMethod("swProd_VegInterParam", "swProd", function(object) object@VegetationInterceptionParameters)
+setMethod("swProd_LitterInterParam", "swProd", function(object) object@LitterInterceptionParameters)
+setMethod("swProd_EsTpartitioning_param", "swProd", function(object) object@EsTpartitioning_param)
+setMethod("swProd_Es_param_limit", "swProd", function(object) object@Es_param_limit)
+setMethod("swProd_Shade", "swProd", function(object) object@Shade)
+setMethod("swProd_HydrRedstro_use", "swProd", function(object) object@HydraulicRedistribution_use)
+setMethod("swProd_HydrRedstro", "swProd", function(object) object@HydraulicRedistribution)
+setMethod("swProd_CritSoilWaterPotential", "swProd", function(object) object@CriticalSoilWaterPotential)
+setMethod("swProd_CO2Coefficients", "swProd", function(object) object@CO2Coefficients)
+setMethod("swProd_MonProd_grass", "swProd", function(object) object@MonthlyProductionValues_grass)
+setMethod("swProd_MonProd_shrub", "swProd", function(object) object@MonthlyProductionValues_shrub)
+setMethod("swProd_MonProd_tree", "swProd", function(object) object@MonthlyProductionValues_tree)
+setMethod("swProd_MonProd_forb", "swProd", function(object) object@MonthlyProductionValues_forb)
 
-setReplaceMethod(f="swProd_Composition", signature="swProd", definition=function(object,value) {object@Composition <- value; return(object)})
-setReplaceMethod(f="swProd_Albedo", signature="swProd", definition=function(object,value) {object@Albedo <- value; return(object)})
-setReplaceMethod(f="swProd_Cover_stcr", signature="swProd", definition=function(object,value) {object@Cover_stcr <- value; return(object)})
-setReplaceMethod(f="swProd_CanopyHeight", signature="swProd", definition=function(object,value) {object@CanopyHeight <- value; return(object)})
-setReplaceMethod(f="swProd_VegInterParam", signature="swProd", definition=function(object,value) {object@VegetationInterceptionParameters <- value; return(object)})
-setReplaceMethod(f="swProd_LitterInterParam", signature="swProd", definition=function(object,value) {object@LitterInterceptionParameters <- value; return(object)})
-setReplaceMethod(f="swProd_EsTpartitioning_param", signature="swProd", definition=function(object,value) {object@EsTpartitioning_param <- value; return(object)})
-setReplaceMethod(f="swProd_Es_param_limit", signature="swProd", definition=function(object,value) {object@Es_param_limit <- value; return(object)})
-setReplaceMethod(f="swProd_Shade", signature="swProd", definition=function(object,value) {object@Shade <- value; return(object)})
-setReplaceMethod(f="swProd_HydrRedstro_use", signature="swProd", definition=function(object,value) {object@HydraulicRedistribution_use <- value; return(object)})
-setReplaceMethod(f="swProd_HydrRedstro", signature="swProd", definition=function(object,value) {object@HydraulicRedistribution <- value; return(object)})
-setReplaceMethod(f="swProd_CritSoilWaterPotential", signature="swProd", definition=function(object,value) {object@CriticalSoilWaterPotential <- value; return(object)})
-setReplaceMethod(f="swProd_CO2Coefficients", signature="swProd", definition=function(object, value) {object@CO2Coefficients <- value; return(object)})
-setReplaceMethod(f="swProd_MonProd_grass", signature="swProd", definition=function(object,value) {object@MonthlyProductionValues_grass <- value; return(object)})
-setReplaceMethod(f="swProd_MonProd_shrub", signature="swProd", definition=function(object,value) {object@MonthlyProductionValues_shrub <- value; return(object)})
-setReplaceMethod(f="swProd_MonProd_tree", signature="swProd", definition=function(object,value) {object@MonthlyProductionValues_tree <- value; return(object)})
-setReplaceMethod(f="swProd_MonProd_forb", signature="swProd", definition=function(object,value) {object@MonthlyProductionValues_forb <- value; return(object)})
+setReplaceMethod("set_swProd", signature = "swProd", function(object, value) {
+  object <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swProd_Composition", signature = "swProd", function(object, value) {
+  object@Composition <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swProd_Albedo", signature = "swProd", function(object, value) {
+  object@Albedo <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swProd_Cover_stcr", signature = "swProd", function(object, value) {
+  object@Cover_stcr <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swProd_CanopyHeight", signature = "swProd", function(object, value) {
+  object@CanopyHeight <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swProd_VegInterParam", signature = "swProd", function(object, value) {
+  object@VegetationInterceptionParameters <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swProd_LitterInterParam", signature = "swProd", function(object, value) {
+  object@LitterInterceptionParameters <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swProd_EsTpartitioning_param", signature = "swProd", function(object, value) {
+  object@EsTpartitioning_param <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swProd_Es_param_limit", signature = "swProd", function(object, value) {
+  object@Es_param_limit <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swProd_Shade", signature = "swProd", function(object, value) {
+  object@Shade <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swProd_HydrRedstro_use", signature = "swProd", function(object, value) {
+  object@HydraulicRedistribution_use <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swProd_HydrRedstro", signature = "swProd", function(object, value) {
+  object@HydraulicRedistribution <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swProd_CritSoilWaterPotential", signature = "swProd", function(object, value) {
+  object@CriticalSoilWaterPotential <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swProd_CO2Coefficients", signature = "swProd", function(object, value) {
+  object@CO2Coefficients <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swProd_MonProd_grass", signature = "swProd", function(object, value) {
+  object@MonthlyProductionValues_grass <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swProd_MonProd_shrub", signature = "swProd", function(object, value) {
+  object@MonthlyProductionValues_shrub <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swProd_MonProd_tree", signature = "swProd", function(object, value) {
+  object@MonthlyProductionValues_tree <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swProd_MonProd_forb", signature = "swProd", function(object, value) {
+  object@MonthlyProductionValues_forb <- value
+  validObject(object)
+  object
+})
 
 
-setMethod("swReadLines", signature=c(object="swProd",file="character"), definition=function(object,file) {
+setMethod("swReadLines", signature = c(object="swProd",file="character"), function(object,file) {
 			infiletext <- readLines(con = file)
 			object@Composition = readNumerics(infiletext[6],5)
 			object@Albedo = readNumerics(infiletext[11],5)

@@ -69,7 +69,7 @@ setMethod("initialize", signature = "swWeatherData", function(.Object, ...,
   .Object
 })
 
-setMethod("swReadLines", signature=c(object="swWeatherData",file="character"), definition=function(object,file) {
+setMethod("swReadLines", signature = c(object="swWeatherData",file="character"), function(object,file) {
 			object@year = as.integer(strsplit(x=basename(file),split=".",fixed=TRUE)[[1]][2])
 			#data <-read.csv(file,header=FALSE,skip=2,sep="\t")
 			data <- read.table(file, header=FALSE, comment.char="#", blank.lines.skip=TRUE, sep="\t")

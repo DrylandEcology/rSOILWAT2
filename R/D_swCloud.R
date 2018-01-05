@@ -110,7 +110,7 @@ setReplaceMethod("swCloud_SnowDensity", signature = "swCloud", function(object, 
 })
 
 
-setMethod("swReadLines", signature=c(object="swCloud",file="character"), definition=function(object,file) {
+setMethod("swReadLines", signature = c(object="swCloud",file="character"), function(object,file) {
 			infiletext <- readLines(con = file)
 			#should be no empty lines
 			infiletext <- infiletext[infiletext != ""]
