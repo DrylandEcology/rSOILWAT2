@@ -73,7 +73,7 @@ setMethod("swReadLines", signature = c(object="swWeatherData",file="character"),
 			object@year = as.integer(strsplit(x=basename(file),split=".",fixed=TRUE)[[1]][2])
 			#data <-read.csv(file,header=FALSE,skip=2,sep="\t")
 			data <- read.table(file, header=FALSE, comment.char="#", blank.lines.skip=TRUE, sep="\t")
-			colnames(data)<-c("DOY","Tmax_C","Tmin_C","PPT_cm")
+			colnames(data)<-c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
 			object@data = as.matrix(data)
 			return(object)
 		})

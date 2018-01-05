@@ -251,7 +251,7 @@ setMethod("swReadLines", signature = c(object="swSite",file="character"), functi
 			}
 
 			data = matrix(NA,nrow=length(71:length(infiletext)),ncol=2)
-			colnames(data)<-c("ndx","layer")
+			colnames(data)<-c("ndx", "layer")
 			for(i in 71:length(infiletext)) {
 				if(!grepl(pattern="#", infiletext[i]))
 					data[i-70,] = readNumerics(infiletext[i],2)

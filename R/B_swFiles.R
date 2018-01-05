@@ -215,6 +215,6 @@ setMethod("swReadLines", signature = c(object="swFiles",file="character"), funct
 			object@InFiles[12] = strsplit(x=infiletext[24],split="\t")[[1]][1]
 			object@OutputPrefix = strsplit(x=infiletext[27],split="\t")[[1]][1]
 			object@InFiles[13] = strsplit(x=infiletext[28],split="\t")[[1]][1]
-			names(object@InFiles) <- c("InputFilesForSimulation","Model_Years","Model_LogFile","Site_Params","Site_Soils","Weather_setup","Markov_precip_probs","Markov_covarianceTable","Weather_atmosphericParams","Vegetation_Productivity","Vegetation_Establishment","SWC_setup","Output_setup")
+			names(object@InFiles) <- c("InputFilesForSimulation", "Model_Years", "Model_LogFile", "Site_Params", "Site_Soils", "Weather_setup", "Markov_precip_probs", "Markov_covarianceTable", "Weather_atmosphericParams", "Vegetation_Productivity", "Vegetation_Establishment", "SWC_setup", "Output_setup")
 			object
 		})

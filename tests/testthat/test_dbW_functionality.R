@@ -41,7 +41,7 @@ site_data3 <- data.frame(
   Label = paste0("TestSite_id", site_N + site_ids),
   stringsAsFactors = FALSE)
 
-weatherDF_dataColumns <- c("DOY","Tmax_C","Tmin_C","PPT_cm")
+weatherDF_dataColumns <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
 
 
 

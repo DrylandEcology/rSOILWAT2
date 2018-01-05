@@ -271,7 +271,7 @@ SEXP onGet_SW_SIT() {
 	char *cIntrinsicSiteParams[] = { "Latitude", "Altitude", "Slope", "Aspect" };
 
 	SEXP SoilTemperatureConstants_use, SoilTemperatureConstants, SoilTemperatureConstants_names;
-	char *cSoilTempValues[] = { "BiomassLimiter_g/m^2", "T1constant_a", "T1constant_b","T1constant_c", "cs_constant_SoilThermCondct", "cs_constant", "sh_constant_SpecificHeatCapacity",
+	char *cSoilTempValues[] = { "BiomassLimiter_g/m^2", "T1constant_a", "T1constant_b", "T1constant_c", "cs_constant_SoilThermCondct", "cs_constant", "sh_constant_SpecificHeatCapacity",
 			"ConstMeanAirTemp", "deltaX_Param", "MaxDepth" };
 
 	SEXP TranspirationRegions, TranspirationRegions_names, TranspirationRegions_names_y;

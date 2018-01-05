@@ -116,8 +116,8 @@ setMethod("swReadLines", signature = c(object="swCloud",file="character"), funct
 			infiletext <- infiletext[infiletext != ""]
 
 			object@Cloud=matrix(data=NA,nrow=5,ncol=12,byrow=T)
-			colnames(object@Cloud)<-c("January","February","March","April","May","June","July","August","September","October","November","December")
-			rownames(object@Cloud)<-c("SkyCoverPCT","WindSpeed_m/s","HumidityPCT","Transmissivity","SnowDensity_kg/m^3")
+			colnames(object@Cloud)<-c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+			rownames(object@Cloud)<-c("SkyCoverPCT", "WindSpeed_m/s", "HumidityPCT", "Transmissivity", "SnowDensity_kg/m^3")
 
 			for(i in 1:length(infiletext)) {
 				object@Cloud[i,] <- readNumerics(infiletext[i],12)

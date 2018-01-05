@@ -162,8 +162,8 @@ setMethod("swReadLines", signature = c(object="swWeather",file="character"), fun
 			object@DaysRunningAverage = readInteger(infiletext[9])
 
 			data=matrix(data=c(rep(1,12),rep(NA,12*6)),nrow=12,ncol=7)
-			colnames(data)<-c("PPT","MaxT","MinT","SkyCover","Wind","rH","Transmissivity")
-			rownames(data)<-c("January","February","March","April","May","June","July","August","September","October","November","December")
+			colnames(data)<-c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "Transmissivity")
+			rownames(data)<-c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
 			for(i in 21:32) {
 				data[i-20,] <- readNumerics(infiletext[i],8)[2:8]
 			}

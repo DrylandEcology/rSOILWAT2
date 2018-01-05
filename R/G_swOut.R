@@ -1,6 +1,6 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,44 +17,43 @@
 ###############################################################################
 
 
-# TODO: Add comment
-#
-# Author: Ryan J. Murphy (2013)
+# Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2013-2018)
 ###############################################################################
 
 
-#Remember this models the C code so index starts at 0 not 1
-timePeriods <- c("dy", "wk", "mo", "yr")
 
 #######
-#Note I use 0 for keys which are not implemented.
-#######
 #' @export
-setClass("swOUT_key", slots = c(mykey = "integer", myobj = "integer", period = "integer",
+setClass("swOUT_key", slots = c(mykey = "integer", myobj = "integer",
   sumtype = "integer", use = "logical", first_orig = "integer", last_orig = "integer",
   outfile = "character"))
 
-setValidity("swOUT_key", function(object) {
-  temp <- c(object@mykey, object@myobj, object@period, object@sumtype, object@use,
-    object@first_orig, object@last_orig, object@outfile)
+swOUT_key_validity <- function(object) {
+  val <- TRUE
 
-  if (any(!lapply(temp, function(x) length(x) == 1)))
-    return("Missing values...")
+  temp <- lengths(lapply(slotNames(object), function(x) slot(object, x)))
 
-  TRUE
-})
+  id <- temp != rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]
+
+  if (any(id)) {
+    msg <- paste0(names(temp)[id], " must be a vector of length 'SW_OUTNKEYS'")
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  val
+}
+setValidity("swOUT_key", swOUT_key_validity)
+
 
 setMethod("initialize", signature = "swOUT_key", function(.Object, ...) {
   def <- slot(inputData, "output")
+  sns <- slotNames("swOUT_key")
+  dots <- list(...)
+  dns <- names(dots)
 
-  .Object@mykey <- def@mykey
-  .Object@myobj <- def@myobj
-  .Object@period <- def@period
-  .Object@sumtype <- def@sumtype
-  .Object@use <- def@use
-  .Object@first_orig <- def@first_orig
-  .Object@last_orig <- def@last_orig
-  .Object@outfile <- def@outfile
+  for (sn in sns) {
+    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  }
 
   #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
   validObject(.Object)
@@ -65,26 +64,41 @@ setMethod("initialize", signature = "swOUT_key", function(.Object, ...) {
 ###########################OUTSETUP.IN########################################
 
 #' @export
-setClass("swOUT", slot = c(outputSeparator = "character", timePeriods = "integer",
-  useTimeStep = "logical"), contains = "swOUT_key")
+setClass("swOUT", slot = c(outputSeparator = "character", timeSteps = "matrix"),
+  contains = "swOUT_key")
 
-swOUT_validity<-function(object){
-	if(length(object@outputSeparator)!=1)
-		return("@outputSeparator needs to be of length 1.")
-	if(length(object@timePeriods) < 1)
-		return("@timePeriods needs to to contain at least 1 value for output")
-	if(length(object@useTimeStep)!=1)
-		return("@useTimeStep needs to be of length 1.")
+swOUT_validity <- function(object) {
+  val <- TRUE
+
+  if (length(object@outputSeparator) != 1) {
+    msg <- "@outputSeparator needs to be of length 1."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  if (length(dim(object@timeSteps)) != 2) {
+    msg <- "@timeSteps must be a 2-dimensional matrix"
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  if (nrow(object@timeSteps) != rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]) {
+    msg <- "@timeSteps must be a matrix with 'SW_OUTNKEYS' rows"
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  val
 }
 setValidity("swOUT", swOUT_validity)
 
 
 setMethod("initialize", signature = "swOUT", function(.Object, ...) {
   def <- slot(inputData, "output")
+  sns <- setdiff(slotNames("swOUT"), inheritedSlotNames("swOUT"))
+  dots <- list(...)
+  dns <- names(dots)
 
-  .Object@outputSeparator <- def@outputSeparator
-  .Object@timePeriods <- def@timePeriods
-  .Object@useTimeStep <- def@useTimeStep
+  for (sn in sns) {
+    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  }
 
   .Object <- callNextMethod(.Object, ...)
   validObject(.Object)
@@ -92,26 +106,40 @@ setMethod("initialize", signature = "swOUT", function(.Object, ...) {
 })
 
 
-setMethod("get_swOUT", "swOUT", function(object) {return(object)})
-setMethod("swOUT_TimeStep","swOUT",function(object) {return(object@timePeriods)})
-setMethod("swOUT_OutputSeparator","swOUT",function(object) {return(object@outputSeparator)})
-setMethod("swOUT_useTimeStep","swOUT",function(object) {return(object@useTimeStep)})
+setMethod("get_swOUT", "swOUT", function(object) object)
+setMethod("swOUT_TimeStep", "swOUT", function(object) object@timeSteps)
+setMethod("swOUT_OutputSeparator", "swOUT", function(object) object@outputSeparator)
 
-setReplaceMethod(f="set_swOUT",signature="swOUT",function(object,value) {object <- value; return(object)})
-setReplaceMethod(f="swOUT_TimeStep",signature="swOUT",function(object,value) {value<-as.integer(value); object@timePeriods <- value; return(object)})
-setReplaceMethod(f="swOUT_OutputSeparator",signature="swOUT",function(object,value) {object@outputSeparator <- value; return(object)})
-setReplaceMethod(f="swOUT_useTimeStep",signature="swOUT",function(object,value) {object@useTimeStep <- value; return(object)})
+setReplaceMethod("set_swOUT", signature = "swOUT", function(object, value) {
+  object <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swOUT_TimeStep", signature = "swOUT", function(object, value) {
+  object@timeSteps <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swOUT_OutputSeparator", signature = "swOUT", function(object, value) {
+  object@outputSeparator <- value
+  validObject(object)
+  object
+})
 
 
 # used by swReadLines
 			KEY <- c("WTHR", "TEMP", "PRECIP", "SOILINFILT", "RUNOFF", "ALLH2O", "VWCBULK",
-				"VWCMATRIC", "SWCBULK", "SWABULK", "SWAMATRIC", "SWPMATRIC","SURFACEWATER", "TRANSP",
+				"VWCMATRIC", "SWCBULK", "SWABULK", "SWAMATRIC", "SWPMATRIC", "SURFACEWATER", "TRANSP",
 				"EVAPSOIL", "EVAPSURFACE", "INTERCEPTION", "LYRDRAIN", "HYDRED", "ET", "AET", "PET",
 				"WETDAY", "SNOWPACK", "DEEPSWC", "SOILTEMP", "ALLVEG", "ESTABL")
 OutSum <- c("off", "sum", "avg", "fnl") # only used for 'swReadLines'
+#Remember this models the C code so index starts at 0 not 1
+timePeriods <- c("dy", "wk", "mo", "yr")
 
 
-setMethod("swReadLines", signature=c(object="swOUT",file="character"), definition=function(object,file) {
+setMethod("swReadLines", signature = c(object="swOUT",file="character"), function(object,file) {
+  print("TODO: method 'swReadLines' for class 'swOUT' is not up-to-date; hard-coded indices are incorrect")
+
 			infiletext <- readLines(con = file)
 			if(temp<-strsplit(infiletext[41],split=" ")[[1]][2] == "t") {
 				object@outputSeparator="\t"
@@ -122,11 +150,11 @@ setMethod("swReadLines", signature=c(object="swOUT",file="character"), definitio
 			}
 
 			if(infiletext[42]==""){
-				object@useTimeStep = FALSE
+				useTimeStep = FALSE
 			} else {
-				object@useTimeStep = TRUE
+				useTimeStep = TRUE
 				temp<-strsplit(x=infiletext[42],split=" ")[[1]][-1]
-				object@timePeriods = as.integer(sapply(1:length(temp), FUN=function(i) which(temp[i] == timePeriods))-1)
+				object@timeSteps = as.integer(sapply(1:length(temp), FUN=function(i) which(temp[i] == timePeriods))-1)
 			}
 
 			for(i in 45:length(infiletext)) {
@@ -145,7 +173,6 @@ setMethod("swReadLines", signature=c(object="swOUT",file="character"), definitio
 					}
 					object@mykey[mykey] = as.integer(mykey-1)
 					object@sumtype[mykey] = as.integer(sumtype)
-					object@period[mykey] = as.integer(period)
 					object@first_orig[mykey] = start
 					object@last_orig[mykey] = end
 					object@outfile[mykey] = temp[6]

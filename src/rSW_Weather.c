@@ -96,8 +96,8 @@ SEXP onGet_SW_WTH() {
 	SEXP MonthlyScalingParams, MonthlyScalingParams_names, MonthlyScalingParams_names_x, MonthlyScalingParams_names_y;
 
 	char *cSW_WTH_names[] = {"UseSnow", "pct_SnowDrift", "pct_SnowRunoff", "use_Markov", "FirstYear_Historical", "DaysRunningAverage", "MonthlyScalingParams"};
-	char *cMonthlyScalingParams_names[] = {"PPT", "MaxT", "MinT","SkyCover","Wind","rH","Transmissivity"};
-	char *cMonths[] = {"January","February","March","April","May","June","July","August","September","October","November","December"};
+	char *cMonthlyScalingParams_names[] = {"PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "Transmissivity"};
+	char *cMonths[] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
 	PROTECT(swWeather = MAKE_CLASS("swWeather"));
 	PROTECT(SW_WTH = NEW_OBJECT(swWeather)); //allocVector(VECSXP, 9 + w->use_markov)
