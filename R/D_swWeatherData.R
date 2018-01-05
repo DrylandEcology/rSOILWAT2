@@ -1,6 +1,6 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,28 +17,36 @@
 ###############################################################################
 
 
-# TODO:
-#
-# Author: Ryan Murphy
+# Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2013-2018)
 ###############################################################################
-
-#######################CONSTANTS##############################################
 
 ##############################################################################
 
 #' @export
 setClass("swWeatherData", slots = c(data = "matrix", year = "integer"))
 
-swWeatherData_validity<-function(object){
-	if(length(object@year)!=1|is.na(object@year)|object@year<0)
-		return("@year needs to be length 1,not NA and positive.")
-	if(!any(dim(object@data)[1]==c(365,366)))
-		return("@data in swWeather Data number of days is not right.")
-	if(dim(object@data)[2]!=4)
-		return("@data in swWeatherData number of columns is not right.")
-	TRUE
+swWeatherData_validity <- function(object) {
+  val <- TRUE
+
+  if (!(length(object@year) == 1 && is.finite(object@year) && object@year >= 0)) {
+    msg <- "@year must be exactly one positive finite value."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  temp <- dim(object@data)
+  if (temp[2] != 4) {
+    msg <- paste("@data must have exactly 4 columns corresponding to",
+      "DOY, Tmax_C, Tmin_C, PPT_cm")
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+  if (!(temp[1] %in% c(365, 366))) {
+    msg <- paste("@data must 365 or 366 rows corresponding to day of year.")
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  val
 }
-setValidity("swWeatherData",swWeatherData_validity)
+setValidity("swWeatherData", swWeatherData_validity)
 
 setMethod("initialize", signature = "swWeatherData", function(.Object, ...,
   year = 0L, data = NULL) {

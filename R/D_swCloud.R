@@ -29,7 +29,6 @@ setClass("swCloud", slots = c(Cloud = "matrix"))
 
 swCloud_validity <- function(object) {
   val <- TRUE
-
   temp <- dim(object@Cloud)
 
   if (temp[1] != 5) {
