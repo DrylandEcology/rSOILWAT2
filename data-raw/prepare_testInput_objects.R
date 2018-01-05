@@ -3,6 +3,8 @@
 #--- rSOILWAT2: use development version
 library("methods")  # in case this code is run via 'Rscript'
 library("devtools")
+
+devtools::clean_dll()
 devtools::load_all()
 
 

@@ -4,7 +4,6 @@ context("Carbon dioxide class")
 test_that("Manipulate swCarbon", {
   x <- new("swCarbon")
   expect_s4_class(x, "swCarbon")
-  expect_equal(x, swClear(x))
 
   # We currently don't have querry/replacement functions with signature 'swCarbon'
   # All these methods operate on the 'swCarbon' slot of signature 'swInputData'
