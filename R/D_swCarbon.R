@@ -94,11 +94,18 @@ setValidity("swCarbon", function(object) {
   val
 })
 
+setMethod("get_swCarbon", "swCarbon", function(object) object)
 setMethod("swCarbon_Use_Bio", "swCarbon", function(object) object@CarbonUseBio)
 setMethod("swCarbon_Use_WUE", "swCarbon", function(object) object@CarbonUseWUE)
 setMethod("swCarbon_Scenario", "swCarbon", function(object) object@Scenario)
 setMethod("swCarbon_DeltaYear", "swCarbon", function(object) object@DeltaYear)
 setMethod("swCarbon_CO2ppm", "swCarbon", function(object) object@CO2ppm)
+
+setReplaceMethod("set_swCarbon", signature = "swCarbon", function(object, value) {
+  object <- value
+  validObject(object)
+  object
+})
 
 setReplaceMethod("swCarbon_Use_Bio", signature = "swCarbon", function(object, value) {
   object@CarbonUseBio <- value

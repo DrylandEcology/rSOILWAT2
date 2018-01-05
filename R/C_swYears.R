@@ -87,11 +87,12 @@ setValidity("swYears", swYears_validity)
 
 
 
-setMethod("swYears_StartYear", "swYears", function(object) {return(object@StartYear)})
-setMethod("swYears_EndYear", "swYears", function(object) {return(object@EndYear)})
-setMethod("swYears_FDOFY", "swYears", function(object) {return(object@FDOFY)})
-setMethod("swYears_EDOEY", "swYears", function(object) {return(object@EDOEY)})
-setMethod("swYears_isNorth", "swYears", function(object) {return(object@isNorth)})
+setMethod("swYears_StartYear", "swYears", function(object) object@StartYear)
+setMethod("swYears_EndYear", "swYears", function(object) object@EndYear)
+setMethod("swYears_FDOFY", "swYears", function(object) object@FDOFY)
+setMethod("swYears_EDOEY", "swYears", function(object) object@EDOEY)
+setMethod("swYears_isNorth", "swYears", function(object) object@isNorth)
+
 setReplaceMethod("swYears_StartYear", signature = "swYears", function(object, value) {
   object@StartYear <- value
   validObject(object)
