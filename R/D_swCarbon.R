@@ -1,6 +1,6 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -15,6 +15,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###############################################################################
+
+# Author: Zach Kramer (2017); Daniel R Schlaepfer (2017-2018)
+##############################################
 
 
 #' Class "swCarbon"
@@ -36,18 +39,18 @@
 #'
 #' @name swCarbon-class
 #' @export
-setClass("swCarbon",
-  slots = c(CarbonUseBio = 'integer', CarbonUseWUE = 'integer',
-    Scenario = 'character', DeltaYear = 'integer', CO2ppm = 'matrix'))
+setClass("swCarbon", slots = c(CarbonUseBio = 'integer', CarbonUseWUE = 'integer',
+  Scenario = 'character', DeltaYear = 'integer', CO2ppm = 'matrix'))
 
 setMethod("initialize", signature = "swCarbon", function(.Object, ...) {
   def <- slot(inputData, "carbon")
+  sns <- slotNames(def)
+  dots <- list(...)
+  dns <- names(dots)
 
-  .Object@CarbonUseBio <- def@CarbonUseBio
-  .Object@CarbonUseWUE <- def@CarbonUseWUE
-  .Object@Scenario <- def@Scenario
-  .Object@DeltaYear <- def@DeltaYear
-  .Object@CO2ppm <- def@CO2ppm
+  for (sn in sns) {
+    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  }
 
   #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
   validObject(.Object)
@@ -86,19 +89,34 @@ setValidity("swCarbon", function(object) {
   val
 })
 
-setMethod("swCarbon_Use_Bio","swCarbon",function(object) {return(object@CarbonUseBio)})
-setMethod("swCarbon_Use_WUE","swCarbon",function(object) {return(object@CarbonUseWUE)})
-setMethod("swCarbon_Scenario","swCarbon",function(object) {return(object@Scenario)})
-setMethod("swCarbon_DeltaYear","swCarbon",function(object) {return(object@DeltaYear)})
-setMethod("swCarbon_CO2ppm", "swCarbon", function(object) {return(object@CO2ppm)})
-setReplaceMethod(f="swCarbon_Use_Bio",signature=c(object="swCarbon", value="integer"),function(object, value) {object@CarbonUseBio <- value; return(object)})
-setReplaceMethod(f="swCarbon_Use_WUE",signature=c(object="swCarbon", value="integer"),function(object, value) {object@CarbonUseWUE <- value; return(object)})
-setReplaceMethod(f="swCarbon_Scenario",signature=c(object="swCarbon", value="character"),function(object, value) {object@Scenario <- value; return(object)})
-setReplaceMethod(f="swCarbon_DeltaYear",signature=c(object="swCarbon", value="integer"),function(object, value) {object@DeltaYear <- value; return(object)})
-setReplaceMethod(f = "swCarbon_CO2ppm",
-                 signature = c(object = "swCarbon", value = "matrix"), function(object, value) {
-                   slot(object, "CO2ppm") <- value
-                   validObject(object)
-                   return(object)
-                 })
+setMethod("swCarbon_Use_Bio", "swCarbon", function(object) object@CarbonUseBio)
+setMethod("swCarbon_Use_WUE", "swCarbon", function(object) object@CarbonUseWUE)
+setMethod("swCarbon_Scenario", "swCarbon", function(object) object@Scenario)
+setMethod("swCarbon_DeltaYear", "swCarbon", function(object) object@DeltaYear)
+setMethod("swCarbon_CO2ppm", "swCarbon", function(object) object@CO2ppm)
 
+setReplaceMethod("swCarbon_Use_Bio", signature = "swCarbon", function(object, value) {
+  object@CarbonUseBio <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swCarbon_Use_WUE", signature = "swCarbon", function(object, value) {
+  object@CarbonUseWUE <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swCarbon_Scenario", signature = "swCarbon", function(object, value) {
+  object@Scenario <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swCarbon_DeltaYear", signature = "swCarbon", function(object, value) {
+  object@DeltaYear <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swCarbon_CO2ppm", signature = "swCarbon", function(object, value) {
+  object@CO2ppm <- value
+  validObject(object)
+  object
+})
