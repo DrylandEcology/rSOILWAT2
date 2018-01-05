@@ -5,9 +5,7 @@ test_that("Manipulate swCarbon", {
   x <- new("swCarbon")
   expect_s4_class(x, "swCarbon")
 
-  # We currently don't have querry/replacement functions with signature 'swCarbon'
-  # All these methods operate on the 'swCarbon' slot of signature 'swInputData'
-  xinput <- xinput2 <- new("swInputData")
+  xinput <- xinput2 <- new("swCarbon")
   expect_s4_class(get_swCarbon(xinput), "swCarbon")
   co2 <- as.matrix(data.frame(Year = 1951:2000, CO2ppm = 360 + seq_len(50) / 2))
   swCarbon_CO2ppm(xinput) <- co2
@@ -18,7 +16,7 @@ test_that("Manipulate swCarbon", {
   cco2 <- get_swCarbon(xinput)
   cco2_new <- new("swCarbon")
   expect_false(isTRUE(all.equal(cco2, cco2_new)))
-  cco2_new <- new("swCarbon", cco2)
+  set_swCarbon(cco2_new) <- cco2
   expect_equal(cco2, cco2_new)
   set_swCarbon(xinput2) <- cco2_new
   expect_equal(xinput, xinput2)
