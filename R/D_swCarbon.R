@@ -48,6 +48,11 @@ setMethod("initialize", signature = "swCarbon", function(.Object, ...) {
   dots <- list(...)
   dns <- names(dots)
 
+  if ("CO2ppm" %in% dns) {
+    # Guarantee dimnames
+    dimnames(dots[["CO2ppm"]]) <- dimnames(def@CO2ppm)
+  }
+
   for (sn in sns) {
     slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
   }
