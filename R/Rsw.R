@@ -104,9 +104,9 @@ sw_args <- function(dir, files.in, echo, quiet) {
 #'
 #' ## ------ Simulation with demonstration data ------------
 #' ## Access demonstration data (including daily weather forcing)
-#' sw_in <- sw_inputData()
+#' sw_in <- inputData
 #'
-#' ## Slots of the input object of class 'swInputData'
+#' ## Slots of the input object of \code{\linkS4class{swInputData}}
 #' str(sw_in, max.level = 2)
 #'
 #' ## Execute the simulation run
@@ -128,7 +128,7 @@ sw_args <- function(dir, files.in, echo, quiet) {
 #' ## Read inputs from files on disk (including daily weather forcing)
 #' sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 #'
-#' ## Slots of the input object of class 'swInputData'
+#' ## Slots of the input object of \code{\linkS4class{swInputData}}
 #' str(sw_in2, max.level = 2)
 #'
 #' ## Execute the simulation run
@@ -268,7 +268,7 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
 #' ## Read inputs from files on disk (including daily weather forcing)
 #' sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 #'
-#' ## Slots of the input object of class 'swInputData'
+#' ## Slots of the input object of \code{\linkS4class{swInputData}}
 #' str(sw_in2, max.level=2)
 #'
 #' ## Execute the simulation run
@@ -288,6 +288,9 @@ sw_inputDataFromFiles <- function(dir = "", files.in = "files.in") {
 
 
 #' Return output data
+#'
+#' @param inputData An object of class \code{\linkS4class{swInputData}}.
+#' @return An object of class \code{\linkS4class{swOutput}}.
 #' @export
 sw_outputData <- function(inputData) {
 
@@ -345,9 +348,9 @@ sw_outputData <- function(inputData) {
 #'
 #' ## ------ Simulation with demonstration data ------------
 #' ## Access demonstration data (including daily weather forcing)
-#' sw_in <- sw_inputData()
+#' sw_in <- inputData
 #'
-#' ## Slots of the input object of class 'swInputData'
+#' ## Slots of the input object of class \code{\linkS4class{swInputData}}
 #' str(sw_in, max.level=2)
 #'
 #' ## Execute the simulation run
@@ -358,7 +361,7 @@ sw_inputData <- function() {
   dir_prev <- getwd()
   on.exit(setwd(dir_prev), add = TRUE)
 
-  temp <- new("swInputData") # data are from prototypes
+  temp <- new("swInputData") # data are from calls to `initialize`-methods
   data(package = "rSOILWAT2", "weatherData", envir = environment())
   slot(temp, "weatherHistory") <- get("weatherData", envir = environment())
 

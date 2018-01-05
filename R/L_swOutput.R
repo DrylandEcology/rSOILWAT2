@@ -1,6 +1,6 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,12 +17,11 @@
 ###############################################################################
 
 
-# This File is the object that will hold all the output from Soilwat.
-#
-# Author: Ryan Murphy
+# Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2013-2018)
 ###############################################################################
 
 
+# TODO: link this to C code
 #' Slot names of \linkS4class{swOutput}
 #' @return Standardized named vector for easier access to slots of class
 #'  \linkS4class{swOutput}.
@@ -60,21 +59,31 @@ sw_out_flags <- function() {
 setClass("swOutput_KEY", slot = c(Title = "character", TimeStep = "integer",
   Columns = "integer", Day = "matrix", Week = "matrix", Month = "matrix", Year = "matrix"))
 
-setMethod("swOutput_KEY_Period", signature = "swOutput_KEY", function(object, index) {
-  slot(object, slotNames(object)[-(1:3)][index])
-})
-setMethod("swOutput_KEY_TimeStep", signature = "swOutput_KEY", function(object) {
-  if (length(object@TimeStep) == 1 & object@TimeStep <= 4) {
-    return(object@TimeStep)
-  } else stop("TimeStep to long or out of Range.")
-})
-setMethod("swOutput_KEY_Columns", signature = "swOutput_KEY", function(object) {
-  object@Columns
+setValidity("swOutput_KEY", function(object) {
+  val <- TRUE
+  ntemp <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
+
+  if (length(object@TimeStep) != 1 || object@TimeStep > ntemp || object@TimeStep < 1) {
+    msg <- paste("@TimeStep must have exactly 1 value between 1 and SW_OUTNPERIODS")
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  val
 })
 
+#TODO: use something like C pd2str to access slot
+setMethod("swOutput_KEY_Period", signature = "swOutput_KEY", function(object, index) {
+  switch(EXPR = as.integer(index), object@Day, object@Week, object@Month, object@Year)
+})
+setMethod("swOutput_KEY_TimeStep", signature = "swOutput_KEY", function(object) object@TimeStep)
+setMethod("swOutput_KEY_Columns", signature = "swOutput_KEY", function(object) object@Columns)
+
+#TODO: use something like C pd2str to access slot
 setReplaceMethod("swOutput_KEY_Period", signature = "swOutput_KEY",
   function(object, index, value) {
-    slot(object, slotNames(object)[-(1:3)][index]) <- value
+    sn <- switch(EXPR = as.integer(index), "Day", "Week", "Month", "Year")
+    slot(object, sn) <- value
+    validObject(object)
     object
   }
 )
@@ -96,26 +105,17 @@ setClass("swOutput", slot = c(yr_nrow = "integer", mo_nrow = "integer",
   ESTABL = "swOutput_KEY", CO2EFFECTS = "swOutput_KEY"))
 
 
-setMethod("$", signature = "swOutput", function(x, name) {slot(x, name)})
+setMethod("$", signature = "swOutput", function(x, name) slot(x, name))
+
+#TODO: use C key2str to access slot
 setMethod("swOutput_getKEY", signature = "swOutput", function(object, index) {
-  slot(object, slotNames(object)[-(1:4)][index])
+  slot(object, slotNames("swOutput")[-(1:4)][index])
 })
 
+#TODO: use C key2str to access slot
 setReplaceMethod("swOutput_getKEY", signature = c(object = "swOutput", value = "swOutput_KEY"),
   function(object, index, value) {
-    slot(object, slotNames(object)[-(1:4)][index]) <- value
+    slot(object, slotNames("swOutput")[-(1:4)][index]) <- value
     object
   }
 )
-
-setMethod("initialize", signature = "swOutput", function(.Object, ...) {
-  # prepare yearly output
-  x <- inputData
-  swOUT_TimeStep(x) <- 3L
-  swOUT_useTimeStep(x) <- TRUE
-  .Object <- sw_outputData(x)
-
-  validObject(.Object)
-  .Object
-})
-

@@ -51,7 +51,7 @@ examples for \code{\link{sw_exec}}).
 ## Access demonstration data (including daily weather forcing)
 sw_in <- sw_inputData()
 
-## Slots of the input object of class 'swInputData'
+## Slots of the input object of \\code{\\linkS4class{swInputData}}
 str(sw_in, max.level=2)
 
 ## Execute the simulation run
