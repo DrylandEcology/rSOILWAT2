@@ -1,6 +1,6 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,9 +17,7 @@
 ###############################################################################
 
 
-# TODO: Add comment
-#
-# Author: Ryan J. Murphy (2013)
+# Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2013-2018)
 ###############################################################################
 
 
@@ -103,26 +101,25 @@ setValidity("swSite", function(object) {
 
 setMethod(f = "initialize", signature = "swSite", function(.Object, ...) {
   def <- slot(inputData, "site")
+  sns <- slotNames(def)
+  dots <- list(...)
+  dns <- names(dots)
 
   # We don't set values for slots `IntrinsicSiteParams` and `TranspirationRegions`; this is to
   # prevent simulation runs with accidentally incorrect values
-  temp <- def@IntrinsicSiteParams
-  temp[c("Latitude", "Altitude")] <- NA_real_
-  .Object@IntrinsicSiteParams <- def@IntrinsicSiteParams
+  if (!("IntrinsicSiteParams" %in% dns)) {
+    def@IntrinsicSiteParams[c("Latitude", "Altitude")] <- NA_real_
+  }
+  if (!("TranspirationRegions" %in% dns)) {
+    def@TranspirationRegions[, "layer"] <- NA_real_
+  } else {
+    # Guarantee dimnames
+    dimnames(dots[["TranspirationRegions"]]) <- dimnames(def@TranspirationRegions)
+  }
 
-  temp <- def@TranspirationRegions
-  temp[, "layer"] <- NA_integer_
-  .Object@TranspirationRegions <- def@TranspirationRegions
-
-  .Object@SWClimits <- def@SWClimits
-  .Object@ModelFlags <- def@ModelFlags
-  .Object@ModelCoefficients <- def@ModelCoefficients
-  .Object@SnowSimulationParameters <- def@SnowSimulationParameters
-  .Object@DrainageCoefficient <- def@DrainageCoefficient
-  .Object@EvaporationCoefficients <- def@EvaporationCoefficients
-  .Object@TranspirationCoefficients <- def@TranspirationCoefficients
-  .Object@SoilTemperatureFlag <- def@SoilTemperatureFlag
-  .Object@SoilTemperatureConstants <- def@SoilTemperatureConstants
+  for (sn in sns) {
+    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  }
 
   #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
   validObject(.Object)
@@ -130,6 +127,7 @@ setMethod(f = "initialize", signature = "swSite", function(.Object, ...) {
 })
 
 
+setMethod("get_swSite", "swSite", function(object) object)
 setMethod("swSite_SWClimits", "swSite", function(object) slot(object, "SWClimits"))
 setMethod("swSite_ModelFlags", "swSite", function(object) slot(object, "ModelFlags"))
 setMethod("swSite_ModelCoefficients", "swSite", function(object) slot(object, "ModelCoefficients"))
@@ -142,57 +140,63 @@ setMethod("swSite_SoilTemperatureFlag", "swSite", function(object) slot(object, 
 setMethod("swSite_SoilTemperatureConsts", "swSite", function(object) slot(object, "SoilTemperatureConstants"))
 setMethod("swSite_TranspirationRegions", "swSite", function(object) slot(object, "TranspirationRegions"))
 
-setReplaceMethod(f = "swSite_SWClimits", signature = "swSite", definition = function(object, value) {
+setReplaceMethod("set_swSite", signature = "swSite", definition = function(object, value) {
+  object <- value
+  validObject(object)
+  object
+})
+
+setReplaceMethod("swSite_SWClimits", signature = "swSite", definition = function(object, value) {
   slot(object, "SWClimits") <- value
   validObject(object)
   object
 })
-setReplaceMethod(f = "swSite_ModelFlags", signature = "swSite", definition = function(object, value) {
+setReplaceMethod("swSite_ModelFlags", signature = "swSite", definition = function(object, value) {
   slot(object, "ModelFlags") <- value
   validObject(object)
   object
 })
-setReplaceMethod(f = "swSite_ModelCoefficients", signature = "swSite", definition = function(object, value) {
+setReplaceMethod("swSite_ModelCoefficients", signature = "swSite", definition = function(object, value) {
   slot(object, "ModelCoefficients") <- value
   validObject(object)
   object
 })
-setReplaceMethod(f = "swSite_SnowSimulationParams", signature = "swSite", definition = function(object, value) {
+setReplaceMethod("swSite_SnowSimulationParams", signature = "swSite", definition = function(object, value) {
   slot(object, "SnowSimulationParameters") <- value
   validObject(object)
   object
 })
-setReplaceMethod(f = "swSite_DrainageCoefficient", signature = "swSite", definition = function(object, value) {
+setReplaceMethod("swSite_DrainageCoefficient", signature = "swSite", definition = function(object, value) {
   slot(object, "DrainageCoefficient") <- value
   validObject(object)
   object
 })
-setReplaceMethod(f = "swSite_EvapCoefficients", signature = "swSite", definition = function(object, value) {
+setReplaceMethod("swSite_EvapCoefficients", signature = "swSite", definition = function(object, value) {
   slot(object, "EvaporationCoefficients") <- value
   validObject(object)
   object
 })
-setReplaceMethod(f = "swSite_TranspCoefficients", signature = "swSite", definition = function(object, value) {
+setReplaceMethod("swSite_TranspCoefficients", signature = "swSite", definition = function(object, value) {
   slot(object, "TranspirationCoefficients") <- value
   validObject(object)
   object
 })
-setReplaceMethod(f = "swSite_IntrinsicSiteParams", signature = "swSite", definition = function(object, value) {
+setReplaceMethod("swSite_IntrinsicSiteParams", signature = "swSite", definition = function(object, value) {
   slot(object, "IntrinsicSiteParams") <- value
   validObject(object)
   object
 })
-setReplaceMethod(f = "swSite_SoilTemperatureFlag", signature = "swSite", definition = function(object, value) {
+setReplaceMethod("swSite_SoilTemperatureFlag", signature = "swSite", definition = function(object, value) {
   slot(object, "SoilTemperatureFlag") <- value
   validObject(object)
   object
 })
-setReplaceMethod(f = "swSite_SoilTemperatureConsts", signature = "swSite", definition = function(object, value) {
+setReplaceMethod("swSite_SoilTemperatureConsts", signature = "swSite", definition = function(object, value) {
   slot(object, "SoilTemperatureConstants") <- value
   validObject(object)
   object
 })
-setReplaceMethod(f = "swSite_TranspirationRegions", signature = "swSite", definition = function(object, value) {
+setReplaceMethod("swSite_TranspirationRegions", signature = "swSite", definition = function(object, value) {
   slot(object, "TranspirationRegions") <- value
   validObject(object)
   object
@@ -200,7 +204,8 @@ setReplaceMethod(f = "swSite_TranspirationRegions", signature = "swSite", defini
 
 
 
-setMethod("swReadLines", signature=c(object="swSite",file="character"), definition=function(object,file) {
+setMethod("swReadLines", signature = c(object="swSite",file="character"), function(object,file) {
+  print("TODO: method 'swReadLines' is not up-to-date; hard-coded indices are incorrect")
 			infiletext <- readLines(con = file)
 			object@SWClimits[1] = readNumeric(infiletext[2])
 			object@SWClimits[2] = readNumeric(infiletext[3])
