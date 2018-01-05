@@ -1,6 +1,6 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,32 +17,52 @@
 ###############################################################################
 
 
-# TODO: Add comment
-#
-# Author: ryan
+# Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2013-2018)
 ###############################################################################
 
 ###############################################################SOILS#####################################################################
 #' @export
 setClass("swSoils", slots = c(Layers = "matrix"))
 
-swSoilLayers_validity<-function(object){
-	if(dim(object@Layers)[1]==0)
-		return("@Layers has to have some Layers.")
-	if(dim(object@Layers)[2]!=12)
-		return("@Layers has to have 12 columns.")
-	TRUE
+swSoilLayers_validity <- function(object) {
+  val <- TRUE
+  temp <- dim(object@Layers)
+
+  if (temp[1] == 0) {
+    msg <- "@Layers must have at least one row/soil layer."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+  if (temp[2] != 12) {
+    msg <- paste("@Layers must have exactly 12 columns corresponding to",
+      "depth_cm, bulkDensity_g/cm^3, gravel_content, EvapBareSoil_frac, transpGrass_frac,",
+      "transpShrub_frac, transpTree_frac, transpForb_frac, sand_frac, clay_frac,",
+      "impermeability_frac, soilTemp_c")
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  val
 }
-setValidity("swSoils",swSoilLayers_validity)
+setValidity("swSoils", swSoilLayers_validity)
 
 setMethod("initialize", signature = "swSoils", function(.Object, ...) {
   def <- slot(inputData, "soils")
+  sns <- slotNames(def)
+  dots <- list(...)
+  dns <- names(dots)
 
-  # We don't set values for slot `Layers`; this is to prevent simulation runs with
-  # accidentally incorrect values
-  temp <- def@Layers
-  temp[] <- NA_real_
-  .Object@Layers <- temp[1, ]
+  # We don't set values for slot `Layers` if not passed via ...; this
+  # is to prevent simulation runs with accidentally incorrect values
+  if (!("Layers" %in% dns)) {
+    def@Layers <- def@Layers[1, , drop = FALSE]
+    def@Layers[] <- NA_real_
+  } else {
+    # Guarantee dimnames
+    dimnames(dots[["Layers"]]) <- dimnames(def@Layers)
+  }
+
+  for (sn in sns) {
+    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  }
 
   #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
   validObject(.Object)
@@ -50,7 +70,24 @@ setMethod("initialize", signature = "swSoils", function(.Object, ...) {
 })
 
 
-setMethod("swReadLines", signature=c(object="swSoils",file="character"), definition=function(object,file) {
+setMethod("get_swSoils", "swSoils", function(object) object)
+setMethod("swSoils_Layers", "swSoils", function(object) object@Layers)
+
+setReplaceMethod("set_swSoils", signature = c(object = "swSoils", value = "swSoils"),
+  function(object, value) {
+    object <- value
+    validObject(object)
+    object
+})
+setReplaceMethod("swSoils_Layers", signature = c(object = "swSoils", value = "matrix"),
+  function(object, value) {
+    object@Layers <- value
+    validObject(object)
+    object
+})
+
+
+setMethod("swReadLines", signature = c(object="swSoils",file="character"), function(object,file) {
 			infiletext <- readLines(con = file)
 			infiletext <- infiletext[infiletext!=""]#get rid of extra spaces
 			infiletext <- infiletext[17:length(infiletext)]#get rid of comments
