@@ -1,6 +1,6 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,9 +17,7 @@
 ###############################################################################
 
 
-# TODO: Add comment
-#
-# Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2016)
+# Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2013-2018)
 ###############################################################################
 
 #######################Monthly Scaling Params#################################
@@ -28,18 +26,38 @@
 setClass("swMonthlyScalingParams", slots = c(MonthlyScalingParams = "matrix"))
 
 setValidity("swMonthlyScalingParams", function(object) {
-  if (identical(dim(object@MonthlyScalingParams), c(12L, 7L))) {
-		TRUE
-	} else {
-		paste("@MonthlyScalingParams requires an input of 12 rows and 7 columns instead of", paste(dim(object@MonthlyScalingParams), collapse = " by "))
-	}
+  val <- TRUE
+  temp <- dim(object@MonthlyScalingParams)
+
+  if (temp[2] != 7) {
+    msg <- paste("@MonthlyScalingParams must have exactly 7 columns corresponding to",
+      "PPT, MaxT, MinT, SkyCover, Wind, rH, Transmissivity")
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+  if (temp[1] != 12) {
+    msg <- paste("@MonthlyScalingParams must have exactly 12 rows corresponding months.")
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  val
 })
 
 setMethod("initialize", signature = "swMonthlyScalingParams", function(.Object, ...) {
   def <- slot(inputData, "weather")
+  sns <- slotNames("swMonthlyScalingParams")
+  dots <- list(...)
+  dns <- names(dots)
 
-  .Object@MonthlyScalingParams <- def@MonthlyScalingParams
+  if ("MonthlyScalingParams" %in% dns) {
+    # Guarantee dimnames
+    dimnames(dots[["MonthlyScalingParams"]]) <- dimnames(def@MonthlyScalingParams)
+  }
 
+  for (sn in sns) {
+    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  }
+
+  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
   validObject(.Object)
   .Object
 })
@@ -55,34 +73,29 @@ setClass("swWeather", slots = c(UseSnow = "logical", pct_SnowDrift = "numeric",
   contains = "swMonthlyScalingParams")
 
 setValidity("swWeather", function(object) {
-  msg <- NULL
+  val <- TRUE
+  sns <- setdiff(slotNames("swWeather"), inheritedSlotNames("swWeather"))
 
-	if (length(object@UseSnow) != 1)
-		msg <- c(msg, "@UseSnow needs to be of length 1.")
-	if (length(object@pct_SnowDrift) != 1)
-		msg <- c(msg, "@pct_SnowDrift needs to be of length 1.")
-	if (length(object@pct_SnowRunoff) != 1)
-		msg <- c(msg, "@pct_SnowRunoff needs to be of length 1.")
-	if (length(object@use_Markov) != 1)
-		msg <- c(msg, "@use_Markov needs to be of length 1.")
-	if (length(object@FirstYear_Historical) != 1)
-		msg <- c(msg, "@FirstYear_Historical needs to be of length 1.")
-	if (length(object@DaysRunningAverage) != 1)
-		msg <- c(msg, "@DaysRunningAverage needs to be of length 1.")
+  for (sn in sns) {
+    if (length(slot(object, sn)) != 1) {
+      msg <- paste0("@", sn, " must have exactly one value.")
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+  }
 
-  if (is.null(msg)) TRUE else msg
+  val
 })
 
 
 setMethod("initialize", signature = "swWeather", function(.Object, ...) {
   def <- slot(inputData, "weather")
+  sns <- setdiff(slotNames("swWeather"), inheritedSlotNames("swWeather"))
+  dots <- list(...)
+  dns <- names(dots)
 
-  .Object@UseSnow <- def@UseSnow
-  .Object@pct_SnowDrift <- def@pct_SnowDrift
-  .Object@pct_SnowRunoff <- def@pct_SnowRunoff
-  .Object@use_Markov <- def@use_Markov
-  .Object@FirstYear_Historical <- def@FirstYear_Historical
-  .Object@DaysRunningAverage <- def@DaysRunningAverage
+  for (sn in sns) {
+    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  }
 
   .Object <- callNextMethod(.Object, ...)
   validObject(.Object)
@@ -100,13 +113,41 @@ setMethod("swWeather_UseMarkov", "swWeather", function(object) object@use_Markov
 setMethod("swWeather_UseSnow", "swWeather", function(object) object@UseSnow)
 setMethod("swWeather_MonScalingParams", "swWeather", function(object) object@MonthlyScalingParams)
 
-setReplaceMethod("swWeather_DaysRunningAverage", signature = "swWeather",function(object,value) initialize(object, DaysRunningAverage = value))
-setReplaceMethod("swWeather_FirstYearHistorical", signature = "swWeather",function(object,value) initialize(object, FirstYear_Historical = value))
-setReplaceMethod("swWeather_pct_SnowDrift", signature = "swWeather",function(object,value) initialize(object, pct_SnowDrift = value))
-setReplaceMethod("swWeather_pct_SnowRunoff", signature = "swWeather",function(object,value) initialize(object, pct_SnowRunoff = value))
-setReplaceMethod("swWeather_UseMarkov", signature = "swWeather",function(object,value) initialize(object, use_Markov = value))
-setReplaceMethod("swWeather_UseSnow", signature = "swWeather",function(object,value) initialize(object, UseSnow = value))
-setReplaceMethod("swWeather_MonScalingParams", signature = "swWeather", function(object, value) initialize(object, MonthlyScalingParams = value))
+setReplaceMethod("swWeather_DaysRunningAverage", signature = "swWeather", function(object, value) {
+  object@DaysRunningAverage <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swWeather_FirstYearHistorical", signature = "swWeather", function(object, value) {
+  object@FirstYear_Historical <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swWeather_pct_SnowDrift", signature = "swWeather", function(object, value) {
+  object@pct_SnowDrift <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swWeather_pct_SnowRunoff", signature = "swWeather", function(object, value) {
+  object@pct_SnowRunoff <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swWeather_UseMarkov", signature = "swWeather", function(object, value) {
+  object@use_Markov <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swWeather_UseSnow", signature = "swWeather", function(object, value) {
+  object@UseSnow <- value
+  validObject(object)
+  object
+})
+setReplaceMethod("swWeather_MonScalingParams", signature = "swWeather", function(object, value) {
+  object@MonthlyScalingParams <- value
+  validObject(object)
+  object
+})
 
 
 
