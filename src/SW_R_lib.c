@@ -69,7 +69,7 @@ extern SW_VEGESTAB SW_VegEstab;
 SEXP tempError(void) {
 	SEXP swR_temp_error;
 	PROTECT(swR_temp_error = NEW_LOGICAL(1));
-	LOGICAL_POINTER(swR_temp_error)[0] = SW_Soilwat.partsError == 1;
+	LOGICAL_POINTER(swR_temp_error)[0] = SW_Soilwat.partsError;
 	UNPROTECT(1);
 	return swR_temp_error;
 }
@@ -146,7 +146,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 }
 
 SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
-	int debug = 1;
+	int debug = 0;
 	SEXP outputData, swLog, oRlogfile;
 
 	collectInData = FALSE;
