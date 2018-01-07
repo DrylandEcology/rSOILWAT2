@@ -211,17 +211,17 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
     output aggregation types, `OutAggs`.
  */
 SEXP sw_consts(void) {
-  const int nret = 5;
-  const int nINT = 9;
+  const int nret = 5; // length of cret
+  const int nINT = 9; // length of vINT and cINT
 
   SEXP ret, cnames, ret_int, ret_str1, ret_str2, ret_str3, ret_infiles;
   int i;
   int *pvINT;
-  char *cret[nret] = {"kINT", "OutKeys", "OutPeriods", "OutAggs", "InFiles"};
+  char *cret[] = {"kINT", "OutKeys", "OutPeriods", "OutAggs", "InFiles"};
 
-  int vINT[nINT] = {SW_NFILES, MAX_LAYERS, MAX_TRANSP_REGIONS, MAX_NYEAR, SW_MISSING,
+  int vINT[] = {SW_NFILES, MAX_LAYERS, MAX_TRANSP_REGIONS, MAX_NYEAR, SW_MISSING,
     SW_OUTNPERIODS, SW_OUTNKEYS, SW_NSUMTYPES, NVEGTYPES};
-  char *cINT[nINT] = {"SW_NFILES", "MAX_LAYERS", "MAX_TRANSP_REGIONS", "MAX_NYEAR", "SW_MISSING",
+  char *cINT[] = {"SW_NFILES", "MAX_LAYERS", "MAX_TRANSP_REGIONS", "MAX_NYEAR", "SW_MISSING",
     "SW_OUTNPERIODS", "SW_OUTNKEYS", "SW_NSUMTYPES", "NVEGTYPES"};
   char *vSTR1[] = {SW_WETHR, SW_TEMP, SW_PRECIP, SW_SOILINF, SW_RUNOFF,
     SW_ALLH2O, SW_VWCBULK, SW_VWCMATRIC, SW_SWCBULK, SW_SWABULK,
@@ -239,7 +239,7 @@ SEXP sw_consts(void) {
   char *cSTR2[] = {"SW_DAY", "SW_WEEK", "SW_MONTH", "SW_YEAR"};
   char *vSTR3[] = {SW_SUM_OFF, SW_SUM_SUM, SW_SUM_AVG, SW_SUM_FNL}; // TODO: this is identical to SW_Output.c/styp2str
   char *cSTR3[] = {"SW_SUM_OFF", "SW_SUM_SUM", "SW_SUM_AVG", "SW_SUM_FNL"};
-  char *cInF[SW_NFILES] = {"eFirst", "eModel", "eLog", "eSite", "eLayers", "eWeather",
+  char *cInF[] = {"eFirst", "eModel", "eLog", "eSite", "eLayers", "eWeather",
     "eMarkovProb",  "eMarkovCov", "eSky", "eVegProd", "eVegEstab", "eCarbon", "eSoilwat",
     "eOutput"}; // TODO: this must match SW_Files.h/SW_FileIndex
 
