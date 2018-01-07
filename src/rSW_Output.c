@@ -354,12 +354,13 @@ SEXP onGetOutput(SEXP inputData) {
 
 			PROTECT(stemp_KEY = NEW_OBJECT(swOutput_KEY));
 
-			SET_SLOT(stemp_KEY, install("Title"), STRING_ELT(outfile, k));
+			SET_SLOT(stemp_KEY, install("Title"), mkString(Str_Dup(CHAR(STRING_ELT(outfile, k)))));
 			SET_SLOT(stemp_KEY, install("Columns"), ScalarInteger(ncol_OUT[k]));
 
 			PROTECT(rTimeStep = NEW_INTEGER(used_OUTNPERIODS));
-			for (i = 0; i < used_OUTNPERIODS; i++)
+			for (i = 0; i < used_OUTNPERIODS; i++) {
 				INTEGER(rTimeStep)[i] = timeSteps[k][i];
+			}
 			SET_SLOT(stemp_KEY, install("TimeStep"), rTimeStep);
 
 			for (i = 0; i < used_OUTNPERIODS; i++) {
