@@ -71,18 +71,15 @@ setValidity("swOutput_KEY", function(object) {
   val
 })
 
-#TODO: use something like C pd2str to access slot
 setMethod("swOutput_KEY_Period", signature = "swOutput_KEY", function(object, index) {
-  switch(EXPR = as.integer(index), object@Day, object@Week, object@Month, object@Year)
+  slot(object, rSW2_glovars[["sw_TimeSteps"]][index])
 })
 setMethod("swOutput_KEY_TimeStep", signature = "swOutput_KEY", function(object) object@TimeStep)
 setMethod("swOutput_KEY_Columns", signature = "swOutput_KEY", function(object) object@Columns)
 
-#TODO: use something like C pd2str to access slot
 setReplaceMethod("swOutput_KEY_Period", signature = "swOutput_KEY",
   function(object, index, value) {
-    sn <- switch(EXPR = as.integer(index), "Day", "Week", "Month", "Year")
-    slot(object, sn) <- value
+    slot(object, rSW2_glovars[["sw_TimeSteps"]][index]) <- value
     validObject(object)
     object
   }
