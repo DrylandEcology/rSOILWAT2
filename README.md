@@ -6,7 +6,7 @@
 [1]: https://travis-ci.org/DrylandEcology/rSOILWAT2.svg?branch=master
 [2]: https://travis-ci.org/DrylandEcology/rSOILWAT2
 [3]: https://ci.appveyor.com/api/projects/status/3bgvcsokr27bo1uh/branch/master?svg=true
-[4]: https://ci.appveyor.com/project/dschlaep/rSOILWAT2/branch/master
+[4]: https://ci.appveyor.com/project/DrylandEcologyGit/rSOILWAT2/branch/master
 [5]: https://img.shields.io/github/release/DrylandEcology/rSOILWAT2.svg?label=current+release
 [6]: https://github.com/DrylandEcology/rSOILWAT2/releases
 [7]: https://img.shields.io/github/license/DrylandEcology/rSOILWAT2.svg
