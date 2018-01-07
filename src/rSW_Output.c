@@ -270,16 +270,20 @@ SEXP onGetOutput(SEXP inputData) {
 	int debug = 0;
 	int i, l, tYears;
 	OutKey k;
-	int pOPuse[SW_OUTNPERIODS];
+	int pOPuse[SW_OUTNPERIODS] = {0};
 	int *use;
 	SEXP swOutput, swOutput_Object, outfile, years, swOutput_KEY, stemp_KEY, rTimeStep,
 		xKEY, xKEY_names, xKEY_cnames;
 
 	char *cSWoutput_Names[] = {"yr_nrow", "mo_nrow", "wk_nrow", "dy_nrow"};
 
-
 	PROTECT(swOutput = MAKE_CLASS("swOutput"));
 	PROTECT(swOutput_Object = NEW_OBJECT(swOutput));
+
+	if (used_OUTNPERIODS <= 0) {
+		UNPROTECT(2);
+		return(swOutput_Object);
+	}
 
   // Determine which output is turned on
 	use = LOGICAL(GET_SLOT(GET_SLOT(inputData, install("output")), install("use")));
@@ -289,10 +293,11 @@ SEXP onGetOutput(SEXP inputData) {
 	PROTECT(years = GET_SLOT(inputData, install("years")));
 	tYears = (INTEGER(GET_SLOT(years, install("EndYear")))[0] - INTEGER(GET_SLOT(years, install("StartYear")))[0] + 1);
 
-	// Determine name of outfile for output key k
+	// Determine name of outfile for output key
 	PROTECT(outfile = GET_SLOT(GET_SLOT(inputData, install("output")), install("outfile")));
+
+	// Determine which output periods are turned on for at least one output key
 	ForEachOutKey(k) {
-		// Determine which output periods are turned on for at least one output key
 		for (i = 0; i < used_OUTNPERIODS; i++) {
 			switch (timeSteps[k][i]) {
 				case eSW_Day:
@@ -338,11 +343,6 @@ SEXP onGetOutput(SEXP inputData) {
 	SET_SLOT(swOutput_Object, install(cSWoutput_Names[1]), ScalarInteger(mo_nrow));
 	SET_SLOT(swOutput_Object, install(cSWoutput_Names[2]), ScalarInteger(wk_nrow));
 	SET_SLOT(swOutput_Object, install(cSWoutput_Names[3]), ScalarInteger(dy_nrow));
-
-
-	// Number and names of columns for output matrices
-	SW_OUT_set_ncol();
-	SW_OUT_set_colnames();
 
 
 	// KEYS

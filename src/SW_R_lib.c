@@ -146,7 +146,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 }
 
 SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
-	int debug = 0;
+	int debug = 1;
 	SEXP outputData, swLog, oRlogfile;
 
 	collectInData = FALSE;
@@ -185,6 +185,8 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 	rSW_CTL_obtain_inputs();
 
   if (debug) swprintf(" setup output variables ...");
+	SW_OUT_set_ncol();
+	SW_OUT_set_colnames();
 	PROTECT(outputData = onGetOutput(inputData));
 	setGlobalrSOILWAT2_OutputVariables(outputData);
 
