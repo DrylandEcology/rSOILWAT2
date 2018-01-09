@@ -524,7 +524,7 @@ setMethod("swSWC_prefix", "swInputData", function(object) swSWC_prefix(object@sw
 setMethod("swSWC_FirstYear", "swInputData", function(object) swSWC_FirstYear(object@swc))
 setMethod("swSWC_Method", "swInputData", function(object) swSWC_Method(object@swc))
 setMethod("swSWC_HistoricList", "swInputData", function(object) swSWC_HistoricList(object@swc))
-setMethod("swSWC_HistoricData", "swInputData", function(object, year) swSWC_HistoricList(object@swc, year))
+setMethod("swSWC_HistoricData", "swInputData", function(object, year) swSWC_HistoricData(object@swc, year))
 
 setReplaceMethod("set_swSWC", signature = c(object = "swInputData", value = "swSWC"),
   function(object, value) {
