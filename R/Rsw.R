@@ -376,3 +376,66 @@ sw_inputData <- function() {
 has_soilTemp_failed <- function() {
   .Call(C_tempError)
 }
+
+
+
+#' Assign requested values to (scalar) input flags
+#'
+#' @param reset A logical value. If \code{TRUE}, then reset flags identified by \code{tag}
+#'  and turned off as identified by \code{use} to \code{default}. If \code{FALSE}, then
+#'  set  flags identified by \code{tag} and turned on as identified by \code{use} to
+#'  corresponding elements of \code{values}; other flags are not changed.
+set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE, default = NA) {
+
+  if (!inherits(swIn, "swInputData")) {
+    stop(paste("ERROR: argument 'swIn' is not a class 'swInputData' object."))
+  }
+
+  val_names <- names(use)
+  i_flags <- grepl(tag, val_names)
+  i_fuse <- i_flags & use
+
+  if (any(i_fuse)) {
+    i_fuse <- which(i_fuse)
+    val_names <- val_names[i_fuse]
+    vals <- unlist(values[i_fuse])
+    temp_bad <- !is.finite(as.numeric(vals))
+
+    if (any(temp_bad)) {
+      stop(paste("ERROR: column(s) of", tag,
+        paste(shQuote(val_names[temp_bad]), "=", vals[temp_bad], collapse = " / "),
+        "contain(s) unsuitable values"))
+
+    } else {
+      def <- get(fun)(swIn)
+
+      def_mode <- mode(def)
+      if (!identical(def_mode, mode(vals))) {
+        vals <- as(vals, def_mode)
+      }
+
+      # Check dimensional agreement
+      ndim_gt1_vals <- sum(dim(data.frame(vals)) > 1)
+      ndim_gt1_def <- sum(dim(data.frame(def)) > 1)
+      if (!(ndim_gt1_vals == 1 && ndim_gt1_def == 1)) {
+        stop(paste("ERROR:", paste(shQuote(val_names), collapse = ", "),
+          "are not represented as 1-dimensional objects in class 'swInputData'."))
+
+      } else {
+        # Transfer values
+        itemp <- sapply(names(def), function(x) {
+          k <- grep(substr(x, 1, 4), val_names)
+          if (length(k) == 1) k else 0})
+        def[itemp > 0] <- vals[itemp]
+
+        if (reset) {
+          def[itemp == 0] <- default
+        }
+
+        swIn <- get(paste0(fun, "<-"))(swIn, def)
+      }
+    }
+  }
+
+  swIn
+}
