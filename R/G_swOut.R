@@ -121,7 +121,7 @@ setReplaceMethod("set_swOUT", signature = "swOUT", function(object, value) {
   object
 })
 setReplaceMethod("swOUT_TimeStep", signature = "swOUT", function(object, value) {
-  object@timeSteps[] <- value
+  object@timeSteps <- value
   validObject(object)
   object
 })
