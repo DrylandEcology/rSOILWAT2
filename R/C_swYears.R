@@ -94,27 +94,27 @@ setMethod("swYears_EDOEY", "swYears", function(object) object@EDOEY)
 setMethod("swYears_isNorth", "swYears", function(object) object@isNorth)
 
 setReplaceMethod("swYears_StartYear", signature = "swYears", function(object, value) {
-  object@StartYear <- value
+  object@StartYear <- as.integer(value)
   validObject(object)
   object
 })
 setReplaceMethod("swYears_EndYear", signature = "swYears", function(object, value) {
-  object@EndYear <- value
+  object@EndYear <- as.integer(value)
   validObject(object)
   object
 })
 setReplaceMethod("swYears_FDOFY", signature = "swYears", function(object, value) {
-  object@FDOFY <- value
+  object@FDOFY <- as.integer(value)
   validObject(object)
   object
 })
 setReplaceMethod("swYears_EDOEY", signature = "swYears", function(object, value) {
-  object@EDOEY <- value
+  object@EDOEY <- as.integer(value)
   validObject(object)
   object
 })
 setReplaceMethod("swYears_isNorth", signature = "swYears", function(object, value) {
-  object@isNorth <- value
+  object@isNorth <- as.logical(value)
   validObject(object)
   object
 })

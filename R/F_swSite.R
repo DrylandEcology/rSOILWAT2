@@ -147,57 +147,57 @@ setReplaceMethod("set_swSite", signature = "swSite", definition = function(objec
 })
 
 setReplaceMethod("swSite_SWClimits", signature = "swSite", definition = function(object, value) {
-  slot(object, "SWClimits") <- value
+  object@SWClimits[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swSite_ModelFlags", signature = "swSite", definition = function(object, value) {
-  slot(object, "ModelFlags") <- value
+  object@ModelFlags[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swSite_ModelCoefficients", signature = "swSite", definition = function(object, value) {
-  slot(object, "ModelCoefficients") <- value
+  object@ModelCoefficients[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swSite_SnowSimulationParams", signature = "swSite", definition = function(object, value) {
-  slot(object, "SnowSimulationParameters") <- value
+  object@SnowSimulationParameters[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swSite_DrainageCoefficient", signature = "swSite", definition = function(object, value) {
-  slot(object, "DrainageCoefficient") <- value
+  object@DrainageCoefficient[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swSite_EvapCoefficients", signature = "swSite", definition = function(object, value) {
-  slot(object, "EvaporationCoefficients") <- value
+  object@EvaporationCoefficients[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swSite_TranspCoefficients", signature = "swSite", definition = function(object, value) {
-  slot(object, "TranspirationCoefficients") <- value
+  object@TranspirationCoefficients[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swSite_IntrinsicSiteParams", signature = "swSite", definition = function(object, value) {
-  slot(object, "IntrinsicSiteParams") <- value
+  object@IntrinsicSiteParams[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swSite_SoilTemperatureFlag", signature = "swSite", definition = function(object, value) {
-  slot(object, "SoilTemperatureFlag") <- value
+  object@SoilTemperatureFlag <- as.logical(value)
   validObject(object)
   object
 })
 setReplaceMethod("swSite_SoilTemperatureConsts", signature = "swSite", definition = function(object, value) {
-  slot(object, "SoilTemperatureConstants") <- value
+  object@SoilTemperatureConstants[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swSite_TranspirationRegions", signature = "swSite", definition = function(object, value) {
-  slot(object, "TranspirationRegions") <- value
+  object@TranspirationRegions[] <- value
   validObject(object)
   object
 })

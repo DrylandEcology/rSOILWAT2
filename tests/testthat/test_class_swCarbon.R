@@ -26,13 +26,11 @@ test_that("Manipulate swCarbon", {
   expect_equal(swCarbon_Use_Bio(xinput2), 1L)
   swCarbon_Use_Bio(xinput2) <- swCarbon_Use_Bio(xinput)
   expect_equal(swCarbon_Use_Bio(xinput2), swCarbon_Use_Bio(xinput))
-  expect_error(swCarbon_Use_Bio(xinput2) <- 0.5)
 
   swCarbon_Use_WUE(xinput2) <- 1L
   expect_equal(swCarbon_Use_WUE(xinput2), 1L)
   swCarbon_Use_WUE(xinput2) <- swCarbon_Use_WUE(xinput)
   expect_equal(swCarbon_Use_WUE(xinput2), swCarbon_Use_WUE(xinput))
-  expect_error(swCarbon_Use_WUE(xinput2) <- 0.5)
 
   # Set/querry scenario name
   swCarbon_Scenario(xinput2) <- "test_scenario"
@@ -46,7 +44,6 @@ test_that("Manipulate swCarbon", {
   expect_equal(swCarbon_DeltaYear(xinput2), 1950L)
   swCarbon_DeltaYear(xinput2) <- swCarbon_DeltaYear(xinput)
   expect_equal(swCarbon_DeltaYear(xinput2), swCarbon_DeltaYear(xinput))
-  expect_error(swCarbon_DeltaYear(xinput2) <- 0.5)
 
   # Set/querry CO2 concentration
   swCarbon_CO2ppm(xinput2) <- co2
@@ -61,9 +58,6 @@ test_that("Manipulate swCarbon", {
   expect_error(swCarbon_CO2ppm(xinput2) <- co2)
   co2 <- co2_ok
   co2[20, "CO2ppm"] <- -5
-  expect_error(swCarbon_CO2ppm(xinput2) <- co2)
-  co2 <- co2_ok
-  colnames(co2) <- c("year", "co2")
   expect_error(swCarbon_CO2ppm(xinput2) <- co2)
   co2 <- co2_ok
   co2[10, "Year"] <- 1789

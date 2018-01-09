@@ -116,12 +116,12 @@ setReplaceMethod("set_swOUT", signature = "swOUT", function(object, value) {
   object
 })
 setReplaceMethod("swOUT_TimeStep", signature = "swOUT", function(object, value) {
-  object@timeSteps <- value
+  object@timeSteps <- as.integer(value)
   validObject(object)
   object
 })
 setReplaceMethod("swOUT_OutputSeparator", signature = "swOUT", function(object, value) {
-  object@outputSeparator <- value
+  object@outputSeparator <- as.character(value)
   validObject(object)
   object
 })

@@ -198,87 +198,87 @@ setReplaceMethod("set_swProd", signature = "swProd", function(object, value) {
   object
 })
 setReplaceMethod("swProd_Composition", signature = "swProd", function(object, value) {
-  object@Composition <- value
+  object@Composition[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_Albedo", signature = "swProd", function(object, value) {
-  object@Albedo <- value
+  object@Albedo[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_Cover_stcr", signature = "swProd", function(object, value) {
-  object@Cover_stcr <- value
+  object@Cover_stcr[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_CanopyHeight", signature = "swProd", function(object, value) {
-  object@CanopyHeight <- value
+  object@CanopyHeight[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_VegInterParam", signature = "swProd", function(object, value) {
-  object@VegetationInterceptionParameters <- value
+  object@VegetationInterceptionParameters[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_LitterInterParam", signature = "swProd", function(object, value) {
-  object@LitterInterceptionParameters <- value
+  object@LitterInterceptionParameters[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_EsTpartitioning_param", signature = "swProd", function(object, value) {
-  object@EsTpartitioning_param <- value
+  object@EsTpartitioning_param[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_Es_param_limit", signature = "swProd", function(object, value) {
-  object@Es_param_limit <- value
+  object@Es_param_limit[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_Shade", signature = "swProd", function(object, value) {
-  object@Shade <- value
+  object@Shade[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_HydrRedstro_use", signature = "swProd", function(object, value) {
-  object@HydraulicRedistribution_use <- value
+  object@HydraulicRedistribution_use[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_HydrRedstro", signature = "swProd", function(object, value) {
-  object@HydraulicRedistribution <- value
+  object@HydraulicRedistribution[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_CritSoilWaterPotential", signature = "swProd", function(object, value) {
-  object@CriticalSoilWaterPotential <- value
+  object@CriticalSoilWaterPotential[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_CO2Coefficients", signature = "swProd", function(object, value) {
-  object@CO2Coefficients <- value
+  object@CO2Coefficients[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_MonProd_grass", signature = "swProd", function(object, value) {
-  object@MonthlyProductionValues_grass <- value
+  object@MonthlyProductionValues_grass[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_MonProd_shrub", signature = "swProd", function(object, value) {
-  object@MonthlyProductionValues_shrub <- value
+  object@MonthlyProductionValues_shrub[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_MonProd_tree", signature = "swProd", function(object, value) {
-  object@MonthlyProductionValues_tree <- value
+  object@MonthlyProductionValues_tree[] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_MonProd_forb", signature = "swProd", function(object, value) {
-  object@MonthlyProductionValues_forb <- value
+  object@MonthlyProductionValues_forb[] <- value
   validObject(object)
   object
 })

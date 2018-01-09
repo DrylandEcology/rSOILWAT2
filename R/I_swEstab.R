@@ -98,7 +98,7 @@ setMethod("initialize", signature = "swEstab", function(.Object, ...) {
 
 setMethod("swEstab_useEstab", "swEstab", function(object) object@useEstab)
 setReplaceMethod("swEstab_useEstab", signature = "swEstab", function(object, value) {
-  object@useEstab <- value
+  object@useEstab <- as.logical(value)
   validObject(object)
   object
 })

@@ -114,37 +114,37 @@ setMethod("swWeather_UseSnow", "swWeather", function(object) object@UseSnow)
 setMethod("swWeather_MonScalingParams", "swWeather", function(object) object@MonthlyScalingParams)
 
 setReplaceMethod("swWeather_DaysRunningAverage", signature = "swWeather", function(object, value) {
-  object@DaysRunningAverage <- value
+  object@DaysRunningAverage <- as.integer(value)
   validObject(object)
   object
 })
 setReplaceMethod("swWeather_FirstYearHistorical", signature = "swWeather", function(object, value) {
-  object@FirstYear_Historical <- value
+  object@FirstYear_Historical <- as.integer(value)
   validObject(object)
   object
 })
 setReplaceMethod("swWeather_pct_SnowDrift", signature = "swWeather", function(object, value) {
-  object@pct_SnowDrift <- value
+  object@pct_SnowDrift <- as.numeric(value)
   validObject(object)
   object
 })
 setReplaceMethod("swWeather_pct_SnowRunoff", signature = "swWeather", function(object, value) {
-  object@pct_SnowRunoff <- value
+  object@pct_SnowRunoff <- as.numeric(value)
   validObject(object)
   object
 })
 setReplaceMethod("swWeather_UseMarkov", signature = "swWeather", function(object, value) {
-  object@use_Markov <- value
+  object@use_Markov <- as.logical(value)
   validObject(object)
   object
 })
 setReplaceMethod("swWeather_UseSnow", signature = "swWeather", function(object, value) {
-  object@UseSnow <- value
+  object@UseSnow <- as.logical(value)
   validObject(object)
   object
 })
 setReplaceMethod("swWeather_MonScalingParams", signature = "swWeather", function(object, value) {
-  object@MonthlyScalingParams <- value
+  object@MonthlyScalingParams[] <- value
   validObject(object)
   object
 })

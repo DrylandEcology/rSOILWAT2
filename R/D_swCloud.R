@@ -104,6 +104,7 @@ setMethod("swCloud_Transmissivity", "swCloud", function(object) object@Cloud[4, 
 setMethod("swCloud_SnowDensity", "swCloud", function(object) object@Cloud[5, ])
 
 setReplaceMethod("set_swCloud", signature = "swCloud", function(object, value) {
+  dimnames(value@Cloud) <- dimnames(object@Cloud)
   object <- value
   validObject(object)
   object

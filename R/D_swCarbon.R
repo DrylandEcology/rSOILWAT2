@@ -108,12 +108,12 @@ setReplaceMethod("set_swCarbon", signature = "swCarbon", function(object, value)
 })
 
 setReplaceMethod("swCarbon_Use_Bio", signature = "swCarbon", function(object, value) {
-  object@CarbonUseBio <- value
+  object@CarbonUseBio <- as.integer(as.logical(value))
   validObject(object)
   object
 })
 setReplaceMethod("swCarbon_Use_WUE", signature = "swCarbon", function(object, value) {
-  object@CarbonUseWUE <- value
+  object@CarbonUseWUE <- as.integer(as.logical(value))
   validObject(object)
   object
 })
@@ -123,11 +123,12 @@ setReplaceMethod("swCarbon_Scenario", signature = "swCarbon", function(object, v
   object
 })
 setReplaceMethod("swCarbon_DeltaYear", signature = "swCarbon", function(object, value) {
-  object@DeltaYear <- value
+  object@DeltaYear <- as.integer(value)
   validObject(object)
   object
 })
 setReplaceMethod("swCarbon_CO2ppm", signature = "swCarbon", function(object, value) {
+  colnames(value) <- dimnames(object@CO2ppm)[[2]]
   object@CO2ppm <- value
   validObject(object)
   object

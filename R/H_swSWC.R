@@ -115,25 +115,25 @@ setMethod("swSWC_HistoricData", "swSWC", function(object, year) {
 
 setReplaceMethod("swSWC_use", signature = c(object = "swSWC", value = "logical"),
   function(object, value) {
-    object@UseSWCHistoricData <- value
+    object@UseSWCHistoricData[] <- value
     validObject(object)
     object
 })
 setReplaceMethod("swSWC_prefix", signature = c(object = "swSWC", value = "character"),
   function(object, value) {
-    object@DataFilePrefix <- value
+    object@DataFilePrefix <- as.character(value)
     validObject(object)
     object
 })
 setReplaceMethod("swSWC_FirstYear", signature = c(object = "swSWC", value = "integer"),
   function(object, value) {
-    object@FirstYear <- value
+    object@FirstYear <- as.integer(value)
     validObject(object)
     object
 })
 setReplaceMethod("swSWC_Method", signature = c(object = "swSWC", value = "integer"),
   function(object, value) {
-    object@Method <- value
+    object@Method <- as.integer(value)
     validObject(object)
     object
 })

@@ -93,16 +93,30 @@ setMethod("swMarkov_Prob", "swMarkov", function(object) object@Prob)
 setMethod("swMarkov_Conv", "swMarkov", function(object) object@Conv)
 
 setReplaceMethod("set_Markov", signature = "swMarkov", function(object, value) {
+  if (ncol(value@Prod) == ncol(object@Prob)) {
+    dimnames(value@Prob) <- dimnames(object@Prob)
+  }
+  if (ncol(value@Conv) == ncol(object@Conv)) {
+    dimnames(value@Conv) <- dimnames(object@Conv)
+  }
   object <- value
   validObject(object)
   object
 })
+
 setReplaceMethod("swMarkov_Prob", signature = "swMarkov", function(object, value) {
+  if (ncol(value) == ncol(object@Prob)) {
+    colnames(value) <- dimnames(object@Prob)[[2]]
+  }
   object@Prob <- value
   validObject(object)
   object
 })
+
 setReplaceMethod("swMarkov_Conv", signature = "swMarkov", function(object, value) {
+    if (ncol(value) == ncol(object@Conv)) {
+    colnames(value) <- dimnames(object@Conv)[[2]]
+  }
   object@Conv <- value
   validObject(object)
   object
