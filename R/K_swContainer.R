@@ -623,6 +623,10 @@ setReplaceMethod("swOUT_TimeStep", signature = "swInputData", function(object, v
   swOUT_TimeStep(object@output) <- value
   object
 })
+setReplaceMethod("swOUT_TimeStepsForEveryKey", signature = "swInputData", function(object, value) {
+  swOUT_TimeStepsForEveryKey(object@output) <- value
+  object
+})
 setReplaceMethod("swOUT_OutputSeparator", signature = "swInputData", function(object, value) {
   swOUT_OutputSeparator(object@output) <- value
   object

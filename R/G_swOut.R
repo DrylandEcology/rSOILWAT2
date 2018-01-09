@@ -85,6 +85,11 @@ swOUT_validity <- function(object) {
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
+  if (any(abs(object@timeSteps) > rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]])) {
+    msg <- "@timeSteps values must in SW_OUTNPERIODS"
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
   val
 }
 setValidity("swOUT", swOUT_validity)
@@ -116,10 +121,24 @@ setReplaceMethod("set_swOUT", signature = "swOUT", function(object, value) {
   object
 })
 setReplaceMethod("swOUT_TimeStep", signature = "swOUT", function(object, value) {
-  object@timeSteps <- as.integer(value)
+  object@timeSteps[] <- value
   validObject(object)
   object
 })
+
+#' @describeIn swOUT Set time steps to the same set of values for each output key.
+#' @examples
+#' x <- new("swOUT")
+#' swOUT_TimeStepsForEveryKey(x) <- c(2, 3)
+#' identical(as.vector(unique(swOUT_TimeStep(x))), as.integer(c(2, 3)))
+setReplaceMethod("swOUT_TimeStepsForEveryKey", signature = "swOUT", function(object, value) {
+  object@timeSteps <- matrix(as.integer(value), byrow = TRUE,
+    nrow = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]],
+    ncol = length(value))
+  validObject(object)
+  object
+})
+
 setReplaceMethod("swOUT_OutputSeparator", signature = "swOUT", function(object, value) {
   object@outputSeparator <- as.character(value)
   validObject(object)

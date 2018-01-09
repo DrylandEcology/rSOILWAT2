@@ -486,6 +486,8 @@ setGeneric("set_swOUT<-", function(object, value) standardGeneric("set_swOUT<-")
 #' @export
 setGeneric("swOUT_TimeStep<-", function(object, value) standardGeneric("swOUT_TimeStep<-"))
 #' @export
+setGeneric("swOUT_TimeStepsForEveryKey<-", function(object, value) standardGeneric("swOUT_TimeStepsForEveryKey<-"))
+#' @export
 setGeneric("swOUT_OutputSeparator<-", function(object, value) standardGeneric("swOUT_OutputSeparator<-"))
 ########################
 
