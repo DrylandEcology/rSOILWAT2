@@ -73,7 +73,7 @@ setClass("swSWC", slot = c(UseSWCHistoricData = "logical", DataFilePrefix = "cha
   FirstYear = "integer", Method = "integer", History = "list"))
 
 setMethod("initialize", signature = "swSWC", function(.Object, ...) {
-  def <- slot(inputData, "swc")
+  def <- slot(rSOILWAT2::sw_exampleData, "swc")
   sns <- slotNames(def)
   dots <- list(...)
   dns <- names(dots)

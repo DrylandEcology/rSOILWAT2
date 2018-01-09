@@ -46,7 +46,7 @@ setValidity("swOUT_key", swOUT_key_validity)
 
 
 setMethod("initialize", signature = "swOUT_key", function(.Object, ...) {
-  def <- slot(inputData, "output")
+  def <- slot(rSOILWAT2::sw_exampleData, "output")
   sns <- slotNames("swOUT_key")
   dots <- list(...)
   dns <- names(dots)
@@ -91,7 +91,7 @@ setValidity("swOUT", swOUT_validity)
 
 
 setMethod("initialize", signature = "swOUT", function(.Object, ...) {
-  def <- slot(inputData, "output")
+  def <- slot(rSOILWAT2::sw_exampleData, "output")
   sns <- setdiff(slotNames("swOUT"), inheritedSlotNames("swOUT"))
   dots <- list(...)
   dns <- names(dots)

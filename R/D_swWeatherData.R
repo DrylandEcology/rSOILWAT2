@@ -51,7 +51,7 @@ setValidity("swWeatherData", swWeatherData_validity)
 setMethod("initialize", signature = "swWeatherData", function(.Object, ...,
   year = 0L, data = NULL) {
 
-  def <- slot(inputData, "weatherHistory")[[1]] # first year of weather data
+  def <- slot(rSOILWAT2::sw_exampleData, "weatherHistory")[[1]] # first year of weather data
   # We don't set values for slots `year` and `data`; this is to prevent simulation runs with
   # accidentally incorrect values
 

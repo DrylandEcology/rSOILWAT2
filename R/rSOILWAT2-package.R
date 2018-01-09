@@ -105,16 +105,16 @@ NULL
 #' swFiles_Estab swInputData-method
 #' swFiles_Carbon<-,swInputData-method
 #' swFiles_Carbon,swInputData-method
-#' swCarbon_Use_Bio,swCarbon-method
-#' swCarbon_Use_WUE,swCarbon-method
-#' swCarbon_Scenario,swCarbon-method
-#' swCarbon_DeltaYear,swCarbon-method
-#' swCarbon_CO2ppm,swCarbon-method
-#' swCarbon_Scenario<-,swCarbon-method
-#' swCarbon_DeltaYear<-,swCarbon-method
-#' swCarbon_CO2ppm<-,swCarbon-method
-#' swCarbon_Use_Bio<-,swCarbon-method
-#' swCarbon_Use_WUE<-,swCarbon-method
+#' swCarbon_Use_Bio,swInputData-method
+#' swCarbon_Use_WUE,swInputData-method
+#' swCarbon_Scenario,swInputData-method
+#' swCarbon_DeltaYear,swInputData-method
+#' swCarbon_CO2ppm,swInputData-method
+#' swCarbon_Scenario<-,swInputData-method
+#' swCarbon_DeltaYear<-,swInputData-method
+#' swCarbon_CO2ppm<-,swInputData-method
+#' swCarbon_Use_Bio<-,swInputData-method
+#' swCarbon_Use_WUE<-,swInputData-method
 #' swFiles_filesIn<- swInputData-method
 #' swFiles_filesIn swInputData-method
 #' swFiles_LogFile<- swInputData-method

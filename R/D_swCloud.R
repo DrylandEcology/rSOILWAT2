@@ -71,7 +71,7 @@ swCloud_validity <- function(object) {
 setValidity("swCloud", swCloud_validity)
 
 setMethod("initialize", signature = "swCloud", function(.Object, ...) {
-  def <- slot(inputData, "cloud")
+  def <- slot(rSOILWAT2::sw_exampleData, "cloud")
   sns <- slotNames(def)
   dots <- list(...)
   dns <- names(dots)

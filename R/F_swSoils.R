@@ -61,7 +61,7 @@ swSoilLayers_validity <- function(object) {
 setValidity("swSoils", swSoilLayers_validity)
 
 setMethod("initialize", signature = "swSoils", function(.Object, ...) {
-  def <- slot(inputData, "soils")
+  def <- slot(rSOILWAT2::sw_exampleData, "soils")
   sns <- slotNames(def)
   dots <- list(...)
   dns <- names(dots)

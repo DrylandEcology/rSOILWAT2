@@ -100,7 +100,7 @@ setValidity("swSite", function(object) {
 })
 
 setMethod(f = "initialize", signature = "swSite", function(.Object, ...) {
-  def <- slot(inputData, "site")
+  def <- slot(rSOILWAT2::sw_exampleData, "site")
   sns <- slotNames(def)
   dots <- list(...)
   dns <- names(dots)

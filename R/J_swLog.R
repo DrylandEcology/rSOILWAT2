@@ -29,7 +29,7 @@ setClass("swLog", slot = c(LogData = "character", MaxLines = "integer",
 
 
 setMethod("initialize", signature = "swLog", function(.Object, ...) {
-  def <- slot(inputData, "log")
+  def <- slot(rSOILWAT2::sw_exampleData, "log")
 
   # We don't set values for any slots; this is to prevent simulation runs with
   # accidentally incorrect values

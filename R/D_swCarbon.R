@@ -43,7 +43,7 @@ setClass("swCarbon", slots = c(CarbonUseBio = 'integer', CarbonUseWUE = 'integer
   Scenario = 'character', DeltaYear = 'integer', CO2ppm = 'matrix'))
 
 setMethod("initialize", signature = "swCarbon", function(.Object, ...) {
-  def <- slot(inputData, "carbon")
+  def <- slot(rSOILWAT2::sw_exampleData, "carbon")
   sns <- slotNames(def)
   dots <- list(...)
   dns <- names(dots)

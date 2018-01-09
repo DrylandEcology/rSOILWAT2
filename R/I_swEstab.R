@@ -35,7 +35,7 @@ setValidity("swEstabSpecies", function(object) {
 })
 
 setMethod("initialize", signature = "swEstabSpecies", function(.Object, ...) {
-  def <- slot(inputData, "estab")
+  def <- slot(rSOILWAT2::sw_exampleData, "estab")
   sns <- slotNames("swEstabSpecies")
   dots <- list(...)
   dns <- names(dots)
@@ -81,7 +81,7 @@ setValidity("swEstab", function(object) {
 })
 
 setMethod("initialize", signature = "swEstab", function(.Object, ...) {
-  def <- slot(inputData, "estab")
+  def <- slot(rSOILWAT2::sw_exampleData, "estab")
   sns <- setdiff(slotNames("swEstab"), inheritedSlotNames("swEstab"))
   dots <- list(...)
   dns <- names(dots)

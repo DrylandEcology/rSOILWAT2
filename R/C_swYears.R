@@ -27,7 +27,7 @@ setClass("swYears", slots = c(StartYear = "integer", EndYear = "integer",
   FDOFY = "integer", EDOEY = "integer", isNorth = "logical"))
 
 setMethod("initialize", signature = "swYears", function(.Object, ...) {
-  def <- slot(inputData, "years")
+  def <- slot(rSOILWAT2::sw_exampleData, "years")
   sns <- slotNames(def)
   dots <- list(...)
   dns <- names(dots)

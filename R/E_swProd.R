@@ -141,7 +141,7 @@ swProd_validity <- function(object) {
 setValidity("swProd", swProd_validity)
 
 setMethod("initialize", signature = "swProd", function(.Object, ...) {
-  def <- slot(inputData, "prod")
+  def <- slot(rSOILWAT2::sw_exampleData, "prod")
   sns <- slotNames(def)
   dots <- list(...)
   dns <- names(dots)

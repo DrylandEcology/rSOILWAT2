@@ -67,7 +67,7 @@ code to estimate these values.
 
 ## ------ Simulation with demonstration data ------------
 ## Access demonstration data (including daily weather forcing)
-sw_in <- inputData
+sw_in <- rSOILWAT2::sw_exampleData
 
 ## Slots of the input object of \\code{\\linkS4class{swInputData}}
 str(sw_in, max.level = 2)

@@ -25,8 +25,8 @@
 #'   \code{example1}; see example code.
 #'
 #' @examples
-#' data(inputData)
+#' data(sw_exampleData)
 #' path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 #' x <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
-#' identical(x, inputData) ## TRUE
-"inputData"
+#' identical(x, sw_exampleData) ## TRUE
+"sw_exampleData"

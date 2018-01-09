@@ -100,8 +100,8 @@ for (it in seq_along(tests)) {
 
 #-----------------------
 #--- USE DEFAULT EXTDATA EXAMPLE AS PACKAGE DATA
-inputData <- sw_inputDataFromFiles(file.path(dir_in, examples[1]), files.in = "files.in")
-devtools::use_data(inputData, internal = FALSE, overwrite = TRUE)
+sw_exampleData <- sw_inputDataFromFiles(file.path(dir_in, examples[1]), files.in = "files.in")
+devtools::use_data(sw_exampleData, internal = FALSE, overwrite = TRUE)
 
 
 #-----------------------

@@ -26,7 +26,7 @@ setClass("swFiles", slots = c(ProjDir = "character", InFiles = "character",
   WeatherPrefix = "character", OutputPrefix = "character"))
 
 setMethod("initialize", signature = "swFiles", function(.Object, ...) {
-  def <- slot(inputData, "files")
+  def <- slot(rSOILWAT2::sw_exampleData, "files")
   sns <- slotNames(def)
   dots <- list(...)
   dns <- names(dots)

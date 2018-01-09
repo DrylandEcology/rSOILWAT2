@@ -43,7 +43,7 @@ setValidity("swMonthlyScalingParams", function(object) {
 })
 
 setMethod("initialize", signature = "swMonthlyScalingParams", function(.Object, ...) {
-  def <- slot(inputData, "weather")
+  def <- slot(rSOILWAT2::sw_exampleData, "weather")
   sns <- slotNames("swMonthlyScalingParams")
   dots <- list(...)
   dns <- names(dots)
@@ -88,7 +88,7 @@ setValidity("swWeather", function(object) {
 
 
 setMethod("initialize", signature = "swWeather", function(.Object, ...) {
-  def <- slot(inputData, "weather")
+  def <- slot(rSOILWAT2::sw_exampleData, "weather")
   sns <- setdiff(slotNames("swWeather"), inheritedSlotNames("swWeather"))
   dots <- list(...)
   dns <- names(dots)

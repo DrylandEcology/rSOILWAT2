@@ -26,7 +26,7 @@
 setClass("swMarkov", slots = c(Prob = "matrix", Conv = "matrix"))
 
 setMethod("initialize", signature = "swMarkov", function(.Object, ...) {
-  def <- slot(inputData, "markov")
+  def <- slot(rSOILWAT2::sw_exampleData, "markov")
   dots <- list(...)
   dns <- names(dots)
 
