@@ -197,7 +197,8 @@ setReplaceMethod("swSite_SoilTemperatureConsts", signature = "swSite", definitio
   object
 })
 setReplaceMethod("swSite_TranspirationRegions", signature = "swSite", definition = function(object, value) {
-  object@TranspirationRegions[] <- value
+  colnames(value) <- colnames(object@TranspirationRegions)
+  object@TranspirationRegions <- value
   validObject(object)
   object
 })

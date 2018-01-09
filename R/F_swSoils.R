@@ -91,14 +91,15 @@ setMethod("swSoils_Layers", "swSoils", function(object) object@Layers)
 
 setReplaceMethod("set_swSoils", signature = c(object = "swSoils", value = "swSoils"),
   function(object, value) {
-    dimnames(value@Layers) <- dimnames(object@Layers)
+    colnames(value@Layers) <- colnames(object@Layers)
     object <- value
     validObject(object)
     object
 })
 setReplaceMethod("swSoils_Layers", signature = c(object = "swSoils", value = "matrix"),
   function(object, value) {
-    object@Layers[] <- value
+    colnames(value) <- colnames(object@Layers)
+    object@Layers <- value
     validObject(object)
     object
 })
