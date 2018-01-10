@@ -1,4 +1,4 @@
 [submodule "src/SOILWAT2"]
 	path = src/SOILWAT2
 	url = https://github.com/Burke-Lauenroth-Lab/SOILWAT2
-        branch = bugfix_66-rSOILWAT2
+        branch = master
