@@ -15,8 +15,6 @@
 \alias{swSWC_prefix,swSWC-method}
 \alias{swSWC_use<-,swSWC,logical-method}
 \alias{swSWC_use,swSWC-method}
-\alias{swClear,swSWC-method}
-\alias{swWriteLines,swSWC-method}
 \alias{swReadLines,swSWC-method}
 \title{Class \code{"swSWC"}}
 \description{
@@ -33,7 +31,7 @@ showClass("swSWC")
 
 }
 \references{
-https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+https://github.com/DrylandEcology/rSOILWAT2
 }
 \seealso{
 \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}

@@ -1,6 +1,6 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,47 +17,113 @@
 ###############################################################################
 
 
-# TODO: Add comment
-#
-# Author: ryan
+# Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2013-2018)
 ###############################################################################
 
 
 #######################Markov##########################################
 #' @export
-setClass("swMarkov", representation(Prob="matrix",Conv="matrix"))
-setMethod(f="swClear",
-		signature="swMarkov",
-		definition=function(object) {
-			object@Prob=matrix(numeric(0),0,0)
-			object@Conv=matrix(numeric(0),0,0)
-			return(object)
-		})
+setClass("swMarkov", slots = c(Prob = "matrix", Conv = "matrix"))
 
-setMethod("swWriteLines", signature=c(object="swMarkov", file="character"), definition=function(object, file) {
-			infilename <- file.path(file[1])
-			infiletext <- character(366+2)
-			infiletext[1] = "# Markov Prob In v1.0 (RJM) 2015 update"
-			infiletext[2] = "# day		wet		dry		avg		std"
-			for(i in 1:366) {
-				infiletext[2+i] = paste(object@Prob[i,],collapse=" ")
-			}
-			infile <- file(infilename, "w+b")
-			writeLines(text = infiletext, con = infile, sep = "\n")
-			close(infile)
+setMethod("initialize", signature = "swMarkov", function(.Object, ...) {
+  def <- slot(rSOILWAT2::sw_exampleData, "markov")
+  dots <- list(...)
+  dns <- names(dots)
 
-			infilename <- file.path(file[2])
-			infiletext <- character(53+2)
-			infiletext[1] = "# Markov Covariance In v1.0 (RJM) 2015 update"
-			infiletext[2] = "# week		u_cov1		u_cov2		v_cov1		v_cov2		v_cov3		v_cov4"
-			for(i in 1:53) {
-				infiletext[2+i] = paste(object@Conv[i,],collapse=" ")
-			}
-			infile <- file(infilename, "w+b")
-			writeLines(text = infiletext, con = infile, sep = "\n")
-			close(infile)
-		})
-setMethod("swReadLines", signature=c(object="swMarkov",file="character"), definition=function(object,file) {
+  # We don't set values for slots `Prob` and `Conv`; this is to prevent simulation runs with
+  # accidentally incorrect values
+
+  # We have to explicitly give column names (as defined in `onGet_MKV_prob` and
+  # `onGet_MKV_conv`) because they are not read in by C code if the weather generator is
+  # turned off
+  ctemp_Prob <- c("day", "wet", "dry", "avg_ppt", "std_ppt")
+  ctemp_Conv <- c("week", "t1", "t2", "t3", "t4", "t5", "t6")
+
+  if ("Prob" %in% dns) {
+    temp <- dots[["Prob"]]
+    if (sum(dim(temp)) > 0) {
+      colnames(temp) <- ctemp_Prob
+    }
+  } else {
+    temp <- matrix(NA_real_, nrow = 366, ncol = length(ctemp_Prob),
+      dimnames = list(NULL, ctemp_Prob))
+    temp[, "day"] <- 1:366
+  }
+  .Object@Prob <- temp
+
+  if ("Conv" %in% dns) {
+    temp <- dots[["Conv"]]
+    if (sum(dim(temp)) > 0) {
+      colnames(temp) <- ctemp_Conv
+    }
+  } else {
+    temp <- matrix(NA_real_, nrow = 53, ncol = length(ctemp_Conv),
+      dimnames = list(NULL, ctemp_Conv))
+    temp[, "week"] <- 1:53
+  }
+  .Object@Conv <- temp
+
+  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  validObject(.Object)
+  .Object
+})
+
+swMarkov_validity <- function(object) {
+  val <- TRUE
+
+  temp <- dim(object@Prob)
+  if (!(temp == c(0, 0) || temp == c(366, 5))) {
+    msg <- paste("@Prob must be a 0x0 or a 366x5 matrix.")
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  temp <- dim(object@Conv)
+  if (!(temp == c(0, 0) || temp == c(53, 7))) {
+    msg <- paste("@Conv must be a 0x0 or a 53x7 matrix.")
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  val
+}
+setValidity("swMarkov", swMarkov_validity)
+
+
+setMethod("get_Markov", "swMarkov", function(object) object)
+setMethod("swMarkov_Prob", "swMarkov", function(object) object@Prob)
+setMethod("swMarkov_Conv", "swMarkov", function(object) object@Conv)
+
+setReplaceMethod("set_Markov", signature = "swMarkov", function(object, value) {
+  if (ncol(value@Prod) == ncol(object@Prob)) {
+    dimnames(value@Prob) <- dimnames(object@Prob)
+  }
+  if (ncol(value@Conv) == ncol(object@Conv)) {
+    dimnames(value@Conv) <- dimnames(object@Conv)
+  }
+  object <- value
+  validObject(object)
+  object
+})
+
+setReplaceMethod("swMarkov_Prob", signature = "swMarkov", function(object, value) {
+  if (ncol(value) == ncol(object@Prob)) {
+    colnames(value) <- dimnames(object@Prob)[[2]]
+  }
+  object@Prob <- value
+  validObject(object)
+  object
+})
+
+setReplaceMethod("swMarkov_Conv", signature = "swMarkov", function(object, value) {
+    if (ncol(value) == ncol(object@Conv)) {
+    colnames(value) <- dimnames(object@Conv)[[2]]
+  }
+  object@Conv <- value
+  validObject(object)
+  object
+})
+
+
+setMethod("swReadLines", signature = c(object="swMarkov",file="character"), function(object,file) {
 			infiletext <- readLines(con = file[1])
 			infiletext <- infiletext[-(1:2)]
 			if(length(infiletext) != 366)

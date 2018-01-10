@@ -37,7 +37,6 @@
 \alias{set_swYears<-}
 \alias{set_WeatherHistory<-}
 \alias{list-method}
-\alias{swClear}
 \alias{swCloud_Humidity<-}
 \alias{swCloud_Humidity}
 \alias{swCloud_SkyCover<-}
@@ -54,16 +53,16 @@
 \alias{swFiles_Estab}
 \alias{swFiles_Carbon<-,swInputData-method}
 \alias{swFiles_Carbon,swInputData-method}
-\alias{swCarbon_Use_Bio,swCarbon-method}
-\alias{swCarbon_Use_WUE,swCarbon-method}
-\alias{swCarbon_Scenario,swCarbon-method}
-\alias{swCarbon_DeltaYear,swCarbon-method}
-\alias{swCarbon_CO2ppm,swCarbon-method}
-\alias{swCarbon_Scenario<-,swCarbon-method}
-\alias{swCarbon_DeltaYear<-,swCarbon-method}
-\alias{swCarbon_CO2ppm<-,swCarbon-method}
-\alias{swCarbon_Use_Bio<-,swCarbon-method}
-\alias{swCarbon_Use_WUE<-,swCarbon-method}
+\alias{swCarbon_Use_Bio,swInputData-method}
+\alias{swCarbon_Use_WUE,swInputData-method}
+\alias{swCarbon_Scenario,swInputData-method}
+\alias{swCarbon_DeltaYear,swInputData-method}
+\alias{swCarbon_CO2ppm,swInputData-method}
+\alias{swCarbon_Scenario<-,swInputData-method}
+\alias{swCarbon_DeltaYear<-,swInputData-method}
+\alias{swCarbon_CO2ppm<-,swInputData-method}
+\alias{swCarbon_Use_Bio<-,swInputData-method}
+\alias{swCarbon_Use_WUE<-,swInputData-method}
 \alias{swFiles_filesIn<-}
 \alias{swFiles_filesIn}
 \alias{swFiles_LogFile<-}
@@ -187,7 +186,6 @@
 \alias{swWeather_UseMarkov}
 \alias{swWeather_UseSnow<-}
 \alias{swWeather_UseSnow}
-\alias{swWriteLines}
 \alias{swYears_EDOEY<-}
 \alias{swYears_EDOEY}
 \alias{swYears_EndYear<-}
@@ -219,7 +217,7 @@ showClass("swInputData")
 
 }
 \references{
-https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+https://github.com/DrylandEcology/rSOILWAT2
 }
 \seealso{
 \code{\linkS4class{swFiles}} \code{\linkS4class{swYears}}

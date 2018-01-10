@@ -3,6 +3,8 @@
 #--- rSOILWAT2: use development version
 library("methods")  # in case this code is run via 'Rscript'
 library("devtools")
+
+devtools::clean_dll()
 devtools::load_all()
 
 
@@ -94,6 +96,12 @@ for (it in seq_along(tests)) {
   saveRDS(sw_weather, file = file.path(dir_out, paste0("Ex", tests[it], "_weather.rds")))
   saveRDS(sw_input, file = file.path(dir_out, paste0("Ex", tests[it], "_input.rds")))
 }
+
+
+#-----------------------
+#--- USE DEFAULT EXTDATA EXAMPLE AS PACKAGE DATA
+sw_exampleData <- sw_inputDataFromFiles(file.path(dir_in, examples[1]), files.in = "files.in")
+devtools::use_data(sw_exampleData, internal = FALSE, overwrite = TRUE)
 
 
 #-----------------------

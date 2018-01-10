@@ -1,6 +1,6 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,13 +24,20 @@
 
 
 #' @export
-setClass(Class="swLog", representation(LogData="character",MaxLines="integer",UsedLines="integer"), prototype=prototype(LogData=character(150),MaxLines=as.integer(150),UsedLines=as.integer(1)))
-setMethod(f="swClear",
-		signature="swLog",
-		definition=function(object) {
-			object@LogData=character(150)
-			object@MaxLines=as.integer(150)
-			object@UsedLines=integer(1)
-			return(object)
-		})
+setClass("swLog", slot = c(LogData = "character", MaxLines = "integer",
+  UsedLines = "integer"))
 
+
+setMethod("initialize", signature = "swLog", function(.Object, ...) {
+  def <- slot(rSOILWAT2::sw_exampleData, "log")
+
+  # We don't set values for any slots; this is to prevent simulation runs with
+  # accidentally incorrect values
+  .Object@MaxLines <- 150L
+  .Object@LogData <- character(.Object@MaxLines)
+  .Object@UsedLines <- 1L
+
+  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  validObject(.Object)
+  .Object
+})

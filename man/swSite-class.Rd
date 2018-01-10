@@ -25,8 +25,6 @@
 \alias{swSite_TranspCoefficients,swSite-method}
 \alias{swSite_TranspirationRegions<-,swSite-method}
 \alias{swSite_TranspirationRegions,swSite-method}
-\alias{swClear,swSite-method}
-\alias{swWriteLines,swSite-method}
 \alias{swReadLines,swSite-method}
 \title{Class \code{"swSite"}}
 \description{
@@ -43,7 +41,7 @@ showClass("swSite")
 
 }
 \references{
-https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+https://github.com/DrylandEcology/rSOILWAT2
 }
 \seealso{
 \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}

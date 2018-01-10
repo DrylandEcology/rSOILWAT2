@@ -67,9 +67,9 @@ code to estimate these values.
 
 ## ------ Simulation with demonstration data ------------
 ## Access demonstration data (including daily weather forcing)
-sw_in <- sw_inputData()
+sw_in <- rSOILWAT2::sw_exampleData
 
-## Slots of the input object of class 'swInputData'
+## Slots of the input object of \\code{\\linkS4class{swInputData}}
 str(sw_in, max.level = 2)
 
 ## Execute the simulation run
@@ -91,7 +91,7 @@ str(sw_out1, max.level=2)
 ## Read inputs from files on disk (including daily weather forcing)
 sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 
-## Slots of the input object of class 'swInputData'
+## Slots of the input object of \\code{\\linkS4class{swInputData}}
 str(sw_in2, max.level = 2)
 
 ## Execute the simulation run

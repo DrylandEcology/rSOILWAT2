@@ -11,7 +11,7 @@ Input/soils.in	# soil layer definitions
 
 #Weather & climate
 Input/weathsetup.in	# weather parameters
-Input/data_weather/weath	# data file containing historical weather (can include path)
+Input/data_weather/weath	# data file containing historical weather (can include path); PROGRAMMER NOTE: This is currently the 5th position; if this changes then update function SW_Files.c/SW_F_read()
 Input/mkv_prob.in	# precip probs; required for markov weather
 Input/mkv_covar.in	# covariance table required for markov weather
 Input/climate.in	# general atmospheric params
@@ -27,5 +27,5 @@ Input/carbon.in
 Input/swcsetup.in	# params for handling measured swc
 
 #Output
-Output/	# 'relative' path for output files: / for same directory, or e.g., Output/
+Output/	# 'relative' path for output files: / for same directory, or e.g., Output/; PROGRAMMER NOTE: This is currently the 13th position; if this changes then update function SW_Files.c/SW_F_read()
 Input/outsetup.in	# define output quantities

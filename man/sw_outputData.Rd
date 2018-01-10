@@ -6,6 +6,12 @@
 \usage{
 sw_outputData(inputData)
 }
+\arguments{
+\item{inputData}{An object of class \code{\linkS4class{swInputData}}.}
+}
+\value{
+An object of class \code{\linkS4class{swOutput}}.
+}
 \description{
 Return output data
 }

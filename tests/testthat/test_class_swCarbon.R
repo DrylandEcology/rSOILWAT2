@@ -4,11 +4,8 @@ context("Carbon dioxide class")
 test_that("Manipulate swCarbon", {
   x <- new("swCarbon")
   expect_s4_class(x, "swCarbon")
-  expect_equal(x, swClear(x))
 
-  # We currently don't have querry/replacement functions with signature 'swCarbon'
-  # All these methods operate on the 'swCarbon' slot of signature 'swInputData'
-  xinput <- xinput2 <- new("swInputData")
+  xinput <- xinput2 <- new("swCarbon")
   expect_s4_class(get_swCarbon(xinput), "swCarbon")
   co2 <- as.matrix(data.frame(Year = 1951:2000, CO2ppm = 360 + seq_len(50) / 2))
   swCarbon_CO2ppm(xinput) <- co2
@@ -19,7 +16,7 @@ test_that("Manipulate swCarbon", {
   cco2 <- get_swCarbon(xinput)
   cco2_new <- new("swCarbon")
   expect_false(isTRUE(all.equal(cco2, cco2_new)))
-  cco2_new <- new("swCarbon", cco2)
+  set_swCarbon(cco2_new) <- cco2
   expect_equal(cco2, cco2_new)
   set_swCarbon(xinput2) <- cco2_new
   expect_equal(xinput, xinput2)
@@ -29,13 +26,11 @@ test_that("Manipulate swCarbon", {
   expect_equal(swCarbon_Use_Bio(xinput2), 1L)
   swCarbon_Use_Bio(xinput2) <- swCarbon_Use_Bio(xinput)
   expect_equal(swCarbon_Use_Bio(xinput2), swCarbon_Use_Bio(xinput))
-  expect_error(swCarbon_Use_Bio(xinput2) <- 0.5)
 
   swCarbon_Use_WUE(xinput2) <- 1L
   expect_equal(swCarbon_Use_WUE(xinput2), 1L)
   swCarbon_Use_WUE(xinput2) <- swCarbon_Use_WUE(xinput)
   expect_equal(swCarbon_Use_WUE(xinput2), swCarbon_Use_WUE(xinput))
-  expect_error(swCarbon_Use_WUE(xinput2) <- 0.5)
 
   # Set/querry scenario name
   swCarbon_Scenario(xinput2) <- "test_scenario"
@@ -49,7 +44,6 @@ test_that("Manipulate swCarbon", {
   expect_equal(swCarbon_DeltaYear(xinput2), 1950L)
   swCarbon_DeltaYear(xinput2) <- swCarbon_DeltaYear(xinput)
   expect_equal(swCarbon_DeltaYear(xinput2), swCarbon_DeltaYear(xinput))
-  expect_error(swCarbon_DeltaYear(xinput2) <- 0.5)
 
   # Set/querry CO2 concentration
   swCarbon_CO2ppm(xinput2) <- co2
@@ -64,9 +58,6 @@ test_that("Manipulate swCarbon", {
   expect_error(swCarbon_CO2ppm(xinput2) <- co2)
   co2 <- co2_ok
   co2[20, "CO2ppm"] <- -5
-  expect_error(swCarbon_CO2ppm(xinput2) <- co2)
-  co2 <- co2_ok
-  colnames(co2) <- c("year", "co2")
   expect_error(swCarbon_CO2ppm(xinput2) <- co2)
   co2 <- co2_ok
   co2[10, "Year"] <- 1789
