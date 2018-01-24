@@ -86,10 +86,6 @@ for (it in tests) {
       idelta1 <- seq_along(aet)[-length(aet)]
       idelta2 <- seq_along(aet)[-1]
 
-      temp <- slot(slot(x, "INTERCEPTION"), OutPeriods[pd])
-      intercepted <- temp[, "int_total"]
-      delta_intercepted <- intercepted[idelta2] - intercepted[idelta1]
-
       temp <- slot(slot(x, "SURFACEWATER"), OutPeriods[pd])
       surfaceWater <- temp[, "surfaceWater_cm"]
       delta_surfaceWater <- surfaceWater[idelta2] - surfaceWater[idelta1]
@@ -129,11 +125,10 @@ for (it in tests) {
       expect_equal(infiltration[idelta2], arriving_water[idelta2] - (runoff[idelta2] +
         intercepted[idelta2] + delta_surfaceWater + Eponded[idelta2]), info = info2)
 
-      # AET - E(snow sublimation) = [rain + snowmelt + runon] -
-      #   [runoff + delta(intercepted-water) + deepDrainage + delta(swc)]
-      expect_equal(aet[idelta2] - Esnow[idelta2],
-        arriving_water[idelta2] - (runoff[idelta2] + delta_intercepted +
-        deepDrainage[idelta2] + apply(delta_swcj, 1, sum)), info = info2)
+      # E(soil) + Ttotal = infiltration - (deepDrainage + delta(swc))
+      expect_equal(Esoil[idelta2] + Ttotal[idelta2],
+        infiltration[idelta2] - (deepDrainage[idelta2] + apply(delta_swcj, 1, sum)),
+        info = info2)
 
       # for every soil layer j: delta(swc) =
       #   = infiltration/percolationIn + hydraulicRedistribution -
