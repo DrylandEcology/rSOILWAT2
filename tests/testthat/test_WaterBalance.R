@@ -121,8 +121,8 @@ for (it in tests) {
 
 
       #--- Water cycling checks
-      # infiltration = [rain + snowmelt + runon] - (runoff + E(total intercepted)
-      expect_equal(infiltration, arriving_water - (runoff + Etotalint), info = info2)
+      # infiltration = [rain + snowmelt + runon] - (runoff + intercepted)
+      expect_equal(infiltration, arriving_water - (runoff + intercepted), info = info2)
 
       # AET - E(snow sublimation) = [rain + snowmelt + runon] -
       #   [runoff + delta(intercepted-water) + deepDrainage + delta(swc)]
