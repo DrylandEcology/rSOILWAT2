@@ -29,8 +29,7 @@ setClass("swProd", slots = c(Composition = "numeric", Albedo = "numeric",
   EsTpartitioning_param = "numeric", Es_param_limit = "numeric", Shade = "matrix",
   HydraulicRedistribution_use = "logical", HydraulicRedistribution = "matrix",
   CriticalSoilWaterPotential = "numeric", CO2Coefficients = "matrix",
-  MonthlyProductionValues_grass = "matrix", MonthlyProductionValues_shrub = "matrix",
-  MonthlyProductionValues_tree = "matrix", MonthlyProductionValues_forb = "matrix"))
+  MonthlyVeg = "list"))
 
 
 swProd_validity <- function(object) {
@@ -112,27 +111,9 @@ swProd_validity <- function(object) {
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
-  temp <- dim(object@MonthlyProductionValues_grass)
-  if (identical(temp, c(12, nvegs))) {
-    msg <- "@MonthlyProductionValues_grass must be a 12xNVEGTYPES matrix."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  temp <- dim(object@MonthlyProductionValues_shrub)
-  if (identical(temp, c(12, nvegs))) {
-    msg <- "@MonthlyProductionValues_shrub must be a 12xNVEGTYPES matrix."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  temp <- dim(object@MonthlyProductionValues_tree)
-  if (identical(temp, c(12, nvegs))) {
-    msg <- "@MonthlyProductionValues_tree must be a 12xNVEGTYPES matrix."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  temp <- dim(object@MonthlyProductionValues_forb)
-  if (identical(temp, c(12, nvegs))) {
-    msg <- "@MonthlyProductionValues_forb must be a 12xNVEGTYPES matrix."
+  if (length(object@MonthlyVeg) != nvegs ||
+    any(sapply(object@MonthlyVeg, function(x) !identical(dim(x), c(12L, 4L))))) {
+    msg <- "@MonthlyVeg must be a list with NVEGTYPES elements of a 12x4 matrix."
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
@@ -154,9 +135,7 @@ setMethod("initialize", signature = "swProd", function(.Object, ...) {
 
   # Guarantee dimnames of dots arguments
   gdns <- c("CanopyHeight", "VegetationInterceptionParameters", "LitterInterceptionParameters",
-    "HydraulicRedistribution", "CO2Coefficients", "MonthlyProductionValues_grass",
-    "MonthlyProductionValues_shrub", "MonthlyProductionValues_tree",
-    "MonthlyProductionValues_forb")
+    "HydraulicRedistribution", "CO2Coefficients", "MonthlyVeg")
 
   for (g in gdns) if (g %in% dns) {
     dimnames(dots[[g]]) <- dimnames(slot(def, g))
@@ -187,10 +166,19 @@ setMethod("swProd_HydrRedstro_use", "swProd", function(object) object@HydraulicR
 setMethod("swProd_HydrRedstro", "swProd", function(object) object@HydraulicRedistribution)
 setMethod("swProd_CritSoilWaterPotential", "swProd", function(object) object@CriticalSoilWaterPotential)
 setMethod("swProd_CO2Coefficients", "swProd", function(object) object@CO2Coefficients)
-setMethod("swProd_MonProd_grass", "swProd", function(object) object@MonthlyProductionValues_grass)
-setMethod("swProd_MonProd_shrub", "swProd", function(object) object@MonthlyProductionValues_shrub)
-setMethod("swProd_MonProd_tree", "swProd", function(object) object@MonthlyProductionValues_tree)
-setMethod("swProd_MonProd_forb", "swProd", function(object) object@MonthlyProductionValues_forb)
+setMethod("swProd_MonProd_veg", "swProd", function(object, vegtype) object@MonthlyVeg[[vegtype]])
+setMethod("swProd_MonProd_grass", "swProd", function(object) {
+  object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]]]
+})
+setMethod("swProd_MonProd_shrub", "swProd", function(object) {
+  object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]]]
+})
+setMethod("swProd_MonProd_tree", "swProd", function(object) {
+  object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]]]
+})
+setMethod("swProd_MonProd_forb", "swProd", function(object) {
+  object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]]]
+})
 
 setReplaceMethod("set_swProd", signature = "swProd", function(object, value) {
   object <- value
@@ -270,26 +258,30 @@ setReplaceMethod("swProd_CO2Coefficients", signature = "swProd", function(object
   object
 })
 setReplaceMethod("swProd_MonProd_grass", signature = "swProd", function(object, value) {
-  dimnames(value) <- dimnames(object@MonthlyProductionValues_grass)
-  object@MonthlyProductionValues_grass <- value
+  k <- rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]
+  dimnames(value) <- dimnames(object@MonthlyVeg[[k]])
+  object@MonthlyVeg[[k]] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_MonProd_shrub", signature = "swProd", function(object, value) {
-  dimnames(value) <- dimnames(object@MonthlyProductionValues_shrub)
-  object@MonthlyProductionValues_shrub <- value
+  k <- rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]
+  dimnames(value) <- dimnames(object@MonthlyVeg[[k]])
+  object@MonthlyVeg[[k]] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_MonProd_tree", signature = "swProd", function(object, value) {
-  dimnames(value) <- dimnames(object@MonthlyProductionValues_tree)
-  object@MonthlyProductionValues_tree <- value
+  k <- rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]
+  dimnames(value) <- dimnames(object@MonthlyVeg[[k]])
+  object@MonthlyVeg[[k]] <- value
   validObject(object)
   object
 })
 setReplaceMethod("swProd_MonProd_forb", signature = "swProd", function(object, value) {
-  dimnames(value) <- dimnames(object@MonthlyProductionValues_forb)
-  object@MonthlyProductionValues_forb <- value
+  k <- rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]
+  dimnames(value) <- dimnames(object@MonthlyVeg[[k]])
+  object@MonthlyVeg[[k]] <- value
   validObject(object)
   object
 })
@@ -327,9 +319,9 @@ setMethod("swReadLines", signature = c(object="swProd",file="character"), functi
 			object@HydraulicRedistribution[3,] = readNumerics(infiletext[69],4)
 			object@CriticalSoilWaterPotential = readNumerics(infiletext[74],4)
 			for(i in 1:4)  object@CO2Coefficients[i, ] = readNumerics(infiletext[79 + i], 4)
-			for(i in 1:12) object@MonthlyProductionValues_grass[i,] = readNumerics(infiletext[94+i],4)
-			for(i in 1:12) object@MonthlyProductionValues_shrub[i,] = readNumerics(infiletext[109+i],4)
-			for(i in 1:12) object@MonthlyProductionValues_tree[i,] = readNumerics(infiletext[124+i],4)
-			for(i in 1:12) object@MonthlyProductionValues_forb[i,] = readNumerics(infiletext[139+i],4)
+			for(i in 1:12) object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]]][i, ] = readNumerics(infiletext[94+i],4)
+			for(i in 1:12) object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]]][i, ] = readNumerics(infiletext[109+i],4)
+			for(i in 1:12) object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]]][i, ] = readNumerics(infiletext[124+i],4)
+			for(i in 1:12) object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]]][i, ] = readNumerics(infiletext[139+i],4)
 			return(object)
 		})

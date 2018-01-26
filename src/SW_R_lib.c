@@ -206,23 +206,27 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 
 
 /** Expose SOILWAT2 constants and defines to internal R code of rSOILWAT2
-  @return A list with four elements: one element `kINT` for integer constants;
-    other elements contain output keys, `OutKeys`; output periods, `OutPeriods`; and
-    output aggregation types, `OutAggs`.
+  @return A list with six elements: one element `kINT` for integer constants;
+    other elements contain vegetation keys, `VegTypes`; output keys, `OutKeys`;
+    output periods, `OutPeriods`; output aggregation types, `OutAggs`; and names of
+    input files, `InFiles`.
  */
 SEXP sw_consts(void) {
-  const int nret = 5; // length of cret
+  const int nret = 6; // length of cret
   const int nINT = 9; // length of vINT and cINT
 
-  SEXP ret, cnames, ret_int, ret_str1, ret_str2, ret_str3, ret_infiles;
+  SEXP ret, cnames, ret_int, ret_int2, ret_str1, ret_str2, ret_str3, ret_infiles;
   int i;
   int *pvINT;
-  char *cret[] = {"kINT", "OutKeys", "OutPeriods", "OutAggs", "InFiles"};
+  char *cret[] = {"kINT", "VegTypes", "OutKeys", "OutPeriods", "OutAggs", "InFiles"};
 
   int vINT[] = {SW_NFILES, MAX_LAYERS, MAX_TRANSP_REGIONS, MAX_NYEAR, SW_MISSING,
     SW_OUTNPERIODS, SW_OUTNKEYS, SW_NSUMTYPES, NVEGTYPES};
   char *cINT[] = {"SW_NFILES", "MAX_LAYERS", "MAX_TRANSP_REGIONS", "MAX_NYEAR", "SW_MISSING",
     "SW_OUTNPERIODS", "SW_OUTNKEYS", "SW_NSUMTYPES", "NVEGTYPES"};
+  int vINT2[] = {SW_TREES, SW_SHRUB, SW_FORBS, SW_GRASS};
+  char *cINT2[] = {"SW_TREES", "SW_SHRUB", "SW_FORBS", "SW_GRASS"};
+
   char *vSTR1[] = {SW_WETHR, SW_TEMP, SW_PRECIP, SW_SOILINF, SW_RUNOFF,
     SW_ALLH2O, SW_VWCBULK, SW_VWCMATRIC, SW_SWCBULK, SW_SWABULK,
     SW_SWAMATRIC, SW_SWPMATRIC, SW_SURFACEW, SW_TRANSP, SW_EVAPSOIL,
@@ -252,6 +256,16 @@ SEXP sw_consts(void) {
     SET_STRING_ELT(cnames, i, mkChar(cINT[i]));
   }
   namesgets(ret_int, cnames);
+
+  // create vector of vegetation types
+  PROTECT(ret_int2 = allocVector(INTSXP, NVEGTYPES));
+  pvINT = INTEGER(ret_int2);
+  PROTECT(cnames = allocVector(STRSXP, NVEGTYPES));
+  for (i = 0; i < NVEGTYPES; i++) {
+    pvINT[i] = vINT2[i];
+    SET_STRING_ELT(cnames, i, mkChar(cINT2[i]));
+  }
+  namesgets(ret_int2, cnames);
 
   // create vector of output key constants
   PROTECT(ret_str1 = allocVector(STRSXP, SW_OUTNKEYS));
@@ -298,12 +312,13 @@ SEXP sw_consts(void) {
     SET_STRING_ELT(cnames, i, mkChar(cret[i]));
   namesgets(ret, cnames);
   SET_VECTOR_ELT(ret, 0, ret_int);
-  SET_VECTOR_ELT(ret, 1, ret_str1);
-  SET_VECTOR_ELT(ret, 2, ret_str2);
-  SET_VECTOR_ELT(ret, 3, ret_str3);
-  SET_VECTOR_ELT(ret, 4, ret_infiles);
+  SET_VECTOR_ELT(ret, 1, ret_int2);
+  SET_VECTOR_ELT(ret, 2, ret_str1);
+  SET_VECTOR_ELT(ret, 3, ret_str2);
+  SET_VECTOR_ELT(ret, 4, ret_str3);
+  SET_VECTOR_ELT(ret, 5, ret_infiles);
 
-  UNPROTECT(12);
+  UNPROTECT(14);
 
   return ret;
 }
