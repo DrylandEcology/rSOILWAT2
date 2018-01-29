@@ -60,6 +60,15 @@ extern RealD _SWCInitVal, /* initialization value for swc */
   _SWCWetVal, /* value for a "wet" day,       */
   _SWCMinVal; /* lower bound on swc.          */
 
+char *cSW_SIT[] = { "SWClimits", "ModelFlags", "ModelCoefficients",
+  "SnowSimulationParameters", "DrainageCoefficient", "EvaporationCoefficients",
+  "TranspirationCoefficients", "IntrinsicSiteParams", "SoilTemperatureFlag",
+  "SoilTemperatureConstants", "TranspirationRegions" };
+char *cLayers[] = { "depth_cm", "bulkDensity_g/cm^3", "gravel_content",
+  "EvapBareSoil_frac", "transpGrass_frac", "transpShrub_frac", "transpTree_frac",
+  "transpForb_frac", "sand_frac", "clay_frac", "impermeability_frac", "soilTemp_c" };
+
+
 /* =================================================== */
 /* =================================================== */
 /*             Private Function Definitions            */
@@ -71,8 +80,6 @@ SEXP onGet_SW_LYR() {
 	SW_SITE *v = &SW_Site;
 	SEXP swSoils, SW_SOILS;
 	SEXP Layers,Layers_names,Layers_names_y;
-	char *cLayers[] = { "depth_cm", "bulkDensity_g/cm^3", "gravel_content", "EvapBareSoil_frac", "transpGrass_frac", "transpShrub_frac",
-			"transpTree_frac", "transpForb_frac", "sand_frac", "clay_frac", "impermeability_frac", "soilTemp_c" };
 	RealD *p_Layers;
 
 	PROTECT(swSoils = MAKE_CLASS("swSoils"));
@@ -84,10 +91,10 @@ SEXP onGet_SW_LYR() {
 		p_Layers[i + (v->n_layers) * 1] = v->lyr[i]->soilMatric_density;
 		p_Layers[i + (v->n_layers) * 2] = v->lyr[i]->fractionVolBulk_gravel;
 		p_Layers[i + (v->n_layers) * 3] = v->lyr[i]->evap_coeff;
-		p_Layers[i + (v->n_layers) * 4] = v->lyr[i]->transp_coeff_grass;
-		p_Layers[i + (v->n_layers) * 5] = v->lyr[i]->transp_coeff_shrub;
-		p_Layers[i + (v->n_layers) * 6] = v->lyr[i]->transp_coeff_tree;
-		p_Layers[i + (v->n_layers) * 7] = v->lyr[i]->transp_coeff_forb;
+		p_Layers[i + (v->n_layers) * 4] = v->lyr[i]->transp_coeff[SW_GRASS];
+		p_Layers[i + (v->n_layers) * 5] = v->lyr[i]->transp_coeff[SW_SHRUB];
+		p_Layers[i + (v->n_layers) * 6] = v->lyr[i]->transp_coeff[SW_TREES];
+		p_Layers[i + (v->n_layers) * 7] = v->lyr[i]->transp_coeff[SW_FORBS];
 		p_Layers[i + (v->n_layers) * 8] = v->lyr[i]->fractionWeightMatric_sand;
 		p_Layers[i + (v->n_layers) * 9] = v->lyr[i]->fractionWeightMatric_clay;
 		p_Layers[i + (v->n_layers) * 10] = v->lyr[i]->impermeability;
@@ -110,21 +117,24 @@ void onSet_SW_LYR(SEXP SW_SOILS) {
 
 	SW_SITE *v = &SW_Site;
 	Bool evap_ok = TRUE, /* mitigate gaps in layers' evap coeffs */
-	transp_ok_tree = TRUE, /* same for transpiration coefficients */
-	transp_ok_forb = TRUE,
-	transp_ok_shrub = TRUE, /* same for transpiration coefficients */
-	transp_ok_grass = TRUE, /* same for transpiration coefficients */
+	transp_ok_veg[NVEGTYPES], /* same for transpiration coefficients */
 	fail = FALSE;
 	LyrIndex lyrno;
-	int i, j, columns;
+	int i, j, k, columns;
 	const char *errtype = "\0";
-	RealF dmin = 0.0, dmax, evco, trco_forb, trco_tree, trco_shrub, trco_grass, psand, pclay, matricd, imperm, soiltemp, fval = 0, f_gravel;
+	RealF dmin = 0.0, dmax, evco, trco_veg[NVEGTYPES], psand, pclay, matricd, imperm, soiltemp, fval = 0, f_gravel;
 	RealD *p_Layers;
 	SEXP SW_LYR;
+
 	/* note that Files.read() must be called prior to this. */
 	PROTECT(SW_LYR = GET_SLOT(SW_SOILS,install("Layers")));
-
 	MyFileName = SW_F_name(eLayers);
+
+	// Initialize
+	ForEachVegType(k) {
+		transp_ok_veg[k] = TRUE;
+	}
+
 
 	j = nrows(SW_LYR);
 	p_Layers = REAL(SW_LYR);
@@ -138,10 +148,10 @@ void onSet_SW_LYR(SEXP SW_SOILS) {
 		matricd = p_Layers[i + j * 1];
 		f_gravel = p_Layers[i + j * 2];
 		evco = p_Layers[i + j * 3];
-		trco_grass = p_Layers[i + j * 4];
-		trco_shrub = p_Layers[i + j * 5];
-		trco_tree = p_Layers[i + j * 6];
-		trco_forb = p_Layers[i + j * 7];
+		trco_veg[SW_GRASS] = p_Layers[i + j * 4];
+		trco_veg[SW_SHRUB] = p_Layers[i + j * 5];
+		trco_veg[SW_TREES] = p_Layers[i + j * 6];
+		trco_veg[SW_FORBS] = p_Layers[i + j * 7];
 		psand = p_Layers[i + j * 8];
 		pclay = p_Layers[i + j * 9];
 		imperm = p_Layers[i + j * 10];
@@ -177,17 +187,13 @@ void onSet_SW_LYR(SEXP SW_SOILS) {
 		v->lyr[lyrno]->soilMatric_density = matricd;
 		v->lyr[lyrno]->fractionVolBulk_gravel = f_gravel;
 		v->lyr[lyrno]->evap_coeff = evco;
-		v->lyr[lyrno]->transp_coeff_tree = trco_tree;
-		v->lyr[lyrno]->transp_coeff_shrub = trco_shrub;
-		v->lyr[lyrno]->transp_coeff_grass = trco_grass;
-		v->lyr[lyrno]->transp_coeff_forb = trco_forb;
+		ForEachVegType(k) {
+			v->lyr[lyrno]->transp_coeff[k] = trco_veg[k];
+			v->lyr[lyrno]->my_transp_rgn[k] = 0;
+		}
 		v->lyr[lyrno]->fractionWeightMatric_sand = psand;
 		v->lyr[lyrno]->fractionWeightMatric_clay = pclay;
 		v->lyr[lyrno]->impermeability = imperm;
-		v->lyr[lyrno]->my_transp_rgn_tree = 0;
-		v->lyr[lyrno]->my_transp_rgn_shrub = 0;
-		v->lyr[lyrno]->my_transp_rgn_grass = 0;
-		v->lyr[lyrno]->my_transp_rgn_forb = 0;
 		v->lyr[lyrno]->sTemp = soiltemp;
 
 		if (evap_ok) {
@@ -196,30 +202,16 @@ void onSet_SW_LYR(SEXP SW_SOILS) {
 			} else
 				evap_ok = FALSE;
 		}
-		if (transp_ok_tree) {
-			if (GT(v->lyr[lyrno]->transp_coeff_tree, 0.0))
-				v->n_transp_lyrs_tree++;
-			else
-				transp_ok_tree = FALSE;
+
+		ForEachVegType(k) {
+			if (transp_ok_veg[k]) {
+				if (GT(v->lyr[lyrno]->transp_coeff[k], 0.0)) {
+					v->n_transp_lyrs[k]++;
+				} else
+					transp_ok_veg[k] = FALSE;
+			}
 		}
-		if (transp_ok_shrub) {
-			if (GT(v->lyr[lyrno]->transp_coeff_shrub, 0.0))
-				v->n_transp_lyrs_shrub++;
-			else
-				transp_ok_shrub = FALSE;
-		}
-		if (transp_ok_forb) {
-			if (GT(v->lyr[lyrno]->transp_coeff_forb, 0.0))
-				v->n_transp_lyrs_forb++;
-			else
-				transp_ok_forb = FALSE;
-		}
-		if (transp_ok_grass) {
-			if (GT(v->lyr[lyrno]->transp_coeff_grass, 0.0))
-				v->n_transp_lyrs_grass++;
-			else
-				transp_ok_grass = FALSE;
-		}
+
 
 		water_eqn(f_gravel, psand, pclay, lyrno);
 		v->lyr[lyrno]->swcBulk_fieldcap = SW_SWPmatric2VWCBulk(f_gravel, 0.333, lyrno) * v->lyr[lyrno]->width;
@@ -246,8 +238,6 @@ SEXP onGet_SW_SIT() {
 
 	SEXP swSite;
 	SEXP SW_SIT;
-	char *cSW_SIT[] = { "SWClimits", "ModelFlags", "ModelCoefficients", "SnowSimulationParameters", "DrainageCoefficient", "EvaporationCoefficients", "TranspirationCoefficients",
-			"IntrinsicSiteParams", "SoilTemperatureFlag", "SoilTemperatureConstants", "TranspirationRegions" };
 
 	SEXP SWClimits, SWClimits_names;
 	char *cSWClimits[] = { "swc_min", "swc_init", "swc_wet" };

@@ -261,6 +261,8 @@ setGeneric("swProd_CritSoilWaterPotential", function(object) standardGeneric("sw
 #' @export
 setGeneric("swProd_CO2Coefficients", function(object) standardGeneric("swProd_CO2Coefficients"))
 #' @export
+setGeneric("swProd_MonProd_veg", function(object, vegtype) standardGeneric("swProd_MonProd_veg"))
+#' @export
 setGeneric("swProd_MonProd_grass", function(object) standardGeneric("swProd_MonProd_grass"))
 #' @export
 setGeneric("swProd_MonProd_shrub", function(object) standardGeneric("swProd_MonProd_shrub"))
@@ -299,6 +301,8 @@ setGeneric("swProd_HydrRedstro<-", function(object, value) standardGeneric("swPr
 setGeneric("swProd_CritSoilWaterPotential<-", function(object, value) standardGeneric("swProd_CritSoilWaterPotential<-"))
 #' @export
 setGeneric("swProd_CO2Coefficients<-", function(object, value) standardGeneric("swProd_CO2Coefficients<-"))
+#' @export
+setGeneric("swProd_MonProd_veg<-", function(object, value) standardGeneric("swProd_MonProd_veg<-"))
 #' @export
 setGeneric("swProd_MonProd_grass<-", function(object, value) standardGeneric("swProd_MonProd_grass<-"))
 #' @export

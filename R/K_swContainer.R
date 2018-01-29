@@ -358,6 +358,7 @@ setMethod("swProd_HydrRedstro_use", "swInputData", function(object) swProd_HydrR
 setMethod("swProd_HydrRedstro", "swInputData", function(object) swProd_HydrRedstro(object@prod))
 setMethod("swProd_CritSoilWaterPotential", "swInputData", function(object) swProd_CritSoilWaterPotential(object@prod))
 setMethod("swProd_CO2Coefficients", "swInputData", function(object) swProd_CO2Coefficients(object@prod))
+setMethod("swProd_MonProd_veg", "swInputData", function(object, vegtype) swProd_MonProd_veg(object@prod, vegtype))
 setMethod("swProd_MonProd_grass", "swInputData", function(object) swProd_MonProd_grass(object@prod))
 setMethod("swProd_MonProd_shrub", "swInputData", function(object) swProd_MonProd_shrub(object@prod))
 setMethod("swProd_MonProd_tree", "swInputData", function(object) swProd_MonProd_tree(object@prod))
