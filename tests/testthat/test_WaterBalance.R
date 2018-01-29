@@ -1,6 +1,6 @@
 context("rSOILWAT2 water balance")
 
-# The 8 implemented checks correspond to the checks in SOILWAT/test/test_WaterBalance.cc
+# The 8 checks, implemented below, correspond to the checks in SOILWAT/test/test_WaterBalance.cc
 
 
 #---CONSTANTS
@@ -86,7 +86,7 @@ for (it in tests) {
     # change in soil moisture
     temp <- slot(slot(x, "SWCBULK"), "Day")
     swcj <- temp[, grep("Lyr", colnames(temp)), drop = FALSE]
-     n_soillayers <- ncol(swcj)
+    n_soillayers <- ncol(swcj)
 
     dy_delta_swcj <- swcj[dyt[["ids2"]], ] - swcj[dyt[["ids1"]], ] # today - yesterday
     list_delta_swcj <- aggregate_for_each_timestep(x = dy_delta_swcj, dyt)
