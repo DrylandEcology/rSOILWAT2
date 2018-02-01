@@ -3,7 +3,15 @@ context("rSOILWAT2 annual aggregation")
 #---CONSTANTS
 tol <- 1e-6
 OutSum <- c("off", "sum", "mean", "fnl")
-tests <- c("Ex1", "Ex2")
+temp <- list.files(".", pattern = "Ex")
+temp <- sapply(strsplit(temp, "_"), function(x) x[[1]])
+tests <- unique(temp)
+test_that("Test data availability", expect_gt(length(tests), 0))
+
+var_SumNotZero <- c("TEMP", "PRECIP", "SOILINFILT", "VWCBULK", "VWCMATRIC", "SWCBULK",
+  "SWABULK", "SWAMATRIC", "SWPMATRIC", "TRANSP", "EVAPSOIL", "EVAPSURFACE",
+  "INTERCEPTION", "LYRDRAIN", "HYDRED", "ET", "AET", "PET", "WETDAY", "SNOWPACK",
+  "DEEPSWC", "CO2EFFECTS")
 
 for (it in tests) {
   #---INPUTS
@@ -28,8 +36,11 @@ for (it in tests) {
     expect_false(has_soilTemp_failed())
 
     # Run silently/verbosely
-    expect_silent(sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE,
-      quiet = TRUE))
+    # This doesn't work for Ex3 'soil temperature' (see issue #90 'Soil temperature simulation fails on unit test/example inputs')
+    if (it != "Ex3") {
+      expect_silent(sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE,
+        quiet = TRUE))
+    }
 
     # This doesn't work; apparently, testthat::expect_message and similar functions don't capture text written by LogError directly to the console.
     # expect_message(sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE, quiet = FALSE))
@@ -51,14 +62,23 @@ for (it in tests) {
         fun_agg[k] %in% c("mean", "sum")) {
 
         info2 <- paste(info1, "- slot", vars[k])
-        res_true <- matrix(TRUE, nrow = rd@yr_nrow, ncol = x1@Columns)
+
+        # Output is not all zero
+        if (vars[k] %in% var_SumNotZero) {
+          expect_true(sum(abs(x1@Day[, -(1:2)])) > 0, info = info2)
+          expect_true(sum(abs(x1@Year[, -1])) > 0, info = info2)
+        }
 
         # Compare aggregated daily against yearly output
-        expect_equivalent({
-            temp1d <- aggregate(x1@Day[, -(1:2)], by = list(x1@Day[, 1]), FUN = fun_agg[k])
-            diff1d <- data.matrix(x1@Year[, -1]) - data.matrix(temp1d[, -1])
-            abs(diff1d) < tol
-        }, res_true, info = info2)
+        if (vars[k] != "ESTABL") {
+          # "ESTABL" produces only yearly output
+          res_true <- matrix(TRUE, nrow = rd@yr_nrow, ncol = x1@Columns)
+          expect_equivalent({
+              temp1d <- aggregate(x1@Day[, -(1:2)], by = list(x1@Day[, 1]), FUN = fun_agg[k])
+              diff1d <- data.matrix(x1@Year[, -1]) - data.matrix(temp1d[, -1])
+              abs(diff1d) < tol
+          }, res_true, info = info2)
+        }
 
       } else {
         # slot 'vars[k]' contains

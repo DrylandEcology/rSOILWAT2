@@ -9,3 +9,7 @@
 0	# use flag; 1=check establishment, 0=don't check, ignore following
 Input/bouteloua.estab
 Input/bromus.estab
+#Input/aristida.estab
+#Input/vulpia.estab
+#Input/opuntia.estab
+

@@ -1,8 +1,13 @@
 context("rSOILWAT2 soil temperature instability")
 
 #---CONSTANTS
-sw_TimeSteps <- c("Day", "Week", "Month", "Year")
-tests <- c("Ex1", "Ex2")
+temp <- list.files(".", pattern = "Ex")
+temp <- sapply(strsplit(temp, "_"), function(x) x[[1]])
+tests <- unique(temp)
+test_that("Test data availability", expect_gt(length(tests), 0))
+
+st_name <- rSW2_glovars[["kSOILWAT2"]][["OutKeys"]][["SW_SOILTEMP"]]
+
 
 for (it in tests) {
   #---INPUTS
@@ -27,8 +32,8 @@ for (it in tests) {
     expect_s4_class(rd <- sw_exec(inputData = sw_input, weatherList = sw_weather,
         echo = FALSE, quiet = TRUE), "swOutput")
 
-      soiltemp <- slot(rd, "SOILTEMP")
-      time_steps <- sw_TimeSteps[1 + soiltemp@TimeStep]
+      soiltemp <- slot(rd, st_name)
+      time_steps <- rSW2_glovars[["sw_TimeSteps"]][1 + soiltemp@TimeStep]
 
       for (k in seq_along(time_steps)) {
         x1 <- slot(soiltemp, time_steps[k])

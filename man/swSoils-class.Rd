@@ -3,8 +3,6 @@
 \docType{class}
 \name{swSoils-class}
 \alias{swSoils-class}
-\alias{swClear,swSoils-method}
-\alias{swWriteLines,swSoils-method}
 \alias{swReadLines,swSoils-method}
 \title{Class \code{"swSoils"}}
 \description{
@@ -21,7 +19,7 @@ showClass("swSoils")
 
 }
 \references{
-https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+https://github.com/DrylandEcology/rSOILWAT2
 }
 \seealso{
 \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}

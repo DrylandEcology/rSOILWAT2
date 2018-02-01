@@ -7,8 +7,6 @@
 \alias{swMarkov_Conv,swMarkov-method}
 \alias{swMarkov_Prob<-,swMarkov-method}
 \alias{swMarkov_Prob,swMarkov-method}
-\alias{swClear,swMarkov-method}
-\alias{swWriteLines,swMarkov-method}
 \alias{swReadLines,swMarkov-method}
 \title{Class \code{"swMarkov"}}
 \description{
@@ -25,7 +23,7 @@ showClass("swMarkov")
 
 }
 \references{
-https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+https://github.com/DrylandEcology/rSOILWAT2
 }
 \seealso{
 \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}

@@ -1,6 +1,6 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -111,7 +111,7 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 		temp <- as.integer(names(weatherData))
 		StartYear <- temp[1]
 		EndYear <- temp[length(temp)]
-		DBI::dbExecute(rSW2_glovars$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
+		DBI::dbExecute(rSW2_glovars$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,", ",scenarioID,", ",StartYear,", ",EndYear,", ",data_blob,");",sep=""))
 		#dbCommit(rSW2_glovars$con)
 	} else {
 		weath <- list.files(weatherFolderPath)
@@ -125,7 +125,7 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 		StartYear <- years[1]
 		EndYear <- years[length(years)]
 		data_blob <- dbW_weatherData_to_blob_old(weatherData, rSW2_glovars$blob_compression_type)
-		DBI::dbExecute(rSW2_glovars$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,",",scenarioID,",",StartYear,",",EndYear,",",data_blob,");",sep=""))
+		DBI::dbExecute(rSW2_glovars$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,", ",scenarioID,", ",StartYear,", ",EndYear,", ",data_blob,");",sep=""))
 		#dbCommit(rSW2_glovars$con)
 	}
 }
@@ -194,7 +194,7 @@ dbW_addSite <- function(Site_id = NULL, lat = NULL, long = NULL, Label = NULL) {
 		sql <- "SELECT MAX(Site_id) FROM Sites"
 		temp <- DBI::dbGetQuery(rSW2_glovars$con, sql)[1,1]
 		Site_id <- if (is.na(temp)) 1L else {temp + 1}
-		sql <- paste0("INSERT INTO Sites VALUES(", Site_id, ",", lat, ",", long, ",",
+		sql <- paste0("INSERT INTO Sites VALUES(", Site_id, ", ", lat, ", ", long, ", ",
 			Label, ")")
 		DBI::dbExecute(rSW2_glovars$con, sql)
 

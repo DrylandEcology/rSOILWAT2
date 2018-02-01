@@ -17,7 +17,7 @@ context("rSOILWAT2 segfault")
 # Create reference objects
 path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 
-a <- sw_inputDataFromFiles(dir = path_demo, files.in = file.path(path_demo, "files_v31.in"))
+a <- sw_inputDataFromFiles(dir = path_demo, files.in = file.path(path_demo, "files.in"))
 
 # Location of segfaults with upper bound of b
 #	- (eo/debug/!interactive()): step 2 >= 558151 > step 3 >= 558105 > step 4 >= 555193 > no segfault

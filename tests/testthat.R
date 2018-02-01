@@ -7,4 +7,4 @@ Sys.setenv("R_TESTS" = "")
 library("testthat")
 library("rSOILWAT2")
 
-test_check("rSOILWAT2")
+test_check("rSOILWAT2", reporter = SummaryReporter)

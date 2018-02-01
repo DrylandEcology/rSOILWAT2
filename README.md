@@ -3,18 +3,18 @@
 | :---- | :---- | :---- | :---- | :---- | :---- |
 [ ![Travis build status][1]][2] | [![Appveyor build status][3]][4] | [ ![github release][5]][6] | [![license][7]][8] | [![coveralls status][9]][10] | [![github downloads][11]][12] |
 
-[1]: https://travis-ci.org/Burke-Lauenroth-Lab/rSOILWAT2.svg?branch=master
-[2]: https://travis-ci.org/Burke-Lauenroth-Lab/rSOILWAT2
+[1]: https://travis-ci.org/DrylandEcology/rSOILWAT2.svg?branch=master
+[2]: https://travis-ci.org/DrylandEcology/rSOILWAT2
 [3]: https://ci.appveyor.com/api/projects/status/3bgvcsokr27bo1uh/branch/master?svg=true
-[4]: https://ci.appveyor.com/project/dschlaep/rSOILWAT2/branch/master
-[5]: https://img.shields.io/github/release/Burke-Lauenroth-Lab/rSOILWAT2.svg?label=current+release
-[6]: https://github.com/Burke-Lauenroth-Lab/rSOILWAT2/releases
-[7]: https://img.shields.io/github/license/Burke-Lauenroth-Lab/rSOILWAT2.svg
+[4]: https://ci.appveyor.com/project/DrylandEcologyGit/rSOILWAT2/branch/master
+[5]: https://img.shields.io/github/release/DrylandEcology/rSOILWAT2.svg?label=current+release
+[6]: https://github.com/DrylandEcology/rSOILWAT2/releases
+[7]: https://img.shields.io/github/license/DrylandEcology/rSOILWAT2.svg
 [8]: https://www.gnu.org/licenses/gpl.html
-[9]: https://coveralls.io/repos/github/Burke-Lauenroth-Lab/rSOILWAT2/badge.svg
-[10]: https://coveralls.io/github/Burke-Lauenroth-Lab/rSOILWAT2
-[11]: https://img.shields.io/github/downloads/Burke-Lauenroth-Lab/rSOILWAT2/total.svg
-[12]: https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+[9]: https://coveralls.io/repos/github/DrylandEcology/rSOILWAT2/badge.svg
+[10]: https://coveralls.io/github/DrylandEcology/rSOILWAT2
+[11]: https://img.shields.io/github/downloads/DrylandEcology/rSOILWAT2/total.svg
+[12]: https://github.com/DrylandEcology/rSOILWAT2
 
 
 # rSOILWAT2
@@ -68,25 +68,12 @@ Original references
 There are several options:
 
 - Download the
-  [package zip file](https://github.com/Burke-Lauenroth-Lab/rSOILWAT2/archive/master.zip)
+  [package zip file](https://github.com/DrylandEcology/rSOILWAT2/archive/master.zip)
   via your web browser.
 
 - Use git to clone and get submodules in one line
   ```
-  git clone -b master --single-branch --recursive https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git rSOILWAT2
-  ```
-
-- Use git to clone and get submodules step by step
-  ```
-  git clone https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git rSOILWAT2
-  cd rSOILWAT2/
-  git checkout master
-  git submodule init
-  git submodule update ## --remote: uses the latest submodule commit; without --remote: uses a previously defined submodule commit
-  cd src/SOILWAT2
-  git checkout master
-  git pull
-  cd ../..
+  git clone -b master --single-branch --recursive https://github.com/DrylandEcology/rSOILWAT2.git rSOILWAT2
   ```
 
 
@@ -110,7 +97,7 @@ R CMD INSTALL rSOILWAT2
 
 Or do all at once from within R:
 ```{r}
-system2(command = "git", args = "clone -b master --single-branch --recursive https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git rSOILWAT2")
+system2(command = "git", args = "clone -b master --single-branch --recursive https://github.com/DrylandEcology/rSOILWAT2.git rSOILWAT2")
 tools::Rcmd(args = paste("INSTALL rSOILWAT2"))
 ```
 
@@ -127,29 +114,56 @@ binary package (this would be named 'rSOILWAT2_X.Y.Z.zip' with version number X.
 - https://ci.appveyor.com/project/dschlaep/rSOILWAT2/build/artifacts
 If the latest build should have failed, then you may want to check out the 'History' tab
 for binaries of older versions.
+- After you downloaded the binary package, open R, and run
+```{r}
+install.packages(pkgs = "path/to/downloaded/zipfile.zip", repos = NULL)
+```
 
 
 
 ### For code contributors only
-Update the submodule 'SOILWAT2' to the latest commit
+
+__Follow our guidelines__ as detailed [here](https://github.com/DrylandEcology/workflow_guidelines)
+
+__Tests, documentation, and code__ form a trinity
+- Code documentation
+  * Read the [section 'Object documentation' in Wickham's book 'R packages'](http://r-pkgs.had.co.nz/man.html)
+  * Use [roxygen2](https://cran.r-project.org/web/packages/roxygen2/vignettes/formatting.html)
+    to write inline code documentation
+  * Update help pages and NAMESPACE with the command `devtools::document()`
+  * Ideally, add examples to function documentation and check these examples with the
+    command `devtools::run_examples()`
+- Code tests
+  * Read the [section 'Testing' in Wickham's book 'R packages'](http://r-pkgs.had.co.nz/tests.html)
+  * Use [testthat](https://github.com/hadley/testthat) to add unit tests to the existing
+    framework
+  * Run unit tests locally with the command `devtools::test()`
+  * These unit tests will also be run on the command-line with `R CMD check .`
+  * The command-line check will be run on the continuous integration frameworks 'travis'
+    and 'appveyor' when commits are pushed
+  * Development/feature branches can only be merged into master if they pass all checks
+
+
+__How to update the submodule 'SOILWAT2'__ to the latest commit
 ```
-git clone https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git rSOILWAT2
-cd rSOILWAT2
-git checkout master
-# if you want to change to the branch 'XXX' of the submodule 'SOILWAT2'
-# git config -f .gitmodules submodule.SOILWAT2.branch XXX
+git submodule update --remote #--remote: uses the latest commit; without --remote: uses the previously defined commit
+git commit -am "Pulled down latest commit 'COMMIT-FLAG' for submodule SOILWAT2"
+git push
+```
+
+Change branch of submodule `SOILWAT2`
+```
+nano .gitmodules # and change branch = <branch> to the desired <branch>
 
 git submodule init
 git submodule update --remote #--remote: uses the latest commit; without --remote: uses the previously defined commit
-cd src/SOILWAT2
-
-git checkout master # or whatever branch you are working on
-git pull
-
-cd ../..
-git commit -am "Pulled down latest commit 'COMMIT-FLAG' to submodule SOILWAT2"
+git commit -am "Changed to branch 'branch' commit 'COMMIT-FLAG' for submodule SOILWAT2"
 git push
 ```
+
+Run the script `./data-raw/prepare_testInput_objects.R` from within `rSOILWAT2/`
+if the `SOILWAT2` updated included changes to the input files.
+
 
 ### Version numbers
 
@@ -162,8 +176,8 @@ If the version numbers changes, then the following files must be updated
 ### How to contribute
 You can help us in different ways:
 
-1. Reporting [issues](https://github.com/Burke-Lauenroth-Lab/rSOILWAT2/issues)
-2. Contributing code and sending a [pull request](https://github.com/Burke-Lauenroth-Lab/rSOILWAT2/pulls)
+1. Reporting [issues](https://github.com/DrylandEcology/rSOILWAT2/issues)
+2. Contributing code and sending a [pull request](https://github.com/DrylandEcology/rSOILWAT2/pulls)
 
 In order to contribute to the code base of this project, you should first contact the
 Lauenroth Lab. We retain any decision to accept your suggestions/contributions or not.
@@ -190,13 +204,22 @@ GNU General Public License for more details.
 
 # Notes
 
+__Organization renamed from Burke-Lauenroth-Lab to DrylandEcology on Dec 22, 2017__
+
+All existing information should [automatically be redirected](https://help.github.com/articles/renaming-a-repository/) to the new name.
+Contributors are encouraged, however, to update local clones to [point to the new URL](https://help.github.com/articles/changing-a-remote-s-url/), i.e.,
+```
+git remote set-url origin https://github.com/DrylandEcology/rSOILWAT2.git
+```
+
+
 __Repository renamed from Rsoilwat (Rsoilwat31) to rSOILWAT2 on Feb 23, 2017__
 
 All existing information should [automatically be redirected](https://help.github.com/articles/renaming-a-repository/) to the new name.
 
 Contributors are encouraged, however, to update local clones to [point to the new URL](https://help.github.com/articles/changing-a-remote-s-url/), i.e.,
 ```
-git remote set-url origin https://github.com/Burke-Lauenroth-Lab/rSOILWAT2.git
+git remote set-url origin https://github.com/DrylandEcology/rSOILWAT2.git
 ```
 If you have installed a previous version as R package, then you may consider removing the old version with
 ```{r}

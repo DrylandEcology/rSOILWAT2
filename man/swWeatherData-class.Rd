@@ -3,8 +3,6 @@
 \docType{class}
 \name{swWeatherData-class}
 \alias{swWeatherData-class}
-\alias{swClear,swWeatherData-method}
-\alias{swWriteLines,swWeatherData-method}
 \alias{swReadLines,swWeatherData-method}
 \title{Class \code{"swWeatherData"}}
 \description{
@@ -21,7 +19,7 @@ showClass("swWeatherData")
 
 }
 \references{
-https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+https://github.com/DrylandEcology/rSOILWAT2
 }
 \seealso{
 \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}

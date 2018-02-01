@@ -1,6 +1,6 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ str(swIn1, max.level=2)
 #Or read input data from files
 setwd("~/Dropbox/Work_Stuff/2_Research/Software/GitHub_Projects/rSOILWAT2/demo/IntroductionExample")
 dir.sw <- getwd()
-swIn2 <- sw_inputDataFromFiles(dir=getwd(), files.in="files_v31.in")
+swIn2 <- sw_inputDataFromFiles(dir=getwd(), files.in="files.in")
 str(swIn2, max.level=2)
 
 
@@ -47,7 +47,7 @@ str(weatherList, max.level=1)
 
 
 #Execute a SoilWat run
-swOut <- sw_exec(inputData=swIn2, weatherList=weatherList, dir="", files.in="files_v31.in", echo=TRUE, quiet=FALSE)
+swOut <- sw_exec(inputData=swIn2, weatherList=weatherList, dir="", files.in="files.in", echo=TRUE, quiet=FALSE)
 str(swOut, max.level=2)
 swOut@Log
 

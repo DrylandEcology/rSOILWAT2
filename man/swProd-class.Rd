@@ -33,8 +33,6 @@
 \alias{swProd_Shade,swProd-method}
 \alias{swProd_VegInterParam<-,swProd-method}
 \alias{swProd_VegInterParam,swProd-method}
-\alias{swClear,swProd-method}
-\alias{swWriteLines,swProd-method}
 \alias{swReadLines,swProd-method}
 \title{Class \code{"swProd"}}
 \description{
@@ -51,7 +49,7 @@ showClass("swProd")
 
 }
 \references{
-https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+https://github.com/DrylandEcology/rSOILWAT2
 }
 \seealso{
 \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}

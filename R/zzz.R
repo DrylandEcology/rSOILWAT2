@@ -1,6 +1,6 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2016}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,10 +30,18 @@
 
 .onLoad <- function(libname, pkgname) {
   #--- Define package level variables that should be hidden from package user
+  # 'rSW2_glovars' is defined in rSOILWAT2-package.R
+
+  # Variables for interaction with SOILWAT2
+  assign("kSOILWAT2", .Call(C_sw_consts), envir = rSW2_glovars)
+  assign("sw_TimeSteps", c("Day", "Week", "Month", "Year"), envir = rSW2_glovars)
+
+  # Variables for weather database functionality
   assign("con", NULL, envir = rSW2_glovars)
   assign("dbW_version", "3.2.0", envir = rSW2_glovars)
   assign("default_blob_compression_type", "gzip", envir = rSW2_glovars)
   assign("blob_compression_type", NULL, envir = rSW2_glovars)
+
 
   invisible()
 }

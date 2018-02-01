@@ -49,9 +49,9 @@ examples for \code{\link{sw_exec}}).
 
 ## ------ Simulation with demonstration data ------------
 ## Access demonstration data (including daily weather forcing)
-sw_in <- sw_inputData()
+sw_in <- rSOILWAT2::sw_exampleData
 
-## Slots of the input object of class 'swInputData'
+## Slots of the input object of class \\code{\\linkS4class{swInputData}}
 str(sw_in, max.level=2)
 
 ## Execute the simulation run

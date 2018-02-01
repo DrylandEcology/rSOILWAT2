@@ -4,7 +4,6 @@
 \name{swLog-class}
 \alias{swLog-class}
 \alias{swLog_setLine<-,swLog-method}
-\alias{swClear,swLog-method}
 \title{Class \code{"swLog"}}
 \description{
 The generic functions listed work on this and the proper sw Class in the container's slots.
@@ -20,7 +19,7 @@ showClass("swLog")
 
 }
 \references{
-https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
+https://github.com/DrylandEcology/rSOILWAT2
 }
 \seealso{
 \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
