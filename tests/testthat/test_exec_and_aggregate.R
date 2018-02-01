@@ -36,11 +36,8 @@ for (it in tests) {
     expect_false(has_soilTemp_failed())
 
     # Run silently/verbosely
-    # This doesn't work for Ex3 'soil temperature' (see issue #90 'Soil temperature simulation fails on unit test/example inputs')
-    if (it != "Ex3") {
-      expect_silent(sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE,
+    expect_silent(sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE,
         quiet = TRUE))
-    }
 
     # This doesn't work; apparently, testthat::expect_message and similar functions don't capture text written by LogError directly to the console.
     # expect_message(sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE, quiet = FALSE))

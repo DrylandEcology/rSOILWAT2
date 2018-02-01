@@ -29,23 +29,25 @@ for (it in tests) {
 
   test_that("Check soil temperature", {
     # Run SOILWAT
-    expect_s4_class(rd <- sw_exec(inputData = sw_input, weatherList = sw_weather,
-        echo = FALSE, quiet = TRUE), "swOutput")
+    rd <- sw_exec(inputData = sw_input, weatherList = sw_weather,
+      echo = FALSE, quiet = TRUE)
+    expect_s4_class(rd, "swOutput")
+    expect_false(has_soilTemp_failed())
 
-      soiltemp <- slot(rd, st_name)
-      time_steps <- rSW2_glovars[["sw_TimeSteps"]][1 + soiltemp@TimeStep]
+    soiltemp <- slot(rd, st_name)
+    time_steps <- rSW2_glovars[["sw_TimeSteps"]][1 + soiltemp@TimeStep]
 
-      for (k in seq_along(time_steps)) {
-        x1 <- slot(soiltemp, time_steps[k])
+    for (k in seq_along(time_steps)) {
+      x1 <- slot(soiltemp, time_steps[k])
 
-        if (all(dim(x1) > 0)) {
-          info <- paste("test-data", it, "- slot", time_steps[k])
-          x <- x1[, seq.int(ncol(x1) - soiltemp@Columns + 1, ncol(x1))]
+      if (all(dim(x1) > 0)) {
+        info <- paste("test-data", it, "- slot", time_steps[k])
+        x <- x1[, seq.int(ncol(x1) - soiltemp@Columns + 1, ncol(x1))]
 
-          expect_true(all(is.finite(x)), info = info)
-          expect_true(all(x > -100), info = info)
-          expect_true(all(x < +100), info = info)
-        }
+        expect_true(all(is.finite(x)), info = info)
+        expect_true(all(x > -100), info = info)
+        expect_true(all(x < +100), info = info)
       }
+    }
   })
 }
