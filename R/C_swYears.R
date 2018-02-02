@@ -22,10 +22,36 @@
 # Author: Ryan J. Murphy (2013)
 ###############################################################################
 
+
+#' Class \code{"swYears"}
+#'
+#' The methods listed below work on this class and the proper slot of the class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#' @param object An object of class \code{\linkS4class{swYears}}.
+#' @param .Object An object of class \code{\linkS4class{swYears}}.
+#' @param value A value to assign to a specific slot of the object.
+#' @param file A character string. The file name from which to read.
+#' @param ... Further arguments to methods.
+#'
+#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
+#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
+#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
+#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
+#' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
+#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#'
+#' @examples
+#' showClass("swYears")
+#' x <- new("swYears")
+#'
+#' @name swYears-class
 #' @export
 setClass("swYears", slots = c(StartYear = "integer", EndYear = "integer",
   FDOFY = "integer", EDOEY = "integer", isNorth = "logical"))
 
+#' @rdname swYears-class
+#' @export
 setMethod("initialize", signature = "swYears", function(.Object, ...) {
   def <- slot(rSOILWAT2::sw_exampleData, "years")
   sns <- slotNames(def)
@@ -87,32 +113,52 @@ setValidity("swYears", swYears_validity)
 
 
 
+#' @rdname swYears-class
+#' @export
 setMethod("swYears_StartYear", "swYears", function(object) object@StartYear)
+#' @rdname swYears-class
+#' @export
 setMethod("swYears_EndYear", "swYears", function(object) object@EndYear)
+#' @rdname swYears-class
+#' @export
 setMethod("swYears_FDOFY", "swYears", function(object) object@FDOFY)
+#' @rdname swYears-class
+#' @export
 setMethod("swYears_EDOEY", "swYears", function(object) object@EDOEY)
+#' @rdname swYears-class
+#' @export
 setMethod("swYears_isNorth", "swYears", function(object) object@isNorth)
 
+#' @rdname swYears-class
+#' @export
 setReplaceMethod("swYears_StartYear", signature = "swYears", function(object, value) {
   object@StartYear <- as.integer(value)
   validObject(object)
   object
 })
+#' @rdname swYears-class
+#' @export
 setReplaceMethod("swYears_EndYear", signature = "swYears", function(object, value) {
   object@EndYear <- as.integer(value)
   validObject(object)
   object
 })
+#' @rdname swYears-class
+#' @export
 setReplaceMethod("swYears_FDOFY", signature = "swYears", function(object, value) {
   object@FDOFY <- as.integer(value)
   validObject(object)
   object
 })
+#' @rdname swYears-class
+#' @export
 setReplaceMethod("swYears_EDOEY", signature = "swYears", function(object, value) {
   object@EDOEY <- as.integer(value)
   validObject(object)
   object
 })
+#' @rdname swYears-class
+#' @export
 setReplaceMethod("swYears_isNorth", signature = "swYears", function(object, value) {
   object@isNorth <- as.logical(value)
   validObject(object)
@@ -120,6 +166,8 @@ setReplaceMethod("swYears_isNorth", signature = "swYears", function(object, valu
 })
 
 
+#' @rdname swYears-class
+#' @export
 setMethod("swReadLines", signature = c(object="swYears",file="character"), function(object,file) {
 			infiletext <- readLines(con = file)
 			object@StartYear = readInteger(infiletext[4])

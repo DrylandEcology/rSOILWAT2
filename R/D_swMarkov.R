@@ -22,9 +22,34 @@
 
 
 #######################Markov##########################################
+#' Class \code{"swMarkov"}
+#'
+#' The methods listed below work on this class and the proper slot of the class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#' @param object An object of class \code{\linkS4class{swMarkov}}.
+#' @param .Object An object of class \code{\linkS4class{swMarkov}}.
+#' @param value A value to assign to a specific slot of the object.
+#' @param file A character string. The file name from which to read.
+#' @param ... Further arguments to methods.
+#'
+#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
+#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
+#' \code{\linkS4class{swInputData}} \code{\linkS4class{swProd}}
+#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
+#' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
+#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#'
+#' @examples
+#' showClass("swMarkov")
+#' x <- new("swMarkov")
+#'
+#' @name swMarkov-class
 #' @export
 setClass("swMarkov", slots = c(Prob = "matrix", Conv = "matrix"))
 
+#' @rdname swMarkov-class
+#' @export
 setMethod("initialize", signature = "swMarkov", function(.Object, ...) {
   def <- slot(rSOILWAT2::sw_exampleData, "markov")
   dots <- list(...)
@@ -88,10 +113,18 @@ swMarkov_validity <- function(object) {
 setValidity("swMarkov", swMarkov_validity)
 
 
+#' @rdname swMarkov-class
+#' @export
 setMethod("get_Markov", "swMarkov", function(object) object)
+#' @rdname swMarkov-class
+#' @export
 setMethod("swMarkov_Prob", "swMarkov", function(object) object@Prob)
+#' @rdname swMarkov-class
+#' @export
 setMethod("swMarkov_Conv", "swMarkov", function(object) object@Conv)
 
+#' @rdname swMarkov-class
+#' @export
 setReplaceMethod("set_Markov", signature = "swMarkov", function(object, value) {
   if (ncol(value@Prod) == ncol(object@Prob)) {
     dimnames(value@Prob) <- dimnames(object@Prob)
@@ -104,6 +137,8 @@ setReplaceMethod("set_Markov", signature = "swMarkov", function(object, value) {
   object
 })
 
+#' @rdname swMarkov-class
+#' @export
 setReplaceMethod("swMarkov_Prob", signature = "swMarkov", function(object, value) {
   if (ncol(value) == ncol(object@Prob)) {
     colnames(value) <- dimnames(object@Prob)[[2]]
@@ -113,6 +148,8 @@ setReplaceMethod("swMarkov_Prob", signature = "swMarkov", function(object, value
   object
 })
 
+#' @rdname swMarkov-class
+#' @export
 setReplaceMethod("swMarkov_Conv", signature = "swMarkov", function(object, value) {
     if (ncol(value) == ncol(object@Conv)) {
     colnames(value) <- dimnames(object@Conv)[[2]]
@@ -123,6 +160,8 @@ setReplaceMethod("swMarkov_Conv", signature = "swMarkov", function(object, value
 })
 
 
+#' @rdname swMarkov-class
+#' @export
 setMethod("swReadLines", signature = c(object="swMarkov",file="character"), function(object,file) {
 			infiletext <- readLines(con = file[1])
 			infiletext <- infiletext[-(1:2)]

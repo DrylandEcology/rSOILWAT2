@@ -21,6 +21,28 @@
 ###############################################################################
 
 
+#' Class \code{"swEstabSpecies"}
+#'
+#' The methods listed below work on this class and the proper slot of the class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#' @param object An object of class \code{\linkS4class{swEstabSpecies}}.
+#' @param .Object An object of class \code{\linkS4class{swEstabSpecies}}.
+#' @param file A character string. The file name from which to read.
+#' @param ... Further arguments to methods.
+#'
+#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
+#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
+#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
+#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
+#' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
+#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#'
+#' @examples
+#' showClass("swEstabSpecies")
+#' x <- new("swEstabSpecies")
+#'
+#' @name swEstabSpecies-class
 #' @export
 setClass("swEstabSpecies", slot = c(fileName = "character", Name = "character",
   estab_lyrs = "integer", barsGERM = "numeric", barsESTAB = "numeric",
@@ -34,6 +56,8 @@ setValidity("swEstabSpecies", function(object) {
   TRUE
 })
 
+#' @rdname swEstabSpecies-class
+#' @export
 setMethod("initialize", signature = "swEstabSpecies", function(.Object, ...) {
   def <- slot(rSOILWAT2::sw_exampleData, "estab")
   sns <- slotNames("swEstabSpecies")
@@ -50,6 +74,8 @@ setMethod("initialize", signature = "swEstabSpecies", function(.Object, ...) {
 })
 
 
+#' @rdname swEstabSpecies-class
+#' @export
 setMethod("swReadLines", signature = c(object="swEstabSpecies",file="character"), function(object,file) {
 			infiletext <- readLines(con = file)
 
@@ -72,6 +98,29 @@ setMethod("swReadLines", signature = c(object="swEstabSpecies",file="character")
 		})
 
 #############################ESTAB.IN#########################################
+#' Class \code{"swEstab"}
+#'
+#' The methods listed below work on this class and the proper slot of the class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#' @param object An object of class \code{\linkS4class{swEstab}}.
+#' @param .Object An object of class \code{\linkS4class{swEstab}}.
+#' @param value A value to assign to a specific slot of the object.
+#' @param file A character string. The file name from which to read.
+#' @param ... Further arguments to methods.
+#'
+#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
+#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
+#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
+#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
+#' \code{\linkS4class{swInputData}} \code{\linkS4class{swOUT}}
+#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#'
+#' @examples
+#' showClass("swEstab")
+#' x <- new("swEstab")
+#'
+#' @name swEstab-class
 #' @export
 setClass("swEstab", slot = c(useEstab = "logical", count = "integer"),
   contains = "swEstabSpecies")
@@ -80,6 +129,8 @@ setValidity("swEstab", function(object) {
   TRUE
 })
 
+#' @rdname swEstab-class
+#' @export
 setMethod("initialize", signature = "swEstab", function(.Object, ...) {
   def <- slot(rSOILWAT2::sw_exampleData, "estab")
   sns <- setdiff(slotNames("swEstab"), inheritedSlotNames("swEstab"))
@@ -96,7 +147,11 @@ setMethod("initialize", signature = "swEstab", function(.Object, ...) {
   .Object
 })
 
+#' @rdname swEstab-class
+#' @export
 setMethod("swEstab_useEstab", "swEstab", function(object) object@useEstab)
+#' @rdname swEstab-class
+#' @export
 setReplaceMethod("swEstab_useEstab", signature = "swEstab", function(object, value) {
   object@useEstab <- as.logical(value)
   validObject(object)
@@ -104,6 +159,8 @@ setReplaceMethod("swEstab_useEstab", signature = "swEstab", function(object, val
 })
 
 
+#' @rdname swEstab-class
+#' @export
 setMethod("swReadLines", signature = c(object="swEstab",file="character"), function(object,file) {
 			infiletext <- readLines(con = file[1])
 			index<-length(object@fileName)+1

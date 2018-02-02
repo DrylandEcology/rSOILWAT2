@@ -21,6 +21,30 @@
 ###############################################################################
 
 
+#' Class \code{"swProd"}
+#'
+#' The methods listed below work on this class and the proper slot of the class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#' @param object An object of class \code{\linkS4class{swProd}}.
+#' @param .Object An object of class \code{\linkS4class{swProd}}.
+#' @param value A value to assign to a specific slot of the object.
+#' @param file A character string. The file name from which to read.
+#' @param ... Further arguments to methods.
+#' @param vegtype The name or index of the vegetation type.
+#'
+#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
+#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
+#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swInputData}}
+#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
+#' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
+#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#'
+#' @examples
+#' showClass("swProd")
+#' x <- new("swProd")
+#'
+#' @name swProd-class
 #' @export
 setClass("swProd", slots = c(Composition = "numeric", Albedo = "numeric",
   Cover_stcr = "numeric", CanopyHeight = "matrix",
@@ -121,6 +145,8 @@ swProd_validity <- function(object) {
 }
 setValidity("swProd", swProd_validity)
 
+#' @rdname swProd-class
+#' @export
 setMethod("initialize", signature = "swProd", function(.Object, ...) {
   def <- slot(rSOILWAT2::sw_exampleData, "prod")
   sns <- slotNames(def)
@@ -152,111 +178,179 @@ setMethod("initialize", signature = "swProd", function(.Object, ...) {
 })
 
 
+#' @rdname swProd-class
+#' @export
 setMethod("get_swProd", "swProd", function(object) object)
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_Composition", "swProd", function(object) object@Composition)
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_Albedo", "swProd", function(object) object@Albedo)
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_Cover_stcr", "swProd", function(object) object@Cover_stcr)
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_CanopyHeight", "swProd", function(object) object@CanopyHeight)
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_VegInterParam", "swProd", function(object) object@VegetationInterceptionParameters)
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_LitterInterParam", "swProd", function(object) object@LitterInterceptionParameters)
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_EsTpartitioning_param", "swProd", function(object) object@EsTpartitioning_param)
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_Es_param_limit", "swProd", function(object) object@Es_param_limit)
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_Shade", "swProd", function(object) object@Shade)
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_HydrRedstro_use", "swProd", function(object) object@HydraulicRedistribution_use)
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_HydrRedstro", "swProd", function(object) object@HydraulicRedistribution)
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_CritSoilWaterPotential", "swProd", function(object) object@CriticalSoilWaterPotential)
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_CO2Coefficients", "swProd", function(object) object@CO2Coefficients)
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_MonProd_veg", "swProd", function(object, vegtype) object@MonthlyVeg[[vegtype]])
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_MonProd_grass", "swProd", function(object) {
   object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]]]
 })
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_MonProd_shrub", "swProd", function(object) {
   object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]]]
 })
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_MonProd_tree", "swProd", function(object) {
   object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]]]
 })
+#' @rdname swProd-class
+#' @export
 setMethod("swProd_MonProd_forb", "swProd", function(object) {
   object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]]]
 })
 
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("set_swProd", signature = "swProd", function(object, value) {
   object <- value
   validObject(object)
   object
 })
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("swProd_Composition", signature = "swProd", function(object, value) {
   object@Composition[] <- value
   validObject(object)
   object
 })
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("swProd_Albedo", signature = "swProd", function(object, value) {
   object@Albedo[] <- value
   validObject(object)
   object
 })
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("swProd_Cover_stcr", signature = "swProd", function(object, value) {
   object@Cover_stcr[] <- value
   validObject(object)
   object
 })
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("swProd_CanopyHeight", signature = "swProd", function(object, value) {
   dimnames(value) <- dimnames(object@CanopyHeight)
   object@CanopyHeight <- value
   validObject(object)
   object
 })
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("swProd_VegInterParam", signature = "swProd", function(object, value) {
   dimnames(value) <- dimnames(object@VegetationInterceptionParameters)
   object@VegetationInterceptionParameters <- value
   validObject(object)
   object
 })
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("swProd_LitterInterParam", signature = "swProd", function(object, value) {
   dimnames(value) <- dimnames(object@LitterInterceptionParameters)
   object@LitterInterceptionParameters <- value
   validObject(object)
   object
 })
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("swProd_EsTpartitioning_param", signature = "swProd", function(object, value) {
   dimnames(value) <- dimnames(object@EsTpartitioning_param)
   object@EsTpartitioning_param <- value
   validObject(object)
   object
 })
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("swProd_Es_param_limit", signature = "swProd", function(object, value) {
   object@Es_param_limit[] <- value
   validObject(object)
   object
 })
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("swProd_Shade", signature = "swProd", function(object, value) {
   dimnames(value) <- dimnames(object@Shade)
   object@Shade <- value
   validObject(object)
   object
 })
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("swProd_HydrRedstro_use", signature = "swProd", function(object, value) {
   object@HydraulicRedistribution_use[] <- value
   validObject(object)
   object
 })
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("swProd_HydrRedstro", signature = "swProd", function(object, value) {
   dimnames(value) <- dimnames(object@HydraulicRedistribution)
   object@HydraulicRedistribution <- value
   validObject(object)
   object
 })
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("swProd_CritSoilWaterPotential", signature = "swProd", function(object, value) {
   object@CriticalSoilWaterPotential[] <- value
   validObject(object)
   object
 })
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("swProd_CO2Coefficients", signature = "swProd", function(object, value) {
   dimnames(value) <- dimnames(object@CO2Coefficients)
   object@CO2Coefficients <- value
   validObject(object)
   object
 })
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("swProd_MonProd_grass", signature = "swProd", function(object, value) {
   k <- rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]
   dimnames(value) <- dimnames(object@MonthlyVeg[[k]])
@@ -264,6 +358,8 @@ setReplaceMethod("swProd_MonProd_grass", signature = "swProd", function(object, 
   validObject(object)
   object
 })
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("swProd_MonProd_shrub", signature = "swProd", function(object, value) {
   k <- rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]
   dimnames(value) <- dimnames(object@MonthlyVeg[[k]])
@@ -271,6 +367,8 @@ setReplaceMethod("swProd_MonProd_shrub", signature = "swProd", function(object, 
   validObject(object)
   object
 })
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("swProd_MonProd_tree", signature = "swProd", function(object, value) {
   k <- rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]
   dimnames(value) <- dimnames(object@MonthlyVeg[[k]])
@@ -278,6 +376,8 @@ setReplaceMethod("swProd_MonProd_tree", signature = "swProd", function(object, v
   validObject(object)
   object
 })
+#' @rdname swProd-class
+#' @export
 setReplaceMethod("swProd_MonProd_forb", signature = "swProd", function(object, value) {
   k <- rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]
   dimnames(value) <- dimnames(object@MonthlyVeg[[k]])
@@ -287,6 +387,8 @@ setReplaceMethod("swProd_MonProd_forb", signature = "swProd", function(object, v
 })
 
 
+#' @rdname swProd-class
+#' @export
 setMethod("swReadLines", signature = c(object="swProd",file="character"), function(object,file) {
 			infiletext <- readLines(con = file)
 			object@Composition = readNumerics(infiletext[6],5)

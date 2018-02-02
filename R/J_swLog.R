@@ -23,11 +23,33 @@
 ###############################################################################
 
 
+#' Class \code{"swLog"}
+#'
+#' The methods listed below work on this class and the proper slot of the class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#' @param .Object An object of class \code{\linkS4class{swLog}}.
+#' @param ... Further arguments to methods.
+#'
+#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
+#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
+#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
+#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
+#' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
+#' \code{\linkS4class{swSWC}} \code{\linkS4class{swInputData}}
+#'
+#' @examples
+#' showClass("swLog")
+#' x <- new("swLog")
+#'
+#' @name swLog-class
 #' @export
 setClass("swLog", slot = c(LogData = "character", MaxLines = "integer",
   UsedLines = "integer"))
 
 
+#' @rdname swLog-class
+#' @export
 setMethod("initialize", signature = "swLog", function(.Object, ...) {
   def <- slot(rSOILWAT2::sw_exampleData, "log")
 

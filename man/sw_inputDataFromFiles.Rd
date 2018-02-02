@@ -72,6 +72,3 @@ str(sw_in2, max.level=2)
 data input \item \code{\link{dbW_getWeatherData}} and
 \code{\link{getWeatherData_folders}} for weather data input }
 }
-\author{
-Ryan Murphy
-}

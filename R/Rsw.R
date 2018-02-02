@@ -81,7 +81,6 @@ sw_args <- function(dir, files.in, echo, quiet) {
 #'
 #' These elements contain the output data from soilwat based on the
 #' outputSetup.  Output columns should all be labeled.
-#' @author Ryan Murphy
 #' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
 #' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
 #' data input \item \code{\link{dbW_getWeatherData}} and
@@ -254,7 +253,6 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
 #' @return Returns a S4 class of type swInputData. This is a container for the
 #' input S4 objects used to run soilwat. The data for the given project is
 #' loaded.
-#' @author Ryan Murphy
 #' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
 #' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
 #' data input \item \code{\link{dbW_getWeatherData}} and
@@ -339,7 +337,6 @@ sw_outputData <- function(inputData) {
 #'
 #' @return Returns a S4 class of type swInputData. This is a container for the
 #' input S4 objects used to run soilwat. The data for a test project is loaded.
-#' @author Ryan Murphy
 #' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
 #' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
 #' data input \item \code{\link{dbW_getWeatherData}} and
