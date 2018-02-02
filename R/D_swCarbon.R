@@ -25,6 +25,11 @@
 #' Class \code{swCarbon} defines variables that allow \code{SOILWAT2} to simulate the
 #' effects of atmospheric carbon dioxide.
 #'
+#' @param object An object of class \code{\linkS4class{swCarbon}}.
+#' @param .Object An object of class \code{\linkS4class{swCarbon}}.
+#' @param value A value to assign to a specific slot of the object.
+#' @param ... Further arguments to methods.
+#'
 #' @slot CarbonUseBio Object of class \code{"integer"}, where a value of 1 enables the
 #'   CO2 biomass multiplier.
 #' @slot CarbonUseWUE Object of class \code{"integer"}, where a value of 1 enables the
@@ -37,11 +42,19 @@
 #' @slot CO2ppm Object of class \code{"matrix"}, that holds years in the first column and
 #'   CO2 ppm concentrations in the second column.
 #'
+#' @seealso \code{\linkS4class{swInputData}}
+#'
+#' @examples
+#' showClass("swCarbon")
+#' x <- new("swCarbon")
+#'
 #' @name swCarbon-class
 #' @export
 setClass("swCarbon", slots = c(CarbonUseBio = 'integer', CarbonUseWUE = 'integer',
   Scenario = 'character', DeltaYear = 'integer', CO2ppm = 'matrix'))
 
+#' @rdname swCarbon-class
+#' @export
 setMethod("initialize", signature = "swCarbon", function(.Object, ...) {
   def <- slot(rSOILWAT2::sw_exampleData, "carbon")
   sns <- slotNames(def)
@@ -94,39 +107,63 @@ setValidity("swCarbon", function(object) {
   val
 })
 
+#' @rdname swCarbon-class
+#' @export
 setMethod("get_swCarbon", "swCarbon", function(object) object)
+#' @rdname swCarbon-class
+#' @export
 setMethod("swCarbon_Use_Bio", "swCarbon", function(object) object@CarbonUseBio)
+#' @rdname swCarbon-class
+#' @export
 setMethod("swCarbon_Use_WUE", "swCarbon", function(object) object@CarbonUseWUE)
+#' @rdname swCarbon-class
+#' @export
 setMethod("swCarbon_Scenario", "swCarbon", function(object) object@Scenario)
+#' @rdname swCarbon-class
+#' @export
 setMethod("swCarbon_DeltaYear", "swCarbon", function(object) object@DeltaYear)
+#' @rdname swCarbon-class
+#' @export
 setMethod("swCarbon_CO2ppm", "swCarbon", function(object) object@CO2ppm)
 
+#' @rdname swCarbon-class
+#' @export
 setReplaceMethod("set_swCarbon", signature = "swCarbon", function(object, value) {
   object <- value
   validObject(object)
   object
 })
 
+#' @rdname swCarbon-class
+#' @export
 setReplaceMethod("swCarbon_Use_Bio", signature = "swCarbon", function(object, value) {
   object@CarbonUseBio <- as.integer(as.logical(value))
   validObject(object)
   object
 })
+#' @rdname swCarbon-class
+#' @export
 setReplaceMethod("swCarbon_Use_WUE", signature = "swCarbon", function(object, value) {
   object@CarbonUseWUE <- as.integer(as.logical(value))
   validObject(object)
   object
 })
+#' @rdname swCarbon-class
+#' @export
 setReplaceMethod("swCarbon_Scenario", signature = "swCarbon", function(object, value) {
   object@Scenario <- value
   validObject(object)
   object
 })
+#' @rdname swCarbon-class
+#' @export
 setReplaceMethod("swCarbon_DeltaYear", signature = "swCarbon", function(object, value) {
   object@DeltaYear <- as.integer(value)
   validObject(object)
   object
 })
+#' @rdname swCarbon-class
+#' @export
 setReplaceMethod("swCarbon_CO2ppm", signature = "swCarbon", function(object, value) {
   colnames(value) <- colnames(object@CO2ppm)
   object@CO2ppm <- value

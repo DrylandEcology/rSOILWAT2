@@ -21,6 +21,29 @@
 ###############################################################################
 
 ###############################################################SOILS#####################################################################
+#' Class \code{"swSoils"}
+#'
+#' The methods listed below work on this class and the proper slot of the class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#' @param object An object of class \code{\linkS4class{swSoils}}.
+#' @param .Object An object of class \code{\linkS4class{swSoils}}.
+#' @param value A value to assign to a specific slot of the object.
+#' @param file A character string. The file name from which to read.
+#' @param ... Further arguments to methods.
+#'
+#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
+#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
+#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
+#' \code{\linkS4class{swSite}} \code{\linkS4class{swInputData}}
+#' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
+#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#'
+#' @examples
+#' showClass("swSoils")
+#' x <- new("swSoils")
+#'
+#' @name swSoils-class
 #' @export
 setClass("swSoils", slots = c(Layers = "matrix"))
 
@@ -60,6 +83,8 @@ swSoilLayers_validity <- function(object) {
 }
 setValidity("swSoils", swSoilLayers_validity)
 
+#' @rdname swSoils-class
+#' @export
 setMethod("initialize", signature = "swSoils", function(.Object, ...) {
   def <- slot(rSOILWAT2::sw_exampleData, "soils")
   sns <- slotNames(def)
@@ -86,9 +111,15 @@ setMethod("initialize", signature = "swSoils", function(.Object, ...) {
 })
 
 
+#' @rdname swSoils-class
+#' @export
 setMethod("get_swSoils", "swSoils", function(object) object)
+#' @rdname swSoils-class
+#' @export
 setMethod("swSoils_Layers", "swSoils", function(object) object@Layers)
 
+#' @rdname swSoils-class
+#' @export
 setReplaceMethod("set_swSoils", signature = c(object = "swSoils", value = "swSoils"),
   function(object, value) {
     colnames(value@Layers) <- colnames(object@Layers)
@@ -96,6 +127,8 @@ setReplaceMethod("set_swSoils", signature = c(object = "swSoils", value = "swSoi
     validObject(object)
     object
 })
+#' @rdname swSoils-class
+#' @export
 setReplaceMethod("swSoils_Layers", signature = c(object = "swSoils", value = "matrix"),
   function(object, value) {
     colnames(value) <- colnames(object@Layers)
@@ -105,6 +138,8 @@ setReplaceMethod("swSoils_Layers", signature = c(object = "swSoils", value = "ma
 })
 
 
+#' @rdname swSoils-class
+#' @export
 setMethod("swReadLines", signature = c(object="swSoils",file="character"), function(object,file) {
 			infiletext <- readLines(con = file)
 			infiletext <- infiletext[infiletext!=""]#get rid of extra spaces

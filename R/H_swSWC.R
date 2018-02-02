@@ -21,10 +21,27 @@
 ###############################################################################
 
 
+#' Class \code{"swSWC_hist"}
+#'
+#' The methods listed below work on this class and the proper slot of the class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#'
+#' @param object An object of class \code{\linkS4class{swSWC_hist}}.
+#' @param .Object An object of class \code{\linkS4class{swSWC_hist}}.
+#' @param file A character string. The file name from which to read.
+#' @param ... Further arguments to methods.
+#' @param year An integer value. The calendar year of the SWC \code{data} object.
+#' @param data A 365 x 4 or 366 x 4 matrix representing daily SWC data for one calendar
+#'    \code{year} with columns "doy", "lyr", "swc", "st_err".
+#'
+#' @name swSWC_hist-class
 #' @export
 setClass("swSWC_hist", slot = c(data = "matrix", year = "integer"))
 
 
+#' @rdname swSWC_hist-class
+#' @export
 setMethod("initialize", signature = "swSWC_hist", function(.Object, ..., year = 0L,
   data = NULL) {
   # We don't set values; this is to prevent simulation runs with
@@ -50,6 +67,8 @@ setMethod("initialize", signature = "swSWC_hist", function(.Object, ..., year = 
 
 
 
+#' @rdname swSWC_hist-class
+#' @export
 setMethod("swReadLines", signature = c(object="swSWC_hist",file="character"), function(object,file) {
 			object@year = as.integer(strsplit(x=file,split=".",fixed=TRUE)[[1]][2])
 			infiletext <- readLines(con = file)
@@ -68,10 +87,36 @@ setMethod("swReadLines", signature = c(object="swSWC_hist",file="character"), fu
 
 ##########################swcsetup.in#########################################
 
+#' Class \code{"swSWC"}
+#'
+#' The methods listed below work on this class and the proper slot of the class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#' @param object An object of class \code{\linkS4class{swSWC}}.
+#' @param .Object An object of class \code{\linkS4class{swSWC}}.
+#' @param file A character string. The file name from which to read.
+#' @param value A value to assign to a specific slot of the object.
+#' @param ... Further arguments to methods.
+#' @param year An integer value. The calendar year of the SWC \code{data} object.
+#'
+#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
+#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
+#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
+#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
+#' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
+#' \code{\linkS4class{swInputData}} \code{\linkS4class{swLog}}
+#'
+#' @examples
+#' showClass("swSWC")
+#' x <- new("swSWC")
+#'
+#' @name swSWC-class
 #' @export
 setClass("swSWC", slot = c(UseSWCHistoricData = "logical", DataFilePrefix = "character",
   FirstYear = "integer", Method = "integer", History = "list"))
 
+#' @rdname swSWC-class
+#' @export
 setMethod("initialize", signature = "swSWC", function(.Object, ...) {
   def <- slot(rSOILWAT2::sw_exampleData, "swc")
   sns <- slotNames(def)
@@ -96,11 +141,23 @@ setMethod("initialize", signature = "swSWC", function(.Object, ...) {
   .Object
 })
 
+#' @rdname swSWC-class
+#' @export
 setMethod("swSWC_use", "swSWC", function(object) object@UseSWCHistoricData)
+#' @rdname swSWC-class
+#' @export
 setMethod("swSWC_prefix", "swSWC", function(object) object@DataFilePrefix)
+#' @rdname swSWC-class
+#' @export
 setMethod("swSWC_FirstYear", "swSWC", function(object) object@FirstYear)
+#' @rdname swSWC-class
+#' @export
 setMethod("swSWC_Method", "swSWC", function(object) object@Method)
+#' @rdname swSWC-class
+#' @export
 setMethod("swSWC_HistoricList", "swSWC", function(object) object@History)
+#' @rdname swSWC-class
+#' @export
 setMethod("swSWC_HistoricData", "swSWC", function(object, year) {
   index <- which(names(object@History) == as.character(year))
   if (length(index) != 1) {
@@ -113,36 +170,48 @@ setMethod("swSWC_HistoricData", "swSWC", function(object, year) {
   object@History[[index]]
 })
 
+#' @rdname swSWC-class
+#' @export
 setReplaceMethod("swSWC_use", signature = c(object = "swSWC", value = "logical"),
   function(object, value) {
     object@UseSWCHistoricData[] <- value
     validObject(object)
     object
 })
+#' @rdname swSWC-class
+#' @export
 setReplaceMethod("swSWC_prefix", signature = c(object = "swSWC", value = "character"),
   function(object, value) {
     object@DataFilePrefix <- as.character(value)
     validObject(object)
     object
 })
+#' @rdname swSWC-class
+#' @export
 setReplaceMethod("swSWC_FirstYear", signature = c(object = "swSWC", value = "integer"),
   function(object, value) {
     object@FirstYear <- as.integer(value)
     validObject(object)
     object
 })
+#' @rdname swSWC-class
+#' @export
 setReplaceMethod("swSWC_Method", signature = c(object = "swSWC", value = "integer"),
   function(object, value) {
     object@Method <- as.integer(value)
     validObject(object)
     object
 })
+#' @rdname swSWC-class
+#' @export
 setReplaceMethod("swSWC_HistoricList", signature = c(object = "swSWC", value = "list"),
   function(object, value) {
     object@History <- value
     validObject(object)
     object
 })
+#' @rdname swSWC-class
+#' @export
 setReplaceMethod("swSWC_HistoricData", signature = c(object = "swSWC", value = "swSWC_hist"),
 function(object, value) {
 			index<-which(names(object@History) == as.character(value@year))
@@ -162,6 +231,8 @@ function(object, value) {
 		})
 
 
+#' @rdname swSWC-class
+#' @export
 setMethod("swReadLines", signature = c(object="swSWC",file="character"), function(object,file) {
 			infiletext <- readLines(con = file)
 			#should be no empty lines

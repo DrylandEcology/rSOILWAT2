@@ -23,6 +23,30 @@
 
 ########################CLOUD DATA################################
 # TODO: consider individual slots for each row of the 5 x 12 matrix
+
+#' Class \code{"swCloud"}
+#'
+#' The methods listed below work on this class and the proper slot of the class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#' @param object An object of class \code{\linkS4class{swCloud}}.
+#' @param .Object An object of class \code{\linkS4class{swCloud}}.
+#' @param value A value to assign to a specific slot of the object.
+#' @param file A character string. The file name from which to read.
+#' @param ... Further arguments to methods.
+#'
+#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
+#' \code{\linkS4class{swWeather}} \code{\linkS4class{swInputData}}
+#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
+#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
+#' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
+#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#'
+#' @examples
+#' showClass("swCloud")
+#' x <- new("swCloud")
+#'
+#' @name swCloud-class
 #' @export
 setClass("swCloud", slots = c(Cloud = "matrix"))
 
@@ -70,6 +94,8 @@ swCloud_validity <- function(object) {
 }
 setValidity("swCloud", swCloud_validity)
 
+#' @rdname swCloud-class
+#' @export
 setMethod("initialize", signature = "swCloud", function(.Object, ...) {
   def <- slot(rSOILWAT2::sw_exampleData, "cloud")
   sns <- slotNames(def)
@@ -96,39 +122,63 @@ setMethod("initialize", signature = "swCloud", function(.Object, ...) {
 
 
 
+#' @rdname swCloud-class
+#' @export
 setMethod("get_swCloud", "swCloud", function(object) object)
+#' @rdname swCloud-class
+#' @export
 setMethod("swCloud_SkyCover", "swCloud", function(object) object@Cloud[1, ])
+#' @rdname swCloud-class
+#' @export
 setMethod("swCloud_WindSpeed", "swCloud", function(object) object@Cloud[2, ])
+#' @rdname swCloud-class
+#' @export
 setMethod("swCloud_Humidity", "swCloud", function(object) object@Cloud[3, ])
+#' @rdname swCloud-class
+#' @export
 setMethod("swCloud_Transmissivity", "swCloud", function(object) object@Cloud[4, ])
+#' @rdname swCloud-class
+#' @export
 setMethod("swCloud_SnowDensity", "swCloud", function(object) object@Cloud[5, ])
 
+#' @rdname swCloud-class
+#' @export
 setReplaceMethod("set_swCloud", signature = "swCloud", function(object, value) {
   dimnames(value@Cloud) <- dimnames(object@Cloud)
   object <- value
   validObject(object)
   object
 })
+#' @rdname swCloud-class
+#' @export
 setReplaceMethod("swCloud_SkyCover", signature = "swCloud", function(object, value) {
   object@Cloud[1, ] <- value
   validObject(object)
   object
 })
+#' @rdname swCloud-class
+#' @export
 setReplaceMethod("swCloud_WindSpeed", signature = "swCloud", function(object, value) {
   object@Cloud[2, ] <- value
   validObject(object)
   object
 })
+#' @rdname swCloud-class
+#' @export
 setReplaceMethod("swCloud_Humidity", signature = "swCloud", function(object, value) {
   object@Cloud[3, ] <- value
   validObject(object)
   object
 })
+#' @rdname swCloud-class
+#' @export
 setReplaceMethod("swCloud_Transmissivity", signature = "swCloud", function(object, value) {
   object@Cloud[4, ] <- value
   validObject(object)
   object
 })
+#' @rdname swCloud-class
+#' @export
 setReplaceMethod("swCloud_SnowDensity", signature = "swCloud", function(object, value) {
   object@Cloud[5, ] <- value
   validObject(object)
@@ -136,6 +186,8 @@ setReplaceMethod("swCloud_SnowDensity", signature = "swCloud", function(object, 
 })
 
 
+#' @rdname swCloud-class
+#' @export
 setMethod("swReadLines", signature = c(object="swCloud",file="character"), function(object,file) {
 			infiletext <- readLines(con = file)
 			#should be no empty lines

@@ -956,7 +956,6 @@ dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
 #' @param endYear Numeric. Extracted weather data will end with this year.
 #' @return Returns weather data as list. Each element contains data for one
 #' year.
-#' @author Ryan Murphy
 #' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
 #' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
 #' data input \item \code{\link{dbW_getWeatherData}} and
