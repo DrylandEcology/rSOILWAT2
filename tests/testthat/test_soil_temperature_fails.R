@@ -8,6 +8,11 @@ test_that("Test data availability", expect_gt(length(tests), 0))
 
 st_name <- rSW2_glovars[["kSOILWAT2"]][["OutKeys"]][["SW_SOILTEMP"]]
 
+format_badData <- function(data, ids_bad) {
+  if (any(ids_bad)) {
+    paste(apply(round(data[ids_bad, ], 2), 1, paste, collapse = "/"), collapse = "; ")
+  } else "all good"
+}
 
 for (it in tests) {
   #---INPUTS
@@ -16,10 +21,10 @@ for (it in tests) {
 
   #---TESTS
   test_that("Check weather", {
-    expect_equivalent({
-        dbW_df_day <- dbW_weatherData_to_dataframe(sw_weather)
-        dbW_dataframe_to_monthly(dbW_df_day)
-      }, dbW_weatherData_to_monthly(sw_weather))
+    dbW_df_day <- dbW_weatherData_to_dataframe(sw_weather)
+
+    expect_equivalent(dbW_dataframe_to_monthly(dbW_df_day),
+      dbW_weatherData_to_monthly(sw_weather))
 
     info <- paste("test-data", it)
     expect_true(all(dbW_df_day[, "Tmin_C"] > -100), info = info)
@@ -34,20 +39,30 @@ for (it in tests) {
     expect_s4_class(rd, "swOutput")
     expect_false(has_soilTemp_failed())
 
-    soiltemp <- slot(rd, st_name)
-    time_steps <- rSW2_glovars[["sw_TimeSteps"]][1 + soiltemp@TimeStep]
+    Tsoil_data <- slot(rd, st_name)
+    time_steps <- rSW2_glovars[["sw_TimeSteps"]][1 + Tsoil_data@TimeStep]
 
     for (k in seq_along(time_steps)) {
-      x1 <- slot(soiltemp, time_steps[k])
+      info <- paste("test-data", it, "- slot", time_steps[k])
 
-      if (all(dim(x1) > 0)) {
-        info <- paste("test-data", it, "- slot", time_steps[k])
-        x <- x1[, seq.int(ncol(x1) - soiltemp@Columns + 1, ncol(x1))]
+      Tsoil_data2 <- slot(Tsoil_data, time_steps[k])
+      expect_true(all(dim(Tsoil_data2) > 0), info = info)
 
-        expect_true(all(is.finite(x)), info = info)
-        expect_true(all(x > -100), info = info)
-        expect_true(all(x < +100), info = info)
-      }
+      ncol1 <- ncol(Tsoil_data2) - Tsoil_data@Columns
+      icol <- seq.int(ncol1 + 1, ncol(Tsoil_data2))
+      Tsoil <- Tsoil_data2[, icol]
+
+      ids_bad <- apply(Tsoil, 1, function(x) any(!is.finite(x)))
+      expect_true(!any(ids_bad), info = paste(info, "check: is.finite",
+        format_badData(Tsoil_data2, ids_bad)))
+
+      ids_bad <- apply(Tsoil, 1, function(x) any(x < -100))
+      expect_true(!any(ids_bad), info = paste(info, "check: Tsoil > -100",
+        format_badData(Tsoil_data2, ids_bad)))
+
+      ids_bad <- apply(Tsoil, 1, function(x) any(x > +100))
+      expect_true(!any(ids_bad), info = paste(info, "check: Tsoil < +100",
+        format_badData(Tsoil_data2, ids_bad)))
     }
   })
 }
