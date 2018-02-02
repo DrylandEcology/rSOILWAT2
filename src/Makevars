@@ -2,7 +2,7 @@ target = SOILWAT2
 lib_target = lib$(target).a
 path_target = SOILWAT2
 
-PKG_CPPFLAGS = -DRSOILWAT
+PKG_CPPFLAGS = -DRSOILWAT -DSWDEBUG
 
 PKG_LIBS = -L$(path_target) -l$(target)  # $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
