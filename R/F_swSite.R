@@ -22,6 +22,29 @@
 
 
 ###############################################################SITE#####################################################################
+#' Class \code{"swSite"}
+#'
+#' The methods listed below work on this class and the proper slot of the class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#' @param object An object of class \code{\linkS4class{swSite}}.
+#' @param .Object An object of class \code{\linkS4class{swSite}}.
+#' @param value A value to assign to a specific slot of the object.
+#' @param file A character string. The file name from which to read.
+#' @param ... Further arguments to methods.
+#'
+#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
+#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
+#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
+#' \code{\linkS4class{swInputData}} \code{\linkS4class{swSoils}}
+#' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
+#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#'
+#' @examples
+#' showClass("swSite")
+#' x <- new("swSite")
+#'
+#' @name swSite-class
 #' @export
 setClass("swSite", slots = c(SWClimits = "numeric", ModelFlags = "logical",
   ModelCoefficients = "numeric", SnowSimulationParameters = "numeric",
@@ -99,6 +122,8 @@ setValidity("swSite", function(object) {
   val
 })
 
+#' @rdname swSite-class
+#' @export
 setMethod(f = "initialize", signature = "swSite", function(.Object, ...) {
   def <- slot(rSOILWAT2::sw_exampleData, "site")
   sns <- slotNames(def)
@@ -127,75 +152,123 @@ setMethod(f = "initialize", signature = "swSite", function(.Object, ...) {
 })
 
 
+#' @rdname swSite-class
+#' @export
 setMethod("get_swSite", "swSite", function(object) object)
+#' @rdname swSite-class
+#' @export
 setMethod("swSite_SWClimits", "swSite", function(object) slot(object, "SWClimits"))
+#' @rdname swSite-class
+#' @export
 setMethod("swSite_ModelFlags", "swSite", function(object) slot(object, "ModelFlags"))
+#' @rdname swSite-class
+#' @export
 setMethod("swSite_ModelCoefficients", "swSite", function(object) slot(object, "ModelCoefficients"))
+#' @rdname swSite-class
+#' @export
 setMethod("swSite_SnowSimulationParams", "swSite", function(object) slot(object, "SnowSimulationParameters"))
+#' @rdname swSite-class
+#' @export
 setMethod("swSite_DrainageCoefficient", "swSite", function(object) slot(object, "DrainageCoefficient"))
+#' @rdname swSite-class
+#' @export
 setMethod("swSite_EvapCoefficients", "swSite", function(object) slot(object, "EvaporationCoefficients"))
+#' @rdname swSite-class
+#' @export
 setMethod("swSite_TranspCoefficients", "swSite", function(object) slot(object, "TranspirationCoefficients"))
+#' @rdname swSite-class
+#' @export
 setMethod("swSite_IntrinsicSiteParams", "swSite", function(object) slot(object, "IntrinsicSiteParams"))
+#' @rdname swSite-class
+#' @export
 setMethod("swSite_SoilTemperatureFlag", "swSite", function(object) slot(object, "SoilTemperatureFlag"))
+#' @rdname swSite-class
+#' @export
 setMethod("swSite_SoilTemperatureConsts", "swSite", function(object) slot(object, "SoilTemperatureConstants"))
+#' @rdname swSite-class
+#' @export
 setMethod("swSite_TranspirationRegions", "swSite", function(object) slot(object, "TranspirationRegions"))
 
+#' @rdname swSite-class
+#' @export
 setReplaceMethod("set_swSite", signature = "swSite", definition = function(object, value) {
   object <- value
   validObject(object)
   object
 })
 
+#' @rdname swSite-class
+#' @export
 setReplaceMethod("swSite_SWClimits", signature = "swSite", definition = function(object, value) {
   object@SWClimits[] <- value
   validObject(object)
   object
 })
+#' @rdname swSite-class
+#' @export
 setReplaceMethod("swSite_ModelFlags", signature = "swSite", definition = function(object, value) {
   object@ModelFlags[] <- value
   validObject(object)
   object
 })
+#' @rdname swSite-class
+#' @export
 setReplaceMethod("swSite_ModelCoefficients", signature = "swSite", definition = function(object, value) {
   object@ModelCoefficients[] <- value
   validObject(object)
   object
 })
+#' @rdname swSite-class
+#' @export
 setReplaceMethod("swSite_SnowSimulationParams", signature = "swSite", definition = function(object, value) {
   object@SnowSimulationParameters[] <- value
   validObject(object)
   object
 })
+#' @rdname swSite-class
+#' @export
 setReplaceMethod("swSite_DrainageCoefficient", signature = "swSite", definition = function(object, value) {
   object@DrainageCoefficient[] <- value
   validObject(object)
   object
 })
+#' @rdname swSite-class
+#' @export
 setReplaceMethod("swSite_EvapCoefficients", signature = "swSite", definition = function(object, value) {
   object@EvaporationCoefficients[] <- value
   validObject(object)
   object
 })
+#' @rdname swSite-class
+#' @export
 setReplaceMethod("swSite_TranspCoefficients", signature = "swSite", definition = function(object, value) {
   object@TranspirationCoefficients[] <- value
   validObject(object)
   object
 })
+#' @rdname swSite-class
+#' @export
 setReplaceMethod("swSite_IntrinsicSiteParams", signature = "swSite", definition = function(object, value) {
   object@IntrinsicSiteParams[] <- value
   validObject(object)
   object
 })
+#' @rdname swSite-class
+#' @export
 setReplaceMethod("swSite_SoilTemperatureFlag", signature = "swSite", definition = function(object, value) {
   object@SoilTemperatureFlag <- as.logical(value)
   validObject(object)
   object
 })
+#' @rdname swSite-class
+#' @export
 setReplaceMethod("swSite_SoilTemperatureConsts", signature = "swSite", definition = function(object, value) {
   object@SoilTemperatureConstants[] <- value
   validObject(object)
   object
 })
+#' @rdname swSite-class
+#' @export
 setReplaceMethod("swSite_TranspirationRegions", signature = "swSite", definition = function(object, value) {
   colnames(value) <- colnames(object@TranspirationRegions)
   object@TranspirationRegions <- value
@@ -205,6 +278,8 @@ setReplaceMethod("swSite_TranspirationRegions", signature = "swSite", definition
 
 
 
+#' @rdname swSite-class
+#' @export
 setMethod("swReadLines", signature = c(object="swSite",file="character"), function(object,file) {
   print("TODO: method 'swReadLines' is not up-to-date; hard-coded indices are incorrect")
 			infiletext <- readLines(con = file)

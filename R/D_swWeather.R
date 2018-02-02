@@ -22,6 +22,26 @@
 
 #######################Monthly Scaling Params#################################
 
+#' Class \code{"swMonthlyScalingParams"}
+#'
+#' The methods listed below work on this class and the proper slot of the class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#' @param .Object An object of class \code{\linkS4class{swMonthlyScalingParams}}.
+#' @param ... Further arguments to methods.
+#'
+#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
+#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
+#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
+#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
+#' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
+#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#'
+#' @examples
+#' showClass("swMonthlyScalingParams")
+#' x <- new("swMonthlyScalingParams")
+#'
+#' @name swMonthlyScalingParams-class
 #' @export
 setClass("swMonthlyScalingParams", slots = c(MonthlyScalingParams = "matrix"))
 
@@ -42,6 +62,8 @@ setValidity("swMonthlyScalingParams", function(object) {
   val
 })
 
+#' @rdname swMonthlyScalingParams-class
+#' @export
 setMethod("initialize", signature = "swMonthlyScalingParams", function(.Object, ...) {
   def <- slot(rSOILWAT2::sw_exampleData, "weather")
   sns <- slotNames("swMonthlyScalingParams")
@@ -66,6 +88,29 @@ setMethod("initialize", signature = "swMonthlyScalingParams", function(.Object, 
 
 #####################WEATHERSETUP.IN###################################
 
+#' Class \code{"swWeather"}
+#'
+#' The methods listed below work on this class and the proper slot of the class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#' @param object An object of class \code{\linkS4class{swWeather}}.
+#' @param .Object An object of class \code{\linkS4class{swWeather}}.
+#' @param value A value to assign to a specific slot of the object.
+#' @param file A character string. The file name from which to read.
+#' @param ... Further arguments to methods.
+#'
+#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
+#' \code{\linkS4class{swInputData}} \code{\linkS4class{swCloud}}
+#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
+#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
+#' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
+#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#'
+#' @examples
+#' showClass("swWeather")
+#' x <- new("swWeather")
+#'
+#' @name swWeather-class
 #' @export
 setClass("swWeather", slots = c(UseSnow = "logical", pct_SnowDrift = "numeric",
   pct_SnowRunoff = "numeric", use_Markov = "logical", FirstYear_Historical = "integer",
@@ -87,6 +132,8 @@ setValidity("swWeather", function(object) {
 })
 
 
+#' @rdname swWeather-class
+#' @export
 setMethod("initialize", signature = "swWeather", function(.Object, ...) {
   def <- slot(rSOILWAT2::sw_exampleData, "weather")
   sns <- setdiff(slotNames("swWeather"), inheritedSlotNames("swWeather"))
@@ -105,44 +152,72 @@ setMethod("initialize", signature = "swWeather", function(.Object, ...) {
 
 
 
+#' @rdname swWeather-class
+#' @export
 setMethod("swWeather_DaysRunningAverage", "swWeather", function(object) object@DaysRunningAverage)
+#' @rdname swWeather-class
+#' @export
 setMethod("swWeather_FirstYearHistorical", "swWeather", function(object) object@FirstYear_Historical)
+#' @rdname swWeather-class
+#' @export
 setMethod("swWeather_pct_SnowDrift", "swWeather", function(object) object@pct_SnowDrift)
+#' @rdname swWeather-class
+#' @export
 setMethod("swWeather_pct_SnowRunoff", "swWeather", function(object) object@pct_SnowRunoff)
+#' @rdname swWeather-class
+#' @export
 setMethod("swWeather_UseMarkov", "swWeather", function(object) object@use_Markov)
+#' @rdname swWeather-class
+#' @export
 setMethod("swWeather_UseSnow", "swWeather", function(object) object@UseSnow)
+#' @rdname swWeather-class
+#' @export
 setMethod("swWeather_MonScalingParams", "swWeather", function(object) object@MonthlyScalingParams)
 
+#' @rdname swWeather-class
+#' @export
 setReplaceMethod("swWeather_DaysRunningAverage", signature = "swWeather", function(object, value) {
   object@DaysRunningAverage <- as.integer(value)
   validObject(object)
   object
 })
+#' @rdname swWeather-class
+#' @export
 setReplaceMethod("swWeather_FirstYearHistorical", signature = "swWeather", function(object, value) {
   object@FirstYear_Historical <- as.integer(value)
   validObject(object)
   object
 })
+#' @rdname swWeather-class
+#' @export
 setReplaceMethod("swWeather_pct_SnowDrift", signature = "swWeather", function(object, value) {
   object@pct_SnowDrift <- as.numeric(value)
   validObject(object)
   object
 })
+#' @rdname swWeather-class
+#' @export
 setReplaceMethod("swWeather_pct_SnowRunoff", signature = "swWeather", function(object, value) {
   object@pct_SnowRunoff <- as.numeric(value)
   validObject(object)
   object
 })
+#' @rdname swWeather-class
+#' @export
 setReplaceMethod("swWeather_UseMarkov", signature = "swWeather", function(object, value) {
   object@use_Markov <- as.logical(value)
   validObject(object)
   object
 })
+#' @rdname swWeather-class
+#' @export
 setReplaceMethod("swWeather_UseSnow", signature = "swWeather", function(object, value) {
   object@UseSnow <- as.logical(value)
   validObject(object)
   object
 })
+#' @rdname swWeather-class
+#' @export
 setReplaceMethod("swWeather_MonScalingParams", signature = "swWeather", function(object, value) {
   object@MonthlyScalingParams[] <- value
   validObject(object)
@@ -151,6 +226,8 @@ setReplaceMethod("swWeather_MonScalingParams", signature = "swWeather", function
 
 
 
+#' @rdname swWeather-class
+#' @export
 setMethod("swReadLines", signature = c(object="swWeather",file="character"), function(object,file) {
 			infiletext <- readLines(con = file)
 

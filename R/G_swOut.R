@@ -23,6 +23,19 @@
 
 
 #######
+#' Class \code{"swOUT_key"}
+#'
+#' The methods listed below work on this class and the proper slot of the class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#' @param .Object An object of class \code{\linkS4class{swOUT_key}}.
+#' @param ... Further arguments to methods.
+#'
+#' @examples
+#' showClass("swOUT_key")
+#' x <- new("swOUT_key")
+#'
+#' @name swOUT_key-class
 #' @export
 setClass("swOUT_key", slots = c(mykey = "integer", myobj = "integer",
   sumtype = "integer", use = "logical", first_orig = "integer", last_orig = "integer",
@@ -45,6 +58,8 @@ swOUT_key_validity <- function(object) {
 setValidity("swOUT_key", swOUT_key_validity)
 
 
+#' @rdname swOUT_key-class
+#' @export
 setMethod("initialize", signature = "swOUT_key", function(.Object, ...) {
   def <- slot(rSOILWAT2::sw_exampleData, "output")
   sns <- slotNames("swOUT_key")
@@ -63,6 +78,40 @@ setMethod("initialize", signature = "swOUT_key", function(.Object, ...) {
 
 ###########################OUTSETUP.IN########################################
 
+#' Class \code{swOUT}
+#'
+#' The methods listed below work on this class and the proper slot of the class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#' @param object An object of class \code{\linkS4class{swOUT}}.
+#' @param .Object An object of class \code{\linkS4class{swOUT}}.
+#' @param value A value to assign to a specific slot of the object.
+#' @param file A character string. The file name from which to read.
+#' @param ... Further arguments to methods.
+#'
+#' @slot outputSeparator A character string. Currently, only "\\t" is functional.
+#' @slot timeSteps An integer matrix. See details.
+#'
+#' @details Output can be generated for four different time steps: daily (DY),
+#'  weekly (WK), monthly (MO), and yearly (YR) periods.
+#'  We have two options to specify time steps:\itemize{
+#'    \item The same time step(s) for every output; this option corresponds to specifying
+#'        a line with `TIMESTEP ...` in the SOILWAT2 input file `outsetup.in`. The matrix
+#'        in slot `timeSteps` should have `SW_OUTNKEYS` rows and `used_SW_OUTNPERIODS`
+#'        columns where each row contains identical values.
+#'    \item A different time step for each output; however, only one time step per
+#'        output variable can be specified. this option corresponds to specifying the
+#'        time step in the column `PERIOD` in the SOILWAT2 input file `outsetup.in`. The
+#'        matrix in slot `timeSteps` should have `SW_OUTNKEYS` rows and 1 column.
+#' }
+#'
+#' @seealso \code{\linkS4class{swInputData}}
+#'
+#' @examples
+#' showClass("swOUT")
+#' x <- new("swOUT")
+#'
+#' @name swOUT-class
 #' @export
 setClass("swOUT", slot = c(outputSeparator = "character", timeSteps = "matrix"),
   contains = "swOUT_key")
@@ -95,6 +144,8 @@ swOUT_validity <- function(object) {
 setValidity("swOUT", swOUT_validity)
 
 
+#' @rdname swOUT-class
+#' @export
 setMethod("initialize", signature = "swOUT", function(.Object, ...) {
   def <- slot(rSOILWAT2::sw_exampleData, "output")
   sns <- setdiff(slotNames("swOUT"), inheritedSlotNames("swOUT"))
@@ -111,26 +162,38 @@ setMethod("initialize", signature = "swOUT", function(.Object, ...) {
 })
 
 
+#' @rdname swOUT-class
+#' @export
 setMethod("get_swOUT", "swOUT", function(object) object)
+#' @rdname swOUT-class
+#' @export
 setMethod("swOUT_TimeStep", "swOUT", function(object) object@timeSteps)
+#' @rdname swOUT-class
+#' @export
 setMethod("swOUT_OutputSeparator", "swOUT", function(object) object@outputSeparator)
 
+#' @rdname swOUT-class
+#' @export
 setReplaceMethod("set_swOUT", signature = "swOUT", function(object, value) {
   object <- value
   validObject(object)
   object
 })
+#' @rdname swOUT-class
+#' @export
 setReplaceMethod("swOUT_TimeStep", signature = "swOUT", function(object, value) {
   object@timeSteps <- value
   validObject(object)
   object
 })
 
-#' @describeIn swOUT Set time steps to the same set of values for each output key.
+#' Set time steps to the same set of values for each output key.
 #' @examples
 #' x <- new("swOUT")
 #' swOUT_TimeStepsForEveryKey(x) <- c(2, 3)
 #' identical(as.vector(unique(swOUT_TimeStep(x))), as.integer(c(2, 3)))
+#' @rdname swOUT-class
+#' @export
 setReplaceMethod("swOUT_TimeStepsForEveryKey", signature = "swOUT", function(object, value) {
   object@timeSteps <- matrix(as.integer(value), byrow = TRUE,
     nrow = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]],
@@ -139,6 +202,8 @@ setReplaceMethod("swOUT_TimeStepsForEveryKey", signature = "swOUT", function(obj
   object
 })
 
+#' @rdname swOUT-class
+#' @export
 setReplaceMethod("swOUT_OutputSeparator", signature = "swOUT", function(object, value) {
   object@outputSeparator <- as.character(value)
   validObject(object)
@@ -156,6 +221,8 @@ OutSum <- c("off", "sum", "avg", "fnl") # only used for 'swReadLines'
 timePeriods <- c("dy", "wk", "mo", "yr")
 
 
+#' @rdname swOUT-class
+#' @export
 setMethod("swReadLines", signature = c(object="swOUT",file="character"), function(object,file) {
   print("TODO: method 'swReadLines' for class 'swOUT' is not up-to-date; hard-coded indices are incorrect")
 

@@ -163,6 +163,3 @@ dynamics in the shortgrass steppe.  \emph{Ecology} \bold{73}:1175--1181.
 data input \item \code{\link{dbW_getWeatherData}} and
 \code{\link{getWeatherData_folders}} for weather data input }
 }
-\author{
-Ryan Murphy
-}

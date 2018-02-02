@@ -22,6 +22,31 @@
 
 ##############################################################################
 
+#' Class \code{"swWeatherData"}
+#'
+#' The methods listed below work on this class and the proper slot of the class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#' @param object An object of class \code{\linkS4class{swWeatherData}}.
+#' @param .Object An object of class \code{\linkS4class{swWeatherData}}.
+#' @param file A character string. The file name from which to read.
+#' @param ... Further arguments to methods.
+#' @param year An integer value. The calendar year of the weather \code{data} object.
+#' @param data A 365 x 4 or 366 x 4 matrix representing daily weather data for one calendar
+#'    \code{year} with columns DOY, Tmax_C, Tmin_C, and PPT_cm.
+#'
+#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
+#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
+#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
+#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
+#' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
+#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#'
+#' @examples
+#' showClass("swWeatherData")
+#' x <- new("swWeatherData")
+#'
+#' @name swWeatherData-class
 #' @export
 setClass("swWeatherData", slots = c(data = "matrix", year = "integer"))
 
@@ -48,6 +73,8 @@ swWeatherData_validity <- function(object) {
 }
 setValidity("swWeatherData", swWeatherData_validity)
 
+#' @rdname swWeatherData-class
+#' @export
 setMethod("initialize", signature = "swWeatherData", function(.Object, ...,
   year = 0L, data = NULL) {
 
@@ -69,6 +96,8 @@ setMethod("initialize", signature = "swWeatherData", function(.Object, ...,
   .Object
 })
 
+#' @rdname swWeatherData-class
+#' @export
 setMethod("swReadLines", signature = c(object="swWeatherData",file="character"), function(object,file) {
 			object@year = as.integer(strsplit(x=basename(file),split=".",fixed=TRUE)[[1]][2])
 			#data <-read.csv(file,header=FALSE,skip=2,sep="\t")
