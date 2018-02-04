@@ -226,22 +226,22 @@ setMethod("swProd_MonProd_veg", "swProd", function(object, vegtype) object@Month
 #' @rdname swProd-class
 #' @export
 setMethod("swProd_MonProd_grass", "swProd", function(object) {
-  object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]]]
+  object@MonthlyVeg[[1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]]]
 })
 #' @rdname swProd-class
 #' @export
 setMethod("swProd_MonProd_shrub", "swProd", function(object) {
-  object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]]]
+  object@MonthlyVeg[[1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]]]
 })
 #' @rdname swProd-class
 #' @export
 setMethod("swProd_MonProd_tree", "swProd", function(object) {
-  object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]]]
+  object@MonthlyVeg[[1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]]]
 })
 #' @rdname swProd-class
 #' @export
 setMethod("swProd_MonProd_forb", "swProd", function(object) {
-  object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]]]
+  object@MonthlyVeg[[1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]]]
 })
 
 #' @rdname swProd-class
@@ -352,7 +352,7 @@ setReplaceMethod("swProd_CO2Coefficients", signature = "swProd", function(object
 #' @rdname swProd-class
 #' @export
 setReplaceMethod("swProd_MonProd_grass", signature = "swProd", function(object, value) {
-  k <- rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]
+  k <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]
   dimnames(value) <- dimnames(object@MonthlyVeg[[k]])
   object@MonthlyVeg[[k]] <- value
   validObject(object)
@@ -361,7 +361,7 @@ setReplaceMethod("swProd_MonProd_grass", signature = "swProd", function(object, 
 #' @rdname swProd-class
 #' @export
 setReplaceMethod("swProd_MonProd_shrub", signature = "swProd", function(object, value) {
-  k <- rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]
+  k <- vrSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]
   dimnames(value) <- dimnames(object@MonthlyVeg[[k]])
   object@MonthlyVeg[[k]] <- value
   validObject(object)
@@ -370,7 +370,7 @@ setReplaceMethod("swProd_MonProd_shrub", signature = "swProd", function(object, 
 #' @rdname swProd-class
 #' @export
 setReplaceMethod("swProd_MonProd_tree", signature = "swProd", function(object, value) {
-  k <- rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]
+  k <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]
   dimnames(value) <- dimnames(object@MonthlyVeg[[k]])
   object@MonthlyVeg[[k]] <- value
   validObject(object)
@@ -379,7 +379,7 @@ setReplaceMethod("swProd_MonProd_tree", signature = "swProd", function(object, v
 #' @rdname swProd-class
 #' @export
 setReplaceMethod("swProd_MonProd_forb", signature = "swProd", function(object, value) {
-  k <- rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]
+  k <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]
   dimnames(value) <- dimnames(object@MonthlyVeg[[k]])
   object@MonthlyVeg[[k]] <- value
   validObject(object)
@@ -421,9 +421,9 @@ setMethod("swReadLines", signature = c(object="swProd",file="character"), functi
 			object@HydraulicRedistribution[3,] = readNumerics(infiletext[69],4)
 			object@CriticalSoilWaterPotential = readNumerics(infiletext[74],4)
 			for(i in 1:4)  object@CO2Coefficients[i, ] = readNumerics(infiletext[79 + i], 4)
-			for(i in 1:12) object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]]][i, ] = readNumerics(infiletext[94+i],4)
-			for(i in 1:12) object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]]][i, ] = readNumerics(infiletext[109+i],4)
-			for(i in 1:12) object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]]][i, ] = readNumerics(infiletext[124+i],4)
-			for(i in 1:12) object@MonthlyVeg[[rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]]][i, ] = readNumerics(infiletext[139+i],4)
+			for(i in 1:12) object@MonthlyVeg[[1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]]][i, ] = readNumerics(infiletext[94+i],4)
+			for(i in 1:12) object@MonthlyVeg[[1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]]][i, ] = readNumerics(infiletext[109+i],4)
+			for(i in 1:12) object@MonthlyVeg[[1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]]][i, ] = readNumerics(infiletext[124+i],4)
+			for(i in 1:12) object@MonthlyVeg[[1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]]][i, ] = readNumerics(infiletext[139+i],4)
 			return(object)
 		})
