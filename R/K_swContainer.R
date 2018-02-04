@@ -696,6 +696,13 @@ setReplaceMethod("swProd_CO2Coefficients", signature = "swInputData", function(o
 })
 #' @rdname swInputData-class
 #' @export
+setReplaceMethod("swProd_MonProd_veg", signature = "swInputData",
+  function(object, vegtype, value) {
+    swProd_MonProd_veg(object@prod, vegtype) <- value
+    object
+})
+#' @rdname swInputData-class
+#' @export
 setReplaceMethod("swProd_MonProd_grass", signature = "swInputData", function(object, value) {
   swProd_MonProd_grass(object@prod) <- value
   object

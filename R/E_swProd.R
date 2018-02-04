@@ -222,7 +222,16 @@ setMethod("swProd_CritSoilWaterPotential", "swProd", function(object) object@Cri
 setMethod("swProd_CO2Coefficients", "swProd", function(object) object@CO2Coefficients)
 #' @rdname swProd-class
 #' @export
-setMethod("swProd_MonProd_veg", "swProd", function(object, vegtype) object@MonthlyVeg[[vegtype]])
+setMethod("swProd_MonProd_veg", signature = c(object = "swProd", vegtype = "numeric"),
+  function(object, vegtype) object@MonthlyVeg[[as.integer(vegtype)]])
+#' @rdname swProd-class
+#' @export
+setMethod("swProd_MonProd_veg", signature = c(object = "swProd", vegtype = "character"),
+  function(object, vegtype) {
+    id_vegtype <- grep(vegtype, names(rSW2_glovars[["kSOILWAT2"]][["VegTypes"]]),
+      ignore.case = TRUE)
+    object@MonthlyVeg[[id_vegtype]]
+})
 #' @rdname swProd-class
 #' @export
 setMethod("swProd_MonProd_grass", "swProd", function(object) {
@@ -349,40 +358,54 @@ setReplaceMethod("swProd_CO2Coefficients", signature = "swProd", function(object
   validObject(object)
   object
 })
+
+#' @rdname swProd-class
+#' @export
+setReplaceMethod("swProd_MonProd_veg",
+  signature = c(object = "swProd", vegtype = "numeric", value = "matrix"),
+  function(object, vegtype, value) {
+    id_vegtype <- as.integer(vegtype)
+    dimnames(value) <- dimnames(object@MonthlyVeg[[id_vegtype]])
+    object@MonthlyVeg[[id_vegtype]] <- value
+    validObject(object)
+    object
+})
+#' @rdname swProd-class
+#' @export
+setReplaceMethod("swProd_MonProd_veg",
+  signature = c(object = "swProd", vegtype = "character", value = "matrix"),
+  function(object, vegtype, value) {
+    id_vegtype <- grep(vegtype, names(rSW2_glovars[["kSOILWAT2"]][["VegTypes"]]),
+      ignore.case = TRUE)
+    swProd_MonProd_veg(object, id_vegtype) <- value
+    object
+})
 #' @rdname swProd-class
 #' @export
 setReplaceMethod("swProd_MonProd_grass", signature = "swProd", function(object, value) {
-  k <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]
-  dimnames(value) <- dimnames(object@MonthlyVeg[[k]])
-  object@MonthlyVeg[[k]] <- value
-  validObject(object)
+  id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]
+  swProd_MonProd_veg(object, id_vegtype) <- value
   object
 })
 #' @rdname swProd-class
 #' @export
 setReplaceMethod("swProd_MonProd_shrub", signature = "swProd", function(object, value) {
-  k <- vrSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]
-  dimnames(value) <- dimnames(object@MonthlyVeg[[k]])
-  object@MonthlyVeg[[k]] <- value
-  validObject(object)
+  id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]
+  swProd_MonProd_veg(object, id_vegtype) <- value
   object
 })
 #' @rdname swProd-class
 #' @export
 setReplaceMethod("swProd_MonProd_tree", signature = "swProd", function(object, value) {
-  k <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]
-  dimnames(value) <- dimnames(object@MonthlyVeg[[k]])
-  object@MonthlyVeg[[k]] <- value
-  validObject(object)
+  id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]
+  swProd_MonProd_veg(object, id_vegtype) <- value
   object
 })
 #' @rdname swProd-class
 #' @export
 setReplaceMethod("swProd_MonProd_forb", signature = "swProd", function(object, value) {
-  k <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]
-  dimnames(value) <- dimnames(object@MonthlyVeg[[k]])
-  object@MonthlyVeg[[k]] <- value
-  validObject(object)
+  id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]
+  swProd_MonProd_veg(object, id_vegtype) <- value
   object
 })
 
