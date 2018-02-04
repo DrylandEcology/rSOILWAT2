@@ -500,6 +500,7 @@ setGeneric("swProd_CritSoilWaterPotential", function(object) standardGeneric("sw
 setGeneric("swProd_CO2Coefficients", function(object) standardGeneric("swProd_CO2Coefficients"))
 #' swProd_MonProd_veg
 #' @param object An object of class \code{\linkS4class{swProd}} or \code{\linkS4class{swInputData}}.
+#' @param vegtype The name or index of the vegetation type.
 #' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
 setGeneric("swProd_MonProd_veg", function(object, vegtype) standardGeneric("swProd_MonProd_veg"))
 #' swProd_MonProd_grass
@@ -591,9 +592,10 @@ setGeneric("swProd_CritSoilWaterPotential<-", function(object, value) standardGe
 setGeneric("swProd_CO2Coefficients<-", function(object, value) standardGeneric("swProd_CO2Coefficients<-"))
 #' swProd_MonProd_veg<-
 #' @param object An object of class \code{\linkS4class{swProd}} or \code{\linkS4class{swInputData}}.
+#' @param vegtype The name or index of the vegetation type.
 #' @param value A value to assign to a specific slot of the \code{object}.
 #' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
-setGeneric("swProd_MonProd_veg<-", function(object, value) standardGeneric("swProd_MonProd_veg<-"))
+setGeneric("swProd_MonProd_veg<-", function(object, vegtype, value) standardGeneric("swProd_MonProd_veg<-"))
 #' swProd_MonProd_grass<-
 #' @param object An object of class \code{\linkS4class{swProd}} or \code{\linkS4class{swInputData}}.
 #' @param value A value to assign to a specific slot of the \code{object}.

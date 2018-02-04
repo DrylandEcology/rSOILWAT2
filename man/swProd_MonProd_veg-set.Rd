@@ -4,10 +4,12 @@
 \alias{swProd_MonProd_veg<-}
 \title{swProd_MonProd_veg<-}
 \usage{
-swProd_MonProd_veg(object) <- value
+swProd_MonProd_veg(object, vegtype) <- value
 }
 \arguments{
 \item{object}{An object of class \code{\linkS4class{swProd}} or \code{\linkS4class{swInputData}}.}
+
+\item{vegtype}{The name or index of the vegetation type.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }

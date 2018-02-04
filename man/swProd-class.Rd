@@ -18,7 +18,8 @@
 \alias{swProd_HydrRedstro,swProd-method}
 \alias{swProd_CritSoilWaterPotential,swProd-method}
 \alias{swProd_CO2Coefficients,swProd-method}
-\alias{swProd_MonProd_veg,swProd-method}
+\alias{swProd_MonProd_veg,swProd,numeric-method}
+\alias{swProd_MonProd_veg,swProd,character-method}
 \alias{swProd_MonProd_grass,swProd-method}
 \alias{swProd_MonProd_shrub,swProd-method}
 \alias{swProd_MonProd_tree,swProd-method}
@@ -37,6 +38,8 @@
 \alias{swProd_HydrRedstro<-,swProd-method}
 \alias{swProd_CritSoilWaterPotential<-,swProd-method}
 \alias{swProd_CO2Coefficients<-,swProd-method}
+\alias{swProd_MonProd_veg<-,swProd,numeric,matrix-method}
+\alias{swProd_MonProd_veg<-,swProd,character,matrix-method}
 \alias{swProd_MonProd_grass<-,swProd-method}
 \alias{swProd_MonProd_shrub<-,swProd-method}
 \alias{swProd_MonProd_tree<-,swProd-method}
@@ -74,7 +77,9 @@
 
 \S4method{swProd_CO2Coefficients}{swProd}(object)
 
-\S4method{swProd_MonProd_veg}{swProd}(object, vegtype)
+\S4method{swProd_MonProd_veg}{swProd,numeric}(object, vegtype)
+
+\S4method{swProd_MonProd_veg}{swProd,character}(object, vegtype)
 
 \S4method{swProd_MonProd_grass}{swProd}(object)
 
@@ -111,6 +116,11 @@
 \S4method{swProd_CritSoilWaterPotential}{swProd}(object) <- value
 
 \S4method{swProd_CO2Coefficients}{swProd}(object) <- value
+
+\S4method{swProd_MonProd_veg}{swProd,numeric,matrix}(object, vegtype) <- value
+
+\S4method{swProd_MonProd_veg}{swProd,character,matrix}(object,
+  vegtype) <- value
 
 \S4method{swProd_MonProd_grass}{swProd}(object) <- value
 

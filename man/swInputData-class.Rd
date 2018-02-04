@@ -108,7 +108,7 @@
 \alias{swProd_HydrRedstro,swInputData-method}
 \alias{swProd_CritSoilWaterPotential,swInputData-method}
 \alias{swProd_CO2Coefficients,swInputData-method}
-\alias{swProd_MonProd_veg,swInputData-method}
+\alias{swProd_MonProd_veg,swInputData,ANY-method}
 \alias{swProd_MonProd_grass,swInputData-method}
 \alias{swProd_MonProd_shrub,swInputData-method}
 \alias{swProd_MonProd_tree,swInputData-method}
@@ -127,6 +127,7 @@
 \alias{swProd_HydrRedstro<-,swInputData-method}
 \alias{swProd_CritSoilWaterPotential<-,swInputData-method}
 \alias{swProd_CO2Coefficients<-,swInputData-method}
+\alias{swProd_MonProd_veg<-,swInputData,ANY,ANY-method}
 \alias{swProd_MonProd_grass<-,swInputData-method}
 \alias{swProd_MonProd_shrub<-,swInputData-method}
 \alias{swProd_MonProd_tree<-,swInputData-method}
@@ -406,7 +407,7 @@
 
 \S4method{swProd_CO2Coefficients}{swInputData}(object)
 
-\S4method{swProd_MonProd_veg}{swInputData}(object, vegtype)
+\S4method{swProd_MonProd_veg}{swInputData,ANY}(object, vegtype)
 
 \S4method{swProd_MonProd_grass}{swInputData}(object)
 
@@ -443,6 +444,8 @@
 \S4method{swProd_CritSoilWaterPotential}{swInputData}(object) <- value
 
 \S4method{swProd_CO2Coefficients}{swInputData}(object) <- value
+
+\S4method{swProd_MonProd_veg}{swInputData,ANY,ANY}(object, vegtype) <- value
 
 \S4method{swProd_MonProd_grass}{swInputData}(object) <- value
 
