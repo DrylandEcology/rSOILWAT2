@@ -357,7 +357,7 @@ SEXP onGet_SW_SIT() {
 	REAL(SoilTemperatureConstants)[4] = v->csParam1;
 	REAL(SoilTemperatureConstants)[5] = v->csParam2;
 	REAL(SoilTemperatureConstants)[6] = v->shParam;
-	REAL(SoilTemperatureConstants)[7] = v->meanAirTemp;
+	REAL(SoilTemperatureConstants)[7] = v->Tsoil_constant;
 	REAL(SoilTemperatureConstants)[8] = v->stDeltaX;
 	REAL(SoilTemperatureConstants)[9] = v->stMaxDepth;
 	PROTECT(SoilTemperatureConstants_names = allocVector(STRSXP,10));
@@ -467,7 +467,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	v->csParam1 = REAL(SoilTemperatureConstants)[4];
 	v->csParam2 = REAL(SoilTemperatureConstants)[5];
 	v->shParam = REAL(SoilTemperatureConstants)[6];
-	v->meanAirTemp = REAL(SoilTemperatureConstants)[7];
+	v->Tsoil_constant = REAL(SoilTemperatureConstants)[7];
 	v->stDeltaX = REAL(SoilTemperatureConstants)[8];
 	v->stMaxDepth = REAL(SoilTemperatureConstants)[9];
 
