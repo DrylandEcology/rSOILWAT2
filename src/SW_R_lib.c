@@ -227,15 +227,15 @@ SEXP sw_consts(void) {
   int vINT2[] = {SW_TREES, SW_SHRUB, SW_FORBS, SW_GRASS};
   char *cINT2[] = {"SW_TREES", "SW_SHRUB", "SW_FORBS", "SW_GRASS"};
 
-  char *vSTR1[] = {SW_WETHR, SW_TEMP, SW_PRECIP, SW_SOILINF, SW_RUNOFF,
-    SW_ALLH2O, SW_VWCBULK, SW_VWCMATRIC, SW_SWCBULK, SW_SWABULK,
-    SW_SWAMATRIC, SW_SWPMATRIC, SW_SURFACEW, SW_TRANSP, SW_EVAPSOIL,
-    SW_EVAPSURFACE, SW_INTERCEPTION, SW_LYRDRAIN, SW_HYDRED, SW_ET, SW_AET,
-    SW_PET, SW_WETDAY, SW_SNOWPACK, SW_DEEPSWC, SW_SOILTEMP, SW_ALLVEG,
-    SW_ESTAB, SW_CO2EFFECTS};  // TODO: this is identical to SW_Output.c/key2str
+  char *vSTR1[] = { SW_WETHR, SW_TEMP, SW_PRECIP, SW_SOILINF, SW_RUNOFF, SW_ALLH2O, SW_VWCBULK,
+			SW_VWCMATRIC, SW_SWCBULK, SW_SWABULK, SW_SWAMATRIC, SW_SWA, SW_SWPMATRIC,
+			SW_SURFACEW, SW_TRANSP, SW_EVAPSOIL, SW_EVAPSURFACE, SW_INTERCEPTION,
+			SW_LYRDRAIN, SW_HYDRED, SW_ET, SW_AET, SW_PET, SW_WETDAY, SW_SNOWPACK,
+			SW_DEEPSWC, SW_SOILTEMP,
+			SW_ALLVEG, SW_ESTAB, SW_CO2EFFECTS };  // TODO: this is identical to SW_Output.c/key2str
   char *cSTR1[] = {"SW_WETHR", "SW_TEMP", "SW_PRECIP", "SW_SOILINF", "SW_RUNOFF",
     "SW_ALLH2O", "SW_VWCBULK", "SW_VWCMATRIC", "SW_SWCBULK", "SW_SWABULK",
-    "SW_SWAMATRIC", "SW_SWPMATRIC", "SW_SURFACEW", "SW_TRANSP", "SW_EVAPSOIL",
+    "SW_SWAMATRIC", "SW_SWA", "SW_SWPMATRIC", "SW_SURFACEW", "SW_TRANSP", "SW_EVAPSOIL",
     "SW_EVAPSURFACE", "SW_INTERCEPTION", "SW_LYRDRAIN", "SW_HYDRED", "SW_ET", "SW_AET",
     "SW_PET", "SW_WETDAY", "SW_SNOWPACK", "SW_DEEPSWC", "SW_SOILTEMP", "SW_ALLVEG",
     "SW_ESTAB", "SW_CO2EFFECTS"};
@@ -245,7 +245,8 @@ SEXP sw_consts(void) {
   char *cSTR3[] = {"SW_SUM_OFF", "SW_SUM_SUM", "SW_SUM_AVG", "SW_SUM_FNL"};
   char *cInF[] = {"eFirst", "eModel", "eLog", "eSite", "eLayers", "eWeather",
     "eMarkovProb",  "eMarkovCov", "eSky", "eVegProd", "eVegEstab", "eCarbon", "eSoilwat",
-    "eOutput"}; // TODO: this must match SW_Files.h/SW_FileIndex
+    "eOutput", "eOutputDaily","eOutputWeekly","eOutputMonthly","eOutputYearly",
+		"eOutputDaily_soil","eOutputWeekly_soil","eOutputMonthly_soil","eOutputYearly_soil"}; // TODO: this must match SW_Files.h/SW_FileIndex
 
   // create vector of integer constants
   PROTECT(ret_int = allocVector(INTSXP, nINT));
@@ -322,4 +323,3 @@ SEXP sw_consts(void) {
 
   return ret;
 }
-
