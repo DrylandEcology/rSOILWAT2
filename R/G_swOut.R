@@ -213,7 +213,7 @@ setReplaceMethod("swOUT_OutputSeparator", signature = "swOUT", function(object, 
 
 # used by swReadLines
 			KEY <- c("WTHR", "TEMP", "PRECIP", "SOILINFILT", "RUNOFF", "ALLH2O", "VWCBULK",
-				"VWCMATRIC", "SWCBULK", "SWABULK", "SWAMATRIC", "SWPMATRIC", "SURFACEWATER", "TRANSP",
+				"VWCMATRIC", "SWCBULK", "SWA", "SWABULK", "SWAMATRIC", "SWPMATRIC", "SURFACEWATER", "TRANSP",
 				"EVAPSOIL", "EVAPSURFACE", "INTERCEPTION", "LYRDRAIN", "HYDRED", "ET", "AET", "PET",
 				"WETDAY", "SNOWPACK", "DEEPSWC", "SOILTEMP", "ALLVEG", "ESTABL")
 OutSum <- c("off", "sum", "avg", "fnl") # only used for 'swReadLines'
