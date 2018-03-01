@@ -29,3 +29,12 @@ Input/swcsetup.in	# params for handling measured swc
 #Output
 Output/	# 'relative' path for output files: / for same directory, or e.g., Output/; PROGRAMMER NOTE: This is currently the 13th position; if this changes then update function SW_Files.c/SW_F_read()
 Input/outsetup.in	# define output quantities
+Output/sw2_daily.csv	#output
+Output/sw2_weekly.csv	#output
+Output/sw2_monthly.csv	#output
+Output/sw2_yearly.csv	#output
+
+Output/sw2_daily_slyrs.csv	#output
+Output/sw2_weekly_slyrs.csv	#output
+Output/sw2_monthly_slyrs.csv	#output
+Output/sw2_yearly_slyrs.csv	#output
