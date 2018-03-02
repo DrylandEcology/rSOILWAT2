@@ -9,7 +9,7 @@ tests <- unique(temp)
 test_that("Test data availability", expect_gt(length(tests), 0))
 
 var_SumNotZero <- c("TEMP", "PRECIP", "SOILINFILT", "VWCBULK", "VWCMATRIC", "SWCBULK",
-  "SWABULK", "SWAMATRIC", "SWPMATRIC", "TRANSP", "EVAPSOIL", "EVAPSURFACE",
+  "SWABULK", "SWAMATRIC", "SWA", "SWPMATRIC", "TRANSP", "EVAPSOIL", "EVAPSURFACE",
   "INTERCEPTION", "LYRDRAIN", "HYDRED", "ET", "AET", "PET", "WETDAY", "SNOWPACK",
   "DEEPSWC", "CO2EFFECTS")
 
@@ -67,6 +67,7 @@ for (it in tests) {
         }
 
         # Compare aggregated daily against yearly output
+        #if (vars[k] != "ESTABL" && vars[k] != "SWA") {
         if (vars[k] != "ESTABL") {
           # "ESTABL" produces only yearly output
           res_true <- matrix(TRUE, nrow = rd@yr_nrow, ncol = x1@Columns)
