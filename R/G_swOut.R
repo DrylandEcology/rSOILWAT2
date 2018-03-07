@@ -134,8 +134,10 @@ swOUT_validity <- function(object) {
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
-  if (any(abs(object@timeSteps) > rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]])) {
-    msg <- "@timeSteps values must in SW_OUTNPERIODS"
+  ok <- c(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_MISSING"]],
+    seq_len(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]) - 1L) # timeSteps is base0
+  if (!all(object@timeSteps %in% ok)) {
+    msg <- "@timeSteps values must be within SW_OUTNPERIODS or be equal to SW_MISSING"
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
