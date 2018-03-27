@@ -233,6 +233,8 @@ setMethod("swReadLines", signature = c(object="swOUT",file="character"), functio
 				object@outputSeparator="\t"
 			} else if(temp == "s") {
 				object@outputSeparator=" "
+			} else if(temp == "c"){
+			  object@outputSeparator=","
 			} else {
 				object@outputSeparator="\t"
 			}
