@@ -39,7 +39,6 @@
 # 'wk' for week, 'mo' for month, and 'yr' for year after TIMESTEP
 # in any order. For example: 'TIMESTEP mo wk' will output for month and week
 #
-# To generate SWA output, the SWCBULK variable must also be requested.
 
 OUTSEP c
 TIMESTEP dy yr # must be lowercase
@@ -52,7 +51,7 @@ TIMESTEP dy yr # must be lowercase
       VWCBULK     AVG       MO       1     end        vwc_bulk      /* bulk volumetric soilwater (cm / layer) */
     VWCMATRIC     AVG       YR       1     end      vwc_matric      /* matric volumetric soilwater (cm / layer) */
       SWCBULK     AVG       DY       1     end        swc_bulk      /* bulk soilwater content (cm / cm layer); swc.l1(today) = swc.l1(yesterday)+inf_soil-lyrdrain.l1-transp.l1-evap_soil.l1; swc.li(today) = swc.li(yesterday)+lyrdrain.l(i-1)-lyrdrain.li-transp.li-evap_soil.li; swc.llast(today) = swc.llast(yesterday)+lyrdrain.l(last-1)-deepswc-transp.llast-evap_soil.llast */
-	  SWA  	  	  AVG  	    YR       1     end        swa			/* plant available soil water (cm / layer): trees, shrubs, forbs, grasses */
+	  SWA  	  AVG  	    YR       1     end        swa			/* plant available soil water (cm / layer): trees, shrubs, forbs, grasses */
       SWABULK     AVG       MO       1     end        swa_bulk      /* DEFUNCT: MAY BE REMOVED IN FUTURE VERSIONS; bulk available soil water (cm/layer) = swc - wilting point */
     SWAMATRIC     AVG       YR       1     end      swa_matric      /* DEFUNCT: MAY BE REMOVED IN FUTURE VERSIONS; matric available soil water (cm/layer) = swc - wilting point */
     SWPMATRIC     AVG       WK       1     end      swp_matric      /* matric soilwater potential (-bars) */
