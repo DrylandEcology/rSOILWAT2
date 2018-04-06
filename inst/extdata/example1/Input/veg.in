@@ -27,9 +27,9 @@
 
 # --- Vegetation interception parameters for equation: intercepted rain = (a + b*veg) + (c+d*veg) * ppt; Grasses+Shrubs: veg=vegcov, Trees: veg=LAI
 # Grasses	Shrubs	Trees	Forbs
-	0.0182	0.	0.00461	0.0182	# a
+	0.0182	0.			0.00461	0.0182	# a
 	0.0065	0.0026	0.01405	0.0065	# b
-	0.0019	0.	0.0383	0.0019	# c
+	0.0019	0.			0.0383	0.0019	# c
 	0.0054	0.0033	0.0337	0.0054	# d
 
 
