@@ -622,6 +622,13 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 	v->veg[SW_TREES].SWPcrit = -10 * REAL(CSWP)[2]; //Tree
 	v->veg[SW_FORBS].SWPcrit = -10 * REAL(CSWP)[3]; //Forb
 
+	// getting critSoilWater for use with SWA and get_critical_rank()
+	// critSoilWater goes tree, shrub, forb, grass
+	SW_VegProd.critSoilWater[0] = REAL(CSWP)[2];
+	SW_VegProd.critSoilWater[1] = REAL(CSWP)[1];
+	SW_VegProd.critSoilWater[2] = REAL(CSWP)[3];
+	SW_VegProd.critSoilWater[3] = REAL(CSWP)[0];
+
 	PROTECT(MonthlyVeg = GET_SLOT(SW_VPD, install(cVegProd_names[12])));
 	PROTECT(Grasslands = VECTOR_ELT(MonthlyVeg, SW_GRASS));
 	p_Grasslands = REAL(Grasslands);

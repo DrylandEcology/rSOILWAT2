@@ -122,7 +122,7 @@ void onSet_SW_OUT(SEXP OUT) {
 		if (SW_Output[k].sumtype == eSW_Fnl
 				&& !(k == eSW_VWCBulk || k == eSW_VWCMatric
 						|| k == eSW_SWPMatric || k == eSW_SWCBulk
-						|| k == eSW_SWABulk || k == eSW_SWAMatric
+						|| k == eSW_SWABulk || k == eSW_SWA || k == eSW_SWAMatric
 						|| k == eSW_DeepSWC))
 		{
 			LogError(logfp, LOGWARN, "%s : Summary Type FIN with key %s is meaningless.\n" "  Using type AVG instead.", MyFileName, key2str[k]);
