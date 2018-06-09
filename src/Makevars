@@ -2,7 +2,8 @@ target = SOILWAT2
 lib_target = lib$(target).a
 path_target = SOILWAT2
 
-PKG_CPPFLAGS = -DRSOILWAT
+# to allow MAKEFLAGS="PKG_DEBUG=-DRSWDEBUG" R CMD INSTALL .
+PKG_CPPFLAGS = $(PKG_DEBUG) -DRSOILWAT
 
 PKG_LIBS = -L$(path_target) -l$(target)  # $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 

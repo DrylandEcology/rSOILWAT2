@@ -22,44 +22,46 @@ A R package for SOILWAT2.
 
 ## Considerations
 
-We haven’t really published the code yet nor prepared it for sharing (though through our
-use of github made it openly accessible), it is actively and gradually being developed by
-the Lauenroth lab and affiliates, and there is no manual either - we cannot give you
-individual support in setting up and running the model except if we agreed on a
-collaboration or similar agreement.
+We haven't really published the code yet nor prepared it for sharing (though
+through our use of github made it openly accessible), it is actively and
+gradually being developed by the Lauenroth lab and affiliates, and there is
+no manual either - we cannot give you individual support in setting up and
+running the model except if we agreed on a collaboration or similar agreement.
 
-Not every part of the code has been extensively tested or is in a stable state. Similarly,
-not every combination of model inputs and options has been evaluated in depth and there is
-not guarantee for anything to work. The code comes with no warranty and no guarantees,
-expressed or implied, as to suitability, completeness, accuracy, and whatever other claim
-you would like to make.
+Not every part of the code has been extensively tested or is in a stable state.
+Similarly, not every combination of model inputs and options has been evaluated
+in depth and there is not guarantee for anything to work. The code comes with
+no warranty and no guarantees, expressed or implied, as to suitability,
+completeness, accuracy, and whatever other claim you would like to make.
 
-There is no graphical user interface, help pages and available documentation may be out
-of date, and you will need to write your own tools to analyse outputs.
+There is no graphical user interface, help pages and available documentation
+may be out of date, and you will need to write your own tools to analyse
+outputs.
 
 Note, the branch 'master' is deployable and is released with version numbers.
 
-If you make use of this model, please cite appropriate references, and we would like to
-hear about your particular study (especially a copy of any published paper).
+If you make use of this model, please cite appropriate references, and we would
+like to hear about your particular study (especially a copy of any published
+paper).
 
 
 Some recent references
 
-* Bradford, J. B., D. R. Schlaepfer, and W. K. Lauenroth. 2014. Ecohydrology of adjacent
-  sagebrush and lodgepole pine ecosystems: The consequences of climate change and
-  disturbance. Ecosystems 17:590-605.
+* Bradford, J. B., D. R. Schlaepfer, and W. K. Lauenroth. 2014. Ecohydrology of
+  adjacent sagebrush and lodgepole pine ecosystems: The consequences of climate
+  change and disturbance. Ecosystems 17:590-605.
 * Palmquist, K.A., Schlaepfer, D.R., Bradford, J.B., and Lauenroth, W.K. 2016.
-  Mid-latitude shrub steppe plant communities: climate change consequences for soil water
-  resources. Ecology 97:2342–2354.
-* Schlaepfer, D. R., W. K. Lauenroth, and J. B. Bradford. 2012. Ecohydrological niche of
-  sagebrush ecosystems. Ecohydrology 5:453-466.
+  Mid-latitude shrub steppe plant communities: climate change consequences for
+  soil water resources. Ecology 97:2342–2354.
+* Schlaepfer, D. R., W. K. Lauenroth, and J. B. Bradford. 2012. Ecohydrological
+  niche of sagebrush ecosystems. Ecohydrology 5:453-466.
 
 Original references
 
 * Parton, W.J. (1978). Abiotic section of ELM. In: Grassland simulation model
   (ed. Innis, G.S.). Springer New York, NY, pp. 31-53.
-* Sala, O.E., Lauenroth, W.K. & Parton, W.J. (1992). Long-term soil-water dynamics in the
-  shortgrass steppe. Ecology, 73, 1175-1181.
+* Sala, O.E., Lauenroth, W.K. & Parton, W.J. (1992). Long-term soil-water
+  dynamics in the shortgrass steppe. Ecology, 73, 1175-1181.
 
 
 
@@ -79,11 +81,12 @@ There are several options:
 
 ### Installation
 
-'rSOILWAT2' will compile the c code of SOILWAT2. Your computer must be set up adequately.
+'rSOILWAT2' will compile the c code of SOILWAT2. Your computer must be set up
+adequately.
 - If you use a Windows OS, then you need the
   [Rtools](http://cran.us.r-project.org/bin/windows/Rtools/)
-  installed that match your R version; please find further information for instance
-  [here](https://www.biostat.wisc.edu/~kbroman/Rintro/Rwinpack.html).
+  installed that match your R version; please find further information for
+  instance [here](https://www.biostat.wisc.edu/~kbroman/Rintro/Rwinpack.html).
 - If you use a macOS, then you need [Xcode](https://developer.apple.com/xcode/) and
   its [command-line tools](https://developer.apple.com/library/content/technotes/tn2339/_index.html)
   installed; please find further information for instance
@@ -102,22 +105,24 @@ tools::Rcmd(args = paste("INSTALL rSOILWAT2"))
 ```
 
 ### Binary package version
-If you want a binary version of the 'rSOILWAT2' package (e.g., to distribute to someone
-without development tools) for a platform to which you do not have access, then you may
-consider using one of the cloud services (no endorsements):
-- https://builder.r-hub.io offers different Linux, Windows, and mac OS flavors as targets
+If you want a binary version of the 'rSOILWAT2' package (e.g., to distribute to
+someone without development tools) for a platform to which you do not have
+access, then you may consider using one of the cloud services (no endorsements):
+- https://builder.r-hub.io offers different Linux, Windows, and mac OS flavors
+  as targets
 - http://win-builder.r-project.org/ offers Windows OS as target
 
-Alternatively, you may access the previous binary package version for Windows OS from our
-CI appveyor service if the build was successful and an artifact was generated for the
-binary package (this would be named 'rSOILWAT2_X.Y.Z.zip' with version number X.Y.Z) at
+Alternatively, you may access the previous binary package version for
+Windows OS from our CI appveyor service if the build was successful and an
+artifact was generated for the binary package (this would be named
+'rSOILWAT2_X.Y.Z.zip' with version number X.Y.Z) at
 - https://ci.appveyor.com/project/dschlaep/rSOILWAT2/build/artifacts
-If the latest build should have failed, then you may want to check out the 'History' tab
-for binaries of older versions.
+If the latest build should have failed, then you may want to check out the
+'History' tab for binaries of older versions.
 - After you downloaded the binary package, open R, and run
-```{r}
-install.packages(pkgs = "path/to/downloaded/zipfile.zip", repos = NULL)
-```
+  ```{r}
+  install.packages(pkgs = "path/to/downloaded/zipfile.zip", repos = NULL)
+  ```
 
 
 
@@ -131,18 +136,34 @@ __Tests, documentation, and code__ form a trinity
   * Use [roxygen2](https://cran.r-project.org/web/packages/roxygen2/vignettes/formatting.html)
     to write inline code documentation
   * Update help pages and NAMESPACE with the command `devtools::document()`
-  * Ideally, add examples to function documentation and check these examples with the
-    command `devtools::run_examples()`
+  * Ideally, add examples to function documentation and check these examples
+    with the command `devtools::run_examples()`
 - Code tests
   * Read the [section 'Testing' in Wickham's book 'R packages'](http://r-pkgs.had.co.nz/tests.html)
-  * Use [testthat](https://github.com/hadley/testthat) to add unit tests to the existing
-    framework
+  * Use [testthat](https://github.com/hadley/testthat) to add unit tests to the
+    existing framework
   * Run unit tests locally with the command `devtools::test()`
   * These unit tests will also be run on the command-line with `R CMD check .`
-  * The command-line check will be run on the continuous integration frameworks 'travis'
-    and 'appveyor' when commits are pushed
-  * Development/feature branches can only be merged into master if they pass all checks
+  * The command-line check will be run on the continuous integration frameworks
+    'travis' and 'appveyor' when commits are pushed
+  * Development/feature branches can only be merged into master if they pass
+    all checks
 
+__Debugging compiled code__
+  * Compile C code in `src/` and `src/SOILWAT2/` in 'debugging' mode.
+    This will define 'SWDEBUG' in 'SOILWAT2' source code
+    (see [SOILWAT2's README](https://github.com/DrylandEcology/SOILWAT2)):
+    * Install package on the command line:
+      ```
+      MAKEFLAGS="PKG_DEBUG=-DRSWDEBUG" R CMD INSTALL --preclean --clean .
+      ```
+    * Using R package 'devtools' (e.g., while running R interactively):
+      ```{r}
+      Sys.setenv(PKG_DEBUG="-DRSWDEBUG")
+      devtools::load_all()
+      ```
+  * For a more formal approach using `gdb`/`lldb`, please see the
+    [section 'Debugging-compiled-code' in the 'R-exts' manual](https://cran.r-project.org/doc/manuals/R-exts.html#Debugging-compiled-code)
 
 __How to update the submodule 'SOILWAT2'__ to the latest commit
 ```
@@ -167,11 +188,11 @@ if the `SOILWAT2` updated included changes to the input files.
 
 ### Version numbers
 
-We attempt to follow guidelines of [semantic versioning](http://semver.org/) with version
-numbers of MAJOR.MINOR.PATCH.
+We attempt to follow guidelines of [semantic versioning](http://semver.org/)
+with version numbers of `MAJOR.MINOR.PATCH``.
 If the version numbers changes, then the following files must be updated
-* DESCRIPTION: adjust lines 'Version' and 'Date'
-* R/zzz.R: adjust package startup message in function '.onAttach'
+* `DESCRIPTION``: adjust lines 'Version' and 'Date'
+* optionally, `R/zzz.R`: adjust package startup message in function `.onAttach`
 
 ### How to contribute
 You can help us in different ways:
@@ -179,16 +200,17 @@ You can help us in different ways:
 1. Reporting [issues](https://github.com/DrylandEcology/rSOILWAT2/issues)
 2. Contributing code and sending a [pull request](https://github.com/DrylandEcology/rSOILWAT2/pulls)
 
-In order to contribute to the code base of this project, you should first contact the
-Lauenroth Lab. We retain any decision to accept your suggestions/contributions or not.
+In order to contribute to the code base of this project, you should first
+contact the Lauenroth Lab. We retain any decision to accept your
+suggestions/contributions or not.
 
 
 
 
 # Code of conduct
 Please note that this project is released with a
-[Contributor Code of Conduct](CONDUCT.md). By participating in this project you agree
-to abide by its terms.
+[Contributor Code of Conduct](CONDUCT.md). By participating in this project you
+agree to abide by its terms.
 
 
 # License
@@ -221,7 +243,8 @@ Contributors are encouraged, however, to update local clones to [point to the ne
 ```
 git remote set-url origin https://github.com/DrylandEcology/rSOILWAT2.git
 ```
-If you have installed a previous version as R package, then you may consider removing the old version with
+If you have installed a previous version as R package, then you may consider
+removing the old version with
 ```{r}
 remove.packages("Rsoilwat31")
 ```
