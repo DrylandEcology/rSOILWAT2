@@ -290,7 +290,7 @@ void setGlobalrSOILWAT2_OutputVariables(SEXP outputData) {
 	// Get the pointers to the pre-configured output data setup. These are used in ifdef RSOILWAT portions of SW_Output.c
 	ForEachOutKey(k) {
 		for (i = 0; i < used_OUTNPERIODS; i++) {
-			switch (timeSteps[eSW_CO2Effects][i]) {
+			switch (timeSteps[k][i]) {
 				case eSW_Day:
 					p_rOUT[k][eSW_Day] = REAL(GET_SLOT(GET_SLOT(outputData, install(key2str[k])), install("Day")));
 					break;
