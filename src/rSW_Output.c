@@ -47,6 +47,7 @@ extern Bool EchoInits;
 extern char _Sep;
 extern char const *key2str[];
 extern int used_OUTNPERIODS;
+extern Bool use_OutPeriod[SW_OUTNPERIODS];
 extern OutPeriod timeSteps[SW_OUTNKEYS][SW_OUTNPERIODS];
 extern int ncol_OUT[SW_OUTNKEYS];
 extern char *colnames_OUT[SW_OUTNKEYS][5 * NVEGTYPES + MAX_LAYERS];
@@ -118,21 +119,15 @@ void onSet_SW_OUT(SEXP OUT) {
 		}
 
 		/*
-		// Fill information into `SW_Output[k]`
 		msg_type = SW_OUT_read_onekey(&k, keyname, sumtype, period, first, last,
 			outfile, msg);
 
 		if (msg_type != 0) {
-			if (msg_type > 0) {
-				if (msg_type == LOGFATAL) {
-					CloseFile(&f);
-				}
-				LogError(logfp, msg_type, "%s", msg);
-			}
-
+			LogError(logfp, msg_type, "%s", msg);
 			continue;
 		}
 		*/
+
 
 		continue1 = (k == eSW_AllVeg || k == eSW_ET || k == eSW_AllWthr || k == eSW_AllH2O);
 		if (continue1) {
@@ -141,19 +136,17 @@ void onSet_SW_OUT(SEXP OUT) {
 			continue;
 		}
 
-		/* check validity of summary type */
+		SW_Output[k].has_sl = has_soillayers(key2str[k]);
+
+		// check validity of summary type
 		SW_Output[k].sumtype = sumtype[k];
-		if (SW_Output[k].sumtype == eSW_Fnl
-				&& !(k == eSW_VWCBulk || k == eSW_VWCMatric
-						|| k == eSW_SWPMatric || k == eSW_SWCBulk
-						|| k == eSW_SWABulk || k == eSW_SWA || k == eSW_SWAMatric
-						|| k == eSW_DeepSWC))
+		if (SW_Output[k].sumtype == eSW_Fnl && !SW_Output[k].has_sl)
 		{
 			LogError(logfp, LOGWARN, "%s : Summary Type FIN with key %s is meaningless.\n" "  Using type AVG instead.", MyFileName, key2str[k]);
 			SW_Output[k].sumtype = eSW_Avg;
 		}
 
-		/* verify deep drainage parameters */
+		// verify deep drainage parameters
 		if (k == eSW_DeepSWC && SW_Output[k].sumtype != eSW_Off
 				&& !SW_Site.deepdrain)
 		{
@@ -161,7 +154,7 @@ void onSet_SW_OUT(SEXP OUT) {
 			continue;
 		}
 
-		/* prepare the remaining structure if use==TRUE */
+		// prepare the remaining structure if use==TRUE
 		SW_Output[k].use = (SW_Output[k].sumtype == eSW_Off || !use[k]) ? FALSE : TRUE;
 		if (SW_Output[k].use) {
 			SW_Output[k].mykey = mykey[k];
@@ -318,7 +311,6 @@ void setGlobalrSOILWAT2_OutputVariables(SEXP outputData) {
 SEXP onGetOutput(SEXP inputData) {
 	int i, l, tYears;
 	OutKey k;
-	int pOPuse[SW_OUTNPERIODS] = {0};
 	int *use;
 	SEXP swOutput, swOutput_Object, outfile, years, swOutput_KEY, stemp_KEY, rTimeStep,
 		xKEY, xKEY_names, xKEY_cnames;
@@ -353,31 +345,14 @@ SEXP onGetOutput(SEXP inputData) {
 	PROTECT(outfile = GET_SLOT(GET_SLOT(inputData, install("output")), install("outfile")));
 
 	// Determine which output periods are turned on for at least one output key
-	ForEachOutKey(k) {
-		for (i = 0; i < used_OUTNPERIODS; i++) {
-			switch (timeSteps[k][i]) {
-				case eSW_Day:
-					pOPuse[eSW_Day] = 1;
-					break;
-				case eSW_Week:
-					pOPuse[eSW_Week] = 1;
-					break;
-				case eSW_Month:
-					pOPuse[eSW_Month] = 1;
-					break;
-				case eSW_Year:
-					pOPuse[eSW_Year] = 1;
-					break;
-			}
-		}
-	}
+	find_OutPeriods_inUse();
 
 	// Determine number of used years/months/weeks/days in simulation period
-	yr_nrow = tYears * pOPuse[eSW_Year];
-	mo_nrow = tYears * MAX_MONTHS * pOPuse[eSW_Month];
-	wk_nrow = tYears * MAX_WEEKS * pOPuse[eSW_Week];
+	yr_nrow = tYears * use_OutPeriod[eSW_Year];
+	mo_nrow = tYears * MAX_MONTHS * use_OutPeriod[eSW_Month];
+	wk_nrow = tYears * MAX_WEEKS * use_OutPeriod[eSW_Week];
 
-	if (pOPuse[eSW_Day] == 1) {
+	if (use_OutPeriod[eSW_Day] == 1) {
 		dy_nrow = 0;
 		for (i = INTEGER(GET_SLOT(years, install("StartYear")))[0]; i <= INTEGER(GET_SLOT(years, install("EndYear")))[0]; i++) {
 			if (i == 0) {
