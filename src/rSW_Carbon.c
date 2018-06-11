@@ -162,10 +162,12 @@ void onSet_swCarbon(SEXP object) {
   // Locate index of first year for which we need CO2 data
   for (i = 1; year != (unsigned int) values[i - 1 + n_input * 0] && i < MAX_NYEAR; i++) {}
 
+  #ifdef RSWDEBUG
   if (debug) {
     swprintf("'onSet_swCarbon': year = %d, n_sim = %d, n_input = %d, i = %d\n",
       year, n_sim, n_input, i);
   }
+  #endif
 
   // Check that we have enough data
   if (i - 1 + n_sim > n_input)
@@ -178,10 +180,12 @@ void onSet_swCarbon(SEXP object) {
   {
     c->ppm[year] = values[i - 1 + n_input * 1];  // R's index is 1-based
 
+    #ifdef RSWDEBUG
     if (debug) {
       swprintf("ppm[year = %d] = %3.2f <-> S4[i = %d] = %3.2f\n",
         year, c->ppm[year], i, values[i - 1 + n_input * 1]);
     }
+    #endif
   }
 
   UNPROTECT(1);

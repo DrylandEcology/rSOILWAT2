@@ -420,18 +420,32 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	LyrIndex r; /* transp region definition number */
 	Bool too_many_regions = FALSE;
 
+	#ifdef RSWDEBUG
+	if (debug) swprintf("onSet_SW_SIT:");
+	#endif
+
 	PROTECT(SWClimits = GET_SLOT(SW_SIT, install("SWClimits")));
 	_SWCMinVal = REAL(SWClimits)[0];
 	_SWCInitVal = REAL(SWClimits)[1];
 	_SWCWetVal = REAL(SWClimits)[2];
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" > 'SWClimits'");
+	#endif
 
 	PROTECT(ModelFlags = GET_SLOT(SW_SIT, install("ModelFlags")));
 	v->reset_yr = LOGICAL(ModelFlags)[0];
 	v->deepdrain = LOGICAL(ModelFlags)[1];
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" > 'flags'");
+	#endif
+
 	PROTECT(ModelCoefficients = GET_SLOT(SW_SIT, install("ModelCoefficients")));
 	v->pet_scale = REAL(ModelCoefficients)[0];
 	v->percentRunoff = REAL(ModelCoefficients)[1];
 	v->percentRunon = REAL(ModelCoefficients)[2];
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" > 'coefs'");
+	#endif
 
 	PROTECT(SnowSimulationParameters = GET_SLOT(SW_SIT, install("SnowSimulationParameters")));
 	v->TminAccu2 = REAL(SnowSimulationParameters)[0];
