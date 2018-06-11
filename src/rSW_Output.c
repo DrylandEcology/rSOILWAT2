@@ -52,11 +52,11 @@ extern OutPeriod timeSteps[SW_OUTNKEYS][SW_OUTNPERIODS];
 extern int ncol_OUT[SW_OUTNKEYS];
 extern char *colnames_OUT[SW_OUTNKEYS][5 * NVEGTYPES + MAX_LAYERS];
 
-// Pointers to the pre configured output data. These are used in ifdef RSOILWAT portions of SW_Output.c
+// Pointers to the pre configured output data. These are used in rSW_Output_rSOILWAT2.c
 RealD *p_rOUT[SW_OUTNKEYS][SW_OUTNPERIODS];
 
-// Number of years/months/weeks/days that are used in ifdef RSOILWAT portions of SW_Output.c
-unsigned int yr_nrow = 0, mo_nrow = 0, wk_nrow = 0, dy_nrow = 0;
+// Number of years/months/weeks/days that are used in rSW_Output_rSOILWAT2.c
+unsigned int nrow_OUT[SW_OUTNPERIODS] = { 0 };
 
 
 /* =================================================== */
@@ -275,10 +275,10 @@ void setGlobalrSOILWAT2_OutputVariables(SEXP outputData) {
 	#endif
 
 	// Number of years/months/weeks/days are used in ifdef RSOILWAT portions of SW_Output.c
-	yr_nrow = INTEGER(GET_SLOT(outputData, install("yr_nrow")))[0];
-	mo_nrow = INTEGER(GET_SLOT(outputData, install("mo_nrow")))[0];
-	wk_nrow = INTEGER(GET_SLOT(outputData, install("wk_nrow")))[0];
-	dy_nrow = INTEGER(GET_SLOT(outputData, install("dy_nrow")))[0];
+	nrow_OUT[eSW_Year] = INTEGER(GET_SLOT(outputData, install("yr_nrow")))[0];
+	nrow_OUT[eSW_Month] = INTEGER(GET_SLOT(outputData, install("mo_nrow")))[0];
+	nrow_OUT[eSW_Week] = INTEGER(GET_SLOT(outputData, install("wk_nrow")))[0];
+	nrow_OUT[eSW_Day] = INTEGER(GET_SLOT(outputData, install("dy_nrow")))[0];
 
 	// Get the pointers to the pre-configured output data setup. These are used in ifdef RSOILWAT portions of SW_Output.c
 	ForEachOutKey(k) {
@@ -309,16 +309,18 @@ void setGlobalrSOILWAT2_OutputVariables(SEXP outputData) {
 /* Experience has shown that generating the Output Data structure in R is slow compared to C
  * This will generate the OUTPUT data Structure and Names*/
 SEXP onGetOutput(SEXP inputData) {
-	int i, l, tYears;
+	int i, l, tYears, h;
 	OutKey k;
 	int *use;
 	SEXP swOutput, swOutput_Object, outfile, years, swOutput_KEY, stemp_KEY, rTimeStep,
 		xKEY, xKEY_names, xKEY_cnames;
 
 	char *cSWoutput_Names[] = {"yr_nrow", "mo_nrow", "wk_nrow", "dy_nrow"};
+	char *cSWTimeStep_Names[] = {"DOY", "Week", "Month", ""}; // has to match typedef `OutPeriod`
+	char *cSWTimeStep_Names2[] = {"Day", "Week", "Month", "Year"}; // has to match typedef `OutPeriod`
 
   #ifdef RSWDEBUG
-  int debug = 0;
+  int debug = 1;
   #endif
 
 	#ifdef RSWDEBUG
@@ -348,34 +350,34 @@ SEXP onGetOutput(SEXP inputData) {
 	find_OutPeriods_inUse();
 
 	// Determine number of used years/months/weeks/days in simulation period
-	yr_nrow = tYears * use_OutPeriod[eSW_Year];
-	mo_nrow = tYears * MAX_MONTHS * use_OutPeriod[eSW_Month];
-	wk_nrow = tYears * MAX_WEEKS * use_OutPeriod[eSW_Week];
+	nrow_OUT[eSW_Year] = tYears * use_OutPeriod[eSW_Year];
+	nrow_OUT[eSW_Month] = tYears * MAX_MONTHS * use_OutPeriod[eSW_Month];
+	nrow_OUT[eSW_Week] = tYears * MAX_WEEKS * use_OutPeriod[eSW_Week];
 
 	if (use_OutPeriod[eSW_Day] == 1) {
-		dy_nrow = 0;
+		nrow_OUT[eSW_Day] = 0;
 		for (i = INTEGER(GET_SLOT(years, install("StartYear")))[0]; i <= INTEGER(GET_SLOT(years, install("EndYear")))[0]; i++) {
 			if (i == 0) {
 				//Need to calculate the starting first day of first year
-				dy_nrow += Time_get_lastdoy_y(i) - INTEGER(GET_SLOT(years, install("FDOFY")))[0] + 1;
+				nrow_OUT[eSW_Day] += Time_get_lastdoy_y(i) - INTEGER(GET_SLOT(years, install("FDOFY")))[0] + 1;
 			} else if (i == (tYears - 1)) {
 				//and last day of last year.
-				dy_nrow += INTEGER(GET_SLOT(years, install("EDOEY")))[0];
+				nrow_OUT[eSW_Day] += INTEGER(GET_SLOT(years, install("EDOEY")))[0];
 			} else {
-				dy_nrow += Time_get_lastdoy_y(i);
+				nrow_OUT[eSW_Day] += Time_get_lastdoy_y(i);
 			}
 		}
 	}
 
 	#ifdef RSWDEBUG
 	if (debug) swprintf("Year Rows: %d, Month Rows: %d, Week Rows: %d, Day Rows: %d\n",
-		yr_nrow, mo_nrow, wk_nrow, dy_nrow);
+		nrow_OUT[eSW_Year], nrow_OUT[eSW_Month], nrow_OUT[eSW_Week], nrow_OUT[eSW_Day]);
 	#endif
 
-	SET_SLOT(swOutput_Object, install(cSWoutput_Names[0]), ScalarInteger(yr_nrow));
-	SET_SLOT(swOutput_Object, install(cSWoutput_Names[1]), ScalarInteger(mo_nrow));
-	SET_SLOT(swOutput_Object, install(cSWoutput_Names[2]), ScalarInteger(wk_nrow));
-	SET_SLOT(swOutput_Object, install(cSWoutput_Names[3]), ScalarInteger(dy_nrow));
+	SET_SLOT(swOutput_Object, install(cSWoutput_Names[0]), ScalarInteger(nrow_OUT[eSW_Year]));
+	SET_SLOT(swOutput_Object, install(cSWoutput_Names[1]), ScalarInteger(nrow_OUT[eSW_Month]));
+	SET_SLOT(swOutput_Object, install(cSWoutput_Names[2]), ScalarInteger(nrow_OUT[eSW_Week]));
+	SET_SLOT(swOutput_Object, install(cSWoutput_Names[3]), ScalarInteger(nrow_OUT[eSW_Day]));
 
 
 	// KEYS
@@ -384,7 +386,7 @@ SEXP onGetOutput(SEXP inputData) {
 	ForEachOutKey(k) {
 		if (use[k]) {
 			#ifdef RSWDEBUG
-			if (debug) swprintf(" %s: ", key2str[k]);
+			if (debug) swprintf(" %s (ncol = %d):", key2str[k], ncol_OUT[k]);
 			#endif
 
 			PROTECT(stemp_KEY = NEW_OBJECT(swOutput_KEY));
@@ -399,92 +401,36 @@ SEXP onGetOutput(SEXP inputData) {
 			SET_SLOT(stemp_KEY, install("TimeStep"), rTimeStep);
 
 			for (i = 0; i < used_OUTNPERIODS; i++) {
-				if (timeSteps[k][i] == eSW_Day) {
+				if (timeSteps[k][i] == eSW_Day || timeSteps[k][i] == eSW_Week ||
+					timeSteps[k][i] == eSW_Month || timeSteps[k][i] == eSW_Year)
 					#ifdef RSWDEBUG
-					if (debug) swprintf(" dy ...");
+					if (debug) swprintf(" %s /", cSWTimeStep_Names2[timeSteps[k][i]]);
 					#endif
 
-					PROTECT(xKEY = allocMatrix(REALSXP, dy_nrow, ncol_OUT[k] + 2)); // future output data matrix
-					for (l = 0; l < dy_nrow * (ncol_OUT[k] + 2); l++)
-						REAL(xKEY)[l] = 0.; // Initialize to 0; allocMatrix does not initialize
+					h = (timeSteps[k][i] == eSW_Day || timeSteps[k][i] == eSW_Week ||
+						timeSteps[k][i] == eSW_Month) ? 2: 1; // number of time columns
+
+					PROTECT(xKEY = allocMatrix(REALSXP, nrow_OUT[timeSteps[k][i]],
+						ncol_OUT[k] + h)); // future output data matrix
+					for (l = 0; l < nrow_OUT[timeSteps[k][i]] * (ncol_OUT[k] + h); l++) {
+						// Initialize to 0; allocMatrix does not initialize
+						REAL(xKEY)[l] = 0.;
+					}
 
 					PROTECT(xKEY_names = allocVector(VECSXP, 2)); // list of dimnames
-					PROTECT(xKEY_cnames = allocVector(STRSXP, ncol_OUT[k] + 2)); // vector of column names
+					PROTECT(xKEY_cnames = allocVector(STRSXP, ncol_OUT[k] + h)); // vector of column names
 					SET_STRING_ELT(xKEY_cnames, 0, mkChar("Year"));
-					SET_STRING_ELT(xKEY_cnames, 1, mkChar("DOY"));
-					for (l = 0; l < ncol_OUT[k]; l++)
-						SET_STRING_ELT(xKEY_cnames, l + 2, mkChar(colnames_OUT[k][l]));
+					if (h == 2) {
+						SET_STRING_ELT(xKEY_cnames, 1, mkChar(cSWTimeStep_Names[timeSteps[k][i]]));
+					}
+					for (l = 0; l < ncol_OUT[k]; l++) {
+						SET_STRING_ELT(xKEY_cnames, l + h, mkChar(colnames_OUT[k][l]));
+					}
 					SET_VECTOR_ELT(xKEY_names, 1, xKEY_cnames);
 					dimnamesgets(xKEY, xKEY_names);
 
-					SET_SLOT(stemp_KEY, install("Day"), xKEY);
+					SET_SLOT(stemp_KEY, install(cSWTimeStep_Names2[timeSteps[k][i]]), xKEY);
 					UNPROTECT(3);
-				}
-
-				if (timeSteps[k][i] == eSW_Week) {
-					#ifdef RSWDEBUG
-					if (debug) swprintf(" wk ...");
-					#endif
-
-					PROTECT(xKEY = allocMatrix(REALSXP, wk_nrow, ncol_OUT[k] + 2)); // future output data matrix
-					for (l = 0; l < wk_nrow * (ncol_OUT[k] + 2); l++)
-						REAL(xKEY)[l] = 0.; // Initialize to 0; allocMatrix does not initialize
-
-					PROTECT(xKEY_names = allocVector(VECSXP, 2)); // list of dimnames
-					PROTECT(xKEY_cnames = allocVector(STRSXP, ncol_OUT[k] + 2)); // vector of column names
-					SET_STRING_ELT(xKEY_cnames, 0, mkChar("Year"));
-					SET_STRING_ELT(xKEY_cnames, 1, mkChar("Week"));
-					for (l = 0; l < ncol_OUT[k]; l++)
-						SET_STRING_ELT(xKEY_cnames, l + 2, mkChar(colnames_OUT[k][l]));
-					SET_VECTOR_ELT(xKEY_names, 1, xKEY_cnames);
-					dimnamesgets(xKEY, xKEY_names);
-
-					SET_SLOT(stemp_KEY, install("Week"), xKEY);
-					UNPROTECT(3);
-				}
-
-				if (timeSteps[k][i] == eSW_Month) {
-					#ifdef RSWDEBUG
-					if (debug) swprintf(" mo ...");
-					#endif
-
-					PROTECT(xKEY = allocMatrix(REALSXP, mo_nrow, ncol_OUT[k] + 2)); // future output data matrix
-					for (l = 0; l < mo_nrow * (ncol_OUT[k] + 2); l++)
-						REAL(xKEY)[l] = 0.; // Initialize to 0; allocMatrix does not initialize
-
-					PROTECT(xKEY_names = allocVector(VECSXP, 2)); // list of dimnames
-					PROTECT(xKEY_cnames = allocVector(STRSXP, ncol_OUT[k] + 2)); // vector of column names
-					SET_STRING_ELT(xKEY_cnames, 0, mkChar("Year"));
-					SET_STRING_ELT(xKEY_cnames, 1, mkChar("Month"));
-					for (l = 0; l < ncol_OUT[k]; l++)
-						SET_STRING_ELT(xKEY_cnames, l + 2, mkChar(colnames_OUT[k][l]));
-					SET_VECTOR_ELT(xKEY_names, 1, xKEY_cnames);
-					dimnamesgets(xKEY, xKEY_names);
-
-					SET_SLOT(stemp_KEY, install("Month"), xKEY);
-					UNPROTECT(3);
-				}
-
-				if (timeSteps[k][i] == eSW_Year) {
-					#ifdef RSWDEBUG
-					if (debug) swprintf(" yr ...");
-					#endif
-
-					PROTECT(xKEY = allocMatrix(REALSXP, yr_nrow, ncol_OUT[k] + 1)); // future output data matrix
-					for (l = 0; l < yr_nrow * (ncol_OUT[k] + 1); l++)
-						REAL(xKEY)[l] = 0.; // Initialize to 0; allocMatrix does not initialize
-
-					PROTECT(xKEY_names = allocVector(VECSXP, 2)); // list of dimnames
-					PROTECT(xKEY_cnames = allocVector(STRSXP, ncol_OUT[k] + 1)); // vector of column names
-					SET_STRING_ELT(xKEY_cnames, 0, mkChar("Year"));
-					for (l = 0; l < ncol_OUT[k]; l++)
-						SET_STRING_ELT(xKEY_cnames, l + 1, mkChar(colnames_OUT[k][l]));
-					SET_VECTOR_ELT(xKEY_names, 1, xKEY_cnames);
-					dimnamesgets(xKEY, xKEY_names);
-
-					SET_SLOT(stemp_KEY, install("Year"), xKEY);
-					UNPROTECT(3);
-				}
 			}
 
 			SET_SLOT(swOutput_Object, install(key2str[k]), stemp_KEY);
