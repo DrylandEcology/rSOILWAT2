@@ -411,6 +411,10 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	SEXP TranspirationRegions;
 	RealD *p_transp;
 
+  #ifdef RSWDEBUG
+  int debug = 0;
+  #endif
+
 	MyFileName = SW_F_name(eSite);
 
 	LyrIndex r; /* transp region definition number */

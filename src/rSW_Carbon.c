@@ -145,7 +145,10 @@ void onSet_swCarbon(SEXP object) {
 
   // Only extract the CO2 values that will be used
   TimeInt year;
-  unsigned int i, n_input, n_sim, debug = 0;
+  unsigned int i, n_input, n_sim;
+  #ifdef RSWDEBUG
+  int debug = 0;
+  #endif
 
   SEXP CO2ppm;
   double *values;

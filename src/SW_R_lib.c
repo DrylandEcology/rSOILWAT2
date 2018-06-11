@@ -76,10 +76,17 @@ SEXP tempError(void) {
 
 
 void initSOILWAT2(SEXP inputOptions) {
-	int i, argc, debug = 0;
+	int i, argc;
 	char *argv[7];
+  #ifdef RSWDEBUG
+  int debug = 0;
+  #endif
 
-	if (debug) swprintf("Set args\n");
+
+  #ifdef RSWDEBUG
+  if (debug) swprintf("Set args\n");
+  #endif
+
 	argc = length(inputOptions);
 	if (argc > 7) {
 		// fatal condition because argv is hard-coded to be of length 7; increase size of
@@ -90,34 +97,48 @@ void initSOILWAT2(SEXP inputOptions) {
 		argv[i] = (char *) CHAR(STRING_ELT(inputOptions, i));
 	}
 
+  #ifdef RSWDEBUG
 	if (debug) swprintf("Set call arguments\n");
+  #endif
+
 	init_args(argc, argv);
 
+  #ifdef RSWDEBUG
   if (debug) swprintf("Initialize SOILWAT ...");
+	#endif
+
 	SW_CTL_init_model(_firstfile);
 	rSW_CTL_init_model2();
 }
 
 
 SEXP onGetInputDataFromFiles(SEXP inputOptions) {
-	int debug = 0;
 	SEXP swInputData, SW_DataList, swLog, oRlogfile;
+  #ifdef RSWDEBUG
+  int debug = 0;
+  #endif
 
 	collectInData = TRUE;
 	logged = FALSE;
 	logfp = NULL;
 
+	#ifdef RSWDEBUG
 	if (debug) swprintf("Set log\n");
+	#endif
 	PROTECT(swLog = MAKE_CLASS("swLog"));
 	PROTECT(oRlogfile = NEW_OBJECT(swLog));
 	PROTECT(Rlogfile = GET_SLOT(oRlogfile,install("LogData")));
 
 	initSOILWAT2(inputOptions);
 
+	#ifdef RSWDEBUG
 	if (debug) swprintf("Read input from disk files\n");
+	#endif
 	SW_CTL_read_inputs_from_disk();
 
+	#ifdef RSWDEBUG
   if (debug) swprintf("Copy data to classes\n");
+	#endif
 	PROTECT(swInputData = MAKE_CLASS("swInputData"));
 	PROTECT(SW_DataList = NEW_OBJECT(swInputData));
 	SET_SLOT(SW_DataList, install("files"), onGet_SW_F());
@@ -146,8 +167,10 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 }
 
 SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
-	int debug = 0;
 	SEXP outputData, swLog, oRlogfile;
+  #ifdef RSWDEBUG
+  int debug = 0;
+  #endif
 
 	collectInData = FALSE;
 	logged = FALSE;
@@ -172,32 +195,47 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 		WeatherList = weatherList;
 	}
 
+  #ifdef RSWDEBUG
   if (debug) swprintf("'start': create log ...");
+  #endif
 	PROTECT(swLog = MAKE_CLASS("swLog"));
 	PROTECT(oRlogfile = NEW_OBJECT(swLog));
 	PROTECT(Rlogfile = GET_SLOT(oRlogfile,install("LogData")));
 
+  #ifdef RSWDEBUG
   if (debug) swprintf(" input arguments ...");
+  #endif
 	initSOILWAT2(inputOptions);
 
+	#ifdef RSWDEBUG
 	if (debug) swprintf(" obtain inputs ...");
+	#endif
 	//Obtain the input data either from files or from memory (depending on useFiles)
 	rSW_CTL_obtain_inputs();
 
+  #ifdef RSWDEBUG
   if (debug) swprintf(" setup output variables ...");
+  #endif
 	SW_OUT_set_ncol();
 	SW_OUT_set_colnames();
 	PROTECT(outputData = onGetOutput(inputData));
 	setGlobalrSOILWAT2_OutputVariables(outputData);
 
+  #ifdef RSWDEBUG
   if (debug) swprintf(" run SOILWAT ...");
+  #endif
 	SW_CTL_main();
 
+  #ifdef RSWDEBUG
   if (debug) swprintf(" clean up ...");
+  #endif
 	SW_SIT_clear_layers();
 	SW_WTH_clear_runavg_list();
 	SW_VES_clear();
+
+  #ifdef RSWDEBUG
   if (debug) swprintf(" completed.\n");
+  #endif
 
 	UNPROTECT(4);
 
