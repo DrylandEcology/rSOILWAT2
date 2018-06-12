@@ -68,240 +68,184 @@ extern unsigned int nrow_OUT[SW_OUTNPERIODS];
 extern unsigned int irow_OUT[SW_OUTNPERIODS];
 
 
+/* =================================================== */
+/* =================================================== */
+/*             Private Function Definitions            */
+/* --------------------------------------------------- */
+
+static void get_outvalleader(OutKey k, OutPeriod pd);
+static void set_VEGPROD_aggslot(OutPeriod pd, SW_VEGPROD_OUTPUTS **pvo);
+static void set_WEATHER_aggslot(OutPeriod pd, SW_WEATHER_OUTPUTS **pvo);
+static void set_SOILWAT_aggslot(OutPeriod pd, SW_SOILWAT_OUTPUTS **pvo);
+
+/** Corresponds to function `get_outstrleader` of `SOILWAT2-standalone`
+*/
+static void get_outvalleader(OutKey k, OutPeriod pd) {
+	RealD *p;
+
+	p = p_rOUT[k][pd];
+	p[irow_OUT[pd] + nrow_OUT[pd] * 0] = SW_Model.simyear;
+
+	switch (pd) {
+		case eSW_Day:
+			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
+			break;
+
+		case eSW_Week:
+			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] =
+				SW_Model.week + 1 - tOffset;
+			break;
+
+		case eSW_Month:
+			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] =
+				SW_Model.month + 1 - tOffset;
+			break;
+
+		case eSW_Year:
+			break;
+	}
+}
+
+
+static void set_VEGPROD_aggslot(OutPeriod pd, SW_VEGPROD_OUTPUTS **pvo) {
+	switch(pd) {
+		case eSW_Day:
+			*pvo = &SW_VegProd.dysum;
+			break;
+
+		case eSW_Week:
+			*pvo = &SW_VegProd.wkavg;
+			break;
+
+		case eSW_Month:
+			*pvo = &SW_VegProd.moavg;
+			break;
+
+		case eSW_Year:
+			*pvo = &SW_VegProd.yravg;
+			break;
+	}
+}
+
+
+static void set_WEATHER_aggslot(OutPeriod pd, SW_WEATHER_OUTPUTS **pvo) {
+	switch(pd) {
+		case eSW_Day:
+			*pvo = &SW_Weather.dysum;
+			break;
+
+		case eSW_Week:
+			*pvo = &SW_Weather.wkavg;
+			break;
+
+		case eSW_Month:
+			*pvo = &SW_Weather.moavg;
+			break;
+
+		case eSW_Year:
+			*pvo = &SW_Weather.yravg;
+			break;
+	}
+}
+
+
+static void set_SOILWAT_aggslot(OutPeriod pd, SW_SOILWAT_OUTPUTS **pvo) {
+	switch(pd) {
+		case eSW_Day:
+			*pvo = &SW_Soilwat.dysum;
+			break;
+
+		case eSW_Week:
+			*pvo = &SW_Soilwat.wkavg;
+			break;
+
+		case eSW_Month:
+			*pvo = &SW_Soilwat.moavg;
+			break;
+
+		case eSW_Year:
+			*pvo = &SW_Soilwat.yravg;
+			break;
+	}
+}
+
+
+
 
 /* =================================================== */
 /* =================================================== */
 /*             Function Definitions                    */
 /*             (declared in SW_Output.h)               */
 /* --------------------------------------------------- */
-
-
 void get_co2effects(OutPeriod pd) {
+	int k;
+	RealD biomass_total = 0., biolive_total = 0.;
 	SW_VEGPROD *v = &SW_VegProd;
+	SW_VEGPROD_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	RealD biomass_total = SW_MISSING, biolive_total = SW_MISSING;
-	RealD biomass_grass = SW_MISSING, biomass_shrub = SW_MISSING,
-		biomass_tree = SW_MISSING, biomass_forb = SW_MISSING;
-	RealD biolive_grass = SW_MISSING, biolive_shrub = SW_MISSING,
-		biolive_tree = SW_MISSING, biolive_forb = SW_MISSING;
+	set_VEGPROD_aggslot(pd, &vo);
 
-	// Grab the multipliers that were just used
-	// No averaging or summing required
-	RealD bio_mult_grass = v->veg[SW_GRASS].co2_multipliers[BIO_INDEX][SW_Model.simyear];
-	RealD bio_mult_shrub = v->veg[SW_SHRUB].co2_multipliers[BIO_INDEX][SW_Model.simyear];
-	RealD bio_mult_tree = v->veg[SW_TREES].co2_multipliers[BIO_INDEX][SW_Model.simyear];
-	RealD bio_mult_forb = v->veg[SW_FORBS].co2_multipliers[BIO_INDEX][SW_Model.simyear];
-	RealD wue_mult_grass = v->veg[SW_GRASS].co2_multipliers[WUE_INDEX][SW_Model.simyear];
-	RealD wue_mult_shrub = v->veg[SW_SHRUB].co2_multipliers[WUE_INDEX][SW_Model.simyear];
-	RealD wue_mult_tree = v->veg[SW_TREES].co2_multipliers[WUE_INDEX][SW_Model.simyear];
-	RealD wue_mult_forb = v->veg[SW_FORBS].co2_multipliers[WUE_INDEX][SW_Model.simyear];
-
-	switch(pd) {
-		case eSW_Day:
-			biomass_grass = v->dysum.veg[SW_GRASS].biomass;
-			biomass_shrub = v->dysum.veg[SW_SHRUB].biomass;
-			biomass_tree = v->dysum.veg[SW_TREES].biomass;
-			biomass_forb = v->dysum.veg[SW_FORBS].biomass;
-			biolive_grass = v->dysum.veg[SW_GRASS].biolive;
-			biolive_shrub = v->dysum.veg[SW_SHRUB].biolive;
-			biolive_tree = v->dysum.veg[SW_TREES].biolive;
-			biolive_forb = v->dysum.veg[SW_FORBS].biolive;
-			biomass_total = biomass_grass + biomass_shrub + biomass_tree + biomass_forb;
-			biolive_total = biolive_grass + biolive_shrub + biolive_tree + biolive_forb;
-
-			p = p_rOUT[eSW_CO2Effects][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 2] = biomass_grass;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 3] = biomass_shrub;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 4] = biomass_tree;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 5] = biomass_forb;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 6] = biomass_total;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 7] = biolive_grass;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 8] = biolive_shrub;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 9] = biolive_tree;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 10] = biolive_forb;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 11] = biolive_total;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 12] = bio_mult_grass;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 13] = bio_mult_shrub;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 14] = bio_mult_tree;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 15] = bio_mult_forb;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 16] = wue_mult_grass;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 17] = wue_mult_shrub;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 18] = wue_mult_tree;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 19] = wue_mult_forb;
-			break;
-
-		case eSW_Week:
-			biomass_grass = v->wkavg.veg[SW_GRASS].biomass;
-			biomass_shrub = v->wkavg.veg[SW_SHRUB].biomass;
-			biomass_tree = v->wkavg.veg[SW_TREES].biomass;
-			biomass_forb = v->wkavg.veg[SW_FORBS].biomass;
-			biolive_grass = v->wkavg.veg[SW_GRASS].biolive;
-			biolive_shrub = v->wkavg.veg[SW_SHRUB].biolive;
-			biolive_tree = v->wkavg.veg[SW_TREES].biolive;
-			biolive_forb = v->wkavg.veg[SW_FORBS].biolive;
-			biomass_total = biomass_grass + biomass_shrub + biomass_tree + biomass_forb;
-			biolive_total = biolive_grass + biolive_shrub + biolive_tree + biolive_forb;
-
-			p = p_rOUT[eSW_CO2Effects][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 2] = biomass_grass;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 3] = biomass_shrub;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 4] = biomass_tree;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 5] = biomass_forb;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 6] = biomass_total;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 7] = biolive_grass;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 8] = biolive_shrub;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 9] = biolive_tree;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 10] = biomass_forb;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 11] = biolive_total;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 12] = bio_mult_grass;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 13] = bio_mult_shrub;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 14] = bio_mult_tree;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 15] = bio_mult_forb;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 16] = wue_mult_grass;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 17] = wue_mult_shrub;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 18] = wue_mult_tree;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 19] = wue_mult_forb;
-			break;
-
-		case eSW_Month:
-			biomass_grass = v->moavg.veg[SW_GRASS].biomass;
-			biomass_shrub = v->moavg.veg[SW_SHRUB].biomass;
-			biomass_tree = v->moavg.veg[SW_TREES].biomass;
-			biomass_forb = v->moavg.veg[SW_FORBS].biomass;
-			biolive_grass = v->moavg.veg[SW_GRASS].biolive;
-			biolive_shrub = v->moavg.veg[SW_SHRUB].biolive;
-			biolive_tree = v->moavg.veg[SW_TREES].biolive;
-			biolive_forb = v->moavg.veg[SW_FORBS].biolive;
-			biomass_total = biomass_grass + biomass_shrub + biomass_tree + biomass_forb;
-			biolive_total = biolive_grass + biolive_shrub + biolive_tree + biolive_forb;
-
-			p = p_rOUT[eSW_CO2Effects][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month) - tOffset + 1;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 2] = biomass_grass;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 3] = biomass_shrub;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 4] = biomass_tree;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 5] = biomass_forb;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 6] = biomass_total;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 8] = biolive_grass;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 7] = biolive_shrub;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 9] = biolive_tree;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 10] = biolive_forb;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 11] = biolive_total;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 12] = bio_mult_grass;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 13] = bio_mult_shrub;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 14] = bio_mult_tree;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 15] = bio_mult_forb;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 16] = wue_mult_grass;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 17] = wue_mult_shrub;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 18] = wue_mult_tree;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 19] = wue_mult_forb;
-			break;
-
-		case eSW_Year:
-			biomass_grass = v->yravg.veg[SW_GRASS].biomass;
-			biomass_shrub = v->yravg.veg[SW_SHRUB].biomass;
-			biomass_tree = v->yravg.veg[SW_TREES].biomass;
-			biomass_forb = v->yravg.veg[SW_FORBS].biomass;
-			biolive_grass = v->yravg.veg[SW_GRASS].biolive;
-			biolive_shrub = v->yravg.veg[SW_SHRUB].biolive;
-			biolive_tree = v->yravg.veg[SW_TREES].biolive;
-			biolive_forb = v->yravg.veg[SW_FORBS].biolive;
-			biomass_total = biomass_grass + biomass_shrub + biomass_tree + biomass_forb;
-			biolive_total = biolive_grass + biolive_shrub + biolive_tree + biolive_forb;
-
-			p = p_rOUT[eSW_CO2Effects][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 1] = biomass_grass;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 2] = biomass_shrub;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 3] = biomass_tree;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 4] = biomass_forb;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 5] = biomass_total;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 6] = biolive_grass;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 7] = biolive_shrub;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 8] = biolive_tree;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 9] = biolive_forb;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 10] = biolive_total;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 11] = bio_mult_grass;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 12] = bio_mult_shrub;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 13] = bio_mult_tree;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 14] = bio_mult_forb;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 15] = wue_mult_grass;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 16] = wue_mult_shrub;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 17] = wue_mult_tree;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 18] = wue_mult_forb;
-			break;
+	ForEachVegType(k)
+	{
+		biomass_total += vo->veg[k].biomass;
+		biolive_total += vo->veg[k].biolive;
 	}
+
+	// Store into output array
+	get_outvalleader(eSW_CO2Effects, pd);
+	p = p_rOUT[eSW_CO2Effects][pd];
+
+	// NOTE: `get_co2effects` uses a different order of vegetation types than the rest of SoilWat!!!
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->veg[SW_GRASS].biomass;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 1)] = vo->veg[SW_SHRUB].biomass;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 2)] = vo->veg[SW_TREES].biomass;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 3)] = vo->veg[SW_FORBS].biomass;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 4)] = biomass_total;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 5)] = vo->veg[SW_GRASS].biolive;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 6)] = vo->veg[SW_SHRUB].biolive;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 7)] = vo->veg[SW_TREES].biolive;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 8)] = vo->veg[SW_FORBS].biolive;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 9)] = biolive_total;
+
+	// No averaging or summing required:
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 10)] =
+		v->veg[SW_GRASS].co2_multipliers[BIO_INDEX][SW_Model.simyear];
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 11)] =
+		v->veg[SW_SHRUB].co2_multipliers[BIO_INDEX][SW_Model.simyear];
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 12)] =
+		v->veg[SW_TREES].co2_multipliers[BIO_INDEX][SW_Model.simyear];
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 12)] =
+		v->veg[SW_FORBS].co2_multipliers[BIO_INDEX][SW_Model.simyear];
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 14)] =
+		v->veg[SW_GRASS].co2_multipliers[WUE_INDEX][SW_Model.simyear];
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 15)] =
+		v->veg[SW_SHRUB].co2_multipliers[WUE_INDEX][SW_Model.simyear];
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 16)] =
+		v->veg[SW_TREES].co2_multipliers[WUE_INDEX][SW_Model.simyear];
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 17)] =
+		v->veg[SW_FORBS].co2_multipliers[WUE_INDEX][SW_Model.simyear];
 }
 
 void get_estab(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
-	/* the establishment check produces, for each species in
-	 * the given set, a day of year >=0 that the species
-	 * established itself in the current year.  The output
-	 * will be a single row of numbers for each year.  Each
-	 * column represents a species in the order it was entered
-	 * in the estabs.in file.  The value will be the day that
-	 * the species established, or 0 if it didn't establish
-	 * this year.
-	 */
 	SW_VEGESTAB *v = &SW_VegEstab;
 	IntU i;
 	RealD *p;
 
-	switch(pd)
-	{
-		case eSW_Day:
-			p = p_rOUT[eSW_Estab][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
+	// Store into output array
+	get_outvalleader(eSW_Estab, pd);
+	p = p_rOUT[eSW_Estab][pd];
 
-			for (i = 0; i < v->count; i++) {
-				p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (i + nrow_TimeOUT[eSW_Day])] = v->parms[i]->estab_doy;
-			}
-			break;
-
-		case eSW_Week:
-			p = p_rOUT[eSW_Estab][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-
-			for (i = 0; i < v->count; i++) {
-				p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (i + nrow_TimeOUT[eSW_Week])] = v->parms[i]->estab_doy;
-			}
-			break;
-
-		case eSW_Month:
-			p = p_rOUT[eSW_Estab][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-
-			for (i = 0; i < v->count; i++) {
-				p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (i + nrow_TimeOUT[eSW_Month])] = v->parms[i]->estab_doy;
-			}
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_Estab][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-
-			for (i = 0; i < v->count; i++) {
-				p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (i + nrow_TimeOUT[eSW_Year])] = v->parms[i]->estab_doy;
-			}
-			break;
+	for (i = 0; i < v->count; i++) {
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = v->parms[i]->estab_doy;
 	}
 }
 
 void get_temp(OutPeriod pd)
 {
+	SW_WEATHER_OUTPUTS *vo = NULL;
 	RealD *p;
-	SW_WEATHER *v = &SW_Weather;
 
   #ifdef SWDEBUG
   int debug = 0;
@@ -311,60 +255,20 @@ void get_temp(OutPeriod pd)
   if (debug) swprintf("'get_temp': start for %d ... ", pd);
   #endif
 
-	switch (pd)
-	{
-	case eSW_Day:
-		#ifdef SWDEBUG
-		if (debug) swprintf("%d doy ... ", SW_Model.doy);
-		#endif
-		p = p_rOUT[eSW_Temp][eSW_Day];
-		p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-		p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-		p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 2] = v->dysum.temp_max;
-		p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 3] = v->dysum.temp_min;
-		p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 4] = v->dysum.temp_avg;
-		p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 5] = v->dysum.surfaceTemp;
-		break;
+	set_WEATHER_aggslot(pd, &vo);
 
-	case eSW_Week:
-		#ifdef SWDEBUG
-		if (debug) swprintf("%d wk ... ", (SW_Model.week + 1) - tOffset);
-		#endif
-		p = p_rOUT[eSW_Temp][eSW_Week];
-		p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-		p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-		p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 2] = v->wkavg.temp_max;
-		p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 3] = v->wkavg.temp_min;
-		p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 4] = v->wkavg.temp_avg;
-		p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 5] = v->wkavg.surfaceTemp;
-		break;
-
-	case eSW_Month:
-		#ifdef SWDEBUG
-		if (debug) swprintf("%d mon ... ", (SW_Model.month + 1) - tOffset);
-		#endif
-		p = p_rOUT[eSW_Temp][eSW_Month];
-		p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-		p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-		p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 2] = v->moavg.temp_max;
-		p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 3] = v->moavg.temp_min;
-		p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 4] = v->moavg.temp_avg;
-		p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 5] = v->moavg.surfaceTemp;
-		break;
-
-	case eSW_Year:
-		#ifdef SWDEBUG
-		if (debug) swprintf("%d yr ... ", SW_Model.simyear);
-		#endif
-		p = p_rOUT[eSW_Temp][eSW_Year];
-		p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-		p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 1] = v->yravg.temp_max;
-		p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 2] = v->yravg.temp_min;
-		p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 3] = v->yravg.temp_avg;
-		p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 4] = v->yravg.surfaceTemp;
-		break;
-	}
-
+	// Store into output array
+	get_outvalleader(eSW_Temp, pd);
+	p = p_rOUT[eSW_Temp][pd];
+	#ifdef SWDEBUG
+	if (debug) swprintf("irows %d-%d ... ",
+		irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0),
+		irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 3));
+	#endif
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->temp_max;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 1)] = vo->temp_min;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 2)] = vo->temp_avg;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 3)] = vo->surfaceTemp;
 
 	#ifdef SWDEBUG
 		if (debug) swprintf("completed\n");
@@ -373,1188 +277,413 @@ void get_temp(OutPeriod pd)
 
 void get_precip(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
-	/* 	20091015 (drs) ppt is divided into rain and snow and all three values are output into precip */
-	SW_WEATHER *v = &SW_Weather;
+	SW_WEATHER_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch(pd)
-	{
-	case eSW_Day:
-		p = p_rOUT[eSW_Precip][eSW_Day];
-		p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-		p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-		p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 2] = v->dysum.ppt;
-		p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 3] = v->dysum.rain;
-		p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 4] = v->dysum.snow;
-		p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 5] = v->dysum.snowmelt;
-		p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 6] = v->dysum.snowloss;
-		break;
+	set_WEATHER_aggslot(pd, &vo);
 
-	case eSW_Week:
-		p = p_rOUT[eSW_Precip][eSW_Week];
-		p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-		p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-		p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 2] = v->wkavg.ppt;
-		p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 3] = v->wkavg.rain;
-		p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 4] = v->wkavg.snow;
-		p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 5] = v->wkavg.snowmelt;
-		p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 6] = v->wkavg.snowloss;
-		break;
-
-	case eSW_Month:
-		p = p_rOUT[eSW_Precip][eSW_Month];
-		p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-		p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-		p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 2] = v->moavg.ppt;
-		p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 3] = v->moavg.rain;
-		p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 4] = v->moavg.snow;
-		p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 5] = v->moavg.snowmelt;
-		p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 6] = v->moavg.snowloss;
-		break;
-
-	case eSW_Year:
-		p = p_rOUT[eSW_Precip][eSW_Year];
-		p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-		p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 1] = v->yravg.ppt;
-		p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 2] = v->yravg.rain;
-		p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 3] = v->yravg.snow;
-		p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 4] = v->yravg.snowmelt;
-		p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 5] = v->yravg.snowloss;
-	}
+	// Store into output array
+	get_outvalleader(eSW_Precip, pd);
+	p = p_rOUT[eSW_Precip][pd];
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->ppt;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 1)] = vo->rain;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 2)] = vo->snow;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 3)] = vo->snowmelt;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 4)] = vo->snowloss;
 }
 
 void get_vwcBulk(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
 	LyrIndex i;
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
-	{ /* vwcBulk at this point is identical to swcBulk */
-	case eSW_Day:
-		p = p_rOUT[eSW_VWCBulk][eSW_Day];
-		p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-		p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-		ForEachSoilLayer(i) {
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (i + nrow_TimeOUT[eSW_Day])] = v->dysum.vwcBulk[i] / SW_Site.lyr[i]->width;
-		}
-		break;
+	set_SOILWAT_aggslot(pd, &vo);
 
-	case eSW_Week:
-		p = p_rOUT[eSW_VWCBulk][eSW_Week];
-		p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-		p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-		ForEachSoilLayer(i) {
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (i + nrow_TimeOUT[eSW_Week])] = v->wkavg.vwcBulk[i] / SW_Site.lyr[i]->width;
-		}
-		break;
+	// Store into output array
+	get_outvalleader(eSW_VWCBulk, pd);
+	p = p_rOUT[eSW_VWCBulk][pd];
 
-	case eSW_Month:
-		p = p_rOUT[eSW_VWCBulk][eSW_Month];
-		p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-		p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-		ForEachSoilLayer(i) {
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (i + nrow_TimeOUT[eSW_Month])] = v->moavg.vwcBulk[i] / SW_Site.lyr[i]->width;
-		}
-		break;
-
-	case eSW_Year:
-		p = p_rOUT[eSW_VWCBulk][eSW_Year];
-		p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-		ForEachSoilLayer(i) {
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (i + nrow_TimeOUT[eSW_Year])] = v->yravg.vwcBulk[i] / SW_Site.lyr[i]->width;
-		}
-		break;
+	ForEachSoilLayer(i) {
+		/* vwcBulk at this point is identical to swcBulk */
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->vwcBulk[i] / SW_Site.lyr[i]->width;
 	}
 }
 
 void get_vwcMatric(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
 	LyrIndex i;
-	SW_SOILWAT *v = &SW_Soilwat;
 	RealD convert;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	/* vwcMatric at this point is identical to swcBulk */
-	switch (pd)
-	{
-	case eSW_Day:
-		p = p_rOUT[eSW_VWCMatric][eSW_Day];
-		p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-		p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-		ForEachSoilLayer(i) {
-			convert = 1. / (1. - SW_Site.lyr[i]->fractionVolBulk_gravel) / SW_Site.lyr[i]->width;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (i + nrow_TimeOUT[eSW_Day])] = v->dysum.vwcMatric[i] * convert;
-		}
-		break;
+	set_SOILWAT_aggslot(pd, &vo);
 
-	case eSW_Week:
-		p = p_rOUT[eSW_VWCMatric][eSW_Week];
-		p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-		p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-		ForEachSoilLayer(i) {
-			convert = 1. / (1. - SW_Site.lyr[i]->fractionVolBulk_gravel) / SW_Site.lyr[i]->width;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (i + nrow_TimeOUT[eSW_Week])] = v->wkavg.vwcMatric[i] * convert;
-		}
-		break;
+	// Store into output array
+	get_outvalleader(eSW_VWCMatric, pd);
+	p = p_rOUT[eSW_VWCMatric][pd];
 
-	case eSW_Month:
-		p = p_rOUT[eSW_VWCMatric][eSW_Month];
-		p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-		p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-		ForEachSoilLayer(i) {
-			convert = 1. / (1. - SW_Site.lyr[i]->fractionVolBulk_gravel) / SW_Site.lyr[i]->width;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (i + nrow_TimeOUT[eSW_Month])] = v->moavg.vwcMatric[i] * convert;
-		}
-		break;
-
-	case eSW_Year:
-		p = p_rOUT[eSW_VWCMatric][eSW_Year];
-		p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-		ForEachSoilLayer(i) {
-			convert = 1. / (1. - SW_Site.lyr[i]->fractionVolBulk_gravel) / SW_Site.lyr[i]->width;
-      p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (i + nrow_TimeOUT[eSW_Year])] = v->yravg.vwcMatric[i] * convert;
-		}
-		break;
+	ForEachSoilLayer(i) {
+		/* vwcMatric at this point is identical to swcBulk */
+		convert = 1. / (1. - SW_Site.lyr[i]->fractionVolBulk_gravel) / SW_Site.lyr[i]->width;
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->vwcMatric[i] * convert;
 	}
 }
 
 void get_swa(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
-	/* added 21-Oct-03, cwb */
 	LyrIndex i;
 	int k;
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
-	{
-		case eSW_Day:
-			p = p_rOUT[eSW_SWA][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
+	set_SOILWAT_aggslot(pd, &vo);
 
-			ForEachSoilLayer(i) {
-				ForEachVegType(k) {
-					p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (i + nrow_TimeOUT[eSW_Day])] = v->dysum.SWA_VegType[k][i];
-				}
-			}
-			break;
+	// Store into output array
+	get_outvalleader(eSW_SWA, pd);
+	p = p_rOUT[eSW_SWA][pd];
 
-		case eSW_Week:
-			p = p_rOUT[eSW_SWA][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-
-			ForEachSoilLayer(i) {
-				ForEachVegType(k) {
-					p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (i + nrow_TimeOUT[eSW_Week])] = v->wkavg.SWA_VegType[k][i];
-				}
-			}
-			break;
-
-		case eSW_Month:
-			p = p_rOUT[eSW_SWA][eSW_Month];
-			p[irow_OUT[eSW_Month]+ nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-
-			ForEachSoilLayer(i) {
-				ForEachVegType(k) {
-					p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (i + nrow_TimeOUT[eSW_Month])] = v->moavg.SWA_VegType[k][i];
-				}
-			}
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_SWA][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-
-			ForEachSoilLayer(i) {
-				ForEachVegType(k) {
-					p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (i + nrow_TimeOUT[eSW_Year])] = v->yravg.SWA_VegType[k][i];
-				}
-			}
-			break;
+	ForEachSoilLayer(i) {
+		ForEachVegType(k) {
+			p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->SWA_VegType[k][i];
+		}
 	}
 }
 
 
 void get_swcBulk(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
-	/* added 21-Oct-03, cwb */
-	RealD *p;
 	LyrIndex i;
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
+	RealD *p;
 
-	switch (pd)
-	{
-		case eSW_Day:
-			p = p_rOUT[eSW_SWCBulk][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (i + nrow_TimeOUT[eSW_Day])] = v->dysum.swcBulk[i];
-			}
-			break;
+	set_SOILWAT_aggslot(pd, &vo);
 
-		case eSW_Week:
-			p = p_rOUT[eSW_SWCBulk][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (i + nrow_TimeOUT[eSW_Week])] = v->wkavg.swcBulk[i];
-			}
-			break;
+	// Store into output array
+	get_outvalleader(eSW_SWCBulk, pd);
+	p = p_rOUT[eSW_SWCBulk][pd];
 
-		case eSW_Month:
-			p = p_rOUT[eSW_SWCBulk][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (i + nrow_TimeOUT[eSW_Month])] = v->moavg.swcBulk[i];
-			}
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_SWCBulk][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (i + nrow_TimeOUT[eSW_Year])] = v->yravg.swcBulk[i];
-			}
-			break;
+	ForEachSoilLayer(i) {
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->swcBulk[i];
 	}
 }
 
 void get_swpMatric(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
-	/* can't take arithmetic average of swp because it's
-	 * exponential.  At this time (until I remember to look
-	 * up whether harmonic or some other average is better
-	 * and fix this) we're not averaging swp but converting
-	 * the averaged swc.  This also avoids converting for
-	 * each day.
-	 *
-	 * added 12-Oct-03, cwb */
-
 	LyrIndex i;
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
-	{
-		case eSW_Day:
-			p = p_rOUT[eSW_SWPMatric][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (i + nrow_TimeOUT[eSW_Day])] = SW_SWCbulk2SWPmatric(SW_Site.lyr[i]->fractionVolBulk_gravel, v->dysum.swpMatric[i], i);
-			}
-			break;
+	set_SOILWAT_aggslot(pd, &vo);
 
-		case eSW_Week:
-			p = p_rOUT[eSW_SWPMatric][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (i + nrow_TimeOUT[eSW_Week])] = SW_SWCbulk2SWPmatric(SW_Site.lyr[i]->fractionVolBulk_gravel, v->wkavg.swpMatric[i], i);
-			}
-			break;
+	// Store into output array
+	get_outvalleader(eSW_SWPMatric, pd);
+	p = p_rOUT[eSW_SWPMatric][pd];
 
-		case eSW_Month:
-			p = p_rOUT[eSW_SWPMatric][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (i + nrow_TimeOUT[eSW_Month])] = SW_SWCbulk2SWPmatric(SW_Site.lyr[i]->fractionVolBulk_gravel, v->moavg.swpMatric[i], i);
-			}
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_SWPMatric][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (i + nrow_TimeOUT[eSW_Year])] = SW_SWCbulk2SWPmatric(SW_Site.lyr[i]->fractionVolBulk_gravel, v->yravg.swpMatric[i], i);
-			}
-			break;
+	ForEachSoilLayer(i) {
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] =
+			SW_SWCbulk2SWPmatric(SW_Site.lyr[i]->fractionVolBulk_gravel,
+				vo->swpMatric[i], i);
 	}
 }
 
 void get_swaBulk(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
-
 	LyrIndex i;
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
-	{
-		case eSW_Day:
-			p = p_rOUT[eSW_SWABulk][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (i + nrow_TimeOUT[eSW_Day])] = v->dysum.swaBulk[i];
-			}
-			break;
+	set_SOILWAT_aggslot(pd, &vo);
 
-		case eSW_Week:
-			p = p_rOUT[eSW_SWABulk][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (i + nrow_TimeOUT[eSW_Week])] = v->wkavg.swaBulk[i];
-			}
-			break;
+	// Store into output array
+	get_outvalleader(eSW_SWABulk, pd);
+	p = p_rOUT[eSW_SWABulk][pd];
 
-		case eSW_Month:
-			p = p_rOUT[eSW_SWABulk][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (i + nrow_TimeOUT[eSW_Month])] = v->moavg.swaBulk[i];
-			}
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_SWABulk][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (i + nrow_TimeOUT[eSW_Year])] = v->yravg.swaBulk[i];
-			}
-			break;
+	ForEachSoilLayer(i) {
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->swaBulk[i];
 	}
 }
 
 void get_swaMatric(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
-
 	LyrIndex i;
-	SW_SOILWAT *v = &SW_Soilwat;
 	RealD convert;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
-	{
-		case eSW_Day:
-			p = p_rOUT[eSW_SWAMatric][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			ForEachSoilLayer(i)
-			{
-				convert = 1. / (1. - SW_Site.lyr[i]->fractionVolBulk_gravel);
-				p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (i + nrow_TimeOUT[eSW_Day])] = v->dysum.swaMatric[i] * convert;
-			}
-			break;
+	set_SOILWAT_aggslot(pd, &vo);
 
-		case eSW_Week:
-			p = p_rOUT[eSW_SWAMatric][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			ForEachSoilLayer(i)
-			{
-				convert = 1. / (1. - SW_Site.lyr[i]->fractionVolBulk_gravel);
-				p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (i + nrow_TimeOUT[eSW_Week])] = v->wkavg.swaMatric[i] * convert;
-			}
-			break;
+	// Store into output array
+	get_outvalleader(eSW_SWAMatric, pd);
+	p = p_rOUT[eSW_SWAMatric][pd];
 
-		case eSW_Month:
-			p = p_rOUT[eSW_SWAMatric][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-			ForEachSoilLayer(i)
-			{
-				convert = 1. / (1. - SW_Site.lyr[i]->fractionVolBulk_gravel);
-				p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (i + nrow_TimeOUT[eSW_Month])] = v->moavg.swaMatric[i] * convert;
-			}
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_SWAMatric][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			ForEachSoilLayer(i)
-			{
-				convert = 1. / (1. - SW_Site.lyr[i]->fractionVolBulk_gravel);
-				p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (i + nrow_TimeOUT[eSW_Year])] = v->yravg.swaMatric[i] * convert;
-			}
-			break;
+	ForEachSoilLayer(i) {
+		convert = 1. / (1. - SW_Site.lyr[i]->fractionVolBulk_gravel);
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->swaMatric[i] * convert;
 	}
 }
 
 void get_surfaceWater(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
-	{
-		case eSW_Day:
-			p = p_rOUT[eSW_SurfaceWater][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 2] = v->dysum.surfaceWater;
-			break;
+	set_SOILWAT_aggslot(pd, &vo);
 
-		case eSW_Week:
-			p = p_rOUT[eSW_SurfaceWater][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 2] = v->wkavg.surfaceWater;
-			break;
-
-		case eSW_Month:
-			p = p_rOUT[eSW_SurfaceWater][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 2] = v->moavg.surfaceWater;
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_SurfaceWater][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 1] = v->yravg.surfaceWater;
-			break;
-	}
+	// Store into output array
+	get_outvalleader(eSW_SurfaceWater, pd);
+	p = p_rOUT[eSW_SurfaceWater][pd];
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->surfaceWater;
 }
 
 void get_runoffrunon(OutPeriod pd) {
-	/* --------------------------------------------------- */
-	/* (12/13/2012) (clk) Added function to output runoff variables */
-
-	SW_WEATHER *w = &SW_Weather;
-	RealD val_netRunoff = SW_MISSING, val_surfaceRunoff = SW_MISSING,
-		val_surfaceRunon = SW_MISSING, val_snowRunoff = SW_MISSING;
+	SW_WEATHER_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
-	{
-		case eSW_Day:
-			val_surfaceRunoff = w->dysum.surfaceRunoff;
-			val_surfaceRunon = w->dysum.surfaceRunon;
-			val_snowRunoff = w->dysum.snowRunoff;
-			break;
-		case eSW_Week:
-			val_surfaceRunoff = w->wkavg.surfaceRunoff;
-			val_surfaceRunon = w->wkavg.surfaceRunon;
-			val_snowRunoff = w->wkavg.snowRunoff;
-			break;
-		case eSW_Month:
-			val_surfaceRunoff = w->moavg.surfaceRunoff;
-			val_surfaceRunon = w->moavg.surfaceRunon;
-			val_snowRunoff = w->moavg.snowRunoff;
-			break;
-		case eSW_Year:
-			val_surfaceRunoff = w->yravg.surfaceRunoff;
-			val_surfaceRunon = w->yravg.surfaceRunon;
-			val_snowRunoff = w->yravg.snowRunoff;
-			break;
-	}
-	val_netRunoff = val_surfaceRunoff + val_snowRunoff - val_surfaceRunon;
+	set_WEATHER_aggslot(pd, &vo);
 
-	switch (pd) {
-		case eSW_Day:
-			p = p_rOUT[eSW_Runoff][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 2] = val_netRunoff;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 3] = val_surfaceRunoff;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 4] = val_snowRunoff;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 5] = val_surfaceRunon;
-			break;
-
-		case eSW_Week:
-			p = p_rOUT[eSW_Runoff][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 2] = val_netRunoff;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 3] = val_surfaceRunoff;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 4] = val_snowRunoff;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 5] = val_surfaceRunon;
-			break;
-
-		case eSW_Month:
-			p = p_rOUT[eSW_Runoff][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 2] = val_netRunoff;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 3] = val_surfaceRunoff;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 4] = val_snowRunoff;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 5] = val_surfaceRunon;
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_Runoff][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 1] = val_netRunoff;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 2] = val_surfaceRunoff;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 3] = val_snowRunoff;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 4] = val_surfaceRunon;
-			break;
-		}
+	// Store into output array
+	get_outvalleader(eSW_Runoff, pd);
+	p = p_rOUT[eSW_Runoff][pd];
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] =
+		vo->surfaceRunoff + vo->snowRunoff - vo->surfaceRunon;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 1)] = vo->surfaceRunoff;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 2)] = vo->snowRunoff;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 3)] = vo->surfaceRunon;
 }
 
 void get_transp(OutPeriod pd)
 {
 	LyrIndex i;
 	int k;
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
-	{
-		case eSW_Day:
-			p = p_rOUT[eSW_Transp][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
+	set_SOILWAT_aggslot(pd, &vo);
 
-			/* total transpiration */
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (i + nrow_TimeOUT[eSW_Day])] = v->dysum.transp_total[i];
-			}
+	// Store into output array
+	get_outvalleader(eSW_Transp, pd);
+	p = p_rOUT[eSW_Transp][pd];
 
-			/* transpiration for each vegetation type */
-			ForEachVegType(k) {
-				ForEachSoilLayer(i) {
-					p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (i + nrow_TimeOUT[eSW_Day]) + (nrow_OUT[eSW_Day] * SW_Site.n_layers * (k + 1))] = v->dysum.transp[k][i];
-				}
-			}
-			break;
+	/* total transpiration */
+	ForEachSoilLayer(i) {
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->transp_total[i];
+	}
 
-		case eSW_Week:
-			p = p_rOUT[eSW_Transp][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-
-			/* total transpiration */
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (i + nrow_TimeOUT[eSW_Week])] = v->wkavg.transp_total[i];
-			}
-
-			/* transpiration for each vegetation type */
-			ForEachVegType(k) {
-				ForEachSoilLayer(i) {
-					p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (i + nrow_TimeOUT[eSW_Week]) + (nrow_OUT[eSW_Week] * SW_Site.n_layers * (k + 1))] = v->wkavg.transp[k][i];
-				}
-			}
-			break;
-
-		case eSW_Month:
-			p = p_rOUT[eSW_Transp][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-
-			/* total transpiration */
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (i + nrow_TimeOUT[eSW_Month])] = v->moavg.transp_total[i];
-			}
-
-			/* transpiration for each vegetation type */
-			ForEachVegType(k) {
-				ForEachSoilLayer(i) {
-					p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (i + nrow_TimeOUT[eSW_Month]) + (nrow_OUT[eSW_Month] * SW_Site.n_layers * (k + 1))] = v->moavg.transp[k][i];
-				}
-			}
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_Transp][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-
-			/* total transpiration */
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (i + nrow_TimeOUT[eSW_Year])] = v->yravg.transp_total[i];
-			}
-
-			/* transpiration for each vegetation type */
-			ForEachVegType(k) {
-				ForEachSoilLayer(i) {
-					p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (i + nrow_TimeOUT[eSW_Year]) + (nrow_OUT[eSW_Year] * SW_Site.n_layers * (k + 1))] = v->yravg.transp[k][i];
-				}
-			}
-			break;
+	/* transpiration for each vegetation type */
+	ForEachVegType(k) {
+		ForEachSoilLayer(i) {
+			p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd]) + (nrow_OUT[pd] * SW_Site.n_layers * (k + 1))] = vo->transp[k][i];
+		}
 	}
 }
 
 
 void get_evapSoil(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
 	LyrIndex i;
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
-	{
-		case eSW_Day:
-			p = p_rOUT[eSW_EvapSoil][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			ForEachEvapLayer(i) {
-				p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (i + nrow_TimeOUT[eSW_Day])] = v->dysum.evap[i];
-			}
-			break;
+	set_SOILWAT_aggslot(pd, &vo);
 
-		case eSW_Week:
-			p = p_rOUT[eSW_EvapSoil][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			ForEachEvapLayer(i) {
-				p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (i + nrow_TimeOUT[eSW_Week])] = v->wkavg.evap[i];
-			}
-			break;
+	// Store into output array
+	get_outvalleader(eSW_EvapSoil, pd);
+	p = p_rOUT[eSW_EvapSoil][pd];
 
-		case eSW_Month:
-			p = p_rOUT[eSW_EvapSoil][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-			ForEachEvapLayer(i) {
-				p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (i + nrow_TimeOUT[eSW_Month])] = v->moavg.evap[i];
-			}
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_EvapSoil][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			ForEachEvapLayer(i) {
-				p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (i + nrow_TimeOUT[eSW_Year])] = v->yravg.evap[i];
-			}
-			break;
+	ForEachEvapLayer(i) {
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->evap[i];
 	}
 }
 
 void get_evapSurface(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
-	SW_SOILWAT *v = &SW_Soilwat;
 	int k;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
-	{
-		case eSW_Day:
-			p = p_rOUT[eSW_EvapSurface][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 2] = v->dysum.total_evap;
-			ForEachVegType(k) {
-				p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (k + 1 + nrow_TimeOUT[eSW_Day])] = v->dysum.evap_veg[k];
-			}
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (1 + nrow_TimeOUT[eSW_Day] + NVEGTYPES)] = v->dysum.litter_evap;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (2 + nrow_TimeOUT[eSW_Day] + NVEGTYPES)] = v->dysum.surfaceWater_evap;
-			break;
+	set_SOILWAT_aggslot(pd, &vo);
 
-		case eSW_Week:
-			p = p_rOUT[eSW_EvapSurface][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 2] = v->wkavg.total_evap;
-			ForEachVegType(k) {
-				p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (k + 1 + nrow_TimeOUT[eSW_Week])] = v->wkavg.evap_veg[k];
-			}
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (1 + nrow_TimeOUT[eSW_Week] + NVEGTYPES)] = v->wkavg.litter_evap;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (2 + nrow_TimeOUT[eSW_Week] + NVEGTYPES)] = v->wkavg.surfaceWater_evap;
-			break;
+	// Store into output array
+	get_outvalleader(eSW_EvapSurface, pd);
+	p = p_rOUT[eSW_EvapSurface][pd];
 
-		case eSW_Month:
-			p = p_rOUT[eSW_EvapSurface][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 2] = v->moavg.total_evap;
-			ForEachVegType(k) {
-				p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (k + 1 + nrow_TimeOUT[eSW_Month])] = v->moavg.evap_veg[k];
-			}
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (1 + nrow_TimeOUT[eSW_Month] + NVEGTYPES)] = v->moavg.litter_evap;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (2 + nrow_TimeOUT[eSW_Month] + NVEGTYPES)] = v->moavg.surfaceWater_evap;
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_EvapSurface][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 1] = v->yravg.total_evap;
-			ForEachVegType(k) {
-				p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (k + 1 + nrow_TimeOUT[eSW_Year])] = v->yravg.evap_veg[k];
-			}
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (1 + nrow_TimeOUT[eSW_Year] + NVEGTYPES)] = v->yravg.litter_evap;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (2 + nrow_TimeOUT[eSW_Year] + NVEGTYPES)] = v->yravg.surfaceWater_evap;
-			break;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->total_evap;
+	ForEachVegType(k) {
+		p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + k + 1)] = vo->evap_veg[k];
 	}
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + NVEGTYPES + 1)] = vo->litter_evap;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + NVEGTYPES + 2)] = vo->surfaceWater_evap;
 }
 
 void get_interception(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
-	SW_SOILWAT *v = &SW_Soilwat;
 	int k;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
-	{
-		case eSW_Day:
-			p = p_rOUT[eSW_Interception][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 2] = v->dysum.total_int;
-			ForEachVegType(k) {
-				p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (1 + nrow_TimeOUT[eSW_Day])] = v->dysum.int_veg[k];
-			}
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (1 + nrow_TimeOUT[eSW_Day] + NVEGTYPES)] = v->dysum.litter_int;
-			break;
+	set_SOILWAT_aggslot(pd, &vo);
 
-		case eSW_Week:
-			p = p_rOUT[eSW_Interception][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 2] = v->wkavg.total_int;
-			ForEachVegType(k) {
-				p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (1 + nrow_TimeOUT[eSW_Week])] = v->wkavg.int_veg[k];
-			}
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (1 + nrow_TimeOUT[eSW_Week] + NVEGTYPES)] = v->wkavg.litter_int;
-			break;
+	// Store into output array
+	get_outvalleader(eSW_Interception, pd);
+	p = p_rOUT[eSW_Interception][pd];
 
-		case eSW_Month:
-			p = p_rOUT[eSW_Interception][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 2] = v->moavg.total_int;
-			ForEachVegType(k) {
-				p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (1 + nrow_TimeOUT[eSW_Month])] = v->moavg.int_veg[k];
-			}
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (1 + nrow_TimeOUT[eSW_Month] + NVEGTYPES)] = v->moavg.litter_int;
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_Interception][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 1] = v->yravg.total_int;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 2] = v->yravg.int_veg[SW_TREES];
-			ForEachVegType(k) {
-				p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (1 + nrow_TimeOUT[eSW_Year])] = v->yravg.int_veg[k];
-			}
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (1 + nrow_TimeOUT[eSW_Year] + NVEGTYPES)] = v->yravg.litter_int;
-			break;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->total_int;
+	ForEachVegType(k) {
+		p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 1)] = vo->int_veg[k];
 	}
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + NVEGTYPES + 1)] = vo->litter_int;
 }
 
 void get_soilinf(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
-	/* 20100202 (drs) added */
-	/* 20110219 (drs) added runoff */
-	/* 12/13/2012	(clk)	moved runoff, now named snowRunoff, to get_runoffrunon(); */
-	SW_WEATHER *v = &SW_Weather;
+	SW_WEATHER_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
-	{
-		case eSW_Day:
-			p = p_rOUT[eSW_SoilInf][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 2] = v->dysum.soil_inf;
-			break;
+	set_WEATHER_aggslot(pd, &vo);
 
-		case eSW_Week:
-			p = p_rOUT[eSW_SoilInf][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 2] = v->wkavg.soil_inf;
-			break;
-
-		case eSW_Month:
-			p = p_rOUT[eSW_SoilInf][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 2] = v->moavg.soil_inf;
-			break;
-
-		case eSW_Year:
-			p_rOUT[eSW_SoilInf][eSW_Year][irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			p_rOUT[eSW_SoilInf][eSW_Year][irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 1] = v->yravg.soil_inf;
-			break;
-	}
+	// Store into output array
+	get_outvalleader(eSW_SoilInf, pd);
+	p = p_rOUT[eSW_SoilInf][pd];
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->soil_inf;
 }
 
 void get_lyrdrain(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
-	/* 20100202 (drs) added */
 	LyrIndex i;
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
+	set_SOILWAT_aggslot(pd, &vo);
+
+	// Store into output array
+	get_outvalleader(eSW_LyrDrain, pd);
+	p = p_rOUT[eSW_LyrDrain][pd];
+
+	for (i = 0; i < SW_Site.n_layers - 1; i++)
 	{
-		case eSW_Day:
-			p = p_rOUT[eSW_LyrDrain][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			for (i = 0; i < SW_Site.n_layers - 1; i++)
-			{
-				p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (i + nrow_TimeOUT[eSW_Day])] = v->dysum.lyrdrain[i];
-			}
-			break;
-
-		case eSW_Week:
-			p = p_rOUT[eSW_LyrDrain][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			for (i = 0; i < SW_Site.n_layers - 1; i++)
-			{
-				p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (i + nrow_TimeOUT[eSW_Week])] = v->wkavg.lyrdrain[i];
-			}
-			break;
-
-		case eSW_Month:
-			p = p_rOUT[eSW_LyrDrain][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-			for (i = 0; i < SW_Site.n_layers - 1; i++)
-			{
-				p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (i + nrow_TimeOUT[eSW_Month])] = v->moavg.lyrdrain[i];
-			}
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_LyrDrain][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			for (i = 0; i < SW_Site.n_layers - 1; i++)
-			{
-				p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (i + nrow_TimeOUT[eSW_Year])] = v->yravg.lyrdrain[i];
-			}
-			break;
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->lyrdrain[i];
 	}
 }
 
 void get_hydred(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
-	/* 20101020 (drs) added */
 	LyrIndex i;
 	int k;
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
-	{
-		case eSW_Day:
-			p = p_rOUT[eSW_HydRed][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
+	set_SOILWAT_aggslot(pd, &vo);
 
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (i + nrow_TimeOUT[eSW_Day])] = v->dysum.hydred_total[i];
-			}
+	// Store into output array
+	get_outvalleader(eSW_HydRed, pd);
+	p = p_rOUT[eSW_HydRed][pd];
 
-			ForEachVegType(k) {
-				ForEachSoilLayer(i) {
-					p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (i + nrow_TimeOUT[eSW_Day]) + (nrow_OUT[eSW_Day] * SW_Site.n_layers * (k + 1))] = v->dysum.hydred[k][i];
-				}
-			}
-			break;
+	ForEachSoilLayer(i) {
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->hydred_total[i];
+	}
 
-		case eSW_Week:
-			p = p_rOUT[eSW_HydRed][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (i + nrow_TimeOUT[eSW_Week])] = v->wkavg.hydred_total[i];
-			}
-
-			ForEachVegType(k) {
-				ForEachSoilLayer(i) {
-					p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (i + nrow_TimeOUT[eSW_Week]) + (nrow_OUT[eSW_Week] * SW_Site.n_layers * (k + 1))] = v->wkavg.hydred[k][i];
-				}
-			}
-			break;
-
-		case eSW_Month:
-			p = p_rOUT[eSW_HydRed][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (i + nrow_TimeOUT[eSW_Month])] = v->moavg.hydred_total[i];
-			}
-
-			ForEachVegType(k) {
-				ForEachSoilLayer(i) {
-					p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (i + nrow_TimeOUT[eSW_Month]) + (nrow_OUT[eSW_Month] * SW_Site.n_layers * (k + 1))] = v->moavg.hydred[k][i];
-				}
-			}
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_HydRed][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-
-			ForEachSoilLayer(i) {
-				p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (i + nrow_TimeOUT[eSW_Year])] = v->yravg.hydred_total[i];
-			}
-
-			ForEachVegType(k) {
-				ForEachSoilLayer(i) {
-					p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (i + nrow_TimeOUT[eSW_Year]) + (nrow_OUT[eSW_Year] * SW_Site.n_layers * (k + 1))] = v->yravg.hydred[k][i];
-				}
-			}
-			break;
+	ForEachVegType(k) {
+		ForEachSoilLayer(i) {
+			p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd]) + (nrow_OUT[pd] * SW_Site.n_layers * (k + 1))] = vo->hydred[k][i];
+		}
 	}
 }
 
 void get_aet(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
-	{
-		case eSW_Day:
-			p = p_rOUT[eSW_AET][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 2] = v->dysum.aet;
-			break;
+	set_SOILWAT_aggslot(pd, &vo);
 
-		case eSW_Week:
-			p = p_rOUT[eSW_AET][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 2] = v->wkavg.aet;
-			break;
-
-		case eSW_Month:
-			p = p_rOUT[eSW_AET][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 2] = v->moavg.aet;
-			break;
-
-		case eSW_Year:
-			p_rOUT[eSW_AET][eSW_Year][irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			p_rOUT[eSW_AET][eSW_Year][irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 1] = v->yravg.aet;
-			break;
-	}
+	// Store into output array
+	get_outvalleader(eSW_AET, pd);
+	p = p_rOUT[eSW_AET][pd];
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->aet;
 }
 
 void get_pet(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
-	{
-		case eSW_Day:
-			p = p_rOUT[eSW_PET][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 2] = v->dysum.pet;
-			break;
+	set_SOILWAT_aggslot(pd, &vo);
 
-		case eSW_Week:
-			p = p_rOUT[eSW_PET][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 2] = v->wkavg.pet;
-			break;
-
-		case eSW_Month:
-			p = p_rOUT[eSW_PET][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 2] = v->moavg.pet;
-			break;
-
-		case eSW_Year:
-			p_rOUT[eSW_PET][eSW_Year][irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			p_rOUT[eSW_PET][eSW_Year][irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 1] = v->yravg.pet;
-			break;
-	}
+	// Store into output array
+	get_outvalleader(eSW_PET, pd);
+	p = p_rOUT[eSW_PET][pd];
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->pet;
 }
 
 void get_wetdays(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
 	LyrIndex i;
-	SW_SOILWAT *v = &SW_Soilwat;
 	RealD *p;
 
-	switch (pd)
+	// Store into output array
+	get_outvalleader(eSW_WetDays, pd);
+	p = p_rOUT[eSW_WetDays][pd];
+
+	if (pd == eSW_Day)
 	{
-		case eSW_Day:
-			p = p_rOUT[eSW_WetDays][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			ForEachSoilLayer(i)
-			{
-				p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (i + nrow_TimeOUT[eSW_Day])] = (v->is_wet[i]) ? 1 : 0;
-			}
-			break;
+		ForEachSoilLayer(i) {
+			p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] =
+				(SW_Soilwat.is_wet[i]) ? 1 : 0;
+		}
 
-		case eSW_Week:
-			p = p_rOUT[eSW_WetDays][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			ForEachSoilLayer(i)
-			{
-				p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (i + nrow_TimeOUT[eSW_Week])] = (int) v->wkavg.wetdays[i];
-			}
-			break;
+	} else
+	{
+		SW_SOILWAT_OUTPUTS *vo = NULL;
+		set_SOILWAT_aggslot(pd, &vo);
 
-		case eSW_Month:
-			p = p_rOUT[eSW_WetDays][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-			ForEachSoilLayer(i)
-			{
-				p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (i + nrow_TimeOUT[eSW_Month])] = (int) v->moavg.wetdays[i];
-			}
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_WetDays][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			ForEachSoilLayer(i)
-			{
-				p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (i + nrow_TimeOUT[eSW_Year])] = (int) v->yravg.wetdays[i];
-			}
-			break;
+		ForEachSoilLayer(i) {
+			p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = (int) vo->wetdays[i];
+		}
 	}
 }
 
 void get_snowpack(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
-	{
-		case eSW_Day:
-			p = p_rOUT[eSW_SnowPack][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 2] = v->dysum.snowpack;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 3] = v->dysum.snowdepth;
-			break;
+	set_SOILWAT_aggslot(pd, &vo);
 
-		case eSW_Week:
-			p = p_rOUT[eSW_SnowPack][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 2] = v->wkavg.snowpack;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 3] = v->wkavg.snowdepth;
-			break;
-
-		case eSW_Month:
-			p = p_rOUT[eSW_SnowPack][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 2] = v->moavg.snowpack;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 3] = v->moavg.snowdepth;
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_SnowPack][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 1] = v->yravg.snowpack;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 2] = v->yravg.snowdepth;
-			break;
-	}
+	// Store into output array
+	get_outvalleader(eSW_SnowPack, pd);
+	p = p_rOUT[eSW_SnowPack][pd];
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->snowpack;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 1)] = vo->snowdepth;
 }
 
 void get_deepswc(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
-	{
-		case eSW_Day:
-			p = p_rOUT[eSW_DeepSWC][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 2] = v->dysum.deep;
-			break;
+	set_SOILWAT_aggslot(pd, &vo);
 
-		case eSW_Week:
-			p = p_rOUT[eSW_DeepSWC][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 2] = v->wkavg.deep;
-			break;
-
-		case eSW_Month:
-			p = p_rOUT[eSW_DeepSWC][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 2] = v->moavg.deep;
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_DeepSWC][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 1] = v->yravg.deep;
-			break;
-	}
+	// Store into output array
+	get_outvalleader(eSW_DeepSWC, pd);
+	p = p_rOUT[eSW_DeepSWC][pd];
+	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->deep;
 }
 
 void get_soiltemp(OutPeriod pd)
 {
-	/* --------------------------------------------------- */
 	LyrIndex i;
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT_OUTPUTS *vo = NULL;
 	RealD *p;
 
-	switch (pd)
+	set_SOILWAT_aggslot(pd, &vo);
+
+	// Store into output array
+	get_outvalleader(eSW_SoilTemp, pd);
+	p = p_rOUT[eSW_SoilTemp][pd];
+
+	ForEachSoilLayer(i)
 	{
-		case eSW_Day:
-			p = p_rOUT[eSW_SoilTemp][eSW_Day];
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * 1] = SW_Model.doy;
-			ForEachSoilLayer(i)
-			{
-				p[irow_OUT[eSW_Day] + nrow_OUT[eSW_Day] * (i + nrow_TimeOUT[eSW_Day])] = v->dysum.sTemp[i];
-			}
-			break;
-
-		case eSW_Week:
-			p = p_rOUT[eSW_SoilTemp][eSW_Week];
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * 1] = (SW_Model.week + 1) - tOffset;
-			ForEachSoilLayer(i)
-			{
-				p[irow_OUT[eSW_Week] + nrow_OUT[eSW_Week] * (i + nrow_TimeOUT[eSW_Week])] = v->wkavg.sTemp[i];
-			}
-			break;
-
-		case eSW_Month:
-			p = p_rOUT[eSW_SoilTemp][eSW_Month];
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 0] = SW_Model.simyear;
-			p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * 1] = (SW_Model.month + 1) - tOffset;
-			ForEachSoilLayer(i)
-			{
-				p[irow_OUT[eSW_Month] + nrow_OUT[eSW_Month] * (i + nrow_TimeOUT[eSW_Month])] = v->moavg.sTemp[i];
-			}
-			break;
-
-		case eSW_Year:
-			p = p_rOUT[eSW_SoilTemp][eSW_Year];
-			p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * 0] = SW_Model.simyear;
-			ForEachSoilLayer(i)
-			{
-				p[irow_OUT[eSW_Year] + nrow_OUT[eSW_Year] * (i + nrow_TimeOUT[eSW_Year])] = v->yravg.sTemp[i];
-			}
-			break;
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->sTemp[i];
 	}
 }

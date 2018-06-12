@@ -88,7 +88,7 @@ void onSet_SW_OUT(SEXP OUT) {
 	Bool continue1;
 	int *use, *timePeriods, *mykey, *myobj, *sumtype, *first_orig, *last_orig;
   #ifdef RSWDEBUG
-  int debug = 1;
+  int debug = 0;
   #endif
 
 	#ifdef RSWDEBUG
@@ -314,7 +314,7 @@ SEXP onGetOutput(SEXP inputData) {
 	char *cSWoutput_Names[] = {"dy_nrow", "wk_nrow", "mo_nrow", "yr_nrow"};
 
   #ifdef RSWDEBUG
-  int debug = 1;
+  int debug = 0;
   #endif
 
 	#ifdef RSWDEBUG
