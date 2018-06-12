@@ -421,7 +421,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	Bool too_many_regions = FALSE;
 
 	#ifdef RSWDEBUG
-	if (debug) swprintf("onSet_SW_SIT:");
+	if (debug) swprintf("'onSet_SW_SIT':");
 	#endif
 
 	PROTECT(SWClimits = GET_SLOT(SW_SIT, install("SWClimits")));
@@ -453,30 +453,49 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	v->lambdasnow = REAL(SnowSimulationParameters)[2];
 	v->RmeltMin = REAL(SnowSimulationParameters)[3];
 	v->RmeltMax = REAL(SnowSimulationParameters)[4];
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" > 'snow'");
+	#endif
 
 	PROTECT(DrainageCoefficient = GET_SLOT(SW_SIT, install("DrainageCoefficient")));
 	v->slow_drain_coeff = REAL(DrainageCoefficient)[0];
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" > 'drain-coef'");
+	#endif
 
 	PROTECT(EvaporationCoefficients = GET_SLOT(SW_SIT, install("EvaporationCoefficients")));
 	v->evap.xinflec = REAL(EvaporationCoefficients)[0];
 	v->evap.slope = REAL(EvaporationCoefficients)[1];
 	v->evap.yinflec = REAL(EvaporationCoefficients)[2];
 	v->evap.range = REAL(EvaporationCoefficients)[3];
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" > 'evap-coef'");
+	#endif
 
 	PROTECT(TranspirationCoefficients = GET_SLOT(SW_SIT, install("TranspirationCoefficients")));
 	v->transp.xinflec = REAL(TranspirationCoefficients)[0];
 	v->transp.slope = REAL(TranspirationCoefficients)[1];
 	v->transp.yinflec = REAL(TranspirationCoefficients)[2];
 	v->transp.range = REAL(TranspirationCoefficients)[3];
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" > 'transp-coef'");
+	#endif
 
 	PROTECT(IntrinsicSiteParams = GET_SLOT(SW_SIT, install("IntrinsicSiteParams")));
 	v->latitude = REAL(IntrinsicSiteParams)[0];
 	v->altitude = REAL(IntrinsicSiteParams)[1];
 	v->slope = REAL(IntrinsicSiteParams)[2];
 	v->aspect = REAL(IntrinsicSiteParams)[3];
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" > 'location'");
+	#endif
 
 	PROTECT(SoilTemperatureConstants_use = GET_SLOT(SW_SIT, install("SoilTemperatureFlag")));
 	v->use_soil_temp = LOGICAL(SoilTemperatureConstants_use)[0];
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" > 'soiltemp-flag'");
+	#endif
+
 	PROTECT(SoilTemperatureConstants = GET_SLOT(SW_SIT, install("SoilTemperatureConstants")));
 	v->bmLimiter = REAL(SoilTemperatureConstants)[0];
 	v->t1Param1 = REAL(SoilTemperatureConstants)[1];
@@ -488,11 +507,13 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	v->Tsoil_constant = REAL(SoilTemperatureConstants)[7];
 	v->stDeltaX = REAL(SoilTemperatureConstants)[8];
 	v->stMaxDepth = REAL(SoilTemperatureConstants)[9];
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" > 'soiltemp-constants'");
+	#endif
 
 	PROTECT(TranspirationRegions = GET_SLOT(SW_SIT, install("TranspirationRegions")));
 	p_transp = REAL(TranspirationRegions);
 	v->n_transp_rgn = nrows(TranspirationRegions);
-
 	if (MAX_TRANSP_REGIONS < v->n_transp_rgn) {
 		too_many_regions = TRUE;
 	} else {
@@ -504,6 +525,9 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 		LogError(logfp, LOGFATAL, "siteparam.in : Number of transpiration regions"
 				" exceeds maximum allowed (%d > %d)\n", v->n_transp_rgn, MAX_TRANSP_REGIONS);
 	}
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" > 'transp-regions'");
+	#endif
 
 	/* check for any discontinuities (reversals) in the transpiration regions */
 	for (r = 1; r < v->n_transp_rgn; r++) {
@@ -514,7 +538,16 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 
 	onSet_SW_LYR(GET_SLOT(InputData,install("soils")));
 	init_site_info();
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" > 'soils'");
+	#endif
+
 	if (EchoInits)
 		_echo_inputs();
+
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" ... done. \n");
+	#endif
+
 	UNPROTECT(11);
 }
