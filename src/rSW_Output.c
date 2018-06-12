@@ -57,9 +57,11 @@ extern char *colnames_OUT[SW_OUTNKEYS][5 * NVEGTYPES + MAX_LAYERS];
 RealD *p_rOUT[SW_OUTNKEYS][SW_OUTNPERIODS];
 
 // Number of years/months/weeks/days that are used in rSW_Output_rSOILWAT2.c
-unsigned int nrow_OUT[SW_OUTNPERIODS] = { 0 };
+unsigned int nrow_OUT[SW_OUTNPERIODS];
+// Row index of current year/month/week/day output; incremented at end of each day
+unsigned int irow_OUT[SW_OUTNPERIODS];
 
-// Number of time columns for each output period
+// Number of time header columns for each output period
 const unsigned int nrow_TimeOUT[SW_OUTNPERIODS] = { 2, 2, 2, 1 }; // Year only has one column, see `get_outstrheader` for equivalent in `SOILWAT2`
 
 
@@ -348,7 +350,7 @@ SEXP onGetOutput(SEXP inputData) {
 	nrow_OUT[eSW_Month] = tYears * MAX_MONTHS * use_OutPeriod[eSW_Month];
 	nrow_OUT[eSW_Week] = tYears * MAX_WEEKS * use_OutPeriod[eSW_Week];
 
-	if (use_OutPeriod[eSW_Day] == 1) {
+	if (use_OutPeriod[eSW_Day]) {
 		nrow_OUT[eSW_Day] = 0;
 		for (i = INTEGER(GET_SLOT(years, install("StartYear")))[0];
 			i <= INTEGER(GET_SLOT(years, install("EndYear")))[0]; i++) {
@@ -449,4 +451,15 @@ SEXP onGetOutput(SEXP inputData) {
 	#endif
 
 	return swOutput_Object;
+}
+
+
+void rSW_OUT_construct(void) {
+	OutPeriod p;
+
+	ForEachOutPeriod(p)
+	{
+		irow_OUT[p] = 0;
+		nrow_OUT[p] = 0;
+	}
 }

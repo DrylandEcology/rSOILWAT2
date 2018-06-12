@@ -50,6 +50,7 @@ extern SEXP InputData;
  */
 void rSW_CTL_init_model2(void) {
   rSW_SWC_construct();
+  rSW_OUT_construct();
 }
 
 
