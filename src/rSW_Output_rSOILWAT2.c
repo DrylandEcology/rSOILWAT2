@@ -74,9 +74,6 @@ extern unsigned int irow_OUT[SW_OUTNPERIODS];
 /* --------------------------------------------------- */
 
 static void get_outvalleader(OutKey k, OutPeriod pd);
-static void set_VEGPROD_aggslot(OutPeriod pd, SW_VEGPROD_OUTPUTS **pvo);
-static void set_WEATHER_aggslot(OutPeriod pd, SW_WEATHER_OUTPUTS **pvo);
-static void set_SOILWAT_aggslot(OutPeriod pd, SW_SOILWAT_OUTPUTS **pvo);
 
 /** Corresponds to function `get_outstrleader` of `SOILWAT2-standalone`
 */
@@ -105,71 +102,6 @@ static void get_outvalleader(OutKey k, OutPeriod pd) {
 			break;
 	}
 }
-
-
-static void set_VEGPROD_aggslot(OutPeriod pd, SW_VEGPROD_OUTPUTS **pvo) {
-	switch(pd) {
-		case eSW_Day:
-			*pvo = &SW_VegProd.dysum;
-			break;
-
-		case eSW_Week:
-			*pvo = &SW_VegProd.wkavg;
-			break;
-
-		case eSW_Month:
-			*pvo = &SW_VegProd.moavg;
-			break;
-
-		case eSW_Year:
-			*pvo = &SW_VegProd.yravg;
-			break;
-	}
-}
-
-
-static void set_WEATHER_aggslot(OutPeriod pd, SW_WEATHER_OUTPUTS **pvo) {
-	switch(pd) {
-		case eSW_Day:
-			*pvo = &SW_Weather.dysum;
-			break;
-
-		case eSW_Week:
-			*pvo = &SW_Weather.wkavg;
-			break;
-
-		case eSW_Month:
-			*pvo = &SW_Weather.moavg;
-			break;
-
-		case eSW_Year:
-			*pvo = &SW_Weather.yravg;
-			break;
-	}
-}
-
-
-static void set_SOILWAT_aggslot(OutPeriod pd, SW_SOILWAT_OUTPUTS **pvo) {
-	switch(pd) {
-		case eSW_Day:
-			*pvo = &SW_Soilwat.dysum;
-			break;
-
-		case eSW_Week:
-			*pvo = &SW_Soilwat.wkavg;
-			break;
-
-		case eSW_Month:
-			*pvo = &SW_Soilwat.moavg;
-			break;
-
-		case eSW_Year:
-			*pvo = &SW_Soilwat.yravg;
-			break;
-	}
-}
-
-
 
 
 /* =================================================== */
@@ -232,6 +164,8 @@ void get_estab(OutPeriod pd)
 	SW_VEGESTAB *v = &SW_VegEstab;
 	IntU i;
 	RealD *p;
+
+	i = (IntU) pd; // silence `-Wunused-parameter`
 
 	// Store into output array
 	get_outvalleader(eSW_Estab, pd);
