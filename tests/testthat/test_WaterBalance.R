@@ -62,7 +62,8 @@ for (it in tests) {
     temp <- slot(slot(x, "SURFACEWATER"), "Day")
     surfaceWater <- temp[, "surfaceWater_cm"]
 
-    dates <- data.frame(temp[, c("Year", "DOY")])
+    dates <- data.frame(temp[, c("Year", "Day")])
+    dates[, "DOY"] <- dates[, "Day"]
     temp <- as.POSIXlt(seq.Date(
       from = as.Date(ISOdate(dates[1, "Year"], 1, 1)),
       to = as.Date(ISOdate(dates[nrow(dates), "Year"], 12, 31)), by = "day"))
