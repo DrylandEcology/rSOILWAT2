@@ -273,19 +273,6 @@ SEXP onGet_SW_OUT(void) {
 void setGlobalrSOILWAT2_OutputVariables(SEXP outputData) {
 	int i;
 	OutKey k;
-  #ifdef RSWDEBUG
-  int debug = 0;
-  #endif
-
-	#ifdef RSWDEBUG
-	if (debug) swprintf("setGlobalrSOILWAT2_OutputVariables: start ...");
-	#endif
-
-	// Number of years/months/weeks/days == nrow in output
-	nrow_OUT[eSW_Year] = INTEGER(GET_SLOT(outputData, install("yr_nrow")))[0];
-	nrow_OUT[eSW_Month] = INTEGER(GET_SLOT(outputData, install("mo_nrow")))[0];
-	nrow_OUT[eSW_Week] = INTEGER(GET_SLOT(outputData, install("wk_nrow")))[0];
-	nrow_OUT[eSW_Day] = INTEGER(GET_SLOT(outputData, install("dy_nrow")))[0];
 
 	// Get the pointers to the pre-configured output data setup.
 	ForEachOutKey(k) {
@@ -294,17 +281,59 @@ void setGlobalrSOILWAT2_OutputVariables(SEXP outputData) {
 				install(key2str[k])), install(pd2longstr[timeSteps[k][i]])));
 		}
 	}
-
-	#ifdef RSWDEBUG
-	if (debug) swprintf(" ... done. \n");
-	#endif
 }
 
+
+/** Determine number of used years/months/weeks/days in simulation period
+		@sideeffects Set `nrow_OUT`
+*/
+void set_OutPeriods_count(int StartYear, int EndYear, int FDOFY, int EDOEY)
+{
+	int i, tYears = EndYear - StartYear + 1;
+	#ifdef RSWDEBUG
+	int debug = 0;
+	#endif
+
+	nrow_OUT[eSW_Year] = tYears * use_OutPeriod[eSW_Year];
+	nrow_OUT[eSW_Month] = tYears * MAX_MONTHS * use_OutPeriod[eSW_Month];
+	nrow_OUT[eSW_Week] = tYears * MAX_WEEKS * use_OutPeriod[eSW_Week];
+
+	nrow_OUT[eSW_Day] = 0;
+
+	if (use_OutPeriod[eSW_Day])
+	{
+		for (i = StartYear; i <= EndYear; i++)
+		{
+			if (i == 0)
+			{
+				// Calculate the starting day of first year
+				nrow_OUT[eSW_Day] += Time_get_lastdoy_y(i) - FDOFY + 1;
+
+			} else if (i == (tYears - 1))
+			{
+				// and last day of last year.
+				nrow_OUT[eSW_Day] += EDOEY;
+
+			} else {
+				nrow_OUT[eSW_Day] += Time_get_lastdoy_y(i);
+			}
+		}
+	}
+
+	#ifdef RSWDEBUG
+	if (debug) {
+		swprintf("n(year) = %d, n(month) = %d, n(week) = %d, n(day) = %d\n",
+			nrow_OUT[eSW_Year], nrow_OUT[eSW_Month], nrow_OUT[eSW_Week],
+			nrow_OUT[eSW_Day]);
+	}
+	#endif
+
+}
 
 /* Experience has shown that generating the Output Data structure in R is slow compared to C
  * This will generate the OUTPUT data Structure and Names*/
 SEXP onGetOutput(SEXP inputData) {
-	int i, l, tYears, h;
+	int i, l, h;
 	OutKey k;
 	OutPeriod pd;
 	int *use;
@@ -332,12 +361,6 @@ SEXP onGetOutput(SEXP inputData) {
   // Determine which output is turned on
 	use = LOGICAL(GET_SLOT(GET_SLOT(inputData, install("output")), install("use")));
 
-	// Determine size of output
-	//   * number of simulation years
-	PROTECT(years = GET_SLOT(inputData, install("years")));
-	tYears = (INTEGER(GET_SLOT(years, install("EndYear")))[0] -
-		INTEGER(GET_SLOT(years, install("StartYear")))[0] + 1);
-
 	// Determine name of outfile for output key
 	PROTECT(outfile = GET_SLOT(GET_SLOT(inputData, install("output")),
 		install("outfile")));
@@ -346,34 +369,13 @@ SEXP onGetOutput(SEXP inputData) {
 	find_OutPeriods_inUse();
 
 	// Determine number of used years/months/weeks/days in simulation period
-	nrow_OUT[eSW_Year] = tYears * use_OutPeriod[eSW_Year];
-	nrow_OUT[eSW_Month] = tYears * MAX_MONTHS * use_OutPeriod[eSW_Month];
-	nrow_OUT[eSW_Week] = tYears * MAX_WEEKS * use_OutPeriod[eSW_Week];
+	PROTECT(years = GET_SLOT(inputData, install("years")));
+	set_OutPeriods_count(
+		INTEGER(GET_SLOT(years, install("StartYear")))[0],
+		INTEGER(GET_SLOT(years, install("EndYear")))[0],
+		INTEGER(GET_SLOT(years, install("FDOFY")))[0],
+		INTEGER(GET_SLOT(years, install("EDOEY")))[0]);
 
-	if (use_OutPeriod[eSW_Day]) {
-		nrow_OUT[eSW_Day] = 0;
-		for (i = INTEGER(GET_SLOT(years, install("StartYear")))[0];
-			i <= INTEGER(GET_SLOT(years, install("EndYear")))[0]; i++) {
-
-			if (i == 0) {
-				//Need to calculate the starting first day of first year
-				nrow_OUT[eSW_Day] += Time_get_lastdoy_y(i) -
-					INTEGER(GET_SLOT(years, install("FDOFY")))[0] + 1;
-
-			} else if (i == (tYears - 1)) {
-				//and last day of last year.
-				nrow_OUT[eSW_Day] += INTEGER(GET_SLOT(years, install("EDOEY")))[0];
-
-			} else {
-				nrow_OUT[eSW_Day] += Time_get_lastdoy_y(i);
-			}
-		}
-	}
-
-	#ifdef RSWDEBUG
-	if (debug) swprintf("Year Rows: %d, Month Rows: %d, Week Rows: %d, Day Rows: %d\n",
-		nrow_OUT[eSW_Year], nrow_OUT[eSW_Month], nrow_OUT[eSW_Week], nrow_OUT[eSW_Day]);
-	#endif
 
 	ForEachOutPeriod(pd) {
 		SET_SLOT(
