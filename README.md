@@ -140,14 +140,22 @@ __Tests, documentation, and code__ form a trinity
     with the command `devtools::run_examples()`
 - Code tests
   * Read the [section 'Testing' in Wickham's book 'R packages'](http://r-pkgs.had.co.nz/tests.html)
-  * Use [testthat](https://github.com/hadley/testthat) to add unit tests to the
-    existing framework
-  * Run unit tests locally with the command `devtools::test()`
-  * These unit tests will also be run on the command-line with `R CMD check .`
-  * The command-line check will be run on the continuous integration frameworks
-    'travis' and 'appveyor' when commits are pushed
-  * Development/feature branches can only be merged into master if they pass
-    all checks
+  * Unit tests
+    * Use [testthat](https://github.com/hadley/testthat) to add unit tests to the
+      existing framework
+    * Run unit tests locally with the command `devtools::test()`
+    * These unit tests will also be run on the command-line with `R CMD check .`
+    * The command-line check will be run on the continuous integration frameworks
+      'travis' and 'appveyor' when commits are pushed
+    * Development/feature branches can only be merged into master if they pass
+      all checks
+  * Integration tests/checks: run a default example and look at some of the
+      output (see also `?sw_exec`), e.g.,
+      ```{r}
+      path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
+      x <- sw_exec(dir = path_demo, files.in = "files.in", quiet = TRUE)
+      str(x)
+      ```
 
 __Debugging compiled code__
   * Compile C code in `src/` and `src/SOILWAT2/` in 'debugging' mode.
@@ -189,7 +197,7 @@ if the `SOILWAT2` updated included changes to the input files.
 ### Version numbers
 
 We attempt to follow guidelines of [semantic versioning](http://semver.org/)
-with version numbers of `MAJOR.MINOR.PATCH``.
+with version numbers of `MAJOR.MINOR.PATCH`.
 If the version numbers changes, then the following files must be updated
 * `DESCRIPTION``: adjust lines 'Version' and 'Date'
 * optionally, `R/zzz.R`: adjust package startup message in function `.onAttach`
