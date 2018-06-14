@@ -63,7 +63,7 @@ extern TimeInt tOffset;
 
 // defined in `rSW_Output.c`
 extern RealD *p_rOUT[SW_OUTNKEYS][SW_OUTNPERIODS];
-extern unsigned int nrow_TimeOUT[SW_OUTNPERIODS];
+extern unsigned int ncol_TimeOUT[SW_OUTNPERIODS];
 extern unsigned int nrow_OUT[SW_OUTNPERIODS];
 extern unsigned int irow_OUT[SW_OUTNPERIODS];
 
@@ -129,33 +129,33 @@ void get_co2effects(OutPeriod pd) {
 	p = p_rOUT[eSW_CO2Effects][pd];
 
 	// NOTE: `get_co2effects` uses a different order of vegetation types than the rest of SoilWat!!!
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->veg[SW_GRASS].biomass;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 1)] = vo->veg[SW_SHRUB].biomass;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 2)] = vo->veg[SW_TREES].biomass;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 3)] = vo->veg[SW_FORBS].biomass;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 4)] = biomass_total;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 5)] = vo->veg[SW_GRASS].biolive;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 6)] = vo->veg[SW_SHRUB].biolive;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 7)] = vo->veg[SW_TREES].biolive;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 8)] = vo->veg[SW_FORBS].biolive;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 9)] = biolive_total;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 0)] = vo->veg[SW_GRASS].biomass;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 1)] = vo->veg[SW_SHRUB].biomass;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 2)] = vo->veg[SW_TREES].biomass;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 3)] = vo->veg[SW_FORBS].biomass;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 4)] = biomass_total;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 5)] = vo->veg[SW_GRASS].biolive;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 6)] = vo->veg[SW_SHRUB].biolive;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 7)] = vo->veg[SW_TREES].biolive;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 8)] = vo->veg[SW_FORBS].biolive;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 9)] = biolive_total;
 
 	// No averaging or summing required:
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 10)] =
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 10)] =
 		v->veg[SW_GRASS].co2_multipliers[BIO_INDEX][SW_Model.simyear];
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 11)] =
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 11)] =
 		v->veg[SW_SHRUB].co2_multipliers[BIO_INDEX][SW_Model.simyear];
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 12)] =
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 12)] =
 		v->veg[SW_TREES].co2_multipliers[BIO_INDEX][SW_Model.simyear];
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 12)] =
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 12)] =
 		v->veg[SW_FORBS].co2_multipliers[BIO_INDEX][SW_Model.simyear];
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 14)] =
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 14)] =
 		v->veg[SW_GRASS].co2_multipliers[WUE_INDEX][SW_Model.simyear];
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 15)] =
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 15)] =
 		v->veg[SW_SHRUB].co2_multipliers[WUE_INDEX][SW_Model.simyear];
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 16)] =
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 16)] =
 		v->veg[SW_TREES].co2_multipliers[WUE_INDEX][SW_Model.simyear];
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 17)] =
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 17)] =
 		v->veg[SW_FORBS].co2_multipliers[WUE_INDEX][SW_Model.simyear];
 }
 
@@ -172,7 +172,7 @@ void get_estab(OutPeriod pd)
 	p = p_rOUT[eSW_Estab][pd];
 
 	for (i = 0; i < v->count; i++) {
-		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = v->parms[i]->estab_doy;
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + ncol_TimeOUT[pd])] = v->parms[i]->estab_doy;
 	}
 }
 
@@ -196,13 +196,13 @@ void get_temp(OutPeriod pd)
 	p = p_rOUT[eSW_Temp][pd];
 	#ifdef SWDEBUG
 	if (debug) swprintf("irows %d-%d ... ",
-		irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0),
-		irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 3));
+		irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 0),
+		irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 3));
 	#endif
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->temp_max;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 1)] = vo->temp_min;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 2)] = vo->temp_avg;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 3)] = vo->surfaceTemp;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 0)] = vo->temp_max;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 1)] = vo->temp_min;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 2)] = vo->temp_avg;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 3)] = vo->surfaceTemp;
 
 	#ifdef SWDEBUG
 		if (debug) swprintf("completed\n");
@@ -219,11 +219,11 @@ void get_precip(OutPeriod pd)
 	// Store into output array
 	get_outvalleader(eSW_Precip, pd);
 	p = p_rOUT[eSW_Precip][pd];
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->ppt;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 1)] = vo->rain;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 2)] = vo->snow;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 3)] = vo->snowmelt;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 4)] = vo->snowloss;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 0)] = vo->ppt;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 1)] = vo->rain;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 2)] = vo->snow;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 3)] = vo->snowmelt;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 4)] = vo->snowloss;
 }
 
 void get_vwcBulk(OutPeriod pd)
@@ -240,7 +240,7 @@ void get_vwcBulk(OutPeriod pd)
 
 	ForEachSoilLayer(i) {
 		/* vwcBulk at this point is identical to swcBulk */
-		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->vwcBulk[i] / SW_Site.lyr[i]->width;
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + ncol_TimeOUT[pd])] = vo->vwcBulk[i] / SW_Site.lyr[i]->width;
 	}
 }
 
@@ -260,7 +260,7 @@ void get_vwcMatric(OutPeriod pd)
 	ForEachSoilLayer(i) {
 		/* vwcMatric at this point is identical to swcBulk */
 		convert = 1. / (1. - SW_Site.lyr[i]->fractionVolBulk_gravel) / SW_Site.lyr[i]->width;
-		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->vwcMatric[i] * convert;
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + ncol_TimeOUT[pd])] = vo->vwcMatric[i] * convert;
 	}
 }
 
@@ -279,7 +279,7 @@ void get_swa(OutPeriod pd)
 
 	ForEachSoilLayer(i) {
 		ForEachVegType(k) {
-			p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->SWA_VegType[k][i];
+			p[irow_OUT[pd] + nrow_OUT[pd] * (i + ncol_TimeOUT[pd])] = vo->SWA_VegType[k][i];
 		}
 	}
 }
@@ -298,7 +298,7 @@ void get_swcBulk(OutPeriod pd)
 	p = p_rOUT[eSW_SWCBulk][pd];
 
 	ForEachSoilLayer(i) {
-		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->swcBulk[i];
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + ncol_TimeOUT[pd])] = vo->swcBulk[i];
 	}
 }
 
@@ -315,7 +315,7 @@ void get_swpMatric(OutPeriod pd)
 	p = p_rOUT[eSW_SWPMatric][pd];
 
 	ForEachSoilLayer(i) {
-		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] =
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + ncol_TimeOUT[pd])] =
 			SW_SWCbulk2SWPmatric(SW_Site.lyr[i]->fractionVolBulk_gravel,
 				vo->swpMatric[i], i);
 	}
@@ -334,7 +334,7 @@ void get_swaBulk(OutPeriod pd)
 	p = p_rOUT[eSW_SWABulk][pd];
 
 	ForEachSoilLayer(i) {
-		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->swaBulk[i];
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + ncol_TimeOUT[pd])] = vo->swaBulk[i];
 	}
 }
 
@@ -353,7 +353,7 @@ void get_swaMatric(OutPeriod pd)
 
 	ForEachSoilLayer(i) {
 		convert = 1. / (1. - SW_Site.lyr[i]->fractionVolBulk_gravel);
-		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->swaMatric[i] * convert;
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + ncol_TimeOUT[pd])] = vo->swaMatric[i] * convert;
 	}
 }
 
@@ -367,7 +367,7 @@ void get_surfaceWater(OutPeriod pd)
 	// Store into output array
 	get_outvalleader(eSW_SurfaceWater, pd);
 	p = p_rOUT[eSW_SurfaceWater][pd];
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->surfaceWater;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 0)] = vo->surfaceWater;
 }
 
 void get_runoffrunon(OutPeriod pd) {
@@ -379,11 +379,11 @@ void get_runoffrunon(OutPeriod pd) {
 	// Store into output array
 	get_outvalleader(eSW_Runoff, pd);
 	p = p_rOUT[eSW_Runoff][pd];
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] =
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 0)] =
 		vo->surfaceRunoff + vo->snowRunoff - vo->surfaceRunon;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 1)] = vo->surfaceRunoff;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 2)] = vo->snowRunoff;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 3)] = vo->surfaceRunon;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 1)] = vo->surfaceRunoff;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 2)] = vo->snowRunoff;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 3)] = vo->surfaceRunon;
 }
 
 void get_transp(OutPeriod pd)
@@ -401,13 +401,13 @@ void get_transp(OutPeriod pd)
 
 	/* total transpiration */
 	ForEachSoilLayer(i) {
-		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->transp_total[i];
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + ncol_TimeOUT[pd])] = vo->transp_total[i];
 	}
 
 	/* transpiration for each vegetation type */
 	ForEachVegType(k) {
 		ForEachSoilLayer(i) {
-			p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd]) + (nrow_OUT[pd] * SW_Site.n_layers * (k + 1))] = vo->transp[k][i];
+			p[irow_OUT[pd] + nrow_OUT[pd] * (i + ncol_TimeOUT[pd]) + (nrow_OUT[pd] * SW_Site.n_layers * (k + 1))] = vo->transp[k][i];
 		}
 	}
 }
@@ -426,7 +426,7 @@ void get_evapSoil(OutPeriod pd)
 	p = p_rOUT[eSW_EvapSoil][pd];
 
 	ForEachEvapLayer(i) {
-		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->evap[i];
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + ncol_TimeOUT[pd])] = vo->evap[i];
 	}
 }
 
@@ -442,12 +442,12 @@ void get_evapSurface(OutPeriod pd)
 	get_outvalleader(eSW_EvapSurface, pd);
 	p = p_rOUT[eSW_EvapSurface][pd];
 
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->total_evap;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 0)] = vo->total_evap;
 	ForEachVegType(k) {
-		p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + k + 1)] = vo->evap_veg[k];
+		p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + k + 1)] = vo->evap_veg[k];
 	}
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + NVEGTYPES + 1)] = vo->litter_evap;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + NVEGTYPES + 2)] = vo->surfaceWater_evap;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + NVEGTYPES + 1)] = vo->litter_evap;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + NVEGTYPES + 2)] = vo->surfaceWater_evap;
 }
 
 void get_interception(OutPeriod pd)
@@ -462,11 +462,11 @@ void get_interception(OutPeriod pd)
 	get_outvalleader(eSW_Interception, pd);
 	p = p_rOUT[eSW_Interception][pd];
 
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->total_int;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 0)] = vo->total_int;
 	ForEachVegType(k) {
-		p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 1)] = vo->int_veg[k];
+		p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 1)] = vo->int_veg[k];
 	}
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + NVEGTYPES + 1)] = vo->litter_int;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + NVEGTYPES + 1)] = vo->litter_int;
 }
 
 void get_soilinf(OutPeriod pd)
@@ -479,7 +479,7 @@ void get_soilinf(OutPeriod pd)
 	// Store into output array
 	get_outvalleader(eSW_SoilInf, pd);
 	p = p_rOUT[eSW_SoilInf][pd];
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->soil_inf;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 0)] = vo->soil_inf;
 }
 
 void get_lyrdrain(OutPeriod pd)
@@ -496,7 +496,7 @@ void get_lyrdrain(OutPeriod pd)
 
 	for (i = 0; i < SW_Site.n_layers - 1; i++)
 	{
-		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->lyrdrain[i];
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + ncol_TimeOUT[pd])] = vo->lyrdrain[i];
 	}
 }
 
@@ -514,12 +514,12 @@ void get_hydred(OutPeriod pd)
 	p = p_rOUT[eSW_HydRed][pd];
 
 	ForEachSoilLayer(i) {
-		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->hydred_total[i];
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + ncol_TimeOUT[pd])] = vo->hydred_total[i];
 	}
 
 	ForEachVegType(k) {
 		ForEachSoilLayer(i) {
-			p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd]) + (nrow_OUT[pd] * SW_Site.n_layers * (k + 1))] = vo->hydred[k][i];
+			p[irow_OUT[pd] + nrow_OUT[pd] * (i + ncol_TimeOUT[pd]) + (nrow_OUT[pd] * SW_Site.n_layers * (k + 1))] = vo->hydred[k][i];
 		}
 	}
 }
@@ -534,7 +534,7 @@ void get_aet(OutPeriod pd)
 	// Store into output array
 	get_outvalleader(eSW_AET, pd);
 	p = p_rOUT[eSW_AET][pd];
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->aet;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 0)] = vo->aet;
 }
 
 void get_pet(OutPeriod pd)
@@ -547,7 +547,7 @@ void get_pet(OutPeriod pd)
 	// Store into output array
 	get_outvalleader(eSW_PET, pd);
 	p = p_rOUT[eSW_PET][pd];
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->pet;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 0)] = vo->pet;
 }
 
 void get_wetdays(OutPeriod pd)
@@ -562,7 +562,7 @@ void get_wetdays(OutPeriod pd)
 	if (pd == eSW_Day)
 	{
 		ForEachSoilLayer(i) {
-			p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] =
+			p[irow_OUT[pd] + nrow_OUT[pd] * (i + ncol_TimeOUT[pd])] =
 				(SW_Soilwat.is_wet[i]) ? 1 : 0;
 		}
 
@@ -572,7 +572,7 @@ void get_wetdays(OutPeriod pd)
 		set_SOILWAT_aggslot(pd, &vo);
 
 		ForEachSoilLayer(i) {
-			p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = (int) vo->wetdays[i];
+			p[irow_OUT[pd] + nrow_OUT[pd] * (i + ncol_TimeOUT[pd])] = (int) vo->wetdays[i];
 		}
 	}
 }
@@ -587,8 +587,8 @@ void get_snowpack(OutPeriod pd)
 	// Store into output array
 	get_outvalleader(eSW_SnowPack, pd);
 	p = p_rOUT[eSW_SnowPack][pd];
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->snowpack;
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 1)] = vo->snowdepth;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 0)] = vo->snowpack;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 1)] = vo->snowdepth;
 }
 
 void get_deepswc(OutPeriod pd)
@@ -601,7 +601,7 @@ void get_deepswc(OutPeriod pd)
 	// Store into output array
 	get_outvalleader(eSW_DeepSWC, pd);
 	p = p_rOUT[eSW_DeepSWC][pd];
-	p[irow_OUT[pd] + nrow_OUT[pd] * (nrow_TimeOUT[pd] + 0)] = vo->deep;
+	p[irow_OUT[pd] + nrow_OUT[pd] * (ncol_TimeOUT[pd] + 0)] = vo->deep;
 }
 
 void get_soiltemp(OutPeriod pd)
@@ -618,6 +618,6 @@ void get_soiltemp(OutPeriod pd)
 
 	ForEachSoilLayer(i)
 	{
-		p[irow_OUT[pd] + nrow_OUT[pd] * (i + nrow_TimeOUT[pd])] = vo->sTemp[i];
+		p[irow_OUT[pd] + nrow_OUT[pd] * (i + ncol_TimeOUT[pd])] = vo->sTemp[i];
 	}
 }
