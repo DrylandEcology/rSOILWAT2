@@ -251,7 +251,7 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
  */
 SEXP sw_consts(void) {
   const int nret = 6; // length of cret
-  const int nINT = 9; // length of vINT and cINT
+  const int nINT = 10; // length of vINT and cINT
 
   SEXP ret, cnames, ret_int, ret_int2, ret_str1, ret_str2, ret_str3, ret_infiles;
   int i;
@@ -259,9 +259,9 @@ SEXP sw_consts(void) {
   char *cret[] = {"kINT", "VegTypes", "OutKeys", "OutPeriods", "OutAggs", "InFiles"};
 
   int vINT[] = {SW_NFILES, MAX_LAYERS, MAX_TRANSP_REGIONS, MAX_NYEAR, SW_MISSING,
-    SW_OUTNPERIODS, SW_OUTNKEYS, SW_NSUMTYPES, NVEGTYPES};
+    SW_OUTNPERIODS, SW_OUTNKEYS, SW_NSUMTYPES, NVEGTYPES, OUT_DIGITS};
   char *cINT[] = {"SW_NFILES", "MAX_LAYERS", "MAX_TRANSP_REGIONS", "MAX_NYEAR", "SW_MISSING",
-    "SW_OUTNPERIODS", "SW_OUTNKEYS", "SW_NSUMTYPES", "NVEGTYPES"};
+    "SW_OUTNPERIODS", "SW_OUTNKEYS", "SW_NSUMTYPES", "NVEGTYPES", "OUT_DIGITS"};
   int vINT2[] = {SW_TREES, SW_SHRUB, SW_FORBS, SW_GRASS};
   char *cINT2[] = {"SW_TREES", "SW_SHRUB", "SW_FORBS", "SW_GRASS"};
 

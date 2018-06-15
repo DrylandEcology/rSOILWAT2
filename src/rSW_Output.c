@@ -29,6 +29,7 @@
 #include "SOILWAT2/SW_Site.h"
 
 #include "SOILWAT2/SW_Output.h"
+#include "SOILWAT2/SW_Output_outarray.h" // for function `SW_OUT_set_nrow`
 #include "rSW_Output.h"
 
 #include <R.h>
@@ -40,23 +41,23 @@
 /* =================================================== */
 /*                  Global Variables                   */
 /* --------------------------------------------------- */
-// Following global variables are defined in `SOILWAT2/SW_Output_core.c`
+// Following global variables are defined in `SOILWAT2/SW_Output.c`
 extern SW_SITE SW_Site;
 extern SW_OUTPUT SW_Output[];
 extern Bool EchoInits;
 extern char _Sep;
 extern char const *key2str[];
 extern char const *pd2longstr[];
-extern unsigned int used_OUTNPERIODS;
-extern Bool use_OutPeriod[SW_OUTNPERIODS];
+extern IntUS used_OUTNPERIODS;
+extern Bool use_OutPeriod[];
 extern OutPeriod timeSteps[SW_OUTNKEYS][SW_OUTNPERIODS];
 extern char *colnames_OUT[SW_OUTNKEYS][5 * NVEGTYPES + MAX_LAYERS];
-extern unsigned int ncol_OUT[SW_OUTNKEYS];
-extern unsigned int nrow_OUT[SW_OUTNPERIODS];
-extern const unsigned int ncol_TimeOUT[SW_OUTNPERIODS];
+extern IntUS ncol_OUT[];
 
-// Pointers to the pre configured output data. These are used in rSW_Output_rSOILWAT2.c
-RealD *p_rOUT[SW_OUTNKEYS][SW_OUTNPERIODS];
+// defined in `SW_Output_outarray.c`
+extern IntUS nrow_OUT[];
+extern const IntUS ncol_TimeOUT[];
+extern RealD *p_OUT[SW_OUTNKEYS][SW_OUTNPERIODS];
 
 
 
@@ -271,7 +272,7 @@ void setGlobalrSOILWAT2_OutputVariables(SEXP outputData) {
 	// Get the pointers to the pre-configured output data setup.
 	ForEachOutKey(k) {
 		for (i = 0; i < used_OUTNPERIODS; i++) {
-			p_rOUT[k][timeSteps[k][i]] = REAL(GET_SLOT(GET_SLOT(outputData,
+			p_OUT[k][timeSteps[k][i]] = REAL(GET_SLOT(GET_SLOT(outputData,
 				install(key2str[k])), install(pd2longstr[timeSteps[k][i]])));
 		}
 	}

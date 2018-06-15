@@ -1,6 +1,7 @@
 target = SOILWAT2
 lib_target = lib$(target).a
 path_target = SOILWAT2
+sw_sources = SW_Output_outarray.c
 
 # to allow MAKEFLAGS="PKG_DEBUG=-DRSWDEBUG" R CMD INSTALL .
 PKG_CPPFLAGS = $(PKG_DEBUG) -DRSOILWAT
@@ -11,7 +12,8 @@ $(SHLIB): $(path_target)/$(lib_target)
 
 $(path_target)/$(lib_target):
 	@(cd $(path_target) && $(MAKE) $(lib_target) \
-		CC="$(CC)" CPPFLAGS="$(ALL_CPPFLAGS)" CFLAGS="$(ALL_CFLAGS)" AR="$(AR)")
+		CC="$(CC)" CPPFLAGS="$(ALL_CPPFLAGS)" CFLAGS="$(ALL_CFLAGS)" AR="$(AR)" \
+		sw_sources="$(sw_sources)")
 
 .PHONY : clean
 clean :
