@@ -102,11 +102,8 @@ void onSet_SW_VES(SEXP VES) {
 	if (EchoInits)
 		LogError(logfp, LOGNOTE, "Establishment not used.\n");
 
-	for (i = 0; i < SW_VegEstab.count; i++)
-		_spp_init(i);
+	Init_SW_VegEstab();
 
-	if (SW_VegEstab.count > 0)
-		SW_VegEstab.yrsum.days = (TimeInt *) Mem_Calloc(SW_VegEstab.count, sizeof(TimeInt), "SW_VES_read()");
 	if (EchoInits)
 		_echo_VegEstab();
 
