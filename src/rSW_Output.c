@@ -77,14 +77,16 @@ static char *MyFileName;
 		defined in SW_Output.c
 	*/
 void onSet_SW_OUT(SEXP OUT) {
-	int i;
+	int i, msg_type;
 	OutKey k;
 	SEXP sep, outfile;
-	Bool continue1;
 	int *use, *timePeriods, *mykey, *myobj, *sumtype, *first_orig, *last_orig;
-  #ifdef RSWDEBUG
-  int debug = 0;
-  #endif
+	char
+		stub[10],
+		msg[200]; // message to print
+	#ifdef RSWDEBUG
+	int debug = 0;
+	#endif
 
 	#ifdef RSWDEBUG
 	if (debug) swprintf("onSet_SW_OUT: start ...");
@@ -120,52 +122,15 @@ void onSet_SW_OUT(SEXP OUT) {
 			timeSteps[k][i] = timePeriods[k + i * SW_OUTNKEYS];
 		}
 
-		/*
-		msg_type = SW_OUT_read_onekey(&k, keyname, sumtype, period, first, last,
-			outfile, msg);
+		msg_type = SW_OUT_read_onekey(k, sumtype[k], stub, first_orig[k],
+			last_orig[k], msg);
 
-		if (msg_type != 0) {
+		if (msg_type > 0) {
 			LogError(logfp, msg_type, "%s", msg);
 			continue;
 		}
-		*/
 
-
-		continue1 = (k == eSW_AllVeg || k == eSW_ET || k == eSW_AllWthr || k == eSW_AllH2O);
-		if (continue1) {
-			SW_Output[k].use = FALSE;
-			LogError(logfp, LOGNOTE, "Output key %s is currently unimplemented.", key2str[k]);
-			continue;
-		}
-
-		SW_Output[k].has_sl = has_soillayers(key2str[k]);
-
-		// check validity of summary type
-		SW_Output[k].sumtype = sumtype[k];
-		if (SW_Output[k].sumtype == eSW_Fnl && !SW_Output[k].has_sl)
-		{
-			LogError(logfp, LOGWARN, "%s : Summary Type FIN with key %s is meaningless.\n" "  Using type AVG instead.", MyFileName, key2str[k]);
-			SW_Output[k].sumtype = eSW_Avg;
-		}
-
-		// verify deep drainage parameters
-		if (k == eSW_DeepSWC && SW_Output[k].sumtype != eSW_Off
-				&& !SW_Site.deepdrain)
-		{
-			LogError(logfp, LOGWARN, "%s : DEEPSWC cannot be output if flag not set in %s.", MyFileName, SW_F_name(eOutput));
-			continue;
-		}
-
-		// prepare the remaining structure if use==TRUE
-		SW_Output[k].use = (SW_Output[k].sumtype == eSW_Off || !use[k]) ? FALSE : TRUE;
 		if (SW_Output[k].use) {
-			SW_Output[k].mykey = mykey[k];
-			SW_Output[k].myobj = myobj[k];
-			SW_Output[k].first_orig = first_orig[k];
-			SW_Output[k].last_orig = last_orig[k];
-			if (SW_Output[k].last_orig == 0) {
-				LogError(logfp, LOGFATAL, "output.in : Invalid ending day (0) for key=%s.", key2str[k]);
-			}
 			SW_Output[k].outfile = Str_Dup(CHAR(STRING_ELT(outfile, k)));
 		}
 	}
@@ -269,7 +234,7 @@ void setGlobalrSOILWAT2_OutputVariables(SEXP outputData) {
 	int i;
 	OutKey k;
 
-	// Get the pointers to the pre-configured output data setup.
+	// Get the pointers to the output arrays that were pre-allocated by `onGetOutput`
 	ForEachOutKey(k) {
 		for (i = 0; i < used_OUTNPERIODS; i++) {
 			p_OUT[k][timeSteps[k][i]] = REAL(GET_SLOT(GET_SLOT(outputData,
