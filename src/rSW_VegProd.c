@@ -629,6 +629,8 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 	SW_VegProd.critSoilWater[2] = REAL(CSWP)[3];
 	SW_VegProd.critSoilWater[3] = REAL(CSWP)[0];
 
+	get_critical_rank();
+
 	PROTECT(MonthlyVeg = GET_SLOT(SW_VPD, install(cVegProd_names[12])));
 	PROTECT(Grasslands = VECTOR_ELT(MonthlyVeg, SW_GRASS));
 	p_Grasslands = REAL(Grasslands);
