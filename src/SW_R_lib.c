@@ -141,6 +141,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 	#endif
 	PROTECT(swInputData = MAKE_CLASS("swInputData"));
 	PROTECT(SW_DataList = NEW_OBJECT(swInputData));
+
 	SET_SLOT(SW_DataList, install("files"), onGet_SW_F());
 	SET_SLOT(SW_DataList, install("years"), onGet_SW_MDL());
 	SET_SLOT(SW_DataList, install("weather"), onGet_SW_WTH());
@@ -158,9 +159,10 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 	SET_SLOT(SW_DataList, install("swc"), onGet_SW_SWC());
 	SET_SLOT(SW_DataList, install("log"), oRlogfile);
 
-	SW_SIT_clear_layers();
-	SW_WTH_clear_runavg_list();
-	SW_VES_clear();
+	#ifdef RSWDEBUG
+	if (debug) swprintf("De-allocate most memory\n");
+	#endif
+	SW_CTL_clear_model(FALSE); // de-allocate all memory, but `p_OUT`
 
 	UNPROTECT(5);
 	return SW_DataList;
@@ -229,9 +231,7 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
   #ifdef RSWDEBUG
   if (debug) swprintf(" clean up ...");
   #endif
-	SW_SIT_clear_layers();
-	SW_WTH_clear_runavg_list();
-	SW_VES_clear();
+	SW_CTL_clear_model(TRUE); // de-allocate all memory
 
   #ifdef RSWDEBUG
   if (debug) swprintf(" completed.\n");
