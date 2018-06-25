@@ -237,8 +237,11 @@ void setGlobalrSOILWAT2_OutputVariables(SEXP outputData) {
 	// Get the pointers to the output arrays that were pre-allocated by `onGetOutput`
 	ForEachOutKey(k) {
 		for (i = 0; i < used_OUTNPERIODS; i++) {
-			p_OUT[k][timeSteps[k][i]] = REAL(GET_SLOT(GET_SLOT(outputData,
-				install(key2str[k])), install(pd2longstr[timeSteps[k][i]])));
+			if (SW_Output[k].use && timeSteps[k][i] != SW_MISSING)
+			{
+				p_OUT[k][timeSteps[k][i]] = REAL(GET_SLOT(GET_SLOT(outputData,
+					install(key2str[k])), install(pd2longstr[timeSteps[k][i]])));
+			}
 		}
 	}
 }
