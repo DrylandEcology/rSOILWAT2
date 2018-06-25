@@ -55,7 +55,7 @@ extern char *colnames_OUT[SW_OUTNKEYS][5 * NVEGTYPES + MAX_LAYERS];
 extern IntUS ncol_OUT[];
 
 // defined in `SW_Output_outarray.c`
-extern IntUS nrow_OUT[];
+extern size_t nrow_OUT[];
 extern const IntUS ncol_TimeOUT[];
 extern RealD *p_OUT[SW_OUTNKEYS][SW_OUTNPERIODS];
 
@@ -237,6 +237,7 @@ void setGlobalrSOILWAT2_OutputVariables(SEXP outputData) {
 	// Get the pointers to the output arrays that were pre-allocated by `onGetOutput`
 	ForEachOutKey(k) {
 		for (i = 0; i < used_OUTNPERIODS; i++) {
+
 			if (SW_Output[k].use && timeSteps[k][i] != SW_MISSING)
 			{
 				p_OUT[k][timeSteps[k][i]] = REAL(GET_SLOT(GET_SLOT(outputData,
@@ -264,7 +265,7 @@ SEXP onGetOutput(SEXP inputData) {
   #endif
 
 	#ifdef RSWDEBUG
-	if (debug) swprintf("onGetOutput: start ...");
+	if (debug) swprintf("onGetOutput: start ...\n");
 	#endif
 
 	PROTECT(swOutput = MAKE_CLASS("swOutput"));
@@ -300,7 +301,7 @@ SEXP onGetOutput(SEXP inputData) {
 	ForEachOutKey(k) {
 		if (use[k]) {
 			#ifdef RSWDEBUG
-			if (debug) swprintf(" %s (ncol = %d):", key2str[k], ncol_OUT[k]);
+			if (debug) swprintf("%s (ncol = %d):", key2str[k], ncol_OUT[k]);
 			#endif
 
 			PROTECT(stemp_KEY = NEW_OBJECT(swOutput_KEY));
@@ -325,15 +326,21 @@ SEXP onGetOutput(SEXP inputData) {
 				}
 
 				#ifdef RSWDEBUG
-				if (debug) swprintf(" %s /", pd2longstr[timeSteps[k][i]]);
+				if (debug) swprintf(" %s (n=%ld = %ld x (%d + %d) alloc'ed) /",
+					pd2longstr[timeSteps[k][i]], nrow_OUT[timeSteps[k][i]] *
+					(ncol_OUT[k] + ncol_TimeOUT[timeSteps[k][i]]),
+					nrow_OUT[timeSteps[k][i]], ncol_OUT[k], ncol_TimeOUT[timeSteps[k][i]]);
 				#endif
 
 				h = ncol_TimeOUT[timeSteps[k][i]];
 
 				PROTECT(xKEY = allocMatrix(REALSXP, nrow_OUT[timeSteps[k][i]],
 					ncol_OUT[k] + h)); // future output data matrix
+
 				for (l = 0; l < nrow_OUT[timeSteps[k][i]] * (ncol_OUT[k] + h); l++) {
-					// Initialize to 0; allocMatrix does not initialize
+					// Initialize to 0:
+					// allocMatrix does not initialize and memset appears to not work on
+					// `allocMatrix` objects
 					REAL(xKEY)[l] = 0.;
 				}
 

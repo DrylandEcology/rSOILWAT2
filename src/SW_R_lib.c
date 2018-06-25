@@ -231,7 +231,7 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
   #ifdef RSWDEBUG
   if (debug) swprintf(" clean up ...");
   #endif
-	SW_CTL_clear_model(TRUE); // de-allocate all memory
+	SW_CTL_clear_model(FALSE); // de-allocate all memory, but let R handle `p_OUT`
 
   #ifdef RSWDEBUG
   if (debug) swprintf(" completed.\n");
