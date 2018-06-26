@@ -250,18 +250,26 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
     input files, `InFiles`.
  */
 SEXP sw_consts(void) {
-  const int nret = 6; // length of cret
-  const int nINT = 10; // length of vINT and cINT
+  const int nret = 7; // length of cret
+  const int nINT = 11; // length of vINT and cINT
+  const int nNUM = 1; // length of vNUM and cNUM
 
-  SEXP ret, cnames, ret_int, ret_int2, ret_str1, ret_str2, ret_str3, ret_infiles;
+  SEXP ret, cnames, ret_num, ret_int, ret_int2, ret_str1, ret_str2, ret_str3,
+    ret_infiles;
   int i;
   int *pvINT;
-  char *cret[] = {"kINT", "VegTypes", "OutKeys", "OutPeriods", "OutAggs", "InFiles"};
+  double *pvNUM;
+  char *cret[] = {"kNUM", "kINT", "VegTypes", "OutKeys", "OutPeriods",
+    "OutAggs", "InFiles"};
 
-  int vINT[] = {SW_NFILES, MAX_LAYERS, MAX_TRANSP_REGIONS, MAX_NYEAR, SW_MISSING,
+  double vNUM[] = {SW_MISSING};
+  char *cNUM[] = {"SW_MISSING"};
+
+  int vINT[] = {SW_NFILES, MAX_LAYERS, MAX_TRANSP_REGIONS, MAX_NYEAR, eSW_NoTime,
     SW_OUTNPERIODS, SW_OUTNKEYS, SW_NSUMTYPES, NVEGTYPES, OUT_DIGITS};
-  char *cINT[] = {"SW_NFILES", "MAX_LAYERS", "MAX_TRANSP_REGIONS", "MAX_NYEAR", "SW_MISSING",
-    "SW_OUTNPERIODS", "SW_OUTNKEYS", "SW_NSUMTYPES", "NVEGTYPES", "OUT_DIGITS"};
+  char *cINT[] = {"SW_NFILES", "MAX_LAYERS", "MAX_TRANSP_REGIONS", "MAX_NYEAR",
+    "eSW_NoTime", "SW_OUTNPERIODS", "SW_OUTNKEYS", "SW_NSUMTYPES", "NVEGTYPES",
+    "OUT_DIGITS"};
   int vINT2[] = {SW_TREES, SW_SHRUB, SW_FORBS, SW_GRASS};
   char *cINT2[] = {"SW_TREES", "SW_SHRUB", "SW_FORBS", "SW_GRASS"};
 
@@ -284,7 +292,17 @@ SEXP sw_consts(void) {
   char *cInF[] = {"eFirst", "eModel", "eLog", "eSite", "eLayers", "eWeather",
     "eMarkovProb",  "eMarkovCov", "eSky", "eVegProd", "eVegEstab", "eCarbon", "eSoilwat",
     "eOutput", "eOutputDaily","eOutputWeekly","eOutputMonthly","eOutputYearly",
-		"eOutputDaily_soil","eOutputWeekly_soil","eOutputMonthly_soil","eOutputYearly_soil"}; // TODO: this must match SW_Files.h/SW_FileIndex
+    "eOutputDaily_soil","eOutputWeekly_soil","eOutputMonthly_soil","eOutputYearly_soil"}; // TODO: this must match SW_Files.h/SW_FileIndex
+
+  // create vector of numeric/real/double constants
+  PROTECT(ret_num = allocVector(REALSXP, nINT));
+  pvNUM = REAL(ret_num);
+  PROTECT(cnames = allocVector(STRSXP, nNUM));
+  for (i = 0; i < nNUM; i++) {
+    pvNUM[i] = vNUM[i];
+    SET_STRING_ELT(cnames, i, mkChar(cNUM[i]));
+  }
+  namesgets(ret_num, cnames);
 
   // create vector of integer constants
   PROTECT(ret_int = allocVector(INTSXP, nINT));
@@ -350,14 +368,15 @@ SEXP sw_consts(void) {
   for (i = 0; i < nret; i++)
     SET_STRING_ELT(cnames, i, mkChar(cret[i]));
   namesgets(ret, cnames);
-  SET_VECTOR_ELT(ret, 0, ret_int);
-  SET_VECTOR_ELT(ret, 1, ret_int2);
-  SET_VECTOR_ELT(ret, 2, ret_str1);
-  SET_VECTOR_ELT(ret, 3, ret_str2);
-  SET_VECTOR_ELT(ret, 4, ret_str3);
-  SET_VECTOR_ELT(ret, 5, ret_infiles);
+  SET_VECTOR_ELT(ret, 0, ret_num);
+  SET_VECTOR_ELT(ret, 1, ret_int);
+  SET_VECTOR_ELT(ret, 2, ret_int2);
+  SET_VECTOR_ELT(ret, 3, ret_str1);
+  SET_VECTOR_ELT(ret, 4, ret_str2);
+  SET_VECTOR_ELT(ret, 5, ret_str3);
+  SET_VECTOR_ELT(ret, 6, ret_infiles);
 
-  UNPROTECT(14);
+  UNPROTECT(nret * 2 + 2);
 
   return ret;
 }

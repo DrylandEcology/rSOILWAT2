@@ -79,7 +79,7 @@ static char *MyFileName;
 void onSet_SW_OUT(SEXP OUT) {
 	int i, msg_type;
 	OutKey k;
-	SEXP sep, outfile;
+	SEXP sep, outfile, tp_convert;
 	int *use, *timePeriods, *mykey, *myobj, *sumtype, *first_orig, *last_orig;
 	char
 		stub[10],
@@ -96,7 +96,10 @@ void onSet_SW_OUT(SEXP OUT) {
 	PROTECT(sep = GET_SLOT(OUT, install("outputSeparator")));
 	_Sep = '\t';/*TODO Make this work.*/
 
-	timePeriods = INTEGER(GET_SLOT(OUT, install("timeSteps")));
+	// TODO: I don't know why `GET_SLOT(OUT, install("timeSteps"))` is suddenly
+	// of type real and not integer any more
+	PROTECT(tp_convert = coerceVector(GET_SLOT(OUT, install("timeSteps")), INTSXP));
+	timePeriods = INTEGER(tp_convert);
 	used_OUTNPERIODS = INTEGER(GET_DIM(GET_SLOT(OUT, install("timeSteps"))))[1]; // number of columns
 
 	mykey = INTEGER(GET_SLOT(OUT, install("mykey")));
@@ -111,17 +114,13 @@ void onSet_SW_OUT(SEXP OUT) {
 		sumtype[eSW_Estab] = eSW_Sum;
 		first_orig[eSW_Estab] = 1;
 		timePeriods[eSW_Estab + 0 * SW_OUTNKEYS] = eSW_Year;
-		for (i = 1; i < used_OUTNPERIODS; i++) {
-			timePeriods[eSW_Estab + i * SW_OUTNKEYS] = SW_MISSING;
+		ForEachOutPeriod(i) {
+			timePeriods[eSW_Estab + i * SW_OUTNKEYS] = eSW_NoTime;
 		}
 		last_orig[eSW_Estab] = 366;
 	}
 
 	ForEachOutKey(k) {
-		for (i = 0; i < used_OUTNPERIODS; i++) {
-			timeSteps[k][i] = timePeriods[k + i * SW_OUTNKEYS];
-		}
-
 		msg_type = SW_OUT_read_onekey(k, sumtype[k], stub, first_orig[k],
 			last_orig[k], msg);
 
@@ -132,13 +131,17 @@ void onSet_SW_OUT(SEXP OUT) {
 
 		if (SW_Output[k].use) {
 			SW_Output[k].outfile = Str_Dup(CHAR(STRING_ELT(outfile, k)));
+
+			ForEachOutPeriod(i) {
+				timeSteps[k][i] = timePeriods[k + i * SW_OUTNKEYS];
+			}
 		}
 	}
 
 	if (EchoInits)
 		_echo_outputs();
 
-	UNPROTECT(2);
+	UNPROTECT(3);
 
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" ... done. \n");
@@ -170,8 +173,12 @@ SEXP onGet_SW_OUT(void) {
 	PROTECT(sep = NEW_STRING(1));
 	SET_STRING_ELT(sep, 0, mkCharLen(&_Sep, 1));
 
-	PROTECT(timePeriods = allocMatrix(INTSXP, SW_OUTNKEYS, used_OUTNPERIODS));
+	PROTECT(timePeriods = allocMatrix(INTSXP, SW_OUTNKEYS, SW_OUTNPERIODS));
 	vtimePeriods = INTEGER(timePeriods);
+	for (i = 0; i < SW_OUTNKEYS * SW_OUTNPERIODS; i++)
+	{
+		vtimePeriods[i] = eSW_NoTime; // `allocMatrix` does not initialize
+	}
 
 	PROTECT(mykey = NEW_INTEGER(SW_OUTNKEYS));
 	PROTECT(myobj = NEW_INTEGER(SW_OUTNKEYS));
@@ -181,11 +188,8 @@ SEXP onGet_SW_OUT(void) {
 	PROTECT(last_orig = NEW_INTEGER(SW_OUTNKEYS));
 	PROTECT(outfile = NEW_STRING(SW_OUTNKEYS));
 
-	ForEachOutKey(k) {
-		for (i = 0; i < used_OUTNPERIODS; i++) {
-			vtimePeriods[k + i * SW_OUTNKEYS] = timeSteps[k][i];
-		}
-
+	ForEachOutKey(k)
+	{
 		INTEGER(mykey)[k] = SW_Output[k].mykey;
 		INTEGER(myobj)[k] = SW_Output[k].myobj;
 		INTEGER(sumtype)[k] = SW_Output[k].sumtype;
@@ -193,7 +197,12 @@ SEXP onGet_SW_OUT(void) {
 		INTEGER(first_orig)[k] = SW_Output[k].first_orig;
 		INTEGER(last_orig)[k] = SW_Output[k].last_orig;
 
-		if (SW_Output[k].use) {
+		if (SW_Output[k].use)
+		{
+			for (i = 0; i < used_OUTNPERIODS; i++) {
+				vtimePeriods[k + i * SW_OUTNKEYS] = timeSteps[k][i];
+			}
+
 			SET_STRING_ELT(outfile, k, mkChar(SW_Output[k].outfile));
 		} else {
 			SET_STRING_ELT(outfile, k, mkChar(""));
@@ -238,7 +247,7 @@ void setGlobalrSOILWAT2_OutputVariables(SEXP outputData) {
 	ForEachOutKey(k) {
 		for (i = 0; i < used_OUTNPERIODS; i++) {
 
-			if (SW_Output[k].use && timeSteps[k][i] != SW_MISSING)
+			if (SW_Output[k].use && timeSteps[k][i] != eSW_NoTime)
 			{
 				p_OUT[k][timeSteps[k][i]] = REAL(GET_SLOT(GET_SLOT(outputData,
 					install(key2str[k])), install(pd2longstr[timeSteps[k][i]])));
@@ -316,12 +325,7 @@ SEXP onGetOutput(SEXP inputData) {
 			SET_SLOT(stemp_KEY, install("TimeStep"), rTimeStep);
 
 			for (i = 0; i < used_OUTNPERIODS; i++) {
-				if (!(timeSteps[k][i] == eSW_Day || timeSteps[k][i] == eSW_Week ||
-					timeSteps[k][i] == eSW_Month || timeSteps[k][i] == eSW_Year))
-				{
-					LogError(logfp, LOGNOTE, "Output time step %d " \
-						"(for key %s, element %d) is not implemented and ignored.\n",
-						timeSteps[k][i], key2str[k], i);
+				if (timeSteps[k][i] == eSW_NoTime) {
 					continue;
 				}
 
