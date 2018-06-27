@@ -55,20 +55,22 @@ Output can be generated for four different time steps: daily (DY),
  We have two options to specify time steps:\itemize{
    \item The same time step(s) for every output; this option corresponds to specifying
        a line with `TIMESTEP ...` in the SOILWAT2 input file `outsetup.in`. The matrix
-       in slot `timeSteps` should have `SW_OUTNKEYS` rows and `used_SW_OUTNPERIODS`
-       columns where each row contains identical values.
+       in slot `timeSteps` should have `SW_OUTNKEYS` rows and `SW_OUTNPERIODS`
+       columns of which `use_OUTNPERIODS` contain identical values in each
+       used row.
    \item A different time step for each output; however, only one time step per
        output variable can be specified. this option corresponds to specifying the
-       time step in the column `PERIOD` in the SOILWAT2 input file `outsetup.in`. The
-       matrix in slot `timeSteps` should have `SW_OUTNKEYS` rows and 1 column.
+       time step in the column `PERIOD` in the SOILWAT2 input file `outsetup.in`.
 }
+Elements that are turned off have the value `eSW_NoTime = 999L`.
 }
 \section{Slots}{
 
 \describe{
 \item{\code{outputSeparator}}{A character string. Currently, only "\\t" is functional.}
 
-\item{\code{timeSteps}}{An integer matrix. See details.}
+\item{\code{timeSteps}}{An integer matrix with rows for each output key and columns
+for each possible ouput time period. See details.}
 }}
 
 \examples{

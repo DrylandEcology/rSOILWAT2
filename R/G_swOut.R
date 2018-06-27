@@ -204,7 +204,7 @@ setReplaceMethod("swOUT_TimeStep", signature = "swOUT", function(object, value) 
 #' @rdname swOUT-class
 #' @export
 setReplaceMethod("swOUT_TimeStepsForEveryKey", signature = "swOUT", function(object, value) {
-  stopifnot(length(values) <= rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]])
+  stopifnot(length(value) <= rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]])
 
   # Create empty matrix
   temp <- matrix(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]],
