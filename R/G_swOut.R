@@ -90,20 +90,22 @@ setMethod("initialize", signature = "swOUT_key", function(.Object, ...) {
 #' @param ... Further arguments to methods.
 #'
 #' @slot outputSeparator A character string. Currently, only "\\t" is functional.
-#' @slot timeSteps An integer matrix. See details.
+#' @slot timeSteps An integer matrix with rows for each output key and columns
+#'   for each possible ouput time period. See details.
 #'
 #' @details Output can be generated for four different time steps: daily (DY),
 #'  weekly (WK), monthly (MO), and yearly (YR) periods.
 #'  We have two options to specify time steps:\itemize{
 #'    \item The same time step(s) for every output; this option corresponds to specifying
 #'        a line with `TIMESTEP ...` in the SOILWAT2 input file `outsetup.in`. The matrix
-#'        in slot `timeSteps` should have `SW_OUTNKEYS` rows and `used_SW_OUTNPERIODS`
-#'        columns where each row contains identical values.
+#'        in slot `timeSteps` should have `SW_OUTNKEYS` rows and `SW_OUTNPERIODS`
+#'        columns of which `use_OUTNPERIODS` contain identical values in each
+#'        used row.
 #'    \item A different time step for each output; however, only one time step per
 #'        output variable can be specified. this option corresponds to specifying the
-#'        time step in the column `PERIOD` in the SOILWAT2 input file `outsetup.in`. The
-#'        matrix in slot `timeSteps` should have `SW_OUTNKEYS` rows and 1 column.
+#'        time step in the column `PERIOD` in the SOILWAT2 input file `outsetup.in`.
 #' }
+#' Elements that are turned off have the value `eSW_NoTime = 999L`.
 #'
 #' @seealso \code{\linkS4class{swInputData}}
 #'
@@ -134,10 +136,15 @@ swOUT_validity <- function(object) {
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
-  ok <- c(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_MISSING"]],
+  if (ncol(object@timeSteps) != rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]) {
+    msg <- "@timeSteps must be a matrix with 'SW_OUTNPERIODS' columns"
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  ok <- c(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]],
     seq_len(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]) - 1L) # timeSteps is base0
   if (!all(object@timeSteps %in% ok)) {
-    msg <- "@timeSteps values must be within SW_OUTNPERIODS or be equal to SW_MISSING"
+    msg <- "@timeSteps values must be within SW_OUTNPERIODS or be equal to eSW_NoTime"
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
@@ -197,10 +204,23 @@ setReplaceMethod("swOUT_TimeStep", signature = "swOUT", function(object, value) 
 #' @rdname swOUT-class
 #' @export
 setReplaceMethod("swOUT_TimeStepsForEveryKey", signature = "swOUT", function(object, value) {
-  object@timeSteps <- matrix(as.integer(value), byrow = TRUE,
+  stopifnot(length(value) <= rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]])
+
+  # Create empty matrix
+  temp <- matrix(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]],
     nrow = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]],
-    ncol = length(value))
+    ncol = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]])
+
+  # Fill matrix with requested values
+  temp[, seq_along(value)] <- rep(value,
+    each = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]])
+
+  # Set unused output keys to no-time
+  temp[!slot(object, "use"), ] <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]]
+
+  object@timeSteps <- temp
   validObject(object)
+
   object
 })
 

@@ -76,10 +76,17 @@ SEXP tempError(void) {
 
 
 void initSOILWAT2(SEXP inputOptions) {
-	int i, argc, debug = 0;
+	int i, argc;
 	char *argv[7];
+  #ifdef RSWDEBUG
+  int debug = 0;
+  #endif
 
-	if (debug) swprintf("Set args\n");
+
+  #ifdef RSWDEBUG
+  if (debug) swprintf("Set args\n");
+  #endif
+
 	argc = length(inputOptions);
 	if (argc > 7) {
 		// fatal condition because argv is hard-coded to be of length 7; increase size of
@@ -90,36 +97,51 @@ void initSOILWAT2(SEXP inputOptions) {
 		argv[i] = (char *) CHAR(STRING_ELT(inputOptions, i));
 	}
 
+  #ifdef RSWDEBUG
 	if (debug) swprintf("Set call arguments\n");
+  #endif
+
 	init_args(argc, argv);
 
+  #ifdef RSWDEBUG
   if (debug) swprintf("Initialize SOILWAT ...");
+	#endif
+
 	SW_CTL_init_model(_firstfile);
 	rSW_CTL_init_model2();
 }
 
 
 SEXP onGetInputDataFromFiles(SEXP inputOptions) {
-	int debug = 0;
 	SEXP swInputData, SW_DataList, swLog, oRlogfile;
+  #ifdef RSWDEBUG
+  int debug = 0;
+  #endif
 
 	collectInData = TRUE;
 	logged = FALSE;
 	logfp = NULL;
 
+	#ifdef RSWDEBUG
 	if (debug) swprintf("Set log\n");
+	#endif
 	PROTECT(swLog = MAKE_CLASS("swLog"));
 	PROTECT(oRlogfile = NEW_OBJECT(swLog));
 	PROTECT(Rlogfile = GET_SLOT(oRlogfile,install("LogData")));
 
 	initSOILWAT2(inputOptions);
 
+	#ifdef RSWDEBUG
 	if (debug) swprintf("Read input from disk files\n");
+	#endif
 	SW_CTL_read_inputs_from_disk();
 
+	#ifdef RSWDEBUG
   if (debug) swprintf("Copy data to classes\n");
+	#endif
 	PROTECT(swInputData = MAKE_CLASS("swInputData"));
 	PROTECT(SW_DataList = NEW_OBJECT(swInputData));
+
 	SET_SLOT(SW_DataList, install("files"), onGet_SW_F());
 	SET_SLOT(SW_DataList, install("years"), onGet_SW_MDL());
 	SET_SLOT(SW_DataList, install("weather"), onGet_SW_WTH());
@@ -137,17 +159,20 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 	SET_SLOT(SW_DataList, install("swc"), onGet_SW_SWC());
 	SET_SLOT(SW_DataList, install("log"), oRlogfile);
 
-	SW_SIT_clear_layers();
-	SW_WTH_clear_runavg_list();
-	SW_VES_clear();
+	#ifdef RSWDEBUG
+	if (debug) swprintf("De-allocate most memory\n");
+	#endif
+	SW_CTL_clear_model(FALSE); // de-allocate all memory, but `p_OUT`
 
 	UNPROTECT(5);
 	return SW_DataList;
 }
 
 SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
-	int debug = 0;
 	SEXP outputData, swLog, oRlogfile;
+  #ifdef RSWDEBUG
+  int debug = 0;
+  #endif
 
 	collectInData = FALSE;
 	logged = FALSE;
@@ -172,32 +197,45 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 		WeatherList = weatherList;
 	}
 
+  #ifdef RSWDEBUG
   if (debug) swprintf("'start': create log ...");
+  #endif
 	PROTECT(swLog = MAKE_CLASS("swLog"));
 	PROTECT(oRlogfile = NEW_OBJECT(swLog));
 	PROTECT(Rlogfile = GET_SLOT(oRlogfile,install("LogData")));
 
+  #ifdef RSWDEBUG
   if (debug) swprintf(" input arguments ...");
+  #endif
 	initSOILWAT2(inputOptions);
 
+	#ifdef RSWDEBUG
 	if (debug) swprintf(" obtain inputs ...");
+	#endif
 	//Obtain the input data either from files or from memory (depending on useFiles)
 	rSW_CTL_obtain_inputs();
 
+  #ifdef RSWDEBUG
   if (debug) swprintf(" setup output variables ...");
+  #endif
 	SW_OUT_set_ncol();
 	SW_OUT_set_colnames();
 	PROTECT(outputData = onGetOutput(inputData));
 	setGlobalrSOILWAT2_OutputVariables(outputData);
 
+  #ifdef RSWDEBUG
   if (debug) swprintf(" run SOILWAT ...");
+  #endif
 	SW_CTL_main();
 
+  #ifdef RSWDEBUG
   if (debug) swprintf(" clean up ...");
-	SW_SIT_clear_layers();
-	SW_WTH_clear_runavg_list();
-	SW_VES_clear();
+  #endif
+	SW_CTL_clear_model(FALSE); // de-allocate all memory, but let R handle `p_OUT`
+
+  #ifdef RSWDEBUG
   if (debug) swprintf(" completed.\n");
+  #endif
 
 	UNPROTECT(4);
 
@@ -212,18 +250,26 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
     input files, `InFiles`.
  */
 SEXP sw_consts(void) {
-  const int nret = 6; // length of cret
-  const int nINT = 9; // length of vINT and cINT
+  const int nret = 7; // length of cret
+  const int nINT = 11; // length of vINT and cINT
+  const int nNUM = 1; // length of vNUM and cNUM
 
-  SEXP ret, cnames, ret_int, ret_int2, ret_str1, ret_str2, ret_str3, ret_infiles;
+  SEXP ret, cnames, ret_num, ret_int, ret_int2, ret_str1, ret_str2, ret_str3,
+    ret_infiles;
   int i;
   int *pvINT;
-  char *cret[] = {"kINT", "VegTypes", "OutKeys", "OutPeriods", "OutAggs", "InFiles"};
+  double *pvNUM;
+  char *cret[] = {"kNUM", "kINT", "VegTypes", "OutKeys", "OutPeriods",
+    "OutAggs", "InFiles"};
 
-  int vINT[] = {SW_NFILES, MAX_LAYERS, MAX_TRANSP_REGIONS, MAX_NYEAR, SW_MISSING,
-    SW_OUTNPERIODS, SW_OUTNKEYS, SW_NSUMTYPES, NVEGTYPES};
-  char *cINT[] = {"SW_NFILES", "MAX_LAYERS", "MAX_TRANSP_REGIONS", "MAX_NYEAR", "SW_MISSING",
-    "SW_OUTNPERIODS", "SW_OUTNKEYS", "SW_NSUMTYPES", "NVEGTYPES"};
+  double vNUM[] = {SW_MISSING};
+  char *cNUM[] = {"SW_MISSING"};
+
+  int vINT[] = {SW_NFILES, MAX_LAYERS, MAX_TRANSP_REGIONS, MAX_NYEAR, eSW_NoTime,
+    SW_OUTNPERIODS, SW_OUTNKEYS, SW_NSUMTYPES, NVEGTYPES, OUT_DIGITS};
+  char *cINT[] = {"SW_NFILES", "MAX_LAYERS", "MAX_TRANSP_REGIONS", "MAX_NYEAR",
+    "eSW_NoTime", "SW_OUTNPERIODS", "SW_OUTNKEYS", "SW_NSUMTYPES", "NVEGTYPES",
+    "OUT_DIGITS"};
   int vINT2[] = {SW_TREES, SW_SHRUB, SW_FORBS, SW_GRASS};
   char *cINT2[] = {"SW_TREES", "SW_SHRUB", "SW_FORBS", "SW_GRASS"};
 
@@ -246,7 +292,17 @@ SEXP sw_consts(void) {
   char *cInF[] = {"eFirst", "eModel", "eLog", "eSite", "eLayers", "eWeather",
     "eMarkovProb",  "eMarkovCov", "eSky", "eVegProd", "eVegEstab", "eCarbon", "eSoilwat",
     "eOutput", "eOutputDaily","eOutputWeekly","eOutputMonthly","eOutputYearly",
-		"eOutputDaily_soil","eOutputWeekly_soil","eOutputMonthly_soil","eOutputYearly_soil"}; // TODO: this must match SW_Files.h/SW_FileIndex
+    "eOutputDaily_soil","eOutputWeekly_soil","eOutputMonthly_soil","eOutputYearly_soil"}; // TODO: this must match SW_Files.h/SW_FileIndex
+
+  // create vector of numeric/real/double constants
+  PROTECT(ret_num = allocVector(REALSXP, nINT));
+  pvNUM = REAL(ret_num);
+  PROTECT(cnames = allocVector(STRSXP, nNUM));
+  for (i = 0; i < nNUM; i++) {
+    pvNUM[i] = vNUM[i];
+    SET_STRING_ELT(cnames, i, mkChar(cNUM[i]));
+  }
+  namesgets(ret_num, cnames);
 
   // create vector of integer constants
   PROTECT(ret_int = allocVector(INTSXP, nINT));
@@ -312,14 +368,15 @@ SEXP sw_consts(void) {
   for (i = 0; i < nret; i++)
     SET_STRING_ELT(cnames, i, mkChar(cret[i]));
   namesgets(ret, cnames);
-  SET_VECTOR_ELT(ret, 0, ret_int);
-  SET_VECTOR_ELT(ret, 1, ret_int2);
-  SET_VECTOR_ELT(ret, 2, ret_str1);
-  SET_VECTOR_ELT(ret, 3, ret_str2);
-  SET_VECTOR_ELT(ret, 4, ret_str3);
-  SET_VECTOR_ELT(ret, 5, ret_infiles);
+  SET_VECTOR_ELT(ret, 0, ret_num);
+  SET_VECTOR_ELT(ret, 1, ret_int);
+  SET_VECTOR_ELT(ret, 2, ret_int2);
+  SET_VECTOR_ELT(ret, 3, ret_str1);
+  SET_VECTOR_ELT(ret, 4, ret_str2);
+  SET_VECTOR_ELT(ret, 5, ret_str3);
+  SET_VECTOR_ELT(ret, 6, ret_infiles);
 
-  UNPROTECT(14);
+  UNPROTECT(nret * 2 + 2);
 
   return ret;
 }

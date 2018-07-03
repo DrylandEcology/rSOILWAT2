@@ -83,7 +83,7 @@ setMethod("initialize", signature = "swWeatherData", function(.Object, ...,
   # accidentally incorrect values
 
   if (is.null(data)) {
-    data <- matrix(c(1:366, rep(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_MISSING"]], 366 * 3)),
+    data <- matrix(c(1:366, rep(rSW2_glovars[["kSOILWAT2"]][["kNUM"]][["SW_MISSING"]], 366 * 3)),
       nrow = 366, ncol = 4)
   }
   colnames(data) <- colnames(slot(def, "data"))

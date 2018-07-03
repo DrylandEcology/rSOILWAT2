@@ -19,5 +19,6 @@ src/SOILWAT2/*\.o
 src/SOILWAT2/*\.a
 ^\.travis\.yml$
 ^appveyor\.yml$
+^\.appveyor_clear_cache\.txt$
 ^codecov\.yml$
 ^data-raw$

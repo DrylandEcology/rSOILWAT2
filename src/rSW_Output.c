@@ -29,6 +29,7 @@
 #include "SOILWAT2/SW_Site.h"
 
 #include "SOILWAT2/SW_Output.h"
+#include "SOILWAT2/SW_Output_outarray.h" // for function `SW_OUT_set_nrow`
 #include "rSW_Output.h"
 
 #include <R.h>
@@ -40,21 +41,24 @@
 /* =================================================== */
 /*                  Global Variables                   */
 /* --------------------------------------------------- */
+// Following global variables are defined in `SOILWAT2/SW_Output.c`
 extern SW_SITE SW_Site;
 extern SW_OUTPUT SW_Output[];
 extern Bool EchoInits;
-extern char _Sep; /* output delimiter */
-extern char const *key2str[];  // defined in SW_Output.c
-extern int used_OUTNPERIODS;  // defined in SW_Output.c
-extern OutPeriod timeSteps[SW_OUTNKEYS][SW_OUTNPERIODS]; // defined in SW_Output.c
-extern int ncol_OUT[SW_OUTNKEYS]; // defined in SW_Output.c
-extern char *colnames_OUT[SW_OUTNKEYS][5 * NVEGTYPES + MAX_LAYERS]; // defined in SW_Output.c
+extern char _Sep;
+extern char const *key2str[];
+extern char const *pd2longstr[];
+extern IntUS used_OUTNPERIODS;
+extern Bool use_OutPeriod[];
+extern OutPeriod timeSteps[SW_OUTNKEYS][SW_OUTNPERIODS];
+extern char *colnames_OUT[SW_OUTNKEYS][5 * NVEGTYPES + MAX_LAYERS];
+extern IntUS ncol_OUT[];
 
-// Pointers to the pre configured output data. These are used in ifdef RSOILWAT portions of SW_Output.c
-RealD *p_rOUT[SW_OUTNKEYS][SW_OUTNPERIODS];
+// defined in `SW_Output_outarray.c`
+extern size_t nrow_OUT[];
+extern const IntUS ncol_TimeOUT[];
+extern RealD *p_OUT[SW_OUTNKEYS][SW_OUTNPERIODS];
 
-// Number of years/months/weeks/days that are used in ifdef RSOILWAT portions of SW_Output.c
-unsigned int yr_nrow = 0, mo_nrow = 0, wk_nrow = 0, dy_nrow = 0;
 
 
 /* =================================================== */
@@ -73,18 +77,29 @@ static char *MyFileName;
 		defined in SW_Output.c
 	*/
 void onSet_SW_OUT(SEXP OUT) {
-	int i;
+	int i, msg_type;
 	OutKey k;
-	SEXP sep, outfile;
-	Bool continue1;
+	SEXP sep, outfile, tp_convert;
 	int *use, *timePeriods, *mykey, *myobj, *sumtype, *first_orig, *last_orig;
+	char
+		stub[10],
+		msg[200]; // message to print
+	#ifdef RSWDEBUG
+	int debug = 0;
+	#endif
 
+	#ifdef RSWDEBUG
+	if (debug) swprintf("onSet_SW_OUT: start ...");
+	#endif
 	MyFileName = SW_F_name(eOutput);
 
 	PROTECT(sep = GET_SLOT(OUT, install("outputSeparator")));
 	_Sep = '\t';/*TODO Make this work.*/
 
-	timePeriods = INTEGER(GET_SLOT(OUT, install("timeSteps")));
+	// TODO: I don't know why `GET_SLOT(OUT, install("timeSteps"))` is suddenly
+	// of type real and not integer any more
+	PROTECT(tp_convert = coerceVector(GET_SLOT(OUT, install("timeSteps")), INTSXP));
+	timePeriods = INTEGER(tp_convert);
 	used_OUTNPERIODS = INTEGER(GET_DIM(GET_SLOT(OUT, install("timeSteps"))))[1]; // number of columns
 
 	mykey = INTEGER(GET_SLOT(OUT, install("mykey")));
@@ -98,63 +113,39 @@ void onSet_SW_OUT(SEXP OUT) {
 	if (use[eSW_Estab]) {
 		sumtype[eSW_Estab] = eSW_Sum;
 		first_orig[eSW_Estab] = 1;
-		timePeriods[eSW_Estab + 0 * SW_OUTNKEYS] = 3;
-		for (i = 1; i < used_OUTNPERIODS; i++) {
-			timePeriods[eSW_Estab + i * SW_OUTNKEYS] = SW_MISSING;
+		timePeriods[eSW_Estab + 0 * SW_OUTNKEYS] = eSW_Year;
+		ForEachOutPeriod(i) {
+			timePeriods[eSW_Estab + i * SW_OUTNKEYS] = eSW_NoTime;
 		}
 		last_orig[eSW_Estab] = 366;
 	}
 
 	ForEachOutKey(k) {
-		for (i = 0; i < used_OUTNPERIODS; i++) {
-			timeSteps[k][i] = timePeriods[k + i * SW_OUTNKEYS];
-		}
+		msg_type = SW_OUT_read_onekey(k, sumtype[k], stub, first_orig[k],
+			last_orig[k], msg);
 
-		continue1 = (k == eSW_AllVeg || k == eSW_ET || k == eSW_AllWthr || k == eSW_AllH2O);
-		if (continue1) {
-			SW_Output[k].use = FALSE;
-			LogError(logfp, LOGNOTE, "Output key %s is currently unimplemented.", key2str[k]);
+		if (msg_type > 0) {
+			LogError(logfp, msg_type, "%s", msg);
 			continue;
 		}
 
-		/* check validity of summary type */
-		SW_Output[k].sumtype = sumtype[k];
-		if (SW_Output[k].sumtype == eSW_Fnl
-				&& !(k == eSW_VWCBulk || k == eSW_VWCMatric
-						|| k == eSW_SWPMatric || k == eSW_SWCBulk
-						|| k == eSW_SWABulk || k == eSW_SWA || k == eSW_SWAMatric
-						|| k == eSW_DeepSWC))
-		{
-			LogError(logfp, LOGWARN, "%s : Summary Type FIN with key %s is meaningless.\n" "  Using type AVG instead.", MyFileName, key2str[k]);
-			SW_Output[k].sumtype = eSW_Avg;
-		}
-
-		/* verify deep drainage parameters */
-		if (k == eSW_DeepSWC && SW_Output[k].sumtype != eSW_Off
-				&& !SW_Site.deepdrain)
-		{
-			LogError(logfp, LOGWARN, "%s : DEEPSWC cannot be output if flag not set in %s.", MyFileName, SW_F_name(eOutput));
-			continue;
-		}
-
-		/* prepare the remaining structure if use==TRUE */
-		SW_Output[k].use = (SW_Output[k].sumtype == eSW_Off || !use[k]) ? FALSE : TRUE;
 		if (SW_Output[k].use) {
-			SW_Output[k].mykey = mykey[k];
-			SW_Output[k].myobj = myobj[k];
-			SW_Output[k].first_orig = first_orig[k];
-			SW_Output[k].last_orig = last_orig[k];
-			if (SW_Output[k].last_orig == 0) {
-				LogError(logfp, LOGFATAL, "output.in : Invalid ending day (0) for key=%s.", key2str[k]);
-			}
 			SW_Output[k].outfile = Str_Dup(CHAR(STRING_ELT(outfile, k)));
+
+			ForEachOutPeriod(i) {
+				timeSteps[k][i] = timePeriods[k + i * SW_OUTNKEYS];
+			}
 		}
 	}
 
 	if (EchoInits)
 		_echo_outputs();
 
-	UNPROTECT(2);
+	UNPROTECT(3);
+
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" ... done. \n");
+	#endif
 }
 
 
@@ -168,7 +159,13 @@ SEXP onGet_SW_OUT(void) {
 	SEXP swOUT, OUT, sep, timePeriods;
 	SEXP mykey, myobj, sumtype, use, first_orig, last_orig, outfile;
 	char *cKEY[] = {"mykey", "myobj", "sumtype", "use", "first_orig", "last_orig", "outfile"};
+  #ifdef RSWDEBUG
+  int debug = 0;
+  #endif
 
+	#ifdef RSWDEBUG
+	if (debug) swprintf("onGet_SW_OUT: start ...");
+	#endif
 
 	PROTECT(swOUT = MAKE_CLASS("swOUT"));
 	PROTECT(OUT = NEW_OBJECT(swOUT));
@@ -176,8 +173,12 @@ SEXP onGet_SW_OUT(void) {
 	PROTECT(sep = NEW_STRING(1));
 	SET_STRING_ELT(sep, 0, mkCharLen(&_Sep, 1));
 
-	PROTECT(timePeriods = allocMatrix(INTSXP, SW_OUTNKEYS, used_OUTNPERIODS));
+	PROTECT(timePeriods = allocMatrix(INTSXP, SW_OUTNKEYS, SW_OUTNPERIODS));
 	vtimePeriods = INTEGER(timePeriods);
+	for (i = 0; i < SW_OUTNKEYS * SW_OUTNPERIODS; i++)
+	{
+		vtimePeriods[i] = eSW_NoTime; // `allocMatrix` does not initialize
+	}
 
 	PROTECT(mykey = NEW_INTEGER(SW_OUTNKEYS));
 	PROTECT(myobj = NEW_INTEGER(SW_OUTNKEYS));
@@ -187,11 +188,8 @@ SEXP onGet_SW_OUT(void) {
 	PROTECT(last_orig = NEW_INTEGER(SW_OUTNKEYS));
 	PROTECT(outfile = NEW_STRING(SW_OUTNKEYS));
 
-	ForEachOutKey(k) {
-		for (i = 0; i < used_OUTNPERIODS; i++) {
-			vtimePeriods[k + i * SW_OUTNKEYS] = timeSteps[k][i];
-		}
-
+	ForEachOutKey(k)
+	{
 		INTEGER(mykey)[k] = SW_Output[k].mykey;
 		INTEGER(myobj)[k] = SW_Output[k].myobj;
 		INTEGER(sumtype)[k] = SW_Output[k].sumtype;
@@ -199,7 +197,12 @@ SEXP onGet_SW_OUT(void) {
 		INTEGER(first_orig)[k] = SW_Output[k].first_orig;
 		INTEGER(last_orig)[k] = SW_Output[k].last_orig;
 
-		if (SW_Output[k].use) {
+		if (SW_Output[k].use)
+		{
+			for (i = 0; i < used_OUTNPERIODS; i++) {
+				vtimePeriods[k + i * SW_OUTNKEYS] = timeSteps[k][i];
+			}
+
 			SET_STRING_ELT(outfile, k, mkChar(SW_Output[k].outfile));
 		} else {
 			SET_STRING_ELT(outfile, k, mkChar(""));
@@ -219,6 +222,10 @@ SEXP onGet_SW_OUT(void) {
 
 	UNPROTECT(11);
 
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" ... done. \n");
+	#endif
+
 	return OUT;
 }
 
@@ -236,28 +243,14 @@ void setGlobalrSOILWAT2_OutputVariables(SEXP outputData) {
 	int i;
 	OutKey k;
 
-	// Number of years/months/weeks/days are used in ifdef RSOILWAT portions of SW_Output.c
-	yr_nrow = INTEGER(GET_SLOT(outputData, install("yr_nrow")))[0];
-	mo_nrow = INTEGER(GET_SLOT(outputData, install("mo_nrow")))[0];
-	wk_nrow = INTEGER(GET_SLOT(outputData, install("wk_nrow")))[0];
-	dy_nrow = INTEGER(GET_SLOT(outputData, install("dy_nrow")))[0];
-
-	// Get the pointers to the pre-configured output data setup. These are used in ifdef RSOILWAT portions of SW_Output.c
+	// Get the pointers to the output arrays that were pre-allocated by `onGetOutput`
 	ForEachOutKey(k) {
 		for (i = 0; i < used_OUTNPERIODS; i++) {
-			switch (timeSteps[eSW_CO2Effects][i]) {
-				case eSW_Day:
-					p_rOUT[k][eSW_Day] = REAL(GET_SLOT(GET_SLOT(outputData, install(key2str[k])), install("Day")));
-					break;
-				case eSW_Week:
-					p_rOUT[k][eSW_Week] = REAL(GET_SLOT(GET_SLOT(outputData, install(key2str[k])), install("Week")));
-					break;
-				case eSW_Month:
-					p_rOUT[k][eSW_Month] = REAL(GET_SLOT(GET_SLOT(outputData, install(key2str[k])), install("Month")));
-					break;
-				case eSW_Year:
-					p_rOUT[k][eSW_Year] = REAL(GET_SLOT(GET_SLOT(outputData, install(key2str[k])), install("Year")));
-					break;
+
+			if (SW_Output[k].use && timeSteps[k][i] != eSW_NoTime)
+			{
+				p_OUT[k][timeSteps[k][i]] = REAL(GET_SLOT(GET_SLOT(outputData,
+					install(key2str[k])), install(pd2longstr[timeSteps[k][i]])));
 			}
 		}
 	}
@@ -267,15 +260,22 @@ void setGlobalrSOILWAT2_OutputVariables(SEXP outputData) {
 /* Experience has shown that generating the Output Data structure in R is slow compared to C
  * This will generate the OUTPUT data Structure and Names*/
 SEXP onGetOutput(SEXP inputData) {
-	int debug = 0;
-	int i, l, tYears;
+	int i, l, h;
 	OutKey k;
-	int pOPuse[SW_OUTNPERIODS] = {0};
+	OutPeriod pd;
 	int *use;
-	SEXP swOutput, swOutput_Object, outfile, years, swOutput_KEY, stemp_KEY, rTimeStep,
-		xKEY, xKEY_names, xKEY_cnames;
+	SEXP swOutput, swOutput_Object, outfile, swOutput_KEY, stemp_KEY,
+		rTimeStep, xKEY, xKEY_names, xKEY_cnames;
 
-	char *cSWoutput_Names[] = {"yr_nrow", "mo_nrow", "wk_nrow", "dy_nrow"};
+	char *cSWoutput_Names[] = {"dy_nrow", "wk_nrow", "mo_nrow", "yr_nrow"};
+
+  #ifdef RSWDEBUG
+  int debug = 0;
+  #endif
+
+	#ifdef RSWDEBUG
+	if (debug) swprintf("onGetOutput: start ...\n");
+	#endif
 
 	PROTECT(swOutput = MAKE_CLASS("swOutput"));
 	PROTECT(swOutput_Object = NEW_OBJECT(swOutput));
@@ -288,69 +288,30 @@ SEXP onGetOutput(SEXP inputData) {
   // Determine which output is turned on
 	use = LOGICAL(GET_SLOT(GET_SLOT(inputData, install("output")), install("use")));
 
-	// Determine size of output
-	//   * number of simulation years
-	PROTECT(years = GET_SLOT(inputData, install("years")));
-	tYears = (INTEGER(GET_SLOT(years, install("EndYear")))[0] - INTEGER(GET_SLOT(years, install("StartYear")))[0] + 1);
-
-	// Determine name of outfile for output key
-	PROTECT(outfile = GET_SLOT(GET_SLOT(inputData, install("output")), install("outfile")));
-
 	// Determine which output periods are turned on for at least one output key
-	ForEachOutKey(k) {
-		for (i = 0; i < used_OUTNPERIODS; i++) {
-			switch (timeSteps[k][i]) {
-				case eSW_Day:
-					pOPuse[eSW_Day] = 1;
-					break;
-				case eSW_Week:
-					pOPuse[eSW_Week] = 1;
-					break;
-				case eSW_Month:
-					pOPuse[eSW_Month] = 1;
-					break;
-				case eSW_Year:
-					pOPuse[eSW_Year] = 1;
-					break;
-			}
-		}
-	}
+	find_OutPeriods_inUse();
 
 	// Determine number of used years/months/weeks/days in simulation period
-	yr_nrow = tYears * pOPuse[eSW_Year];
-	mo_nrow = tYears * MAX_MONTHS * pOPuse[eSW_Month];
-	wk_nrow = tYears * MAX_WEEKS * pOPuse[eSW_Week];
+	SW_OUT_set_nrow();
 
-	if (pOPuse[eSW_Day] == 1) {
-		dy_nrow = 0;
-		for (i = INTEGER(GET_SLOT(years, install("StartYear")))[0]; i <= INTEGER(GET_SLOT(years, install("EndYear")))[0]; i++) {
-			if (i == 0) {
-				//Need to calculate the starting first day of first year
-				dy_nrow += Time_get_lastdoy_y(i) - INTEGER(GET_SLOT(years, install("FDOFY")))[0] + 1;
-			} else if (i == (tYears - 1)) {
-				//and last day of last year.
-				dy_nrow += INTEGER(GET_SLOT(years, install("EDOEY")))[0];
-			} else {
-				dy_nrow += Time_get_lastdoy_y(i);
-			}
-		}
+	ForEachOutPeriod(pd) {
+		SET_SLOT(
+			swOutput_Object,
+			install(cSWoutput_Names[pd]),
+			ScalarInteger(nrow_OUT[pd]));
 	}
-
-	if (debug) swprintf("Year Rows: %d, Month Rows: %d, Week Rows: %d, Day Rows: %d\n",
-		yr_nrow, mo_nrow, wk_nrow, dy_nrow);
-
-	SET_SLOT(swOutput_Object, install(cSWoutput_Names[0]), ScalarInteger(yr_nrow));
-	SET_SLOT(swOutput_Object, install(cSWoutput_Names[1]), ScalarInteger(mo_nrow));
-	SET_SLOT(swOutput_Object, install(cSWoutput_Names[2]), ScalarInteger(wk_nrow));
-	SET_SLOT(swOutput_Object, install(cSWoutput_Names[3]), ScalarInteger(dy_nrow));
-
 
 	// KEYS
 	PROTECT(swOutput_KEY = MAKE_CLASS("swOutput_KEY"));
 
+	PROTECT(outfile = GET_SLOT(GET_SLOT(inputData, install("output")),
+		install("outfile")));
+
 	ForEachOutKey(k) {
 		if (use[k]) {
-			if (debug) swprintf(" %s: ", key2str[k]);
+			#ifdef RSWDEBUG
+			if (debug) swprintf("%s (ncol = %d):", key2str[k], ncol_OUT[k]);
+			#endif
 
 			PROTECT(stemp_KEY = NEW_OBJECT(swOutput_KEY));
 
@@ -364,90 +325,60 @@ SEXP onGetOutput(SEXP inputData) {
 			SET_SLOT(stemp_KEY, install("TimeStep"), rTimeStep);
 
 			for (i = 0; i < used_OUTNPERIODS; i++) {
-				if (timeSteps[k][i] == eSW_Day) {
-					if (debug) swprintf(" dy ...");
-					PROTECT(xKEY = allocMatrix(REALSXP, dy_nrow, ncol_OUT[k] + 2)); // future output data matrix
-					for (l = 0; l < dy_nrow * (ncol_OUT[k] + 2); l++)
-						REAL(xKEY)[l] = 0.; // Initialize to 0; allocMatrix does not initialize
-
-					PROTECT(xKEY_names = allocVector(VECSXP, 2)); // list of dimnames
-					PROTECT(xKEY_cnames = allocVector(STRSXP, ncol_OUT[k] + 2)); // vector of column names
-					SET_STRING_ELT(xKEY_cnames, 0, mkChar("Year"));
-					SET_STRING_ELT(xKEY_cnames, 1, mkChar("DOY"));
-					for (l = 0; l < ncol_OUT[k]; l++)
-						SET_STRING_ELT(xKEY_cnames, l + 2, mkChar(colnames_OUT[k][l]));
-					SET_VECTOR_ELT(xKEY_names, 1, xKEY_cnames);
-					dimnamesgets(xKEY, xKEY_names);
-
-					SET_SLOT(stemp_KEY, install("Day"), xKEY);
-					UNPROTECT(3);
+				if (timeSteps[k][i] == eSW_NoTime) {
+					continue;
 				}
 
-				if (timeSteps[k][i] == eSW_Week) {
-					if (debug) swprintf(" wk ...");
-					PROTECT(xKEY = allocMatrix(REALSXP, wk_nrow, ncol_OUT[k] + 2)); // future output data matrix
-					for (l = 0; l < wk_nrow * (ncol_OUT[k] + 2); l++)
-						REAL(xKEY)[l] = 0.; // Initialize to 0; allocMatrix does not initialize
+				#ifdef RSWDEBUG
+				if (debug) swprintf(" %s (n=%ld = %ld x (%d + %d) alloc'ed) /",
+					pd2longstr[timeSteps[k][i]], nrow_OUT[timeSteps[k][i]] *
+					(ncol_OUT[k] + ncol_TimeOUT[timeSteps[k][i]]),
+					nrow_OUT[timeSteps[k][i]], ncol_OUT[k], ncol_TimeOUT[timeSteps[k][i]]);
+				#endif
 
-					PROTECT(xKEY_names = allocVector(VECSXP, 2)); // list of dimnames
-					PROTECT(xKEY_cnames = allocVector(STRSXP, ncol_OUT[k] + 2)); // vector of column names
-					SET_STRING_ELT(xKEY_cnames, 0, mkChar("Year"));
-					SET_STRING_ELT(xKEY_cnames, 1, mkChar("Week"));
-					for (l = 0; l < ncol_OUT[k]; l++)
-						SET_STRING_ELT(xKEY_cnames, l + 2, mkChar(colnames_OUT[k][l]));
-					SET_VECTOR_ELT(xKEY_names, 1, xKEY_cnames);
-					dimnamesgets(xKEY, xKEY_names);
+				h = ncol_TimeOUT[timeSteps[k][i]];
 
-					SET_SLOT(stemp_KEY, install("Week"), xKEY);
-					UNPROTECT(3);
+				PROTECT(xKEY = allocMatrix(REALSXP, nrow_OUT[timeSteps[k][i]],
+					ncol_OUT[k] + h)); // future output data matrix
+
+				for (l = 0; l < nrow_OUT[timeSteps[k][i]] * (ncol_OUT[k] + h); l++) {
+					// Initialize to 0:
+					// allocMatrix does not initialize and memset appears to not work on
+					// `allocMatrix` objects
+					REAL(xKEY)[l] = 0.;
 				}
 
-				if (timeSteps[k][i] == eSW_Month) {
-					if (debug) swprintf(" mo ...");
-					PROTECT(xKEY = allocMatrix(REALSXP, mo_nrow, ncol_OUT[k] + 2)); // future output data matrix
-					for (l = 0; l < mo_nrow * (ncol_OUT[k] + 2); l++)
-						REAL(xKEY)[l] = 0.; // Initialize to 0; allocMatrix does not initialize
-
-					PROTECT(xKEY_names = allocVector(VECSXP, 2)); // list of dimnames
-					PROTECT(xKEY_cnames = allocVector(STRSXP, ncol_OUT[k] + 2)); // vector of column names
-					SET_STRING_ELT(xKEY_cnames, 0, mkChar("Year"));
-					SET_STRING_ELT(xKEY_cnames, 1, mkChar("Month"));
-					for (l = 0; l < ncol_OUT[k]; l++)
-						SET_STRING_ELT(xKEY_cnames, l + 2, mkChar(colnames_OUT[k][l]));
-					SET_VECTOR_ELT(xKEY_names, 1, xKEY_cnames);
-					dimnamesgets(xKEY, xKEY_names);
-
-					SET_SLOT(stemp_KEY, install("Month"), xKEY);
-					UNPROTECT(3);
+				PROTECT(xKEY_names = allocVector(VECSXP, 2)); // list of dimnames
+				PROTECT(xKEY_cnames = allocVector(STRSXP, ncol_OUT[k] + h)); // vector of column names
+				SET_STRING_ELT(xKEY_cnames, 0, mkChar("Year"));
+				if (h == 2) {
+					SET_STRING_ELT(xKEY_cnames, 1, mkChar(pd2longstr[timeSteps[k][i]]));
 				}
-
-				if (timeSteps[k][i] == eSW_Year) {
-					if (debug) swprintf(" yr ...");
-					PROTECT(xKEY = allocMatrix(REALSXP, yr_nrow, ncol_OUT[k] + 1)); // future output data matrix
-					for (l = 0; l < yr_nrow * (ncol_OUT[k] + 1); l++)
-						REAL(xKEY)[l] = 0.; // Initialize to 0; allocMatrix does not initialize
-
-					PROTECT(xKEY_names = allocVector(VECSXP, 2)); // list of dimnames
-					PROTECT(xKEY_cnames = allocVector(STRSXP, ncol_OUT[k] + 1)); // vector of column names
-					SET_STRING_ELT(xKEY_cnames, 0, mkChar("Year"));
-					for (l = 0; l < ncol_OUT[k]; l++)
-						SET_STRING_ELT(xKEY_cnames, l + 1, mkChar(colnames_OUT[k][l]));
-					SET_VECTOR_ELT(xKEY_names, 1, xKEY_cnames);
-					dimnamesgets(xKEY, xKEY_names);
-
-					SET_SLOT(stemp_KEY, install("Year"), xKEY);
-					UNPROTECT(3);
+				for (l = 0; l < ncol_OUT[k]; l++) {
+					SET_STRING_ELT(xKEY_cnames, l + h, mkChar(colnames_OUT[k][l]));
 				}
+				SET_VECTOR_ELT(xKEY_names, 1, xKEY_cnames);
+				dimnamesgets(xKEY, xKEY_names);
+
+				SET_SLOT(stemp_KEY, install(pd2longstr[timeSteps[k][i]]), xKEY);
+				UNPROTECT(3);
 			}
 
 			SET_SLOT(swOutput_Object, install(key2str[k]), stemp_KEY);
+
+			#ifdef RSWDEBUG
 			if (debug) swprintf(" %s completed.\n", key2str[k]);
+			#endif
 
 			UNPROTECT(2);
 		}
 	}
 
-	UNPROTECT(5);
+	UNPROTECT(4);
+
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" ... done. \n");
+	#endif
 
 	return swOutput_Object;
 }
