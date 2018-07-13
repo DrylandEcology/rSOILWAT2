@@ -16,6 +16,7 @@
 [11]: https://img.shields.io/github/downloads/DrylandEcology/rSOILWAT2/total.svg
 [12]: https://github.com/DrylandEcology/rSOILWAT2
 
+<br>
 
 # rSOILWAT2
 A R package for SOILWAT2.
@@ -64,6 +65,7 @@ Original references
   dynamics in the shortgrass steppe. Ecology, 73, 1175-1181.
 
 
+<br>
 
 ### Obtain the source package
 
@@ -81,8 +83,9 @@ There are several options:
 
 ### Installation
 
-'rSOILWAT2' will compile the c code of SOILWAT2. Your computer must be set up
-adequately.
+'rSOILWAT2' will compile the c code of
+[SOILWAT2](https://github.com/DrylandEcology/SOILWAT2). Your computer must be
+set up adequately.
 - If you use a Windows OS, then you need the
   [Rtools](http://cran.us.r-project.org/bin/windows/Rtools/)
   installed that match your R version; please find further information for
@@ -125,6 +128,8 @@ If the latest build should have failed, then you may want to check out the
   ```
 
 
+<br>
+
 
 ### For code contributors only
 
@@ -145,6 +150,7 @@ __Tests, documentation, and code__ form a trinity
       existing framework
     * Run unit tests locally with the command `devtools::test()`
     * These unit tests will also be run on the command-line with `R CMD check .`
+      which you can run also with `devtools::check()`
     * The command-line check will be run on the continuous integration frameworks
       'travis' and 'appveyor' when commits are pushed
     * Development/feature branches can only be merged into master if they pass
@@ -213,6 +219,7 @@ contact the Lauenroth Lab. We retain any decision to accept your
 suggestions/contributions or not.
 
 
+<br>
 
 
 # Code of conduct
@@ -231,6 +238,8 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
+
+<br>
 
 # Notes
 
