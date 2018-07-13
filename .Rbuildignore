@@ -11,6 +11,7 @@ src/SOILWAT2/codecov\.yml
 src/SOILWAT2/Doxyfile
 src/SOILWAT2/README\.md
 src/SOILWAT2/run_gcov\.sh
+src/SOILWAT2/\.LSAN_suppr\.txt
 src/SOILWAT2/SW_Main\.c
 src/SOILWAT2/SW_Output_mock\.c
 src/*\.o
