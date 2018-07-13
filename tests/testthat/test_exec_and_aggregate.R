@@ -45,8 +45,17 @@ for (it in tests) {
 
   Tmax <- 100 # C
   H2Omax <- 1000 # cm / day
-  weather_extremes <- apply(dbW_weatherData_to_dataframe(sw_weather)[, -(1:2)],
-    2, range)
+
+  if (it == "Ex2") {
+    # Markov-weather generator is turned on to fill in missing weather data
+    # see `data-raw/prepare_testInput_objects.R`
+    weather_extremes <- data.frame(
+      Tmax_C = c(-Tmax, Tmax), Tmin_C = c(-Tmax, Tmax), PPT_cm = c(0, H2Omax))
+  } else {
+    weather_extremes <- apply(dbW_weatherData_to_dataframe(sw_weather)[, -(1:2)],
+      2, range)
+  }
+
   var_limits2 <- data.frame(matrix(NA, nrow = 0, ncol = 2,
     dimnames = list(NULL, c("min", "max"))))
   var_limits2["TEMP", ] <- c(max(-Tmax, weather_extremes[1, "Tmin_C"]),
