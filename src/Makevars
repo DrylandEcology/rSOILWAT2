@@ -17,8 +17,8 @@ $(path_target)/$(lib_target):
 
 .PHONY : clean
 clean :
-	@rm -f $(path_target)/$(lib_target) SW_R_init.o SW_R_lib.o
-	@(cd $(path_target) && $(MAKE) cleaner)
+	-@$(RM) -f $(path_target)/$(lib_target) SW_R_init.o SW_R_lib.o
+	-@(cd $(path_target) && $(MAKE) cleaner)
 
 .PHONY : shlib-clean
 shlib-clean : clean
