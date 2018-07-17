@@ -15,7 +15,7 @@ var_SumNotZero <- c("TEMP", "PRECIP", "SOILINFILT", "VWCBULK", "VWCMATRIC", "SWC
   "DEEPSWC", "CO2EFFECTS")
 
 expect_within <- function(object, expected, ..., info = NULL,
-  tol = sqrt(.Machine$double.eps)) {
+  tol = sqrt(.Machine$double.eps), digits_N = 4L) {
 
   robj <- range(object)
   rexp <- range(expected)
@@ -24,7 +24,11 @@ expect_within <- function(object, expected, ..., info = NULL,
   lte <- rexp[2] - robj[2] >= -tol # max of `object` is lte to max of `expected`
   within <- gte & lte
 
-  expect_equivalent(within, TRUE, info = info)
+  expect_equivalent(within, TRUE, info = paste(info,
+    if (!gte) paste("min =", signif(robj[2], digits_N),
+      "smaller than expected", signif(rexp[1], digits_N)),
+    if (!lte) paste("max =", signif(robj[2], digits_N),
+      "larger than expected", signif(rexp[2], digits_N))))
 }
 
 
@@ -41,7 +45,16 @@ for (it in tests) {
 
   Tmax <- 100 # C
   H2Omax <- 1000 # cm / day
-  weather_extremes <- apply(dbW_weatherData_to_dataframe(sw_weather)[, -(1:2)], 2, range)
+
+  if (it == "Ex2") {
+    # Markov-weather generator is turned on to fill in missing weather data
+    # see `data-raw/prepare_testInput_objects.R`
+    weather_extremes <- data.frame(
+      Tmax_C = c(-Tmax, Tmax), Tmin_C = c(-Tmax, Tmax), PPT_cm = c(0, H2Omax))
+  } else {
+    weather_extremes <- apply(dbW_weatherData_to_dataframe(sw_weather)[, -(1:2)],
+      2, range)
+  }
 
   var_limits2 <- data.frame(matrix(NA, nrow = 0, ncol = 2,
     dimnames = list(NULL, c("min", "max"))))
@@ -83,11 +96,11 @@ for (it in tests) {
 
   #---TESTS
   info1 <- paste("test-data", it)
+
+  dbW_df_day <- dbW_weatherData_to_dataframe(sw_weather)
   test_that("Check weather", {
-    expect_equivalent({
-        dbW_df_day <- dbW_weatherData_to_dataframe(sw_weather)
-        dbW_dataframe_to_monthly(dbW_df_day)
-      }, dbW_weatherData_to_monthly(sw_weather), info = info1)
+    expect_equivalent(dbW_dataframe_to_monthly(dbW_df_day),
+      dbW_weatherData_to_monthly(sw_weather), info = info1)
   })
 
   test_that("Simulate and aggregate", {
@@ -103,6 +116,27 @@ for (it in tests) {
 
     # This doesn't work; apparently, testthat::expect_message and similar functions don't capture text written by LogError directly to the console.
     # expect_message(sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE, quiet = FALSE))
+
+
+    # Check that input weather is identical to output weather (unless weather
+    # generator is turned on)
+    if (!swWeather_UseMarkov(sw_input)) {
+      # Precipitation
+      sim <- slot(slot(rd, "PRECIP"), "Day")[, "ppt"]
+      obs <- dbW_df_day[, "PPT_cm"]
+      expect_equal(sim, obs, info = info1)
+
+      # Tmin
+      sim <- slot(slot(rd, "TEMP"), "Day")[, "min_C"]
+      obs <- dbW_df_day[, "Tmin_C"]
+      expect_equal(sim, obs, info = info1)
+
+      # Tmax
+      sim <- slot(slot(rd, "TEMP"), "Day")[, "max_C"]
+      obs <- dbW_df_day[, "Tmax_C"]
+      expect_equal(sim, obs, info = info1)
+    }
+
 
     # Loop through output
     temp <- slotNames(rd)
