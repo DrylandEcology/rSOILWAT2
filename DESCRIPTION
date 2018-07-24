@@ -5,9 +5,11 @@ Title: An Ecohydrological Ecosystem-Scale Water Balance Simulation Model
 Description: Access to the C-based 'SOILWAT2' v4.1.3 and functionality for
   SQLite-database of weather data.
 Authors@R: c(person("Ryan", "Murphy", role = "aut"),
-  person("Daniel", "Schlaepfer", role = c("aut", "cre"), email = "daniel.schlaepfer@yale.edu"),
-  person("John", "Bradford", role = "ctb"),
-  person("William", "Lauenroth", role = "ctb"))
+  person("Daniel", "Schlaepfer", email = "daniel.schlaepfer@yale.edu",
+    comment = c(ORCID = "0000-0001-9973-2065"), role = c("aut", "cre")),
+  person("Zach", "Kramer", role = "ctb"),
+  person("Brenden", "Bernal", role = "ctb"),
+  person("Ashish", "Tiwari", role = "ctb"))
 Depends:
   R (>= 3.0.0)
 Imports:
@@ -23,8 +25,8 @@ Suggests:
   covr
 NeedsCompilation: yes
 License: GPL-3 + file LICENSE
-URL: https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
-BugReports: https://github.com/Burke-Lauenroth-Lab/rSOILWAT2/issues
+URL: https://github.com/DrylandEcology/rSOILWAT2
+BugReports: https://github.com/DrylandEcology/rSOILWAT2/issues
 RoxygenNote: 6.0.1
 LazyData: true
 ByteCompile: true

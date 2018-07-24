@@ -41,12 +41,11 @@ outputs.
 
 Note, the branch 'master' is deployable and is released with version numbers.
 
-If you make use of this model, please cite appropriate references, and we would
-like to hear about your particular study (especially a copy of any published
-paper).
+Please cite the package if you publish results based on simulations carried
+out with our package, see `citation("rSOILWAT2")`, and we would like to hear
+about your publication.
 
-
-Some recent references
+Some other references
 
 * Bradford, J. B., D. R. Schlaepfer, and W. K. Lauenroth. 2014. Ecohydrology of
   adjacent sagebrush and lodgepole pine ecosystems: The consequences of climate
@@ -57,7 +56,8 @@ Some recent references
 * Schlaepfer, D. R., W. K. Lauenroth, and J. B. Bradford. 2012. Ecohydrological
   niche of sagebrush ecosystems. Ecohydrology 5:453-466.
 
-Original references
+
+References for the original version of "Soilwat"
 
 * Parton, W.J. (1978). Abiotic section of ELM. In: Grassland simulation model
   (ed. Innis, G.S.). Springer New York, NY, pp. 31-53.
@@ -237,6 +237,14 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
+
+
+<br>
+
+# Funding
+Work on this package has been supported by various funds managed by
+Dr. Bill Lauenroth (Yale University), Dr. John Bradford (USGS), and
+Dr. Daniel Schlaepfer.
 
 
 <br>
