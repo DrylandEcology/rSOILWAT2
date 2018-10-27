@@ -70,13 +70,11 @@
 \alias{swWeather_UseMarkov<-,swInputData-method}
 \alias{swWeather_UseSnow<-,swInputData-method}
 \alias{swWeather_MonScalingParams<-,swInputData-method}
-\alias{get_swCloud,swInputData-method}
 \alias{swCloud_SkyCover,swInputData-method}
 \alias{swCloud_WindSpeed,swInputData-method}
 \alias{swCloud_Humidity,swInputData-method}
 \alias{swCloud_Transmissivity,swInputData-method}
 \alias{swCloud_SnowDensity,swInputData-method}
-\alias{set_swCloud<-,swInputData-method}
 \alias{swCloud_SkyCover<-,swInputData-method}
 \alias{swCloud_WindSpeed<-,swInputData-method}
 \alias{swCloud_Humidity<-,swInputData-method}
@@ -445,7 +443,8 @@
 
 \S4method{swProd_CO2Coefficients}{swInputData}(object) <- value
 
-\S4method{swProd_MonProd_veg}{swInputData,ANY,ANY}(object, vegtype) <- value
+\S4method{swProd_MonProd_veg}{swInputData,ANY,ANY}(object,
+  vegtype) <- value
 
 \S4method{swProd_MonProd_grass}{swInputData}(object) <- value
 

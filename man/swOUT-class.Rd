@@ -46,8 +46,6 @@
 \description{
 The methods listed below work on this class and the proper slot of the class
   \code{\linkS4class{swInputData}}.
-
-Set time steps to the same set of values for each output key.
 }
 \details{
 Output can be generated for four different time steps: daily (DY),

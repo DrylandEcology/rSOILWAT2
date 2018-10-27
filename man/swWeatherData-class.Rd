@@ -7,7 +7,8 @@
 \alias{swReadLines,swWeatherData,character-method}
 \title{Class \code{"swWeatherData"}}
 \usage{
-\S4method{initialize}{swWeatherData}(.Object, ..., year = 0L, data = NULL)
+\S4method{initialize}{swWeatherData}(.Object, ..., year = 0L,
+  data = NULL)
 
 \S4method{swReadLines}{swWeatherData,character}(object, file)
 }

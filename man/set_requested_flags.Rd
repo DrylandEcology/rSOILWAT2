@@ -4,7 +4,8 @@
 \alias{set_requested_flags}
 \title{Assign requested values to (scalar) input flags}
 \usage{
-set_requested_flags(swIn, tag, use, values, fun, reset = TRUE, default = NA)
+set_requested_flags(swIn, tag, use, values, fun, reset = TRUE,
+  default = NA)
 }
 \arguments{
 \item{swIn}{An object of class \code{\linkS4class{swInputData}}.}

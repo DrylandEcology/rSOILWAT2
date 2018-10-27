@@ -41,6 +41,8 @@
   assign("dbW_version", "3.2.0", envir = rSW2_glovars)
   assign("default_blob_compression_type", "gzip", envir = rSW2_glovars)
   assign("blob_compression_type", NULL, envir = rSW2_glovars)
+  assign("tol", sqrt(.Machine$double.eps), envir = rSW2_glovars)
+  assign("st_mo", seq_len(12L), envir = rSW2_glovars)
 
 
   invisible()

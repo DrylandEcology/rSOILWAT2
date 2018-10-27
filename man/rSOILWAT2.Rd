@@ -8,7 +8,6 @@
 \alias{SoilWat}
 \alias{SOILWAT}
 \alias{SOILWAT2}
-\alias{rSOILWAT2-package}
 \title{Package `rSOILWAT2': summary information}
 \description{
 The package `rSOILWAT2' is a R implementation of SoilWat
@@ -50,7 +49,7 @@ data input \item \code{\link{dbW_getWeatherData}} and
 \code{\link{getWeatherData_folders}} for weather data input }
 }
 \author{
-\strong{Maintainer}: Daniel Schlaepfer \email{daniel.schlaepfer@yale.edu}
+\strong{Maintainer}: Daniel Schlaepfer \email{daniel.schlaepfer@yale.edu} (0000-0001-9973-2065)
 
 Authors:
 \itemize{
@@ -59,8 +58,9 @@ Authors:
 
 Other contributors:
 \itemize{
-  \item John Bradford [contributor]
-  \item William Lauenroth [contributor]
+  \item Zach Kramer [contributor]
+  \item Brenden Bernal [contributor]
+  \item Ashish Tiwari [contributor]
 }
 
 }
