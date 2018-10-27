@@ -9,7 +9,8 @@ tol <- 10 ^ (-rSW2_glovars[["kSOILWAT2"]][["kINT"]][["OUT_DIGITS"]])
 SW_OUTNPERIODS <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
 OutPeriods <- c("Day", "Week", "Month", "Year")
 veg_types <- c("tree", "shrub", "forbs", "grass")
-temp <- list.files(".", pattern = "Ex")
+dir_test_data <- file.path("..", "test_data")
+temp <- list.files(dir_test_data, pattern = "Ex")
 temp <- sapply(strsplit(temp, "_"), function(x) x[[1]])
 tests <- unique(temp)
 test_that("Test data availability", expect_gt(length(tests), 0))
@@ -40,8 +41,8 @@ aggregate_for_each_timestep <- function(x, dyt) {
 
 for (it in tests) {
   #---INPUTS
-  sw_weather <- readRDS(paste0(it, "_weather.rds"))
-  sw_input <- readRDS(paste0(it, "_input.rds"))
+  sw_weather <- readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
+  sw_input <- readRDS(file.path(dir_test_data, paste0(it, "_input.rds")))
 
   # Request summed values for every time step
   swOUT_TimeStepsForEveryKey(sw_input) <- seq_len(SW_OUTNPERIODS) - 1
