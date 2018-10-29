@@ -35,6 +35,64 @@ sw_dailyC4_TempVar <- function(dailyTempMin, dailyTempMean, simTime2) {
   res
 }
 
+#' @seealso \code{\link[raster]{movingFun}}
+window <- function(x, n = 3, win_fun = sum) {
+  ids <- seq_len(n)
+  lng <- length(x)
+  x <- c(x, x[ids])
+
+  m <- matrix(ncol = 3, nrow = lng)
+  for (i in ids) {
+    m[, i] <- x[i:(lng + i - 1)]
+  }
+
+  apply(m, MARGIN = 1, FUN = win_fun)
+}
+
+#' Calculate climate variables required to estimate percent cheatgrass cover
+#' in North America
+#'
+#' @section Note: This function does not correct for nothern/southern
+#'   hemisphere.
+#'
+#' @param monthlyPPT_cm A numeric matrix of monthly precipitation values in
+#'   centimeter. There are 12 rows, one for each month of the year;
+#'   and there is one column for each year.
+#' @param monthlyTempMean A numeric matrix of monthly mean temperature values in
+#'   degree Celsius There are 12 rows, one for each month of the year;
+#'   and there is one column for each year.
+#'
+#' @return A named numeric vector of length 4 with mean and standard deviation
+#'   for \var{Month7th_PPT_mm} and \var{MeanTemp_ofDriestQuarter_C}.
+#'
+#' @references Brummer, T. J., K. T. Taylor, J. Rotella, B. D. Maxwell,
+#'   L. J. Rew, and M. Lavin. 2016. Drivers of Bromus tectorum Abundance in
+#'   the Western North American Sagebrush Steppe. Ecosystems 19:986-1000.
+#'
+#' @export
+sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm, monthlyTempMean) {
+
+  # Mean precipitation sum of seventh month of the season (i.e.,
+  # July in northern hemisphere)
+  Month7th_PPT_mm <- 10 * monthlyPPT_cm[7, ]
+
+  # Mean temperature of driest quarter (Bioclim variable 9)
+  # see \code{link[dismo]{biovars}}
+  wet <- t(apply(monthlyPPT_cm, 2, window))
+  tmp <- t(apply(monthlyTempMean, 2, window, win_fun = mean))
+  dryqrt <- cbind(1:ncol(monthlyPPT_cm), as.integer(apply(wet, 1, which.min)))
+  MeanTemp_ofDriestQuarter_C <- tmp[dryqrt]
+
+  nyrs <- seq_along(Month7th_PPT_mm)
+  temp <- cbind(Month7th_PPT_mm[nyrs], MeanTemp_ofDriestQuarter_C[nyrs])
+
+  res <- c(apply(temp, 2, mean), apply(temp, 2, stats::sd))
+  temp <- c("Month7th_PPT_mm", "MeanTemp_ofDriestQuarter_C")
+  names(res) <- c(temp, paste0(temp, "_SD"))
+
+  res
+}
+
 #' Calculate climate variables from daily weather
 #'
 #' @param weatherList A list. Each element is an object of class
@@ -46,6 +104,8 @@ sw_dailyC4_TempVar <- function(dailyTempMin, dailyTempMean, simTime2) {
 #'   which climate variables should be calculated.
 #' @param do_C4vars A logical value. If \code{TRUE} then additional output is
 #'   returned.
+#' @param do_Cheatgrass_ClimVars A logical value. If \code{TRUE} then additional
+#'   output is returned.
 #' @param simTime2 A list with two named elements. The elements are numeric
 #'   vectors \var{month_ForEachUsedDay_NSadj} and
 #'   \var{year_ForEachUsedDay_NSadj}; they are calculated internally
@@ -78,6 +138,10 @@ sw_dailyC4_TempVar <- function(dailyTempMin, dailyTempMean, simTime2) {
 #'   \item{\var{\dQuote{dailyC4vars}}} {If \code{isTRUE(do_C4vars)}, then a
 #'     named numeric vector containing the output of
 #'     \code{\link{sw_dailyC4_TempVar}}, else \code{NA}.}
+#'   \item{\var{\dQuote{monthlyCheatgrass_ClimVars}}} {
+#'     If \code{isTRUE(do_Cheatgrass_ClimVars)}, then a named numeric vector
+#'     containing the output of \code{\link{sw_Cheatgrass_ClimVar}},
+#'     else \code{NA}.}
 #' }
 #'
 #' @examples
@@ -85,10 +149,13 @@ sw_dailyC4_TempVar <- function(dailyTempMin, dailyTempMean, simTime2) {
 #' data("weatherData", package = "rSOILWAT2")
 #' clim1 <- calc_SiteClimate(weatherList = weatherData)
 #' clim2 <- calc_SiteClimate(weatherList = weatherData, do_C4vars = TRUE)
+#' clim3 <- calc_SiteClimate(weatherList = weatherData,
+#'   do_Cheatgrass_ClimVars = TRUE)
 #'
 #' @export
 calc_SiteClimate <- function(weatherList, year.start = NA, year.end = NA,
-  do_C4vars = FALSE, simTime2 = NULL, latitude = 90) {
+  do_C4vars = FALSE, do_Cheatgrass_ClimVars = FALSE, simTime2 = NULL,
+  latitude = 90) {
 
   x <- dbW_weatherData_to_dataframe(weatherList)
 
@@ -131,7 +198,8 @@ calc_SiteClimate <- function(weatherList, year.start = NA, year.end = NA,
     st2 <- simTime2
   } else {
     st2 <- simTiming_ForEachUsedTimeUnit(useyrs = years, sim_tscales = "daily",
-      latitude = latitude, account_NorthSouth = do_C4vars)
+      latitude = latitude,
+      account_NorthSouth = do_C4vars)
   }
 
 
@@ -161,6 +229,12 @@ calc_SiteClimate <- function(weatherList, year.start = NA, year.end = NA,
     dailyC4vars = if (do_C4vars) {
       sw_dailyC4_TempVar(dailyTempMin = x[, "Tmin_C"], dailyTempMean = Tmean_C,
         simTime2 = st2)
-      } else NA
+      } else NA,
+
+    # If cheatgrass-variables are requested
+    Cheatgrass_ClimVars = if (do_Cheatgrass_ClimVars) {
+      sw_Cheatgrass_ClimVar(monthlyPPT_cm = mon_PPT,
+        monthlyTempMean = mon_Temp[, , 1, drop = FALSE])
+    } else NA
   )
 }

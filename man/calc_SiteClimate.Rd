@@ -5,7 +5,8 @@
 \title{Calculate climate variables from daily weather}
 \usage{
 calc_SiteClimate(weatherList, year.start = NA, year.end = NA,
-  do_C4vars = FALSE, simTime2 = NULL, latitude = 90)
+  do_C4vars = FALSE, do_Cheatgrass_ClimVars = FALSE, simTime2 = NULL,
+  latitude = 90)
 }
 \arguments{
 \item{weatherList}{A list. Each element is an object of class
@@ -20,6 +21,9 @@ which climate variables should be calculated.}
 
 \item{do_C4vars}{A logical value. If \code{TRUE} then additional output is
 returned.}
+
+\item{do_Cheatgrass_ClimVars}{A logical value. If \code{TRUE} then additional
+output is returned.}
 
 \item{simTime2}{A list with two named elements. The elements are numeric
 vectors \var{month_ForEachUsedDay_NSadj} and
@@ -55,6 +59,10 @@ A list with named elements \itemize{
   \item{\var{\dQuote{dailyC4vars}}} {If \code{isTRUE(do_C4vars)}, then a
     named numeric vector containing the output of
     \code{\link{sw_dailyC4_TempVar}}, else \code{NA}.}
+  \item{\var{\dQuote{monthlyCheatgrass_ClimVars}}} {
+    If \code{isTRUE(do_Cheatgrass_ClimVars)}, then a named numeric vector
+    containing the output of \code{\link{sw_Cheatgrass_ClimVar}},
+    else \code{NA}.}
 }
 }
 \description{
@@ -65,5 +73,7 @@ Calculate climate variables from daily weather
 data("weatherData", package = "rSOILWAT2")
 clim1 <- calc_SiteClimate(weatherList = weatherData)
 clim2 <- calc_SiteClimate(weatherList = weatherData, do_C4vars = TRUE)
+clim3 <- calc_SiteClimate(weatherList = weatherData,
+  do_Cheatgrass_ClimVars = TRUE)
 
 }
