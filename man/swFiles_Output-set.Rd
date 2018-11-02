@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swFiles_Output<-}
 \alias{swFiles_Output<-}
-\title{swFiles_Output<-}
+\title{\code{swFiles_Output<-}}
 \usage{
 swFiles_Output(object) <- value
 }
@@ -12,7 +12,7 @@ swFiles_Output(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swFiles_Output<-
+\code{swFiles_Output<-}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}

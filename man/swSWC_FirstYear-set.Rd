@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSWC_FirstYear<-}
 \alias{swSWC_FirstYear<-}
-\title{swSWC_FirstYear<-}
+\title{\code{swSWC_FirstYear<-}}
 \usage{
 swSWC_FirstYear(object) <- value
 }
@@ -12,7 +12,7 @@ swSWC_FirstYear(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swSWC_FirstYear<-
+\code{swSWC_FirstYear<-}
 }
 \seealso{
 \code{\linkS4class{swSWC}} and \code{\linkS4class{swInputData}}

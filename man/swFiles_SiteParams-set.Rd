@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swFiles_SiteParams<-}
 \alias{swFiles_SiteParams<-}
-\title{swFiles_SiteParams<-}
+\title{\code{swFiles_SiteParams<-}}
 \usage{
 swFiles_SiteParams(object) <- value
 }
@@ -12,7 +12,7 @@ swFiles_SiteParams(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swFiles_SiteParams<-
+\code{swFiles_SiteParams<-}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}

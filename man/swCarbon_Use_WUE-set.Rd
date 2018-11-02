@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swCarbon_Use_WUE<-}
 \alias{swCarbon_Use_WUE<-}
-\title{swCarbon_Use_WUE<-}
+\title{\code{swCarbon_Use_WUE<-}}
 \usage{
 swCarbon_Use_WUE(object) <- value
 }
@@ -12,7 +12,7 @@ swCarbon_Use_WUE(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swCarbon_Use_WUE<-
+\code{swCarbon_Use_WUE<-}
 }
 \seealso{
 \code{\linkS4class{swCarbon}} and \code{\linkS4class{swInputData}}

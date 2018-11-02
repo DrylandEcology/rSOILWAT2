@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swWeather_DaysRunningAverage<-}
 \alias{swWeather_DaysRunningAverage<-}
-\title{swWeather_DaysRunningAverage<-}
+\title{\code{swWeather_DaysRunningAverage<-}}
 \usage{
 swWeather_DaysRunningAverage(object) <- value
 }
@@ -12,7 +12,7 @@ swWeather_DaysRunningAverage(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swWeather_DaysRunningAverage<-
+\code{swWeather_DaysRunningAverage<-}
 }
 \seealso{
 \code{\linkS4class{swWeather}} and \code{\linkS4class{swInputData}}

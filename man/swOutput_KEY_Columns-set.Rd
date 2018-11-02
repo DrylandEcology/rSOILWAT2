@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swOutput_KEY_Columns<-}
 \alias{swOutput_KEY_Columns<-}
-\title{swOutput_KEY_Columns<-}
+\title{\code{swOutput_KEY_Columns<-}}
 \usage{
 swOutput_KEY_Columns(object) <- value
 }
@@ -12,7 +12,7 @@ swOutput_KEY_Columns(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swOutput_KEY_Columns<-
+\code{swOutput_KEY_Columns<-}
 }
 \seealso{
 \code{\linkS4class{swOutput}} and \code{\linkS4class{swInputData}}

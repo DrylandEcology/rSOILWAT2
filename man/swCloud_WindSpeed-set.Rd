@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swCloud_WindSpeed<-}
 \alias{swCloud_WindSpeed<-}
-\title{swCloud_WindSpeed<-}
+\title{\code{swCloud_WindSpeed<-}}
 \usage{
 swCloud_WindSpeed(object) <- value
 }
@@ -12,7 +12,7 @@ swCloud_WindSpeed(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swCloud_WindSpeed<-
+\code{swCloud_WindSpeed<-}
 }
 \seealso{
 \code{\linkS4class{swCloud}} and \code{\linkS4class{swInputData}}

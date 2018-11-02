@@ -2,12 +2,12 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_WeatherHistory}
 \alias{set_WeatherHistory}
-\title{set_WeatherHistory
+\title{\code{set_WeatherHistory}
 Need to define and export this generic method -- otherwise, \code{\link{set_WeatherHistory<-}} doesn't work.}
 \usage{
 set_WeatherHistory(object, value)
 }
 \description{
-set_WeatherHistory
+\code{set_WeatherHistory}
 Need to define and export this generic method -- otherwise, \code{\link{set_WeatherHistory<-}} doesn't work.
 }

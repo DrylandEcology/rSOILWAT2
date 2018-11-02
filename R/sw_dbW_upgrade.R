@@ -30,7 +30,7 @@ NULL
 #' @rdname dbW_upgrade
 #'
 #' @section Details: \code{dbW_upgrade_to_rSOILWAT2} upgrades a weather database that was
-#' created under'Rsoilwat31' to the current package version 'rSOILWAT2'
+#' created under \pkg{Rsoilwat31} to the current package version \pkg{rSOILWAT2}
 #'
 #' @inheritParams dbW_upgrade
 #' @param check_all A logical value. If \code{TRUE}, then every record is checked;

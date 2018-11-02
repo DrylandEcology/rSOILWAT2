@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSWC_HistoricData}
 \alias{swSWC_HistoricData}
-\title{swSWC_HistoricData}
+\title{\code{swSWC_HistoricData}}
 \usage{
 swSWC_HistoricData(object, year)
 }
@@ -10,7 +10,7 @@ swSWC_HistoricData(object, year)
 \item{object}{An object of class \code{\linkS4class{swSWC}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swSWC_HistoricData
+\code{swSWC_HistoricData}
 }
 \seealso{
 \code{\linkS4class{swSWC}} and \code{\linkS4class{swInputData}}

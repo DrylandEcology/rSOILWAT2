@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swOUT_OutputSeparator}
 \alias{swOUT_OutputSeparator}
-\title{swOUT_OutputSeparator}
+\title{\code{swOUT_OutputSeparator}}
 \usage{
 swOUT_OutputSeparator(object)
 }
@@ -10,7 +10,7 @@ swOUT_OutputSeparator(object)
 \item{object}{An object of class \code{\linkS4class{swOUT}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swOUT_OutputSeparator
+\code{swOUT_OutputSeparator}
 }
 \seealso{
 \code{\linkS4class{swOUT}} and \code{\linkS4class{swInputData}}

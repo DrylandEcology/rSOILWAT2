@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSite_DrainageCoefficient}
 \alias{swSite_DrainageCoefficient}
-\title{swSite_DrainageCoefficient}
+\title{\code{swSite_DrainageCoefficient}}
 \usage{
 swSite_DrainageCoefficient(object)
 }
@@ -10,7 +10,7 @@ swSite_DrainageCoefficient(object)
 \item{object}{An object of class \code{\linkS4class{swSite}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swSite_DrainageCoefficient
+\code{swSite_DrainageCoefficient}
 }
 \seealso{
 \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}

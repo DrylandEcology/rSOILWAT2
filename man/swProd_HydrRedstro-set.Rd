@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swProd_HydrRedstro<-}
 \alias{swProd_HydrRedstro<-}
-\title{swProd_HydrRedstro<-}
+\title{\code{swProd_HydrRedstro<-}}
 \usage{
 swProd_HydrRedstro(object) <- value
 }
@@ -12,7 +12,7 @@ swProd_HydrRedstro(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swProd_HydrRedstro<-
+\code{swProd_HydrRedstro<-}
 }
 \seealso{
 \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}

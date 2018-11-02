@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swOutput_getKEY}
 \alias{swOutput_getKEY}
-\title{swOutput_getKEY}
+\title{\code{swOutput_getKEY}}
 \usage{
 swOutput_getKEY(object, index)
 }
@@ -10,7 +10,7 @@ swOutput_getKEY(object, index)
 \item{object}{An object of class \code{\linkS4class{swOutput}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swOutput_getKEY
+\code{swOutput_getKEY}
 }
 \seealso{
 \code{\linkS4class{swOutput}} and \code{\linkS4class{swInputData}}

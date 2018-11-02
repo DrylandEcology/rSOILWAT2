@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swWeather_MonScalingParams<-}
 \alias{swWeather_MonScalingParams<-}
-\title{swWeather_MonScalingParams<-}
+\title{\code{swWeather_MonScalingParams<-}}
 \usage{
 swWeather_MonScalingParams(object) <- value
 }
@@ -12,7 +12,7 @@ swWeather_MonScalingParams(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swWeather_MonScalingParams<-
+\code{swWeather_MonScalingParams<-}
 }
 \seealso{
 \code{\linkS4class{swWeather}} and \code{\linkS4class{swInputData}}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swProd_MonProd_shrub<-}
 \alias{swProd_MonProd_shrub<-}
-\title{swProd_MonProd_shrub<-}
+\title{\code{swProd_MonProd_shrub<-}}
 \usage{
 swProd_MonProd_shrub(object) <- value
 }
@@ -12,7 +12,7 @@ swProd_MonProd_shrub(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swProd_MonProd_shrub<-
+\code{swProd_MonProd_shrub<-}
 }
 \seealso{
 \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}

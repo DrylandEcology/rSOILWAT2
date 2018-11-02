@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{get_swCarbon}
 \alias{get_swCarbon}
-\title{get_swCarbon}
+\title{\code{get_swCarbon}}
 \usage{
 get_swCarbon(object)
 }
@@ -10,7 +10,7 @@ get_swCarbon(object)
 \item{object}{An object of class \code{\linkS4class{swCarbon}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-get_swCarbon
+\code{get_swCarbon}
 }
 \seealso{
 \code{\linkS4class{swCarbon}} and \code{\linkS4class{swInputData}}

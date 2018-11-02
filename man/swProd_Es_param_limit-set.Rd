@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swProd_Es_param_limit<-}
 \alias{swProd_Es_param_limit<-}
-\title{swProd_Es_param_limit<-}
+\title{\code{swProd_Es_param_limit<-}}
 \usage{
 swProd_Es_param_limit(object) <- value
 }
@@ -12,7 +12,7 @@ swProd_Es_param_limit(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swProd_Es_param_limit<-
+\code{swProd_Es_param_limit<-}
 }
 \seealso{
 \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}

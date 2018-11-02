@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swCloud_Transmissivity<-}
 \alias{swCloud_Transmissivity<-}
-\title{swCloud_Transmissivity<-}
+\title{\code{swCloud_Transmissivity<-}}
 \usage{
 swCloud_Transmissivity(object) <- value
 }
@@ -12,7 +12,7 @@ swCloud_Transmissivity(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swCloud_Transmissivity<-
+\code{swCloud_Transmissivity<-}
 }
 \seealso{
 \code{\linkS4class{swCloud}} and \code{\linkS4class{swInputData}}

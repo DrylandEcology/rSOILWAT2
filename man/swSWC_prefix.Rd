@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSWC_prefix}
 \alias{swSWC_prefix}
-\title{swSWC_prefix}
+\title{\code{swSWC_prefix}}
 \usage{
 swSWC_prefix(object)
 }
@@ -10,7 +10,7 @@ swSWC_prefix(object)
 \item{object}{An object of class \code{\linkS4class{swSWC}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swSWC_prefix
+\code{swSWC_prefix}
 }
 \seealso{
 \code{\linkS4class{swSWC}} and \code{\linkS4class{swInputData}}

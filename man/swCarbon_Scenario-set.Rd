@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swCarbon_Scenario<-}
 \alias{swCarbon_Scenario<-}
-\title{swCarbon_Scenario<-}
+\title{\code{swCarbon_Scenario<-}}
 \usage{
 swCarbon_Scenario(object) <- value
 }
@@ -12,7 +12,7 @@ swCarbon_Scenario(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swCarbon_Scenario<-
+\code{swCarbon_Scenario<-}
 }
 \seealso{
 \code{\linkS4class{swCarbon}} and \code{\linkS4class{swInputData}}

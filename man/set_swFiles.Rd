@@ -2,12 +2,12 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swFiles}
 \alias{set_swFiles}
-\title{set_swFiles
+\title{\code{set_swFiles}
 Need to define and export this generic method -- otherwise, \code{\link{set_swFiles<-}} doesn't work.}
 \usage{
 set_swFiles(object, value)
 }
 \description{
-set_swFiles
+\code{set_swFiles}
 Need to define and export this generic method -- otherwise, \code{\link{set_swFiles<-}} doesn't work.
 }

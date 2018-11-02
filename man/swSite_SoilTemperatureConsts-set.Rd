@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSite_SoilTemperatureConsts<-}
 \alias{swSite_SoilTemperatureConsts<-}
-\title{swSite_SoilTemperatureConsts<-}
+\title{\code{swSite_SoilTemperatureConsts<-}}
 \usage{
 swSite_SoilTemperatureConsts(object) <- value
 }
@@ -12,7 +12,7 @@ swSite_SoilTemperatureConsts(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swSite_SoilTemperatureConsts<-
+\code{swSite_SoilTemperatureConsts<-}
 }
 \seealso{
 \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}

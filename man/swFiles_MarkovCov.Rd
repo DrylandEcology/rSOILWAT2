@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swFiles_MarkovCov}
 \alias{swFiles_MarkovCov}
-\title{swFiles_MarkovCov}
+\title{\code{swFiles_MarkovCov}}
 \usage{
 swFiles_MarkovCov(object)
 }
@@ -10,7 +10,7 @@ swFiles_MarkovCov(object)
 \item{object}{An object of class \code{\linkS4class{swFiles}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swFiles_MarkovCov
+\code{swFiles_MarkovCov}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}

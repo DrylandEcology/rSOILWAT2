@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swProd_CO2Coefficients<-}
 \alias{swProd_CO2Coefficients<-}
-\title{swProd_CO2Coefficients<-}
+\title{\code{swProd_CO2Coefficients<-}}
 \usage{
 swProd_CO2Coefficients(object) <- value
 }
@@ -12,7 +12,7 @@ swProd_CO2Coefficients(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swProd_CO2Coefficients<-
+\code{swProd_CO2Coefficients<-}
 }
 \seealso{
 \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}

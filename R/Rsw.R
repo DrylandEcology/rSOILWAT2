@@ -34,71 +34,71 @@ sw_args <- function(dir, files.in, echo, quiet) {
 
 
 
-#' Execute a SOILWAT simulation run
+#' Execute a \pkg{rSOILWAT2} simulation run
 #'
-#' Run the simulation and get the output data.  Executes Soil Water simulator
-#' and returns Soil Water data via List.  Uses .Call to pass data to/from C
+#' Run the simulation and get the output data.  Executes the \pkg{SOILWAT2}
+#' simulation model.  Uses \code{\link[base]{.Call}} to pass data to/from the C
 #' library.
 #'
 #' The input data for a simulation run can be passed to the function
-#' \code{\link{sw_exec}} either as \code{swInputData} and \code{weatherList} or
-#' as text files organized in a folder \code{dir} and explained in
-#' \code{files.in}.
+#' \code{\link{sw_exec}} either as \code{\linkS4class{swInputData}} and
+#' \code{weatherList} or as text files organized in the folder \code{dir}
+#' and explained in \code{files.in}.
 #'
-#' The weather data can be a part of the input data S4 class or separate as a
-#' list to reduce the input object size.  The option 'weatherList' if set will
-#' use the weatherList provided and not the inputdata object's weather data if
-#' it has it. Weather data can also be read in when 'dir' and 'files.in' are
-#' set.
+#' There are three ways to pass daily forcing weather data to the simulation:
+#' \itemize{
+#'   \item as values in the slot of the argument
+#'         \code{\linkS4class{swInputData}},
+#'   \item as separate \code{weatherList} which takes precedence over the
+#'         weather data contained in \code{\linkS4class{swInputData}}, or
+#'   \item as instructions to read in values from files if \code{dir} and
+#'         \code{files.in} are set.
+#' }
 #'
-#' SOILWAT does not handle missing data. If you have missing data, then you
-#' have to impute yourself or use the built-in Markov weather generator (see
-#' examples section). If you use the weather generator, then you have to
-#' provide appropriate values for the input (files) 'mkv_covar.in' and
-#' 'mkv_prob.in' for your simulation run - currently, SOILWAT does not contain
-#' code to estimate these values.
+#' If you have missing weather data, then you have to impute yourself or use the
+#' built-in Markov weather generator (see examples section). If you use the
+#' weather generator, then you have to provide appropriate values for the input
+#' (files) \var{mkv_covar.in} and \var{mkv_prob.in} for your simulation run -
+#' currently, \pkg{rSOILWAT2} does not contain code to estimate these values.
 #'
-#' @param inputData an object of the S4 class \code{swInputData} which is
-#' generated from \code{\link{sw_inputData}} or
-#' \code{\link{sw_inputDataFromFiles}}.
+#' @param inputData an object of the \var{S4} class
+#'   \code{\linkS4class{swInputData}} which is generated from
+#'   \code{\link{sw_inputData}} or \code{\link{sw_inputDataFromFiles}}.
 #' @param weatherList a list of weather data generated via
-#' \code{\link{dbW_getWeatherData}} or \code{\link{getWeatherData_folders}}.
-#' @param dir a character vector that represents the path to the input data.
-#' Use with files.in
+#'   \code{\link{dbW_getWeatherData}} or \code{\link{getWeatherData_folders}}.
+#' @param dir a character vector that represents the path to the input data. Use
+#'   with \code{files.in}
 #' @param files.in a character vector that represents the partial path of the
-#' 'files.in' file
-#' @param echo logical. This option will echo the inputs to the Log Data.
-#' Helpful for debugging.
-#' @param quiet logical. Quiet mode doesn't print messages to the logfile.
-#' @return A S4 Object Containing 28 outputkey slots.  Each of those has slots
-#' for Yr Mo Wk Dy.
+#'   \var{files.in} file
+#' @param echo logical. This option will echo the inputs to the \var{logfile}.
+#'   Helpful for debugging.
+#' @param quiet logical. Quiet mode doesn't print messages to the \var{logfile}.
 #'
-#' NOTE: WTHR ALLH2O ET ALLVEG do not work.
+#' @return An object of class \code{\linkS4class{swOutput}}.
 #'
-#' The output also contains slots for the number of rows for each time period.
-#' Individual outputKeys also have slots for time periods used. Title from
-#' outputsetup. They also have the number of data columns.
+#' @seealso \itemize{
+#'   \item \code{\link{sw_exec}} for running a simulation
+#'   \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}}
+#'         for data input
+#'   \item \code{\link{dbW_getWeatherData}} and
+#'         \code{\link{getWeatherData_folders}} for weather data input.
+#' }
 #'
-#' These elements contain the output data from soilwat based on the
-#' outputSetup.  Output columns should all be labeled.
-#' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
-#' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
-#' data input \item \code{\link{dbW_getWeatherData}} and
-#' \code{\link{getWeatherData_folders}} for weather data input }
 #' @references Bradford, J. B., D. R. Schlaepfer, and W. K. Lauenroth (2014)
-#' Ecohydrology of adjacent sagebrush and lodgepole pine ecosystems: The
-#' consequences of climate change and disturbance.  \emph{Ecosystems}
-#' \bold{17}:590--605.
+#'   Ecohydrology of adjacent sagebrush and lodgepole pine ecosystems: The
+#'   consequences of climate change and disturbance.  \emph{Ecosystems}
+#'   \bold{17}:590--605.
 #'
-#' Schlaepfer, D. R., W. K. Lauenroth, and J. B. Bradford (2012)
-#' Ecohydrological niche of sagebrush ecosystems.  \emph{Ecohydrology}
-#' \bold{5}:453--466.
+#'   Schlaepfer, D. R., W. K. Lauenroth, and J. B. Bradford (2012)
+#'   Ecohydrological niche of sagebrush ecosystems.  \emph{Ecohydrology}
+#'   \bold{5}:453--466.
 #'
-#' Parton, W.J. (1978).  \emph{Abiotic section of ELM}. In: Grassland
-#' simulation model (ed. Innis, G.S.).  Springer New York, NY, pp. 31--53.
+#'   Parton, W.J. (1978).  \emph{Abiotic section of ELM}. In: Grassland
+#'   simulation model (ed. Innis, G.S.).  Springer New York, NY, pp. 31--53.
 #'
-#' Sala, O.E., Lauenroth, W.K. & Parton, W.J. (1992) Long-term soil-water
-#' dynamics in the shortgrass steppe.  \emph{Ecology} \bold{73}:1175--1181.
+#'   Sala, O.E., Lauenroth, W.K. & Parton, W.J. (1992) Long-term soil-water
+#'   dynamics in the shortgrass steppe.  \emph{Ecology} \bold{73}:1175--1181.
+#'
 #' @examples
 #'
 #' ## ------ Simulation with demonstration data ------------
@@ -109,7 +109,7 @@ sw_args <- function(dir, files.in, echo, quiet) {
 #' str(sw_in, max.level = 2)
 #'
 #' ## Execute the simulation run
-#' \dontrun{sw_out <- sw_exec(inputData = sw_in)}
+#' sw_out <- sw_exec(inputData = sw_in)
 #'
 #'
 #' ## ------ Directory to a SOLWAT project used in the following examples
@@ -215,48 +215,23 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
 
 
 
-#' rSOILWAT2 sw_inputDataFromFiles
+#' Read simulation input data from files on disk
 #'
-#' Reads in a SoilWat Project's input data.  Returns swInputData Object.
+#' @param dir A character string. The path to the simulation project directory.
+#' @param files.in A character string. The file name (and path relative to
+#'   \code{dir}) of the \var{files} input file that contains in formation
+#'   about the remaining input files.
 #'
-#' swInputData Object is a S4 object containing slots for all input data.
-#' Calling sw_inputDataFromFiles generates a new swInputData object with data
-#' from the Project files given.
+#' @return An object of class \code{\linkS4class{swInputData}}.
 #'
-#' The data returned can be directly used to run the simulation if weather Data
-#' was included in the Project Directory. If weather data was not in the
-#' project directory then use onGetWeatherData_database or
-#' onGetWeatherData_folders to obtain weatherDataList and pass both to sw_exec.
+#' @seealso \itemize{
+#'   \item \code{\link{sw_exec}} for running a simulation
+#'   \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}}
+#'         for data input
+#'   \item \code{\link{dbW_getWeatherData}} and
+#'         \code{\link{getWeatherData_folders}} for weather data input.
+#' }
 #'
-#' swInputData consists of slots for each file that is read in. These slots can
-#' be accessed via the following functions: \tabular{ll}{ \code{get_Markov}
-#' \tab #get markov prop and conv\cr \code{get_swCloud} \tab #get cloud\cr
-#' \code{get_swFiles} \tab #get files.in\cr \code{get_swOUT} \tab #get
-#' outpusetup.in\cr \code{get_swProd} \tab #get prod.in\cr \code{get_swSite}
-#' \tab #get site.in\cr \code{get_swSoils} \tab #get soils.in\cr
-#' \code{get_swSWC} \tab #get swcSetup.in\cr \code{get_swWeather} \tab #get
-#' weatherSetup.in\cr \code{get_swWeatherData} \tab #get individual year\cr
-#' \code{get_swYears} \tab #get years.in data object\cr
-#' \code{get_WeatherHistory} \tab #get S4 of WeatherHistory\cr }
-#'
-#' generic functions to get/set individual elements follow a format: 'sw' +
-#' file name + '_' + option, e.g.  \itemize{ \item \code{swFiles_Cloud} \item
-#' \code{swProd_Albedo} } Remember tab complete is your friend.
-#'
-#' SOILWAT does not handle missing weather data. If you have missing data, then
-#' you have to impute yourself or use the built-in Markov weather generator
-#' (see examples for \code{\link{sw_exec}}).
-#'
-#' @param dir String. The path to the Project Directory. Use with files.in
-#' @param files.in String. The partial path, after project dir path, and file
-#' name to files.in file.
-#' @return Returns a S4 class of type swInputData. This is a container for the
-#' input S4 objects used to run soilwat. The data for the given project is
-#' loaded.
-#' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
-#' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
-#' data input \item \code{\link{dbW_getWeatherData}} and
-#' \code{\link{getWeatherData_folders}} for weather data input }
 #' @examples
 #'
 #' path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
@@ -300,47 +275,18 @@ sw_outputData <- function(inputData) {
 
 
 
-#' rSOILWAT2 sw_inputData
+#' Default input object for \pkg{rSOILWAT2}. Use this as a template or for
+#' testing the package.
 #'
-#' Default data Set for SoilWat.  Use this as a template or for testing the
-#' package.
+#' @return An object of class \code{\linkS4class{swInputData}}.
 #'
-#' swInputData Object is a S4 object containing slots for all input data.
-#' Calling sw_inputData() generates a new swInputData object with test project
-#' data loaded into them. This can be used for testing or as a template to
-#' build another project off of.
-#'
-#' The data returned can be directly used to run the simulation. Use the
-#' function sw_exec and pass it the output from this function to run SW.
-#'
-#' \code{showMethods(class="swInputData")} # Will show all generic functions
-#' that be applied to the inputData. These include getters/setters for slots.
-#'
-#' swInputData consists of slots for each file that is read in. These slots can
-#' be accessed via the following functions: \tabular{ll}{ \code{get_Markov}
-#' \tab #get markov prop and conv\cr \code{get_swCloud} \tab #get cloud\cr
-#' \code{get_swFiles} \tab #get files.in\cr \code{get_swOUT} \tab #get
-#' outpusetup.in\cr \code{get_swProd} \tab #get prod.in\cr \code{get_swSite}
-#' \tab #get site.in\cr \code{get_swSoils} \tab #get soils.in\cr
-#' \code{get_swSWC} \tab #get swcSetup.in\cr \code{get_swWeather} \tab #get
-#' weatherSetup.in\cr \code{get_swWeatherData} \tab #get individual year\cr
-#' \code{get_swYears} \tab #get years.in data object\cr
-#' \code{get_WeatherHistory} \tab #get S4 of WeatherHistory\cr }
-#'
-#' generic functions to get/set individual elements follow a format: 'sw' +
-#' file name + '_' + option, e.g.  \itemize{ \item \code{swFiles_Cloud} \item
-#' \code{swProd_Albedo} } Remember tab complete is your friend.
-#'
-#' SOILWAT does not handle missing data. If you have missing data, then you
-#' have to impute yourself or use the built-in Markov weather generator (see
-#' examples for \code{\link{sw_exec}}).
-#'
-#' @return Returns a S4 class of type swInputData. This is a container for the
-#' input S4 objects used to run soilwat. The data for a test project is loaded.
-#' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
-#' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
-#' data input \item \code{\link{dbW_getWeatherData}} and
-#' \code{\link{getWeatherData_folders}} for weather data input }
+#' @seealso \itemize{
+#'   \item \code{\link{sw_exec}} for running a simulation
+#'   \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}}
+#'         for data input
+#'   \item \code{\link{dbW_getWeatherData}} and
+#'         \code{\link{getWeatherData_folders}} for weather data input
+#' }
 #' @examples
 #'
 #' ## ------ Simulation with demonstration data ------------
@@ -379,23 +325,26 @@ has_soilTemp_failed <- function() {
 #' Assign requested values to (scalar) input flags
 #'
 #' @param swIn An object of class \code{\linkS4class{swInputData}}.
-#' @param tag A character string. This string is used to partially match names of parameter
-#'  \code{use} which indicates which of the values should be manipulated.
+#' @param tag A character string. This string is used to partially match names
+#'  of parameter \code{use} which indicates which of the values should be
+#'  manipulated.
 #' @param use A logical named vector.
 #' @param values A vector.
-#' @param fun A character string. Identifies the method to extract and replace values.
+#' @param fun A character string. Identifies the method to extract and replace
+#'   values.
 #' @param reset A logical value.
 #' @param default A scalar value.
 #'
-#' @section Details: If \code{reset} is \code{TRUE}, then function resets flags identified
-#'  by \code{tag} and turned off as identified by \code{use} to \code{default}.
-#   If \code{reset} is \code{FALSE}, then code sets flags identified by \code{tag} and
-#'  turned on as identified by \code{use} to corresponding elements of \code{values};
-#'  other flags are not changed.
+#' @section Details: If \code{reset} is \code{TRUE}, then function resets flags
+#'  identified by \code{tag} and turned off as identified by \code{use} to
+#'  \code{default}. If \code{reset} is \code{FALSE}, then code sets flags
+#'  identified by \code{tag} and turned on as identified by \code{use} to
+#'  corresponding elements of \code{values}; other flags are not changed.
 #'
 #' @return An updated version of \code{swIn}.
 #' @export
-set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE, default = NA) {
+set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE,
+  default = NA) {
 
   if (!inherits(swIn, "swInputData")) {
     stop(paste("ERROR: argument 'swIn' is not a class 'swInputData' object."))

@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swCloud<-}
 \alias{set_swCloud<-}
-\title{set_swCloud<-}
+\title{\code{set_swCloud<-}}
 \usage{
 set_swCloud(object) <- value
 }
@@ -12,7 +12,7 @@ set_swCloud(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-set_swCloud<-
+\code{set_swCloud<-}
 }
 \seealso{
 \code{\linkS4class{swCloud}} and \code{\linkS4class{swInputData}}

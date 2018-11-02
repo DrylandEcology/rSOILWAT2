@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSWC_HistoricList<-}
 \alias{swSWC_HistoricList<-}
-\title{swSWC_HistoricList<-}
+\title{\code{swSWC_HistoricList<-}}
 \usage{
 swSWC_HistoricList(object) <- value
 }
@@ -12,7 +12,7 @@ swSWC_HistoricList(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swSWC_HistoricList<-
+\code{swSWC_HistoricList<-}
 }
 \seealso{
 \code{\linkS4class{swSWC}} and \code{\linkS4class{swInputData}}

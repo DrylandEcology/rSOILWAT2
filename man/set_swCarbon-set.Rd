@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swCarbon<-}
 \alias{set_swCarbon<-}
-\title{set_swCarbon<-}
+\title{\code{set_swCarbon<-}}
 \usage{
 set_swCarbon(object) <- value
 }
@@ -12,7 +12,7 @@ set_swCarbon(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-set_swCarbon<-
+\code{set_swCarbon<-}
 }
 \seealso{
 \code{\linkS4class{swCarbon}} and \code{\linkS4class{swInputData}}

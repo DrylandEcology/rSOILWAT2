@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swMarkov_Conv}
 \alias{swMarkov_Conv}
-\title{swMarkov_Conv}
+\title{\code{swMarkov_Conv}}
 \usage{
 swMarkov_Conv(object)
 }
@@ -10,7 +10,7 @@ swMarkov_Conv(object)
 \item{object}{An object of class \code{\linkS4class{swMarkov}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swMarkov_Conv
+\code{swMarkov_Conv}
 }
 \seealso{
 \code{\linkS4class{swMarkov}} and \code{\linkS4class{swInputData}}

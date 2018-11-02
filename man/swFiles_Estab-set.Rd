@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swFiles_Estab<-}
 \alias{swFiles_Estab<-}
-\title{swFiles_Estab<-}
+\title{\code{swFiles_Estab<-}}
 \usage{
 swFiles_Estab(object) <- value
 }
@@ -12,7 +12,7 @@ swFiles_Estab(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swFiles_Estab<-
+\code{swFiles_Estab<-}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}

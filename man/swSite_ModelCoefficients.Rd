@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSite_ModelCoefficients}
 \alias{swSite_ModelCoefficients}
-\title{swSite_ModelCoefficients}
+\title{\code{swSite_ModelCoefficients}}
 \usage{
 swSite_ModelCoefficients(object)
 }
@@ -10,7 +10,7 @@ swSite_ModelCoefficients(object)
 \item{object}{An object of class \code{\linkS4class{swSite}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swSite_ModelCoefficients
+\code{swSite_ModelCoefficients}
 }
 \seealso{
 \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}

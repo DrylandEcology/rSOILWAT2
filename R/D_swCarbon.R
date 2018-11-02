@@ -20,27 +20,28 @@
 ##############################################
 
 
-#' Class "swCarbon"
+#' Class \code{"swCarbon"}
 #'
-#' Class \code{swCarbon} defines variables that allow \code{SOILWAT2} to simulate the
-#' effects of atmospheric carbon dioxide.
+#' Class \code{swCarbon} defines variables that allow \code{SOILWAT2} to
+#' simulate the effects of atmospheric carbon dioxide.
 #'
 #' @param object An object of class \code{\linkS4class{swCarbon}}.
 #' @param .Object An object of class \code{\linkS4class{swCarbon}}.
 #' @param value A value to assign to a specific slot of the object.
 #' @param ... Further arguments to methods.
 #'
-#' @slot CarbonUseBio Object of class \code{"integer"}, where a value of 1 enables the
-#'   CO2 biomass multiplier.
-#' @slot CarbonUseWUE Object of class \code{"integer"}, where a value of 1 enables the
-#'   CO2 WUE multipler.
-#' @slot Scenario Object of class \code{"character"}, that represents the name of the
-#'   scenario that is being simulated. This slot is not used in rSOILWAT2, but it's
-#'   useful to see what scenario was used in the SOILWAT2 input object.
-#' @slot DeltaYear Object of class \code{"integer"}, that represents the number of years
-#'   in the future that this simulation is being run.
-#' @slot CO2ppm Object of class \code{"matrix"}, that holds years in the first column and
-#'   CO2 ppm concentrations in the second column.
+#' @slot CarbonUseBio Object of class \code{"integer"}, where a value of 1
+#'   enables the \var{CO2} biomass multiplier.
+#' @slot CarbonUseWUE Object of class \code{"integer"}, where a value of 1
+#'   enables the \var{CO2} water-use efficiency \var{WUE} multiplier.
+#' @slot Scenario Object of class \code{"character"}, that represents the name
+#'   of the scenario that is being simulated. This slot is not used in
+#'   \pkg{rSOILWAT2}, but it's useful to see what scenario was used in the
+#'   \pkg{SOILWAT2} input object.
+#' @slot DeltaYear Object of class \code{"integer"}, that represents the number
+#'   of years in the future that this simulation is being run.
+#' @slot CO2ppm Object of class \code{"matrix"}, that holds years in the first
+#'   column and CO2 ppm concentrations in the second column.
 #'
 #' @seealso \code{\linkS4class{swInputData}}
 #'

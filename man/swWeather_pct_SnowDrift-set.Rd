@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swWeather_pct_SnowDrift<-}
 \alias{swWeather_pct_SnowDrift<-}
-\title{swWeather_pct_SnowDrift<-}
+\title{\code{swWeather_pct_SnowDrift<-}}
 \usage{
 swWeather_pct_SnowDrift(object) <- value
 }
@@ -12,7 +12,7 @@ swWeather_pct_SnowDrift(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swWeather_pct_SnowDrift<-
+\code{swWeather_pct_SnowDrift<-}
 }
 \seealso{
 \code{\linkS4class{swWeather}} and \code{\linkS4class{swInputData}}

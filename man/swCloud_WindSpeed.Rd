@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swCloud_WindSpeed}
 \alias{swCloud_WindSpeed}
-\title{swCloud_WindSpeed}
+\title{\code{swCloud_WindSpeed}}
 \usage{
 swCloud_WindSpeed(object)
 }
@@ -10,7 +10,7 @@ swCloud_WindSpeed(object)
 \item{object}{An object of class \code{\linkS4class{swCloud}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swCloud_WindSpeed
+\code{swCloud_WindSpeed}
 }
 \seealso{
 \code{\linkS4class{swCloud}} and \code{\linkS4class{swInputData}}

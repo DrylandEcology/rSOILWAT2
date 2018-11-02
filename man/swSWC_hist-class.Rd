@@ -16,10 +16,12 @@
 
 \item{...}{Further arguments to methods.}
 
-\item{year}{An integer value. The calendar year of the SWC \code{data} object.}
+\item{year}{An integer value. The calendar year of the \var{SWC}
+\code{data} object.}
 
-\item{data}{A 365 x 4 or 366 x 4 matrix representing daily SWC data for one calendar
-\code{year} with columns "doy", "lyr", "swc", "st_err".}
+\item{data}{A 365 x 4 or 366 x 4 matrix representing daily \var{SWC}
+data for one calendar \code{year} with columns \var{doy}, \var{lyr},
+\var{swc}, \var{st_err}.}
 
 \item{object}{An object of class \code{\linkS4class{swSWC_hist}}.}
 

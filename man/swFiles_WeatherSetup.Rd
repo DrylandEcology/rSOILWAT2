@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swFiles_WeatherSetup}
 \alias{swFiles_WeatherSetup}
-\title{swFiles_WeatherSetup}
+\title{\code{swFiles_WeatherSetup}}
 \usage{
 swFiles_WeatherSetup(object)
 }
@@ -10,7 +10,7 @@ swFiles_WeatherSetup(object)
 \item{object}{An object of class \code{\linkS4class{swFiles}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swFiles_WeatherSetup
+\code{swFiles_WeatherSetup}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}

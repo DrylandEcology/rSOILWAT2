@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swCloud_Transmissivity}
 \alias{swCloud_Transmissivity}
-\title{swCloud_Transmissivity}
+\title{\code{swCloud_Transmissivity}}
 \usage{
 swCloud_Transmissivity(object)
 }
@@ -10,7 +10,7 @@ swCloud_Transmissivity(object)
 \item{object}{An object of class \code{\linkS4class{swCloud}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swCloud_Transmissivity
+\code{swCloud_Transmissivity}
 }
 \seealso{
 \code{\linkS4class{swCloud}} and \code{\linkS4class{swInputData}}

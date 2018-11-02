@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swYears<-}
 \alias{set_swYears<-}
-\title{set_swYears<-}
+\title{\code{set_swYears<-}}
 \usage{
 set_swYears(object) <- value
 }
@@ -12,7 +12,7 @@ set_swYears(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-set_swYears<-
+\code{set_swYears<-}
 }
 \seealso{
 \code{\linkS4class{swYears}} and \code{\linkS4class{swInputData}}

@@ -2,52 +2,22 @@
 % Please edit documentation in R/Rsw.R
 \name{sw_inputDataFromFiles}
 \alias{sw_inputDataFromFiles}
-\title{rSOILWAT2 sw_inputDataFromFiles}
+\title{Read simulation input data from files on disk}
 \usage{
 sw_inputDataFromFiles(dir = "", files.in = "files.in")
 }
 \arguments{
-\item{dir}{String. The path to the Project Directory. Use with files.in}
+\item{dir}{A character string. The path to the simulation project directory.}
 
-\item{files.in}{String. The partial path, after project dir path, and file
-name to files.in file.}
+\item{files.in}{A character string. The file name (and path relative to
+\code{dir}) of the \var{files} input file that contains in formation
+about the remaining input files.}
 }
 \value{
-Returns a S4 class of type swInputData. This is a container for the
-input S4 objects used to run soilwat. The data for the given project is
-loaded.
+An object of class \code{\linkS4class{swInputData}}.
 }
 \description{
-Reads in a SoilWat Project's input data.  Returns swInputData Object.
-}
-\details{
-swInputData Object is a S4 object containing slots for all input data.
-Calling sw_inputDataFromFiles generates a new swInputData object with data
-from the Project files given.
-
-The data returned can be directly used to run the simulation if weather Data
-was included in the Project Directory. If weather data was not in the
-project directory then use onGetWeatherData_database or
-onGetWeatherData_folders to obtain weatherDataList and pass both to sw_exec.
-
-swInputData consists of slots for each file that is read in. These slots can
-be accessed via the following functions: \tabular{ll}{ \code{get_Markov}
-\tab #get markov prop and conv\cr \code{get_swCloud} \tab #get cloud\cr
-\code{get_swFiles} \tab #get files.in\cr \code{get_swOUT} \tab #get
-outpusetup.in\cr \code{get_swProd} \tab #get prod.in\cr \code{get_swSite}
-\tab #get site.in\cr \code{get_swSoils} \tab #get soils.in\cr
-\code{get_swSWC} \tab #get swcSetup.in\cr \code{get_swWeather} \tab #get
-weatherSetup.in\cr \code{get_swWeatherData} \tab #get individual year\cr
-\code{get_swYears} \tab #get years.in data object\cr
-\code{get_WeatherHistory} \tab #get S4 of WeatherHistory\cr }
-
-generic functions to get/set individual elements follow a format: 'sw' +
-file name + '_' + option, e.g.  \itemize{ \item \code{swFiles_Cloud} \item
-\code{swProd_Albedo} } Remember tab complete is your friend.
-
-SOILWAT does not handle missing weather data. If you have missing data, then
-you have to impute yourself or use the built-in Markov weather generator
-(see examples for \code{\link{sw_exec}}).
+Read simulation input data from files on disk
 }
 \examples{
 
@@ -67,8 +37,11 @@ str(sw_in2, max.level=2)
 
 }
 \seealso{
-\itemize{ \item \code{\link{sw_exec}} for running a simulation
-\item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
-data input \item \code{\link{dbW_getWeatherData}} and
-\code{\link{getWeatherData_folders}} for weather data input }
+\itemize{
+  \item \code{\link{sw_exec}} for running a simulation
+  \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}}
+        for data input
+  \item \code{\link{dbW_getWeatherData}} and
+        \code{\link{getWeatherData_folders}} for weather data input.
+}
 }

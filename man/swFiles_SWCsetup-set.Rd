@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swFiles_SWCsetup<-}
 \alias{swFiles_SWCsetup<-}
-\title{swFiles_SWCsetup<-}
+\title{\code{swFiles_SWCsetup<-}}
 \usage{
 swFiles_SWCsetup(object) <- value
 }
@@ -12,7 +12,7 @@ swFiles_SWCsetup(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swFiles_SWCsetup<-
+\code{swFiles_SWCsetup<-}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}

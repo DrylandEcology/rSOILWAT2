@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{get_swFiles}
 \alias{get_swFiles}
-\title{get_swFiles}
+\title{\code{get_swFiles}}
 \usage{
 get_swFiles(object)
 }
@@ -10,7 +10,7 @@ get_swFiles(object)
 \item{object}{An object of class \code{\linkS4class{swFiles}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-get_swFiles
+\code{get_swFiles}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}

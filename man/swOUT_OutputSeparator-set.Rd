@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swOUT_OutputSeparator<-}
 \alias{swOUT_OutputSeparator<-}
-\title{swOUT_OutputSeparator<-}
+\title{\code{swOUT_OutputSeparator<-}}
 \usage{
 swOUT_OutputSeparator(object) <- value
 }
@@ -12,7 +12,7 @@ swOUT_OutputSeparator(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swOUT_OutputSeparator<-
+\code{swOUT_OutputSeparator<-}
 }
 \seealso{
 \code{\linkS4class{swOUT}} and \code{\linkS4class{swInputData}}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swFiles_WeatherPrefix<-}
 \alias{swFiles_WeatherPrefix<-}
-\title{swFiles_WeatherPrefix<-}
+\title{\code{swFiles_WeatherPrefix<-}}
 \usage{
 swFiles_WeatherPrefix(object) <- value
 }
@@ -12,7 +12,7 @@ swFiles_WeatherPrefix(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swFiles_WeatherPrefix<-
+\code{swFiles_WeatherPrefix<-}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}

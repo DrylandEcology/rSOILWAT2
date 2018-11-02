@@ -31,9 +31,11 @@
 #' @param .Object An object of class \code{\linkS4class{swSWC_hist}}.
 #' @param file A character string. The file name from which to read.
 #' @param ... Further arguments to methods.
-#' @param year An integer value. The calendar year of the SWC \code{data} object.
-#' @param data A 365 x 4 or 366 x 4 matrix representing daily SWC data for one calendar
-#'    \code{year} with columns "doy", "lyr", "swc", "st_err".
+#' @param year An integer value. The calendar year of the \var{SWC}
+#'   \code{data} object.
+#' @param data A 365 x 4 or 366 x 4 matrix representing daily \var{SWC}
+#'   data for one calendar \code{year} with columns \var{doy}, \var{lyr},
+#'   \var{swc}, \var{st_err}.
 #'
 #' @name swSWC_hist-class
 #' @export
@@ -97,7 +99,7 @@ setMethod("swReadLines", signature = c(object="swSWC_hist",file="character"), fu
 #' @param file A character string. The file name from which to read.
 #' @param value A value to assign to a specific slot of the object.
 #' @param ... Further arguments to methods.
-#' @param year An integer value. The calendar year of the SWC \code{data} object.
+#' @param year An integer value. The calendar year of the \var{SWC} \code{data} object.
 #'
 #' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
 #' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}

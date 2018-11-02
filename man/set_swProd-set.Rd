@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swProd<-}
 \alias{set_swProd<-}
-\title{set_swProd<-}
+\title{\code{set_swProd<-}}
 \usage{
 set_swProd(object) <- value
 }
@@ -12,7 +12,7 @@ set_swProd(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-set_swProd<-
+\code{set_swProd<-}
 }
 \seealso{
 \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}

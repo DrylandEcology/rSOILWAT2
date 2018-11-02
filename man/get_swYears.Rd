@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{get_swYears}
 \alias{get_swYears}
-\title{get_swYears}
+\title{\code{get_swYears}}
 \usage{
 get_swYears(object)
 }
@@ -10,7 +10,7 @@ get_swYears(object)
 \item{object}{An object of class \code{\linkS4class{swYears}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-get_swYears
+\code{get_swYears}
 }
 \seealso{
 \code{\linkS4class{swYears}} and \code{\linkS4class{swInputData}}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swProd_HydrRedstro_use}
 \alias{swProd_HydrRedstro_use}
-\title{swProd_HydrRedstro_use}
+\title{\code{swProd_HydrRedstro_use}}
 \usage{
 swProd_HydrRedstro_use(object)
 }
@@ -10,7 +10,7 @@ swProd_HydrRedstro_use(object)
 \item{object}{An object of class \code{\linkS4class{swProd}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swProd_HydrRedstro_use
+\code{swProd_HydrRedstro_use}
 }
 \seealso{
 \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}

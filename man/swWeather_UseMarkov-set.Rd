@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swWeather_UseMarkov<-}
 \alias{swWeather_UseMarkov<-}
-\title{swWeather_UseMarkov<-}
+\title{\code{swWeather_UseMarkov<-}}
 \usage{
 swWeather_UseMarkov(object) <- value
 }
@@ -12,7 +12,7 @@ swWeather_UseMarkov(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swWeather_UseMarkov<-
+\code{swWeather_UseMarkov<-}
 }
 \seealso{
 \code{\linkS4class{swWeather}} and \code{\linkS4class{swInputData}}

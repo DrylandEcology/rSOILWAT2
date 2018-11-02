@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swOUT<-}
 \alias{set_swOUT<-}
-\title{set_swOUT<-}
+\title{\code{set_swOUT<-}}
 \usage{
 set_swOUT(object) <- value
 }
@@ -12,7 +12,7 @@ set_swOUT(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-set_swOUT<-
+\code{set_swOUT<-}
 }
 \seealso{
 \code{\linkS4class{swOUT}} and \code{\linkS4class{swInputData}}

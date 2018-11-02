@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swFiles_MarkovCov<-}
 \alias{swFiles_MarkovCov<-}
-\title{swFiles_MarkovCov<-}
+\title{\code{swFiles_MarkovCov<-}}
 \usage{
 swFiles_MarkovCov(object) <- value
 }
@@ -12,7 +12,7 @@ swFiles_MarkovCov(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swFiles_MarkovCov<-
+\code{swFiles_MarkovCov<-}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}

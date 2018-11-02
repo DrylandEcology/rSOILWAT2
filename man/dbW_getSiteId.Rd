@@ -9,10 +9,10 @@ dbW_getSiteId(lat = NULL, long = NULL, Labels = NULL,
   ignore.case = FALSE, verbose = FALSE)
 }
 \arguments{
-\item{lat}{A numeric vector or \code{NULL}. The latitude in decimal degrees of WGS84.
+\item{lat}{A numeric vector or \code{NULL}. The latitude in decimal degrees of \var{WGS84}.
 Northern latitude are positive, sites on the southern hemisphere have negative values.}
 
-\item{long}{A numeric vector or \code{NULL}. The longitude in decimal degrees of WGS84.
+\item{long}{A numeric vector or \code{NULL}. The longitude in decimal degrees of \var{WGS84}.
 Eastern longitudes are positive, sites on the western hemisphere have negative values.}
 
 \item{Labels}{A vector of character strings. The names/labels of the queried sites.}
@@ -27,6 +27,6 @@ Extract table keys to connect sites with weather data in the registered weather
 database
 }
 \details{
-The key(s) (Site_id) can be located by either providing a \code{Labels} or
+The key(s) (\var{Site_id}) can be located by either providing a \code{Labels} or
 by providing \code{lat} and \code{long} of the requested site(s).
 }

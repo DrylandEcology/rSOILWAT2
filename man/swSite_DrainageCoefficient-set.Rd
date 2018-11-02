@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSite_DrainageCoefficient<-}
 \alias{swSite_DrainageCoefficient<-}
-\title{swSite_DrainageCoefficient<-}
+\title{\code{swSite_DrainageCoefficient<-}}
 \usage{
 swSite_DrainageCoefficient(object) <- value
 }
@@ -12,7 +12,7 @@ swSite_DrainageCoefficient(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swSite_DrainageCoefficient<-
+\code{swSite_DrainageCoefficient<-}
 }
 \seealso{
 \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}

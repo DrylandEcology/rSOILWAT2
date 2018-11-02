@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swOutput_KEY_TimeStep<-}
 \alias{swOutput_KEY_TimeStep<-}
-\title{swOutput_KEY_TimeStep<-}
+\title{\code{swOutput_KEY_TimeStep<-}}
 \usage{
 swOutput_KEY_TimeStep(object) <- value
 }
@@ -12,7 +12,7 @@ swOutput_KEY_TimeStep(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swOutput_KEY_TimeStep<-
+\code{swOutput_KEY_TimeStep<-}
 }
 \seealso{
 \code{\linkS4class{swOutput}} and \code{\linkS4class{swInputData}}

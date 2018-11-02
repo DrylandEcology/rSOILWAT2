@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swMarkov_Prob<-}
 \alias{swMarkov_Prob<-}
-\title{swMarkov_Prob<-}
+\title{\code{swMarkov_Prob<-}}
 \usage{
 swMarkov_Prob(object) <- value
 }
@@ -12,7 +12,7 @@ swMarkov_Prob(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swMarkov_Prob<-
+\code{swMarkov_Prob<-}
 }
 \seealso{
 \code{\linkS4class{swMarkov}} and \code{\linkS4class{swInputData}}

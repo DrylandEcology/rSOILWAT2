@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swOUT_TimeStep<-}
 \alias{swOUT_TimeStep<-}
-\title{swOUT_TimeStep<-}
+\title{\code{swOUT_TimeStep<-}}
 \usage{
 swOUT_TimeStep(object) <- value
 }
@@ -12,7 +12,7 @@ swOUT_TimeStep(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swOUT_TimeStep<-
+\code{swOUT_TimeStep<-}
 }
 \seealso{
 \code{\linkS4class{swOUT}} and \code{\linkS4class{swInputData}}

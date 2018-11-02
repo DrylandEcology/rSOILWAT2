@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swWeather_MonScalingParams}
 \alias{swWeather_MonScalingParams}
-\title{swWeather_MonScalingParams}
+\title{\code{swWeather_MonScalingParams}}
 \usage{
 swWeather_MonScalingParams(object)
 }
@@ -10,7 +10,7 @@ swWeather_MonScalingParams(object)
 \item{object}{An object of class \code{\linkS4class{swWeather}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swWeather_MonScalingParams
+\code{swWeather_MonScalingParams}
 }
 \seealso{
 \code{\linkS4class{swWeather}} and \code{\linkS4class{swInputData}}

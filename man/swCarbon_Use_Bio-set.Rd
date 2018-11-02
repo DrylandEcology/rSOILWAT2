@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swCarbon_Use_Bio<-}
 \alias{swCarbon_Use_Bio<-}
-\title{swCarbon_Use_Bio<-}
+\title{\code{swCarbon_Use_Bio<-}}
 \usage{
 swCarbon_Use_Bio(object) <- value
 }
@@ -12,7 +12,7 @@ swCarbon_Use_Bio(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swCarbon_Use_Bio<-
+\code{swCarbon_Use_Bio<-}
 }
 \seealso{
 \code{\linkS4class{swCarbon}} and \code{\linkS4class{swInputData}}

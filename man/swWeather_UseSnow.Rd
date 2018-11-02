@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swWeather_UseSnow}
 \alias{swWeather_UseSnow}
-\title{swWeather_UseSnow}
+\title{\code{swWeather_UseSnow}}
 \usage{
 swWeather_UseSnow(object)
 }
@@ -10,7 +10,7 @@ swWeather_UseSnow(object)
 \item{object}{An object of class \code{\linkS4class{swWeather}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swWeather_UseSnow
+\code{swWeather_UseSnow}
 }
 \seealso{
 \code{\linkS4class{swWeather}} and \code{\linkS4class{swInputData}}

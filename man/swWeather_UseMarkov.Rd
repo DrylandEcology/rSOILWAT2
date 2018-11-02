@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swWeather_UseMarkov}
 \alias{swWeather_UseMarkov}
-\title{swWeather_UseMarkov}
+\title{\code{swWeather_UseMarkov}}
 \usage{
 swWeather_UseMarkov(object)
 }
@@ -10,7 +10,7 @@ swWeather_UseMarkov(object)
 \item{object}{An object of class \code{\linkS4class{swWeather}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swWeather_UseMarkov
+\code{swWeather_UseMarkov}
 }
 \seealso{
 \code{\linkS4class{swWeather}} and \code{\linkS4class{swInputData}}

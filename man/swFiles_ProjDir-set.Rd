@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swFiles_ProjDir<-}
 \alias{swFiles_ProjDir<-}
-\title{swFiles_ProjDir<-}
+\title{\code{swFiles_ProjDir<-}}
 \usage{
 swFiles_ProjDir(object) <- value
 }
@@ -12,7 +12,7 @@ swFiles_ProjDir(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swFiles_ProjDir<-
+\code{swFiles_ProjDir<-}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}

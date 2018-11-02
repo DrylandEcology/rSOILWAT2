@@ -15,7 +15,8 @@ dbW_upgrade_to_rSOILWAT2(dbWeatherDataFile, fbackup = NULL,
 
 dbW_upgrade_v31to32(dbWeatherDataFile, fbackup = NULL)
 
-dbW_upgrade_v3to31(dbWeatherDataFile, fbackup = NULL, type_new = "gzip")
+dbW_upgrade_v3to31(dbWeatherDataFile, fbackup = NULL,
+  type_new = "gzip")
 
 dbW_upgrade_v2to3(dbWeatherDataFile, fbackup = NULL)
 
@@ -50,7 +51,7 @@ Weather database upgrade functions
 }
 \section{Details}{
  \code{dbW_upgrade_to_rSOILWAT2} upgrades a weather database that was
-created under'Rsoilwat31' to the current package version 'rSOILWAT2'
+created under \pkg{Rsoilwat31} to the current package version \pkg{rSOILWAT2}
 
  \code{dbW_upgrade_v31to32} upgrades a weather database from version
  '3.1.z' to '3.2.0'

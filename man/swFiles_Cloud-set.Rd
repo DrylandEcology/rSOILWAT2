@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swFiles_Cloud<-}
 \alias{swFiles_Cloud<-}
-\title{swFiles_Cloud<-}
+\title{\code{swFiles_Cloud<-}}
 \usage{
 swFiles_Cloud(object) <- value
 }
@@ -12,7 +12,7 @@ swFiles_Cloud(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swFiles_Cloud<-
+\code{swFiles_Cloud<-}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}

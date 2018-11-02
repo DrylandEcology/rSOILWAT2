@@ -22,15 +22,40 @@
 
 #' Class \code{"swInputData"}
 #'
-#' This class is a container class to the input file S4 objects. The generic functions
-#' listed work on this and the proper sw classes in the container's slots.
+#' This class is a container class to the input file \var{S4} objects. The
+#' generic functions listed work on this and the proper \pkg{rSOILWAT2}
+#' classes in the container's slots.
+#'
+#' \code{\linkS4class{swInputData}} consists of slots for each file that is
+#' read in. These slots can be accessed via the following functions: \itemize{
+#'   \item \code{\link{get_Markov}}
+#'   \item \code{\link{get_swCloud}}
+#'   \item \code{\link{get_swFiles}}
+#'   \item \code{\link{get_swOUT}}
+#'   \item \code{\link{get_swProd}}
+#'   \item \code{\link{get_swSite}}
+#'   \item \code{\link{get_swSoils}}
+#'   \item \code{\link{get_swSWC}}
+#'   \item \code{\link{get_swWeather}}
+#'   \item \code{\link{get_swWeatherData}}
+#'   \item \code{\link{get_swYears}}
+#'   \item \code{\link{get_WeatherHistory}}
+#' }
+#'
+#' Generic methods to get/set individual elements follow a format:
+#' \code{"sw" + filename + "_" + option}, e.g.
+#' \itemize{
+#'   \item \code{\link{swFiles_Cloud}}
+#'   \item \code{\link{swProd_Albedo}}
+#' }
 #'
 #' @param object An object of class \code{\linkS4class{swInputData}}.
 #' @param .Object An object of class \code{\linkS4class{swInputData}}.
 #' @param value A value to assign to a specific slot of the object.
 #' @param file A character string. The file name from which to read.
 #' @param ... Further arguments to methods.
-#' @param year An integer value. The calendar year of the weather or SWC \code{data} object.
+#' @param year An integer value. The calendar year of the weather or
+#'   \var{SWC} \code{data} object.
 #' @param vegtype The name or index of the vegetation type.
 #'
 #' @seealso \code{\linkS4class{swFiles}} \code{\linkS4class{swYears}}
@@ -72,7 +97,7 @@ setValidity("swInputData", function(object) {
 })
 
 
-# Methods for slot 'files'
+# Methods for slot \code{files}
 #' @rdname swInputData-class
 #' @export
 setMethod("get_swFiles", "swInputData", function(object) object@files)
@@ -239,7 +264,7 @@ setReplaceMethod("swFiles_OutputPrefix", signature = "swInputData", function(obj
 })
 
 
-# Methods for slot 'years'
+# Methods for slot \code{years}
 #' @rdname swInputData-class
 #' @export
 setMethod("get_swYears", "swInputData", function(object) object@years)
@@ -298,7 +323,7 @@ setReplaceMethod("swYears_isNorth", signature = "swInputData", function(object, 
 })
 
 
-# Methods for slot 'cloud'
+# Methods for slot \code{cloud}
 #' @rdname swInputData-class
 #' @export
 setMethod("get_swCloud", "swInputData", function(object) object@cloud)
@@ -311,7 +336,7 @@ setReplaceMethod("set_swCloud", signature = "swInputData", function(object, valu
 })
 
 
-# Methods for slot 'weather'
+# Methods for slot \code{weather}
 #' @rdname swInputData-class
 #' @export
 setMethod("get_swWeather", "swInputData", function(object) object@weather)
@@ -389,7 +414,7 @@ setReplaceMethod("swWeather_MonScalingParams", signature = "swInputData", functi
 
 
 
-# Methods for slot 'cloud'
+# Methods for slot \code{cloud}
 #' @rdname swInputData-class
 #' @export
 setMethod("get_swCloud", "swInputData", function(object) object@cloud)
@@ -447,7 +472,7 @@ setReplaceMethod("swCloud_SnowDensity", signature = "swInputData", function(obje
 })
 
 
-# Methods for slot 'markov'
+# Methods for slot \code{markov}
 #' @rdname swInputData-class
 #' @export
 setMethod("get_Markov", "swInputData", function(object) object@markov)
@@ -478,7 +503,7 @@ setReplaceMethod("swMarkov_Conv", signature = "swInputData", function(object, va
 })
 
 
-# Methods for slot 'weatherHistory'
+# Methods for slot \code{weatherHistory}
 #' @rdname swInputData-class
 #' @export
 setMethod("get_WeatherHistory", "swInputData", function(object) object@weatherHistory)
@@ -551,7 +576,7 @@ setReplaceMethod("set_swWeatherData", signature = c(object="list",value="swWeath
 		})
 
 
-# Methods for slot 'prod'
+# Methods for slot \code{prod}
 #' @rdname swInputData-class
 #' @export
 setMethod("get_swProd", "swInputData", function(object) object@prod)
@@ -727,7 +752,7 @@ setReplaceMethod("swProd_MonProd_forb", signature = "swInputData", function(obje
 })
 
 
-# Methods for slot 'site'
+# Methods for slot \code{site}
 #' @rdname swInputData-class
 #' @export
 setMethod("get_swSite", "swInputData", function(object) slot(object, "site"))
@@ -839,7 +864,7 @@ setReplaceMethod("swSite_TranspirationRegions", signature = "swInputData", funct
 })
 
 
-# Methods for slot 'soils'
+# Methods for slot \code{soils}
 #' @rdname swInputData-class
 #' @export
 setMethod("get_swSoils", "swInputData", function(object) object@soils)
@@ -863,7 +888,7 @@ setReplaceMethod("swSoils_Layers", signature = c(object = "swInputData", value =
 })
 
 
-# Methods for slot 'swc'
+# Methods for slot \code{swc}
 #' @rdname swInputData-class
 #' @export
 setMethod("get_swSWC", "swInputData", function(object) object@swc)
@@ -949,7 +974,7 @@ setReplaceMethod("swSWC_HistoricData", signature = c(object = "swInputData", val
 		})
 
 
-# Methods for slot 'carbon'
+# Methods for slot \code{carbon}
 #' @rdname swInputData-class
 #' @export
 setMethod("get_swCarbon", "swInputData", function(object) object@carbon)
@@ -1008,7 +1033,7 @@ setReplaceMethod("swCarbon_CO2ppm", signature = "swInputData", function(object, 
 ##
 
 
-# Methods for slot 'output'
+# Methods for slot \code{output}
 #' @rdname swInputData-class
 #' @export
 setMethod("get_swOUT", "swInputData", function(object) object@output)
@@ -1045,7 +1070,7 @@ setReplaceMethod("swOUT_OutputSeparator", signature = "swInputData", function(ob
 })
 
 
-# Methods for slot 'log'
+# Methods for slot \code{log}
 #' @rdname swInputData-class
 #' @export
 setReplaceMethod("swLog_setLine", "swInputData", function(object, value) {

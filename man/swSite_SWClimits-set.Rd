@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSite_SWClimits<-}
 \alias{swSite_SWClimits<-}
-\title{swSite_SWClimits<-}
+\title{\code{swSite_SWClimits<-}}
 \usage{
 swSite_SWClimits(object) <- value
 }
@@ -12,7 +12,7 @@ swSite_SWClimits(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swSite_SWClimits<-
+\code{swSite_SWClimits<-}
 }
 \seealso{
 \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}

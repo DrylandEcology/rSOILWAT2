@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSWC_Method<-}
 \alias{swSWC_Method<-}
-\title{swSWC_Method<-}
+\title{\code{swSWC_Method<-}}
 \usage{
 swSWC_Method(object) <- value
 }
@@ -12,7 +12,7 @@ swSWC_Method(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swSWC_Method<-
+\code{swSWC_Method<-}
 }
 \seealso{
 \code{\linkS4class{swSWC}} and \code{\linkS4class{swInputData}}

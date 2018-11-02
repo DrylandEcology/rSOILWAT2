@@ -41,7 +41,7 @@ dbW_has_weatherData(Site_ids, Scenario_ids)
 \code{dbW_has_scenarios} returns a logical vector of the length of queried
  Scenarios.
 
-code{dbW_has_weatherData} returns a logical matrix with rows corresponding to
+\code{dbW_has_weatherData} returns a logical matrix with rows corresponding to
  queried sites and columns to queried scenarios.
 }
 \description{

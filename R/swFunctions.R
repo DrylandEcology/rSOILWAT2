@@ -18,7 +18,7 @@
 
 
 ## ------SQLite weather database functions
-# Daily weather data is stored in database as SQL-blob of a list of R objects of class 'swWeatherData'
+# Daily weather data is stored in database as SQL-blob of a list of R objects of class \code{\linkS4class{swWeatherData}}
 
 #' Check whether registered weather database connection is valid
 #' @return A logical value.
@@ -127,7 +127,7 @@ dbW_has_scenarios <- function(Scenarios, ignore.case = FALSE) {
 
 #' @rdname check_content
 #' @section Details: \code{dbW_has_weatherData} checks whether weather data are available.
-#' @return code{dbW_has_weatherData} returns a logical matrix with rows corresponding to
+#' @return \code{dbW_has_weatherData} returns a logical matrix with rows corresponding to
 #'  queried sites and columns to queried scenarios.
 #' @export
 dbW_has_weatherData <- function(Site_ids, Scenario_ids) {
@@ -152,12 +152,12 @@ dbW_has_weatherData <- function(Site_ids, Scenario_ids) {
 #' Extract table keys to connect sites with weather data in the registered weather
 #' database
 #'
-#' @details The key(s) (Site_id) can be located by either providing a \code{Labels} or
+#' @details The key(s) (\var{Site_id}) can be located by either providing a \code{Labels} or
 #' by providing \code{lat} and \code{long} of the requested site(s).
 #'
-#' @param lat A numeric vector or \code{NULL}. The latitude in decimal degrees of WGS84.
+#' @param lat A numeric vector or \code{NULL}. The latitude in decimal degrees of \var{WGS84}.
 #'	Northern latitude are positive, sites on the southern hemisphere have negative values.
-#' @param long A numeric vector or \code{NULL}. The longitude in decimal degrees of WGS84.
+#' @param long A numeric vector or \code{NULL}. The longitude in decimal degrees of \var{WGS84}.
 #'	Eastern longitudes are positive, sites on the western hemisphere have negative values.
 #' @inheritParams check_content
 #'
@@ -233,7 +233,7 @@ dbW_getScenarioId <- function(Scenario, ignore.case = FALSE, verbose = FALSE) {
 #'
 #' @return A list with two elements \code{site_id} and \code{scenario_id}.
 #'
-#' extern
+#' @export
 dbW_getIDs <- function(site_id = NULL, site_label = NULL, long = NULL, lat = NULL,
   scenario = NULL, scenario_id = NULL, add_if_missing = FALSE, ignore.case = FALSE,
   verbose = FALSE) {
@@ -349,39 +349,31 @@ get_years_from_weatherData <- function(wd) {
 
 #' Extracts daily weather data from a registered weather database
 #'
-#' Reads weather data from database. Returns list of weather data.
-#'
 #' Weather data for the soil water simulation run can be stored in the input
 #' data or it can be separate to keep the input data size down for multiple
 #' variations of the same site. This function is used to return the weather
-#' data from a pre defined weather database. Using the database was faster then
+#' data from a predefined weather database. Using the database was faster then
 #' reading in multiple weather files from disk.
 #'
-#' SOILWAT does not handle missing weather data. If you have missing data, then
-#' you have to impute yourself or use the built-in Markov weather generator
-#' (see examples for \code{\link{sw_exec}}).
-#'
-#' The output from this function can be passed directly to sw_exec with input
-#' data.
+#' \pkg{SOILWAT2} does not handle missing weather data. If you have missing
+#' data, then you have to impute yourself or use the built-in Markov
+#' weather generator (see examples for \code{\link{sw_exec}}).
 #'
 #' @param Site_id Numeric. Used to identify site and extract weather data.
 #' @param lat Numeric. Latitude used with longitude to identify site id if
-#' Site_id is missing.
+#'   \code{Site_id} is missing.
 #' @param long Numeric. Longitude and Latitude are used to identify site if
-#' Site_id is missing.
+#'   \code{Site_id} is missing.
 #' @param Label A character string. A site label.
 #' @param startYear Numeric. Extracted weather data will start with this year.
 #' @param endYear Numeric. Extracted weather data will end with this year.
 #' @param Scenario A character string.
 #'
-#' @return Returns weather data as list. Each element contains data for one
-#' year.
-#' @seealso \itemize{
-#'    \item \code{\link{sw_exec}} for running a simulation
-#'    \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
-#' data input \item \code{\link{dbW_getWeatherData}} and
-#' \code{\link{getWeatherData_folders}} for weather data input
-#' }
+#' @return Returns weather data as list. Each element is an object of class
+#'   \code{\linkS4class{swWeatherData}} and contains data for one year.
+#'
+#' @seealso \code{\link{getWeatherData_folders}}
+#'
 #' @export
 dbW_getWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL, Label = NULL,
 	startYear = NULL, endYear = NULL, Scenario = "Current", Scenario_id = NULL,
@@ -498,9 +490,9 @@ dbW_setConnection <- function(dbFilePath, create_if_missing = FALSE, check_versi
 	invisible(dbW_IsValid())
 }
 
-#' De-registers/deconnects a SQLite weather database from the package
-#' @return An invisible logical value indicating success with \code{TRUE} and failure
-#'  with \code{FALSE}.
+#' Disconnects a SQLite weather database from the package
+#' @return An invisible logical value indicating success with \code{TRUE} and
+#'  failure with \code{FALSE}.
 #' @export
 dbW_disconnectConnection <- function() {
 	res <- if (dbW_IsValid()) {
@@ -517,8 +509,8 @@ dbW_disconnectConnection <- function() {
 #'
 #' @inheritParams check_content
 #' @inheritParams dbW_createDatabase
-#' @return An invisible logical value indicating success with \code{TRUE} and failure
-#'  with \code{FALSE}.
+#' @return An invisible logical value indicating success with \code{TRUE} and
+#'  failure with \code{FALSE}.
 #' @export
 dbW_addSites <- function(site_data, ignore.case = FALSE, verbose = FALSE) {
 	stopifnot(dbW_IsValid())
@@ -726,22 +718,22 @@ dbW_addWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL,
 
 #' Create a weather database
 #'
-#' @section Details: A rSOILWAT2 weather database has the following format: \describe{
-#'   \item{Table 'Meta'}{contains two fields 'Desc' and 'Value' which contain \itemize{
-#'      \item the records 'Version' and 'Compression_type'}}
-#'   \item{Table 'Sites'}{contains four fields 'Site_id', 'Latitude', 'Longitude', and
-#'      'Label'}
-#'   \item{Table 'WeatherData'}{contains six fields 'wdid' (the ID of the weather data
-#'      record), 'Site_id', 'Scenario' (i.e., the ID of the scenario), 'StartYear',
-#'      'EndYear', and 'data'}
-#'   \item{Table 'Scenarios'}{contains two fields 'id' and 'Scenario' (i.e., the scenario
+#' @section Details: A \pkg{rSOILWAT2} weather database has the following format: \describe{
+#'   \item{Table \var{Meta}}{contains two fields \var{Desc} and \var{Value} which contain \itemize{
+#'      \item the records \var{Version} and \var{Compression_type}}}
+#'   \item{Table \var{Sites}}{contains four fields \var{Site_id}, \var{Latitude}, \var{Longitude}, and
+#'      \var{Label}}
+#'   \item{Table \var{WeatherData}}{contains six fields \var{wdid} (the ID of the weather data
+#'      record), \var{Site_id}, \var{Scenario} (i.e., the ID of the scenario), \var{StartYear},
+#'      \var{EndYear}, and \var{data}}
+#'   \item{Table \var{Scenarios}}{contains two fields \var{id} and \var{Scenario} (i.e., the scenario
 #'      name)}
 #' }
 #'
 #' @param dbFilePath A character string. The file path of the weather database. This will
 #'  be a file of type \code{sqlite3}. In-memory databases are not supported.
-#' @param site_data A data.frame. The site data with column names "Latitude", "Longitude",
-#'  and "Label".
+#' @param site_data A data.frame. The site data with column names \var{Latitude}, \var{Longitude},
+#'  and \var{Label}.
 #' @param Scenarios A vector of character strings. The climate scenarios of which the
 #'  first one is enforced to be \code{scen_ambient}.
 #' @param scen_ambient A character string. The first/default climate scenario.
@@ -890,12 +882,13 @@ dbW_deleteSiteData <- function(Site_id, Scenario_id = NULL) {
 ## ------ Conversion of weather data formats
 #' Conversion: (Compressed) raw vector (e.g., SQL-retrieved blob) to (uncompressed) object
 #'
-#' The rSOILWAT2 SQlite-DB which manages daily weather data (each as a list of elements
-#' of class 'swWeatherData'), uses internally (compressed) blobs. This function is used
-#' to convert the blob object to the object used by rSOILWAT2's simulation functions.
+#' The \pkg{rSOILWAT2} SQLite-DB which manages daily weather data (each as a list of elements
+#' of class \code{\linkS4class{swWeatherData}}), uses internally (compressed) blobs. This function is used
+#' to convert the blob object to the object used by \pkg{rSOILWAT2}'s simulation functions.
 #'
 #' @param data_blob A raw vector
-#' @param type A character string. One of c("gzip", "bzip2", "xz", "none").
+#' @param type A character string. One of
+#'   \code{c("gzip", "bzip2", "xz", "none")}.
 #'
 #' @seealso \code{\link{memDecompress}}, \code{\link{unserialize}}
 #' @export
@@ -911,15 +904,18 @@ dbW_blob_to_weatherData <- function(data_blob, type = "gzip") {
 	unserialize(memDecompress(data_blob, type = type))
 }
 
-#' Conversion: R object to (compressed) SQL-blob-ready character vector
+#' Conversion: R object to (compressed) \var{SQL-blob-ready} character vector
 #'
-#' The rSOILWAT2 SQLite-DB which manages daily weather data (each as a list of elements
-#' of class 'swWeatherData'), uses internally (compressed) blobs. This function is used
-#' to a list of daily weather data used by rSOILWAT2's simulation functions to a blob object
+#' The \pkg{rSOILWAT2} database which manages daily weather data (each as a
+#' list of elements of class \code{\linkS4class{swWeatherData}}), uses
+#' internally (compressed) blobs. This function is used to a list of daily
+#' weather data used by \pkg{rSOILWAT2}'s simulation functions to a blob object
 #' which can be inserted into a SQLite DB.
 #'
-#' @param weatherData A list of elements of class 'swWeatherData' or any suitable object.
-#' @param type A character string. One of c("gzip", "bzip2", "xz", "none").
+#' @param weatherData A list of elements of class
+#'   \code{\linkS4class{swWeatherData}} or any suitable object.
+#' @param type A character string. One of
+#'   \code{c("gzip", "bzip2", "xz", "none")}.
 #'
 #' @seealso \code{\link[base]{memCompress}}, \code{\link{serialize}}
 #' @export
@@ -929,37 +925,26 @@ dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
 
 
 
-#----- Conversion: reading of SOILWAT input text files to object of class 'swWeatherData'
+#----- Conversion: reading of SOILWAT input text files to object of class \code{\linkS4class{swWeatherData}}
 
-#' rSOILWAT2 getWeatherData_folders
+#' Reads daily weather data from files
 #'
-#' Reads weather data from files.  Returns list of weather data.
-#'
-#' Weather data for the soil water simulation run can be stored in the input
-#' data or it can be separate to keep the input data size down for multiple
-#' variations of the same site. This function is used to return the weather
-#' data from folders.  The other option is to use onGetWeatherData_database.
-#'
-#' SOILWAT does not handle missing weather data. If you have missing data, then
+#' \pkg{SOILWAT2} does not handle missing weather data. If you have missing data, then
 #' you have to impute yourself or use the built-in Markov weather generator
 #' (see examples for \code{\link{sw_exec}}).
 #'
-#' The output from this function can be passed directly to sw_exec with input
-#' data.
-#'
-#' @param LookupWeatherFolder String Path. Path to the LookupWeatherFolder
-#' location.
-#' @param weatherDirName String. Name of the folder containing weather data
-#' files.
-#' @param filebasename String. File prefix for weather data. Usually 'weath'.
+#' @param LookupWeatherFolder A character string. The path to the parent folder
+#'   of \code{weatherDirName}.
+#' @param weatherDirName String. Name of the folder with
+#'   the daily weather data files.
+#' @param filebasename String. File prefix for weather data. Usually \var{weath}.
 #' @param startYear Numeric. Extracted weather data will start with this year.
 #' @param endYear Numeric. Extracted weather data will end with this year.
-#' @return Returns weather data as list. Each element contains data for one
-#' year.
-#' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
-#' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
-#' data input \item \code{\link{dbW_getWeatherData}} and
-#' \code{\link{getWeatherData_folders}} for weather data input }
+#'
+#' @return A list of elements of class \code{\linkS4class{swWeatherData}}.
+#'
+#' @seealso \code{\link{dbW_getWeatherData}}
+#'
 #' @examples
 #'
 #' path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
@@ -1013,7 +998,7 @@ getWeatherData_folders <- function(LookupWeatherFolder, weatherDirName = NULL,
 	weathDataList
 }
 
-# Conversion: object of class 'swWeatherData' to data.frame
+#' Convert an object of class \code{\linkS4class{swWeatherData}} to a data.frame
 #' @export
 dbW_weatherData_to_dataframe <- function(weatherData){
 	do.call(rbind, lapply(weatherData, FUN=function(x) {
@@ -1023,7 +1008,8 @@ dbW_weatherData_to_dataframe <- function(weatherData){
 						}))
 }
 
-# Conversion: object of class 'swWeatherData' to matrix of monthly values (mean Tmax, mean Tmin, sum PPT)
+#' Conversion: object of class \code{\linkS4class{swWeatherData}} to
+#' matrix of monthly values (\var{mean Tmax}, \var{mean Tmin}, \var{sum PPT})
 #' @export
 dbW_weatherData_to_monthly <- function(dailySW) {
 	monthly <- matrix(NA, nrow = length(dailySW) * 12, ncol = 5, dimnames = list(NULL, c("Year", "Month", "Tmax_C", "Tmin_C", "PPT_cm")))
@@ -1040,7 +1026,8 @@ dbW_weatherData_to_monthly <- function(dailySW) {
 	monthly
 }
 
-# Conversion: object of daily weather data.frame to matrix of monthly values (mean Tmax, mean Tmin, sum PPT)
+#' Conversion: object of daily weather data.frame to matrix of monthly values
+#' (\var{mean Tmax}, \var{mean Tmin}, \var{sum PPT})
 #' @export
 dbW_dataframe_to_monthly <- function(dailySW) {
   temp <- apply(dailySW[, c("Year", "DOY")], 1, paste, collapse = "-")
@@ -1095,7 +1082,7 @@ get_years_from_weatherDF <- function(weatherDF, years, weatherDF_dataColumns){
 }
 
 
-# Conversion: data.frame to object of class 'swWeatherData'
+#' Conversion: data.frame to object of class \code{\linkS4class{swWeatherData}}
 #' @export
 dbW_dataframe_to_weatherData <- function(weatherDF, years=NULL, weatherDF_dataColumns=c("DOY", "Tmax_C", "Tmin_C", "PPT_cm"), round = 2){
 	if(!(length(weatherDF_dataColumns) == 4) || !all(weatherDF_dataColumns %in% colnames(weatherDF)))
@@ -1119,7 +1106,8 @@ dbW_dataframe_to_weatherData <- function(weatherDF, years=NULL, weatherDF_dataCo
 }
 
 
-# Conversion: object of class 'swWeatherData' or data.frame to SOILWAT input text files
+#' Conversion: object of class \code{\linkS4class{swWeatherData}} or
+#' data.frame to \pkg{SOILWAT} input text files
 #' @export
 dbW_weather_to_SOILWATfiles <- function(path, site.label, weatherData=NULL, weatherDF=NULL, years=NULL, weatherDF_dataColumns=c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")){
 	stopifnot(is.null(weatherData) || is.null(weatherDF))

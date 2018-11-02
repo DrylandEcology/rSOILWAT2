@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swWeather_DaysRunningAverage}
 \alias{swWeather_DaysRunningAverage}
-\title{swWeather_DaysRunningAverage}
+\title{\code{swWeather_DaysRunningAverage}}
 \usage{
 swWeather_DaysRunningAverage(object)
 }
@@ -10,7 +10,7 @@ swWeather_DaysRunningAverage(object)
 \item{object}{An object of class \code{\linkS4class{swWeather}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swWeather_DaysRunningAverage
+\code{swWeather_DaysRunningAverage}
 }
 \seealso{
 \code{\linkS4class{swWeather}} and \code{\linkS4class{swInputData}}

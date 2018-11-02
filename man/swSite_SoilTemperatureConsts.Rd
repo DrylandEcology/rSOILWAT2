@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSite_SoilTemperatureConsts}
 \alias{swSite_SoilTemperatureConsts}
-\title{swSite_SoilTemperatureConsts}
+\title{\code{swSite_SoilTemperatureConsts}}
 \usage{
 swSite_SoilTemperatureConsts(object)
 }
@@ -10,7 +10,7 @@ swSite_SoilTemperatureConsts(object)
 \item{object}{An object of class \code{\linkS4class{swSite}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swSite_SoilTemperatureConsts
+\code{swSite_SoilTemperatureConsts}
 }
 \seealso{
 \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}

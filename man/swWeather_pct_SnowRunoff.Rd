@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swWeather_pct_SnowRunoff}
 \alias{swWeather_pct_SnowRunoff}
-\title{swWeather_pct_SnowRunoff}
+\title{\code{swWeather_pct_SnowRunoff}}
 \usage{
 swWeather_pct_SnowRunoff(object)
 }
@@ -10,7 +10,7 @@ swWeather_pct_SnowRunoff(object)
 \item{object}{An object of class \code{\linkS4class{swWeather}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swWeather_pct_SnowRunoff
+\code{swWeather_pct_SnowRunoff}
 }
 \seealso{
 \code{\linkS4class{swWeather}} and \code{\linkS4class{swInputData}}

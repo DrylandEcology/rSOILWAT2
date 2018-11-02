@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSWC_FirstYear}
 \alias{swSWC_FirstYear}
-\title{swSWC_FirstYear}
+\title{\code{swSWC_FirstYear}}
 \usage{
 swSWC_FirstYear(object)
 }
@@ -10,7 +10,7 @@ swSWC_FirstYear(object)
 \item{object}{An object of class \code{\linkS4class{swSWC}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swSWC_FirstYear
+\code{swSWC_FirstYear}
 }
 \seealso{
 \code{\linkS4class{swSWC}} and \code{\linkS4class{swInputData}}

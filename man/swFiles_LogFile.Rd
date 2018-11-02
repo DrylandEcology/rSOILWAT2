@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swFiles_LogFile}
 \alias{swFiles_LogFile}
-\title{swFiles_LogFile}
+\title{\code{swFiles_LogFile}}
 \usage{
 swFiles_LogFile(object)
 }
@@ -10,7 +10,7 @@ swFiles_LogFile(object)
 \item{object}{An object of class \code{\linkS4class{swFiles}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swFiles_LogFile
+\code{swFiles_LogFile}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}

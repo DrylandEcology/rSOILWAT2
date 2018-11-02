@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSite_IntrinsicSiteParams<-}
 \alias{swSite_IntrinsicSiteParams<-}
-\title{swSite_IntrinsicSiteParams<-}
+\title{\code{swSite_IntrinsicSiteParams<-}}
 \usage{
 swSite_IntrinsicSiteParams(object) <- value
 }
@@ -12,7 +12,7 @@ swSite_IntrinsicSiteParams(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swSite_IntrinsicSiteParams<-
+\code{swSite_IntrinsicSiteParams<-}
 }
 \seealso{
 \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}

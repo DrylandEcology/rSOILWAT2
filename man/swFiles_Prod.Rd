@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swFiles_Prod}
 \alias{swFiles_Prod}
-\title{swFiles_Prod}
+\title{\code{swFiles_Prod}}
 \usage{
 swFiles_Prod(object)
 }
@@ -10,7 +10,7 @@ swFiles_Prod(object)
 \item{object}{An object of class \code{\linkS4class{swFiles}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swFiles_Prod
+\code{swFiles_Prod}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}

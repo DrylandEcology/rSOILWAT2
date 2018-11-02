@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swOutput_KEY_Columns}
 \alias{swOutput_KEY_Columns}
-\title{swOutput_KEY_Columns}
+\title{\code{swOutput_KEY_Columns}}
 \usage{
 swOutput_KEY_Columns(object)
 }
@@ -10,7 +10,7 @@ swOutput_KEY_Columns(object)
 \item{object}{An object of class \code{\linkS4class{swOutput}} or \code{\linkS4class{swInputData}}.}
 }
 \description{
-swOutput_KEY_Columns
+\code{swOutput_KEY_Columns}
 }
 \seealso{
 \code{\linkS4class{swOutput}} and \code{\linkS4class{swInputData}}

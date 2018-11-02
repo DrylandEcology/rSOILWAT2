@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swOutput_KEY_Period<-}
 \alias{swOutput_KEY_Period<-}
-\title{swOutput_KEY_Period<-}
+\title{\code{swOutput_KEY_Period<-}}
 \usage{
 swOutput_KEY_Period(object, index) <- value
 }
@@ -12,7 +12,7 @@ swOutput_KEY_Period(object, index) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swOutput_KEY_Period<-
+\code{swOutput_KEY_Period<-}
 }
 \seealso{
 \code{\linkS4class{swOutput}} and \code{\linkS4class{swInputData}}

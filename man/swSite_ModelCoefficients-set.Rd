@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSite_ModelCoefficients<-}
 \alias{swSite_ModelCoefficients<-}
-\title{swSite_ModelCoefficients<-}
+\title{\code{swSite_ModelCoefficients<-}}
 \usage{
 swSite_ModelCoefficients(object) <- value
 }
@@ -12,7 +12,7 @@ swSite_ModelCoefficients(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swSite_ModelCoefficients<-
+\code{swSite_ModelCoefficients<-}
 }
 \seealso{
 \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}

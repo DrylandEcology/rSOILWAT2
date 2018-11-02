@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swOutput_setKEY<-}
 \alias{swOutput_setKEY<-}
-\title{swOutput_setKEY<-}
+\title{\code{swOutput_setKEY<-}}
 \usage{
 swOutput_setKEY(object, index) <- value
 }
@@ -12,7 +12,7 @@ swOutput_setKEY(object, index) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swOutput_setKEY<-
+\code{swOutput_setKEY<-}
 }
 \seealso{
 \code{\linkS4class{swOutput}} and \code{\linkS4class{swInputData}}

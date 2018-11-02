@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swCloud_SnowDensity<-}
 \alias{swCloud_SnowDensity<-}
-\title{swCloud_SnowDensity<-}
+\title{\code{swCloud_SnowDensity<-}}
 \usage{
 swCloud_SnowDensity(object) <- value
 }
@@ -12,7 +12,7 @@ swCloud_SnowDensity(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swCloud_SnowDensity<-
+\code{swCloud_SnowDensity<-}
 }
 \seealso{
 \code{\linkS4class{swCloud}} and \code{\linkS4class{swInputData}}

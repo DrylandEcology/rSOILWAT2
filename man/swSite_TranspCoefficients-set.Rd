@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSite_TranspCoefficients<-}
 \alias{swSite_TranspCoefficients<-}
-\title{swSite_TranspCoefficients<-}
+\title{\code{swSite_TranspCoefficients<-}}
 \usage{
 swSite_TranspCoefficients(object) <- value
 }
@@ -12,7 +12,7 @@ swSite_TranspCoefficients(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swSite_TranspCoefficients<-
+\code{swSite_TranspCoefficients<-}
 }
 \seealso{
 \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}

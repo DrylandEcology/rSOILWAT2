@@ -33,7 +33,7 @@
 #' @param ... Further arguments to methods.
 #' @param year An integer value. The calendar year of the weather \code{data} object.
 #' @param data A 365 x 4 or 366 x 4 matrix representing daily weather data for one calendar
-#'    \code{year} with columns DOY, Tmax_C, Tmin_C, and PPT_cm.
+#'    \code{year} with columns \var{DOY}, \var{Tmax_C}, \var{Tmin_C}, and \var{PPT_cm}.
 #'
 #' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
 #' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
