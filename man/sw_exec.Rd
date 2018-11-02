@@ -91,15 +91,16 @@ str(sw_in2, max.level = 2)
 sw_out2 <- sw_exec(inputData = sw_in2, quiet = TRUE)
 
 
-## ------ Simulation with data prepared beforehand and separate weather data ------------
+## ------ Simulation with data prepared beforehand and separate weather data
 ## Read inputs from files on disk
 sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 
-## Read forcing weather data from files on disk (there are also functions to set up a
-##   SQLite database for the weather data)
-sw_weath3 <- getWeatherData_folders(LookupWeatherFolder=file.path(path_demo, "Input"),
-   weatherDirName = "data_weather", filebasename = "weath", startYear = 1979,
-   endYear = 2010)
+## Read forcing weather data from files on disk (there are also functions
+##   to set up a SQLite database for the weather data)
+sw_weath3 <- getWeatherData_folders(
+   LookupWeatherFolder = file.path(path_demo, "Input"),
+   weatherDirName = "data_weather", filebasename = "weath",
+   startYear = 1979, endYear = 2010)
 
 ## List of the slots of the input objects of class 'swWeatherData'
 str(sw_weath3, max.level = 1)

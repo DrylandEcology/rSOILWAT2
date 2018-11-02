@@ -3,11 +3,13 @@
 \name{set_swProd}
 \alias{set_swProd}
 \title{\code{set_swProd}
-Need to define and export this generic method -- otherwise, \code{\link{set_swProd<-}} doesn't work.}
+Need to define and export this generic method -- otherwise,
+\code{\link{set_swProd<-}} doesn't work.}
 \usage{
 set_swProd(object, value)
 }
 \description{
 \code{set_swProd}
-Need to define and export this generic method -- otherwise, \code{\link{set_swProd<-}} doesn't work.
+Need to define and export this generic method -- otherwise,
+\code{\link{set_swProd<-}} doesn't work.
 }

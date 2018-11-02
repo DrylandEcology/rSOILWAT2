@@ -2,8 +2,8 @@
 #'
 #' The package \pkg{rSOILWAT2} is a R implementation of \pkg{SOILWAT2}
 #' Modeling Software.  The C code was converted into a library with
-#' input/output functions to R. \pkg{SOILWAT2} is a simulator of the dynamics of soil
-#' water. The input data structure is \var{S4}. Generic functions that
+#' input/output functions to R. \pkg{SOILWAT2} is a simulator of the dynamics
+#' of soil water. The input data structure is \var{S4}. Generic functions that
 #' apply to the input container or individual object control setting/getting
 #' input data. Output data is in the form of lists.
 #'
@@ -49,9 +49,11 @@ rSW2_glovars <- new.env()
 
 ##------ Import from other packages
 ## Package uses S3/S4 classes - they are defined in package:methods
-#' @importFrom methods slot slot<- as as<- initialize new slotNames inheritedSlotNames getSlots validObject callNextMethod
+#' @importFrom methods slot slot<- as as<- initialize new slotNames
+#'   inheritedSlotNames getSlots validObject callNextMethod
 #' @importFrom stats aggregate na.exclude
-#' @importFrom utils data head packageDescription read.csv read.table str tail write.table
+#' @importFrom utils data head packageDescription read.csv read.table str
+#'   tail write.table
 NULL
 
 ##------ Access SOILWAT2 C code

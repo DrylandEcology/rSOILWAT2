@@ -2,8 +2,8 @@
 % Please edit documentation in R/swFunctions.R
 \name{dbW_getScenarioId}
 \alias{dbW_getScenarioId}
-\title{Extract table keys to connect scenario(s) with weather data in the registered weather
-database}
+\title{Extract table keys to connect scenario(s) with weather data in the registered
+weather database}
 \usage{
 dbW_getScenarioId(Scenario, ignore.case = FALSE, verbose = FALSE)
 }
@@ -11,9 +11,10 @@ dbW_getScenarioId(Scenario, ignore.case = FALSE, verbose = FALSE)
 \item{ignore.case}{A logical value.}
 }
 \value{
-An integer vector with the values of the keys or \code{NA} if not located.
+An integer vector with the values of the keys or \code{NA} if not
+  located.
 }
 \description{
-Extract table keys to connect scenario(s) with weather data in the registered weather
-database
+Extract table keys to connect scenario(s) with weather data in the registered
+weather database
 }

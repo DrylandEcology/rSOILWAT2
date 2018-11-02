@@ -3,11 +3,13 @@
 \name{set_Markov}
 \alias{set_Markov}
 \title{\code{set_Markov}
-Need to define and export this generic method -- otherwise, \code{\link{set_Markov<-}} doesn't work.}
+Need to define and export this generic method -- otherwise,
+\code{\link{set_Markov<-}} doesn't work.}
 \usage{
 set_Markov(object, value)
 }
 \description{
 \code{set_Markov}
-Need to define and export this generic method -- otherwise, \code{\link{set_Markov<-}} doesn't work.
+Need to define and export this generic method -- otherwise,
+\code{\link{set_Markov<-}} doesn't work.
 }

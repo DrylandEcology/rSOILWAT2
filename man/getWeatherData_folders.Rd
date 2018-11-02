@@ -11,10 +11,11 @@ getWeatherData_folders(LookupWeatherFolder, weatherDirName = NULL,
 \item{LookupWeatherFolder}{A character string. The path to the parent folder
 of \code{weatherDirName}.}
 
-\item{weatherDirName}{String. Name of the folder with
-the daily weather data files.}
+\item{weatherDirName}{String. Name of the folder with the daily weather data
+files.}
 
-\item{filebasename}{String. File prefix for weather data. Usually \var{weath}.}
+\item{filebasename}{String. File prefix for weather data. Usually
+\var{weath}.}
 
 \item{startYear}{Numeric. Extracted weather data will start with this year.}
 
@@ -24,22 +25,24 @@ the daily weather data files.}
 A list of elements of class \code{\linkS4class{swWeatherData}}.
 }
 \description{
-\pkg{SOILWAT2} does not handle missing weather data. If you have missing data, then
-you have to impute yourself or use the built-in Markov weather generator
-(see examples for \code{\link{sw_exec}}).
+\pkg{SOILWAT2} does not handle missing weather data. If you have missing
+data, then you have to impute yourself or use the built-in Markov weather
+generator (see examples for \code{\link{sw_exec}}).
 }
 \examples{
 
 path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 
-## ------ Simulation with data prepared beforehand and separate weather data ------------
+## ------ Simulation with data prepared beforehand and separate weather data
 ## Read inputs from files on disk
 sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 
-## Read forcing weather data from files on disk (there are also functions to set up a
-##   SQLite database for the weather data)
-sw_weath3 <- getWeatherData_folders(LookupWeatherFolder=file.path(path_demo, "Input"),
-   weatherDirName="data_weather", filebasename="weath", startYear=1979, endYear=2010)
+## Read forcing weather data from files on disk (there are also functions
+##   to set up a SQLite database for the weather data)
+sw_weath3 <- getWeatherData_folders(
+   LookupWeatherFolder = file.path(path_demo, "Input"),
+   weatherDirName = "data_weather", filebasename = "weath",
+   startYear = 1979, endYear = 2010)
 
 ## List of the slots of the input objects of class 'swWeatherData'
 str(sw_weath3, max.level=1)

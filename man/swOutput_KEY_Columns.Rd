@@ -7,7 +7,8 @@
 swOutput_KEY_Columns(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swOutput}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swOutput}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
 \code{swOutput_KEY_Columns}

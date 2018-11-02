@@ -7,7 +7,8 @@
 swSite_SoilTemperatureFlag(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swSite}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swSite}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
 \code{swSite_SoilTemperatureFlag}

@@ -9,7 +9,8 @@
 \S4method{initialize}{swMonthlyScalingParams}(.Object, ...)
 }
 \arguments{
-\item{.Object}{An object of class \code{\linkS4class{swMonthlyScalingParams}}.}
+\item{.Object}{An object of class
+\code{\linkS4class{swMonthlyScalingParams}}.}
 
 \item{...}{Further arguments to methods.}
 }

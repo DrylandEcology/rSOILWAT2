@@ -9,43 +9,48 @@ dbW_createDatabase(dbFilePath = "dbWeatherData.sqlite3", site_data,
   verbose = FALSE, ...)
 }
 \arguments{
-\item{dbFilePath}{A character string. The file path of the weather database. This will
-be a file of type \code{sqlite3}. In-memory databases are not supported.}
+\item{dbFilePath}{A character string. The file path of the weather database.
+This will be a file of type \code{sqlite3}. In-memory databases are not
+supported.}
 
-\item{site_data}{A data.frame. The site data with column names \var{Latitude}, \var{Longitude},
-and \var{Label}.}
+\item{site_data}{A data.frame. The site data with column names
+\var{Latitude}, \var{Longitude}, and \var{Label}.}
 
-\item{Scenarios}{A vector of character strings. The climate scenarios of which the
-first one is enforced to be \code{scen_ambient}.}
+\item{Scenarios}{A vector of character strings. The climate scenarios of
+which the first one is enforced to be \code{scen_ambient}.}
 
 \item{scen_ambient}{A character string. The first/default climate scenario.}
 
-\item{compression_type}{A character string. The type of compression for the weather
-blob. See \code{\link[base]{memCompress}} for the available choices.}
+\item{compression_type}{A character string. The type of compression for
+the weather blob. See \code{\link[base]{memCompress}} for the available
+choices.}
 
 \item{verbose}{A logical value.}
 
 \item{...}{Additional/deprecated arguments which are currently ignored.}
 }
 \value{
-\code{TRUE} on success; \code{FALSE} otherwise. If the file \code{dbFilePath}
-  didn't already exist, but creating it failed, then the attempt will be disconnected
-  and removed.
+\code{TRUE} on success; \code{FALSE} otherwise. If the file
+  \code{dbFilePath} didn't already exist, but creating it failed, then the
+  attempt will be disconnected and removed.
 }
 \description{
 Create a weather database
 }
 \section{Details}{
- A \pkg{rSOILWAT2} weather database has the following format: \describe{
-  \item{Table \var{Meta}}{contains two fields \var{Desc} and \var{Value} which contain \itemize{
+ A \pkg{rSOILWAT2} weather database has the following
+  format: \describe{
+  \item{Table \var{Meta}}{contains two fields \var{Desc} and \var{Value}
+     which contain \itemize{
      \item the records \var{Version} and \var{Compression_type}}}
-  \item{Table \var{Sites}}{contains four fields \var{Site_id}, \var{Latitude}, \var{Longitude}, and
-     \var{Label}}
-  \item{Table \var{WeatherData}}{contains six fields \var{wdid} (the ID of the weather data
-     record), \var{Site_id}, \var{Scenario} (i.e., the ID of the scenario), \var{StartYear},
-     \var{EndYear}, and \var{data}}
-  \item{Table \var{Scenarios}}{contains two fields \var{id} and \var{Scenario} (i.e., the scenario
-     name)}
+  \item{Table \var{Sites}}{contains four fields \var{Site_id},
+     \var{Latitude}, \var{Longitude}, and \var{Label}}
+  \item{Table \var{WeatherData}}{contains six fields \var{wdid}
+     (the ID of the weather data record), \var{Site_id}, \var{Scenario}
+     (i.e., the ID of the scenario), \var{StartYear}, \var{EndYear}, and
+     \var{data}}
+  \item{Table \var{Scenarios}}{contains two fields \var{id} and
+     \var{Scenario} (i.e., the scenario name)}
 }
 }
 

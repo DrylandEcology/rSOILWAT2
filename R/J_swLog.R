@@ -1,6 +1,7 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer,
+#    William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -59,7 +60,11 @@ setMethod("initialize", signature = "swLog", function(.Object, ...) {
   .Object@LogData <- character(.Object@MaxLines)
   .Object@UsedLines <- 1L
 
-  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  if (FALSE) {
+    # not needed because no relevant inheritance
+    .Object <- callNextMethod(.Object, ...)
+  }
+
   validObject(.Object)
   .Object
 })

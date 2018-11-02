@@ -1,6 +1,7 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer,
+#    William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -38,8 +39,8 @@
 #' @name swOUT_key-class
 #' @export
 setClass("swOUT_key", slots = c(mykey = "integer", myobj = "integer",
-  sumtype = "integer", use = "logical", first_orig = "integer", last_orig = "integer",
-  outfile = "character"))
+  sumtype = "integer", use = "logical", first_orig = "integer",
+  last_orig = "integer", outfile = "character"))
 
 swOUT_key_validity <- function(object) {
   val <- TRUE
@@ -70,7 +71,11 @@ setMethod("initialize", signature = "swOUT_key", function(.Object, ...) {
     slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
   }
 
-  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  if (FALSE) {
+    # not needed because no relevant inheritance
+    .Object <- callNextMethod(.Object, ...)
+  }
+
   validObject(.Object)
   .Object
 })
@@ -89,21 +94,25 @@ setMethod("initialize", signature = "swOUT_key", function(.Object, ...) {
 #' @param file A character string. The file name from which to read.
 #' @param ... Further arguments to methods.
 #'
-#' @slot outputSeparator A character string. Currently, only "\\t" is functional.
+#' @slot outputSeparator A character string. Currently, only \var{"\\t"} is
+#'   functional.
 #' @slot timeSteps An integer matrix with rows for each output key and columns
 #'   for each possible output time period. See details.
 #'
-#' @details Output can be generated for four different time steps: daily (\var{DY}),
-#'  weekly (\var{WK}), monthly (\var{MO}), and yearly (\var{YR}) periods.
-#'  We have two options to specify time steps:\itemize{
-#'    \item The same time step(s) for every output; this option corresponds to specifying
-#'        a line with \code{TIMESTEP ...} in the \pkg{SOILWAT2} input file \var{outsetup.in}. The matrix
-#'        in slot \var{timeSteps} should have \var{SW_OUTNKEYS} rows and \var{SW_OUTNPERIODS}
-#'        columns of which \var{use_OUTNPERIODS} contain identical values in each
-#'        used row.
-#'    \item A different time step for each output; however, only one time step per
-#'        output variable can be specified. this option corresponds to specifying the
-#'        time step in the column \var{PERIOD} in the \pkg{SOILWAT2} input file \var{outsetup.in}.
+#' @details Output can be generated for four different time steps:
+#'   daily (\var{DY}), weekly (\var{WK}), monthly (\var{MO}), and yearly
+#'   (\var{YR}) periods.
+#'  We have two options to specify time steps: \itemize{
+#'    \item The same time step(s) for every output; this option corresponds
+#'        to specifying a line with \code{TIMESTEP ...} in the \pkg{SOILWAT2}
+#'        input file \var{outsetup.in}. The matrix in slot \var{timeSteps}
+#'        should have \var{SW_OUTNKEYS} rows and \var{SW_OUTNPERIODS}
+#'        columns of which \var{use_OUTNPERIODS} contain identical values in
+#'        each used row.
+#'    \item A different time step for each output; however, only one time
+#'        step per output variable can be specified. this option corresponds to
+#'        specifying the time step in the column \var{PERIOD} in the
+#'        \pkg{SOILWAT2} input file \var{outsetup.in}.
 #' }
 #' Elements that are turned off have the value \code{eSW_NoTime = 999L}.
 #'
@@ -131,20 +140,25 @@ swOUT_validity <- function(object) {
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
-  if (nrow(object@timeSteps) != rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]) {
+  if (nrow(object@timeSteps) !=
+      rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]) {
     msg <- "@timeSteps must be a matrix with 'SW_OUTNKEYS' rows"
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
-  if (ncol(object@timeSteps) != rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]) {
+  if (ncol(object@timeSteps) !=
+      rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]) {
     msg <- "@timeSteps must be a matrix with 'SW_OUTNPERIODS' columns"
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
+  # timeSteps is base0
   ok <- c(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]],
-    seq_len(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]) - 1L) # timeSteps is base0
+    seq_len(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]) - 1L)
+
   if (!all(object@timeSteps %in% ok)) {
-    msg <- "@timeSteps values must be within SW_OUTNPERIODS or be equal to eSW_NoTime"
+    msg <- paste("@timeSteps values must be within SW_OUTNPERIODS or be",
+      "equal to eSW_NoTime")
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
@@ -174,12 +188,15 @@ setMethod("initialize", signature = "swOUT", function(.Object, ...) {
 #' @rdname swOUT-class
 #' @export
 setMethod("get_swOUT", "swOUT", function(object) object)
+
 #' @rdname swOUT-class
 #' @export
 setMethod("swOUT_TimeStep", "swOUT", function(object) object@timeSteps)
+
 #' @rdname swOUT-class
 #' @export
-setMethod("swOUT_OutputSeparator", "swOUT", function(object) object@outputSeparator)
+setMethod("swOUT_OutputSeparator", "swOUT",
+  function(object) object@outputSeparator)
 
 #' @rdname swOUT-class
 #' @export
@@ -188,12 +205,14 @@ setReplaceMethod("set_swOUT", signature = "swOUT", function(object, value) {
   validObject(object)
   object
 })
+
 #' @rdname swOUT-class
 #' @export
-setReplaceMethod("swOUT_TimeStep", signature = "swOUT", function(object, value) {
-  object@timeSteps <- value
-  validObject(object)
-  object
+setReplaceMethod("swOUT_TimeStep", signature = "swOUT",
+  function(object, value) {
+    object@timeSteps <- value
+    validObject(object)
+    object
 })
 
 #' Set time steps to the same set of values for each output key.
@@ -203,41 +222,46 @@ setReplaceMethod("swOUT_TimeStep", signature = "swOUT", function(object, value) 
 #' identical(as.vector(unique(swOUT_TimeStep(x))), as.integer(c(2, 3)))
 #' @rdname swOUT-class
 #' @export
-setReplaceMethod("swOUT_TimeStepsForEveryKey", signature = "swOUT", function(object, value) {
-  stopifnot(length(value) <= rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]])
+setReplaceMethod("swOUT_TimeStepsForEveryKey", signature = "swOUT",
+  function(object, value) {
+    stopifnot(length(value) <=
+        rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]])
 
-  # Create empty matrix
-  temp <- matrix(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]],
-    nrow = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]],
-    ncol = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]])
+    # Create empty matrix
+    temp <- matrix(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]],
+      nrow = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]],
+      ncol = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]])
 
-  # Fill matrix with requested values
-  temp[, seq_along(value)] <- rep(value,
-    each = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]])
+    # Fill matrix with requested values
+    temp[, seq_along(value)] <- rep(value,
+      each = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]])
 
-  # Set unused output keys to no-time
-  temp[!slot(object, "use"), ] <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]]
+    # Set unused output keys to no-time
+    temp[!slot(object, "use"), ] <-
+      rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]]
 
-  object@timeSteps <- temp
-  validObject(object)
+    object@timeSteps <- temp
+    validObject(object)
 
-  object
+    object
 })
 
 #' @rdname swOUT-class
 #' @export
-setReplaceMethod("swOUT_OutputSeparator", signature = "swOUT", function(object, value) {
-  object@outputSeparator <- as.character(value)
-  validObject(object)
-  object
+setReplaceMethod("swOUT_OutputSeparator", signature = "swOUT",
+  function(object, value) {
+    object@outputSeparator <- as.character(value)
+    validObject(object)
+    object
 })
 
 
 # used by swReadLines
-			KEY <- c("WTHR", "TEMP", "PRECIP", "SOILINFILT", "RUNOFF", "ALLH2O", "VWCBULK",
-				"VWCMATRIC", "SWCBULK", "SWA", "SWABULK", "SWAMATRIC", "SWPMATRIC", "SURFACEWATER", "TRANSP",
-				"EVAPSOIL", "EVAPSURFACE", "INTERCEPTION", "LYRDRAIN", "HYDRED", "ET", "AET", "PET",
-				"WETDAY", "SNOWPACK", "DEEPSWC", "SOILTEMP", "ALLVEG", "ESTABL")
+KEY <- c("WTHR", "TEMP", "PRECIP", "SOILINFILT", "RUNOFF", "ALLH2O", "VWCBULK",
+  "VWCMATRIC", "SWCBULK", "SWA", "SWABULK", "SWAMATRIC", "SWPMATRIC",
+  "SURFACEWATER", "TRANSP", "EVAPSOIL", "EVAPSURFACE", "INTERCEPTION",
+  "LYRDRAIN", "HYDRED", "ET", "AET", "PET", "WETDAY", "SNOWPACK", "DEEPSWC",
+  "SOILTEMP", "ALLVEG", "ESTABL")
 OutSum <- c("off", "sum", "avg", "fnl") # only used for 'swReadLines'
 #Remember this models the C code so index starts at 0 not 1
 timePeriods <- c("dy", "wk", "mo", "yr")
@@ -245,6 +269,7 @@ timePeriods <- c("dy", "wk", "mo", "yr")
 
 #' @rdname swOUT-class
 #' @export
+# nolint start
 setMethod("swReadLines", signature = c(object="swOUT",file="character"), function(object,file) {
   print("TODO: method 'swReadLines' for class 'swOUT' is not up-to-date; hard-coded indices are incorrect")
 
@@ -295,4 +320,4 @@ setMethod("swReadLines", signature = c(object="swOUT",file="character"), functio
 			}
 			return(object)
 		})
-
+# nolint end

@@ -7,7 +7,8 @@
 swProd_MonProd_grass(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swProd}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swProd}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
 \code{swProd_MonProd_grass}

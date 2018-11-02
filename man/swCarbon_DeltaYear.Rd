@@ -7,7 +7,8 @@
 swCarbon_DeltaYear(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swCarbon}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swCarbon}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
 \code{swCarbon_DeltaYear}

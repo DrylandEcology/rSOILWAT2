@@ -7,7 +7,8 @@
 swLog_setLine(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swLog}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swLog}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }

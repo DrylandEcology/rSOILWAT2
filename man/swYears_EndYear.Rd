@@ -7,7 +7,8 @@
 swYears_EndYear(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swYears}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swYears}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
 \code{swYears_EndYear}

@@ -7,7 +7,8 @@
 swProd_MonProd_veg(object, vegtype)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swProd}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swProd}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{vegtype}{The name or index of the vegetation type.}
 }

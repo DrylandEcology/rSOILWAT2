@@ -12,8 +12,8 @@
 \description{
 The package \pkg{rSOILWAT2} is a R implementation of \pkg{SOILWAT2}
 Modeling Software.  The C code was converted into a library with
-input/output functions to R. \pkg{SOILWAT2} is a simulator of the dynamics of soil
-water. The input data structure is \var{S4}. Generic functions that
+input/output functions to R. \pkg{SOILWAT2} is a simulator of the dynamics
+of soil water. The input data structure is \var{S4}. Generic functions that
 apply to the input container or individual object control setting/getting
 input data. Output data is in the form of lists.
 }

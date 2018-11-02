@@ -3,11 +3,13 @@
 \name{set_swCarbon}
 \alias{set_swCarbon}
 \title{\code{set_swCarbon}
-Need to define and export this generic method -- otherwise, \code{\link{set_swCarbon<-}} doesn't work.}
+Need to define and export this generic method -- otherwise,
+\code{\link{set_swCarbon<-}} doesn't work.}
 \usage{
 set_swCarbon(object, value)
 }
 \description{
 \code{set_swCarbon}
-Need to define and export this generic method -- otherwise, \code{\link{set_swCarbon<-}} doesn't work.
+Need to define and export this generic method -- otherwise,
+\code{\link{set_swCarbon<-}} doesn't work.
 }

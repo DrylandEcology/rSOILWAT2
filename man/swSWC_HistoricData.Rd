@@ -7,7 +7,8 @@
 swSWC_HistoricData(object, year)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swSWC}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swSWC}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
 \code{swSWC_HistoricData}

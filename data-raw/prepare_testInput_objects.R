@@ -93,14 +93,17 @@ for (it in seq_along(tests)) {
   slot(sw_input, "weatherHistory") <- slot(sw_input, "weatherHistory")[1]
 
   #---Files for unit testing
-  saveRDS(sw_weather, file = file.path(dir_out, paste0("Ex", tests[it], "_weather.rds")))
-  saveRDS(sw_input, file = file.path(dir_out, paste0("Ex", tests[it], "_input.rds")))
+  saveRDS(sw_weather, file = file.path(dir_out,
+    paste0("Ex", tests[it], "_weather.rds")))
+  saveRDS(sw_input, file = file.path(dir_out,
+    paste0("Ex", tests[it], "_input.rds")))
 }
 
 
 #-----------------------
 #--- USE DEFAULT EXTDATA EXAMPLE AS PACKAGE DATA
-sw_exampleData <- sw_inputDataFromFiles(file.path(dir_in, examples[1]), files.in = "files.in")
+sw_exampleData <- sw_inputDataFromFiles(file.path(dir_in, examples[1]),
+  files.in = "files.in")
 devtools::use_data(sw_exampleData, internal = FALSE, overwrite = TRUE)
 
 
@@ -111,5 +114,5 @@ for (it in seq_along(tests)[-1]) {
 }
 
 #-----------------------
-print(paste("NOTE: Remove", shQuote(dir_backup), "before pushing to repository if",
-  "script worked well."))
+print(paste("NOTE: Remove", shQuote(dir_backup), "before pushing to",
+  "repository if script worked well."))

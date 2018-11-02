@@ -3,11 +3,13 @@
 \name{set_WeatherHistory}
 \alias{set_WeatherHistory}
 \title{\code{set_WeatherHistory}
-Need to define and export this generic method -- otherwise, \code{\link{set_WeatherHistory<-}} doesn't work.}
+Need to define and export this generic method -- otherwise,
+\code{\link{set_WeatherHistory<-}} doesn't work.}
 \usage{
 set_WeatherHistory(object, value)
 }
 \description{
 \code{set_WeatherHistory}
-Need to define and export this generic method -- otherwise, \code{\link{set_WeatherHistory<-}} doesn't work.
+Need to define and export this generic method -- otherwise,
+\code{\link{set_WeatherHistory<-}} doesn't work.
 }

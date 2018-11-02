@@ -20,7 +20,7 @@ weather data.frame.}
 \value{
 A named list of length 2.
 \itemize{
-\item \code{years} a vector of unique year values.
+ \item \code{years} a vector of unique year values.
  \item \code{year_ts} a vector of time series values for each row/day of the
 data.frame.
 }

@@ -7,7 +7,8 @@
 set_swWeatherData(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swWeatherData}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swWeatherData}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
@@ -15,5 +16,6 @@ set_swWeatherData(object) <- value
 \code{set_swWeatherData<-}
 }
 \seealso{
-\code{\linkS4class{swWeatherData}} and \code{\linkS4class{swInputData}}
+\code{\linkS4class{swWeatherData}} and
+  \code{\linkS4class{swInputData}}
 }

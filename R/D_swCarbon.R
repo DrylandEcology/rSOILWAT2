@@ -1,6 +1,7 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer,
+#    William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -51,8 +52,9 @@
 #'
 #' @name swCarbon-class
 #' @export
-setClass("swCarbon", slots = c(CarbonUseBio = 'integer', CarbonUseWUE = 'integer',
-  Scenario = 'character', DeltaYear = 'integer', CO2ppm = 'matrix'))
+setClass("swCarbon", slots = c(CarbonUseBio = "integer",
+  CarbonUseWUE = "integer", Scenario = "character", DeltaYear = "integer",
+  CO2ppm = "matrix"))
 
 #' @rdname swCarbon-class
 #' @export
@@ -71,7 +73,11 @@ setMethod("initialize", signature = "swCarbon", function(.Object, ...) {
     slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
   }
 
-  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  if (FALSE) {
+    # not needed because no relevant inheritance
+    .Object <- callNextMethod(.Object, ...)
+  }
+
   validObject(.Object)
   .Object
 })
@@ -129,45 +135,55 @@ setMethod("swCarbon_CO2ppm", "swCarbon", function(object) object@CO2ppm)
 
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("set_swCarbon", signature = "swCarbon", function(object, value) {
-  object <- value
-  validObject(object)
-  object
+setReplaceMethod("set_swCarbon", signature = "swCarbon",
+  function(object, value) {
+    object <- value
+    validObject(object)
+    object
 })
 
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_Use_Bio", signature = "swCarbon", function(object, value) {
-  object@CarbonUseBio <- as.integer(as.logical(value))
-  validObject(object)
-  object
+setReplaceMethod("swCarbon_Use_Bio", signature = "swCarbon",
+  function(object, value) {
+    object@CarbonUseBio <- as.integer(as.logical(value))
+    validObject(object)
+    object
 })
+
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_Use_WUE", signature = "swCarbon", function(object, value) {
-  object@CarbonUseWUE <- as.integer(as.logical(value))
-  validObject(object)
-  object
+setReplaceMethod("swCarbon_Use_WUE", signature = "swCarbon",
+  function(object, value) {
+    object@CarbonUseWUE <- as.integer(as.logical(value))
+    validObject(object)
+    object
 })
+
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_Scenario", signature = "swCarbon", function(object, value) {
-  object@Scenario <- value
-  validObject(object)
-  object
+setReplaceMethod("swCarbon_Scenario", signature = "swCarbon",
+  function(object, value) {
+    object@Scenario <- value
+    validObject(object)
+    object
 })
+
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_DeltaYear", signature = "swCarbon", function(object, value) {
-  object@DeltaYear <- as.integer(value)
-  validObject(object)
-  object
+setReplaceMethod("swCarbon_DeltaYear", signature = "swCarbon",
+  function(object, value) {
+    object@DeltaYear <- as.integer(value)
+    validObject(object)
+    object
 })
+
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_CO2ppm", signature = "swCarbon", function(object, value) {
-  colnames(value) <- colnames(object@CO2ppm)
-  object@CO2ppm <- value
-  validObject(object)
-  object
+setReplaceMethod("swCarbon_CO2ppm", signature = "swCarbon",
+  function(object, value) {
+    colnames(value) <- colnames(object@CO2ppm)
+    object@CO2ppm <- value
+    validObject(object)
+    object
 })

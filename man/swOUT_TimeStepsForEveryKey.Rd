@@ -3,11 +3,13 @@
 \name{swOUT_TimeStepsForEveryKey}
 \alias{swOUT_TimeStepsForEveryKey}
 \title{\code{swOUT_TimeStepsForEveryKey}
-Need to define and export this generic method -- otherwise, \code{\link{swOUT_TimeStepsForEveryKey<-}} doesn't work.}
+Need to define and export this generic method -- otherwise,
+\code{\link{swOUT_TimeStepsForEveryKey<-}} doesn't work.}
 \usage{
 swOUT_TimeStepsForEveryKey(object, value)
 }
 \description{
 \code{swOUT_TimeStepsForEveryKey}
-Need to define and export this generic method -- otherwise, \code{\link{swOUT_TimeStepsForEveryKey<-}} doesn't work.
+Need to define and export this generic method -- otherwise,
+\code{\link{swOUT_TimeStepsForEveryKey<-}} doesn't work.
 }

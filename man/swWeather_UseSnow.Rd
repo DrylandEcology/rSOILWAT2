@@ -7,7 +7,8 @@
 swWeather_UseSnow(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swWeather}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swWeather}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
 \code{swWeather_UseSnow}

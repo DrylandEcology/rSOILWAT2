@@ -7,7 +7,8 @@
 swOUT_OutputSeparator(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swOUT}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swOUT}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
 \code{swOUT_OutputSeparator}

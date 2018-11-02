@@ -10,7 +10,8 @@ st_name <- rSW2_glovars[["kSOILWAT2"]][["OutKeys"]][["SW_SOILTEMP"]]
 
 format_badData <- function(data, ids_bad) {
   if (any(ids_bad)) {
-    paste(apply(round(data[ids_bad, ], 2), 1, paste, collapse = "/"), collapse = "; ")
+    paste(apply(round(data[ids_bad, ], 2), 1, paste, collapse = "/"),
+      collapse = "; ")
   } else "all good"
 }
 

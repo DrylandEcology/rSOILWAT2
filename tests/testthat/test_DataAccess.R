@@ -6,13 +6,16 @@ test_that("set_requested_flags:", {
   #--- INPUTS
   rswin <- rSOILWAT2::sw_exampleData
 
-  std_values <- list(Composition = 0.5, Albedo = 0.5, Height = 0.5, HydRed = TRUE,
-    SWPcrit_MPa = -0.5)
+  std_values <- list(Composition = 0.5, Albedo = 0.5, Height = 0.5,
+    HydRed = TRUE, SWPcrit_MPa = -0.5)
 
   test_data <- list(
     Composition = list(
-      use = c(Composition_GrassFraction = FALSE, Composition_ShrubFraction = FALSE,
-        Composition_TreeFraction = FALSE, Composition_ForbFraction = FALSE,
+      use = c(
+        Composition_GrassFraction = FALSE,
+        Composition_ShrubFraction = FALSE,
+        Composition_TreeFraction = FALSE,
+        Composition_ForbFraction = FALSE,
         Composition_BareGround = FALSE),
       values = swProd_Composition(rswin)),
 
@@ -22,8 +25,11 @@ test_that("set_requested_flags:", {
       values = swProd_Albedo(rswin)),
 
     Height = list(
-      use = c(Grass_CanopyHeight_Constant_cm = FALSE, Shrub_CanopyHeight_Constant_cm = FALSE,
-        Tree_CanopyHeight_Constant_cm = FALSE, Forb_CanopyHeight_Constant_cm = FALSE),
+      use = c(
+        Grass_CanopyHeight_Constant_cm = FALSE,
+        Shrub_CanopyHeight_Constant_cm = FALSE,
+        Tree_CanopyHeight_Constant_cm = FALSE,
+        Forb_CanopyHeight_Constant_cm = FALSE),
       values = swProd_CanopyHeight(rswin)),
 
     HydRed = list(
@@ -38,16 +44,16 @@ test_that("set_requested_flags:", {
   )
 
   test_args <- list(
-    Composition = list(tag = "Composition", fun = "swProd_Composition", reset = TRUE,
-      default = 0),
-    Albedo = list(tag = "Albedo", fun = "swProd_Albedo", reset = FALSE,
-      default = NA),
-    Height = list(tag = "CanopyHeight_Constant", fun = "swProd_CanopyHeight",
-      reset = FALSE, default = NA),
-    HydRed = list(tag = "HydRed", fun = "swProd_HydrRedstro_use", reset = FALSE,
-      default = NA),
-    SWPcrit_MPa = list(tag = "SWPcrit_MPa", fun = "swProd_CritSoilWaterPotential",
-      reset = FALSE, default = NA)
+    Composition = list(tag = "Composition",
+      fun = "swProd_Composition", reset = TRUE, default = 0),
+    Albedo = list(tag = "Albedo",
+      fun = "swProd_Albedo", reset = FALSE, default = NA),
+    Height = list(tag = "CanopyHeight_Constant",
+      fun = "swProd_CanopyHeight", reset = FALSE, default = NA),
+    HydRed = list(tag = "HydRed",
+      fun = "swProd_HydrRedstro_use", reset = FALSE, default = NA),
+    SWPcrit_MPa = list(tag = "SWPcrit_MPa",
+      fun = "swProd_CritSoilWaterPotential", reset = FALSE, default = NA)
   )
 
   tests <- names(test_args)
@@ -88,11 +94,13 @@ test_that("set_requested_flags:", {
           dat[["values"]][ids] <- std_values[[test]]
         }
         if (test_args[[test]][["reset"]] && length(dat[["values"]]) > 2) {
-          dat[["values"]][seq_along(dat[["values"]])[-ids]] <- test_args[[test]][["default"]]
+          dat[["values"]][seq_along(dat[["values"]])[-ids]] <-
+            test_args[[test]][["default"]]
         }
 
         expect_silent(temp <- do.call(set_requested_flags, args = c(args, dat)))
-        values <- utils::getFromNamespace(test_args[[test]][["fun"]], "rSOILWAT2")(temp)
+        values <- utils::getFromNamespace(test_args[[test]][["fun"]],
+          "rSOILWAT2")(temp)
         expect_equal(values, dat[["values"]], info = test)
       }
     }
@@ -104,4 +112,3 @@ test_that("set_requested_flags:", {
     expect_error(do.call(set_requested_flags, args = c(args, dat)))
   }
 })
-

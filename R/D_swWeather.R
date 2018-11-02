@@ -1,6 +1,7 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer,
+#    William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,7 +28,8 @@
 #' The methods listed below work on this class and the proper slot of the class
 #'   \code{\linkS4class{swInputData}}.
 #'
-#' @param .Object An object of class \code{\linkS4class{swMonthlyScalingParams}}.
+#' @param .Object An object of class
+#'   \code{\linkS4class{swMonthlyScalingParams}}.
 #' @param ... Further arguments to methods.
 #'
 #' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
@@ -50,12 +52,13 @@ setValidity("swMonthlyScalingParams", function(object) {
   temp <- dim(object@MonthlyScalingParams)
 
   if (temp[2] != 7) {
-    msg <- paste("@MonthlyScalingParams must have exactly 7 columns corresponding to",
-      "PPT, MaxT, MinT, SkyCover, Wind, rH, Transmissivity")
+    msg <- paste("@MonthlyScalingParams must have exactly 7 columns ",
+      "corresponding to PPT, MaxT, MinT, SkyCover, Wind, rH, Transmissivity")
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
   if (temp[1] != 12) {
-    msg <- paste("@MonthlyScalingParams must have exactly 12 rows corresponding months.")
+    msg <- paste("@MonthlyScalingParams must have exactly 12 rows",
+      "corresponding months.")
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
@@ -64,24 +67,30 @@ setValidity("swMonthlyScalingParams", function(object) {
 
 #' @rdname swMonthlyScalingParams-class
 #' @export
-setMethod("initialize", signature = "swMonthlyScalingParams", function(.Object, ...) {
-  def <- slot(rSOILWAT2::sw_exampleData, "weather")
-  sns <- slotNames("swMonthlyScalingParams")
-  dots <- list(...)
-  dns <- names(dots)
+setMethod("initialize", signature = "swMonthlyScalingParams",
+  function(.Object, ...) {
+    def <- slot(rSOILWAT2::sw_exampleData, "weather")
+    sns <- slotNames("swMonthlyScalingParams")
+    dots <- list(...)
+    dns <- names(dots)
 
-  if ("MonthlyScalingParams" %in% dns) {
-    # Guarantee dimnames
-    dimnames(dots[["MonthlyScalingParams"]]) <- dimnames(def@MonthlyScalingParams)
-  }
+    if ("MonthlyScalingParams" %in% dns) {
+      # Guarantee dimnames
+      dimnames(dots[["MonthlyScalingParams"]]) <-
+        dimnames(def@MonthlyScalingParams)
+    }
 
-  for (sn in sns) {
-    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
-  }
+    for (sn in sns) {
+      slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
+    }
 
-  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
-  validObject(.Object)
-  .Object
+    if (FALSE) {
+      # not needed because no relevant inheritance
+      .Object <- callNextMethod(.Object, ...)
+    }
+
+    validObject(.Object)
+    .Object
 })
 
 
@@ -112,10 +121,10 @@ setMethod("initialize", signature = "swMonthlyScalingParams", function(.Object, 
 #'
 #' @name swWeather-class
 #' @export
-setClass("swWeather", slots = c(UseSnow = "logical", pct_SnowDrift = "numeric",
-  pct_SnowRunoff = "numeric", use_Markov = "logical", FirstYear_Historical = "integer",
-  DaysRunningAverage = "integer"),
-  contains = "swMonthlyScalingParams")
+setClass("swWeather", slots = c(UseSnow = "logical",
+  pct_SnowDrift = "numeric", pct_SnowRunoff = "numeric",
+  use_Markov = "logical", FirstYear_Historical = "integer",
+  DaysRunningAverage = "integer"), contains = "swMonthlyScalingParams")
 
 setValidity("swWeather", function(object) {
   val <- TRUE
@@ -154,96 +163,128 @@ setMethod("initialize", signature = "swWeather", function(.Object, ...) {
 
 #' @rdname swWeather-class
 #' @export
-setMethod("swWeather_DaysRunningAverage", "swWeather", function(object) object@DaysRunningAverage)
-#' @rdname swWeather-class
-#' @export
-setMethod("swWeather_FirstYearHistorical", "swWeather", function(object) object@FirstYear_Historical)
-#' @rdname swWeather-class
-#' @export
-setMethod("swWeather_pct_SnowDrift", "swWeather", function(object) object@pct_SnowDrift)
-#' @rdname swWeather-class
-#' @export
-setMethod("swWeather_pct_SnowRunoff", "swWeather", function(object) object@pct_SnowRunoff)
-#' @rdname swWeather-class
-#' @export
-setMethod("swWeather_UseMarkov", "swWeather", function(object) object@use_Markov)
-#' @rdname swWeather-class
-#' @export
-setMethod("swWeather_UseSnow", "swWeather", function(object) object@UseSnow)
-#' @rdname swWeather-class
-#' @export
-setMethod("swWeather_MonScalingParams", "swWeather", function(object) object@MonthlyScalingParams)
+setMethod("swWeather_DaysRunningAverage", "swWeather",
+  function(object) object@DaysRunningAverage)
 
 #' @rdname swWeather-class
 #' @export
-setReplaceMethod("swWeather_DaysRunningAverage", signature = "swWeather", function(object, value) {
-  object@DaysRunningAverage <- as.integer(value)
-  validObject(object)
-  object
-})
+setMethod("swWeather_FirstYearHistorical", "swWeather",
+  function(object) object@FirstYear_Historical)
+
 #' @rdname swWeather-class
 #' @export
-setReplaceMethod("swWeather_FirstYearHistorical", signature = "swWeather", function(object, value) {
-  object@FirstYear_Historical <- as.integer(value)
-  validObject(object)
-  object
-})
+setMethod("swWeather_pct_SnowDrift", "swWeather",
+  function(object) object@pct_SnowDrift)
+
 #' @rdname swWeather-class
 #' @export
-setReplaceMethod("swWeather_pct_SnowDrift", signature = "swWeather", function(object, value) {
-  object@pct_SnowDrift <- as.numeric(value)
-  validObject(object)
-  object
-})
+setMethod("swWeather_pct_SnowRunoff", "swWeather",
+  function(object) object@pct_SnowRunoff)
+
 #' @rdname swWeather-class
 #' @export
-setReplaceMethod("swWeather_pct_SnowRunoff", signature = "swWeather", function(object, value) {
-  object@pct_SnowRunoff <- as.numeric(value)
-  validObject(object)
-  object
-})
+setMethod("swWeather_UseMarkov", "swWeather",
+  function(object) object@use_Markov)
+
 #' @rdname swWeather-class
 #' @export
-setReplaceMethod("swWeather_UseMarkov", signature = "swWeather", function(object, value) {
-  object@use_Markov <- as.logical(value)
-  validObject(object)
-  object
-})
+setMethod("swWeather_UseSnow", "swWeather",
+  function(object) object@UseSnow)
+
 #' @rdname swWeather-class
 #' @export
-setReplaceMethod("swWeather_UseSnow", signature = "swWeather", function(object, value) {
-  object@UseSnow <- as.logical(value)
-  validObject(object)
-  object
-})
+setMethod("swWeather_MonScalingParams", "swWeather",
+  function(object) object@MonthlyScalingParams)
+
 #' @rdname swWeather-class
 #' @export
-setReplaceMethod("swWeather_MonScalingParams", signature = "swWeather", function(object, value) {
-  object@MonthlyScalingParams[] <- value
-  validObject(object)
-  object
+setReplaceMethod("swWeather_DaysRunningAverage", signature = "swWeather",
+  function(object, value) {
+    object@DaysRunningAverage <- as.integer(value)
+    validObject(object)
+    object
+})
+
+#' @rdname swWeather-class
+#' @export
+setReplaceMethod("swWeather_FirstYearHistorical", signature = "swWeather",
+  function(object, value) {
+    object@FirstYear_Historical <- as.integer(value)
+    validObject(object)
+    object
+})
+
+#' @rdname swWeather-class
+#' @export
+setReplaceMethod("swWeather_pct_SnowDrift", signature = "swWeather",
+  function(object, value) {
+    object@pct_SnowDrift <- as.numeric(value)
+    validObject(object)
+    object
+})
+
+#' @rdname swWeather-class
+#' @export
+setReplaceMethod("swWeather_pct_SnowRunoff", signature = "swWeather",
+  function(object, value) {
+    object@pct_SnowRunoff <- as.numeric(value)
+    validObject(object)
+    object
+})
+
+#' @rdname swWeather-class
+#' @export
+setReplaceMethod("swWeather_UseMarkov", signature = "swWeather",
+  function(object, value) {
+    object@use_Markov <- as.logical(value)
+    validObject(object)
+    object
+})
+
+#' @rdname swWeather-class
+#' @export
+setReplaceMethod("swWeather_UseSnow", signature = "swWeather",
+  function(object, value) {
+    object@UseSnow <- as.logical(value)
+    validObject(object)
+    object
+})
+
+#' @rdname swWeather-class
+#' @export
+setReplaceMethod("swWeather_MonScalingParams", signature = "swWeather",
+  function(object, value) {
+    object@MonthlyScalingParams[] <- value
+    validObject(object)
+    object
 })
 
 
 
 #' @rdname swWeather-class
 #' @export
-setMethod("swReadLines", signature = c(object="swWeather",file="character"), function(object,file) {
-			infiletext <- readLines(con = file)
+setMethod("swReadLines",
+  signature = c(object = "swWeather", file = "character"),
+  function(object, file) {
+    infiletext <- readLines(con = file)
 
-			object@UseSnow = readLogical(infiletext[4])
-			object@pct_SnowDrift = readNumeric(infiletext[5])
-			object@pct_SnowRunoff = readNumeric(infiletext[6])
-			object@use_Markov = readLogical(infiletext[7])
-			object@FirstYear_Historical = readInteger(infiletext[8])
-			object@DaysRunningAverage = readInteger(infiletext[9])
+    object@UseSnow <- readLogical(infiletext[4])
+    object@pct_SnowDrift <- readNumeric(infiletext[5])
+    object@pct_SnowRunoff <- readNumeric(infiletext[6])
+    object@use_Markov <- readLogical(infiletext[7])
+    object@FirstYear_Historical <- readInteger(infiletext[8])
+    object@DaysRunningAverage <- readInteger(infiletext[9])
 
-			data=matrix(data=c(rep(1,12),rep(NA,12*6)),nrow=12,ncol=7)
-			colnames(data)<-c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "Transmissivity")
-			rownames(data)<-c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
-			for(i in 21:32) {
-				data[i-20,] <- readNumerics(infiletext[i],8)[2:8]
-			}
-			object@MonthlyScalingParams = data
-			return(object)
-		})
+    data <- matrix(data = c(rep(1, 12), rep(NA, 12 * 6)), nrow = 12, ncol = 7)
+    colnames(data) <- c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH",
+      "Transmissivity")
+    rownames(data) <- c("January", "February", "March", "April", "May",
+      "June", "July", "August", "September", "October", "November", "December")
+
+    for (i in 21:32) {
+      data[i - 20, ] <- readNumerics(infiletext[i], 8)[2:8]
+    }
+    object@MonthlyScalingParams <- data
+
+    object
+})

@@ -7,7 +7,8 @@
 swFiles_Cloud(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swFiles}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swFiles}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
 \code{swFiles_Cloud}

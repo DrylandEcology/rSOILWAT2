@@ -1,6 +1,7 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer,
+#    William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -18,7 +19,7 @@
 
 
 sw_args <- function(dir, files.in, echo, quiet) {
-  input <- c("SOILWAT2")
+  input <- "SOILWAT2"
 
   if (dir != "")
     input <- c(input, "-d", dir)
@@ -134,15 +135,16 @@ sw_args <- function(dir, files.in, echo, quiet) {
 #' sw_out2 <- sw_exec(inputData = sw_in2, quiet = TRUE)
 #'
 #'
-#' ## ------ Simulation with data prepared beforehand and separate weather data ------------
+#' ## ------ Simulation with data prepared beforehand and separate weather data
 #' ## Read inputs from files on disk
 #' sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 #'
-#' ## Read forcing weather data from files on disk (there are also functions to set up a
-#' ##   SQLite database for the weather data)
-#' sw_weath3 <- getWeatherData_folders(LookupWeatherFolder=file.path(path_demo, "Input"),
-#'    weatherDirName = "data_weather", filebasename = "weath", startYear = 1979,
-#'    endYear = 2010)
+#' ## Read forcing weather data from files on disk (there are also functions
+#' ##   to set up a SQLite database for the weather data)
+#' sw_weath3 <- getWeatherData_folders(
+#'    LookupWeatherFolder = file.path(path_demo, "Input"),
+#'    weatherDirName = "data_weather", filebasename = "weath",
+#'    startYear = 1979, endYear = 2010)
 #'
 #' ## List of the slots of the input objects of class 'swWeatherData'
 #' str(sw_weath3, max.level = 1)
@@ -270,7 +272,7 @@ sw_outputData <- function(inputData) {
   dir_prev <- getwd()
   on.exit(setwd(dir_prev), add = TRUE)
 
-	.Call(C_onGetOutput, inputData)
+  .Call(C_onGetOutput, inputData)
 }
 
 
@@ -362,7 +364,8 @@ set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE,
 
     if (any(temp_bad)) {
       stop(paste("ERROR: column(s) of", tag,
-        paste(shQuote(val_names[temp_bad]), "=", vals[temp_bad], collapse = " / "),
+        paste(shQuote(val_names[temp_bad]), "=", vals[temp_bad],
+          collapse = " / "),
         "contain(s) unsuitable values"))
 
     } else {
@@ -378,7 +381,8 @@ set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE,
       ndim_gt1_def <- sum(dim(data.frame(def)) > 1)
       if (!(ndim_gt1_vals == 1 && ndim_gt1_def == 1)) {
         stop(paste("ERROR:", paste(shQuote(val_names), collapse = ", "),
-          "are not represented as 1-dimensional objects in class 'swInputData'."))
+          "are not represented as 1-dimensional objects in ",
+          "class 'swInputData'."))
 
       } else {
         # Transfer values

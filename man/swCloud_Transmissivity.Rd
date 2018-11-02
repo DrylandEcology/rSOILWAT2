@@ -7,7 +7,8 @@
 swCloud_Transmissivity(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swCloud}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swCloud}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
 \code{swCloud_Transmissivity}

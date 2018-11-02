@@ -7,7 +7,8 @@
 swEstab_useEstab(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swEstab}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swEstab}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
 \code{swEstab_useEstab}

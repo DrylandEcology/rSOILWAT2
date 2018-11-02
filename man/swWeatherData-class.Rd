@@ -17,10 +17,12 @@
 
 \item{...}{Further arguments to methods.}
 
-\item{year}{An integer value. The calendar year of the weather \code{data} object.}
+\item{year}{An integer value. The calendar year of the weather \code{data}
+object.}
 
-\item{data}{A 365 x 4 or 366 x 4 matrix representing daily weather data for one calendar
-\code{year} with columns \var{DOY}, \var{Tmax_C}, \var{Tmin_C}, and \var{PPT_cm}.}
+\item{data}{A 365 x 4 or 366 x 4 matrix representing daily weather data for
+one calendar \code{year} with columns \var{DOY}, \var{Tmax_C},
+\var{Tmin_C}, and \var{PPT_cm}.}
 
 \item{object}{An object of class \code{\linkS4class{swWeatherData}}.}
 

@@ -25,8 +25,8 @@ dbW_addWeatherData(Site_id = NULL, lat = NULL, long = NULL,
 \item{ignore.case}{A logical value.}
 }
 \value{
-An invisible logical value indicating success with \code{TRUE} and failure
- with \code{FALSE}.
+An invisible logical value indicating success with \code{TRUE} and
+ failure with \code{FALSE}.
 }
 \description{
 Adds daily weather data to a registered weather database

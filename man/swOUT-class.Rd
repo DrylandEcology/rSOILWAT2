@@ -48,24 +48,28 @@ The methods listed below work on this class and the proper slot of the class
   \code{\linkS4class{swInputData}}.
 }
 \details{
-Output can be generated for four different time steps: daily (\var{DY}),
- weekly (\var{WK}), monthly (\var{MO}), and yearly (\var{YR}) periods.
- We have two options to specify time steps:\itemize{
-   \item The same time step(s) for every output; this option corresponds to specifying
-       a line with \code{TIMESTEP ...} in the \pkg{SOILWAT2} input file \var{outsetup.in}. The matrix
-       in slot \var{timeSteps} should have \var{SW_OUTNKEYS} rows and \var{SW_OUTNPERIODS}
-       columns of which \var{use_OUTNPERIODS} contain identical values in each
-       used row.
-   \item A different time step for each output; however, only one time step per
-       output variable can be specified. this option corresponds to specifying the
-       time step in the column \var{PERIOD} in the \pkg{SOILWAT2} input file \var{outsetup.in}.
+Output can be generated for four different time steps:
+  daily (\var{DY}), weekly (\var{WK}), monthly (\var{MO}), and yearly
+  (\var{YR}) periods.
+ We have two options to specify time steps: \itemize{
+   \item The same time step(s) for every output; this option corresponds
+       to specifying a line with \code{TIMESTEP ...} in the \pkg{SOILWAT2}
+       input file \var{outsetup.in}. The matrix in slot \var{timeSteps}
+       should have \var{SW_OUTNKEYS} rows and \var{SW_OUTNPERIODS}
+       columns of which \var{use_OUTNPERIODS} contain identical values in
+       each used row.
+   \item A different time step for each output; however, only one time
+       step per output variable can be specified. this option corresponds to
+       specifying the time step in the column \var{PERIOD} in the
+       \pkg{SOILWAT2} input file \var{outsetup.in}.
 }
 Elements that are turned off have the value \code{eSW_NoTime = 999L}.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{outputSeparator}}{A character string. Currently, only "\\t" is functional.}
+\item{\code{outputSeparator}}{A character string. Currently, only \var{"\\t"} is
+functional.}
 
 \item{\code{timeSteps}}{An integer matrix with rows for each output key and columns
 for each possible output time period. See details.}
