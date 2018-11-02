@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swProd_Shade}
 \alias{swProd_Shade}
-\title{swProd_Shade}
+\title{\code{swProd_Shade}}
 \usage{
 swProd_Shade(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swProd}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swProd}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-swProd_Shade
+\code{swProd_Shade}
 }
 \seealso{
 \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}

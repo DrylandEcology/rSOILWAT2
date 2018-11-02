@@ -10,11 +10,11 @@ dbW_setConnection(dbFilePath, create_if_missing = FALSE,
 \arguments{
 \item{dbFilePath}{A character string. The weather database file path.}
 
-\item{create_if_missing}{A logical value. If \code{TRUE} and now file \code{dbFilePath}
-exists then create a new file.}
+\item{create_if_missing}{A logical value. If \code{TRUE} and now file
+\code{dbFilePath} exists then create a new file.}
 
-\item{check_version}{A logical value. If \code{TRUE} then check database version
-against currently implemented version by the package.}
+\item{check_version}{A logical value. If \code{TRUE} then check database
+version against currently implemented version by the package.}
 
 \item{verbose}{A logical value.}
 }

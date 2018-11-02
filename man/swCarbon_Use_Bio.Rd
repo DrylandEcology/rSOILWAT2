@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swCarbon_Use_Bio}
 \alias{swCarbon_Use_Bio}
-\title{swCarbon_Use_Bio}
+\title{\code{swCarbon_Use_Bio}}
 \usage{
 swCarbon_Use_Bio(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swCarbon}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swCarbon}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-swCarbon_Use_Bio
+\code{swCarbon_Use_Bio}
 }
 \seealso{
 \code{\linkS4class{swCarbon}} and \code{\linkS4class{swInputData}}

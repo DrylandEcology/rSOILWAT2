@@ -2,12 +2,14 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swSoils}
 \alias{set_swSoils}
-\title{set_swSoils
-Need to define and export this generic method -- otherwise, \code{\link{set_swSoils<-}} doesn't work.}
+\title{\code{set_swSoils}
+Need to define and export this generic method -- otherwise,
+\code{\link{set_swSoils<-}} doesn't work.}
 \usage{
 set_swSoils(object, value)
 }
 \description{
-set_swSoils
-Need to define and export this generic method -- otherwise, \code{\link{set_swSoils<-}} doesn't work.
+\code{set_swSoils}
+Need to define and export this generic method -- otherwise,
+\code{\link{set_swSoils<-}} doesn't work.
 }

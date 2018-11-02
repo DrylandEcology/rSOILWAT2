@@ -1,6 +1,7 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer,
+#    William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -58,8 +59,9 @@ setMethod("initialize", signature = "swYears", function(.Object, ...) {
   dots <- list(...)
   dns <- names(dots)
 
-  # We don't set values for slots `StartYear` and `EndYear` if not passed via ...; this
-  # is to prevent simulation runs with accidentally incorrect values
+  # We don't set values for slots `StartYear` and `EndYear` if not passed
+  # via ...; this is to prevent simulation runs with accidentally incorrect
+  # values
   if (!("StartYear" %in% dns)) def@StartYear <- NA_integer_
   if (!("EndYear" %in% dns)) def@EndYear <- NA_integer_
 
@@ -67,7 +69,11 @@ setMethod("initialize", signature = "swYears", function(.Object, ...) {
     slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
   }
 
-  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  if (FALSE) {
+    # not needed because no relevant inheritance
+    .Object <- callNextMethod(.Object, ...)
+  }
+
   validObject(.Object)
   .Object
 })
@@ -75,29 +81,33 @@ setMethod("initialize", signature = "swYears", function(.Object, ...) {
 swYears_validity <- function(object) {
   val <- TRUE
 
-  if (length(object@StartYear) != 1 || (!is.na(object@StartYear) && object@StartYear < 0)) {
+  if (length(object@StartYear) != 1 ||
+      (!is.na(object@StartYear) && object@StartYear < 0)) {
     msg <- "There must be exactly one non-negative @StartYear value."
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
-  if (length(object@EndYear) != 1 || (!is.na(object@EndYear) && object@EndYear < 0) ||
-    (!is.na(object@EndYear) && !is.na(object@StartYear) && object@EndYear < object@StartYear)) {
-    msg <- paste("There must be exactly one non-negative @EndYear value that is",
-      "not smaller than @StartYear.")
+  if (length(object@EndYear) != 1 ||
+      (!is.na(object@EndYear) && object@EndYear < 0) ||
+      (!is.na(object@EndYear) && !is.na(object@StartYear) &&
+          object@EndYear < object@StartYear)) {
+    msg <- paste("There must be exactly one non-negative @EndYear value that",
+      "is not smaller than @StartYear.")
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
-  if (length(object@FDOFY) != 1 || !is.finite(object@FDOFY) || object@FDOFY < 0 ||
+  if (length(object@FDOFY) != 1 || !is.finite(object@FDOFY) ||
+      object@FDOFY < 0 ||
     object@FDOFY > 365) {
-    msg <- paste("There must be exactly one non-negative finite @FDOFY value that is",
-      "smaller than day 366.")
+    msg <- paste("There must be exactly one non-negative finite @FDOFY value",
+      "that is smaller than day 366.")
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
-  if (length(object@EDOEY) != 1 || !is.finite(object@EDOEY) || object@EDOEY < 0 ||
-    object@EDOEY > 366 || object@EDOEY < object@FDOFY) {
-    msg <- paste("There must be exactly one non-negative finite @EDOEY value that is",
-      "not larger than day 366 and larger than @FDOFY.")
+  if (length(object@EDOEY) != 1 || !is.finite(object@EDOEY) ||
+      object@EDOEY < 0 || object@EDOEY > 366 || object@EDOEY < object@FDOFY) {
+    msg <- paste("There must be exactly one non-negative finite @EDOEY value",
+      "that is not larger than day 366 and larger than @FDOFY.")
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
@@ -131,53 +141,63 @@ setMethod("swYears_isNorth", "swYears", function(object) object@isNorth)
 
 #' @rdname swYears-class
 #' @export
-setReplaceMethod("swYears_StartYear", signature = "swYears", function(object, value) {
-  object@StartYear <- as.integer(value)
-  validObject(object)
-  object
+setReplaceMethod("swYears_StartYear", signature = "swYears",
+  function(object, value) {
+    object@StartYear <- as.integer(value)
+    validObject(object)
+    object
 })
+
 #' @rdname swYears-class
 #' @export
-setReplaceMethod("swYears_EndYear", signature = "swYears", function(object, value) {
-  object@EndYear <- as.integer(value)
-  validObject(object)
-  object
+setReplaceMethod("swYears_EndYear", signature = "swYears",
+  function(object, value) {
+    object@EndYear <- as.integer(value)
+    validObject(object)
+    object
 })
+
 #' @rdname swYears-class
 #' @export
-setReplaceMethod("swYears_FDOFY", signature = "swYears", function(object, value) {
-  object@FDOFY <- as.integer(value)
-  validObject(object)
-  object
+setReplaceMethod("swYears_FDOFY", signature = "swYears",
+  function(object, value) {
+    object@FDOFY <- as.integer(value)
+    validObject(object)
+    object
 })
+
 #' @rdname swYears-class
 #' @export
-setReplaceMethod("swYears_EDOEY", signature = "swYears", function(object, value) {
-  object@EDOEY <- as.integer(value)
-  validObject(object)
-  object
+setReplaceMethod("swYears_EDOEY", signature = "swYears",
+  function(object, value) {
+   object@EDOEY <- as.integer(value)
+   validObject(object)
+   object
 })
+
 #' @rdname swYears-class
 #' @export
-setReplaceMethod("swYears_isNorth", signature = "swYears", function(object, value) {
-  object@isNorth <- as.logical(value)
-  validObject(object)
-  object
+setReplaceMethod("swYears_isNorth", signature = "swYears",
+  function(object, value) {
+   object@isNorth <- as.logical(value)
+   validObject(object)
+   object
 })
 
 
 #' @rdname swYears-class
 #' @export
-setMethod("swReadLines", signature = c(object="swYears",file="character"), function(object,file) {
-			infiletext <- readLines(con = file)
-			object@StartYear = readInteger(infiletext[4])
-			object@EndYear = readInteger(infiletext[5])
-			object@FDOFY = readInteger(infiletext[6])
-			object@EDOEY = readInteger(infiletext[7])
-			temp <- unlist(strsplit(x=infiletext[8],split="\t"))
-			temp <- unlist(strsplit(x=temp,split=" "))
-			temp <- temp[temp != ""][1]
-			if(temp == "N") object@isNorth = TRUE
-			if(temp == "S") object@isNorth = FALSE
-			return(object)
-		})
+setMethod("swReadLines", signature = c(object = "swYears", file = "character"),
+  function(object, file) {
+    infiletext <- readLines(con = file)
+    object@StartYear <- readInteger(infiletext[4])
+    object@EndYear <- readInteger(infiletext[5])
+    object@FDOFY <- readInteger(infiletext[6])
+    object@EDOEY <- readInteger(infiletext[7])
+    temp <- unlist(strsplit(x = infiletext[8], split = "\t"))
+    temp <- unlist(strsplit(x = temp, split = " "))
+    temp <- temp[temp != ""][1]
+    object@isNorth <- isTRUE(temp == "N")
+
+    object
+})

@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{get_WeatherHistory}
 \alias{get_WeatherHistory}
-\title{get_WeatherHistory}
+\title{\code{get_WeatherHistory}}
 \usage{
 get_WeatherHistory(object)
 }
@@ -10,7 +10,7 @@ get_WeatherHistory(object)
 \item{object}{An object of class \code{\linkS4class{swInputData}}.}
 }
 \description{
-get_WeatherHistory
+\code{get_WeatherHistory}
 }
 \seealso{
 \code{\linkS4class{swInputData}}

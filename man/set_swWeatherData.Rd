@@ -2,12 +2,14 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swWeatherData}
 \alias{set_swWeatherData}
-\title{set_swWeatherData
-Need to define and export this generic method -- otherwise, \code{\link{set_swWeatherData<-}} doesn't work.}
+\title{\code{set_swWeatherData}
+Need to define and export this generic method -- otherwise,
+\code{\link{set_swWeatherData<-}} doesn't work.}
 \usage{
 set_swWeatherData(object, value)
 }
 \description{
-set_swWeatherData
-Need to define and export this generic method -- otherwise, \code{\link{set_swWeatherData<-}} doesn't work.
+\code{set_swWeatherData}
+Need to define and export this generic method -- otherwise,
+\code{\link{set_swWeatherData<-}} doesn't work.
 }

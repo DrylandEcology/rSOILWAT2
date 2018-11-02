@@ -12,7 +12,8 @@
 
 \S4method{swOutput_getKEY}{swOutput}(object, index)
 
-\S4method{swOutput_setKEY}{swOutput,ANY,swOutput_KEY}(object, index) <- value
+\S4method{swOutput_setKEY}{swOutput,ANY,swOutput_KEY}(object,
+  index) <- value
 }
 \arguments{
 \item{x}{An object of class \code{\linkS4class{swOutput}}.}

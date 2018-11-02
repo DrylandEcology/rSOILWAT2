@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swFiles_Estab}
 \alias{swFiles_Estab}
-\title{swFiles_Estab}
+\title{\code{swFiles_Estab}}
 \usage{
 swFiles_Estab(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swFiles}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swFiles}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-swFiles_Estab
+\code{swFiles_Estab}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}

@@ -24,12 +24,18 @@ p_OUT <- matrix(list(), nrow = SW_OUTNKEYS, ncol = SW_OUTNPERIODS)
 # macros defined by SOILWAT2: i, k, and pd are base0
 # here, convert i and k from base1 to base0;
 # here, need `irow_OUT` as argument otherwise functions don't see correct values
-iOUT <- function(i, pd, irow_OUT) {
-  (irow_OUT[(pd)] + nrow_OUT[(pd)] * (ncol_TimeOUT[(pd)] + (i + tobase0)))
+iOUT <- function(i, pd, irow_OUT,
+  nrow_OUT. = nrow_OUT, ncol_TimeOUT. = ncol_TimeOUT, tobase0. = tobase0) {
+
+  (irow_OUT[(pd)] + nrow_OUT.[(pd)] * (ncol_TimeOUT.[(pd)] + (i + tobase0.)))
 }
-iOUT2 <- function(i, k, pd, irow_OUT) {
-  (irow_OUT[(pd)] + nrow_OUT[(pd)] *
-      (ncol_TimeOUT[(pd)] + (i + tobase0) + n_layers * (k + tobase0)))
+
+iOUT2 <- function(i, k, pd, irow_OUT,
+  nrow_OUT. = nrow_OUT, ncol_TimeOUT. = ncol_TimeOUT, tobase0. = tobase0,
+  n_layers. = n_layers) {
+
+  (irow_OUT[(pd)] + nrow_OUT.[(pd)] *
+      (ncol_TimeOUT.[(pd)] + (i + tobase0.) + n_layers. * (k + tobase0.)))
 }
 
 #---TESTS
@@ -53,7 +59,10 @@ test_that("Tests of iOUT and iOUT2", {
           for (i in seq_len(n_vars)) {
             # test `iOUT` for 'key = 1'
             icol <- ncol_TimeOUT[pd] + i
-            #print(paste("key =", key, "var =", i, "irow =", irow_OUT[pd], "icol =", icol, "iOUT =", iOUT(i, pd, irow_OUT)))
+            if (FALSE) {
+              print(paste("key =", key, "var =", i, "irow =", irow_OUT[pd],
+                "icol =", icol, "iOUT =", iOUT(i, pd, irow_OUT)))
+            }
             p_OUT[key, pd][[1]][irow_OUT[pd], icol] <- iOUT(i, pd, irow_OUT)
           }
 
@@ -62,8 +71,13 @@ test_that("Tests of iOUT and iOUT2", {
           for (k in seq_len(NVEGTYPES)) {
             for (i in seq_len(n_layers)) {
               icol <- ncol_TimeOUT[pd] + i + n_layers * (k - 1)
-              #print(paste("key =", key, "veg =", k, "slyr =", i, "irow =", irow_OUT[pd], "icol =", icol, "iOUT =", iOUT2(i, k, pd, irow_OUT)))
-              p_OUT[key, pd][[1]][irow_OUT[pd], icol] <- iOUT2(i, k, pd, irow_OUT)
+              if (FALSE) {
+                print(paste("key =", key, "veg =", k, "slyr =", i, "irow =",
+                  irow_OUT[pd], "icol =", icol, "iOUT =",
+                  iOUT2(i, k, pd, irow_OUT)))
+              }
+              p_OUT[key, pd][[1]][irow_OUT[pd], icol] <-
+                iOUT2(i, k, pd, irow_OUT)
             }
           }
         }
@@ -77,5 +91,3 @@ test_that("Tests of iOUT and iOUT2", {
     }
   }
 })
-
-

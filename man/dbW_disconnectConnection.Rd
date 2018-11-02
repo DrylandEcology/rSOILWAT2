@@ -2,14 +2,14 @@
 % Please edit documentation in R/swFunctions.R
 \name{dbW_disconnectConnection}
 \alias{dbW_disconnectConnection}
-\title{De-registers/deconnects a SQLite weather database from the package}
+\title{Disconnects a SQLite weather database from the package}
 \usage{
 dbW_disconnectConnection()
 }
 \value{
-An invisible logical value indicating success with \code{TRUE} and failure
- with \code{FALSE}.
+An invisible logical value indicating success with \code{TRUE} and
+ failure with \code{FALSE}.
 }
 \description{
-De-registers/deconnects a SQLite weather database from the package
+Disconnects a SQLite weather database from the package
 }

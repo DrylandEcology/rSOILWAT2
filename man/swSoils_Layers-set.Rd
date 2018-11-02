@@ -2,17 +2,18 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSoils_Layers<-}
 \alias{swSoils_Layers<-}
-\title{swSoils_Layers<-}
+\title{\code{swSoils_Layers<-}}
 \usage{
 swSoils_Layers(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swSoils}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swSoils}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swSoils_Layers<-
+\code{swSoils_Layers<-}
 }
 \seealso{
 \code{\linkS4class{swSoils}} and \code{\linkS4class{swInputData}}

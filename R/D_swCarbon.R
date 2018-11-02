@@ -1,6 +1,7 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer,
+#    William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -20,27 +21,28 @@
 ##############################################
 
 
-#' Class "swCarbon"
+#' Class \code{"swCarbon"}
 #'
-#' Class \code{swCarbon} defines variables that allow \code{SOILWAT2} to simulate the
-#' effects of atmospheric carbon dioxide.
+#' Class \code{swCarbon} defines variables that allow \code{SOILWAT2} to
+#' simulate the effects of atmospheric carbon dioxide.
 #'
 #' @param object An object of class \code{\linkS4class{swCarbon}}.
 #' @param .Object An object of class \code{\linkS4class{swCarbon}}.
 #' @param value A value to assign to a specific slot of the object.
 #' @param ... Further arguments to methods.
 #'
-#' @slot CarbonUseBio Object of class \code{"integer"}, where a value of 1 enables the
-#'   CO2 biomass multiplier.
-#' @slot CarbonUseWUE Object of class \code{"integer"}, where a value of 1 enables the
-#'   CO2 WUE multipler.
-#' @slot Scenario Object of class \code{"character"}, that represents the name of the
-#'   scenario that is being simulated. This slot is not used in rSOILWAT2, but it's
-#'   useful to see what scenario was used in the SOILWAT2 input object.
-#' @slot DeltaYear Object of class \code{"integer"}, that represents the number of years
-#'   in the future that this simulation is being run.
-#' @slot CO2ppm Object of class \code{"matrix"}, that holds years in the first column and
-#'   CO2 ppm concentrations in the second column.
+#' @slot CarbonUseBio Object of class \code{"integer"}, where a value of 1
+#'   enables the \var{CO2} biomass multiplier.
+#' @slot CarbonUseWUE Object of class \code{"integer"}, where a value of 1
+#'   enables the \var{CO2} water-use efficiency \var{WUE} multiplier.
+#' @slot Scenario Object of class \code{"character"}, that represents the name
+#'   of the scenario that is being simulated. This slot is not used in
+#'   \pkg{rSOILWAT2}, but it's useful to see what scenario was used in the
+#'   \pkg{SOILWAT2} input object.
+#' @slot DeltaYear Object of class \code{"integer"}, that represents the number
+#'   of years in the future that this simulation is being run.
+#' @slot CO2ppm Object of class \code{"matrix"}, that holds years in the first
+#'   column and CO2 ppm concentrations in the second column.
 #'
 #' @seealso \code{\linkS4class{swInputData}}
 #'
@@ -50,8 +52,9 @@
 #'
 #' @name swCarbon-class
 #' @export
-setClass("swCarbon", slots = c(CarbonUseBio = 'integer', CarbonUseWUE = 'integer',
-  Scenario = 'character', DeltaYear = 'integer', CO2ppm = 'matrix'))
+setClass("swCarbon", slots = c(CarbonUseBio = "integer",
+  CarbonUseWUE = "integer", Scenario = "character", DeltaYear = "integer",
+  CO2ppm = "matrix"))
 
 #' @rdname swCarbon-class
 #' @export
@@ -70,7 +73,11 @@ setMethod("initialize", signature = "swCarbon", function(.Object, ...) {
     slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
   }
 
-  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  if (FALSE) {
+    # not needed because no relevant inheritance
+    .Object <- callNextMethod(.Object, ...)
+  }
+
   validObject(.Object)
   .Object
 })
@@ -128,45 +135,55 @@ setMethod("swCarbon_CO2ppm", "swCarbon", function(object) object@CO2ppm)
 
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("set_swCarbon", signature = "swCarbon", function(object, value) {
-  object <- value
-  validObject(object)
-  object
+setReplaceMethod("set_swCarbon", signature = "swCarbon",
+  function(object, value) {
+    object <- value
+    validObject(object)
+    object
 })
 
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_Use_Bio", signature = "swCarbon", function(object, value) {
-  object@CarbonUseBio <- as.integer(as.logical(value))
-  validObject(object)
-  object
+setReplaceMethod("swCarbon_Use_Bio", signature = "swCarbon",
+  function(object, value) {
+    object@CarbonUseBio <- as.integer(as.logical(value))
+    validObject(object)
+    object
 })
+
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_Use_WUE", signature = "swCarbon", function(object, value) {
-  object@CarbonUseWUE <- as.integer(as.logical(value))
-  validObject(object)
-  object
+setReplaceMethod("swCarbon_Use_WUE", signature = "swCarbon",
+  function(object, value) {
+    object@CarbonUseWUE <- as.integer(as.logical(value))
+    validObject(object)
+    object
 })
+
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_Scenario", signature = "swCarbon", function(object, value) {
-  object@Scenario <- value
-  validObject(object)
-  object
+setReplaceMethod("swCarbon_Scenario", signature = "swCarbon",
+  function(object, value) {
+    object@Scenario <- value
+    validObject(object)
+    object
 })
+
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_DeltaYear", signature = "swCarbon", function(object, value) {
-  object@DeltaYear <- as.integer(value)
-  validObject(object)
-  object
+setReplaceMethod("swCarbon_DeltaYear", signature = "swCarbon",
+  function(object, value) {
+    object@DeltaYear <- as.integer(value)
+    validObject(object)
+    object
 })
+
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_CO2ppm", signature = "swCarbon", function(object, value) {
-  colnames(value) <- colnames(object@CO2ppm)
-  object@CO2ppm <- value
-  validObject(object)
-  object
+setReplaceMethod("swCarbon_CO2ppm", signature = "swCarbon",
+  function(object, value) {
+    colnames(value) <- colnames(object@CO2ppm)
+    object@CO2ppm <- value
+    validObject(object)
+    object
 })

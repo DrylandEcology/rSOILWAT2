@@ -117,7 +117,8 @@
 
 \S4method{swProd_CO2Coefficients}{swProd}(object) <- value
 
-\S4method{swProd_MonProd_veg}{swProd,numeric,matrix}(object, vegtype) <- value
+\S4method{swProd_MonProd_veg}{swProd,numeric,matrix}(object,
+  vegtype) <- value
 
 \S4method{swProd_MonProd_veg}{swProd,character,matrix}(object,
   vegtype) <- value

@@ -1,23 +1,26 @@
-#' Package `rSOILWAT2': summary information
+#' Package \pkg{rSOILWAT2}: summary information
 #'
-#' The package `rSOILWAT2' is a R implementation of SoilWat
+#' The package \pkg{rSOILWAT2} is a R implementation of \pkg{SOILWAT2}
 #' Modeling Software.  The C code was converted into a library with
-#' input/output functions to R.  SoilWat is a simulator of the dynamics of soil
-#' water. Originally written in the 1900's by a highly trained team of Botany's
-#' finest. It is now maintained by Dr. William Lauenroth's Lab and Dr. Daniel
-#' Schlaepfer.  The input data structure is S4. Generic functions that
+#' input/output functions to R. \pkg{SOILWAT2} is a simulator of the dynamics
+#' of soil water. The input data structure is \var{S4}. Generic functions that
 #' apply to the input container or individual object control setting/getting
 #' input data. Output data is in the form of lists.
 #'
 #'
 #' @section Version: The version level of the package is given by the command
-#' \code{packageDescription("rSOILWAT2")}. The most recent version of the
-#' package can be obtained from github at
-#' \url{https://github.com/DrylandEcology/rSOILWAT2}
-#' @seealso \itemize{ \item \code{\link{sw_exec}} for running a simulation
-#' \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
-#' data input \item \code{\link{dbW_getWeatherData}} and
-#' \code{\link{getWeatherData_folders}} for weather data input }
+#'   \code{packageDescription("rSOILWAT2")}. The most recent version of the
+#'   package can be obtained from github at
+#'   \url{https://github.com/DrylandEcology/rSOILWAT2}
+#'
+#' @seealso \itemize{
+#'   \item \code{\link{sw_exec}} for running a simulation
+#'   \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}}
+#'         for data input
+#'   \item \code{\link{dbW_getWeatherData}} and
+#'         \code{\link{getWeatherData_folders}} for weather data input
+#' }
+#'
 #' @references Bradford, J. B., D. R. Schlaepfer, and W. K. Lauenroth (2014)
 #' Ecohydrology of adjacent sagebrush and lodgepole pine ecosystems: The
 #' consequences of climate change and disturbance.  \emph{Ecosystems}
@@ -46,9 +49,11 @@ rSW2_glovars <- new.env()
 
 ##------ Import from other packages
 ## Package uses S3/S4 classes - they are defined in package:methods
-#' @importFrom methods slot slot<- as as<- initialize new slotNames inheritedSlotNames getSlots validObject callNextMethod
+#' @importFrom methods slot slot<- as as<- initialize new slotNames
+#'   inheritedSlotNames getSlots validObject callNextMethod
 #' @importFrom stats aggregate na.exclude
-#' @importFrom utils data head packageDescription read.csv read.table str tail write.table
+#' @importFrom utils data head packageDescription read.csv read.table str
+#'   tail write.table
 NULL
 
 ##------ Access SOILWAT2 C code

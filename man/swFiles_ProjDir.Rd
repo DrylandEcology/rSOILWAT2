@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swFiles_ProjDir}
 \alias{swFiles_ProjDir}
-\title{swFiles_ProjDir}
+\title{\code{swFiles_ProjDir}}
 \usage{
 swFiles_ProjDir(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swFiles}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swFiles}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-swFiles_ProjDir
+\code{swFiles_ProjDir}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}

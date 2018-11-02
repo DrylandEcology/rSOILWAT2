@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swEstab_useEstab}
 \alias{swEstab_useEstab}
-\title{swEstab_useEstab}
+\title{\code{swEstab_useEstab}}
 \usage{
 swEstab_useEstab(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swEstab}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swEstab}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-swEstab_useEstab
+\code{swEstab_useEstab}
 }
 \seealso{
 \code{\linkS4class{swEstab}} and \code{\linkS4class{swInputData}}

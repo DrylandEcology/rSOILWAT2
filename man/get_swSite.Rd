@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{get_swSite}
 \alias{get_swSite}
-\title{get_swSite}
+\title{\code{get_swSite}}
 \usage{
 get_swSite(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swSite}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swSite}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-get_swSite
+\code{get_swSite}
 }
 \seealso{
 \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}

@@ -2,17 +2,18 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swSWC<-}
 \alias{set_swSWC<-}
-\title{set_swSWC<-}
+\title{\code{set_swSWC<-}}
 \usage{
 set_swSWC(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swSWC}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swSWC}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-set_swSWC<-
+\code{set_swSWC<-}
 }
 \seealso{
 \code{\linkS4class{swSWC}} and \code{\linkS4class{swInputData}}

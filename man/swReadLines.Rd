@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swReadLines}
 \alias{swReadLines}
-\title{swReadLines}
+\title{\code{swReadLines}}
 \usage{
 swReadLines(object, file)
 }
@@ -10,7 +10,7 @@ swReadLines(object, file)
 \item{object}{An object of a class such \code{\linkS4class{swInputData}}.}
 }
 \description{
-swReadLines
+\code{swReadLines}
 }
 \seealso{
 \code{\linkS4class{swInputData}}

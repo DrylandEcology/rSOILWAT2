@@ -2,17 +2,18 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swEstab<-}
 \alias{set_swEstab<-}
-\title{set_swEstab<-}
+\title{\code{set_swEstab<-}}
 \usage{
 set_swEstab(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swEstab}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swEstab}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-set_swEstab<-
+\code{set_swEstab<-}
 }
 \seealso{
 \code{\linkS4class{swEstab}} and \code{\linkS4class{swInputData}}

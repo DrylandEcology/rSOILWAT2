@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swProd_Albedo}
 \alias{swProd_Albedo}
-\title{swProd_Albedo}
+\title{\code{swProd_Albedo}}
 \usage{
 swProd_Albedo(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swProd}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swProd}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-swProd_Albedo
+\code{swProd_Albedo}
 }
 \seealso{
 \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}

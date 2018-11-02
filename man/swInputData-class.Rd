@@ -70,13 +70,11 @@
 \alias{swWeather_UseMarkov<-,swInputData-method}
 \alias{swWeather_UseSnow<-,swInputData-method}
 \alias{swWeather_MonScalingParams<-,swInputData-method}
-\alias{get_swCloud,swInputData-method}
 \alias{swCloud_SkyCover,swInputData-method}
 \alias{swCloud_WindSpeed,swInputData-method}
 \alias{swCloud_Humidity,swInputData-method}
 \alias{swCloud_Transmissivity,swInputData-method}
 \alias{swCloud_SnowDensity,swInputData-method}
-\alias{set_swCloud<-,swInputData-method}
 \alias{swCloud_SkyCover<-,swInputData-method}
 \alias{swCloud_WindSpeed<-,swInputData-method}
 \alias{swCloud_Humidity<-,swInputData-method}
@@ -445,7 +443,8 @@
 
 \S4method{swProd_CO2Coefficients}{swInputData}(object) <- value
 
-\S4method{swProd_MonProd_veg}{swInputData,ANY,ANY}(object, vegtype) <- value
+\S4method{swProd_MonProd_veg}{swInputData,ANY,ANY}(object,
+  vegtype) <- value
 
 \S4method{swProd_MonProd_grass}{swInputData}(object) <- value
 
@@ -588,7 +587,8 @@
 
 \item{value}{A value to assign to a specific slot of the object.}
 
-\item{year}{An integer value. The calendar year of the weather or SWC \code{data} object.}
+\item{year}{An integer value. The calendar year of the weather or
+\var{SWC} \code{data} object.}
 
 \item{vegtype}{The name or index of the vegetation type.}
 
@@ -597,8 +597,33 @@
 \item{...}{Further arguments to methods.}
 }
 \description{
-This class is a container class to the input file S4 objects. The generic functions
-listed work on this and the proper sw classes in the container's slots.
+This class is a container class to the input file \var{S4} objects. The
+generic functions listed work on this and the proper \pkg{rSOILWAT2}
+classes in the container's slots.
+}
+\details{
+\code{\linkS4class{swInputData}} consists of slots for each file that is
+read in. These slots can be accessed via the following functions: \itemize{
+  \item \code{\link{get_Markov}}
+  \item \code{\link{get_swCloud}}
+  \item \code{\link{get_swFiles}}
+  \item \code{\link{get_swOUT}}
+  \item \code{\link{get_swProd}}
+  \item \code{\link{get_swSite}}
+  \item \code{\link{get_swSoils}}
+  \item \code{\link{get_swSWC}}
+  \item \code{\link{get_swWeather}}
+  \item \code{\link{get_swWeatherData}}
+  \item \code{\link{get_swYears}}
+  \item \code{\link{get_WeatherHistory}}
+}
+
+Generic methods to get/set individual elements follow a format:
+\code{"sw" + filename + "_" + option}, e.g.
+\itemize{
+  \item \code{\link{swFiles_Cloud}}
+  \item \code{\link{swProd_Albedo}}
+}
 }
 \examples{
 showClass("swInputData")

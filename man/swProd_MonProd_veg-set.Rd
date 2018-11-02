@@ -2,19 +2,20 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swProd_MonProd_veg<-}
 \alias{swProd_MonProd_veg<-}
-\title{swProd_MonProd_veg<-}
+\title{\code{swProd_MonProd_veg<-}}
 \usage{
 swProd_MonProd_veg(object, vegtype) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swProd}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swProd}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{vegtype}{The name or index of the vegetation type.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swProd_MonProd_veg<-
+\code{swProd_MonProd_veg<-}
 }
 \seealso{
 \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}

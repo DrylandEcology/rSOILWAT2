@@ -2,12 +2,14 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swOUT_TimeStepsForEveryKey}
 \alias{swOUT_TimeStepsForEveryKey}
-\title{swOUT_TimeStepsForEveryKey
-Need to define and export this generic method -- otherwise, \code{\link{swOUT_TimeStepsForEveryKey<-}} doesn't work.}
+\title{\code{swOUT_TimeStepsForEveryKey}
+Need to define and export this generic method -- otherwise,
+\code{\link{swOUT_TimeStepsForEveryKey<-}} doesn't work.}
 \usage{
 swOUT_TimeStepsForEveryKey(object, value)
 }
 \description{
-swOUT_TimeStepsForEveryKey
-Need to define and export this generic method -- otherwise, \code{\link{swOUT_TimeStepsForEveryKey<-}} doesn't work.
+\code{swOUT_TimeStepsForEveryKey}
+Need to define and export this generic method -- otherwise,
+\code{\link{swOUT_TimeStepsForEveryKey<-}} doesn't work.
 }

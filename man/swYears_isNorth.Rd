@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swYears_isNorth}
 \alias{swYears_isNorth}
-\title{swYears_isNorth}
+\title{\code{swYears_isNorth}}
 \usage{
 swYears_isNorth(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swYears}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swYears}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-swYears_isNorth
+\code{swYears_isNorth}
 }
 \seealso{
 \code{\linkS4class{swYears}} and \code{\linkS4class{swInputData}}

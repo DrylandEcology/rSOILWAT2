@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swProd_CanopyHeight}
 \alias{swProd_CanopyHeight}
-\title{swProd_CanopyHeight}
+\title{\code{swProd_CanopyHeight}}
 \usage{
 swProd_CanopyHeight(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swProd}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swProd}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-swProd_CanopyHeight
+\code{swProd_CanopyHeight}
 }
 \seealso{
 \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}

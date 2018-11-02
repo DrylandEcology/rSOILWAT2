@@ -2,17 +2,18 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swProd_MonProd_forb<-}
 \alias{swProd_MonProd_forb<-}
-\title{swProd_MonProd_forb<-}
+\title{\code{swProd_MonProd_forb<-}}
 \usage{
 swProd_MonProd_forb(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swProd}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swProd}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swProd_MonProd_forb<-
+\code{swProd_MonProd_forb<-}
 }
 \seealso{
 \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}

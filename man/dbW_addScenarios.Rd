@@ -7,15 +7,16 @@
 dbW_addScenarios(Scenarios, ignore.case = FALSE, verbose = FALSE)
 }
 \arguments{
-\item{Scenarios}{A vector of character strings. The names/labels of the queried scenarios.}
+\item{Scenarios}{A vector of character strings. The names/labels of the
+queried scenarios.}
 
 \item{ignore.case}{A logical value.}
 
 \item{verbose}{A logical value.}
 }
 \value{
-An invisible logical value indicating success with \code{TRUE} and failure
- with \code{FALSE}.
+An invisible logical value indicating success with \code{TRUE} and
+ failure with \code{FALSE}.
 }
 \description{
 Adds new Scenarios to a registered weather database

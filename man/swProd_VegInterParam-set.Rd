@@ -2,17 +2,18 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swProd_VegInterParam<-}
 \alias{swProd_VegInterParam<-}
-\title{swProd_VegInterParam<-}
+\title{\code{swProd_VegInterParam<-}}
 \usage{
 swProd_VegInterParam(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swProd}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swProd}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swProd_VegInterParam<-
+\code{swProd_VegInterParam<-}
 }
 \seealso{
 \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}

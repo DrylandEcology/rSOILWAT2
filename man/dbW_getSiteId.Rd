@@ -2,31 +2,36 @@
 % Please edit documentation in R/swFunctions.R
 \name{dbW_getSiteId}
 \alias{dbW_getSiteId}
-\title{Extract table keys to connect sites with weather data in the registered weather
-database}
+\title{Extract table keys to connect sites with weather data in the registered
+weather database}
 \usage{
 dbW_getSiteId(lat = NULL, long = NULL, Labels = NULL,
   ignore.case = FALSE, verbose = FALSE)
 }
 \arguments{
-\item{lat}{A numeric vector or \code{NULL}. The latitude in decimal degrees of WGS84.
-Northern latitude are positive, sites on the southern hemisphere have negative values.}
+\item{lat}{A numeric vector or \code{NULL}. The latitude in decimal degrees
+of \var{WGS84}. Northern latitude are positive, sites on the southern
+hemisphere have negative values.}
 
-\item{long}{A numeric vector or \code{NULL}. The longitude in decimal degrees of WGS84.
-Eastern longitudes are positive, sites on the western hemisphere have negative values.}
+\item{long}{A numeric vector or \code{NULL}. The longitude in decimal degrees
+of \var{WGS84}. Eastern longitudes are positive, sites on the western
+hemisphere have negative values.}
 
-\item{Labels}{A vector of character strings. The names/labels of the queried sites.}
+\item{Labels}{A vector of character strings. The names/labels of the queried
+sites.}
 
 \item{ignore.case}{A logical value.}
 }
 \value{
-An integer vector with the values of the keys or \code{NA} if not located.
+An integer vector with the values of the keys or \code{NA} if not
+  located.
 }
 \description{
-Extract table keys to connect sites with weather data in the registered weather
-database
+Extract table keys to connect sites with weather data in the registered
+weather database
 }
 \details{
-The key(s) (Site_id) can be located by either providing a \code{Labels} or
-by providing \code{lat} and \code{long} of the requested site(s).
+The key(s) (\var{Site_id}) can be located by either providing a
+  \code{Labels} or by providing \code{lat} and \code{long} of the requested
+  site(s).
 }

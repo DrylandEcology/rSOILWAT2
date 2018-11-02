@@ -2,17 +2,18 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swCarbon_CO2ppm<-}
 \alias{swCarbon_CO2ppm<-}
-\title{swCarbon_CO2ppm<-}
+\title{\code{swCarbon_CO2ppm<-}}
 \usage{
 swCarbon_CO2ppm(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swCarbon}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swCarbon}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swCarbon_CO2ppm<-
+\code{swCarbon_CO2ppm<-}
 }
 \seealso{
 \code{\linkS4class{swCarbon}} and \code{\linkS4class{swInputData}}

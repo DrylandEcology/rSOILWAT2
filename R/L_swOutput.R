@@ -1,6 +1,7 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer,
+#    William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -79,14 +80,17 @@ sw_out_flags <- function() {
 #' @name swOutput_KEY-class
 #' @export
 setClass("swOutput_KEY", slot = c(Title = "character", TimeStep = "integer",
-  Columns = "integer", Day = "matrix", Week = "matrix", Month = "matrix", Year = "matrix"))
+  Columns = "integer", Day = "matrix", Week = "matrix", Month = "matrix",
+  Year = "matrix"))
 
 setValidity("swOutput_KEY", function(object) {
   val <- TRUE
   ntemp <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
 
-  if (length(object@TimeStep) != 1 || object@TimeStep > ntemp || object@TimeStep < 1) {
-    msg <- paste("@TimeStep must have exactly 1 value between 1 and SW_OUTNPERIODS")
+  if (length(object@TimeStep) != 1 || object@TimeStep > ntemp ||
+      object@TimeStep < 1) {
+    msg <- paste("@TimeStep must have exactly 1 value between 1 and",
+      "SW_OUTNPERIODS")
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
@@ -94,13 +98,18 @@ setValidity("swOutput_KEY", function(object) {
 })
 
 #' @rdname swOutput_KEY-class
-setMethod("swOutput_KEY_Period", signature = "swOutput_KEY", function(object, index) {
-  slot(object, rSW2_glovars[["sw_TimeSteps"]][index])
+setMethod("swOutput_KEY_Period", signature = "swOutput_KEY",
+  function(object, index) {
+    slot(object, rSW2_glovars[["sw_TimeSteps"]][index])
 })
+
 #' @rdname swOutput_KEY-class
-setMethod("swOutput_KEY_TimeStep", signature = "swOutput_KEY", function(object) object@TimeStep)
+setMethod("swOutput_KEY_TimeStep", signature = "swOutput_KEY",
+  function(object) object@TimeStep)
+
 #' @rdname swOutput_KEY-class
-setMethod("swOutput_KEY_Columns", signature = "swOutput_KEY", function(object) object@Columns)
+setMethod("swOutput_KEY_Columns", signature = "swOutput_KEY",
+  function(object) object@Columns)
 
 #' @rdname swOutput_KEY-class
 setReplaceMethod("swOutput_KEY_Period", signature = "swOutput_KEY",
@@ -137,19 +146,45 @@ setReplaceMethod("swOutput_KEY_Period", signature = "swOutput_KEY",
 #'
 #' @name swOutput-class
 #' @export
-setClass("swOutput", slot = c(yr_nrow = "integer", mo_nrow = "integer",
-  wk_nrow = "integer", dy_nrow = "integer",
-  WTHR = "swOutput_KEY", TEMP = "swOutput_KEY", PRECIP = "swOutput_KEY",
-  SOILINFILT = "swOutput_KEY", RUNOFF = "swOutput_KEY", ALLH2O = "swOutput_KEY",
-  VWCBULK = "swOutput_KEY", VWCMATRIC = "swOutput_KEY", SWCBULK = "swOutput_KEY",
-  SWA = "swOutput_KEY",
-  SWABULK = "swOutput_KEY", SWAMATRIC = "swOutput_KEY", SWPMATRIC = "swOutput_KEY",
-  SURFACEWATER = "swOutput_KEY", TRANSP = "swOutput_KEY", EVAPSOIL = "swOutput_KEY",
-  EVAPSURFACE = "swOutput_KEY", INTERCEPTION = "swOutput_KEY", LYRDRAIN = "swOutput_KEY",
-  HYDRED = "swOutput_KEY", ET = "swOutput_KEY", AET = "swOutput_KEY",
-  PET = "swOutput_KEY", WETDAY = "swOutput_KEY", SNOWPACK = "swOutput_KEY",
-  DEEPSWC = "swOutput_KEY", SOILTEMP = "swOutput_KEY", ALLVEG = "swOutput_KEY",
-  ESTABL = "swOutput_KEY", CO2EFFECTS = "swOutput_KEY"))
+setClass(
+  "swOutput",
+  slot = c(
+    yr_nrow = "integer",
+    mo_nrow = "integer",
+    wk_nrow = "integer",
+    dy_nrow = "integer",
+    WTHR = "swOutput_KEY",
+    TEMP = "swOutput_KEY",
+    PRECIP = "swOutput_KEY",
+    SOILINFILT = "swOutput_KEY",
+    RUNOFF = "swOutput_KEY",
+    ALLH2O = "swOutput_KEY",
+    VWCBULK = "swOutput_KEY",
+    VWCMATRIC = "swOutput_KEY",
+    SWCBULK = "swOutput_KEY",
+    SWA = "swOutput_KEY",
+    SWABULK = "swOutput_KEY",
+    SWAMATRIC = "swOutput_KEY",
+    SWPMATRIC = "swOutput_KEY",
+    SURFACEWATER = "swOutput_KEY",
+    TRANSP = "swOutput_KEY",
+    EVAPSOIL = "swOutput_KEY",
+    EVAPSURFACE = "swOutput_KEY",
+    INTERCEPTION = "swOutput_KEY",
+    LYRDRAIN = "swOutput_KEY",
+    HYDRED = "swOutput_KEY",
+    ET = "swOutput_KEY",
+    AET = "swOutput_KEY",
+    PET = "swOutput_KEY",
+    WETDAY = "swOutput_KEY",
+    SNOWPACK = "swOutput_KEY",
+    DEEPSWC = "swOutput_KEY",
+    SOILTEMP = "swOutput_KEY",
+    ALLVEG = "swOutput_KEY",
+    ESTABL = "swOutput_KEY",
+    CO2EFFECTS = "swOutput_KEY"
+  )
+)
 
 
 #' @rdname swOutput-class
@@ -160,15 +195,18 @@ setMethod("$", signature = "swOutput", function(x, name) slot(x, name))
 #' @rdname swOutput-class
 #' @export
 setMethod("swOutput_getKEY", signature = "swOutput", function(object, index) {
-  slot(object, slotNames("swOutput")[-(1:4)][index])
+  nid <- seq_len(4)
+  slot(object, slotNames("swOutput")[-nid][index])
 })
 
 #TODO: use C key2str to access slot
 #' @rdname swOutput-class
 #' @export
-setReplaceMethod("swOutput_setKEY", signature = c(object = "swOutput", value = "swOutput_KEY"),
+setReplaceMethod("swOutput_setKEY",
+  signature = c(object = "swOutput", value = "swOutput_KEY"),
   function(object, index, value) {
-    slot(object, slotNames("swOutput")[-(1:4)][index]) <- value
+    nid <- seq_len(4)
+    slot(object, slotNames("swOutput")[-nid][index]) <- value
     object
   }
 )

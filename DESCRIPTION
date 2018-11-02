@@ -1,8 +1,8 @@
 Package: rSOILWAT2
-Version: 2.3.2
-Date: 2018-07-17
+Version: 2.3.3
+Date: 2018-11-02
 Title: An Ecohydrological Ecosystem-Scale Water Balance Simulation Model
-Description: Access to the C-based 'SOILWAT2' v4.1.3 and functionality for
+Description: Access to the C-based SOILWAT2 v4.1.3 and functionality for
   SQLite-database of weather data.
 Authors@R: c(person("Ryan", "Murphy", role = "aut"),
   person("Daniel", "Schlaepfer", email = "daniel.schlaepfer@yale.edu",
@@ -27,6 +27,7 @@ NeedsCompilation: yes
 License: GPL-3 + file LICENSE
 URL: https://github.com/DrylandEcology/rSOILWAT2
 BugReports: https://github.com/DrylandEcology/rSOILWAT2/issues
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 LazyData: true
 ByteCompile: true
+Language: en-US

@@ -15,7 +15,8 @@ dbW_upgrade_to_rSOILWAT2(dbWeatherDataFile, fbackup = NULL,
 
 dbW_upgrade_v31to32(dbWeatherDataFile, fbackup = NULL)
 
-dbW_upgrade_v3to31(dbWeatherDataFile, fbackup = NULL, type_new = "gzip")
+dbW_upgrade_v3to31(dbWeatherDataFile, fbackup = NULL,
+  type_new = "gzip")
 
 dbW_upgrade_v2to3(dbWeatherDataFile, fbackup = NULL)
 
@@ -24,47 +25,51 @@ dbW_upgrade_v1to2(dbWeatherDataFile, fbackup = NULL, SWRunInformation)
 backup_copy(dbWeatherDataFile, fbackup = NULL)
 }
 \arguments{
-\item{dbWeatherDataFile}{A character string. The path to the weather database file.}
+\item{dbWeatherDataFile}{A character string. The path to the weather database
+file.}
 
-\item{fbackup}{A character string. The path to where the weather database should be
-backed up. If \code{NULL}, then '_copy' is appended to \code{dbWeatherDataFile}.}
+\item{fbackup}{A character string. The path to where the weather database
+should be backed up. If \code{NULL}, then '_copy' is appended to
+\code{dbWeatherDataFile}.}
 
-\item{check_all}{A logical value. If \code{TRUE}, then every record is checked;
-otherwise, only the first record is checked for the package version.}
+\item{check_all}{A logical value. If \code{TRUE}, then every record is
+checked; otherwise, only the first record is checked for the package
+version.}
 
-\item{with_resume}{A logical value. If \code{TRUE}, then digest of call and progress
-status are stored in a temporary file on disk on the same path as \code{dbWeatherDataFile}.
-If such a temporary file is present, then upgrade is resumed from where progress
-status indicates. Otherwise, ignore temporary disk files and attempt to upgrade
-database records from scratch.}
+\item{with_resume}{A logical value. If \code{TRUE}, then digest of call and
+progress status are stored in a temporary file on disk on the same path as
+\code{dbWeatherDataFile}. If such a temporary file is present, then upgrade
+is resumed from where progress status indicates. Otherwise, ignore
+temporary disk files and attempt to upgrade database records from scratch.}
 
-\item{clean_cache}{A logical value. If \code{TRUE}, then temporary file generated
-with \code{with_resume} set to \code{TRUE}, if present, is removed once upgrade
-completed successfully.}
+\item{clean_cache}{A logical value. If \code{TRUE}, then temporary file
+generated with \code{with_resume} set to \code{TRUE}, if present, is
+removed once upgrade completed successfully.}
 
-\item{type_new}{The type of compression used to compress the weather blobs. See
-\code{\link[base]{memCompress}}.}
+\item{type_new}{The type of compression used to compress the weather blobs.
+See \code{\link[base]{memCompress}}.}
 }
 \description{
 Weather database upgrade functions
 }
 \section{Details}{
- \code{dbW_upgrade_to_rSOILWAT2} upgrades a weather database that was
-created under'Rsoilwat31' to the current package version 'rSOILWAT2'
+ \code{dbW_upgrade_to_rSOILWAT2} upgrades a weather database
+  that was created under \pkg{Rsoilwat31} to the current package version
+  \pkg{rSOILWAT2}
 
- \code{dbW_upgrade_v31to32} upgrades a weather database from version
- '3.1.z' to '3.2.0'
+ \code{dbW_upgrade_v31to32} upgrades a weather database
+  from version 3.1.z' to '3.2.0'
 
- \code{dbW_upgrade_v3to31} upgrades a weather database from version
- '3.0.x' to '3.1.0'
+ \code{dbW_upgrade_v3to31} upgrades a weather database
+ from version '3.0.x' to '3.1.0'
 
- \code{dbW_upgrade_v2to3} upgrades a weather database from version
- '2.x.y' to '3.0.0'
+ \code{dbW_upgrade_v2to3} upgrades a weather database
+ from version '2.x.y' to '3.0.0'
 
- \code{dbW_upgrade_v1to2} upgrades a weather database from version
- '1.x.y' to '2.0.0'
+ \code{dbW_upgrade_v1to2} upgrades a weather database
+ from version '1.x.y' to '2.0.0'
 
- \code{backup_copy} creates a backup copy of a weather database file
- if not already present
+ \code{backup_copy} creates a backup copy of a weather
+  database file if not already present
 }
 

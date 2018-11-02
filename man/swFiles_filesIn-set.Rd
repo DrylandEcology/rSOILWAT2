@@ -2,17 +2,18 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swFiles_filesIn<-}
 \alias{swFiles_filesIn<-}
-\title{swFiles_filesIn<-}
+\title{\code{swFiles_filesIn<-}}
 \usage{
 swFiles_filesIn(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swFiles}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swFiles}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swFiles_filesIn<-
+\code{swFiles_filesIn<-}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}
