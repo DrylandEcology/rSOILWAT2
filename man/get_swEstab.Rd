@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{get_swEstab}
 \alias{get_swEstab}
-\title{get_swEstab}
+\title{\code{get_swEstab}}
 \usage{
 get_swEstab(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swEstab}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swEstab}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-get_swEstab
+\code{get_swEstab}
 }
 \seealso{
 \code{\linkS4class{swEstab}} and \code{\linkS4class{swInputData}}

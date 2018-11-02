@@ -2,12 +2,14 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swProd}
 \alias{set_swProd}
-\title{set_swProd
-Need to define and export this generic method -- otherwise, \code{\link{set_swProd<-}} doesn't work.}
+\title{\code{set_swProd}
+Need to define and export this generic method -- otherwise,
+\code{\link{set_swProd<-}} doesn't work.}
 \usage{
 set_swProd(object, value)
 }
 \description{
-set_swProd
-Need to define and export this generic method -- otherwise, \code{\link{set_swProd<-}} doesn't work.
+\code{set_swProd}
+Need to define and export this generic method -- otherwise,
+\code{\link{set_swProd<-}} doesn't work.
 }

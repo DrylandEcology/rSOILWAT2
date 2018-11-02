@@ -20,7 +20,8 @@ test_that("Test data availability", expect_gt(length(tests), 0))
 sw_weather <- lapply(tests, function(it)
   readRDS(file.path(dir_test_data, paste0(it, "_weather.rds"))))
 scenarios <- c("Current", paste0("TestScenario", tests))
-scenarios_added <- c(scenarios, paste0(scenarios[1], "_new"), tolower(scenarios[3]))
+scenarios_added <- c(scenarios, paste0(scenarios[1], "_new"),
+  tolower(scenarios[3]))
 
 req_cols <- c("Latitude", "Longitude", "Label")
 site_N <- 5
@@ -47,17 +48,18 @@ weatherDF_dataColumns <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
 
 
 
-# This function is needed for appveyor: for some reason 'dbW_createDatabase' doesn't
-# remove (in any situation) failed disk files 'fdbWeather'; this is not a problem on
-# travis or on my local macOS
+# This function is needed for appveyor: for some reason 'dbW_createDatabase'
+# doesn't remove (in any situation) failed disk files 'fdbWeather'; this is not
+# a problem on travis or on my local macOS
 unlink_forcefully <- function(x, recursive = TRUE, force = TRUE, info = NULL) {
   if (file.exists(x)) {
-    message(paste0(info, ": file ", x, " should not exists, but it does - so we delete it."))
+    message(paste0(info, ": file ", x, " should not exists, but it does - ",
+      "so we delete it."))
     unlink(x, recursive = recursive, force = force)
   }
   if (file.exists(x)) {
-    message(paste0(info, ": file ", x, " should not exists because we just attempted ",
-      "to delete it."))
+    message(paste0(info, ": file ", x, " should not exists because we just ",
+      "attempted to delete it."))
   } else {
     message(paste0(info, ": file ", x, " sucessfully deleted."))
   }
@@ -69,14 +71,16 @@ test_that("Disk file write and delete permissions", {
   expect_true(!inherits(temp, "try-error") && file.exists(fdbWeather),
     info = paste("Failed to create file", fdbWeather))
 
-  expect_message(temp <- try(unlink_forcefully(fdbWeather, info = "1st"), silent = TRUE),
-    regexp = "sucessfully deleted")
+  expect_message(temp <- try(unlink_forcefully(fdbWeather, info = "1st"),
+    silent = TRUE), regexp = "sucessfully deleted")
   expect_true(!inherits(temp, "try-error") && !file.exists(fdbWeather),
     info = paste("Failed to delete file", fdbWeather))
 })
 
 test_that("dbW creation", {
-  skip_on_appveyor() #remove once issue #43 is fixed (unit tests for 'test_dbW_functionality.R' fail on appveyor but not on travis)
+  # remove once issue #43 is fixed (unit tests for 'test_dbW_functionality.R'
+  # fail on appveyor but not on travis)
+  skip_on_appveyor()
 
   #--- Attempt to connect to (no) weather database
   unlink(fdbWeather)
@@ -91,13 +95,15 @@ test_that("dbW creation", {
     verbose = TRUE), regexp = "exists but is likely not a SQLite-database")
   expect_false(dbW_setConnection(fdbWeather3, create_if_missing = TRUE))
   expect_message(dbW_setConnection(fdbWeather3, create_if_missing = TRUE,
-    verbose = TRUE), regexp = "cannot be created likely because the path does not exist")
+    verbose = TRUE),
+    regexp = "cannot be created likely because the path does not exist")
   expect_false(dbW_IsValid())
 
   #--- Create weather database and check that connection
   expect_message(dbW_createDatabase(fdbWeather, site_data = site_data1,
     Scenarios = scenarios, scen_ambient = scenarios[1],
-    verbose = TRUE, ARG_DOESNT_EXIST = 1:3), regexp = "arguments ignored/deprecated")
+    verbose = TRUE, ARG_DOESNT_EXIST = 1:3),
+    regexp = "arguments ignored/deprecated")
   unlink(fdbWeather)
   expect_false(dbW_createDatabase(fdbWeather))
   expect_message(unlink_forcefully(fdbWeather, info = "2nd"),
@@ -106,7 +112,8 @@ test_that("dbW creation", {
     regexp = "errors in the table data")
   # this is a warning coming from 'normalizePath':
   #   - on 'unix': regexp = "No such file or directory"
-  #   - on 'windows': regexp = "The system cannot find the path specified" or similar
+  #   - on 'windows': regexp = "The system cannot find the path specified" or
+  #     similar
   expect_warning(dbW_createDatabase(fdbWeather3, site_data = site_data1,
     Scenarios = scenarios, scen_ambient = scenarios[1]))
   expect_message(unlink_forcefully(fdbWeather, info = "3rd"),
@@ -149,7 +156,9 @@ test_that("dbW creation", {
 })
 
 test_that("dbW site/scenario tables manipulation", {
-  skip_on_appveyor() #remove once issue #43 is fixed (unit tests for 'test_dbW_functionality.R' fail on appveyor but not on travis)
+  #remove once issue #43 is fixed (unit tests for 'test_dbW_functionality.R'
+  # fail on appveyor but not on travis)
+  skip_on_appveyor()
 
   #--- Obtain site_id all at once
   site_id1 <- dbW_getSiteId(lat = site_data1[, "Latitude"],
@@ -169,7 +178,8 @@ test_that("dbW site/scenario tables manipulation", {
     #--- Obtain site_id one by one
     site_id1 <- dbW_getSiteId(lat = site_data1[k, "Latitude"],
       long = site_data1[k, "Longitude"])
-    site_id2 <- dbW_getSiteId(Labels = site_data1[k, "Label"], ignore.case = FALSE)
+    site_id2 <- dbW_getSiteId(Labels = site_data1[k, "Label"],
+      ignore.case = FALSE)
     expect_equal(site_id1, site_id2)
     site_id3 <- dbW_getSiteId(Labels = tolower(site_data1[k, "Label"]),
       ignore.case = TRUE)
@@ -191,21 +201,30 @@ test_that("dbW site/scenario tables manipulation", {
   }
 
   #--- Update site information
-  expect_equal(dbW_getSiteTable()[, req_cols], rbind(site_data1, site_data3)[, req_cols])
-  expect_true(dbW_updateSites(Site_ids = i_update2, site_data = site_data2[i_update2, ]))
-  expect_equal(dbW_getSiteTable()[, req_cols], rbind(site_data2, site_data3)[, req_cols])
-  expect_true(dbW_updateSites(Site_ids = i_update2, site_data = site_data1[i_update2, ]))
-  expect_equal(dbW_getSiteTable()[, req_cols], rbind(site_data1, site_data3)[, req_cols])
-  expect_true(dbW_updateSites(Site_ids = -1, site_data = site_data1[i_update2, ]))
-  expect_equal(dbW_getSiteTable()[, req_cols], rbind(site_data1, site_data3)[, req_cols])
+  expect_equal(dbW_getSiteTable()[, req_cols],
+    rbind(site_data1, site_data3)[, req_cols])
+  expect_true(dbW_updateSites(Site_ids = i_update2,
+    site_data = site_data2[i_update2, ]))
+  expect_equal(dbW_getSiteTable()[, req_cols],
+    rbind(site_data2, site_data3)[, req_cols])
+  expect_true(dbW_updateSites(Site_ids = i_update2,
+    site_data = site_data1[i_update2, ]))
+  expect_equal(dbW_getSiteTable()[, req_cols],
+    rbind(site_data1, site_data3)[, req_cols])
+  expect_true(dbW_updateSites(Site_ids = -1,
+    site_data = site_data1[i_update2, ]))
+  expect_equal(dbW_getSiteTable()[, req_cols],
+    rbind(site_data1, site_data3)[, req_cols])
 
   #--- Add scenarios
   # Obtain scenario id
   expect_equal(dbW_getScenarioId(scenarios_added),
-    c(seq_along(scenarios), rep(NA_integer_, length(scenarios_added) - length(scenarios))))
+    c(seq_along(scenarios), rep(NA_integer_,
+      length(scenarios_added) - length(scenarios))))
   for (k in seq_along(scenarios)) {
     expect_equal(dbW_getScenarioId(scenarios[k]), k)
   }
+
   # Scenario already exists
   expect_true(dbW_addScenarios(scenarios[1], verbose = FALSE))
   expect_message(dbW_addScenarios(scenarios[1], verbose = TRUE),
@@ -233,15 +252,19 @@ test_that("dbW site/scenario tables manipulation", {
     ignore.case = FALSE)
   expect_equal(site_id4, rep(NA_integer_, site_N))
 
-  id1 <- dbW_getIDs(long = site_data1[, "Longitude"], lat = site_data1[, "Latitude"],
-    scenario = scenarios_added, add_if_missing = FALSE)
+  id1 <- dbW_getIDs(long = site_data1[, "Longitude"],
+    lat = site_data1[, "Latitude"], scenario = scenarios_added,
+    add_if_missing = FALSE)
   id2 <- dbW_getIDs(site_label = site_data1[, "Label"],
     scenario_id = seq_along(scenarios_added), add_if_missing = FALSE)
+
   expect_equal(id1, id2)
 })
 
 test_that("dbW weather data manipulation", {
-  skip_on_appveyor() #remove once issue #43 is fixed (unit tests for 'test_dbW_functionality.R' fail on appveyor but not on travis)
+  #remove once issue #43 is fixed (unit tests for 'test_dbW_functionality.R'
+  # fail on appveyor but not on travis)
+  skip_on_appveyor()
 
   #--- Add weather data
   # Use 'Site_id' as identifier
@@ -269,10 +292,14 @@ test_that("dbW weather data manipulation", {
   expect_equal(dbW_has_weatherData(Site_ids = 1:3, Scenario_ids = 1:4), res_exp)
 
   # Retrieve weather data
-  expect_equal(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[1]), sw_weather[[1]])
-  expect_equal(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[2]), sw_weather[[1]])
-  expect_equal(dbW_getWeatherData(Site_id = 2, Scenario = scenarios[1]), sw_weather[[2]])
-  expect_equal(dbW_getWeatherData(Site_id = 3, Scenario = scenarios[2]), sw_weather[[2]])
+  expect_equal(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[1]),
+    sw_weather[[1]])
+  expect_equal(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[2]),
+    sw_weather[[1]])
+  expect_equal(dbW_getWeatherData(Site_id = 2, Scenario = scenarios[1]),
+    sw_weather[[2]])
+  expect_equal(dbW_getWeatherData(Site_id = 3, Scenario = scenarios[2]),
+    sw_weather[[2]])
 
   # Adding data to the same Site_id x ScenarioName combination will fail
   expect_error(dbW_addWeatherData(Site_id = 1, weatherData = sw_weather[[1]],
@@ -289,7 +316,8 @@ test_that("dbW weather data manipulation", {
   expect_true(dbW_has_siteIDs(1))
   expect_true(dbW_deleteSiteData(Site_id = 1, Scenario_id = 2))
   expect_true(dbW_has_siteIDs(1))
-  expect_equal(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[1]), sw_weather[[1]])
+  expect_equal(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[1]),
+    sw_weather[[1]])
   expect_error(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[2]))
 })
 
@@ -313,21 +341,26 @@ test_that("Manipulate weather data", {
   datA_DF_noyrs  <- datA_DF[, -1]
   datA_yrs_ts <- datA_DF[, 1]
 
-  datA_DF_result_con1 <- get_years_from_weatherDF(datA_DF, datA_yrs_ts, weatherDF_dataColumns)
+  datA_DF_result_con1 <- get_years_from_weatherDF(datA_DF, datA_yrs_ts,
+    weatherDF_dataColumns)
   expect_equal(datA_DF_result_con1[["years"]], datA_yrs)
   expect_equal(datA_DF_result_con1[["year_ts"]], datA_yrs_ts)
 
-  datA_DF_result_con2 <- get_years_from_weatherDF(datA_DF, datA_yrs, weatherDF_dataColumns)
+  datA_DF_result_con2 <- get_years_from_weatherDF(datA_DF, datA_yrs,
+    weatherDF_dataColumns)
   expect_equal(datA_DF_result_con2[["years"]], datA_yrs)
   expect_equal(datA_DF_result_con2[["year_ts"]], datA_yrs_ts)
 
-  expect_error(get_years_from_weatherDF(datA_DF, datA_yrs[2:20], weatherDF_dataColumns)) #con 3
+  expect_error(get_years_from_weatherDF(datA_DF, datA_yrs[2:20],
+    weatherDF_dataColumns)) #con 3
 
-  datA_DF_result_con4 <- get_years_from_weatherDF(datA_DF, NULL, weatherDF_dataColumns)
+  datA_DF_result_con4 <- get_years_from_weatherDF(datA_DF, NULL,
+    weatherDF_dataColumns)
   expect_equal(datA_DF_result_con4[["years"]], datA_yrs)
   expect_equal(datA_DF_result_con4[["year_ts"]], datA_yrs_ts)
 
-  expect_error(get_years_from_weatherDF(datA_DF_noyrs, NULL, weatherDF_dataColumns)) #con 5
+  expect_error(get_years_from_weatherDF(datA_DF_noyrs, NULL,
+    weatherDF_dataColumns)) #con 5
 
   for (k in seq_along(tests)) {
     datB <- sw_weather[[k]]

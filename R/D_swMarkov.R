@@ -1,6 +1,7 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer,
+#    William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -55,12 +56,12 @@ setMethod("initialize", signature = "swMarkov", function(.Object, ...) {
   dots <- list(...)
   dns <- names(dots)
 
-  # We don't set values for slots `Prob` and `Conv`; this is to prevent simulation runs with
-  # accidentally incorrect values
+  # We don't set values for slots `Prob` and `Conv`; this is to prevent
+  # simulation runs with accidentally incorrect values
 
   # We have to explicitly give column names (as defined in `onGet_MKV_prob` and
-  # `onGet_MKV_conv`) because they are not read in by C code if the weather generator is
-  # turned off
+  # `onGet_MKV_conv`) because they are not read in by C code if the weather
+  # generator is turned off
   ctemp_Prob <- c("day", "wet", "dry", "avg_ppt", "std_ppt")
   ctemp_Conv <- c("week", "t1", "t2", "t3", "t4", "t5", "t6")
 
@@ -88,7 +89,11 @@ setMethod("initialize", signature = "swMarkov", function(.Object, ...) {
   }
   .Object@Conv <- temp
 
-  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  if (FALSE) {
+    # not needed because no relevant inheritance
+    .Object <- callNextMethod(.Object, ...)
+  }
+
   validObject(.Object)
   .Object
 })
@@ -139,48 +144,54 @@ setReplaceMethod("set_Markov", signature = "swMarkov", function(object, value) {
 
 #' @rdname swMarkov-class
 #' @export
-setReplaceMethod("swMarkov_Prob", signature = "swMarkov", function(object, value) {
-  if (ncol(value) == ncol(object@Prob)) {
-    colnames(value) <- dimnames(object@Prob)[[2]]
-  }
-  object@Prob <- value
-  validObject(object)
-  object
+setReplaceMethod("swMarkov_Prob", signature = "swMarkov",
+  function(object, value) {
+    if (ncol(value) == ncol(object@Prob)) {
+      colnames(value) <- dimnames(object@Prob)[[2]]
+    }
+    object@Prob <- value
+    validObject(object)
+    object
 })
 
 #' @rdname swMarkov-class
 #' @export
-setReplaceMethod("swMarkov_Conv", signature = "swMarkov", function(object, value) {
+setReplaceMethod("swMarkov_Conv", signature = "swMarkov",
+  function(object, value) {
     if (ncol(value) == ncol(object@Conv)) {
-    colnames(value) <- dimnames(object@Conv)[[2]]
-  }
-  object@Conv <- value
-  validObject(object)
-  object
+      colnames(value) <- dimnames(object@Conv)[[2]]
+    }
+    object@Conv <- value
+    validObject(object)
+    object
 })
 
 
 #' @rdname swMarkov-class
 #' @export
-setMethod("swReadLines", signature = c(object="swMarkov",file="character"), function(object,file) {
-			infiletext <- readLines(con = file[1])
-			infiletext <- infiletext[-(1:2)]
-			if(length(infiletext) != 366)
-				stop("Markov Prod wrong number of lines")
+setMethod("swReadLines", signature = c(object = "swMarkov", file = "character"),
+  function(object, file) {
+    id_skip <- 1:2
 
-			object@Prob=matrix(0,366,5)
-			for(i in 1:366) {
-				object@Prob[i,]<- readNumerics(infiletext[i],5)
-			}
+    infiletext <- readLines(con = file[1])
+    infiletext <- infiletext[-id_skip]
+    if (length(infiletext) != 366)
+      stop("Markov Prod wrong number of lines")
 
-			infiletext <- readLines(con = file[2])
-			infiletext <- infiletext[-(1:2)]
-			if(length(infiletext) != 53)
-				stop("Markov Prod wrong number of lines")
+    object@Prob <- matrix(0, 366, 5)
+    for (i in seq_len(366)) {
+      object@Prob[i, ] <- readNumerics(infiletext[i], 5)
+    }
 
-			object@Conv=matrix(0,53,7)
-			for(i in 1:366) {
-				object@Conv[i,]<- readNumerics(infiletext[i],7)
-			}
-			return(object)
-		})
+    infiletext <- readLines(con = file[2])
+    infiletext <- infiletext[-id_skip]
+    if (length(infiletext) != 53)
+      stop("Markov Prod wrong number of lines")
+
+    object@Conv <- matrix(0, 53, 7)
+    for (i in seq_len(366)) {
+      object@Conv[i, ] <- readNumerics(infiletext[i], 7)
+    }
+
+    object
+})

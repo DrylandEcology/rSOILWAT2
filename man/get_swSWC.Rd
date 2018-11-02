@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{get_swSWC}
 \alias{get_swSWC}
-\title{get_swSWC}
+\title{\code{get_swSWC}}
 \usage{
 get_swSWC(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swSWC}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swSWC}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-get_swSWC
+\code{get_swSWC}
 }
 \seealso{
 \code{\linkS4class{swSWC}} and \code{\linkS4class{swInputData}}

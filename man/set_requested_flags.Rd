@@ -10,14 +10,16 @@ set_requested_flags(swIn, tag, use, values, fun, reset = TRUE,
 \arguments{
 \item{swIn}{An object of class \code{\linkS4class{swInputData}}.}
 
-\item{tag}{A character string. This string is used to partially match names of parameter
-\code{use} which indicates which of the values should be manipulated.}
+\item{tag}{A character string. This string is used to partially match names
+of parameter \code{use} which indicates which of the values should be
+manipulated.}
 
 \item{use}{A logical named vector.}
 
 \item{values}{A vector.}
 
-\item{fun}{A character string. Identifies the method to extract and replace values.}
+\item{fun}{A character string. Identifies the method to extract and replace
+values.}
 
 \item{reset}{A logical value.}
 
@@ -30,9 +32,10 @@ An updated version of \code{swIn}.
 Assign requested values to (scalar) input flags
 }
 \section{Details}{
- If \code{reset} is \code{TRUE}, then function resets flags identified
- by \code{tag} and turned off as identified by \code{use} to \code{default}.
- turned on as identified by \code{use} to corresponding elements of \code{values};
- other flags are not changed.
+ If \code{reset} is \code{TRUE}, then function resets flags
+ identified by \code{tag} and turned off as identified by \code{use} to
+ \code{default}. If \code{reset} is \code{FALSE}, then code sets flags
+ identified by \code{tag} and turned on as identified by \code{use} to
+ corresponding elements of \code{values}; other flags are not changed.
 }
 

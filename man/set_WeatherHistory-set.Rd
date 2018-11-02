@@ -2,7 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_WeatherHistory<-}
 \alias{set_WeatherHistory<-}
-\title{set_WeatherHistory<-}
+\title{\code{set_WeatherHistory<-}}
 \usage{
 set_WeatherHistory(object) <- value
 }
@@ -12,7 +12,7 @@ set_WeatherHistory(object) <- value
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-set_WeatherHistory<-
+\code{set_WeatherHistory<-}
 }
 \seealso{
 \code{\linkS4class{swInputData}}

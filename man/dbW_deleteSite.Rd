@@ -2,7 +2,8 @@
 % Please edit documentation in R/sw_dbW_WeatherDatabase.R
 \name{dbW_deleteSite}
 \alias{dbW_deleteSite}
-\title{Delete a site and all associated weather data from a registered weather database}
+\title{Delete a site and all associated weather data from a registered weather
+database}
 \usage{
 dbW_deleteSite(Site_ids)
 }
@@ -10,9 +11,10 @@ dbW_deleteSite(Site_ids)
 \item{Site_ids}{An integer vector. The IDs/database keys of the queried site.}
 }
 \value{
-An invisible logical value indicating success with \code{TRUE} and failure
- with \code{FALSE}.
+An invisible logical value indicating success with \code{TRUE} and
+  failure with \code{FALSE}.
 }
 \description{
-Delete a site and all associated weather data from a registered weather database
+Delete a site and all associated weather data from a registered weather
+database
 }

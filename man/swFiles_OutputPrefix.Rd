@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swFiles_OutputPrefix}
 \alias{swFiles_OutputPrefix}
-\title{swFiles_OutputPrefix}
+\title{\code{swFiles_OutputPrefix}}
 \usage{
 swFiles_OutputPrefix(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swFiles}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swFiles}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-swFiles_OutputPrefix
+\code{swFiles_OutputPrefix}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}

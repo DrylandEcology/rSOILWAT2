@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{get_swSoils}
 \alias{get_swSoils}
-\title{get_swSoils}
+\title{\code{get_swSoils}}
 \usage{
 get_swSoils(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swSoils}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swSoils}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-get_swSoils
+\code{get_swSoils}
 }
 \seealso{
 \code{\linkS4class{swSoils}} and \code{\linkS4class{swInputData}}

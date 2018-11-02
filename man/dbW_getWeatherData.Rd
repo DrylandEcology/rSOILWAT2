@@ -13,10 +13,10 @@ dbW_getWeatherData(Site_id = NULL, lat = NULL, long = NULL,
 \item{Site_id}{Numeric. Used to identify site and extract weather data.}
 
 \item{lat}{Numeric. Latitude used with longitude to identify site id if
-Site_id is missing.}
+\code{Site_id} is missing.}
 
 \item{long}{Numeric. Longitude and Latitude are used to identify site if
-Site_id is missing.}
+\code{Site_id} is missing.}
 
 \item{Label}{A character string. A site label.}
 
@@ -27,31 +27,21 @@ Site_id is missing.}
 \item{Scenario}{A character string.}
 }
 \value{
-Returns weather data as list. Each element contains data for one
-year.
+Returns weather data as list. Each element is an object of class
+  \code{\linkS4class{swWeatherData}} and contains data for one year.
 }
 \description{
-Reads weather data from database. Returns list of weather data.
-}
-\details{
 Weather data for the soil water simulation run can be stored in the input
 data or it can be separate to keep the input data size down for multiple
 variations of the same site. This function is used to return the weather
-data from a pre defined weather database. Using the database was faster then
+data from a predefined weather database. Using the database was faster then
 reading in multiple weather files from disk.
-
-SOILWAT does not handle missing weather data. If you have missing data, then
-you have to impute yourself or use the built-in Markov weather generator
-(see examples for \code{\link{sw_exec}}).
-
-The output from this function can be passed directly to sw_exec with input
-data.
+}
+\details{
+\pkg{SOILWAT2} does not handle missing weather data. If you have missing
+data, then you have to impute yourself or use the built-in Markov
+weather generator (see examples for \code{\link{sw_exec}}).
 }
 \seealso{
-\itemize{
-   \item \code{\link{sw_exec}} for running a simulation
-   \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
-data input \item \code{\link{dbW_getWeatherData}} and
-\code{\link{getWeatherData_folders}} for weather data input
-}
+\code{\link{getWeatherData_folders}}
 }

@@ -13,10 +13,10 @@ dbW_addWeatherData(Site_id = NULL, lat = NULL, long = NULL,
 \item{Site_id}{Numeric. Used to identify site and extract weather data.}
 
 \item{lat}{Numeric. Latitude used with longitude to identify site id if
-Site_id is missing.}
+\code{Site_id} is missing.}
 
 \item{long}{Numeric. Longitude and Latitude are used to identify site if
-Site_id is missing.}
+\code{Site_id} is missing.}
 
 \item{Label}{A character string. A site label.}
 
@@ -25,8 +25,8 @@ Site_id is missing.}
 \item{ignore.case}{A logical value.}
 }
 \value{
-An invisible logical value indicating success with \code{TRUE} and failure
- with \code{FALSE}.
+An invisible logical value indicating success with \code{TRUE} and
+ failure with \code{FALSE}.
 }
 \description{
 Adds daily weather data to a registered weather database

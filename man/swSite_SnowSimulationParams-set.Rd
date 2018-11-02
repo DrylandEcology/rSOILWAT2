@@ -2,17 +2,18 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSite_SnowSimulationParams<-}
 \alias{swSite_SnowSimulationParams<-}
-\title{swSite_SnowSimulationParams<-}
+\title{\code{swSite_SnowSimulationParams<-}}
 \usage{
 swSite_SnowSimulationParams(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swSite}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swSite}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swSite_SnowSimulationParams<-
+\code{swSite_SnowSimulationParams<-}
 }
 \seealso{
 \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}

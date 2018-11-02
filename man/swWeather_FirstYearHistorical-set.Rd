@@ -2,17 +2,18 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swWeather_FirstYearHistorical<-}
 \alias{swWeather_FirstYearHistorical<-}
-\title{swWeather_FirstYearHistorical<-}
+\title{\code{swWeather_FirstYearHistorical<-}}
 \usage{
 swWeather_FirstYearHistorical(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swWeather}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swWeather}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swWeather_FirstYearHistorical<-
+\code{swWeather_FirstYearHistorical<-}
 }
 \seealso{
 \code{\linkS4class{swWeather}} and \code{\linkS4class{swInputData}}

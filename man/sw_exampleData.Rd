@@ -4,8 +4,8 @@
 \name{sw_exampleData}
 \alias{sw_exampleData}
 \title{Input data object for a site}
-\format{An object of class \code{\linkS4class{swInputData}}. Values correspond to
-  \code{example1}; see example code.}
+\format{An object of class \code{\linkS4class{swInputData}}. Values
+  correspond to \code{example1}; see example code.}
 \usage{
 sw_exampleData
 }

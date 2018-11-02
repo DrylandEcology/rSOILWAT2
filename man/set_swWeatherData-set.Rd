@@ -2,18 +2,20 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swWeatherData<-}
 \alias{set_swWeatherData<-}
-\title{set_swWeatherData<-}
+\title{\code{set_swWeatherData<-}}
 \usage{
 set_swWeatherData(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swWeatherData}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swWeatherData}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-set_swWeatherData<-
+\code{set_swWeatherData<-}
 }
 \seealso{
-\code{\linkS4class{swWeatherData}} and \code{\linkS4class{swInputData}}
+\code{\linkS4class{swWeatherData}} and
+  \code{\linkS4class{swInputData}}
 }

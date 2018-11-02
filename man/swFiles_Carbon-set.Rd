@@ -2,17 +2,18 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swFiles_Carbon<-}
 \alias{swFiles_Carbon<-}
-\title{swFiles_Carbon<-}
+\title{\code{swFiles_Carbon<-}}
 \usage{
 swFiles_Carbon(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swFiles}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swFiles}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swFiles_Carbon<-
+\code{swFiles_Carbon<-}
 }
 \seealso{
 \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}

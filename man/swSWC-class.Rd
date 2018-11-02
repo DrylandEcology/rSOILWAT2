@@ -54,7 +54,8 @@
 
 \item{object}{An object of class \code{\linkS4class{swSWC}}.}
 
-\item{year}{An integer value. The calendar year of the SWC \code{data} object.}
+\item{year}{An integer value. The calendar year of the \var{SWC}
+\code{data} object.}
 
 \item{value}{A value to assign to a specific slot of the object.}
 

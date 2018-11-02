@@ -2,17 +2,18 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swYears_EndYear<-}
 \alias{swYears_EndYear<-}
-\title{swYears_EndYear<-}
+\title{\code{swYears_EndYear<-}}
 \usage{
 swYears_EndYear(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swYears}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swYears}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swYears_EndYear<-
+\code{swYears_EndYear<-}
 }
 \seealso{
 \code{\linkS4class{swYears}} and \code{\linkS4class{swInputData}}

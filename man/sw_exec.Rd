@@ -2,66 +2,59 @@
 % Please edit documentation in R/Rsw.R
 \name{sw_exec}
 \alias{sw_exec}
-\title{Execute a SOILWAT simulation run}
+\title{Execute a \pkg{rSOILWAT2} simulation run}
 \usage{
 sw_exec(inputData = NULL, weatherList = NULL, dir = "",
   files.in = "files.in", echo = FALSE, quiet = FALSE)
 }
 \arguments{
-\item{inputData}{an object of the S4 class \code{swInputData} which is
-generated from \code{\link{sw_inputData}} or
-\code{\link{sw_inputDataFromFiles}}.}
+\item{inputData}{an object of the \var{S4} class
+\code{\linkS4class{swInputData}} which is generated from
+\code{\link{sw_inputData}} or \code{\link{sw_inputDataFromFiles}}.}
 
 \item{weatherList}{a list of weather data generated via
 \code{\link{dbW_getWeatherData}} or \code{\link{getWeatherData_folders}}.}
 
-\item{dir}{a character vector that represents the path to the input data.
-Use with files.in}
+\item{dir}{a character vector that represents the path to the input data. Use
+with \code{files.in}}
 
 \item{files.in}{a character vector that represents the partial path of the
-'files.in' file}
+\var{files.in} file}
 
-\item{echo}{logical. This option will echo the inputs to the Log Data.
+\item{echo}{logical. This option will echo the inputs to the \var{logfile}.
 Helpful for debugging.}
 
-\item{quiet}{logical. Quiet mode doesn't print messages to the logfile.}
+\item{quiet}{logical. Quiet mode doesn't print messages to the \var{logfile}.}
 }
 \value{
-A S4 Object Containing 28 outputkey slots.  Each of those has slots
-for Yr Mo Wk Dy.
-
-NOTE: WTHR ALLH2O ET ALLVEG do not work.
-
-The output also contains slots for the number of rows for each time period.
-Individual outputKeys also have slots for time periods used. Title from
-outputsetup. They also have the number of data columns.
-
-These elements contain the output data from soilwat based on the
-outputSetup.  Output columns should all be labeled.
+An object of class \code{\linkS4class{swOutput}}.
 }
 \description{
-Run the simulation and get the output data.  Executes Soil Water simulator
-and returns Soil Water data via List.  Uses .Call to pass data to/from C
+Run the simulation and get the output data.  Executes the \pkg{SOILWAT2}
+simulation model.  Uses \code{\link[base]{.Call}} to pass data to/from the C
 library.
 }
 \details{
 The input data for a simulation run can be passed to the function
-\code{\link{sw_exec}} either as \code{swInputData} and \code{weatherList} or
-as text files organized in a folder \code{dir} and explained in
-\code{files.in}.
+\code{\link{sw_exec}} either as \code{\linkS4class{swInputData}} and
+\code{weatherList} or as text files organized in the folder \code{dir}
+and explained in \code{files.in}.
 
-The weather data can be a part of the input data S4 class or separate as a
-list to reduce the input object size.  The option 'weatherList' if set will
-use the weatherList provided and not the inputdata object's weather data if
-it has it. Weather data can also be read in when 'dir' and 'files.in' are
-set.
+There are three ways to pass daily forcing weather data to the simulation:
+\itemize{
+  \item as values in the slot of the argument
+        \code{\linkS4class{swInputData}},
+  \item as separate \code{weatherList} which takes precedence over the
+        weather data contained in \code{\linkS4class{swInputData}}, or
+  \item as instructions to read in values from files if \code{dir} and
+        \code{files.in} are set.
+}
 
-SOILWAT does not handle missing data. If you have missing data, then you
-have to impute yourself or use the built-in Markov weather generator (see
-examples section). If you use the weather generator, then you have to
-provide appropriate values for the input (files) 'mkv_covar.in' and
-'mkv_prob.in' for your simulation run - currently, SOILWAT does not contain
-code to estimate these values.
+If you have missing weather data, then you have to impute yourself or use the
+built-in Markov weather generator (see examples section). If you use the
+weather generator, then you have to provide appropriate values for the input
+(files) \var{mkv_covar.in} and \var{mkv_prob.in} for your simulation run -
+currently, \pkg{rSOILWAT2} does not contain code to estimate these values.
 }
 \examples{
 
@@ -73,7 +66,7 @@ sw_in <- rSOILWAT2::sw_exampleData
 str(sw_in, max.level = 2)
 
 ## Execute the simulation run
-\dontrun{sw_out <- sw_exec(inputData = sw_in)}
+sw_out <- sw_exec(inputData = sw_in)
 
 
 ## ------ Directory to a SOLWAT project used in the following examples
@@ -98,15 +91,16 @@ str(sw_in2, max.level = 2)
 sw_out2 <- sw_exec(inputData = sw_in2, quiet = TRUE)
 
 
-## ------ Simulation with data prepared beforehand and separate weather data ------------
+## ------ Simulation with data prepared beforehand and separate weather data
 ## Read inputs from files on disk
 sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 
-## Read forcing weather data from files on disk (there are also functions to set up a
-##   SQLite database for the weather data)
-sw_weath3 <- getWeatherData_folders(LookupWeatherFolder=file.path(path_demo, "Input"),
-   weatherDirName = "data_weather", filebasename = "weath", startYear = 1979,
-   endYear = 2010)
+## Read forcing weather data from files on disk (there are also functions
+##   to set up a SQLite database for the weather data)
+sw_weath3 <- getWeatherData_folders(
+   LookupWeatherFolder = file.path(path_demo, "Input"),
+   weatherDirName = "data_weather", filebasename = "weath",
+   startYear = 1979, endYear = 2010)
 
 ## List of the slots of the input objects of class 'swWeatherData'
 str(sw_weath3, max.level = 1)
@@ -143,23 +137,26 @@ sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3, quiet = TRUE)
 }
 \references{
 Bradford, J. B., D. R. Schlaepfer, and W. K. Lauenroth (2014)
-Ecohydrology of adjacent sagebrush and lodgepole pine ecosystems: The
-consequences of climate change and disturbance.  \emph{Ecosystems}
-\bold{17}:590--605.
+  Ecohydrology of adjacent sagebrush and lodgepole pine ecosystems: The
+  consequences of climate change and disturbance.  \emph{Ecosystems}
+  \bold{17}:590--605.
 
-Schlaepfer, D. R., W. K. Lauenroth, and J. B. Bradford (2012)
-Ecohydrological niche of sagebrush ecosystems.  \emph{Ecohydrology}
-\bold{5}:453--466.
+  Schlaepfer, D. R., W. K. Lauenroth, and J. B. Bradford (2012)
+  Ecohydrological niche of sagebrush ecosystems.  \emph{Ecohydrology}
+  \bold{5}:453--466.
 
-Parton, W.J. (1978).  \emph{Abiotic section of ELM}. In: Grassland
-simulation model (ed. Innis, G.S.).  Springer New York, NY, pp. 31--53.
+  Parton, W.J. (1978).  \emph{Abiotic section of ELM}. In: Grassland
+  simulation model (ed. Innis, G.S.).  Springer New York, NY, pp. 31--53.
 
-Sala, O.E., Lauenroth, W.K. & Parton, W.J. (1992) Long-term soil-water
-dynamics in the shortgrass steppe.  \emph{Ecology} \bold{73}:1175--1181.
+  Sala, O.E., Lauenroth, W.K. & Parton, W.J. (1992) Long-term soil-water
+  dynamics in the shortgrass steppe.  \emph{Ecology} \bold{73}:1175--1181.
 }
 \seealso{
-\itemize{ \item \code{\link{sw_exec}} for running a simulation
-\item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
-data input \item \code{\link{dbW_getWeatherData}} and
-\code{\link{getWeatherData_folders}} for weather data input }
+\itemize{
+  \item \code{\link{sw_exec}} for running a simulation
+  \item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}}
+        for data input
+  \item \code{\link{dbW_getWeatherData}} and
+        \code{\link{getWeatherData_folders}} for weather data input.
+}
 }

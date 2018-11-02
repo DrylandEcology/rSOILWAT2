@@ -1,6 +1,7 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer,
+#    William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -20,9 +21,10 @@
 .onAttach <- function(library, pkgname) {
   if (interactive())  {
     meta <- utils::packageDescription(pkgname)
-    packageStartupMessage("Package ", shQuote(pkgname), " v", meta$Version, " (",
-      meta$Date,") attached/loaded.")
-    packageStartupMessage("Daily weather database version ", rSW2_glovars$dbW_version)
+    packageStartupMessage("Package ", shQuote(pkgname), " v", meta$Version,
+      " (", meta$Date, ") attached/loaded.")
+    packageStartupMessage("Daily weather database version ",
+      rSW2_glovars$dbW_version)
   }
 
   invisible()
@@ -34,7 +36,8 @@
 
   # Variables for interaction with SOILWAT2
   assign("kSOILWAT2", .Call(C_sw_consts), envir = rSW2_glovars)
-  assign("sw_TimeSteps", c("Day", "Week", "Month", "Year"), envir = rSW2_glovars)
+  assign("sw_TimeSteps", c("Day", "Week", "Month", "Year"),
+    envir = rSW2_glovars)
 
   # Variables for weather database functionality
   assign("con", NULL, envir = rSW2_glovars)

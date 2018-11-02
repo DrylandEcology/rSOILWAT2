@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSWC_Method}
 \alias{swSWC_Method}
-\title{swSWC_Method}
+\title{\code{swSWC_Method}}
 \usage{
 swSWC_Method(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swSWC}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swSWC}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-swSWC_Method
+\code{swSWC_Method}
 }
 \seealso{
 \code{\linkS4class{swSWC}} and \code{\linkS4class{swInputData}}

@@ -1,6 +1,7 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer,
+#    William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -20,7 +21,7 @@
 # Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2013-2018)
 ###############################################################################
 
-###############################################################SOILS#####################################################################
+###############################################################SOILS###########
 #' Class \code{"swSoils"}
 #'
 #' The methods listed below work on this class and the proper slot of the class
@@ -58,9 +59,9 @@ swSoilLayers_validity <- function(object) {
   }
   if (temp[2] != 12) {
     msg <- paste("@Layers must have exactly 12 columns corresponding to",
-      "depth_cm, bulkDensity_g/cm^3, gravel_content, EvapBareSoil_frac, transpGrass_frac,",
-      "transpShrub_frac, transpTree_frac, transpForb_frac, sand_frac, clay_frac,",
-      "impermeability_frac, soilTemp_c")
+      "depth_cm, bulkDensity_g/cm^3, gravel_content, EvapBareSoil_frac,",
+      "transpGrass_frac,transpShrub_frac, transpTree_frac, transpForb_frac,",
+      "sand_frac, clay_frac, impermeability_frac, soilTemp_c")
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
   if (!all(is.na(object@Layers[, 1])) && (any(object@Layers[, 1] <= 0) ||
@@ -70,12 +71,14 @@ swSoilLayers_validity <- function(object) {
   }
   if (!all(is.na(object@Layers[, 3:11])) && (any(object@Layers[, 3:11] < 0) ||
     any(object@Layers[, 3:11] > dtol1))) {
-    msg <- "@Layers values of gravel, evco, trcos, sand, clay, and impermeability must be between 0 and 1."
+    msg <- paste("@Layers values of gravel, evco, trcos, sand, clay, and",
+      "impermeability must be between 0 and 1.")
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
   temp <- colSums(object@Layers[, 4:8, drop = FALSE])
   if (any(temp > dtol1, na.rm = TRUE)) {
-    msg <- "@Layers values of profile sums of evco and trcos must be between 0 and 1."
+    msg <- paste("@Layers values of profile sums of evco and trcos must be",
+      "between 0 and 1.")
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
@@ -105,7 +108,11 @@ setMethod("initialize", signature = "swSoils", function(.Object, ...) {
     slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
   }
 
-  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  if (FALSE) {
+    # not needed because no relevant inheritance
+    .Object <- callNextMethod(.Object, ...)
+  }
+
   validObject(.Object)
   .Object
 })
@@ -114,22 +121,26 @@ setMethod("initialize", signature = "swSoils", function(.Object, ...) {
 #' @rdname swSoils-class
 #' @export
 setMethod("get_swSoils", "swSoils", function(object) object)
+
 #' @rdname swSoils-class
 #' @export
 setMethod("swSoils_Layers", "swSoils", function(object) object@Layers)
 
 #' @rdname swSoils-class
 #' @export
-setReplaceMethod("set_swSoils", signature = c(object = "swSoils", value = "swSoils"),
+setReplaceMethod("set_swSoils",
+  signature = c(object = "swSoils", value = "swSoils"),
   function(object, value) {
     colnames(value@Layers) <- colnames(object@Layers)
     object <- value
     validObject(object)
     object
 })
+
 #' @rdname swSoils-class
 #' @export
-setReplaceMethod("swSoils_Layers", signature = c(object = "swSoils", value = "matrix"),
+setReplaceMethod("swSoils_Layers",
+  signature = c(object = "swSoils", value = "matrix"),
   function(object, value) {
     colnames(value) <- colnames(object@Layers)
     object@Layers <- value
@@ -140,14 +151,20 @@ setReplaceMethod("swSoils_Layers", signature = c(object = "swSoils", value = "ma
 
 #' @rdname swSoils-class
 #' @export
-setMethod("swReadLines", signature = c(object="swSoils",file="character"), function(object,file) {
-			infiletext <- readLines(con = file)
-			infiletext <- infiletext[infiletext!=""]#get rid of extra spaces
-			infiletext <- infiletext[17:length(infiletext)]#get rid of comments
-			object@Layers <- matrix(data=NA, nrow=length(1:length(infiletext)),ncol=12)
-			colnames(object@Layers)<-c("depth_cm", "bulkDensity_g/cm^3", "gravel_content", "EvapBareSoil_frac", "transpGrass_frac", "transpShrub_frac", "transpTree_frac", "transpForb_frac", "sand_frac", "clay_frac", "impermeability_frac", "soilTemp_c")
-			for(i in 1:length(infiletext)) {
-				object@Layers[i,] = readNumerics(infiletext[i],12)
-			}
-			return(object)
-		})
+setMethod("swReadLines",
+  signature = c(object = "swSoils", file = "character"),
+  function(object, file) {
+    infiletext <- readLines(con = file)
+    infiletext <- infiletext[infiletext != ""] #get rid of extra spaces
+    infiletext <- infiletext[17:length(infiletext)] #get rid of comments
+    object@Layers <- matrix(data = NA, nrow = length(infiletext), ncol = 12)
+    colnames(object@Layers) <- c("depth_cm", "bulkDensity_g/cm^3",
+      "gravel_content", "EvapBareSoil_frac", "transpGrass_frac",
+      "transpShrub_frac", "transpTree_frac", "transpForb_frac",
+      "sand_frac", "clay_frac", "impermeability_frac", "soilTemp_c")
+    for (i in seq_along(infiletext)) {
+      object@Layers[i, ] <- readNumerics(infiletext[i], 12)
+    }
+
+    object
+})

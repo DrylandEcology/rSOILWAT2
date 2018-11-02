@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swProd_MonProd_tree}
 \alias{swProd_MonProd_tree}
-\title{swProd_MonProd_tree}
+\title{\code{swProd_MonProd_tree}}
 \usage{
 swProd_MonProd_tree(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swProd}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swProd}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-swProd_MonProd_tree
+\code{swProd_MonProd_tree}
 }
 \seealso{
 \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}

@@ -2,17 +2,18 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swSite_ModelFlags<-}
 \alias{swSite_ModelFlags<-}
-\title{swSite_ModelFlags<-}
+\title{\code{swSite_ModelFlags<-}}
 \usage{
 swSite_ModelFlags(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swSite}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swSite}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swSite_ModelFlags<-
+\code{swSite_ModelFlags<-}
 }
 \seealso{
 \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}

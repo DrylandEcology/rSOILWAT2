@@ -2,12 +2,14 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swCloud}
 \alias{set_swCloud}
-\title{set_swCloud
-Need to define and export this generic method -- otherwise, \code{\link{set_swCloud<-}} doesn't work.}
+\title{\code{set_swCloud}
+Need to define and export this generic method -- otherwise,
+\code{\link{set_swCloud<-}} doesn't work.}
 \usage{
 set_swCloud(object, value)
 }
 \description{
-set_swCloud
-Need to define and export this generic method -- otherwise, \code{\link{set_swCloud<-}} doesn't work.
+\code{set_swCloud}
+Need to define and export this generic method -- otherwise,
+\code{\link{set_swCloud<-}} doesn't work.
 }

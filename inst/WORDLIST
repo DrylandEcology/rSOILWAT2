@@ -1,0 +1,49 @@
+###---- Spell checking
+
+# Keep this list as short as possible
+
+# Avoid false positive hits, e.g., for object names in documentation, by
+# wrapping them in \var{}.
+
+# Sections:
+#   - Jargon
+#   - Abbreviations (mostly from cited articles)
+#   - Names of people (mostly from cited articles)
+
+
+#------------------------------------
+#------ Jargon
+abiotic
+albedo
+ecohydrological
+ecohydrology
+forb
+gregorian
+lodgepole
+transmissivity
+shortgrass
+
+
+#------------------------------------
+#------ Abbreviations
+al
+doy
+
+
+#------------------------------------
+#------ Names
+Ashish
+Bernal
+Brenden
+github
+Innis
+Lauenroth
+Markov
+Parton
+Sala
+Schlaepfer
+SOILWAT
+Springer
+SQLite
+Tiwari
+Zach

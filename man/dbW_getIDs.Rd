@@ -10,12 +10,10 @@ dbW_getIDs(site_id = NULL, site_label = NULL, long = NULL,
 }
 \value{
 A list with two elements \code{site_id} and \code{scenario_id}.
-
-extern
 }
 \description{
-Obtain database table keys 'Site_id' and 'Scenario_id' using alternative information
-and optionally add missing sites and scenarios.
+Obtain database table keys 'Site_id' and 'Scenario_id' using alternative
+information and optionally add missing sites and scenarios.
 A site will be identified alternatively
 by \itemize{
    \item its identification number \code{site_id},

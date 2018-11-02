@@ -32,6 +32,7 @@ days_in_years <- function(start_year, end_year) {
 #'      # barely any difference
 #'      microbenchmark::microbenchmark(month1(), month2())
 #'  }
+#' @export
 seq_month_ofeach_day <- function(from = list(year = 1900, month = 1, day = 1),
   to = list(year = 1900, month = 12, day = 31), tz = "UTC") {
 

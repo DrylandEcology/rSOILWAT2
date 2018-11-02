@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swCarbon_Scenario}
 \alias{swCarbon_Scenario}
-\title{swCarbon_Scenario}
+\title{\code{swCarbon_Scenario}}
 \usage{
 swCarbon_Scenario(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swCarbon}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swCarbon}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-swCarbon_Scenario
+\code{swCarbon_Scenario}
 }
 \seealso{
 \code{\linkS4class{swCarbon}} and \code{\linkS4class{swInputData}}

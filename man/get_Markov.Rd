@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{get_Markov}
 \alias{get_Markov}
-\title{get_Markov}
+\title{\code{get_Markov}}
 \usage{
 get_Markov(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swMarkov}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swMarkov}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-get_Markov
+\code{get_Markov}
 }
 \seealso{
 \code{\linkS4class{swMarkov}} and \code{\linkS4class{swInputData}}

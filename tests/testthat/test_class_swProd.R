@@ -1,7 +1,8 @@
 context("Vegetation parameters class")
 
 ids_VegType <- rSW2_glovars[["kSOILWAT2"]][["VegTypes"]]
-names_VegTypes <- tolower(gsub("SW_", "", names(rSW2_glovars[["kSOILWAT2"]][["VegTypes"]])))
+names_VegTypes <- tolower(gsub("SW_", "",
+  names(rSW2_glovars[["kSOILWAT2"]][["VegTypes"]])))
 
 names_VegTypes2 <- sapply(names_VegTypes, function(x) {
   if (endsWith(x, "s")) {
@@ -42,8 +43,8 @@ test_that("Manipulate 'swProd' class", {
       swProd_MonProd_veg(xinv, names_VegTypes[1 + k]))
 
     # veg-type named version
-    f <- utils::getFromNamespace(paste0("swProd_MonProd_", names_VegTypes2[1 + k]),
-      ns = "rSOILWAT2")
+    f <- utils::getFromNamespace(paste0("swProd_MonProd_",
+      names_VegTypes2[1 + k]), ns = "rSOILWAT2")
     expect_equal(f(xinput), f(xinv))
     expect_equal(swProd_MonProd_veg(xinv, 1 + k), f(xinv))
 
@@ -56,8 +57,8 @@ test_that("Manipulate 'swProd' class", {
     expect_error(swProd_MonProd_veg(xinput, names_VegTypes[1 + k]) <- data_fail)
     expect_error(swProd_MonProd_veg(xinv, names_VegTypes[1 + k]) <- data_fail)
 
-    fr <- utils::getFromNamespace(paste0("swProd_MonProd_", names_VegTypes2[1 + k], "<-"),
-      ns = "rSOILWAT2")
+    fr <- utils::getFromNamespace(paste0("swProd_MonProd_",
+      names_VegTypes2[1 + k], "<-"), ns = "rSOILWAT2")
     expect_error(fr(xinput, data_fail))
     expect_error(fr(xinv, data_fail))
 

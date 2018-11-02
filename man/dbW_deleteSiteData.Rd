@@ -7,8 +7,8 @@
 dbW_deleteSiteData(Site_id, Scenario_id = NULL)
 }
 \value{
-An invisible logical value indicating success with \code{TRUE} and failure
- with \code{FALSE}.
+An invisible logical value indicating success with \code{TRUE} and
+  failure with \code{FALSE}.
 }
 \description{
 Delete a weather data record from a registered weather database

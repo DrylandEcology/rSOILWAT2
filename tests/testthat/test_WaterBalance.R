@@ -1,7 +1,7 @@
 context("rSOILWAT2 water balance")
 
 # The 8 checks, implemented below, correspond to the checks in
-# `SOILWAT/test/test_WaterBalance.cc`
+# \var{SOILWAT/test/test_WaterBalance.cc}
 
 
 #---CONSTANTS
@@ -16,19 +16,20 @@ tests <- unique(temp)
 test_that("Test data availability", expect_gt(length(tests), 0))
 
 aggregate_for_each_timestep <- function(x, dyt) {
+  nid <- 1:2
   list(
     Day = x,
     Week = {
       temp <- if (NCOL(x) > 1) x[dyt[["nfw"]] - 1, ] else x[dyt[["nfw"]] - 1]
       temp <- aggregate(temp, by = dyt[["d"]][dyt[["nfw"]], c("Week", "Year")],
         FUN = sum)
-      temp <- temp[, -(1:2)]
+      temp <- temp[, -nid]
     },
     Month = {
       temp <- if (NCOL(x) > 1) x[dyt[["nfm"]] - 1, ] else x[dyt[["nfm"]] - 1]
       temp <- aggregate(temp, by = dyt[["d"]][dyt[["nfm"]], c("Month", "Year")],
         FUN = sum)
-      temp <- temp[, -(1:2)]
+      temp <- temp[, -nid]
     },
     Year = {
       temp <- if (NCOL(x) > 1) x[dyt[["nfy"]] - 1, ] else x[dyt[["nfy"]] - 1]
@@ -75,8 +76,8 @@ for (it in tests) {
     dates[, "Month"] <- 1 + temp$mon
     dates[, "Day"] <- temp$mday
     # SOILWAT2 'weeks' are not calendar weeks as in
-    #   as.integer(format(temp, "%W"))
-    #   # %U = US weeks; %V = ISO 8601; %W = UK weeks
+    #   \code{as.integer(format(temp, "%W"))}
+    #   with \code{%U = US weeks}; \coe{%V = ISO 8601}; \code{%W = UK weeks}
     # instead SOILWAT2 numbers consecutive sets of 7-day periods
     dates[, "Week"] <- 1 + (dates[, "DOY"] - 1) %/% 7
     dyt <- list(d = dates, ids1 = idelta1, ids2 = idelta2,
@@ -184,42 +185,42 @@ for (it in tests) {
       delta_swc_total <- list_delta_swc_total[[OutPeriods[pd]]]
 
       #--- Water balance checks
-      # (1) AET <= PET
+      # (1) \code{AET <= PET}
       expect_true(aet < pet || all.equal(aet, pet), info = info2)
 
-      # (2) AET == E(total) + T(total)
+      # (2) \code{AET == E(total) + T(total)}
       expect_equal(aet, Etotal + Ttotal, info = info2)
 
-      # (3) T(total) = sum of T(veg-type i from soil layer j)
+      # (3) \code{T(total) = sum of T(veg-type i from soil layer j)}
       expect_equal(Ttotal, apply(sapply(Tvegij, function(x) apply(x, 1, sum)),
         1, sum), info = info2)
 
-      # (4) E(total) = E(total bare-soil) + E(ponded water) +
+      # (4) \code{E(total) = E(total bare-soil) + E(ponded water) +
       #              + E(total litter-intercepted) + E(total veg-intercepted) +
-      #              + E(snow sublimation)
+      #              + E(snow sublimation)}
       expect_equal(Etotal, Esoil + Eponded + Eveg + Elitter + Esnow,
         info = info2)
 
-      # (5) E(total surface) = E(ponded water) + E(total litter-intercepted) +
-      #                    + E(total veg-intercepted)
+      # (5) \code{E(total surface) = E(ponded water) +
+      #           + E(total litter-intercepted) + E(total veg-intercepted)}
       expect_equal(Etotalsurf, Eponded + Eveg + Elitter, info = info2)
 
 
       #--- Water cycling checks
-      # (6) infiltration = [rain + snowmelt + runon] -
-      #                    (runoff + intercepted + delta_surfaceWater + Eponded)
+      # (6) \code{infiltration = [rain + snowmelt + runon] -
+      #                (runoff + intercepted + delta_surfaceWater + Eponded)}
       expect_equal(infiltration[idelta2], arriving_water[idelta2] -
         (runoff[idelta2] + intercepted[idelta2] + delta_surfaceWater +
         Eponded[idelta2]), info = info2)
 
-      # (7) E(soil) + Ttotal = infiltration - (deepDrainage + delta(swc))
+      # (7) \code{E(soil) + Ttotal = infiltration - (deepDrainage + delta(swc))}
       expect_equal(Esoil[idelta2] + Ttotal[idelta2],
         infiltration[idelta2] - (deepDrainage[idelta2] + delta_swc_total),
         info = info2)
 
-      # (8) for every soil layer j: delta(swc) =
+      # (8) for every soil layer j: \code{delta(swc) =
       #   = infiltration/percolationIn + hydraulicRedistribution -
-      #     (percolationOut/deepDrainage + transpiration + evaporation)
+      #     (percolationOut/deepDrainage + transpiration + evaporation)}
       for (j in seq_len(n_soillayers)) {
         expect_equal(delta_swcj[, j],
           percolationIn[idelta2, j] + hydraulicRedistribution[idelta2, j] -

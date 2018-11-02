@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swProd_CO2Coefficients}
 \alias{swProd_CO2Coefficients}
-\title{swProd_CO2Coefficients}
+\title{\code{swProd_CO2Coefficients}}
 \usage{
 swProd_CO2Coefficients(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swProd}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swProd}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-swProd_CO2Coefficients
+\code{swProd_CO2Coefficients}
 }
 \seealso{
 \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}

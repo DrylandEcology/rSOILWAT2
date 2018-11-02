@@ -10,10 +10,10 @@ tests <- unique(temp)
 
 test_that("Test data availability", expect_gt(length(tests), 0))
 
-var_SumNotZero <- c("TEMP", "PRECIP", "SOILINFILT", "VWCBULK", "VWCMATRIC", "SWCBULK",
-  "SWABULK", "SWAMATRIC", "SWA", "SWPMATRIC", "TRANSP", "EVAPSOIL", "EVAPSURFACE",
-  "INTERCEPTION", "LYRDRAIN", "HYDRED", "ET", "AET", "PET", "WETDAY", "SNOWPACK",
-  "DEEPSWC", "CO2EFFECTS")
+var_SumNotZero <- c("TEMP", "PRECIP", "SOILINFILT", "VWCBULK", "VWCMATRIC",
+  "SWCBULK", "SWABULK", "SWAMATRIC", "SWA", "SWPMATRIC", "TRANSP", "EVAPSOIL",
+  "EVAPSURFACE", "INTERCEPTION", "LYRDRAIN", "HYDRED", "ET", "AET", "PET",
+  "WETDAY", "SNOWPACK", "DEEPSWC", "CO2EFFECTS")
 
 expect_within <- function(object, expected, ..., info = NULL,
   tol = sqrt(.Machine$double.eps), digits_N = 4L) {
@@ -21,8 +21,10 @@ expect_within <- function(object, expected, ..., info = NULL,
   robj <- range(object)
   rexp <- range(expected)
 
-  gte <- robj[1] - rexp[1] >= -tol # min of `object` is gte to minimum of `expected`
-  lte <- rexp[2] - robj[2] >= -tol # max of `object` is lte to max of `expected`
+  # min of `object` is gte to minimum of `expected`:
+  gte <- robj[1] - rexp[1] >= -tol
+  # max of `object` is lte to max of `expected`:
+  lte <- rexp[2] - robj[2] >= -tol
   within <- gte & lte
 
   expect_equivalent(within, TRUE, info = paste(info,
@@ -45,7 +47,7 @@ for (it in tests) {
   layer_widths <- diff(c(0, soil[, "depth_cm"]))
 
   Tmax <- 100 # C
-  H2Omax <- 1000 # cm / day
+  H2Omax <- 1000 # cm day-1
 
   if (it == "Ex2") {
     # Markov-weather generator is turned on to fill in missing weather data
@@ -53,8 +55,9 @@ for (it in tests) {
     weather_extremes <- data.frame(
       Tmax_C = c(-Tmax, Tmax), Tmin_C = c(-Tmax, Tmax), PPT_cm = c(0, H2Omax))
   } else {
-    weather_extremes <- apply(dbW_weatherData_to_dataframe(sw_weather)[, -(1:2)],
-      2, range)
+    nid <- 1:2
+    temp <- dbW_weatherData_to_dataframe(sw_weather)[, -nid]
+    weather_extremes <- apply(temp, 2, range)
   }
 
   var_limits2 <- data.frame(matrix(NA, nrow = 0, ncol = 2,
@@ -85,13 +88,15 @@ for (it in tests) {
   x <- tempSL
   x[, "min"] <- 0
   x[, "max"] <- layer_widths
-  for (iv in c("SWCBULK", "SWABULK", "SWAMATRIC", "SWA", "TRANSP", "EVAPSOIL")) {
+
+  ivars <- c("SWCBULK", "SWABULK", "SWAMATRIC", "SWA", "TRANSP", "EVAPSOIL")
+  for (iv in ivars) {
     var_limitsSL[[iv]] <- x
   }
 
   x <- tempSL
   x[, c("min", "max")] <- rep(c(0, Inf), each = layer_N)
-  var_limitsSL[["SWPMATRIC"]] <- x # units [-bar]
+  var_limitsSL[["SWPMATRIC"]] <- x # units in `-bar`
   var_limitsSL[["LYRDRAIN"]] <- x
 
 
@@ -112,11 +117,15 @@ for (it in tests) {
     expect_false(has_soilTemp_failed())
 
     # Run silently/verbosely
-    expect_silent(sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE,
-        quiet = TRUE))
+    expect_silent(sw_exec(inputData = sw_input, weatherList = sw_weather,
+      echo = FALSE, quiet = TRUE))
 
-    # This doesn't work; apparently, testthat::expect_message and similar functions don't capture text written by LogError directly to the console.
-    # expect_message(sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE, quiet = FALSE))
+    # This doesn't work; apparently, testthat::expect_message and similar
+    # functions don't capture text written by LogError directly to the console.
+    if (FALSE) {
+      expect_message(sw_exec(inputData = sw_input, weatherList = sw_weather,
+        echo = FALSE, quiet = FALSE))
+    }
 
 
     # Check that input weather is identical to output weather (unless weather
@@ -177,7 +186,8 @@ for (it in tests) {
             val_extremes <- apply(x2[, -ch[[its]], drop = FALSE], 2, range)
 
             if (vars[k] %in% rownames(var_limits2)) {
-              expect_within(range(val_extremes), var_limits2[vars[k], ], info = info3)
+              expect_within(range(val_extremes), var_limits2[vars[k], ],
+                info = info3)
             }
 
             if (vars[k] %in% names(var_limitsSL)) {
@@ -201,10 +211,14 @@ for (it in tests) {
       #   * "ESTABL" produces only yearly output
       #   * SWP is not additive; SOILWAT uses pedotransfer functions
       if (all(unlist(has_times))) {
-        if (fun_agg[k] %in% c("mean", "sum") && !(vars[k] %in% c("SWPMATRIC", "ESTABL"))) {
+        if (fun_agg[k] %in% c("mean", "sum") &&
+            !(vars[k] %in% c("SWPMATRIC", "ESTABL"))) {
+
           res_true <- matrix(TRUE, nrow = rd@yr_nrow, ncol = x1@Columns)
           expect_equivalent({
-              temp1d <- aggregate(x1@Day[, -(1:2)], by = list(x1@Day[, 1]), FUN = fun_agg[k])
+              nid <- 1:2
+              temp1d <- aggregate(x1@Day[, -nid], by = list(x1@Day[, 1]),
+                FUN = fun_agg[k])
               diff1d <- data.matrix(x1@Year[, -1]) - data.matrix(temp1d[, -1])
               abs(diff1d) < tol
           }, res_true, info = info2)

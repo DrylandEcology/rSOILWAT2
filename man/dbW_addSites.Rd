@@ -7,16 +7,16 @@
 dbW_addSites(site_data, ignore.case = FALSE, verbose = FALSE)
 }
 \arguments{
-\item{site_data}{A data.frame. The site data with column names "Latitude", "Longitude",
-and "Label".}
+\item{site_data}{A data.frame. The site data with column names
+\var{Latitude}, \var{Longitude}, and \var{Label}.}
 
 \item{ignore.case}{A logical value.}
 
 \item{verbose}{A logical value.}
 }
 \value{
-An invisible logical value indicating success with \code{TRUE} and failure
- with \code{FALSE}.
+An invisible logical value indicating success with \code{TRUE} and
+ failure with \code{FALSE}.
 }
 \description{
 Adds new sites to a registered weather database

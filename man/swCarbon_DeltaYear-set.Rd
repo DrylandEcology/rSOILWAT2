@@ -2,17 +2,18 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swCarbon_DeltaYear<-}
 \alias{swCarbon_DeltaYear<-}
-\title{swCarbon_DeltaYear<-}
+\title{\code{swCarbon_DeltaYear<-}}
 \usage{
 swCarbon_DeltaYear(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swCarbon}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swCarbon}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swCarbon_DeltaYear<-
+\code{swCarbon_DeltaYear<-}
 }
 \seealso{
 \code{\linkS4class{swCarbon}} and \code{\linkS4class{swInputData}}

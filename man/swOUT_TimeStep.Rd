@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swOUT_TimeStep}
 \alias{swOUT_TimeStep}
-\title{swOUT_TimeStep}
+\title{\code{swOUT_TimeStep}}
 \usage{
 swOUT_TimeStep(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swOUT}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swOUT}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-swOUT_TimeStep
+\code{swOUT_TimeStep}
 }
 \seealso{
 \code{\linkS4class{swOUT}} and \code{\linkS4class{swInputData}}

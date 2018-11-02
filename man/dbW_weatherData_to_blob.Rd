@@ -2,19 +2,22 @@
 % Please edit documentation in R/sw_dbW_WeatherDatabase.R
 \name{dbW_weatherData_to_blob}
 \alias{dbW_weatherData_to_blob}
-\title{Conversion: R object to (compressed) SQL-blob-ready character vector}
+\title{Conversion: R object to (compressed) \var{SQL-blob-ready} character vector}
 \usage{
 dbW_weatherData_to_blob(weatherData, type = "gzip")
 }
 \arguments{
-\item{weatherData}{A list of elements of class 'swWeatherData' or any suitable object.}
+\item{weatherData}{A list of elements of class
+\code{\linkS4class{swWeatherData}} or any suitable object.}
 
-\item{type}{A character string. One of c("gzip", "bzip2", "xz", "none").}
+\item{type}{A character string. One of
+\code{c("gzip", "bzip2", "xz", "none")}.}
 }
 \description{
-The rSOILWAT2 SQLite-DB which manages daily weather data (each as a list of elements
-of class 'swWeatherData'), uses internally (compressed) blobs. This function is used
-to a list of daily weather data used by rSOILWAT2's simulation functions to a blob object
+The \pkg{rSOILWAT2} database which manages daily weather data (each as a
+list of elements of class \code{\linkS4class{swWeatherData}}), uses
+internally (compressed) blobs. This function is used to a list of daily
+weather data used by \pkg{rSOILWAT2}'s simulation functions to a blob object
 which can be inserted into a SQLite DB.
 }
 \seealso{

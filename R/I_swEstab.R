@@ -1,6 +1,7 @@
 ###############################################################################
 #rSOILWAT2
-#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer, William Lauenroth, John Bradford}
+#    Copyright (C) {2009-2018}  {Ryan Murphy, Daniel Schlaepfer,
+#    William Lauenroth, John Bradford}
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -49,8 +50,9 @@ setClass("swEstabSpecies", slot = c(fileName = "character", Name = "character",
   min_pregerm_days = "integer", max_pregerm_days = "integer",
   min_wetdays_for_germ = "integer", max_drydays_postgerm = "integer",
   min_wetdays_for_estab = "integer", min_days_germ2estab = "integer",
-  max_days_germ2estab = "integer", min_temp_germ = "numeric", max_temp_germ = "numeric",
-  min_temp_estab = "numeric", max_temp_estab = "numeric"))
+  max_days_germ2estab = "integer", min_temp_germ = "numeric",
+  max_temp_germ = "numeric", min_temp_estab = "numeric",
+  max_temp_estab = "numeric"))
 
 setValidity("swEstabSpecies", function(object) {
   TRUE
@@ -68,7 +70,11 @@ setMethod("initialize", signature = "swEstabSpecies", function(.Object, ...) {
     slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
   }
 
-  #.Object <- callNextMethod(.Object, ...) # not needed because no relevant inheritance
+  if (FALSE) {
+    # not needed because no relevant inheritance
+    .Object <- callNextMethod(.Object, ...)
+  }
+
   validObject(.Object)
   .Object
 })
@@ -76,6 +82,7 @@ setMethod("initialize", signature = "swEstabSpecies", function(.Object, ...) {
 
 #' @rdname swEstabSpecies-class
 #' @export
+# nolint start
 setMethod("swReadLines", signature = c(object="swEstabSpecies",file="character"), function(object,file) {
 			infiletext <- readLines(con = file)
 
@@ -96,6 +103,7 @@ setMethod("swReadLines", signature = c(object="swEstabSpecies",file="character")
 			object@max_temp_estab = c(object@max_temp_estab,readNumeric(infiletext[18]))
 			return(object)
 		})
+# nolint end
 
 #############################ESTAB.IN#########################################
 #' Class \code{"swEstab"}
@@ -152,15 +160,17 @@ setMethod("initialize", signature = "swEstab", function(.Object, ...) {
 setMethod("swEstab_useEstab", "swEstab", function(object) object@useEstab)
 #' @rdname swEstab-class
 #' @export
-setReplaceMethod("swEstab_useEstab", signature = "swEstab", function(object, value) {
-  object@useEstab <- as.logical(value)
-  validObject(object)
-  object
+setReplaceMethod("swEstab_useEstab", signature = "swEstab",
+  function(object, value) {
+    object@useEstab <- as.logical(value)
+    validObject(object)
+    object
 })
 
 
 #' @rdname swEstab-class
 #' @export
+# nolint start
 setMethod("swReadLines", signature = c(object="swEstab",file="character"), function(object,file) {
 			infiletext <- readLines(con = file[1])
 			index<-length(object@fileName)+1
@@ -181,4 +191,4 @@ setMethod("swReadLines", signature = c(object="swEstab",file="character"), funct
 			}
 			return(object)
 		})
-
+# nolint end

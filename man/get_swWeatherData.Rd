@@ -2,16 +2,18 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{get_swWeatherData}
 \alias{get_swWeatherData}
-\title{get_swWeatherData}
+\title{\code{get_swWeatherData}}
 \usage{
 get_swWeatherData(object, year)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swWeatherData}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swWeatherData}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-get_swWeatherData
+\code{get_swWeatherData}
 }
 \seealso{
-\code{\linkS4class{swWeatherData}} and \code{\linkS4class{swInputData}}
+\code{\linkS4class{swWeatherData}} and
+  \code{\linkS4class{swInputData}}
 }

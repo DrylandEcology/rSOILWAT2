@@ -2,17 +2,18 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swLog_setLine<-}
 \alias{swLog_setLine<-}
-\title{swLog_setLine<-}
+\title{\code{swLog_setLine<-}}
 \usage{
 swLog_setLine(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swLog}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swLog}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swLog_setLine<-
+\code{swLog_setLine<-}
 }
 \seealso{
 \code{\linkS4class{swLog}} and \code{\linkS4class{swInputData}}

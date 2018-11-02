@@ -2,17 +2,18 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swProd_EsTpartitioning_param<-}
 \alias{swProd_EsTpartitioning_param<-}
-\title{swProd_EsTpartitioning_param<-}
+\title{\code{swProd_EsTpartitioning_param<-}}
 \usage{
 swProd_EsTpartitioning_param(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swProd}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swProd}} or
+\code{\linkS4class{swInputData}}.}
 
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{
-swProd_EsTpartitioning_param<-
+\code{swProd_EsTpartitioning_param<-}
 }
 \seealso{
 \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}

@@ -2,56 +2,47 @@
 % Please edit documentation in R/sw_dbW_WeatherDatabase.R
 \name{getWeatherData_folders}
 \alias{getWeatherData_folders}
-\title{rSOILWAT2 getWeatherData_folders}
+\title{Reads daily weather data from files}
 \usage{
 getWeatherData_folders(LookupWeatherFolder, weatherDirName = NULL,
   filebasename = "weath", startYear = NULL, endYear = NULL)
 }
 \arguments{
-\item{LookupWeatherFolder}{String Path. Path to the LookupWeatherFolder
-location.}
+\item{LookupWeatherFolder}{A character string. The path to the parent folder
+of \code{weatherDirName}.}
 
-\item{weatherDirName}{String. Name of the folder containing weather data
+\item{weatherDirName}{String. Name of the folder with the daily weather data
 files.}
 
-\item{filebasename}{String. File prefix for weather data. Usually 'weath'.}
+\item{filebasename}{String. File prefix for weather data. Usually
+\var{weath}.}
 
 \item{startYear}{Numeric. Extracted weather data will start with this year.}
 
 \item{endYear}{Numeric. Extracted weather data will end with this year.}
 }
 \value{
-Returns weather data as list. Each element contains data for one
-year.
+A list of elements of class \code{\linkS4class{swWeatherData}}.
 }
 \description{
-Reads weather data from files.  Returns list of weather data.
-}
-\details{
-Weather data for the soil water simulation run can be stored in the input
-data or it can be separate to keep the input data size down for multiple
-variations of the same site. This function is used to return the weather
-data from folders.  The other option is to use onGetWeatherData_database.
-
-SOILWAT does not handle missing weather data. If you have missing data, then
-you have to impute yourself or use the built-in Markov weather generator
-(see examples for \code{\link{sw_exec}}).
-
-The output from this function can be passed directly to sw_exec with input
-data.
+\pkg{SOILWAT2} does not handle missing weather data. If you have missing
+data, then you have to impute yourself or use the built-in Markov weather
+generator (see examples for \code{\link{sw_exec}}).
 }
 \examples{
 
 path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 
-## ------ Simulation with data prepared beforehand and separate weather data ------------
+## ------ Simulation with data prepared beforehand and separate weather data
 ## Read inputs from files on disk
 sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 
-## Read forcing weather data from files on disk (there are also functions to set up a
-##   SQLite database for the weather data)
-sw_weath3 <- getWeatherData_folders(LookupWeatherFolder=file.path(path_demo, "Input"),
-   weatherDirName="data_weather", filebasename="weath", startYear=1979, endYear=2010)
+## Read forcing weather data from files on disk (there are also functions
+##   to set up a SQLite database for the weather data)
+sw_weath3 <- getWeatherData_folders(
+   LookupWeatherFolder = file.path(path_demo, "Input"),
+   weatherDirName = "data_weather", filebasename = "weath",
+   startYear = 1979, endYear = 2010)
 
 ## List of the slots of the input objects of class 'swWeatherData'
 str(sw_weath3, max.level=1)
@@ -61,8 +52,5 @@ str(sw_weath3, max.level=1)
 
 }
 \seealso{
-\itemize{ \item \code{\link{sw_exec}} for running a simulation
-\item \code{\link{sw_inputData}} and \code{\link{sw_inputDataFromFiles}} for
-data input \item \code{\link{dbW_getWeatherData}} and
-\code{\link{getWeatherData_folders}} for weather data input }
+\code{\link{dbW_getWeatherData}}
 }

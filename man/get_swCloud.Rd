@@ -2,15 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{get_swCloud}
 \alias{get_swCloud}
-\title{get_swCloud}
+\title{\code{get_swCloud}}
 \usage{
 get_swCloud(object)
 }
 \arguments{
-\item{object}{An object of class \code{\linkS4class{swCloud}} or \code{\linkS4class{swInputData}}.}
+\item{object}{An object of class \code{\linkS4class{swCloud}} or
+\code{\linkS4class{swInputData}}.}
 }
 \description{
-get_swCloud
+\code{get_swCloud}
 }
 \seealso{
 \code{\linkS4class{swCloud}} and \code{\linkS4class{swInputData}}
