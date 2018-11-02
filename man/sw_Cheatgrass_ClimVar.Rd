@@ -25,7 +25,7 @@ Calculate climate variables required to estimate percent cheatgrass cover
 in North America
 }
 \section{Note}{
- This function does not correct for nothern/southern
+ This function does not correct for northern/southern
   hemisphere.
 }
 

@@ -83,4 +83,3 @@ test_that("Check years", {
   expect_equal(x[["start_year"]], 2000L)
   expect_equal(x[["end_year"]], 2010L)
 })
-

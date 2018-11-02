@@ -52,7 +52,7 @@ window <- function(x, n = 3, win_fun = sum) {
 #' Calculate climate variables required to estimate percent cheatgrass cover
 #' in North America
 #'
-#' @section Note: This function does not correct for nothern/southern
+#' @section Note: This function does not correct for northern/southern
 #'   hemisphere.
 #'
 #' @param monthlyPPT_cm A numeric matrix of monthly precipitation values in
@@ -80,7 +80,8 @@ sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm, monthlyTempMean) {
   # see \code{link[dismo]{biovars}}
   wet <- t(apply(monthlyPPT_cm, 2, window))
   tmp <- t(apply(monthlyTempMean, 2, window, win_fun = mean))
-  dryqrt <- cbind(1:ncol(monthlyPPT_cm), as.integer(apply(wet, 1, which.min)))
+  dryqrt <- cbind(seq_len(ncol(monthlyPPT_cm)),
+    as.integer(apply(wet, 1, which.min)))
   MeanTemp_ofDriestQuarter_C <- tmp[dryqrt]
 
   nyrs <- seq_along(Month7th_PPT_mm)
