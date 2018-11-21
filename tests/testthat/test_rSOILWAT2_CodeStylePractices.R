@@ -46,7 +46,8 @@ test_that("Package code style", {
 
     for (k in seq_along(files_tolint)) {
       badstyle <- lintr::lint(files_tolint[k])
-      expect_identical(length(badstyle), 0L, info = print(badstyle))
+      expect_identical(length(badstyle), 0L,
+        info = paste0(shQuote(basename(files_tolint[k])), ": ", badstyle))
     }
   }
 })
