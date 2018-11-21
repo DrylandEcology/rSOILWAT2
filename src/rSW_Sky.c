@@ -58,25 +58,29 @@ SEXP onGet_SW_SKY() {
 	SEXP swCloud,SW_SKY;
 	SEXP Cloud;
 	SEXP Cloud_names, Cloud_names_x, Cloud_names_y;
-	char *x_names[] = { "SkyCoverPCT", "WindSpeed_m/s", "HumidityPCT", "Transmissivity", "SnowDensity_kg/m^3" };
-	char *y_names[] = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+	int k = 6;
+  char *x_names[] = { "SkyCoverPCT", "WindSpeed_m/s", "HumidityPCT",
+    "Transmissivity", "SnowDensity_kg/m^3", "RainEvents_per_day" };
+  char *y_names[] = { "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December" };
 	RealD *p_Cloud;
 
 	PROTECT(swCloud = MAKE_CLASS("swCloud"));
 	PROTECT(SW_SKY = NEW_OBJECT(swCloud));
-	PROTECT(Cloud = allocMatrix(REALSXP, 5, 12));
+	PROTECT(Cloud = allocMatrix(REALSXP, k, 12));
 	p_Cloud = REAL(Cloud);
 	for (i = 0; i < 12; i++) { //i=columns
-		p_Cloud[0 + 5 * i] = v->cloudcov[i];
-		p_Cloud[1 + 5 * i] = v->windspeed[i];
-		p_Cloud[2 + 5 * i] = v->r_humidity[i];
-		p_Cloud[3 + 5 * i] = v->transmission[i];
-		p_Cloud[4 + 5 * i] = v->snow_density[i];
+		p_Cloud[0 + k * i] = v->cloudcov[i];
+		p_Cloud[1 + k * i] = v->windspeed[i];
+		p_Cloud[2 + k * i] = v->r_humidity[i];
+		p_Cloud[3 + k * i] = v->transmission[i];
+		p_Cloud[4 + k * i] = v->snow_density[i];
+		p_Cloud[5 + k * i] = v->n_rain_per_day[i];
 	}
 
 	PROTECT(Cloud_names = allocVector(VECSXP, 2));
-	PROTECT(Cloud_names_x = allocVector(STRSXP, 5));
-	for (i = 0; i < 5; i++) {
+	PROTECT(Cloud_names_x = allocVector(STRSXP, k));
+	for (i = 0; i < k; i++) {
 		SET_STRING_ELT(Cloud_names_x, i, mkChar(x_names[i]));
 	}
 	PROTECT(Cloud_names_y = allocVector(STRSXP, 12));
@@ -87,27 +91,28 @@ SEXP onGet_SW_SKY() {
 	SET_VECTOR_ELT(Cloud_names, 1, Cloud_names_y);
 	setAttrib(Cloud, R_DimNamesSymbol, Cloud_names);
 
-	SET_SLOT(SW_SKY,install("Cloud"),Cloud);
+	SET_SLOT(SW_SKY,install("Cloud"), Cloud);
 
 	UNPROTECT(6);
 	return SW_SKY;
 }
 
 void onSet_SW_SKY(SEXP sxp_SW_SKY) {
-	int i;
+	int i, k = 6;
 	SW_SKY *v = &SW_Sky;
 	RealD *p_Cloud;
 	PROTECT(sxp_SW_SKY);
-	p_Cloud = REAL(GET_SLOT(sxp_SW_SKY,install("Cloud")));
+	p_Cloud = REAL(GET_SLOT(sxp_SW_SKY, install("Cloud")));
 
 	MyFileName = SW_F_name(eSky);
 
 	for (i = 0; i < 12; i++) { //i=columns
-		v->cloudcov[i] = p_Cloud[0 + 5 * i];
-		v->windspeed[i] = p_Cloud[1 + 5 * i];
-		v->r_humidity[i] = p_Cloud[2 + 5 * i];
-		v->transmission[i] = p_Cloud[3 + 5 * i];
-		v->snow_density[i] = p_Cloud[4 + 5 * i];
+		v->cloudcov[i] = p_Cloud[0 + k * i];
+		v->windspeed[i] = p_Cloud[1 + k * i];
+		v->r_humidity[i] = p_Cloud[2 + k * i];
+		v->transmission[i] = p_Cloud[3 + k * i];
+		v->snow_density[i] = p_Cloud[4 + k * i];
+		v->n_rain_per_day[i] = p_Cloud[5 + k * i];
 	}
 	UNPROTECT(1);
 }
