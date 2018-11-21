@@ -2,10 +2,12 @@
 
 #--- rSOILWAT2: use development version
 library("methods")  # in case this code is run via 'Rscript'
-library("devtools")
+stopifnot(requireNamespace("pkgbuild"))
+stopifnot(requireNamespace("pkgload"))
+stopifnot(requireNamespace("usethis"))
 
-devtools::clean_dll()
-devtools::load_all()
+pkgbuild::clean_dll()
+pkgload::load_all()
 
 
 #--- INPUTS
@@ -48,7 +50,7 @@ for (it in seq_along(tests)) {
   # Turn on weather generator
   ftemp <- file.path(dir_in, examples[2], "Input", "weathsetup.in")
   fin <- readLines(ftemp)
-  line <- grep("Markov process for missing weather", fin)
+  line <- grep("Markov process for missing weather", fin, ignore.case = TRUE)
   stopifnot(length(line) == 1, line > 0, line < length(fin))
   substr(fin[line], 1, 1) <- "1"
   writeLines(fin, con = ftemp)
@@ -104,7 +106,7 @@ for (it in seq_along(tests)) {
 #--- USE DEFAULT EXTDATA EXAMPLE AS PACKAGE DATA
 sw_exampleData <- sw_inputDataFromFiles(file.path(dir_in, examples[1]),
   files.in = "files.in")
-devtools::use_data(sw_exampleData, internal = FALSE, overwrite = TRUE)
+usethis::use_data(sw_exampleData, internal = FALSE, overwrite = TRUE)
 
 
 #-----------------------
