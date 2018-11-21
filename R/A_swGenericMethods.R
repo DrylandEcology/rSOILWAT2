@@ -665,6 +665,13 @@ setGeneric("swCloud_Transmissivity",
 setGeneric("swCloud_SnowDensity",
   function(object) standardGeneric("swCloud_SnowDensity"))
 
+#' \code{swCloud_RainEvents}
+#' @param object An object of class \code{\linkS4class{swCloud}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swCloud}} and \code{\linkS4class{swInputData}}
+setGeneric("swCloud_RainEvents",
+  function(object) standardGeneric("swCloud_RainEvents"))
+
 #' \code{set_swCloud}
 #' Need to define and export this generic method -- otherwise,
 #' \code{\link{set_swCloud<-}} doesn't work.
@@ -719,6 +726,14 @@ setGeneric("swCloud_Transmissivity<-",
 #' @seealso \code{\linkS4class{swCloud}} and \code{\linkS4class{swInputData}}
 setGeneric("swCloud_SnowDensity<-",
   function(object, value) standardGeneric("swCloud_SnowDensity<-"))
+
+#' \code{swCloud_RainEvents<-}
+#' @param object An object of class \code{\linkS4class{swCloud}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swCloud}} and \code{\linkS4class{swInputData}}
+setGeneric("swCloud_RainEvents<-",
+  function(object, value) standardGeneric("swCloud_RainEvents<-"))
 ########################
 
 ########PROD############
@@ -740,13 +755,6 @@ setGeneric("swProd_Composition",
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
 setGeneric("swProd_Albedo", function(object) standardGeneric("swProd_Albedo"))
-
-#' \code{swProd_Cover_stcr}
-#' @param object An object of class \code{\linkS4class{swProd}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
-setGeneric("swProd_Cover_stcr",
-  function(object) standardGeneric("swProd_Cover_stcr"))
 
 #' \code{swProd_CanopyHeight}
 #' @param object An object of class \code{\linkS4class{swProd}} or
@@ -882,14 +890,6 @@ setGeneric("swProd_Composition<-",
 #' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
 setGeneric("swProd_Albedo<-",
   function(object, value) standardGeneric("swProd_Albedo<-"))
-
-#' \code{swProd_Cover_stcr<-}
-#' @param object An object of class \code{\linkS4class{swProd}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
-#' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
-setGeneric("swProd_Cover_stcr<-",
-  function(object, value) standardGeneric("swProd_Cover_stcr<-"))
 
 #' \code{swProd_CanopyHeight<-}
 #' @param object An object of class \code{\linkS4class{swProd}} or

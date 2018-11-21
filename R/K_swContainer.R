@@ -569,6 +569,11 @@ setMethod("swCloud_SnowDensity", "swInputData",
 
 #' @rdname swInputData-class
 #' @export
+setMethod("swCloud_RainEvents", "swInputData",
+  function(object) swCloud_RainEvents(object@cloud))
+
+#' @rdname swInputData-class
+#' @export
 setReplaceMethod("set_swCloud", signature = "swInputData",
   function(object, value) {
     set_swCloud(object@cloud) <- value
@@ -612,6 +617,14 @@ setReplaceMethod("swCloud_Transmissivity", signature = "swInputData",
 setReplaceMethod("swCloud_SnowDensity", signature = "swInputData",
   function(object, value) {
     swCloud_SnowDensity(object@cloud) <- value
+    object
+})
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod("swCloud_RainEvents", signature = "swInputData",
+  function(object, value) {
+    swCloud_RainEvents(object@cloud) <- value
     object
 })
 
@@ -774,11 +787,6 @@ setMethod("swProd_Albedo", "swInputData",
 
 #' @rdname swInputData-class
 #' @export
-setMethod("swProd_Cover_stcr", "swInputData",
-  function(object) swProd_Cover_stcr(object@prod))
-
-#' @rdname swInputData-class
-#' @export
 setMethod("swProd_CanopyHeight", "swInputData",
   function(object) swProd_CanopyHeight(object@prod))
 
@@ -874,14 +882,6 @@ setReplaceMethod("swProd_Composition", signature = "swInputData",
 setReplaceMethod("swProd_Albedo", signature = "swInputData",
   function(object, value) {
     swProd_Albedo(object@prod) <- value
-    object
-})
-
-#' @rdname swInputData-class
-#' @export
-setReplaceMethod("swProd_Cover_stcr", signature = "swInputData",
-  function(object, value) {
-    swProd_Cover_stcr(object@prod) <- value
     object
 })
 

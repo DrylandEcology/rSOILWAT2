@@ -49,7 +49,7 @@
 #' @name swProd-class
 #' @export
 setClass("swProd", slots = c(Composition = "numeric", Albedo = "numeric",
-  Cover_stcr = "numeric", CanopyHeight = "matrix",
+  CanopyHeight = "matrix",
   VegetationInterceptionParameters = "matrix",
   LitterInterceptionParameters = "matrix",
   EsTpartitioning_param = "numeric", Es_param_limit = "numeric",
@@ -76,11 +76,6 @@ swProd_validity <- function(object) {
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
-  if (length(object@Cover_stcr) != nvegs || !all(object@Cover_stcr >= 0)) {
-    msg <- "@Cover_stcr must have NVEGTYPES non-negative values."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
   temp <- dim(object@CanopyHeight)
   if (identical(temp, c(5, nvegs))) {
     msg <- "@CanopyHeight must be a 5xNVEGTYPES matrix."
@@ -88,14 +83,14 @@ swProd_validity <- function(object) {
   }
 
   temp <- dim(object@VegetationInterceptionParameters)
-  if (identical(temp, c(4, nvegs))) {
+  if (identical(temp, c(2, nvegs))) {
     msg <- "@VegetationInterceptionParameters must be a 4xNVEGTYPES matrix."
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
   temp <- dim(object@LitterInterceptionParameters)
-  if (identical(temp, c(4, nvegs))) {
-    msg <- "@LitterInterceptionParameters must be a 4xNVEGTYPES matrix."
+  if (identical(temp, c(1, nvegs))) {
+    msg <- "@LitterInterceptionParameters must be a 1xNVEGTYPES matrix."
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
@@ -201,10 +196,6 @@ setMethod("swProd_Composition", "swProd", function(object) object@Composition)
 #' @rdname swProd-class
 #' @export
 setMethod("swProd_Albedo", "swProd", function(object) object@Albedo)
-
-#' @rdname swProd-class
-#' @export
-setMethod("swProd_Cover_stcr", "swProd", function(object) object@Cover_stcr)
 
 #' @rdname swProd-class
 #' @export
@@ -317,15 +308,6 @@ setReplaceMethod("swProd_Composition", signature = "swProd",
 setReplaceMethod("swProd_Albedo", signature = "swProd",
   function(object, value) {
     object@Albedo[] <- value
-    validObject(object)
-    object
-})
-
-#' @rdname swProd-class
-#' @export
-setReplaceMethod("swProd_Cover_stcr", signature = "swProd",
-  function(object, value) {
-    object@Cover_stcr[] <- value
     validObject(object)
     object
 })
@@ -493,7 +475,6 @@ setMethod("swReadLines", signature = c(object = "swProd", file = "character"),
     infiletext <- readLines(con = file)
     object@Composition = readNumerics(infiletext[6],5)
     object@Albedo = readNumerics(infiletext[11],5)
-    object@Cover_stcr = readNumerics(infiletext[16],4)
     object@CanopyHeight[1,] = readNumerics(infiletext[21],4)
     object@CanopyHeight[2,] = readNumerics(infiletext[22],4)
     object@CanopyHeight[3,] = readNumerics(infiletext[23],4)
@@ -501,12 +482,7 @@ setMethod("swReadLines", signature = c(object = "swProd", file = "character"),
     object@CanopyHeight[5,] = readNumerics(infiletext[25],4)
     object@VegetationInterceptionParameters[1,] = readNumerics(infiletext[30],4)
     object@VegetationInterceptionParameters[2,] = readNumerics(infiletext[31],4)
-    object@VegetationInterceptionParameters[3,] = readNumerics(infiletext[32],4)
-    object@VegetationInterceptionParameters[4,] = readNumerics(infiletext[33],4)
     object@LitterInterceptionParameters[1,] = readNumerics(infiletext[38],4)
-    object@LitterInterceptionParameters[2,] = readNumerics(infiletext[39],4)
-    object@LitterInterceptionParameters[3,] = readNumerics(infiletext[40],4)
-    object@LitterInterceptionParameters[4,] = readNumerics(infiletext[41],4)
     object@EsTpartitioning_param = readNumerics(infiletext[46],4)
     object@Es_param_limit = readNumerics(infiletext[51],4)
     object@Shade[1,] = readNumerics(infiletext[56],4)
