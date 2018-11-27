@@ -623,21 +623,7 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 	v->veg[SW_FORBS].co2_wue_coeff2 = REAL(CO2Coefficients)[15];
 
 
-	fraction_sum = v->veg[SW_GRASS].cov.fCover + v->veg[SW_SHRUB].cov.fCover + v->veg[SW_TREES].cov.fCover + v->veg[SW_FORBS].cov.fCover + v->bare_cov.fCover;
-	if (!EQ(fraction_sum, 1.0)) {
-		LogError(logfp, LOGWARN, "%s : Fractions of vegetation components were normalized, "
-			"sum of fractions (%5.4f) != 1.0.\nNew coefficients are:", MyFileName, fraction_sum);
-		v->veg[SW_GRASS].cov.fCover /= fraction_sum;
-		v->veg[SW_SHRUB].cov.fCover /= fraction_sum;
-		v->veg[SW_TREES].cov.fCover /= fraction_sum;
-		v->bare_cov.fCover /= fraction_sum;
-		v->veg[SW_FORBS].cov.fCover /= fraction_sum;
-		LogError(logfp, LOGWARN, "  Grassland fraction : %5.4f", v->veg[SW_GRASS].cov.fCover);
-		LogError(logfp, LOGWARN, "  Shrubland fraction : %5.4f", v->veg[SW_SHRUB].cov.fCover);
-		LogError(logfp, LOGWARN, "  Forest/tree fraction : %5.4f", v->veg[SW_TREES].cov.fCover);
-		LogError(logfp, LOGWARN, "  FORB fraction : %5.4f", v->veg[SW_FORBS].cov.fCover);
-		LogError(logfp, LOGWARN, "  Bare Ground fraction : %5.4f", v->bare_cov.fCover);
-	}
+  SW_VPD_fix_cover();
 
 	SW_VPD_init();
 
