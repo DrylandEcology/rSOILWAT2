@@ -266,7 +266,7 @@ SEXP onGet_SW_SIT() {
 
 	SEXP TranspirationRegions, TranspirationRegions_names, TranspirationRegions_names_y;
 	char *cTranspirationRegions[] = { "ndx", "layer" };
-	RealD *p_transp;
+	int *p_transp;
 
 	MyFileName = SW_F_name(eSite);
 
@@ -365,8 +365,8 @@ SEXP onGet_SW_SIT() {
 		SET_STRING_ELT(SoilTemperatureConstants_names, i, mkChar(cSoilTempValues[i]));
 	setAttrib(SoilTemperatureConstants, R_NamesSymbol, SoilTemperatureConstants_names);
 
-	PROTECT(TranspirationRegions = allocMatrix(REALSXP,(v->n_transp_rgn),2));
-	p_transp = REAL(TranspirationRegions);
+	PROTECT(TranspirationRegions = allocMatrix(INTSXP,(v->n_transp_rgn),2));
+	p_transp = INTEGER(TranspirationRegions);
 	for (i = 0; i < (v->n_transp_rgn); i++) {
 		p_transp[i + (v->n_transp_rgn) * 0] = (i + 1);
 		p_transp[i + (v->n_transp_rgn) * 1] = (_TranspRgnBounds[i]+1);
@@ -409,7 +409,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	SEXP SoilTemperatureConstants_use;
 	SEXP SoilTemperatureConstants;
 	SEXP TranspirationRegions;
-	RealD *p_transp;
+	int *p_transp;
 
   #ifdef RSWDEBUG
   int debug = 0;
@@ -512,7 +512,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	#endif
 
 	PROTECT(TranspirationRegions = GET_SLOT(SW_SIT, install("TranspirationRegions")));
-	p_transp = REAL(TranspirationRegions);
+	p_transp = INTEGER(TranspirationRegions);
 	v->n_transp_rgn = nrows(TranspirationRegions);
 	if (MAX_TRANSP_REGIONS < v->n_transp_rgn) {
 		too_many_regions = TRUE;

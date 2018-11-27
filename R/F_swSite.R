@@ -118,6 +118,10 @@ setValidity("swSite", function(object) {
     msg <- "@SoilTemperatureConstants length != 10."
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
+  if (typeof(object@TranspirationRegions) != "integer") {
+    msg <- "@TranspirationRegions is of integer type."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
   if (NCOL(object@TranspirationRegions) != 2) {
     msg <- "@TranspirationRegions columns != 2."
     val <- if (isTRUE(val)) msg else c(val, msg)
@@ -141,7 +145,7 @@ setMethod(f = "initialize", signature = "swSite", function(.Object, ...) {
     def@IntrinsicSiteParams[c("Latitude", "Altitude")] <- NA_real_
   }
   if (!("TranspirationRegions" %in% dns)) {
-    def@TranspirationRegions[, "layer"] <- NA_real_
+    def@TranspirationRegions[, "layer"] <- NA_integer_
   } else {
     # Guarantee dimnames
     dimnames(dots[["TranspirationRegions"]]) <-
@@ -324,6 +328,16 @@ setReplaceMethod("swSite_SoilTemperatureConsts", signature = "swSite",
 #' @export
 setReplaceMethod("swSite_TranspirationRegions", signature = "swSite",
   definition = function(object, value) {
+    if (typeof(value) != "integer") {
+      # Check whether we can convert to integer without great loss of info
+      x <- as.integer(value)
+      d <- sum(abs(value[] - x))
+      if (d < rSW2_glovars[["tol"]]) {
+        # We can convert without great loss
+        value <- array(x, dim = dim(value))
+      }
+      # otherwise, we copy non-integer values which will trigger `validObject`
+    }
     colnames(value) <- colnames(object@TranspirationRegions)
     object@TranspirationRegions <- value
     validObject(object)
