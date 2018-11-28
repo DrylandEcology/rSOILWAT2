@@ -48,7 +48,7 @@ for (it in seq_along(tests)) {
   # Turn on weather generator
   ftemp <- file.path(dir_in, examples[2], "Input", "weathsetup.in")
   fin <- readLines(ftemp)
-  line <- grep("Markov process for missing weather", fin)
+  line <- grep("Markov process for missing weather", fin, ignore.case = TRUE)
   stopifnot(length(line) == 1, line > 0, line < length(fin))
   substr(fin[line], 1, 1) <- "1"
   writeLines(fin, con = ftemp)
