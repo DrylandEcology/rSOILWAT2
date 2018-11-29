@@ -188,7 +188,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
   input_cover[isuc] <- if (fix_succulents) Succulents_Fraction else NA
 
   # treat negative input values as if NA
-  input_cover <- cut0Inf(input_cover)
+  input_cover <- cut0Inf(input_cover, val = NA)
 
   #--- Decide if all fractions are sufficiently defined or if they need to be
   # estimated based on climate reltionships
@@ -333,7 +333,8 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
       ngood <- sum(!is.na(estim_cover[iestim]))
 
       # Any remaining NAs are set to 0
-      estim_cover[iestim] <- NAto0(estim_cover[iestim])
+      estim_cover[iestim] <- replace_NAs_with_val(estim_cover[iestim],
+        val_replace = 0)
 
       if (!fill_empty_with_BareGround && ngood <= 1) {
         #--- Hack if some of the equations produced NAs:

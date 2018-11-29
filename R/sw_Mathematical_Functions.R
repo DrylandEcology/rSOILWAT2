@@ -1,18 +1,28 @@
+
+replace_NAs_with_val <- function(x, val_replace) {
+  x[is.na(x)] <- val_replace
+  x
+}
+
+squash_into_low_high <- function(x, val_low = 0, val_low_replace = val_low,
+  val_high = 1, val_high_replace = val_high) {
+  if (!is.null(val_low)) x[x < val_low] <- val_low_replace
+  if (!is.null(val_high)) x[x > val_high] <- val_high_replace
+  x
+}
+
 cut0Inf <- function(x, val = NA) {
-  x[x < 0] <- val
-  x
+  squash_into_low_high(x, val_low = 0, val_low_replace = val,
+    val_high = NULL)
 }
 
-NAto0 <- function(x) {
-  x[is.na(x)] <- 0
-  x
+finite01 <- function(x, val_low_replace = 0, val_high_replace = 1) {
+  x <- replace_NAs_with_val(x, val_replace = val_low_replace)
+  squash_into_low_high(x, val_low = 0, val_low_replace = val_low_replace,
+    val_high = 1, val_high_replace = val_high_replace)
 }
 
-finite01 <- function(x, val_low = 0, val_high = 1) {
-  x[x < 0 | is.na(x)] <- val_low
-  x[x > 1] <- val_high
-  x
-}
+
 
 calc.loess_coeff <- function(N, span) {
   # prevent call to loessc.c:ehg182(104):
