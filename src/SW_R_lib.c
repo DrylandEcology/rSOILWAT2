@@ -250,9 +250,17 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
     input files, `InFiles`.
  */
 SEXP sw_consts(void) {
+  #ifdef RSWDEBUG
+  int debug = 0;
+  #endif
+
   const int nret = 7; // length of cret
-  const int nINT = 11; // length of vINT and cINT
+  const int nINT = 10; // length of vINT and cINT
   const int nNUM = 1; // length of vNUM and cNUM
+
+  #ifdef RSWDEBUG
+  if (debug) swprintf("sw_consts: define variables ... ");
+  #endif
 
   SEXP ret, cnames, ret_num, ret_int, ret_int2, ret_str1, ret_str2, ret_str3,
     ret_infiles;
@@ -295,7 +303,10 @@ SEXP sw_consts(void) {
     "eOutputDaily_soil","eOutputWeekly_soil","eOutputMonthly_soil","eOutputYearly_soil"}; // TODO: this must match SW_Files.h/SW_FileIndex
 
   // create vector of numeric/real/double constants
-  PROTECT(ret_num = allocVector(REALSXP, nINT));
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" create ret_num ...");
+  #endif
+  PROTECT(ret_num = allocVector(REALSXP, nNUM));
   pvNUM = REAL(ret_num);
   PROTECT(cnames = allocVector(STRSXP, nNUM));
   for (i = 0; i < nNUM; i++) {
@@ -305,6 +316,9 @@ SEXP sw_consts(void) {
   namesgets(ret_num, cnames);
 
   // create vector of integer constants
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" create ret_int ...");
+  #endif
   PROTECT(ret_int = allocVector(INTSXP, nINT));
   pvINT = INTEGER(ret_int);
   PROTECT(cnames = allocVector(STRSXP, nINT));
@@ -315,6 +329,9 @@ SEXP sw_consts(void) {
   namesgets(ret_int, cnames);
 
   // create vector of vegetation types
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" create ret_int2 ...");
+  #endif
   PROTECT(ret_int2 = allocVector(INTSXP, NVEGTYPES));
   pvINT = INTEGER(ret_int2);
   PROTECT(cnames = allocVector(STRSXP, NVEGTYPES));
@@ -325,6 +342,9 @@ SEXP sw_consts(void) {
   namesgets(ret_int2, cnames);
 
   // create vector of output key constants
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" create ret_str1 ...");
+  #endif
   PROTECT(ret_str1 = allocVector(STRSXP, SW_OUTNKEYS));
   PROTECT(cnames = allocVector(STRSXP, SW_OUTNKEYS));
   for (i = 0; i < SW_OUTNKEYS; i++) {
@@ -334,6 +354,9 @@ SEXP sw_consts(void) {
   namesgets(ret_str1, cnames);
 
   // create vector of output period constants
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" create ret_str2 ...");
+  #endif
   PROTECT(ret_str2 = allocVector(STRSXP, SW_OUTNPERIODS));
   PROTECT(cnames = allocVector(STRSXP, SW_OUTNPERIODS));
   for (i = 0; i < SW_OUTNPERIODS; i++) {
@@ -343,6 +366,9 @@ SEXP sw_consts(void) {
   namesgets(ret_str2, cnames);
 
   // create vector of output summary constants
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" create ret_str3 ...");
+  #endif
   PROTECT(ret_str3 = allocVector(STRSXP, SW_NSUMTYPES));
   PROTECT(cnames = allocVector(STRSXP, SW_NSUMTYPES));
   for (i = 0; i < SW_NSUMTYPES; i++) {
@@ -352,6 +378,9 @@ SEXP sw_consts(void) {
   namesgets(ret_str3, cnames);
 
   // create vector of input file descriptors
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" create ret_infiles ...");
+  #endif
   PROTECT(ret_infiles = allocVector(INTSXP, SW_NFILES));
   pvINT = INTEGER(ret_infiles);
   PROTECT(cnames = allocVector(STRSXP, SW_NFILES));
@@ -363,6 +392,9 @@ SEXP sw_consts(void) {
 
 
   // combine vectors into a list and return
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" create ret ...");
+  #endif
   PROTECT(ret = allocVector(VECSXP, nret));
   PROTECT(cnames = allocVector(STRSXP, nret));
   for (i = 0; i < nret; i++)
@@ -377,6 +409,9 @@ SEXP sw_consts(void) {
   SET_VECTOR_ELT(ret, 6, ret_infiles);
 
   UNPROTECT(nret * 2 + 2);
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" ... done.\n");
+  #endif
 
   return ret;
 }
