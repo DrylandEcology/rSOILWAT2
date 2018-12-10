@@ -1225,6 +1225,19 @@ Chambers2014_Table1 <- function() {
 #' Determine resilience & resistance classes (sensu Chambers et al. 2014) based
 #' on soil moisture and soil temperature regimes
 #'
+#' @param Tregime A named numeric vector. The soil temperature regime
+#'   \var{\dQuote{STR}} element of the return object of
+#'   \code{\link{dailyNRCS_SoilMoistureTemperatureRegimes}}.
+#' @param Sregime A named numeric vector. The soil moisture regime
+#'   \var{\dQuote{SMR}} element of the return object of
+#'   \code{\link{dailyNRCS_SoilMoistureTemperatureRegimes}}.
+#' @param MAP_mm A numeric value. The mean annual precipitation in millimeters.
+#'
+#' @return A named numeric vector of \code{0s} and \code{1s} indicating
+#'   the matching resilience and resistance class. Note: All elements may be
+#'   0 if the input soil moisture/temperature regimes are not covered by
+#'   Chambers et al. 2014.
+#'
 #' @references Chambers, J. C., D. A. Pyke, J. D. Maestas, M. Pellant,
 #'   C. S. Boyd, S. B. Campbell, S. Espinosa, D. W. Havlina, K. E. Mayer, and
 #'   A. Wuenschel. 2014. Using Resistance and Resilience Concepts to Reduce
@@ -1232,6 +1245,23 @@ Chambers2014_Table1 <- function() {
 #'   Sagebrush Ecosystem and Greater Sage-Grouse: A Strategic Multi-Scale
 #'   Approach. Gen. Tech. Rep. RMRS-GTR-326. U.S. Department of Agriculture,
 #'   Forest Service, Rocky Mountain Research Station, Fort Collins, CO.
+#'
+#' @examples
+#' # Calculate soil moisture and soil temperature regimes
+#' sw_in <- rSOILWAT2::sw_exampleData
+#' sw_out <- sw_exec(inputData = sw_in)
+#' SMTR <- dailyNRCS_SoilMoistureTemperatureRegimes(
+#'   sim_in = sw_in, sim_out = sw_out)
+#'
+#' # Determine average across years and set aggregation agreement level
+#' Tregime <- colMeans(SMTR[["STR"]]) >= 0.9
+#' Sregime <- colMeans(SMTR[["SMR"]]) >= 0.9
+#'
+#' # Calculate resilience and resistance categories
+#' clim <- calc_SiteClimate(weatherList = get_WeatherHistory(sw_in))
+#' dailyNRCS_Chambers2014_ResilienceResistance(Tregime, Sregime,
+#'   MAP_mm = 10 * clim[["MAP_cm"]])
+#'
 #' @export
 dailyNRCS_Chambers2014_ResilienceResistance <- function(Tregime, Sregime,
   MAP_mm) {
@@ -1303,9 +1333,36 @@ Maestas2016_Table1 <- function() {
 #' Determine resilience & resistance classes (sensu Maestas et al. 2016) based
 #' on soil moisture and soil temperature regimes
 #'
+#' @param Tregime A named numeric vector. The soil temperature regime
+#'   \var{\dQuote{STR}} element of the return object of
+#'   \code{\link{dailyNRCS_SoilMoistureTemperatureRegimes}}.
+#' @param Sregime A named numeric vector. The soil moisture regime
+#'   \var{\dQuote{SMR}} element of the return object of
+#'   \code{\link{dailyNRCS_SoilMoistureTemperatureRegimes}}.
+#'
+#' @return A named numeric vector of \code{0s} and \code{1s} indicating
+#'   the matching resilience and resistance class. Note: All elements may be
+#'   0 if the input soil moisture/temperature regimes are not covered by
+#'   Maestas et al. 2016.
+#'
 #' @references Maestas, J.D., Campbell, S.B., Chambers, J.C., Pellant, M. &
 #'   Miller, R.F. (2016). Tapping Soil Survey Information for Rapid Assessment
 #'   of Sagebrush Ecosystem Resilience and Resistance. Rangelands, 38, 120-128.
+#'
+#' @examples
+#' # Calculate soil moisture and soil temperature regimes
+#' sw_in <- rSOILWAT2::sw_exampleData
+#' sw_out <- sw_exec(inputData = sw_in)
+#' SMTR <- dailyNRCS_SoilMoistureTemperatureRegimes(
+#'   sim_in = sw_in, sim_out = sw_out)
+#'
+#' # Determine average across years and set aggregation agreement level
+#' Tregime <- colMeans(SMTR[["STR"]]) >= 0.9
+#' Sregime <- colMeans(SMTR[["SMR"]]) >= 0.9
+#'
+#' # Calculate resilience and resistance categories
+#' dailyNRCS_Maestas2016_ResilienceResistance(Tregime, Sregime)
+#'
 #' @export
 dailyNRCS_Maestas2016_ResilienceResistance <- function(Tregime, Sregime) {
   RR <- c(Low = NA, Moderate = NA, High = NA)

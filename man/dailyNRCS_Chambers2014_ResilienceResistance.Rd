@@ -7,9 +7,43 @@ on soil moisture and soil temperature regimes}
 \usage{
 dailyNRCS_Chambers2014_ResilienceResistance(Tregime, Sregime, MAP_mm)
 }
+\arguments{
+\item{Tregime}{A named numeric vector. The soil temperature regime
+\var{\dQuote{STR}} element of the return object of
+\code{\link{dailyNRCS_SoilMoistureTemperatureRegimes}}.}
+
+\item{Sregime}{A named numeric vector. The soil moisture regime
+\var{\dQuote{SMR}} element of the return object of
+\code{\link{dailyNRCS_SoilMoistureTemperatureRegimes}}.}
+
+\item{MAP_mm}{A numeric value. The mean annual precipitation in millimeters.}
+}
+\value{
+A named numeric vector of \code{0s} and \code{1s} indicating
+  the matching resilience and resistance class. Note: All elements may be
+  0 if the input soil moisture/temperature regimes are not covered by
+  Chambers et al. 2014.
+}
 \description{
 Determine resilience & resistance classes (sensu Chambers et al. 2014) based
 on soil moisture and soil temperature regimes
+}
+\examples{
+# Calculate soil moisture and soil temperature regimes
+sw_in <- rSOILWAT2::sw_exampleData
+sw_out <- sw_exec(inputData = sw_in)
+SMTR <- dailyNRCS_SoilMoistureTemperatureRegimes(
+  sim_in = sw_in, sim_out = sw_out)
+
+# Determine average across years and set aggregation agreement level
+Tregime <- colMeans(SMTR[["STR"]]) >= 0.9
+Sregime <- colMeans(SMTR[["SMR"]]) >= 0.9
+
+# Calculate resilience and resistance categories
+clim <- calc_SiteClimate(weatherList = get_WeatherHistory(sw_in))
+dailyNRCS_Chambers2014_ResilienceResistance(Tregime, Sregime,
+  MAP_mm = 10 * clim[["MAP_cm"]])
+
 }
 \references{
 Chambers, J. C., D. A. Pyke, J. D. Maestas, M. Pellant,
