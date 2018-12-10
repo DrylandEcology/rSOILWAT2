@@ -44,7 +44,7 @@ or just read in such input files for later manipulation:
 
 
 
-[rSFSW2]: https://github.com/Burke-Lauenroth-Lab/rSFSW2
-[rSOILWAT2]: https://github.com/Burke-Lauenroth-Lab/rSOILWAT2
-[SOILWAT2]: https://github.com/Burke-Lauenroth-Lab/SOILWAT2
+[rSFSW2]: https://github.com/DrylandEcology/rSFSW2
+[rSOILWAT2]: https://github.com/DrylandEcology/rSOILWAT2
+[SOILWAT2]: https://github.com/DrylandEcology/SOILWAT2
 
