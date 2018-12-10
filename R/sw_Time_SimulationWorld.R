@@ -5,6 +5,11 @@ isLeapYear <- function(y) {
   y %% 4 == 0 & (y %% 100 != 0 | y %% 400 == 0)
 }
 
+getStartYear <- function(simstartyr, spinup_N = 1L) {
+  as.integer(simstartyr + spinup_N)
+}
+
+
 #' Create a sequence of each day between and including two calendar years
 #'
 #' @param start_year An integer value. The first year.
@@ -44,6 +49,73 @@ seq_month_ofeach_day <- function(from = list(year = 1900, month = 1, day = 1),
 
   res <- seq.int(0, to0 - from0, by = 86400) + from0
   as.POSIXlt.POSIXct(.POSIXct(res, tz = tz))$mon + 1
+}
+
+
+#' Describe the time of a simulation run
+#'
+#' @param sim_time A list with at least values for three named elements:
+#'   \var{\dQuote{endyr}} and two of the following three:
+#'   \var{\dQuote{startyr}}, \var{\dQuote{simstartyr}}, and
+#'   \var{\dQuote{spinup_N}}.
+#'
+#' @return A named list, i.e., the updated version of \code{sim_time} with
+#'   additional elements: \itemize{
+#'   \item \var{\dQuote{useyrs}}: numeric vector with included calendar years,
+#'         i.e., years between \var{\dQuote{startyr}} and \var{\dQuote{endyr}},
+#'         but without the \var{\dQuote{spinup_N}} following
+#'         \var{\dQuote{simstartyr}};
+#'   \item \var{\dQuote{no.useyr}}: number of included years;
+#'   \item \var{\dQuote{no.usemo}}: number of included months;
+#'   \item \var{\dQuote{no.usedy}}: number of included days;
+#'   \item \var{\dQuote{index.useyr}}: indices of included years;
+#'   \item \var{\dQuote{index.usemo}}: indices of included months;
+#'   \item \var{\dQuote{index.usedy}}: indices of included days.
+#'   }
+#'
+#' @examples
+#' st1 <- setup_time_simulation_run(sim_time =
+#'   list(simstartyr = 1979, startyr = 1980, endyr = 2010))
+#' st2 <- setup_time_simulation_run(sim_time =
+#'   list(spinup_N = 1, startyr = 1980, endyr = 2010))
+#' st3 <- setup_time_simulation_run(sim_time =
+#'   list(simstartyr = 1979, spinup_N = 1, endyr = 2010))
+#'
+#' @export
+setup_time_simulation_run <- function(sim_time =
+    list(spinup_N = NULL, simstartyr = NA, startyr = NULL, endyr = NA)) {
+
+  if (is.null(sim_time[["simstartyr"]])) {
+    sim_time[["simstartyr"]] <- sim_time[["startyr"]] - sim_time[["spinup_N"]]
+  } else if (is.null(sim_time[["startyr"]])) {
+    sim_time[["startyr"]] <- getStartYear(sim_time[["simstartyr"]],
+      sim_time[["spinup_N"]])
+  } else if (is.null(sim_time[["spinup_N"]])) {
+    sim_time[["spinup_N"]] <- sim_time[["startyr"]] - sim_time[["simstartyr"]]
+  }
+
+  stopifnot(sapply(c("spinup_N", "simstartyr", "startyr", "endyr"), function(x)
+    !is.null(sim_time[[x]]) && is.finite(sim_time[[x]])))
+
+
+  temp <- ISOdate(sim_time[["startyr"]], 1, 1, tz = "UTC")
+  discarddy <- as.numeric(temp - ISOdate(sim_time[["simstartyr"]], 1, 1,
+    tz = "UTC"))
+
+  sim_time[["useyrs"]] <- sim_time[["startyr"]]:sim_time[["endyr"]]
+
+  sim_time[["no.useyr"]] <- sim_time[["endyr"]] - sim_time[["startyr"]] + 1
+  sim_time[["no.usemo"]] <- sim_time[["no.useyr"]] * 12
+  sim_time[["no.usedy"]] <- as.numeric(ISOdate(sim_time[["endyr"]], 12, 31,
+    tz = "UTC") - temp) + 1
+
+  sim_time[["index.useyr"]] <- sim_time[["spinup_N"]] +
+    seq_len(sim_time[["no.useyr"]])
+  sim_time[["index.usemo"]] <- sim_time[["spinup_N"]] * 12 +
+    seq_len(sim_time[["no.usemo"]])
+  sim_time[["index.usedy"]] <- discarddy + seq_len(sim_time[["no.usedy"]])
+
+  sim_time
 }
 
 

@@ -19,6 +19,12 @@ input_sim_time <- list(
 
 #--- TESTS
 test_that("Obtain time information", {
+  # Spinup of simulation
+  expect_equal(getStartYear(1980), 1981L)
+  expect_equal(getStartYear(0), 1L)
+  expect_equal(getStartYear(0, 10), 10L)
+
+
   # Leap years
   expect_true(isLeapYear(2000))
   expect_true(isLeapYear(2016))
@@ -30,6 +36,20 @@ test_that("Obtain time information", {
   expect_equal(
     seq_month_ofeach_day(list(1980, 1, 1), list(2010, 12, 31), tz = "UTC"),
     as.POSIXlt(days_in_years(1980, 2010))$mon + 1)
+
+
+  # Describe simulation time
+  st1 <- setup_time_simulation_run(list(simstartyr = 1979, startyr = 1980,
+    endyr = 2010))
+  ns <- names(st1)
+  expect_equal(st1,
+    setup_time_simulation_run(sim_time =
+      list(spinup_N = 1, startyr = 1980, endyr = 2010))[ns]
+  )
+  expect_equal(st1,
+    setup_time_simulation_run(sim_time =
+      list(simstartyr = 1979, spinup_N = 1, endyr = 2010))[ns]
+  )
 
 
   # Simulation time aggregation lists

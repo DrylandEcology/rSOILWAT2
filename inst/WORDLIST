@@ -14,25 +14,40 @@
 #------------------------------------
 #------ Jargon
 abiotic
+additively
 albedo
+aridic
 Bromus tectorum
 cheatgrass
 dryland
 ecohydrological
 ecohydrology
+et
 forb
 gregorian
 lodgepole
+matric
+operationalization
+pedotransfer
 phenology
+rangeland
+sensu
 shortgrass
 shrubland
 transmissivity
+xeric
 
 
 #------------------------------------
 #------ Abbreviations
 al
 doy
+GTR
+iso
+MPa
+pre
+RMRS
+th
 
 
 #------------------------------------
@@ -41,15 +56,23 @@ Ashish
 Bernal
 Brenden
 Brummer
+Clapp
+Espinosa
+Ginn
 github
+Havlina
+Hornberger
 Innis
 Lauenroth
 Lavin
 Markov
+Maestas
 Milchunas
 Oecologia
 Parton
 Paruelo
+Pellant
+Pyke
 Rew
 Rotella
 Sala
@@ -59,4 +82,5 @@ Springer
 SQLite
 Teeri
 Tiwari
+Wuenschel
 Zach
