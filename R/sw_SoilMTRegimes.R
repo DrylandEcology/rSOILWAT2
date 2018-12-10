@@ -339,11 +339,10 @@ SMR_logic <- function(ACS_COND1, ACS_COND2, ACS_COND3, MCS_COND0,
 #' @examples
 #' sw_in <- rSOILWAT2::sw_exampleData
 #' sw_out <- sw_exec(inputData = sw_in)
-#' SMTR <- dailyNRCS_SoilMoistureTemperatureRegimes(
-#'   sim_in = sw_in, sim_out = sw_out)
+#' SMTR <- calc_SMTRs(sim_in = sw_in, sim_out = sw_out)
 #'
 #' @export
-dailyNRCS_SoilMoistureTemperatureRegimes <- function(
+calc_SMTRs <- function(
   sim_in, sim_out = NULL, sim_agg = NULL, soil_TOC = NULL,
   has_soil_temperature = TRUE,
   opt_SMTR = list(
@@ -1227,10 +1226,10 @@ Chambers2014_Table1 <- function() {
 #'
 #' @param Tregime A named numeric vector. The soil temperature regime
 #'   \var{\dQuote{STR}} element of the return object of
-#'   \code{\link{dailyNRCS_SoilMoistureTemperatureRegimes}}.
+#'   \code{\link{calc_SMTRs}}.
 #' @param Sregime A named numeric vector. The soil moisture regime
 #'   \var{\dQuote{SMR}} element of the return object of
-#'   \code{\link{dailyNRCS_SoilMoistureTemperatureRegimes}}.
+#'   \code{\link{calc_SMTRs}}.
 #' @param MAP_mm A numeric value. The mean annual precipitation in millimeters.
 #'
 #' @return A named numeric vector of \code{0s} and \code{1s} indicating
@@ -1250,8 +1249,7 @@ Chambers2014_Table1 <- function() {
 #' # Calculate soil moisture and soil temperature regimes
 #' sw_in <- rSOILWAT2::sw_exampleData
 #' sw_out <- sw_exec(inputData = sw_in)
-#' SMTR <- dailyNRCS_SoilMoistureTemperatureRegimes(
-#'   sim_in = sw_in, sim_out = sw_out)
+#' SMTR <- calc_SMTRs(sim_in = sw_in, sim_out = sw_out)
 #'
 #' # Determine average across years and set aggregation agreement level
 #' Tregime <- colMeans(SMTR[["STR"]]) >= 0.9
@@ -1259,12 +1257,10 @@ Chambers2014_Table1 <- function() {
 #'
 #' # Calculate resilience and resistance categories
 #' clim <- calc_SiteClimate(weatherList = get_WeatherHistory(sw_in))
-#' dailyNRCS_Chambers2014_ResilienceResistance(Tregime, Sregime,
-#'   MAP_mm = 10 * clim[["MAP_cm"]])
+#' calc_RRs_Chambers2014(Tregime, Sregime, MAP_mm = 10 * clim[["MAP_cm"]])
 #'
 #' @export
-dailyNRCS_Chambers2014_ResilienceResistance <- function(Tregime, Sregime,
-  MAP_mm) {
+calc_RRs_Chambers2014 <- function(Tregime, Sregime, MAP_mm) {
 
   # Result containers
   cats <- c("Low", "ModeratelyLow", "Moderate", "ModeratelyHigh", "High")
@@ -1335,10 +1331,10 @@ Maestas2016_Table1 <- function() {
 #'
 #' @param Tregime A named numeric vector. The soil temperature regime
 #'   \var{\dQuote{STR}} element of the return object of
-#'   \code{\link{dailyNRCS_SoilMoistureTemperatureRegimes}}.
+#'   \code{\link{calc_SMTRs}}.
 #' @param Sregime A named numeric vector. The soil moisture regime
 #'   \var{\dQuote{SMR}} element of the return object of
-#'   \code{\link{dailyNRCS_SoilMoistureTemperatureRegimes}}.
+#'   \code{\link{calc_SMTRs}}.
 #'
 #' @return A named numeric vector of \code{0s} and \code{1s} indicating
 #'   the matching resilience and resistance class. Note: All elements may be
@@ -1353,18 +1349,17 @@ Maestas2016_Table1 <- function() {
 #' # Calculate soil moisture and soil temperature regimes
 #' sw_in <- rSOILWAT2::sw_exampleData
 #' sw_out <- sw_exec(inputData = sw_in)
-#' SMTR <- dailyNRCS_SoilMoistureTemperatureRegimes(
-#'   sim_in = sw_in, sim_out = sw_out)
+#' SMTR <- calc_SMTRs(sim_in = sw_in, sim_out = sw_out)
 #'
 #' # Determine average across years and set aggregation agreement level
 #' Tregime <- colMeans(SMTR[["STR"]]) >= 0.9
 #' Sregime <- colMeans(SMTR[["SMR"]]) >= 0.9
 #'
 #' # Calculate resilience and resistance categories
-#' dailyNRCS_Maestas2016_ResilienceResistance(Tregime, Sregime)
+#' calc_RRs_Maestas2016(Tregime, Sregime)
 #'
 #' @export
-dailyNRCS_Maestas2016_ResilienceResistance <- function(Tregime, Sregime) {
+calc_RRs_Maestas2016 <- function(Tregime, Sregime) {
   RR <- c(Low = NA, Moderate = NA, High = NA)
 
   if (any(!is.na(Tregime)) && any(!is.na(Sregime))) {

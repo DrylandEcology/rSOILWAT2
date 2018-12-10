@@ -25,8 +25,7 @@ test_that("SMTR", {
 
 
     #--- Calculate soil moisture/texture regimes
-    SMTR <- dailyNRCS_SoilMoistureTemperatureRegimes(
-      sim_in = sw_in, sim_out = sw_out)
+    SMTR <- calc_SMTRs(sim_in = sw_in, sim_out = sw_out)
 
     expect_true(SMTR[["regimes_done"]])
 
