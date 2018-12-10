@@ -134,4 +134,3 @@ identify_soillayers <- function(depths, sdepth) {
     it[1]
   }
 }
-

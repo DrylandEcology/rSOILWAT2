@@ -409,7 +409,7 @@ calc_SMTRs <- function(
   } else {
     st2 <- simTiming_ForEachUsedTimeUnit(useyrs = years,
       sim_tscales = c("daily", "monthly", "yearly"),
-      latitude = swSite_IntrinsicSiteParams(sw_in)[["Latitude"]],
+      latitude = swSite_IntrinsicSiteParams(sim_in)[["Latitude"]],
       account_NorthSouth = TRUE)
   }
 
@@ -431,7 +431,7 @@ calc_SMTRs <- function(
     "CSPartSummer", "meanTair_Tsoil50_offset_C")
   icols1 <- c("COND1", "COND2", "COND3", "HalfDryDaysCumAbove0C",
     "SoilAbove0C")
-  icols2 <- c('T50_at0C', 'Lanh_Dry_Half', 'COND3_Test')
+  icols2 <- c("T50_at0C", "Lanh_Dry_Half", "COND3_Test")
   icols3 <- c("COND0",
     "DryDaysCumAbove5C", "SoilAbove5C", "COND1",
     "MaxContDaysAnyMoistCumAbove8", "COND2", "COND2_1", "COND2_2",
@@ -471,8 +471,10 @@ calc_SMTRs <- function(
           slot(slot(sim_out, rSW2_glovars[["swof"]]["sw_soiltemp"]), "Day"))
     }
 
+    ihead <- 1:2
+
     if (!anyNA(sim_agg[["soiltemp.dy.all"]][["val"]]) &&
-        all(sim_agg[["soiltemp.dy.all"]][["val"]][, -(1:2)] < 100)) {
+        all(sim_agg[["soiltemp.dy.all"]][["val"]][, -ihead] < 100)) {
 
       SMTR[["has_realistic_SoilTemp"]] <- 1
 
@@ -489,7 +491,6 @@ calc_SMTRs <- function(
           slot(slot(sim_out, rSW2_glovars[["swof"]]["sw_vwcmatric"]), "Day"))
       }
       if (!exists("swpmatric.dy.all", where = sim_agg)) {
-        ihead <- 1:2
         sim_agg[["swpmatric.dy.all"]] <- cbind(
           sim_agg[["vwcmatric.dy.all"]][["val"]][, ihead],
           VWCtoSWP(sim_agg[["vwcmatric.dy.all"]][["val"]][, -ihead],
@@ -786,13 +787,11 @@ calc_SMTRs <- function(
           rm(weightsLanh)
         }
 
+        soilLayers_N_NRCS <- dim(soildat)[1]
         soiltemp_nrsc <- lapply(soiltemp_nrsc, function(st) st[["data"]])
 
         swp_recalculate <- calc50 || any(calcMCS) || any(calcLanh)
-        if (swp_recalculate) {
-          soilLayers_N_NRCS <- dim(soildat)[1]
-
-          if (verbose)
+        if (swp_recalculate && verbose) {
             print(paste0(msg_tag, ": interpolated soil layers for NRCS soil ",
               "regimes because of insufficient soil layers: ",
               "required would be {",
@@ -800,11 +799,8 @@ calc_SMTRs <- function(
                   SMTR[["Lanh_depth"]]))), collapse = ", "),
               "} and available are {",
                 paste(layers_depth, collapse = ", "), "}"))
-        } else {
-          soilLayers_N_NRCS <- soilLayers_N
         }
 
-        ihead <- 1:2
         swp_dy_nrsc <- if (swp_recalculate ||
           opt_SMTR[["aggregate_at"]] == "data") {
             temp <- VWCtoSWP(vwc_dy_nrsc[["val"]][, -ihead, drop = FALSE],
@@ -1001,11 +997,13 @@ calc_SMTRs <- function(
             MCS_Moist_All = {
                 temp <- swp_dy_nrsc[, i_MCS, drop = FALSE] >
                   opt_SMTR[["SWP_dry"]]
-                apply(temp, 1, all)},
+                apply(temp, 1, all)
+              },
             MCS_Dry_All = {
                 temp <- swp_dy_nrsc[, i_MCS, drop = FALSE] <
                   opt_SMTR[["SWP_dry"]]
-                apply(temp, 1, all)}
+                apply(temp, 1, all)
+              }
           )
 
           MCS_CondsDF_yrs <- data.frame(
@@ -1020,7 +1018,7 @@ calc_SMTRs <- function(
           MCS_CondsDF_yrs$COND0 <- if (opt_SMTR[["aggregate_at"]] == "data") {
               all(tapply(temp, st2[["month_ForEachUsedMonth"]], mean) > 0)
             } else {
-              temp <- tapply(temp, st2[["yearno_ForEachUsedMonth"]], all)
+              temp <- tapply(temp > 0, st2[["yearno_ForEachUsedMonth"]], all)
               temp[st_NRCS[["i_yr_used"]]]
             }
 
@@ -1079,7 +1077,7 @@ calc_SMTRs <- function(
           # Consecutive days of dry soil after summer solsitice
           temp <- with(MCS_CondsDF_day[MCS_CondsDF_day$DOY %in% c(172:293), ],
             tapply(MCS_Dry_All, Years, max_duration))
-          ids <- match( MCS_CondsDF_yrs[, "Years"], as.integer(names(temp)),
+          ids <- match(MCS_CondsDF_yrs[, "Years"], as.integer(names(temp)),
             nomatch = 0)
           MCS_CondsDF_yrs[ids > 0, "DryDaysConsecSummer"] <- temp[ids]
           # TRUE = dry less than 45 consecutive days
@@ -1106,7 +1104,7 @@ calc_SMTRs <- function(
           itemp <- MCS_CondsDF_day$DOY %in% c(355:365, 1:111)
           temp <- with(MCS_CondsDF_day[itemp, ],
               tapply(MCS_Moist_All, Years, max_duration))
-          ids <- match( MCS_CondsDF_yrs[, "Years"], as.integer(names(temp)),
+          ids <- match(MCS_CondsDF_yrs[, "Years"], as.integer(names(temp)),
             nomatch = 0)
           MCS_CondsDF_yrs[ids > 0, "MoistDaysConsecWinter"] <- temp[ids]
           # TRUE = moist more than 45 consecutive days
