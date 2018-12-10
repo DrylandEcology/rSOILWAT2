@@ -22,7 +22,10 @@ Thumbs.db
 .cproject
 .project
 .settings/
-
 # R stuff
 .RData
 .Rhistory
+..Rcheck
+# Example code in package build process
+*-Ex.R
+inst/doc
