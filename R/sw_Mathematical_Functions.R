@@ -26,10 +26,10 @@ finite01 <- function(x, val_low_replace = 0, val_high_replace = 1) {
 
 calc.loess_coeff <- function(N, span) {
   # prevent call to loessc.c:ehg182(104):
-  # "span too small.   fewer data values than degrees of freedom"
+  # error msg: "span too small.   fewer data values than degrees of freedom"
   lcoef <- list(span = min(1, span), degree = 2)
   if (span <= 1) {
-    # see R/trunk/src/library/stats/src/loessf.f:ehg136()
+    # see code for: R/trunk/src/library/stats/src/loessf.f:ehg136()
     nf <- floor(lcoef$span * N) - 1
     if (nf > 2) {
       lcoef$degree <- 2

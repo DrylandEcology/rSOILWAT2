@@ -28,18 +28,20 @@ vignette: >
 [rSOILWAT2] can initiate a [SOILWAT2] simulation run in one of two ways:
 
 - Pass all input data through memory as an object of the S4 class `swInputData`:
-    * This is done through the C function `start` which calls `SW_CTL_init_model`
-    which calls `_read_inputs`. The function `_read_inputs` if compiled for `rSOILWAT2`,
-    takes the inputs from the S4 classes if `useFiles` is FALSE.
+    * This is done through the C function `start` which calls 
+      `SW_CTL_init_model` which calls `_read_inputs`. The function 
+      `_read_inputs` if compiled for `rSOILWAT2`, takes the inputs from the 
+      S4 classes if `useFiles` is FALSE.
 
-- Read all input data from disk file -- emulate [SOILWAT2] standalone behavior --
-or just read in such input files for later manipulation:
-    * If the C function `start` is called without input object but with a directory
-    pointing to the input files, then `_read_inputs` will read those disk files --
-    however, this should not happen because:
-    * If the R function `sw_exec` is called without input object -- or if the input
-    object is created previously by a call to the R function `sw_inputDataFromFiles` --,
-    then the C function `onGetInputDataFromFiles` will read the disk files.
+- Read all input data from disk file -- emulate [SOILWAT2] standalone 
+  behavior -- or just read in such input files for later manipulation:
+    * If the C function `start` is called without input object but with a 
+      directory pointing to the input files, then `_read_inputs` will 
+      read those disk files -- however, this should not happen because:
+    * If the R function `sw_exec` is called without input object -- or if 
+      the input object is created previously by a call to the R function 
+      `sw_inputDataFromFiles` --, then the C function `onGetInputDataFromFiles` 
+      will read the disk files.
 
 
 

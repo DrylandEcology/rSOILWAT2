@@ -2,7 +2,7 @@ context("SOILWAT2's Mathematical Functions")
 
 #---TESTS
 test_that("replace_NAs_with_val", {
-  # length 1
+  # tests if length is one
   x0 <- 1
   expect_identical(replace_NAs_with_val(x0, val_replace = NULL), x0)
   expect_identical(replace_NAs_with_val(x0, val_replace = NA), x0)
@@ -14,7 +14,7 @@ test_that("replace_NAs_with_val", {
   temp <- 2
   expect_identical(replace_NAs_with_val(x0, val_replace = temp), temp)
 
-  # length > 1
+  # tests if length is larger than one
   n <- 3
   x0 <- rep(NA, n)
   temp <- rep(NA, n)
@@ -25,7 +25,7 @@ test_that("replace_NAs_with_val", {
 
 
 test_that("cut0Inf", {
-  # length 1
+  # tests if length is one
   x0 <- 1
   temp <- NA_real_
   expect_identical(cut0Inf(x0, val = temp), x0)
@@ -38,7 +38,7 @@ test_that("cut0Inf", {
   temp <- -2
   expect_identical(cut0Inf(x0, val = temp), temp)
 
-  # length > 1
+  # tests if length is larger than one
   n <- 3
   x0 <- rep(-1, n)
   temp <- rep(NA_real_, n)
@@ -53,7 +53,7 @@ test_that("cut0Inf", {
 
 
 test_that("finite01", {
-  # length 1
+  # tests if length is one
   expect_identical(finite01(NA), 0)
   expect_identical(finite01(-1), 0)
   expect_identical(finite01(0 - rSW2_glovars[["tol"]]), 0)
@@ -63,7 +63,7 @@ test_that("finite01", {
   expect_identical(finite01(10), 1)
   expect_identical(finite01(0.5), 0.5)
 
-  # length > 1
+  # tests if length is larger than one
   expect_identical(
     finite01(c(10, 1, NA, -1, NA, 1, 0, 0.5)),
     c(1, 1, 0, 0, 0, 1, 0, 0.5))
@@ -73,7 +73,8 @@ test_that("finite01", {
     c(NA, 1, 0, 0, 0, 1, 0, 0.5))
 
   expect_identical(
-    finite01(c(10, 1, NA, -1, NA, 1, 0, 0.5), val_low_replace = -3, val_high_replace = 2),
+    finite01(c(10, 1, NA, -1, NA, 1, 0, 0.5), val_low_replace = -3,
+      val_high_replace = 2),
     c(2, 1, -3, -3, -3, 1, 0, 0.5))
 })
 
