@@ -45,7 +45,8 @@ test_that("Package code style", {
     files_tolint <- pkg_code_files[ids]
 
     for (k in seq_along(files_tolint)) {
-      badstyle <- lintr::lint(files_tolint[k])
+      # Suppress warnings: "argument is not a function"
+      badstyle <- suppressWarnings(lintr::lint(files_tolint[k]))
       expect_identical(length(badstyle), 0L,
         info = paste0(shQuote(basename(files_tolint[k])), ": ", badstyle))
     }
