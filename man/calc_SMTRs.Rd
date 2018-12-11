@@ -96,7 +96,7 @@ A list with the following elements: \itemize{
 \description{
 Calculations are based on SSS (2014, 2015) and explained in detail in the
 \code{vignette(topic = "SoilMoistureRegimes_SoilTemperatureRegimes",
-package = "rSFSW2")}.
+package = "rSOILWAT2")}.
 }
 \section{Details}{
  The argument \code{aggregate_at} determines at which level

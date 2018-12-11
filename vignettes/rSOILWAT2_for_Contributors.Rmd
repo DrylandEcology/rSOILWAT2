@@ -3,14 +3,14 @@ title: "Background information about rSOILWAT2 for contributors"
 author: "Daniel R Schlaepfer"
 date: "`r Sys.Date()`"
 output:
-  rmarkdown::html_document:
+  rmarkdown::html_vignette:
     toc: true
     toc_depth: 3
-    toc_float: true
+    #toc_float: true
     collapsed: false
     smooth_scroll: false
-    theme: united
-    highlight: tango
+    #theme: united
+    #highlight: tango
     smart: false
 vignette: >
   %\VignetteIndexEntry{rSOILWAT2_contributors}

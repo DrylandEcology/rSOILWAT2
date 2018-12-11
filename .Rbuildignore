@@ -1,4 +1,4 @@
-.git
+\.git*
 CONDUCT.md
 src/SOILWAT2/\.git
 src/SOILWAT2/doc
@@ -16,6 +16,7 @@ src/SOILWAT2/SW_Main\.c
 src/SOILWAT2/SW_Output_mock\.c
 src/*\.o
 src/*\.so
+src/*\.dll
 src/SOILWAT2/*\.o
 src/SOILWAT2/*\.a
 ^\.travis\.yml$

@@ -36,11 +36,12 @@ vignette: >
 ```{r, install, results = "hide"}
   v <- try(utils::packageVersion("rSOILWAT2"), silent = TRUE)
   if (inherits(v, "try-error") || v < "2.5.0") {
-    # Install rSOILWAT2 from github repository
+    # Download rSOILWAT2 package code from github repository
     args <- paste("clone -b feature_fun_from_rSFSW2 --single-branch --recursive",
       "https://github.com/DrylandEcology/rSOILWAT2.git rSOILWAT2")
     system2(command = "git", args = args)
-    tools::Rcmd(args = paste("INSTALL rSOILWAT2 --preclean --clean"))
+    # Install package and build vignettes
+    devtools::install(build_vignettes = TRUE)
   }
 
   stopifnot(require("rSOILWAT2", quietly = TRUE))

@@ -247,7 +247,7 @@ SMR_logic <- function(ACS_COND1, ACS_COND2, ACS_COND3, MCS_COND0,
 #'
 #' Calculations are based on SSS (2014, 2015) and explained in detail in the
 #' \code{vignette(topic = "SoilMoistureRegimes_SoilTemperatureRegimes",
-#' package = "rSFSW2")}.
+#' package = "rSOILWAT2")}.
 #'
 #' @param sim_in An object of class \code{\linkS4class{swInputData}}. The
 #'   \pkg{rSOILWAT2} simulation input.

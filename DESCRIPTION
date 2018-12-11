@@ -33,4 +33,4 @@ RoxygenNote: 6.1.0
 LazyData: true
 ByteCompile: true
 Language: en-US
-VignetteBuilder: knitr, rmarkdown
+VignetteBuilder: knitr
