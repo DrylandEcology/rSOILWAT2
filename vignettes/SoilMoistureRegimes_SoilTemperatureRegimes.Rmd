@@ -1,6 +1,6 @@
 ---
 title: >-
-          How rSFSW2 calculates NCRS soil moisture regimes and soil
+          How rSOILWAT2 calculates NCRS soil moisture regimes and soil
           temperature regimes
 author: | 
   | Daniel R Schlaepfer \textsuperscript{1}, John B Bradford \textsuperscript{2}
@@ -28,13 +28,141 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+\pagebreak
 
+# How to use rSOILWAT2 to calculate SMRs and STRs
+
+## Install a sufficiently recent rSOILWAT2 package version:
+```{r, install, results = "hide"}
+  v <- try(utils::packageVersion("rSOILWAT2"), silent = TRUE)
+  if (inherits(v, "try-error") || v < "2.4.0") {
+    # Install rSOILWAT2 from github repository
+    args <- paste("clone -b feature_fun_from_rSFSW2 --single-branch --recursive",
+      "https://github.com/DrylandEcology/rSOILWAT2.git rSOILWAT2")
+    system2(command = "git", args = args)
+    tools::Rcmd(args = paste("INSTALL rSOILWAT2 --preclean --clean"))
+  }
+
+  stopifnot(require("rSOILWAT2", quietly = TRUE))
+```
+  
+## Load data and run rSOILWAT2 simulation
+```{r, simulate}
+  # Load data for an example site: see ?sw_exampleData
+  sw_in <- rSOILWAT2::sw_exampleData
+  # Run SOILWAT2 for the example site: see ?sw_exec
+  sw_out <- sw_exec(inputData = sw_in)
+```
+
+  
+## Calculate SMRs and STRs and underlying conditions for the example site
+```{r, SMTRs, collapse = TRUE}
+  # For more information, see ?calc_SMTRs
+  SMTR <- calc_SMTRs(sim_in = sw_in, sim_out = sw_out)
+
+  # Check that simulation was successful and regimes could be identified:
+  stopifnot(as.logical(SMTR[c("regimes_done", "has_simulated_SoilTemp",
+    "has_realistic_SoilTemp")]), SMTR[["SMR_normalyears_N"]] > 2)
+
+  # Take average across years and select regimes with more than 90% agreement
+  crit_agree_frac <- 0.9
+  x <- SMTR[["cond_annual"]]
+
+  # --> Soil temperature regime is "Cryic"
+  Tregime <- colMeans(SMTR[["STR"]]) >= crit_agree_frac
+  print(Tregime)
+  
+  # --> Soil moisture regime is "Ustic" / "Typic-Tempustic"
+  Sregime <- colMeans(SMTR[["SMR"]]) >= crit_agree_frac
+  print(Sregime)
+```
+
+
+###  Explore the conditions that define the [cryic](#Cryic) STR:
+```{r, cryic, collapse = TRUE}
+  # The STR of the example site is cryic because:
+  cryic <- 
+    #   - there is no permafrost:
+    SMTR[["permafrost_yrs"]] == 0 &&
+  
+    #   - annual soil temperature at 50-cm depth is between 0 and 8 C:
+    mean(x[, "MAT50"] > 0 & x[, "MAT50"] < 8) >= crit_agree_frac &&
+  
+    #  - soil is not saturated with water during some part of the summer:
+    mean(x[, "CSPartSummer"] == 0) >= crit_agree_frac &&
+  
+    #  - soil does not have an O-horizon:
+    !SMTR[["has_Ohorizon"]] &&
+  
+    #  - summer soil temperature at 50-cm depth is below 15 C:
+    mean(x[, "T50jja"] < 15) >= crit_agree_frac
+  
+  print(cryic)
+```
+
+
+### Explore the conditions that define the [ustic](#ustic) SMR:
+```{r, ustic, collapse = TRUE}
+  # The SMR of the example site is ustic because:
+  ustic <- 
+    #   - there is no permafrost:
+    SMTR[["permafrost_yrs"]] == 0 &&
+
+    #   - moisture control section is not dry for less than 90 cumulative days
+    !(mean(x[, "COND3"]) >= crit_agree_frac) &&
+  
+    #   - annual soil temperature at 50-cm depth is not more than 22 C
+    !(mean(x[, "COND4"]) >= crit_agree_frac) &&
+  
+    #   - soils are not completely dry for more than half the days of the year
+    #     when soil temperature ato 50-cm depth is more than 5 C
+    !(mean(x[, "COND1"]) >= crit_agree_frac) &&
+  
+    #   - soils are not moist for more than 45 consecutive days following 
+    #     the winter soltice
+    !(mean(x[, "COND9"]) >= crit_agree_frac)
+  
+  print(ustic)
+
+  # The SMR of the example site is typic-tempustic because:
+  typic_tempustic <- 
+    #   - SMR is ustic
+    ustic &&
+    
+    #   - soils are not moist for more than 45 consecutive days following 
+    #     the winter soltice
+    !(mean(x[, "COND9"]) >= crit_agree_frac)
+  
+  print(typic_tempustic)
+```
+
+
+### Determine resilience and resistance (RR) categories:
+  
+  Note: cryic/ustic conditions have not been included by 
+  (Chambers et al. 2014)^[\ref{def:Chambers2014}]^ or
+  (Maestas et al. 2016)^[\ref{def:Maestas2016}]^.
+  
+```{r, rr, collapse = TRUE}
+  # Determine resilience & resistance classes (sensu Chambers et al. 2014):
+  clim <- calc_SiteClimate(weatherList = get_WeatherHistory(sw_in))
+  RR <- calc_RRs_Chambers2014(Tregime, Sregime, MAP_mm = 10 * clim[["MAP_cm"]])
+  print(RR)
+
+  # Determine resilience & resistance classes (sensu Maestas et al. 2016):
+  RR <- calc_RRs_Maestas2016(Tregime, Sregime)
+  print(RR)
+```
+
+
+
+\pagebreak
 
 # Notes
-* This vignette explains how rSFSW2 has implemented the calculations of soil 
-  moisture regime (SMR) and soil temperature regime (STR) and compares the 
-  logic with the Java Newhall Simulation Model and with the Keys to Soil 
-  Taxonomy (SSS 2014)^[\ref{def:SSS2014}]^.
+* The rest of the vignette explains how rSOILWAT2 has implemented the 
+  calculations of soil moisture regime (SMR) and soil temperature regime (STR) 
+  and compares the logic with the 'Java Newhall Simulation Model' (jNSM) and 
+  with the 'Keys to Soil Taxonomy' (SSS 2014)^[\ref{def:SSS2014}]^.
 * Quoted text is directly from SSS (2014)^[\ref{def:SSS2014}]^. So direction of 
   a logic may be opposite of a condition, which will be indicated by \! before 
   the condition.
@@ -44,8 +172,8 @@ vignette: >
 
 
 # Definitions of conditions
-Our interpretations from SSS (2014)^[\ref{def:SSS2014}]^ -- language refers to 
-layers, not parts
+Our interpretations of SSS (2014)^[\ref{def:SSS2014}]^ -- language refers to 
+soil layers, not parts
 
 * __Dry__ := soil water potential < -1.5 MPa "the moisture tension is 1500 
   kPa or more" (p. 29, SSS 2014^[\ref{def:SSS2014}]^)
@@ -167,7 +295,7 @@ layers, not parts
 # Soil Moisture Regimes
 
 ## Undefined
-* rSFSW2
+* rSOILWAT2
     * not one of {[perudic](#perudic), [aridic](#aridic), [xeric](#xeric), 
       [ustic](#ustic), [udic](#udic), [anhydrous](#anhydrous)}
 * jNSM (2016)^[\ref{def:jNSM2016}]^ (line 3060)
@@ -178,7 +306,7 @@ layers, not parts
 ## Perudic
 * Regime characteristic of areas where precipitation exceeds evapotranspiration 
   every month
-* rSFSW2
+* rSOILWAT2
     * COND0^[\ref{def:COND0}]^
 * jNSM (2016)^[\ref{def:jNSM2016}]^ (lines 2977ff)
     * perudic: [COND0^[\ref{def:COND0}]^] swt != 0
@@ -194,13 +322,13 @@ layers, not parts
 * Remarks
     * Somewhat unclear if PET or AET should be compared with PPT. 
       "evapotranspiration by plants" sounds like AET, but jNSM uses PET. 
-      rSFSW2 follows jNSM and uses PET.
+      rSOILWAT2 follows jNSM and uses PET.
 
 
 ## Udic
 * Regime characteristic of humid regions with seasonally well distributed 
   precipitation
-* rSFSW2
+* rSOILWAT2
     * COND3^[\ref{def:COND3}]^ & {{\!COND4^[\ref{def:COND4}]^ & COND5^[\ref{def:COND5}]^ & 
       COND6^[\ref{def:COND6}]^} | \!{\!COND4^[\ref{def:COND4}]^ & COND5^[\ref{def:COND5}]^}}
 * jNSM (2016)^[\ref{def:jNSM2016}]^ (lines 3011ff)
@@ -236,7 +364,7 @@ layers, not parts
       summer and winter soil temperatures).
 * Remarks
     * jNSM ignores COND4^[\ref{def:COND4}]^, COND5^[\ref{def:COND5}]^, and COND6^[\ref{def:COND6}]^
-    * rSFSW2 and jNSM ignore "except for short periods, a three- phase system, 
+    * rSOILWAT2 and jNSM ignore "except for short periods, a three- phase system, 
       solid-liquid-gas, in part or all of the soil moisture control section 
       when the soil temperature is above 5 C"
 
@@ -244,7 +372,7 @@ layers, not parts
 ## Ustic
 * Regime characteristic of semiarid climates where moisture is limited but 
   available for portions of the growing season
-* rSFSW2
+* rSOILWAT2
     * \!permafrost & \!COND3^[\ref{def:COND3}]^ &
       ([(COND4^[\ref{def:COND4}]^ | \!COND5^[\ref{def:COND5}]^) & (COND7^[\ref{def:COND7}]^ | 
       COND8^[\ref{def:COND8}]^)] | [(\!(COND4^[\ref{def:COND4}]^ | \!COND5^[\ref{def:COND5}]^) & 
@@ -334,7 +462,7 @@ layers, not parts
 ## Xeric
 * Regime characteristic of a Mediterranean-type climate with cool, moist 
   winters and warm, dry summers
-* rSFSW2
+* rSOILWAT2
     * \!COND6^[\ref{def:COND6}]^ & COND9^[\ref{def:COND9}]^ & \!COND4^[\ref{def:COND4}]^ & COND5^[\ref{def:COND5}]^
 * jNSM (2016)^[\ref{def:jNSM2016}]^ (lines 3000ff)
     * not one of {[perudic](#perudic), [aridic](#aridic)}
@@ -363,7 +491,7 @@ layers, not parts
 ## Aridic
 * Regime characteristic of arid and semiarid climates that are unsuitable for 
   cultivation without irrigation
-* rSFSW2
+* rSOILWAT2
     * COND1^[\ref{def:COND1}]^ & COND2^[\ref{def:COND2}]^
 * jNSM (lines 2988ff)
     * not [perudic](#perudic)
@@ -389,7 +517,7 @@ layers, not parts
 
 ## Anhydrous
 * Very cold and very dry soil conditions
-* rSFSW2
+* rSOILWAT2
     * AnhCOND1^[\ref{def:AnhCOND1}]^ & AnhCOND2^[\ref{def:AnhCOND2}]^ & 
       AnhCOND3^[\ref{def:AnhCOND3}]^
 * jNSM (2016)^[\ref{def:jNSM2016}]^: not considered
@@ -420,7 +548,7 @@ layers, not parts
         * When temperature is < 0 C, soil is loose to just slightly hard 
           (unless there is pedogenic cementation).
 * Remarks
-    * rSFSW2 ignores "Includes no ice-impregnated permafrost" and "Has a 
+    * rSOILWAT2 ignores "Includes no ice-impregnated permafrost" and "Has a 
       rupture-resistance class of loose to slightly hard throughout when the 
       soil temperature is 0 C or colder, except where a cemented pedogenic 
       horizon occurs."
@@ -439,7 +567,7 @@ lithic, or paralithic contact, whichever is shallower", which is applicable to
 * Permanently frozen layers
 * "Permafrost may be impregnated by ice or, in the case of insufficient 
   interstitial water, may be dry." (SSS 2014^[\ref{def:SSS2014}]^)
-* rSFSW2
+* rSOILWAT2
     * stCOND0^[\ref{def:stCOND0}]^
 * jNSM (2016)^[\ref{def:jNSM2016}]^: not considered
 * Characteristics (p. 28 in SSS 2014^[\ref{def:SSS2014}]^)
@@ -459,7 +587,7 @@ lithic, or paralithic contact, whichever is shallower", which is applicable to
 * "The gelic soil temperature regime has not been documented in soils of the 
   continental U.S. but occurs in the soils of Alaska." 
   (SSS 2015^[\ref{def:SSS2015}]^)
-* rSFSW2
+* rSOILWAT2
     * stCOND1^[\ref{def:stCOND1}]^ | stCOND0^[\ref{def:stCOND0}]^
 * jNSM (2016)^[\ref{def:jNSM2016}]^: calls this regime "pergelic"
     + [stCOND1^[\ref{def:stCOND1}]^] tma < 0
@@ -474,7 +602,7 @@ lithic, or paralithic contact, whichever is shallower", which is applicable to
 * Cryic soils are cold but have no permafrost and they are cold also during 
   summer.
 * "Too cold for virtually all crops" (SSS 2015^[\ref{def:SSS2015}]^)
-* rSFSW2
+* rSOILWAT2
     + \!stCOND0^[\ref{def:stCOND0}]^ & \!stCOND1^[\ref{def:stCOND1}]^ & 
       stCOND2^[\ref{def:stCOND2}]^ & (\![stCOND5^[\ref{def:stCOND5}]^ &
       {\!O-horizon^[\ref{def:Ohorizon}]^ & stCOND8^[\ref{def:stCOND8}]^} |
@@ -537,14 +665,14 @@ lithic, or paralithic contact, whichever is shallower", which is applicable to
       "no O-horizon^[\ref{def:Ohorizon}]^", when testing for the 
       [cryic](#Cryic) 
       regime with [stCOND8^[\ref{def:stCOND8}]^].
-    * rSFSW2 ignores "organic soils^[\ref{def:OSM}]^", but consideres the 
+    * rSOILWAT2 ignores "organic soils^[\ref{def:OSM}]^", but considers the 
       presence of O-horizons^[\ref{def:Ohorizon}]^.
 
 
 ## Frigid
 * "Too cold for all but cold weather crops, such as wheat, oats, or
 barley" (SSS 2015^[\ref{def:SSS2015}]^)
-* rSFSW2
+* rSOILWAT2
     * \!stCOND0^[\ref{def:stCOND0}]^ & \!stCOND1^[\ref{def:stCOND1}]^ & stCOND2^[\ref{def:stCOND2}]^ & 
       \![cryic](#cryic)
 * jNSM (2016)^[\ref{def:jNSM2016}]^:
@@ -563,7 +691,7 @@ barley" (SSS 2015^[\ref{def:SSS2015}]^)
 
 ## Mesic
 * "Suited to crops such as corn, wheat, and soybeans" (SSS 2015^[\ref{def:SSS2015}]^)
-* rSFSW2
+* rSOILWAT2
     * \!stCOND2^[\ref{def:stCOND2}]^ & stCOND3^[\ref{def:stCOND3}]^
 * jNSM (2016)^[\ref{def:jNSM2016}]^:
     + [\!stCOND2^[\ref{def:stCOND2}]^] tma >= 8 && [stCOND3^[\ref{def:stCOND3}]^] tma < 15
@@ -576,7 +704,7 @@ barley" (SSS 2015^[\ref{def:SSS2015}]^)
 
 ## Thermic
 * "Suited to warm weather crops such as cotton" (SSS 2015^[\ref{def:SSS2015}]^)
-* rSFSW2
+* rSOILWAT2
     * \!stCOND3^[\ref{def:stCOND3}]^ & stCOND4^[\ref{def:stCOND4}]^
 * jNSM (2016)^[\ref{def:jNSM2016}]^:
     + [\!stCOND3^[\ref{def:stCOND3}]^] tma >= 15 && [stCOND4^[\ref{def:stCOND4}]^] tma < 22
@@ -589,7 +717,7 @@ barley" (SSS 2015^[\ref{def:SSS2015}]^)
 
 ## Hyperthermic
 * "Suited to citrus and other freeze-intolerant crops" (SSS 2015^[\ref{def:SSS2015}]^)
-* rSFSW2
+* rSOILWAT2
     * \!stCOND4^[\ref{def:stCOND4}]^
 * jNSM (2016)^[\ref{def:jNSM2016}]^:
     + [\!stCOND4^[\ref{def:stCOND4}]^] tma >= 22
@@ -661,7 +789,7 @@ Code interpretation based on 'BASICSimulationModel.java' and
         * jNSM is using the old limit of 5 C instead of the new limit of 6 C
         * "in 1999 the Iso- definitions were refined from < 5 degrees C to 
           < 6 degrees C" [slide 3 of ' jNSM_Background_Use_Tutorial.pptx']
-        * rSFSW2 is using new limit of 6 C
+        * rSOILWAT2 is using new limit of 6 C
 
 
 ## jNSM inputs
@@ -676,6 +804,19 @@ Code interpretation based on 'BASICSimulationModel.java' and
 
 
 # References
+\label{def:Chambers2014} Chambers, J. C., D. A. Pyke, J. D. Maestas, M. Pellant,
+  C. S. Boyd, S. B. Campbell, S. Espinosa, D. W. Havlina, K. E. Mayer, and
+  A. Wuenschel. 2014. Using Resistance and Resilience Concepts to Reduce
+  Impacts of Invasive Annual Grasses and Altered Fire Regimes on the
+  Sagebrush Ecosystem and Greater Sage-Grouse: A Strategic Multi-Scale
+  Approach. Gen. Tech. Rep. RMRS-GTR-326. U.S. Department of Agriculture,
+  Forest Service, Rocky Mountain Research Station, Fort Collins, CO.
+
+\label{def:Maestas2016} Maestas, J.D., Campbell, S.B., Chambers, J.C., 
+  Pellant, M. & Miller, R.F. (2016). Tapping Soil Survey Information for 
+  Rapid Assessment of Sagebrush Ecosystem Resilience and Resistance. 
+  Rangelands, 38, 120-128.
+
 \label{def:SSS2014} Soil Survey Staff (2014). Keys to soil taxonomy, 
   12th ed. USDA Natural Resources Conservation Service, Washington, DC.
   
