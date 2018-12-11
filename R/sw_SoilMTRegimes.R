@@ -370,6 +370,9 @@ calc_SMTRs <- function(
     soil_TOC <- rep(0, NROW(soildat))
   }
   soildat <- cbind(soildat[, req_soilvars, drop = FALSE], soil_TOC = soil_TOC)
+  if (verbose) {
+    layers_depth_old <- soildat[, "depth_cm"]
+  }
 
   if (is.null(sim_agg)) {
     # we need simulation output object instead
@@ -630,7 +633,7 @@ calc_SMTRs <- function(
         temp <- dim(vwc_dy_nrsc[["val"]])[1]
         st_NRCS <- c(st_NRCS, list(
           index_usedy = seq_len(temp),
-          month_ForMonth = SFSW2_glovars[["st_mo"]],
+          month_ForMonth = rSW2_glovars[["st_mo"]],
           yearno_ForMonth = rep(1, 12),
           doy_ForDay = seq_len(temp)
         ))
@@ -639,7 +642,7 @@ calc_SMTRs <- function(
           yr_used = 1,
           N_yr_used = 1,
           i_yr_used = 1,
-          i_mo_used = SFSW2_glovars[["st_mo"]],
+          i_mo_used = rSW2_glovars[["st_mo"]],
           i_dy_used = rep(TRUE, temp),
           N_dy_used = temp,
           days_per_yr_used = temp))
@@ -799,7 +802,7 @@ calc_SMTRs <- function(
                 paste(sort(unique(c(SMTR[["Fifty_depth"]], SMTR[["MCS_depth"]],
                   SMTR[["Lanh_depth"]]))), collapse = ", "),
               "} and available are {",
-                paste(layers_depth, collapse = ", "), "}"))
+                paste(layers_depth_old, collapse = ", "), "}"))
         }
 
         swp_dy_nrsc <- if (swp_recalculate ||
