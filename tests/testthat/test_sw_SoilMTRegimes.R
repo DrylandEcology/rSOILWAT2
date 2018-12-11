@@ -8,9 +8,12 @@ tests <- unique(temp)
 
 test_that("Test data availability", expect_gt(length(tests), 0))
 
-STR_tests <- c(Ex1 = "Cryic", Ex2 = "Gelic", Ex3 = "Cryic", Ex4 = "Cryic")
-SMR_tests <- c(Ex1 = "Perudic", Ex2 = "Perudic", Ex3 = "Perudic",
-  Ex4 = "Perudic")
+STR_tests <- list(Ex1 = "Cryic", Ex2 = "Gelic", Ex3 = "Cryic", Ex4 = "Cryic")
+SMR_tests <- list(
+  Ex1 = c("Ustic", "Typic-Tempustic"),
+  Ex2 = NULL,
+  Ex3 = c("Ustic", "Typic-Tempustic"),
+  Ex4 = c("Ustic", "Typic-Tempustic"))
 
 #---TESTS
 
@@ -32,7 +35,9 @@ test_that("SMTR", {
     expect_true(all(colnames(SMTR[["STR"]]) %in% STR_names()))
     expect_true(all(colnames(SMTR[["SMR"]]) %in% c(SMR_names(), SMRq_names())))
 
-    expect_equivalent(SMTR[["STR"]][, STR_tests[it]], 1)
-    expect_equivalent(SMTR[["SMR"]][, SMR_tests[it]], 1)
+    expect_equivalent(SMTR[["STR"]][, STR_tests[[it]]],
+      rep(1, length(STR_tests[[it]])))
+    expect_equivalent(SMTR[["SMR"]][, SMR_tests[[it]]],
+      rep(1, length(SMR_tests[[it]])))
   }
 })
