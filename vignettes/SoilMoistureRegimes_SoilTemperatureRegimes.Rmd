@@ -35,7 +35,7 @@ vignette: >
 ## Install a sufficiently recent rSOILWAT2 package version:
 ```{r, install, results = "hide"}
   v <- try(utils::packageVersion("rSOILWAT2"), silent = TRUE)
-  if (inherits(v, "try-error") || v < "2.4.0") {
+  if (inherits(v, "try-error") || v < "2.5.0") {
     # Install rSOILWAT2 from github repository
     args <- paste("clone -b feature_fun_from_rSFSW2 --single-branch --recursive",
       "https://github.com/DrylandEcology/rSOILWAT2.git rSOILWAT2")
