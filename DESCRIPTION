@@ -22,6 +22,7 @@ Suggests:
   digest (>= 0.6.12),
   knitr,
   rmarkdown,
+  bookdown,
   testthat,
   covr
 NeedsCompilation: yes
