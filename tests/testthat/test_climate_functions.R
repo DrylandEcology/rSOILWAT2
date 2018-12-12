@@ -15,7 +15,8 @@ temp <- c("Month7th_NSadj_MinTemp_C",
   "LengthFreezeFreeGrowingPeriod_NSadj_Days", "DegreeDaysAbove65F_NSadj_DaysC")
 names_sw_dailyC4_TempVar <- c(temp, paste0(temp, ".sd"))
 
-temp <- c("Month7th_PPT_mm", "MeanTemp_ofDriestQuarter_C")
+temp <- c("Month7th_PPT_mm", "MeanTemp_ofDriestQuarter_C",
+  "MinTemp_of2ndMonth_C")
 names_sw_Cheatgrass_ClimVar <- c(temp, paste0(temp, "_SD"))
 
 

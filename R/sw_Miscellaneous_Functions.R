@@ -58,37 +58,57 @@ window <- function(x, n = 3, win_fun = sum) {
 #' @param monthlyPPT_cm A numeric matrix of monthly precipitation values in
 #'   centimeter. There are 12 rows, one for each month of the year;
 #'   and there is one column for each year.
-#' @param monthlyTempMean A numeric matrix of monthly mean temperature values in
-#'   degree Celsius There are 12 rows, one for each month of the year;
+#' @param monthlyTempMean_C A numeric matrix of monthly mean temperature values
+#'   in degree Celsius. There are 12 rows, one for each month of the year;
 #'   and there is one column for each year.
+#' @param monthlyTempMin_C A numeric matrix of monthly minimum temperature
+#'   value sin degree Celsius. There are 12 rows, one for each month of the
+#'   year; and there is one column for each year.
 #'
-#' @return A named numeric vector of length 4 with mean and standard deviation
-#'   for \var{Month7th_PPT_mm} and \var{MeanTemp_ofDriestQuarter_C}.
+#' @return A named numeric vector of length 6 with mean and standard deviation
+#'   for \var{Month7th_PPT_mm}, \var{MeanTemp_ofDriestQuarter_C}, and
+#'   \var{MinTemp_of2ndMonth_C}.
 #'
 #' @references Brummer, T. J., K. T. Taylor, J. Rotella, B. D. Maxwell,
 #'   L. J. Rew, and M. Lavin. 2016. Drivers of Bromus tectorum Abundance in
 #'   the Western North American Sagebrush Steppe. Ecosystems 19:986-1000.
 #'
 #' @export
-sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm, monthlyTempMean) {
+sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
+  monthlyTempMean_C = NULL, monthlyTempMin_C = NULL) {
 
   # Mean precipitation sum of seventh month of the season (i.e.,
   # July in northern hemisphere)
   Month7th_PPT_mm <- 10 * monthlyPPT_cm[7, ]
+  nyrs <- seq_along(Month7th_PPT_mm)
 
   # Mean temperature of driest quarter (Bioclim variable 9)
   # see \code{link[dismo]{biovars}}
-  wet <- t(apply(monthlyPPT_cm, 2, window))
-  tmp <- t(apply(monthlyTempMean, 2, window, win_fun = mean))
-  dryqrt <- cbind(seq_len(ncol(monthlyPPT_cm)),
-    as.integer(apply(wet, 1, which.min)))
-  MeanTemp_ofDriestQuarter_C <- tmp[dryqrt]
+  if (!is.null(monthlyTempMean_C)) {
+    wet <- t(apply(monthlyPPT_cm, 2, window))
+    tmp <- t(apply(monthlyTempMean_C, 2, window, win_fun = mean))
+    dryqrt <- cbind(seq_len(ncol(monthlyPPT_cm)),
+      as.integer(apply(wet, 1, which.min)))
+    MeanTemp_ofDriestQuarter_C <- tmp[dryqrt]
+  } else {
+    MeanTemp_ofDriestQuarter_C <- rep(NA, length(Month7th_PPT_mm))
+  }
 
-  nyrs <- seq_along(Month7th_PPT_mm)
-  temp <- cbind(Month7th_PPT_mm[nyrs], MeanTemp_ofDriestQuarter_C[nyrs])
+  # Minimum February temperature
+  if (!is.null(monthlyTempMin_C)) {
+    MinTemp_of2ndMonth_C <- monthlyTempMin_C[2, , ]
+  } else {
+    MinTemp_of2ndMonth_C <- rep(NA, length(Month7th_PPT_mm))
+  }
+
+
+  # Aggregate
+  temp <- cbind(Month7th_PPT_mm[nyrs], MeanTemp_ofDriestQuarter_C[nyrs],
+    MinTemp_of2ndMonth_C[nyrs])
 
   res <- c(apply(temp, 2, mean), apply(temp, 2, stats::sd))
-  temp <- c("Month7th_PPT_mm", "MeanTemp_ofDriestQuarter_C")
+  temp <- c("Month7th_PPT_mm", "MeanTemp_ofDriestQuarter_C",
+    "MinTemp_of2ndMonth_C")
   names(res) <- c(temp, paste0(temp, "_SD"))
 
   res
@@ -235,7 +255,8 @@ calc_SiteClimate <- function(weatherList, year.start = NA, year.end = NA,
     # If cheatgrass-variables are requested
     Cheatgrass_ClimVars = if (do_Cheatgrass_ClimVars) {
       sw_Cheatgrass_ClimVar(monthlyPPT_cm = mon_PPT,
-        monthlyTempMean = mon_Temp[, , 1, drop = FALSE])
+        monthlyTempMean_C = mon_Temp[, , 1, drop = FALSE],
+        monthlyTempMin_C = mon_Temp[, , 2, drop = FALSE])
     } else NA
   )
 }

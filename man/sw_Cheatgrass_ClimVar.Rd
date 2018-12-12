@@ -5,20 +5,26 @@
 \title{Calculate climate variables required to estimate percent cheatgrass cover
 in North America}
 \usage{
-sw_Cheatgrass_ClimVar(monthlyPPT_cm, monthlyTempMean)
+sw_Cheatgrass_ClimVar(monthlyPPT_cm, monthlyTempMean_C = NULL,
+  monthlyTempMin_C = NULL)
 }
 \arguments{
 \item{monthlyPPT_cm}{A numeric matrix of monthly precipitation values in
 centimeter. There are 12 rows, one for each month of the year;
 and there is one column for each year.}
 
-\item{monthlyTempMean}{A numeric matrix of monthly mean temperature values in
-degree Celsius There are 12 rows, one for each month of the year;
+\item{monthlyTempMean_C}{A numeric matrix of monthly mean temperature values
+in degree Celsius. There are 12 rows, one for each month of the year;
 and there is one column for each year.}
+
+\item{monthlyTempMin_C}{A numeric matrix of monthly minimum temperature
+value sin degree Celsius. There are 12 rows, one for each month of the
+year; and there is one column for each year.}
 }
 \value{
-A named numeric vector of length 4 with mean and standard deviation
-  for \var{Month7th_PPT_mm} and \var{MeanTemp_ofDriestQuarter_C}.
+A named numeric vector of length 6 with mean and standard deviation
+  for \var{Month7th_PPT_mm}, \var{MeanTemp_ofDriestQuarter_C}, and
+  \var{MinTemp_of2ndMonth_C}.
 }
 \description{
 Calculate climate variables required to estimate percent cheatgrass cover

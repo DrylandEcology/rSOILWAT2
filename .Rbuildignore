@@ -1,3 +1,5 @@
+^Meta$
+^doc$
 \.git*
 CONDUCT.md
 src/SOILWAT2/\.git
