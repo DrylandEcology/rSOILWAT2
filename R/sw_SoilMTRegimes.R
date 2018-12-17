@@ -433,9 +433,9 @@ calc_SMTRs <- function(
 
   icols0 <- c("MATLanh", "MAT50", "T50jja", "T50djf",
     "CSPartSummer", "meanTair_Tsoil50_offset_C")
-  icols1 <- c("COND1", "COND2", "COND3", "HalfDryDaysCumAbove0C",
-    "SoilAbove0C")
-  icols2 <- c("T50_at0C", "Lanh_Dry_Half", "COND3_Test")
+  icols1a <- c("ACS_COND1", "ACS_COND2", "ACS_COND3")
+  icols1 <- c(icols1a, "ACS_HalfDryDaysCumAbove0C", "ACS_SoilAbove0C")
+  icols2 <- c("T50_at0C", "Lanh_Dry_Half", "ACS_COND3_Test")
   icols3 <- c("COND0",
     "DryDaysCumAbove5C", "SoilAbove5C", "COND1",
     "MaxContDaysAnyMoistCumAbove8", "COND2", "COND2_1", "COND2_2",
@@ -961,35 +961,33 @@ calc_SMTRs <- function(
           )
 
           # Mean Annual soil temperature is less than or equal to 0C
-          ACS_CondsDF_yrs$COND1 <- ACS_CondsDF_yrs$MAT50 <= 0
+          ACS_CondsDF_yrs$ACS_COND1 <- ACS_CondsDF_yrs$MAT50 <= 0
           # Soil temperature in the Lahn Depth is never greater than 5
-          ACS_CondsDF_day$COND2_Test <- apply(
+          ACS_CondsDF_day$ACS_COND2_Test <- apply(
             soiltemp_nrsc[["dy"]][, 1 + i_Lanh, drop = FALSE], 1,
             function(st) all(st < 5))
-          ACS_CondsDF_yrs$COND2 <- with(ACS_CondsDF_day,
-            tapply(COND2_Test, Years, all))
+          ACS_CondsDF_yrs$ACS_COND2 <- with(ACS_CondsDF_day,
+            tapply(ACS_COND2_Test, Years, all))
           # In the Lahn Depth, 1/2 of soil dry > 1/2 CUMULATIVE days when
           # Mean Annual ST > 0C
-          ACS_CondsDF_day$COND3_Test <- with(ACS_CondsDF_day,
+          ACS_CondsDF_day$ACS_COND3_Test <- with(ACS_CondsDF_day,
             Lanh_Dry_Half == T50_at0C)
-          ACS_CondsDF_yrs$HalfDryDaysCumAbove0C <- with(ACS_CondsDF_day,
-            tapply(COND3_Test, Years, sum))
-          ACS_CondsDF_yrs$SoilAbove0C <- with(ACS_CondsDF_day,
+          ACS_CondsDF_yrs$ACS_HalfDryDaysCumAbove0C <- with(ACS_CondsDF_day,
+            tapply(ACS_COND3_Test, Years, sum))
+          ACS_CondsDF_yrs$ACS_SoilAbove0C <- with(ACS_CondsDF_day,
             tapply(T50_at0C, Years, sum))
           # TRUE = Half of soil layers are dry greater than half the days
           #   where MAST > 0 C
-          ACS_CondsDF_yrs$COND3 <- with(ACS_CondsDF_yrs,
-            HalfDryDaysCumAbove0C > .5 * SoilAbove0C)
+          ACS_CondsDF_yrs$ACS_COND3 <- with(ACS_CondsDF_yrs,
+            ACS_HalfDryDaysCumAbove0C > .5 * ACS_SoilAbove0C)
 
-          icol <- c("COND1", "COND2", "COND3")
-          icol_new <- paste0("ACS_", icol)
-          ACS_CondsDF3 <- as.matrix(ACS_CondsDF_yrs[, icol, drop = FALSE])
+          ACS_CondsDF3 <- as.matrix(ACS_CondsDF_yrs[, icols1a, drop = FALSE])
           if (opt_SMTR[["aggregate_at"]] == "conditions") {
             temp <- matrix(colSums(ACS_CondsDF3, na.rm = TRUE), nrow = 1,
-              ncol = length(icol), dimnames = list(NULL, icol_new))
+              ncol = length(icols1a), dimnames = list(NULL, icols1a))
             ACS_CondsDF3 <- temp >= crit_agree
           } else {
-            dimnames(ACS_CondsDF3)[[2]] <- icol_new
+            dimnames(ACS_CondsDF3)[[2]] <- icols1a
           }
 
           #--- Structures used for MCS delineation
