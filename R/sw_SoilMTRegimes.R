@@ -495,10 +495,10 @@ calc_SMTRs <- function(
           slot(slot(sim_out, rSW2_glovars[["swof"]]["sw_vwcmatric"]), "Day"))
       }
       if (!exists("swpmatric.dy.all", where = sim_agg)) {
-        sim_agg[["swpmatric.dy.all"]] <- cbind(
+        sim_agg[["swpmatric.dy.all"]] <- list(val = cbind(
           sim_agg[["vwcmatric.dy.all"]][["val"]][, ihead],
           VWCtoSWP(sim_agg[["vwcmatric.dy.all"]][["val"]][, -ihead],
-            sand = soildat[, "sand_frac"], clay = soildat[, "clay_frac"]))
+            sand = soildat[, "sand_frac"], clay = soildat[, "clay_frac"])))
       }
 
       if (!exists("prcp.yr", where = sim_agg)) {
@@ -811,7 +811,7 @@ calc_SMTRs <- function(
               sand = soildat[, "sand_frac"], clay = soildat[, "clay_frac"])
             temp[st_NRCS[["index_usedy"]], , drop = FALSE]
           } else {
-            sim_agg[["swpmatric.dy.all"]][
+            sim_agg[["swpmatric.dy.all"]][["val"]][
               st_NRCS[["index_usedy"]], -ihead, drop = FALSE]
           }
 
