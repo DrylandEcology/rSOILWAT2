@@ -122,6 +122,10 @@ setValidity("swSite", function(object) {
     msg <- "@TranspirationRegions columns != 2."
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
+  if (typeof(object@TranspirationRegions) != "integer") {
+    msg <- "@TranspirationRegions must be integers."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
 
   val
 })
@@ -141,7 +145,7 @@ setMethod(f = "initialize", signature = "swSite", function(.Object, ...) {
     def@IntrinsicSiteParams[c("Latitude", "Altitude")] <- NA_real_
   }
   if (!("TranspirationRegions" %in% dns)) {
-    def@TranspirationRegions[, "layer"] <- NA_real_
+    def@TranspirationRegions[, "layer"] <- NA_integer_
   } else {
     # Guarantee dimnames
     dimnames(dots[["TranspirationRegions"]]) <-
@@ -325,7 +329,8 @@ setReplaceMethod("swSite_SoilTemperatureConsts", signature = "swSite",
 setReplaceMethod("swSite_TranspirationRegions", signature = "swSite",
   definition = function(object, value) {
     colnames(value) <- colnames(object@TranspirationRegions)
-    object@TranspirationRegions <- value
+    object@TranspirationRegions <- array(as.integer(value), dim = dim(value),
+      dimnames = dimnames(value))
     validObject(object)
     object
 })
