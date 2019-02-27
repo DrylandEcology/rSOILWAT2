@@ -2,10 +2,9 @@
 
 #--- rSOILWAT2: use development version
 library("methods")  # in case this code is run via 'Rscript'
-library("devtools")
 
-devtools::clean_dll()
-devtools::load_all()
+pkgbuild::clean_dll()
+pkgload::load_all()
 
 
 #--- INPUTS
@@ -104,7 +103,7 @@ for (it in seq_along(tests)) {
 #--- USE DEFAULT EXTDATA EXAMPLE AS PACKAGE DATA
 sw_exampleData <- sw_inputDataFromFiles(file.path(dir_in, examples[1]),
   files.in = "files.in")
-devtools::use_data(sw_exampleData, internal = FALSE, overwrite = TRUE)
+usethis::use_data(sw_exampleData, internal = FALSE, overwrite = TRUE)
 
 
 #-----------------------
