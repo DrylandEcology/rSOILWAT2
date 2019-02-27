@@ -1,11 +1,18 @@
 context("Site parameters class")
 
+temp <- list.files(".", pattern = "Ex")
+temp <- sapply(strsplit(temp, "_"), function(x) x[[1]])
+tests <- unique(temp)
+
+test_that("Test data availability", expect_gt(length(tests), 0))
+
+
 #---TESTS
 test_that("Manipulate 'swSite' class", {
   x <- new("swSite")
   expect_s4_class(x, "swSite")
 
-  # Tests for the 'swSite' slot of signature 'swInputData'
+  #--- Tests for the 'swSite' slot of signature 'swInputData'
   xinput <- xinput2 <- new("swInputData")
   expect_s4_class(get_swSite(xinput), "swSite")
 
@@ -15,7 +22,7 @@ test_that("Manipulate 'swSite' class", {
   set_swSite(xinput2) <- site1
   expect_equal(xinput, xinput2)
 
-  # Slot 'ModelCoefficients'
+  #--- Slot 'ModelCoefficients'
   expect_equal(swSite_ModelCoefficients(xinput),
     swSite_ModelCoefficients(get_swSite(xinput)))
 
@@ -57,4 +64,40 @@ test_that("Manipulate 'swSite' class", {
   mc["DailyRunon"] <- -1
   expect_error(swSite_ModelCoefficients(site1) <- mc)
   expect_error(swSite_ModelCoefficients(xinput2) <- mc)
+
+  #--- Slot TranspirationRegions
+  expect_equal(swSite_TranspirationRegions(xinput),
+    swSite_TranspirationRegions(get_swSite(xinput)))
+
+  mc <- mc_ok <- swSite_TranspirationRegions(xinput2)
+  expect_equal(swSite_TranspirationRegions(xinput2), mc)
+
+  mc[, "layer"] <- seq_len(nrow(mc))
+  swSite_TranspirationRegions(xinput) <- mc
+  expect_equal(swSite_TranspirationRegions(xinput), mc)
+})
+
+
+test_that("Run 'rSOILWAT2' with different 'swSite' inputs", {
+  it <- tests[1]
+
+  #---INPUTS
+  sw_input <- readRDS(paste0(it, "_input.rds"))
+  sw_weather <- readRDS(paste0(it, "_weather.rds"))
+
+  # Set transpiration regions to numeric/integer layer values
+  types <- c("as.double", "as.integer")
+
+  for (ftype in types) {
+    # Set type of transpiration regions
+    mc <- mc_ok <- swSite_TranspirationRegions(sw_input)
+    mc <- array(match.fun(ftype)(mc), dim = dim(mc), dimnames = dimnames(mc))
+    swSite_TranspirationRegions(sw_input) <- mc
+
+    # Run SOILWAT
+    expect_s4_class(
+      sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE,
+        quiet = TRUE),
+      "swOutput")
+  }
 })
