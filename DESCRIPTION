@@ -24,6 +24,7 @@ Suggests:
   rmarkdown,
   bookdown,
   testthat,
+  lintr (>= 1.0.3.9000)
   covr
 NeedsCompilation: yes
 License: GPL-3 + file LICENSE
