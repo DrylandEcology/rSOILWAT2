@@ -102,15 +102,15 @@ swMarkov_validity <- function(object) {
   val <- TRUE
 
   temp <- dim(object@Prob)
-  if (isFALSE(all.equal(temp, c(0, 0))) &&
-      isFALSE(all.equal(temp, c(366, 5)))) {
+  if (!isTRUE(all.equal(temp, c(0, 0))) &&
+      !isTRUE(all.equal(temp, c(366, 5)))) {
     msg <- paste("@Prob must be a 0x0 or a 366x5 matrix.")
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
   temp <- dim(object@Conv)
-  if (isFALSE(all.equal(temp, c(0, 0))) &&
-      isFALSE(all.equal(temp, c(53, 7)))) {
+  if (!isTRUE(all.equal(temp, c(0, 0))) &&
+      !isTRUE(all.equal(temp, c(53, 7)))) {
       msg <- paste("@Conv must be a 0x0 or a 53x7 matrix.")
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
