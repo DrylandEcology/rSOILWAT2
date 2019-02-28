@@ -185,7 +185,7 @@ for (it in tests) {
 
       #--- Water balance checks
       # (1) \code{AET <= PET}
-      expect_true(aet < pet || all.equal(aet, pet), info = info2)
+      expect_true(all(aet < pet | abs(pet - aet) < tol), info = info2)
 
       # (2) \code{AET == E(total) + T(total)}
       expect_equal(aet, Etotal + Ttotal, info = info2)
