@@ -266,7 +266,7 @@ SEXP onGet_SW_SIT() {
 
 	SEXP TranspirationRegions, TranspirationRegions_names, TranspirationRegions_names_y;
 	char *cTranspirationRegions[] = { "ndx", "layer" };
-	int *p_transp;
+	int *p_transp; // ideally `LyrIndex` so that same type as `_TranspRgnBounds`, but R API INTEGER() is signed
 
 	MyFileName = SW_F_name(eSite);
 
@@ -409,7 +409,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	SEXP SoilTemperatureConstants_use;
 	SEXP SoilTemperatureConstants;
 	SEXP TranspirationRegions;
-	int *p_transp;
+	int *p_transp; // ideally `LyrIndex` so that same type as `_TranspRgnBounds`, but R API INTEGER() is signed
 
   #ifdef RSWDEBUG
   int debug = 0;
@@ -518,7 +518,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 		too_many_regions = TRUE;
 	} else {
 		for (i = 0; i < v->n_transp_rgn; i++) {
-			_TranspRgnBounds[(int)(p_transp[i + v->n_transp_rgn * 0]-1)] = (p_transp[i + v->n_transp_rgn * 1]-1);
+			_TranspRgnBounds[p_transp[i + v->n_transp_rgn * 0] - 1] = p_transp[i + v->n_transp_rgn * 1] - 1;
 		}
 	}
 	if (too_many_regions) {

@@ -126,6 +126,10 @@ setValidity("swSite", function(object) {
     msg <- "@TranspirationRegions columns != 2."
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
+  if (typeof(object@TranspirationRegions) != "integer") {
+    msg <- "@TranspirationRegions must be integers."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
 
   val
 })
@@ -339,7 +343,8 @@ setReplaceMethod("swSite_TranspirationRegions", signature = "swSite",
       # otherwise, we copy non-integer values which will trigger `validObject`
     }
     colnames(value) <- colnames(object@TranspirationRegions)
-    object@TranspirationRegions <- value
+    object@TranspirationRegions <- array(as.integer(value), dim = dim(value),
+      dimnames = dimnames(value))
     validObject(object)
     object
 })
