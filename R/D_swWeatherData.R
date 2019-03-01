@@ -56,8 +56,8 @@ setClass("swWeatherData", slots = c(data = "matrix", year = "integer"))
 swWeatherData_validity <- function(object) {
   val <- TRUE
 
-  if (!(length(object@year) == 1 && is.finite(object@year) &&
-      object@year >= 0)) {
+  if (!(length(object@year) == 1 && isTRUE(is.finite(object@year)) &&
+      isTRUE(object@year >= 0))) {
     msg <- "@year must be exactly one positive finite value."
     val <- if (isTRUE(val)) msg else c(val, msg)
   }

@@ -262,7 +262,7 @@ dbW_getIDs <- function(site_id = NULL, site_label = NULL, long = NULL,
   res <- list(site_id = site_id, scenario_id = scenario_id)
 
   has_siteID <- is.numeric(res[["site_id"]]) &&
-    dbW_has_siteIDs(res[["site_id"]])
+    all(dbW_has_siteIDs(res[["site_id"]]))
 
   if (!has_siteID) {
     res[["site_id"]] <- dbW_getSiteId(Labels = site_label,
@@ -281,7 +281,7 @@ dbW_getIDs <- function(site_id = NULL, site_label = NULL, long = NULL,
 
         } else FALSE
 
-      if (!inherits(temp, "try-error") && temp) {
+      if (!inherits(temp, "try-error") && isTRUE(temp)) {
         res[["site_id"]] <- dbW_getSiteId(Labels = site_label,
           lat = lat, long = long, ignore.case = ignore.case, verbose = verbose)
       }
@@ -289,7 +289,7 @@ dbW_getIDs <- function(site_id = NULL, site_label = NULL, long = NULL,
   }
 
   has_scenID <- is.numeric(res[["scenario_id"]]) &&
-    dbW_has_scenarioIDs(res[["scenario_id"]])
+    all(dbW_has_scenarioIDs(res[["scenario_id"]]))
 
   if (!has_scenID) {
     res[["scenario_id"]] <- dbW_getScenarioId(Scenario = scenario,
@@ -303,7 +303,7 @@ dbW_getIDs <- function(site_id = NULL, site_label = NULL, long = NULL,
             ignore.case = ignore.case), silent = TRUE)
         } else FALSE
 
-      if (!inherits(temp, "try-error") && temp) {
+      if (!inherits(temp, "try-error") && isTRUE(temp)) {
         res[["scenario_id"]] <- dbW_getScenarioId(Scenario = scenario,
           ignore.case = ignore.case, verbose = verbose)
       }
