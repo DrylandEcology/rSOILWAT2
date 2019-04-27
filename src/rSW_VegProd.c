@@ -438,7 +438,6 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 	SEXP MonthlyVeg, Grasslands, Shrublands, Forest, Forb;
 	SEXP CO2Coefficients;
 	RealD *p_Grasslands, *p_Shrublands, *p_Forest, *p_Forb;
-	RealD fraction_sum = 0.;
 
 	MyFileName = SW_F_name(eVegProd);
 
