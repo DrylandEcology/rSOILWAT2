@@ -78,7 +78,7 @@ add_layer_to_soil <- function(x, il, w, method = c("interpolate", "exhaust")) {
 
   if (ncols > il) {
     # Add layer at an intermediate depth of existing layers
-    x <- x[, c(seq_len(il), NA, (il + 1):ncols)]
+    x <- x[, c(seq_len(il), NA, (il + 1):ncols), drop = FALSE]
 
     if (method == "interpolate") {
       if (il > 0) {
@@ -102,7 +102,7 @@ add_layer_to_soil <- function(x, il, w, method = c("interpolate", "exhaust")) {
 
   } else if (ncols == il) {
     # Add a deeper layer than any existing layer
-    x <- x[, c(seq_len(ncols), NA)]
+    x <- x[, c(seq_len(ncols), NA), drop = FALSE]
 
     if (method == "interpolate") {
       x[, il + 1] <- x[, il]
