@@ -16,7 +16,7 @@
 #' res <- dbW_estimate_WeatherGenerator_coefficients(rSOILWAT2::weatherData)
 #'
 #' @extern
-dbW_estimate_WeatherGenerator_coefficients <- function(weatherData) {
+dbW_estimate_WeatherGenerator_coefficients <- function(weatherData, yr = 30) {
 
     ############ make mkv_prob.in file #############
     #input data for particular site and scenario
