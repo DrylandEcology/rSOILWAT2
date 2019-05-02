@@ -11,9 +11,11 @@
 #'   https://github.com/DrylandEcology/rSFSTEP2/commit/cd9e161971136e1e56d427a4f76062bbb0f3d03a
 #' @param weatherData A list of elements of class
 #'   \code{\linkS4class{swWeatherData}}.
+#' @param yr A numeric value. The number of years covered by \code{weatherData}.
 #'
 #' @examples
-#' res <- dbW_estimate_WeatherGenerator_coefficients(rSOILWAT2::weatherData)
+#' res <- dbW_estimate_WeatherGenerator_coefficients(rSOILWAT2::weatherData,
+#'   yr = length(rSOILWAT2::weatherData))
 #'
 #' @extern
 dbW_estimate_WeatherGenerator_coefficients <- function(weatherData, yr = 30) {
