@@ -275,7 +275,7 @@ dbW_estimate_WeatherGenerator_coefficients <- function(weatherData,
 #'   path = normalizePath("."))
 #'
 #' @export
-print_mkv_files <- function(mkv_doy, mkv_weekoy, path, digits = 5) {
+print_mkv_files <- function(mkv_doy, mkv_woy, path, digits = 5) {
   colnames(mkv_doy)[1] <- paste0("#", colnames(mkv_doy)[1])
   write.table(format(mkv_doy, digits = digits),
     file = file.path(path, "mkv_prob.in"),
