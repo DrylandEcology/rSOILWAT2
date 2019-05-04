@@ -104,7 +104,11 @@ R CMD INSTALL rSOILWAT2
 Or do all at once from within R:
 ```{r}
 system2(command = "git", args = "clone -b master --single-branch --recursive https://github.com/DrylandEcology/rSOILWAT2.git rSOILWAT2")
-tools::Rcmd(args = paste("INSTALL rSOILWAT2"))
+if ("devtools" %in% installed.packages()) {
+  devtools::install(build_vignettes = TRUE)
+} else {
+  tools::Rcmd(args = paste("INSTALL rSOILWAT2"))
+}
 ```
 
 ### Binary package version

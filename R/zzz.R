@@ -35,6 +35,7 @@
   # 'rSW2_glovars' is defined in rSOILWAT2-package.R
 
   # Variables for interaction with SOILWAT2
+  assign("swof", sw_out_flags(), envir = rSW2_glovars)
   assign("kSOILWAT2", .Call(C_sw_consts), envir = rSW2_glovars)
   assign("sw_TimeSteps", c("Day", "Week", "Month", "Year"),
     envir = rSW2_glovars)
@@ -44,6 +45,8 @@
   assign("dbW_version", "3.2.0", envir = rSW2_glovars)
   assign("default_blob_compression_type", "gzip", envir = rSW2_glovars)
   assign("blob_compression_type", NULL, envir = rSW2_glovars)
+  assign("tol", sqrt(.Machine$double.eps), envir = rSW2_glovars)
+  assign("st_mo", seq_len(12L), envir = rSW2_glovars)
 
 
   invisible()

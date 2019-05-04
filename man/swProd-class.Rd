@@ -7,7 +7,6 @@
 \alias{get_swProd,swProd-method}
 \alias{swProd_Composition,swProd-method}
 \alias{swProd_Albedo,swProd-method}
-\alias{swProd_Cover_stcr,swProd-method}
 \alias{swProd_CanopyHeight,swProd-method}
 \alias{swProd_VegInterParam,swProd-method}
 \alias{swProd_LitterInterParam,swProd-method}
@@ -27,7 +26,6 @@
 \alias{set_swProd<-,swProd-method}
 \alias{swProd_Composition<-,swProd-method}
 \alias{swProd_Albedo<-,swProd-method}
-\alias{swProd_Cover_stcr<-,swProd-method}
 \alias{swProd_CanopyHeight<-,swProd-method}
 \alias{swProd_VegInterParam<-,swProd-method}
 \alias{swProd_LitterInterParam<-,swProd-method}
@@ -54,8 +52,6 @@
 \S4method{swProd_Composition}{swProd}(object)
 
 \S4method{swProd_Albedo}{swProd}(object)
-
-\S4method{swProd_Cover_stcr}{swProd}(object)
 
 \S4method{swProd_CanopyHeight}{swProd}(object)
 
@@ -94,8 +90,6 @@
 \S4method{swProd_Composition}{swProd}(object) <- value
 
 \S4method{swProd_Albedo}{swProd}(object) <- value
-
-\S4method{swProd_Cover_stcr}{swProd}(object) <- value
 
 \S4method{swProd_CanopyHeight}{swProd}(object) <- value
 
