@@ -2,6 +2,9 @@
 
 #--- rSOILWAT2: use development version
 library("methods")  # in case this code is run via 'Rscript'
+stopifnot(requireNamespace("pkgbuild"))
+stopifnot(requireNamespace("pkgload"))
+stopifnot(requireNamespace("usethis"))
 
 pkgbuild::clean_dll()
 pkgload::load_all()
@@ -12,7 +15,7 @@ dSOILWAT2_inputs <- "testing"
 dir_orig <- file.path("src", "SOILWAT2", dSOILWAT2_inputs)
 dir_in <- file.path("inst", "extdata")
 dir_backup <- sub("extdata", "extdata_copy", dir_in)
-dir_out <- file.path("tests", "testthat")
+dir_out <- file.path("tests", "test_data")
 
 tests <- 1:4
 examples <- paste0("example", tests)

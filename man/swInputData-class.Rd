@@ -75,11 +75,13 @@
 \alias{swCloud_Humidity,swInputData-method}
 \alias{swCloud_Transmissivity,swInputData-method}
 \alias{swCloud_SnowDensity,swInputData-method}
+\alias{swCloud_RainEvents,swInputData-method}
 \alias{swCloud_SkyCover<-,swInputData-method}
 \alias{swCloud_WindSpeed<-,swInputData-method}
 \alias{swCloud_Humidity<-,swInputData-method}
 \alias{swCloud_Transmissivity<-,swInputData-method}
 \alias{swCloud_SnowDensity<-,swInputData-method}
+\alias{swCloud_RainEvents<-,swInputData-method}
 \alias{get_Markov,swInputData-method}
 \alias{swMarkov_Prob,swInputData-method}
 \alias{swMarkov_Conv,swInputData-method}
@@ -95,7 +97,6 @@
 \alias{get_swProd,swInputData-method}
 \alias{swProd_Composition,swInputData-method}
 \alias{swProd_Albedo,swInputData-method}
-\alias{swProd_Cover_stcr,swInputData-method}
 \alias{swProd_CanopyHeight,swInputData-method}
 \alias{swProd_VegInterParam,swInputData-method}
 \alias{swProd_LitterInterParam,swInputData-method}
@@ -114,7 +115,6 @@
 \alias{set_swProd<-,swInputData-method}
 \alias{swProd_Composition<-,swInputData-method}
 \alias{swProd_Albedo<-,swInputData-method}
-\alias{swProd_Cover_stcr<-,swInputData-method}
 \alias{swProd_CanopyHeight<-,swInputData-method}
 \alias{swProd_VegInterParam<-,swInputData-method}
 \alias{swProd_LitterInterParam<-,swInputData-method}
@@ -341,6 +341,8 @@
 
 \S4method{swCloud_SnowDensity}{swInputData}(object)
 
+\S4method{swCloud_RainEvents}{swInputData}(object)
+
 \S4method{set_swCloud}{swInputData}(object) <- value
 
 \S4method{swCloud_SkyCover}{swInputData}(object) <- value
@@ -352,6 +354,8 @@
 \S4method{swCloud_Transmissivity}{swInputData}(object) <- value
 
 \S4method{swCloud_SnowDensity}{swInputData}(object) <- value
+
+\S4method{swCloud_RainEvents}{swInputData}(object) <- value
 
 \S4method{get_Markov}{swInputData}(object)
 
@@ -382,8 +386,6 @@
 \S4method{swProd_Composition}{swInputData}(object)
 
 \S4method{swProd_Albedo}{swInputData}(object)
-
-\S4method{swProd_Cover_stcr}{swInputData}(object)
 
 \S4method{swProd_CanopyHeight}{swInputData}(object)
 
@@ -420,8 +422,6 @@
 \S4method{swProd_Composition}{swInputData}(object) <- value
 
 \S4method{swProd_Albedo}{swInputData}(object) <- value
-
-\S4method{swProd_Cover_stcr}{swInputData}(object) <- value
 
 \S4method{swProd_CanopyHeight}{swInputData}(object) <- value
 

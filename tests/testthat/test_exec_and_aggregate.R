@@ -3,7 +3,8 @@ context("rSOILWAT2 annual aggregation")
 #---CONSTANTS
 tol <- 1e-6
 OutSum <- c("off", "sum", "mean", "fnl")
-temp <- list.files(".", pattern = "Ex")
+dir_test_data <- file.path("..", "test_data")
+temp <- list.files(dir_test_data, pattern = "Ex")
 temp <- sapply(strsplit(temp, "_"), function(x) x[[1]])
 tests <- unique(temp)
 
@@ -37,8 +38,8 @@ expect_within <- function(object, expected, ..., info = NULL,
 
 for (it in tests) {
   #---INPUTS
-  sw_input <- readRDS(paste0(it, "_input.rds"))
-  sw_weather <- readRDS(paste0(it, "_weather.rds"))
+  sw_input <- readRDS(file.path(dir_test_data, paste0(it, "_input.rds")))
+  sw_weather <- readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
 
   # Reasonable limits
   soil <- swSoils_Layers(sw_input)

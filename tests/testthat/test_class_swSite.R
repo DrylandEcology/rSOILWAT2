@@ -1,6 +1,7 @@
 context("Site parameters class")
 
-temp <- list.files(".", pattern = "Ex")
+dir_test_data <- file.path("..", "test_data")
+temp <- list.files(dir_test_data, pattern = "Ex")
 temp <- sapply(strsplit(temp, "_"), function(x) x[[1]])
 tests <- unique(temp)
 
@@ -82,8 +83,8 @@ test_that("Run 'rSOILWAT2' with different 'swSite' inputs", {
   it <- tests[1]
 
   #---INPUTS
-  sw_input <- readRDS(paste0(it, "_input.rds"))
-  sw_weather <- readRDS(paste0(it, "_weather.rds"))
+  sw_input <- readRDS(file.path(dir_test_data, paste0(it, "_input.rds")))
+  sw_weather <- readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
 
   # Set transpiration regions to numeric/integer layer values
   types <- c("as.double", "as.integer")
