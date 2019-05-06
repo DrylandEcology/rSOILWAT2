@@ -5,7 +5,11 @@
 \title{Conversion: object of class \code{\linkS4class{swWeatherData}} to
 matrix of monthly values (\var{mean Tmax}, \var{mean Tmin}, \var{sum PPT})}
 \usage{
-dbW_weatherData_to_monthly(dailySW)
+dbW_weatherData_to_monthly(dailySW, na.rm = FALSE, valNA = NULL)
+}
+\arguments{
+\item{valNA}{The (numerical) value of missing weather data.
+If \code{NULL}, then default values are interpreted as missing.}
 }
 \description{
 Conversion: object of class \code{\linkS4class{swWeatherData}} to

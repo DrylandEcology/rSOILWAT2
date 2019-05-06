@@ -22,16 +22,11 @@
 #'
 #' Estimates coefficients for the two site-specific files
 #' \var{mkv_covar.in} and \var{mkv_prob.in} required by the first-order
-#' markov weather generator in \var{SOILWAT2} \var{> v4.2.5}.
+#' Markov weather generator in \var{SOILWAT2} \var{> v4.2.5}.
 #'
 #' @section Notes: This code is a complete overhaul compared to the version
 #'   from \var{rSFSTEP2} on \code{2019-Feb-10}
 #'   \url{https://github.com/DrylandEcology/rSFSTEP2/commit/cd9e161971136e1e56d427a4f76062bbb0f3d03a}
-#'
-#' @section Details: Missing weather values may be coded with \code{NA},
-#'   with the corresponding \var{SOILWAT2} value (i.e.,
-#'   \code{rSOILWAT2:::rSW2_glovars[["kSOILWAT2"]][["kNUM"]][["SW_MISSING"]]}),
-#'   or with the value of the argument \code{valNA}.
 #'
 #' @param weatherData A list of elements of class
 #'   \code{\linkS4class{swWeatherData}}.
@@ -42,8 +37,7 @@
 #' @param na.rm A logical value. If \code{TRUE}, then missing weather values
 #'   in the input \code{weatherData} are excluded; if \code{FALSE}, then
 #'   missing values are propagated.
-#' @param valNA The value of missing weather data. If \code{NULL}, then default
-#'   values are considered. See section \code{Details}.
+#' @inheritParams set_missing_weather
 #'
 #' @return A list with two named elements:
 #'   \describe{
@@ -60,7 +54,7 @@
 #'            (centimeters) on doy if it is wet.}
 #'        }}
 #'     \item{\code{mkv_woy}}{A data.frame with 53 rows (\var{SOILWAT2}
-#'       weeks of year, i.e., counted as consecutive heptads of days) and
+#'       weeks of year, i.e., counted as consecutive \var{heptads} of days) and
 #'       11 columns: \describe{
 #'         \item{WEEK}{Week of year.}
 #'         \item{wTmax_C}{Average daily maximum temperature (C) for week.}
@@ -87,32 +81,19 @@
 #'   input object of class \code{\linkS4class{swInputData}}.
 #'
 #' @examples
-#' res <- dbW_estimate_WeatherGenerator_coefficients(rSOILWAT2::weatherData)
+#' res <- dbW_estimate_WGen_coefs(rSOILWAT2::weatherData)
 #'
 #' sw_in <- rSOILWAT2::sw_exampleData
 #' swMarkov_Prob(sw_in) <- res[["mkv_doy"]]
 #' swMarkov_Conv(sw_in) <- res[["mkv_woy"]]
 #'
 #' @export
-dbW_estimate_WeatherGenerator_coefficients <- function(weatherData,
+dbW_estimate_WGen_coefs <- function(weatherData,
   WET_limit_cm = 0, na.rm = FALSE, valNA = NULL) {
 
   # daily weather data
-  wdata <- data.frame(dbW_weatherData_to_dataframe(weatherData))
+  wdata <- data.frame(dbW_weatherData_to_dataframe(weatherData, valNA = valNA))
   n_days <- nrow(wdata)
-
-
-  #--- deal with missing values: convert to NAs
-  if (is.null(valNA)) {
-    # missing values coded as NA or in SOILWAT2' format
-    wdata[wdata ==
-        rSOILWAT2:::rSW2_glovars[["kSOILWAT2"]][["kNUM"]][["SW_MISSING"]]] <- NA
-
-  } else {
-    # missing values coded as 'valNA'
-    wdata[wdata == valNA] <- NA
-  }
-
 
 
   #-----------------------------------------------------------------------------
@@ -144,10 +125,10 @@ dbW_estimate_WeatherGenerator_coefficients <- function(weatherData,
   mkv_prob[, c("PPT_avg", "PPT_sd")] <- do.call(rbind, temp)
 
 
-  #--- `wetprob` = p(wet|wet) = "p_W_W"
+  #--- wetprob = p(wet|wet) = "p_W_W" #nolint
   #    = probability that it precipitates today if it was wet
   #      (precipitated) yesterday
-  #    `dryprob` = p(wet|dry) = "p_W_D"
+  #    dryprob = p(wet|dry) = "p_W_D" #nolint
   #    = probability that it precipitates today if it was dry
   #      (did not precipitate) yesterday
   temp <- by(wdata[, c("WET_yesterday", "WW", "WD")], INDICES = wdata[, "DOY"],
@@ -259,18 +240,18 @@ dbW_estimate_WeatherGenerator_coefficients <- function(weatherData,
 #' Print Markov weather generator files as required by \var{SOILWAT2}
 #'
 #' @param mkv_doy A data.frame. The same named output element of
-#'   \code{\link{dbW_estimate_WeatherGenerator_coefficients}}.
+#'   \code{\link{dbW_estimate_WGen_coefs}}.
 #' @param mkv_woy A data.frame. The same named output element of
-#'   \code{\link{dbW_estimate_WeatherGenerator_coefficients}}.
+#'   \code{\link{dbW_estimate_WGen_coefs}}.
 #'
-#' @seealso \code{\link{dbW_estimate_WeatherGenerator_coefficients}} to
+#' @seealso \code{\link{dbW_estimate_WGen_coefs}} to
 #'   calculate the necessary values based on daily weather data.
 #'
 #' @return This function is called for its side effect, i.e., writing values
-#'   to files \code{\dQuote{mkv_prob.in}} and \code{\dQuote{mkv_covar.in}}.
+#'   to files \var{\dQuote{mkv_prob.in}} and \var{\dQuote{mkv_covar.in}}.
 #'
 #' @examples
-#' res <- dbW_estimate_WeatherGenerator_coefficients(rSOILWAT2::weatherData)
+#' res <- dbW_estimate_WGen_coefs(rSOILWAT2::weatherData)
 #' print_mkv_files(mkv_doy = res[["mkv_doy"]], mkv_woy = res[["mkv_woy"]],
 #'   path = normalizePath("."))
 #'

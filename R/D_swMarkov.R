@@ -75,7 +75,7 @@ setMethod("initialize", signature = "swMarkov", function(.Object, ...) {
   } else {
     temp <- matrix(NA_real_, nrow = 366, ncol = length(ctemp_Prob),
       dimnames = list(NULL, ctemp_Prob))
-    temp[, "day"] <- 1:366
+    temp[, "DOY"] <- 1:366
   }
   .Object@Prob <- temp
 
@@ -87,7 +87,7 @@ setMethod("initialize", signature = "swMarkov", function(.Object, ...) {
   } else {
     temp <- matrix(NA_real_, nrow = 53, ncol = length(ctemp_Conv),
       dimnames = list(NULL, ctemp_Conv))
-    temp[, "week"] <- 1:53
+    temp[, "WEEK"] <- 1:53
   }
   .Object@Conv <- temp
 
@@ -193,7 +193,7 @@ setMethod("swReadLines", signature = c(object = "swMarkov", file = "character"),
       stop("Markov Prod wrong number of lines")
 
     object@Conv <- matrix(0, 53, 11)
-    for (i in seq_len(366)) {
+    for (i in seq_len(53)) {
       object@Conv[i, ] <- readNumerics(infiletext[i], 11)
     }
 

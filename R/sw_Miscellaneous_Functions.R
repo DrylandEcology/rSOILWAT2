@@ -228,21 +228,24 @@ calc_SiteClimate <- function(weatherList, year.start = NA, year.end = NA,
   index <- st2[["month_ForEachUsedDay"]] + 100 * x[, "Year"]
 
   mon_Temp <- vapply(list(Tmean_C, x[, "Tmin_C"], x[, "Tmax_C"]),
-    function(data) matrix(tapply(data, index, mean), nrow = 12),
+    function(data) matrix(tapply(data, index, mean, na.rm = TRUE), nrow = 12),
     FUN.VALUE = matrix(NA_real_, nrow = 12, ncol = length(years)))
 
-  mon_PPT <- matrix(tapply(x[, "PPT_cm"], index, sum), nrow = 12)
+  mon_PPT <- matrix(tapply(x[, "PPT_cm"], index, sum, na.rm = TRUE), nrow = 12)
 
   list(
     # Calculate mean monthly values
-    meanMonthlyTempC = apply(mon_Temp[, , 1, drop = FALSE], 1, mean),
-    minMonthlyTempC = apply(mon_Temp[, , 2, drop = FALSE], 1, mean),
-    maxMonthlyTempC = apply(mon_Temp[, , 3, drop = FALSE], 1, mean),
-    meanMonthlyPPTcm = apply(mon_PPT, 1, mean),
+    meanMonthlyTempC = apply(mon_Temp[, , 1, drop = FALSE], 1, mean,
+      na.rm = TRUE),
+    minMonthlyTempC = apply(mon_Temp[, , 2, drop = FALSE], 1, mean,
+      na.rm = TRUE),
+    maxMonthlyTempC = apply(mon_Temp[, , 3, drop = FALSE], 1, mean,
+      na.rm = TRUE),
+    meanMonthlyPPTcm = apply(mon_PPT, 1, mean, na.rm = TRUE),
 
     # Calculate mean annual values
-    MAP_cm = sum(mon_PPT) / length(years),
-    MAT_C = mean(Tmean_C),
+    MAP_cm = sum(mon_PPT, na.rm = TRUE) / length(years),
+    MAT_C = mean(Tmean_C, na.rm = TRUE),
 
     # If C4-variables are requested
     dailyTempMin = if (do_C4vars) x[, "Tmin_C"] else NA,

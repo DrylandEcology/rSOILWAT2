@@ -363,10 +363,18 @@ test_that("Manipulate weather data", {
     weatherDF_dataColumns)) #con 5
 
   for (k in seq_along(tests)) {
-    datB <- sw_weather[[k]]
-    datB_yrs <- get_years_from_weatherData(datB)
-    yrs_joint <- intersect(datA_yrs, datB_yrs)
-    expect_equal(datA[select_years(datA_yrs, min(yrs_joint), max(yrs_joint))],
-      datB[select_years(datB_yrs, min(yrs_joint), max(yrs_joint))], tol = 1e-3)
+    # skip test if weather generator is turned on due to missing weather data
+    sw_input <- readRDS(file.path(dir_test_data,
+      paste0(tests[k], "_input.rds")))
+
+    if (!swWeather_UseMarkov(sw_input)) {
+      datB <- sw_weather[[k]]
+      datB_yrs <- get_years_from_weatherData(datB)
+      yrs_joint <- intersect(datA_yrs, datB_yrs)
+      expect_equal(
+        datA[select_years(datA_yrs, min(yrs_joint), max(yrs_joint))],
+        datB[select_years(datB_yrs, min(yrs_joint), max(yrs_joint))],
+        tol = 1e-3)
+    }
   }
 })

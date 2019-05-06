@@ -22,6 +22,7 @@
 #include "SOILWAT2/SW_Defines.h"
 #include "SOILWAT2/SW_Files.h"
 
+#include "SOILWAT2/SW_Weather.h"
 #include "SOILWAT2/SW_Sky.h"
 #include "rSW_Sky.h"
 
@@ -35,6 +36,7 @@
 /* --------------------------------------------------- */
 
 extern SW_SKY SW_Sky;
+extern SW_WEATHER SW_Weather;
 
 /* =================================================== */
 /*                Module-Level Variables               */
@@ -91,7 +93,7 @@ SEXP onGet_SW_SKY() {
 	SET_VECTOR_ELT(Cloud_names, 1, Cloud_names_y);
 	setAttrib(Cloud, R_DimNamesSymbol, Cloud_names);
 
-	SET_SLOT(SW_SKY,install("Cloud"), Cloud);
+	SET_SLOT(SW_SKY, install("Cloud"), Cloud);
 
 	UNPROTECT(6);
 	return SW_SKY;
@@ -99,6 +101,7 @@ SEXP onGet_SW_SKY() {
 
 void onSet_SW_SKY(SEXP sxp_SW_SKY) {
 	int i, k = 6;
+	SW_WEATHER *w = &SW_Weather;
 	SW_SKY *v = &SW_Sky;
 	RealD *p_Cloud;
 	PROTECT(sxp_SW_SKY);
@@ -114,5 +117,10 @@ void onSet_SW_SKY(SEXP sxp_SW_SKY) {
 		v->snow_density[i] = p_Cloud[4 + k * i];
 		v->n_rain_per_day[i] = p_Cloud[5 + k * i];
 	}
+
+	// must be called after `onSet_SW_WTH`
+	SW_SKY_init(w->scale_skyCover, w->scale_wind, w->scale_rH,
+		w->scale_transmissivity);
+
 	UNPROTECT(1);
 }

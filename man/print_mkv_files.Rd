@@ -4,29 +4,29 @@
 \alias{print_mkv_files}
 \title{Print Markov weather generator files as required by \var{SOILWAT2}}
 \usage{
-print_mkv_files(mkv_doy, mkv_weekoy, path, digits = 5)
+print_mkv_files(mkv_doy, mkv_woy, path, digits = 5)
 }
 \arguments{
 \item{mkv_doy}{A data.frame. The same named output element of
-\code{\link{dbW_estimate_WeatherGenerator_coefficients}}.}
+\code{\link{dbW_estimate_WGen_coefs}}.}
 
 \item{mkv_woy}{A data.frame. The same named output element of
-\code{\link{dbW_estimate_WeatherGenerator_coefficients}}.}
+\code{\link{dbW_estimate_WGen_coefs}}.}
 }
 \value{
 This function is called for its side effect, i.e., writing values
-  to files \code{\dQuote{mkv_prob.in}} and \code{\dQuote{mkv_covar.in}}.
+  to files \var{\dQuote{mkv_prob.in}} and \var{\dQuote{mkv_covar.in}}.
 }
 \description{
 Print Markov weather generator files as required by \var{SOILWAT2}
 }
 \examples{
-res <- dbW_estimate_WeatherGenerator_coefficients(rSOILWAT2::weatherData)
+res <- dbW_estimate_WGen_coefs(rSOILWAT2::weatherData)
 print_mkv_files(mkv_doy = res[["mkv_doy"]], mkv_woy = res[["mkv_woy"]],
   path = normalizePath("."))
 
 }
 \seealso{
-\code{\link{dbW_estimate_WeatherGenerator_coefficients}} to
+\code{\link{dbW_estimate_WGen_coefs}} to
   calculate the necessary values based on daily weather data.
 }

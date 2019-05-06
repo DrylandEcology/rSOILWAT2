@@ -26,8 +26,6 @@
 
 #include "SOILWAT2/SW_Weather.h"
 #include "rSW_Weather.h"
-#include "rSW_Markov.h"
-#include "rSW_Sky.h"
 
 #include <R.h>
 #include <Rinternals.h>
@@ -44,7 +42,6 @@ extern SEXP InputData;
 extern SEXP WeatherList;
 extern Bool bWeatherList;
 
-extern Bool weth_found; /* TRUE=success reading this years weather file */
 extern RealD *runavg_list; /* used in run_tmp_avg() */
 
 /* =================================================== */
@@ -52,11 +49,18 @@ extern RealD *runavg_list; /* used in run_tmp_avg() */
 /* --------------------------------------------------- */
 static char *MyFileName;
 
+static char *cSW_WTH_names[] = { "UseSnow", "pct_SnowDrift", "pct_SnowRunoff",
+  "use_Markov", "FirstYear_Historical", "DaysRunningAverage",
+  "MonthlyScalingParams" };
+
 
 /* =================================================== */
 /* =================================================== */
 /*             Private Function Definitions            */
 /* --------------------------------------------------- */
+
+static SEXP onGet_WTH_DATA_YEAR(TimeInt year);
+static Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year);
 
 
 /* =================================================== */
@@ -64,28 +68,31 @@ static char *MyFileName;
 /*             Public Function Definitions             */
 /* --------------------------------------------------- */
 
-void rSW_WTH_new_year2(TimeInt year) {
+Bool onSet_WTH_DATA_YEAR(TimeInt year) {
   int i = 0;
+  Bool has_weather = FALSE;
 
   if (bWeatherList) {
     for (i = 0; i < LENGTH(WeatherList); i++) {
       if (year == *INTEGER(GET_SLOT(VECTOR_ELT(WeatherList, i), install("year")))) {
-        weth_found = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT(WeatherList, i), install("data")), year);
+        has_weather = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT(WeatherList, i), install("data")), year);
       }
     }
 
   } else {
     for (i = 0; i < LENGTH(GET_SLOT(InputData, install("weatherHistory"))); i++) {
       if (year == *INTEGER(GET_SLOT(VECTOR_ELT(GET_SLOT(InputData, install("weatherHistory")), i), install("year")))) {
-        weth_found = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT(GET_SLOT(InputData, install("weatherHistory")), i), install("data")), year);
+        has_weather = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT(GET_SLOT(InputData, install("weatherHistory")), i), install("data")), year);
       }
     }
   }
 
+  return has_weather;
 }
 
 SEXP onGet_SW_WTH() {
 	int i;
+	const int nitems = 7;
 	RealD *p_MonthlyValues;
 	SW_WEATHER *w = &SW_Weather;
 
@@ -95,7 +102,6 @@ SEXP onGet_SW_WTH() {
 	SEXP use_snow, pct_snowdrift, pct_snowRunoff, use_markov, yr_first, days_in_runavg;
 	SEXP MonthlyScalingParams, MonthlyScalingParams_names, MonthlyScalingParams_names_x, MonthlyScalingParams_names_y;
 
-	char *cSW_WTH_names[] = {"UseSnow", "pct_SnowDrift", "pct_SnowRunoff", "use_Markov", "FirstYear_Historical", "DaysRunningAverage", "MonthlyScalingParams"};
 	char *cMonthlyScalingParams_names[] = {"PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "Transmissivity"};
 	char *cMonths[] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
@@ -115,7 +121,7 @@ SEXP onGet_SW_WTH() {
 	PROTECT(days_in_runavg = NEW_INTEGER(1));
 	INTEGER_POINTER(days_in_runavg)[0] = w->days_in_runavg;
 
-	PROTECT(MonthlyScalingParams = allocMatrix(REALSXP,12,7));
+	PROTECT(MonthlyScalingParams = allocMatrix(REALSXP, 12, nitems));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
 	for (i = 0; i < 12; i++) {
 		p_MonthlyValues[i + 12 * 0] = w->scale_precip[i];
@@ -127,11 +133,11 @@ SEXP onGet_SW_WTH() {
 		p_MonthlyValues[i + 12 * 6] = w->scale_transmissivity[i];
 	}
 	PROTECT(MonthlyScalingParams_names = allocVector(VECSXP, 2));
-	PROTECT(MonthlyScalingParams_names_x = allocVector(STRSXP,12));
+	PROTECT(MonthlyScalingParams_names_x = allocVector(STRSXP, 12));
 	for (i = 0; i < 12; i++)
 		SET_STRING_ELT(MonthlyScalingParams_names_x, i, mkChar(cMonths[i]));
-	PROTECT(MonthlyScalingParams_names_y = allocVector(STRSXP,7));
-	for (i = 0; i < 7; i++)
+	PROTECT(MonthlyScalingParams_names_y = allocVector(STRSXP, nitems));
+	for (i = 0; i < nitems; i++)
 		SET_STRING_ELT(MonthlyScalingParams_names_y, i, mkChar(cMonthlyScalingParams_names[i]));
 	SET_VECTOR_ELT(MonthlyScalingParams_names, 0, MonthlyScalingParams_names_x);
 	SET_VECTOR_ELT(MonthlyScalingParams_names, 1, MonthlyScalingParams_names_y);
@@ -154,11 +160,7 @@ void onSet_SW_WTH(SEXP SW_WTH) {
 	SW_WEATHER *w = &SW_Weather;
 	SEXP use_snow, pct_snowdrift, pct_snowRunoff, use_markov, yr_first, days_in_runavg;
 	SEXP MonthlyScalingParams;
-	SEXP SW_SKY;
-	SEXP SW_MKV, SW_MKV_prob, SW_MKV_conv;
 	RealD *p_MonthlyValues;
-	char *cSW_WTH_names[] = {"UseSnow", "pct_SnowDrift", "pct_SnowRunoff", "use_Markov", "FirstYear_Historical", "DaysRunningAverage", "MonthlyScalingParams", "Cloud",
-		"weatherYearsIn", "markov"};
 
 	MyFileName = SW_F_name(eWeather);
 
@@ -175,6 +177,7 @@ void onSet_SW_WTH(SEXP SW_WTH) {
 	PROTECT(days_in_runavg = GET_SLOT(SW_WTH, install(cSW_WTH_names[5])));
 	w->days_in_runavg = *INTEGER(days_in_runavg);
 	runavg_list = (RealD *) Mem_Calloc(w->days_in_runavg, sizeof(RealD), "SW_WTH_read()");
+
 	PROTECT(MonthlyScalingParams = GET_SLOT(SW_WTH, install(cSW_WTH_names[6])));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
 	for (i = 0; i < 12; i++) {
@@ -192,86 +195,56 @@ void onSet_SW_WTH(SEXP SW_WTH) {
 	w->yr.last = SW_Model.endyr;
 	w->yr.total = w->yr.last - w->yr.first + 1;
 
-	if (w->use_markov) {
-		PROTECT(SW_MKV = GET_SLOT(InputData, install("markov")));
-		PROTECT(SW_MKV_prob = GET_SLOT(SW_MKV, install("Prob")));
-		PROTECT(SW_MKV_conv = GET_SLOT(SW_MKV, install("Conv")));
-		SW_MKV_construct();
-		if (!onSet_MKV_prob(SW_MKV_prob)) {
-			LogError(logfp, LOGFATAL, "Markov_prob: Something Went Wrong");
-		}
-		if (!onSet_MKV_conv(SW_MKV_conv)) {
-			LogError(logfp, LOGFATAL, "Markov_conv: Something Went Wrong");
-		}
-	} else if (SW_Model.startyr < w->yr.first) {
+	if (!w->use_markov && SW_Model.startyr < w->yr.first) {
 		LogError(logfp, LOGFATAL, "weathersetup.in : Model year (%d) starts before weather files (%d)"
 				" and use_Markov=FALSE.\nPlease synchronize the years"
 				" or set up the Markov weather files", SW_Model.startyr, w->yr.first);
 	}
 
-	PROTECT(SW_SKY = GET_SLOT(InputData, install("cloud")));
-	onSet_SW_SKY(SW_SKY);
-	SW_SKY_init(w->scale_skyCover, w->scale_wind, w->scale_rH, w->scale_transmissivity);
-
-	if(w->use_markov)
-		UNPROTECT(11);
-	else
-		UNPROTECT(8);
+	UNPROTECT(7);
 }
 
 SEXP onGet_WTH_DATA(void) {
 	TimeInt year;
 	SEXP WTH_DATA, WTH_DATA_names;
-	Bool setNames = FALSE;
+	Bool has_weather = FALSE;
 	char cYear[5];
-	char fname[MAX_FILENAMESIZE];
-	FILE *f;
-	int nWeathData = 0, i;
+	int n_yrs, i;
 
-	for (year = SW_Model.startyr; year <= SW_Model.endyr; year++) {
-		sprintf(fname, "%s.%4d", SW_Weather.name_prefix, year);
-		if (NULL == (f = fopen(fname, "r"))) {
-			break;
+	// number of years
+	n_yrs = SW_Model.endyr - SW_Model.startyr + 1;
+	PROTECT(WTH_DATA = allocVector(VECSXP, n_yrs));
+	PROTECT(WTH_DATA_names = allocVector(STRSXP, n_yrs));
+
+	for (year = SW_Model.startyr, i = 0; year <= SW_Model.endyr; year++, i++) {
+		sprintf(cYear, "%4d", year);
+		SET_STRING_ELT(WTH_DATA_names, i, mkChar(cYear));
+
+		has_weather = _read_weather_hist(year);
+
+		if (has_weather) {
+			// copy values from SOILWAT2 variables to rSOILWAT2 S4 class object
+			SET_VECTOR_ELT(WTH_DATA, i, onGet_WTH_DATA_YEAR(year));
+
+		} else if (SW_Weather.use_markov) {
+			// set the missing values from SOILWAT2 into rSOILWAT2 S4 weather object
+			SET_VECTOR_ELT(WTH_DATA, i, onGet_WTH_DATA_YEAR(year));
+
+		} else {
+			LogError(logfp, LOGFATAL, "Markov Simulator turned off and weather "
+				"file found not for year %d", year);
 		}
-		fclose(f);
-		nWeathData++;
 	}
 
-	PROTECT(WTH_DATA = allocVector(VECSXP,nWeathData));
-	PROTECT(WTH_DATA_names = allocVector(STRSXP,nWeathData));
+	setAttrib(WTH_DATA, R_NamesSymbol, WTH_DATA_names);
 
-	if (nWeathData > 0){
-		weth_found = TRUE;
-		for (year = SW_Model.startyr, i = 0; year <= SW_Model.endyr; year++, i++) {
-			if (year < SW_Weather.yr.first) {
-				weth_found = FALSE;
-			} else {
-				if(_read_weather_hist(year)) {
-					SET_VECTOR_ELT(WTH_DATA, i, onGet_WTH_DATA_YEAR(year));
-					sprintf(cYear, "%4d", year);
-					SET_STRING_ELT(WTH_DATA_names, i, mkChar(cYear));
-					setNames=TRUE;
-				}
-			}
-			if (!weth_found && !SW_Weather.use_markov) {
-				LogError(logfp, LOGFATAL, "Markov Simulator turned off and weather file found not for year %d", year);
-			}
-		}
-	} else {
-		weth_found = FALSE;
-	}
-	if(setNames) {
-		setAttrib(WTH_DATA, R_NamesSymbol, WTH_DATA_names);
-		UNPROTECT(2);
-	} else {
-		PROTECT(WTH_DATA = allocVector(VECSXP,0));
-		UNPROTECT(3);
-	}
+	UNPROTECT(2);
 	return WTH_DATA;
 }
 
 SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	int i,days;
+	const int nitems = 4;
 	SEXP swWeatherData;
 	SEXP WeatherData;
 	SEXP Year, Year_names, Year_names_y;
@@ -288,7 +261,7 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	PROTECT(nYear = NEW_INTEGER(1));
 	INTEGER(nYear)[0] = year;
 
-	PROTECT(Year = allocMatrix(REALSXP,days,4));
+	PROTECT(Year = allocMatrix(REALSXP, days, nitems));
 	p_Year = REAL(Year);
 	for (i = 0; i < days; i++) {
 		p_Year[i + days * 0] = (i + 1);
@@ -296,15 +269,17 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 		p_Year[i + days * 2] = wh->temp_min[i];
 		p_Year[i + days * 3] = wh->ppt[i];
 	}
-	PROTECT(Year_names = allocVector(VECSXP,2));
-	PROTECT(Year_names_y = allocVector(STRSXP,4));
-	for (i = 0; i < 4; i++)
-	SET_STRING_ELT(Year_names_y, i, mkChar(cYear[i]));
+
+	PROTECT(Year_names = allocVector(VECSXP, 2));
+	PROTECT(Year_names_y = allocVector(STRSXP, nitems));
+	for (i = 0; i < nitems; i++) {
+		SET_STRING_ELT(Year_names_y, i, mkChar(cYear[i]));
+	}
 	SET_VECTOR_ELT(Year_names, 1, Year_names_y);
 	setAttrib(Year, R_DimNamesSymbol, Year_names);
 
-	SET_SLOT(WeatherData,install("data"),Year);
-	SET_SLOT(WeatherData,install("year"),nYear);
+	SET_SLOT(WeatherData, install("data"), Year);
+	SET_SLOT(WeatherData, install("year"), nYear);
 
 	UNPROTECT(6);
 	return WeatherData;
@@ -313,9 +288,14 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year) {
 	SW_WEATHER_HIST *wh = &SW_Weather.hist;
 	int x, lineno = 0, k = 0, i, j, days;
+	Bool has_values = FALSE;
 	RealD *p_WTH_DATA;
 	RealF acc = 0.0;
 	TimeInt doy;
+
+	if (isnull(WTH_DATA_YEAR)) {
+		return FALSE; // no weather data for this year --> use weather generator
+	}
 
 	days = Time_get_lastdoy_y(year);
 
@@ -337,38 +317,34 @@ Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year) {
 		doy--;
 
 		/* Reassign if invalid values are found.  The values are
-		 * either valid or WTH_MISSING.  If they were not
-		 * present in the file, we wouldn't get this far because
-		 * sscanf() would return too few items.
-		 */
+		 * either valid or SW_MISSING. */
 		j = i + days * 1;
-		if (p_WTH_DATA[j] == SW_MISSING || p_WTH_DATA[j] == WTH_MISSING || ISNA(p_WTH_DATA[j])) {
-			wh->temp_max[doy] = WTH_MISSING;
-			LogError(logfp, LOGWARN, "weath.%4d : Missing max temp on doy=%d.", year, doy + 1);
+		if (missing(p_WTH_DATA[j]) || ISNA(p_WTH_DATA[j])) {
+			wh->temp_max[doy] = SW_MISSING;
 		} else {
 			wh->temp_max[doy] = p_WTH_DATA[j];
 		}
 
 		j = i + days * 2;
-		if (p_WTH_DATA[j] == SW_MISSING || p_WTH_DATA[j] == WTH_MISSING || ISNA(p_WTH_DATA[j])) {
-			wh->temp_min[doy] = WTH_MISSING;
-			LogError(logfp, LOGWARN, "weath.%4d : Missing min temp on doy=%d.", year, doy + 1);
+		if (missing(p_WTH_DATA[j]) || ISNA(p_WTH_DATA[j])) {
+			wh->temp_min[doy] = SW_MISSING;
 		} else {
 			wh->temp_min[doy] = p_WTH_DATA[j];
 		}
 
 		j = i + days * 3;
-		if (p_WTH_DATA[j] == SW_MISSING || p_WTH_DATA[j] == WTH_MISSING || ISNA(p_WTH_DATA[j])) {
-			wh->ppt[doy] = 0.;
-			LogError(logfp, LOGWARN, "weath.%4d : Missing PPT on doy=%d.", year, doy + 1);
+		if (missing(p_WTH_DATA[j]) || ISNA(p_WTH_DATA[j])) {
+			wh->ppt[doy] = SW_MISSING;
 		} else {
 			wh->ppt[doy] = p_WTH_DATA[j];
+			has_values = TRUE;
 		}
 
-		if (wh->temp_max[doy] != WTH_MISSING && wh->temp_min[doy] != WTH_MISSING) {
+		if (!missing(wh->temp_max[doy]) && !missing(wh->temp_min[doy])) {
 			k++;
 			wh->temp_avg[doy] = (wh->temp_max[doy] + wh->temp_min[doy]) / 2.0;
 			acc += wh->temp_avg[doy];
+			has_values = TRUE;
 		}
 	} /* end of input lines */
 
@@ -391,5 +367,7 @@ Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year) {
 		wh->temp_month_avg[i] = acc / (k + 0.0);
 		x += k;
 	}
-	return TRUE;
+
+
+	return has_values;
 }

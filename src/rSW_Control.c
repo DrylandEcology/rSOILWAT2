@@ -23,6 +23,8 @@
 #include "rSW_Files.h"
 #include "rSW_Model.h"
 #include "rSW_Weather.h"
+#include "rSW_Markov.h"
+#include "rSW_Sky.h"
 #include "rSW_VegProd.h"
 #include "rSW_Site.h"
 #include "rSW_VegEstab.h"
@@ -54,17 +56,18 @@ void rSW_CTL_init_model2(void) {
 
 
 
-void rSW_CTL_obtain_inputs(void) {
+void rSW_CTL_obtain_inputs(Bool from_files) {
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
 
-  if (useFiles) {
+  if (from_files) {
     SW_CTL_read_inputs_from_disk();
 
   } else { //Use R data to set the data
     #ifdef RSWDEBUG
-    if (debug) swprintf("'SW_CTL_obtain_inputs': Copy input from 'InputData':");
+    if (debug) swprintf("'rSW_CTL_obtain_inputs': Copy data from rSOILWAT2 S4 "
+      "'InputData' object to SOILWAT2 variables:");
     #endif
 
     onSet_SW_F(GET_SLOT(InputData, install("files")));
@@ -79,8 +82,20 @@ void rSW_CTL_obtain_inputs(void) {
 
     onSet_SW_WTH(GET_SLOT(InputData, install("weather")));
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'weather'");
+    if (debug) swprintf(" > 'weather-setup'");
     #endif
+
+    onSet_SW_SKY(GET_SLOT(InputData, install("cloud")));
+    #ifdef RSWDEBUG
+    if (debug) swprintf(" > 'climate'");
+    #endif
+
+    if (LOGICAL(GET_SLOT(GET_SLOT(InputData, install("weather")), install("use_Markov")))[0]) {
+      onSet_MKV(GET_SLOT(InputData, install("markov")));
+      #ifdef RSWDEBUG
+      if (debug) swprintf(" > 'mwgen'");
+      #endif
+    }
 
     onSet_SW_VPD(GET_SLOT(InputData, install("prod")));
     #ifdef RSWDEBUG
@@ -90,6 +105,11 @@ void rSW_CTL_obtain_inputs(void) {
     onSet_SW_SIT(GET_SLOT(InputData, install("site")));
     #ifdef RSWDEBUG
     if (debug) swprintf(" > 'site'");
+    #endif
+
+    onSet_SW_LYR(GET_SLOT(InputData, install("soils")));
+    #ifdef RSWDEBUG
+    if (debug) swprintf(" > 'soils'");
     #endif
 
     onSet_SW_VES(GET_SLOT(InputData, install("estab")));

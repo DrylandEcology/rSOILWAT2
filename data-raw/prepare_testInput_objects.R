@@ -55,13 +55,19 @@ for (it in seq_along(tests)) {
   substr(fin[line], 1, 1) <- "1"
   writeLines(fin, con = ftemp)
 
-  # Delete weather data
-  ftemp <- list.files(file.path(dir_in, examples[2], "Input", "data_weather"),
-    full.names = TRUE, pattern = "weath")
-  N <- length(ftemp)
-  stopifnot(N > 1)
-  n_delete <- min(10, N)
-  unlink(ftemp[(N - n_delete + 1):N])
+  # Use partial weather data
+  unlink(file.path(dir_in, examples[2], "Input", "data_weather"),
+    recursive = TRUE)
+
+  ftemp <- file.path(dir_in, examples[2], "files.in")
+  fin <- readLines(ftemp)
+  line <- grep("data file containing historical weather", fin,
+    ignore.case = TRUE)
+  stopifnot(length(line) == 1, line > 0, line < length(fin))
+  fin[line] <- sub("Input/data_weather/weath",
+    "Input/data_weather_missing/weath", x = fin[line])
+  writeLines(fin, con = ftemp)
+
 
 # example3: use soil temperature
   ftemp <- file.path(dir_in, examples[3], "Input", "siteparam.in")
@@ -92,7 +98,7 @@ for (it in seq_along(tests)) {
     files.in = "files.in")
 
   sw_weather <- slot(sw_input, "weatherHistory")
-  slot(sw_input, "weatherHistory") <- slot(sw_input, "weatherHistory")[1]
+  slot(sw_input, "weatherHistory") <- list(new("swWeatherData"))
 
   #---Files for unit testing
   saveRDS(sw_weather, file = file.path(dir_out,

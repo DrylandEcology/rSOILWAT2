@@ -5,7 +5,7 @@
 \title{Conversion: object of daily weather data.frame to matrix of monthly values
 (\var{mean Tmax}, \var{mean Tmin}, \var{sum PPT})}
 \usage{
-dbW_dataframe_to_monthly(dailySW)
+dbW_dataframe_to_monthly(dailySW, na.rm = FALSE)
 }
 \description{
 Conversion: object of daily weather data.frame to matrix of monthly values

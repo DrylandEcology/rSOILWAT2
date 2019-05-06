@@ -229,6 +229,10 @@ void onSet_SW_LYR(SEXP SW_SOILS) {
 		lyrno = _newlayer();
 		v->lyr[lyrno]->width = 1.0;
 	}
+
+
+	init_site_info();
+
 	UNPROTECT(1);
 }
 
@@ -536,11 +540,6 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 		}
 	}
 
-	onSet_SW_LYR(GET_SLOT(InputData,install("soils")));
-	init_site_info();
-	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'soils'");
-	#endif
 
 	if (EchoInits)
 		_echo_inputs();
