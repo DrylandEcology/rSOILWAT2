@@ -29,7 +29,8 @@
 #'   \url{https://github.com/DrylandEcology/rSFSTEP2/commit/cd9e161971136e1e56d427a4f76062bbb0f3d03a}
 #'
 #' @param weatherData A list of elements of class
-#'   \code{\linkS4class{swWeatherData}}.
+#'   \code{\linkS4class{swWeatherData}} or a \code{data.frame} as returned by
+#'   \code{\link{dbW_weatherData_to_dataframe}}.
 #' @param WET_limit_cm A numeric value. A day with more precipitation than
 #'   this value is considered \var{wet} instead of \var{dry}. Default is 0.
 #'   This values should be equal to the corresponding value used in
@@ -81,18 +82,27 @@
 #'   input object of class \code{\linkS4class{swInputData}}.
 #'
 #' @examples
-#' res <- dbW_estimate_WGen_coefs(rSOILWAT2::weatherData)
+#' res1 <- dbW_estimate_WGen_coefs(rSOILWAT2::weatherData)
+#' wdata <- data.frame(dbW_weatherData_to_dataframe(weatherData, valNA = NULL))
+#' res2 <- dbW_estimate_WGen_coefs(wdata)
 #'
 #' sw_in <- rSOILWAT2::sw_exampleData
 #' swMarkov_Prob(sw_in) <- res[["mkv_doy"]]
 #' swMarkov_Conv(sw_in) <- res[["mkv_woy"]]
 #'
 #' @export
-dbW_estimate_WGen_coefs <- function(weatherData,
-  WET_limit_cm = 0, na.rm = FALSE, valNA = NULL) {
+dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
+  na.rm = FALSE, valNA = NULL) {
 
   # daily weather data
-  wdata <- data.frame(dbW_weatherData_to_dataframe(weatherData, valNA = valNA))
+  if (inherits(weatherData, "list") &&
+      all(sapply(weatherData, inherits, what = "swWeatherData"))) {
+    wdata <- data.frame(dbW_weatherData_to_dataframe(weatherData,
+      valNA = valNA))
+  } else {
+    wdata <- data.frame(set_missing_weather(weatherData, valNA = valNA))
+  }
+
   n_days <- nrow(wdata)
 
 
