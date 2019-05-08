@@ -164,7 +164,7 @@ dbW_estimate_WGen_coefs <- function(weatherData,
 
   #--- Check that no missing coefficients
   if (anyNA(mkv_prob)) {
-    ids_baddoy <- mkv_prob[apply(mkv_prob, 1, anyNA), "WEEK"]
+    ids_baddoy <- mkv_prob[apply(mkv_prob, 1, anyNA), "DOY"]
     warning("Insufficient data to estimate values for n = ",
       length(ids_baddoy), " DOYs: ", paste(ids_baddoy, collapse = ", "))
   }
