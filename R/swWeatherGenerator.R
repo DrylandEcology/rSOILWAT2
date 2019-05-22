@@ -39,6 +39,17 @@
 #'   in the input \code{weatherData} are excluded; if \code{FALSE}, then
 #'   missing values are propagated.
 #' @inheritParams set_missing_weather
+#' @param imputation_type A character string; currently, one of three options:
+#'   \describe{
+#'     \item{\var{"none"}}{no imputation is carried out; note: any \code{NA}s
+#'       will likely cause a \pkg{SOILWAT2} simulation to fail;}
+#'     \item{\var{"meanX"}}{missing value will be replaced by the average
+#'       of \var{X} non-missing values before and \var{X} non-missing values
+#'       after; \var{X} must be a positive integer; note: this may fail if
+#'       there are less than \var{2 * X} non-missing values;}
+#'     \item{\var{"locf"}{missing values will be replaced by the
+#'       "last-obsevation-carried-forward" imputation method.}}
+#'  }
 #'
 #' @return A list with two named elements:
 #'   \describe{
@@ -92,7 +103,18 @@
 #'
 #' @export
 dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
-  na.rm = FALSE, valNA = NULL) {
+  na.rm = FALSE, valNA = NULL, imputation_type = c("none", "mean5", "locf")) {
+
+  if (grepl("mean", imputation_type)) {
+    temp <- regexec("[[:digit:]]+", imputation_type)[[1]]
+    imputation_span <- if (temp > 0) {
+        as.integer(regmatches(imputation_type, temp))
+      } else {
+        5L
+      }
+
+    imputation_type <- "mean"
+  }
 
   # daily weather data
   if (inherits(weatherData, "list") &&
@@ -130,7 +152,12 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   temp <- by(wdata[, c("WET", "PPT_cm")], INDICES = wdata[, "DOY"],
     function(x) {
       ppt <- x[x[, "WET"], "PPT_cm"]
-      c(PPT_avg = mean(ppt, na.rm = na.rm), PPT_sd = sd(ppt, na.rm = na.rm))
+      if (length(ppt) > 0) {
+        c(PPT_avg = mean(ppt, na.rm = na.rm), PPT_sd = sd(ppt, na.rm = na.rm))
+      } else {
+        # there are no wet days for this DOY; thus PPT = 0
+        c(PPT_avg = 0, PPT_sd = 0)
+      }
     })
   mkv_prob[, c("PPT_avg", "PPT_sd")] <- do.call(rbind, temp)
 
@@ -141,8 +168,10 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   #    dryprob = p(wet|dry) = "p_W_D" #nolint
   #    = probability that it precipitates today if it was dry
   #      (did not precipitate) yesterday
-  temp <- by(wdata[, c("WET_yesterday", "WW", "WD")], INDICES = wdata[, "DOY"],
-    function(x) {
+  temp <- by(wdata[, c("WET", "WET_yesterday", "WW", "WD")],
+    INDICES = wdata[, "DOY"], function(x) {
+      # p(wet): probability that today is wet
+      p_W <- mean(x[, "WET"], na.rm = na.rm)
       # number of DOY = i that follow a wet day
       n_Wy <- sum(x[, "WET_yesterday"], na.rm = na.rm)
       # number of DOY = i that follow a dry day
@@ -152,11 +181,11 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
         # `wetprob` calculated as the number of years with doy being wet
         # given previous day is wet divided by the number of years with
         # the previous day being wet
-        p_W_W = sum(x[, "WW"], na.rm = na.rm) / n_Wy,
+        p_W_W = if (n_Wy > 0) sum(x[, "WW"], na.rm = na.rm) / n_Wy else p_W,
          # `dryprob` calculated as the number of years with doy being wet
         # given previous day is wet divided by the number of years with
         # the previous day being wet
-        p_W_D = sum(x[, "WD"], na.rm = na.rm) / n_Dy)
+        p_W_D = if (n_Dy > 0) sum(x[, "WD"], na.rm = na.rm) / n_Dy else p_W)
     })
   mkv_prob[, c("p_W_W", "p_W_D")] <- do.call(rbind, temp)
 
@@ -175,8 +204,17 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   #--- Check that no missing coefficients
   if (anyNA(mkv_prob)) {
     ids_baddoy <- mkv_prob[apply(mkv_prob, 1, anyNA), "DOY"]
-    warning("Insufficient data to estimate values for n = ",
-      length(ids_baddoy), " DOYs: ", paste(ids_baddoy, collapse = ", "))
+
+    msg <- paste0("values for n = ", length(ids_baddoy), " DOYs: ",
+      paste(ids_baddoy, collapse = ", "))
+
+    if (imputation_type == "none") {
+      warning("Insufficient weather data to estimate ", msg)
+    } else {
+      message("Impute missing `mkv_prob` ", msg)
+      mkv_prob <- impute_df(mkv_prob, imputation_type = imputation_type,
+        span = imputation_span)
+    }
   }
 
 
@@ -220,11 +258,34 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   # if that target day is wet or dry (e.g., overcast weather tends to
   # increase minimum daily temperature and decrease maximum daily tempature)
   temp <- by(wdata[, c("WET", "Tmax_C", "Tmin_C")], INDICES = wdata[, "WEEK"],
-    function(x)
-      c(Tmax_mean_wet = mean(x[x[, "WET"], "Tmax_C"], na.rm = na.rm),
-        Tmax_mean_dry = mean(x[!x[, "WET"], "Tmax_C"], na.rm = na.rm),
-        Tmin_mean_wet = mean(x[x[, "WET"], "Tmin_C"], na.rm = na.rm),
-        Tmin_mean_dry = mean(x[!x[, "WET"], "Tmin_C"], na.rm = na.rm))
+    function(x) {
+      iswet <- x[, "WET"]
+      isanywet <- any(iswet, na.rm = na.rm)
+      isdry <- !iswet
+      isanydry <- any(isdry, na.rm = na.rm)
+
+      c(Tmax_mean_wet = if (isanywet) {
+            mean(x[iswet, "Tmax_C"], na.rm = na.rm)
+          } else {
+            mean(x[, "Tmax_C"], na.rm = na.rm)
+          },
+        Tmax_mean_dry = if (isanydry) {
+            mean(x[isdry, "Tmax_C"], na.rm = na.rm)
+          } else {
+            mean(x[, "Tmax_C"], na.rm = na.rm)
+          },
+        Tmin_mean_wet = if (isanywet) {
+            mean(x[iswet, "Tmin_C"], na.rm = na.rm)
+          } else {
+            mean(x[, "Tmin_C"], na.rm = na.rm)
+          },
+        Tmin_mean_dry = if (isanydry) {
+            mean(x[isdry, "Tmin_C"], na.rm = na.rm)
+          } else {
+            mean(x[, "Tmin_C"], na.rm = na.rm)
+          }
+      )
+    }
   )
   temp <- do.call(rbind, temp)
 
@@ -237,14 +298,104 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   #--- Check that no missing coefficients
   if (anyNA(mkv_cov)) {
     ids_badweek <- mkv_cov[apply(mkv_cov, 1, anyNA), "WEEK"]
-    warning("Insufficient data to estimate values for n = ",
-      length(ids_badweek), " weeks: ", paste(ids_badweek, collapse = ", "))
+
+    msg <- paste0("values for n = ", length(ids_badweek), " weeks: ",
+      paste(ids_badweek, collapse = ", "))
+
+    if (imputation_type == "none") {
+      warning("Insufficient weather data to estimate ", msg)
+    } else {
+      message("Impute missing `mkv_cov` ", msg)
+      mkv_cov <- impute_df(mkv_cov, imputation_type = imputation_type,
+        span = imputation_span)
+    }
   }
 
 
   list(mkv_woy = mkv_cov, mkv_doy = mkv_prob)
 }
 
+
+#' Imputes missing values in a data.frame
+#'
+#' @param x A \code{\link{data.frame}} with numerical columns.
+#' @param imputation_type A character string; currently, one of two values:
+#'   \describe{
+#'     \item{\var{"none"}}{no imputation is carried out;}
+#'     \item{\var{"mean"}}{missing value will be replaced by the average
+#'       of \code{span} non-missing values before and \code{span} non-missing
+#'       values after; note: this may fail if there are less than
+#'       \code{2 * span} non-missing values;}
+#'     \item{\var{"locf"}{missing values will be replaced by the
+#'       "last-obsevation-carried-forward" imputation method.}
+#'  }
+#' @param span An integer value. The number of non-missing values considered
+#'   if \code{imputation_type = "mean"}.
+#'
+#' @return An updated version of \code{x}.
+#'
+#' @export
+impute_df <- function(x, imputation_type = c("none", "mean", "locf"),
+  span = 5L) {
+
+  imputation_type <- match.arg(imputation_type)
+  span <- round(span)
+
+  if (imputation_type == "none") {
+    return(x)
+  }
+
+  #--- imputations
+  icols_withNAs <- which(apply(x, 2, anyNA))
+
+  for (k1 in icols_withNAs) {
+    irows_withNA <- which(is.na(x[, k1]))
+
+    for (k2 in irows_withNA) {
+      if (imputation_type == "mean" && span > 0) {
+        #--- imputation by mean of neighbor values
+        spank <- span
+
+        # locate a sufficient number of non-missing neighbors
+        repeat {
+          temp <- 1 + (seq(k2 - spank, k2 + spank) - 1) %% 366
+          ids_source <- temp[!(temp %in% irows_withNA)]
+
+          if (length(ids_source) >= 2 * span || spank >= 366) {
+            break
+          } else {
+            spank <- spank + 1
+          }
+        }
+
+        # impute mean of neighbors
+        x[k2, k1] <- mean(x[ids_source, k1])
+
+
+      } else if (imputation_type == "locf") {
+        #--- imputation by last-observation carried forward
+        dlast <- 1
+
+        # locate last non-missing value
+        repeat {
+          temp <- 1 + (k2 - dlast - 1) %% 366
+          ids_source <- temp[!(temp %in% irows_withNA)]
+
+          if (length(ids_source) == 1 || dlast >= 366) {
+            break
+          } else {
+            dlast <- dlast + 1
+          }
+        }
+
+        # impute locf
+        x[k2, k1] <- x[ids_source, k1]
+      }
+    }
+  }
+
+  x
+}
 
 
 #' Print Markov weather generator files as required by \var{SOILWAT2}
