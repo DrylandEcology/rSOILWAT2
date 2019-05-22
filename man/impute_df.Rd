@@ -4,24 +4,26 @@
 \alias{impute_df}
 \title{Imputes missing values in a data.frame}
 \usage{
-impute_df(x, imputation_type = c("none", "mean", "locf"), span = 5L)
+impute_df(x, imputation_type = c("none", "mean", "locf"),
+  imputation_span = 5L)
 }
 \arguments{
 \item{x}{A \code{\link{data.frame}} with numerical columns.}
 
-\item{imputation_type}{A character string; currently, one of two values:
- \describe{
+\item{imputation_type}{A character string describing the imputation method;
+ currently, one of three values: \describe{
    \item{\var{"none"}}{no imputation is carried out;}
    \item{\var{"mean"}}{missing values will be replaced by the average
-     of \code{span} non-missing values before and \code{span} non-missing
-     values after; note: this may fail if there are less than
-     \code{2 * span} non-missing values;}
+     of \code{imputation_span} non-missing values before and
+     \code{imputation_span} non-missing values after; note:
+     this may fail if there are less than \code{2 * imputation_span}
+     non-missing values;}
    \item{\var{"locf"}}{missing values will be replaced by the
      \var{"last-observation-carried-forward"} imputation method.}
 }}
 
-\item{span}{An integer value. The number of non-missing values considered
-if \code{imputation_type = "mean"}.}
+\item{imputation_span}{An integer value. The number of non-missing values
+considered if \code{imputation_type = "mean"}.}
 }
 \value{
 An updated version of \code{x}.

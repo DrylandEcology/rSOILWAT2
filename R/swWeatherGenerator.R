@@ -28,6 +28,15 @@
 #'   from \var{rSFSTEP2} on \code{2019-Feb-10}
 #'   \url{https://github.com/DrylandEcology/rSFSTEP2/commit/cd9e161971136e1e56d427a4f76062bbb0f3d03a}
 #'
+#' @section Notes: This function will produce \code{NA}s in the output if there
+#'   are insufficient weather observation in the input data \code{weatherData}
+#'   for a specific day or week of the year. Such \code{NA}s will cause a
+#'   \var{SOILWAT2} run to fail (potentially non-graciously and
+#'   with non-obvious error messages). To avoid that, this function offers
+#'   imputation approaches in order to fill in those un-estimated coefficients;
+#'   see \code{\link{impute_df}}, but please note that any such imputation
+#'   likely introduces biases in the generated weather.
+#'
 #' @param weatherData A list of elements of class
 #'   \code{\linkS4class{swWeatherData}} or a \code{data.frame} as returned by
 #'   \code{\link{dbW_weatherData_to_dataframe}}.
@@ -39,18 +48,7 @@
 #'   in the input \code{weatherData} are excluded; if \code{FALSE}, then
 #'   missing values are propagated.
 #' @inheritParams set_missing_weather
-#' @param imputation_type A character string; currently, one of three options
-#'   used as arguments to call \code{\link{impute_df}}:
-#'   \describe{
-#'     \item{\var{"none"}}{no imputation is carried out; note: any \code{NA}s
-#'       will likely cause a \var{SOILWAT2} simulation to fail;}
-#'     \item{\var{"meanX"}}{missing values will be replaced by the average
-#'       of \var{X} non-missing values before and \var{X} non-missing values
-#'       after; \var{X} must be a positive integer; note: this may fail if
-#'       there are less than \var{2 * X} non-missing values;}
-#'     \item{\var{"locf"}}{missing values will be replaced by the
-#'       \var{"last-observation-carried-forward"} imputation method.}
-#'  }
+#' @inheritParams impute_df
 #'
 #' @return A list with two named elements:
 #'   \describe{
@@ -104,20 +102,8 @@
 #'
 #' @export
 dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
-  na.rm = FALSE, valNA = NULL, imputation_type = c("none", "mean5", "locf")) {
-
-  imputation_type <- match.arg(imputation_type)
-
-  if (grepl("mean", imputation_type)) {
-    temp <- regexec("[[:digit:]]+", imputation_type)[[1]]
-    imputation_span <- if (temp > 0) {
-        as.integer(regmatches(imputation_type, temp))
-      } else {
-        5L
-      }
-
-    imputation_type <- "mean"
-  }
+  na.rm = FALSE, valNA = NULL, imputation_type = c("none", "mean", "locf"),
+  imputation_span = 5L) {
 
   # daily weather data
   if (inherits(weatherData, "list") &&
@@ -216,7 +202,7 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
     } else {
       message("Impute missing `mkv_prob` ", msg)
       mkv_prob <- impute_df(mkv_prob, imputation_type = imputation_type,
-        span = imputation_span)
+        imputation_span = imputation_span)
     }
   }
 
@@ -310,7 +296,7 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
     } else {
       message("Impute missing `mkv_cov` ", msg)
       mkv_cov <- impute_df(mkv_cov, imputation_type = imputation_type,
-        span = imputation_span)
+        imputation_span = imputation_span)
     }
   }
 
@@ -322,28 +308,29 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
 #' Imputes missing values in a data.frame
 #'
 #' @param x A \code{\link{data.frame}} with numerical columns.
-#' @param imputation_type A character string; currently, one of two values:
-#'   \describe{
+#' @param imputation_type A character string describing the imputation method;
+#'   currently, one of three values: \describe{
 #'     \item{\var{"none"}}{no imputation is carried out;}
 #'     \item{\var{"mean"}}{missing values will be replaced by the average
-#'       of \code{span} non-missing values before and \code{span} non-missing
-#'       values after; note: this may fail if there are less than
-#'       \code{2 * span} non-missing values;}
+#'       of \code{imputation_span} non-missing values before and
+#'       \code{imputation_span} non-missing values after; note:
+#'       this may fail if there are less than \code{2 * imputation_span}
+#'       non-missing values;}
 #'     \item{\var{"locf"}}{missing values will be replaced by the
 #'       \var{"last-observation-carried-forward"} imputation method.}
 #'  }
-#' @param span An integer value. The number of non-missing values considered
-#'   if \code{imputation_type = "mean"}.
+#' @param imputation_span An integer value. The number of non-missing values
+#'   considered if \code{imputation_type = "mean"}.
 #'
 #' @return An updated version of \code{x}.
 #'
 #' @export
 impute_df <- function(x, imputation_type = c("none", "mean", "locf"),
-  span = 5L) {
+  imputation_span = 5L) {
 
   imputation_type <- match.arg(imputation_type)
   if (imputation_type == "mean") {
-    span <- round(span)
+    imputation_span <- round(imputation_span)
   }
 
   if (imputation_type == "none") {
@@ -357,16 +344,16 @@ impute_df <- function(x, imputation_type = c("none", "mean", "locf"),
     irows_withNA <- which(is.na(x[, k1]))
 
     for (k2 in irows_withNA) {
-      if (imputation_type == "mean" && span > 0) {
+      if (imputation_type == "mean" && imputation_span > 0) {
         #--- imputation by mean of neighbor values
-        spank <- span
+        spank <- imputation_span
 
         # locate a sufficient number of non-missing neighbors
         repeat {
           temp <- 1 + (seq(k2 - spank, k2 + spank) - 1) %% 366
           ids_source <- temp[!(temp %in% irows_withNA)]
 
-          if (length(ids_source) >= 2 * span || spank >= 366) {
+          if (length(ids_source) >= 2 * imputation_span || spank >= 366) {
             break
           } else {
             spank <- spank + 1

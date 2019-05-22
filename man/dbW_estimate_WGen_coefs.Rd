@@ -5,7 +5,8 @@
 \title{Estimate coefficients for use by \var{SOILWAT2} weather generator}
 \usage{
 dbW_estimate_WGen_coefs(weatherData, WET_limit_cm = 0, na.rm = FALSE,
-  valNA = NULL, imputation_type = c("none", "mean5", "locf"))
+  valNA = NULL, imputation_type = c("none", "mean", "locf"),
+  imputation_span = 5L)
 }
 \arguments{
 \item{weatherData}{A list of elements of class
@@ -24,18 +25,20 @@ missing values are propagated.}
 \item{valNA}{The (numerical) value of missing weather data.
 If \code{NULL}, then default values are interpreted as missing.}
 
-\item{imputation_type}{A character string; currently, one of three options
- used as arguments to call \code{\link{impute_df}}:
- \describe{
-   \item{\var{"none"}}{no imputation is carried out; note: any \code{NA}s
-     will likely cause a \var{SOILWAT2} simulation to fail;}
-   \item{\var{"meanX"}}{missing values will be replaced by the average
-     of \var{X} non-missing values before and \var{X} non-missing values
-     after; \var{X} must be a positive integer; note: this may fail if
-     there are less than \var{2 * X} non-missing values;}
+\item{imputation_type}{A character string describing the imputation method;
+ currently, one of three values: \describe{
+   \item{\var{"none"}}{no imputation is carried out;}
+   \item{\var{"mean"}}{missing values will be replaced by the average
+     of \code{imputation_span} non-missing values before and
+     \code{imputation_span} non-missing values after; note:
+     this may fail if there are less than \code{2 * imputation_span}
+     non-missing values;}
    \item{\var{"locf"}}{missing values will be replaced by the
      \var{"last-observation-carried-forward"} imputation method.}
 }}
+
+\item{imputation_span}{An integer value. The number of non-missing values
+considered if \code{imputation_type = "mean"}.}
 }
 \value{
 A list with two named elements:
@@ -83,6 +86,15 @@ Markov weather generator in \var{SOILWAT2} \var{> v4.2.5}.
  This code is a complete overhaul compared to the version
   from \var{rSFSTEP2} on \code{2019-Feb-10}
   \url{https://github.com/DrylandEcology/rSFSTEP2/commit/cd9e161971136e1e56d427a4f76062bbb0f3d03a}
+
+ This function will produce \code{NA}s in the output if there
+  are insufficient weather observation in the input data \code{weatherData}
+  for a specific day or week of the year. Such \code{NA}s will cause a
+  \var{SOILWAT2} run to fail (potentially non-graciously and
+  with non-obvious error messages). To avoid that, this function offers
+  imputation approaches in order to fill in those un-estimated coefficients;
+  see \code{\link{impute_df}}, but please note that any such imputation
+  likely introduces biases in the generated weather.
 }
 
 \examples{
