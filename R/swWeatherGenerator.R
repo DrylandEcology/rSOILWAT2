@@ -342,7 +342,9 @@ impute_df <- function(x, imputation_type = c("none", "mean", "locf"),
   span = 5L) {
 
   imputation_type <- match.arg(imputation_type)
-  span <- round(span)
+  if (imputation_type == "mean") {
+    span <- round(span)
+  }
 
   if (imputation_type == "none") {
     return(x)
