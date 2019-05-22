@@ -91,8 +91,8 @@ wdata <- data.frame(dbW_weatherData_to_dataframe(weatherData, valNA = NULL))
 res2 <- dbW_estimate_WGen_coefs(wdata)
 
 sw_in <- rSOILWAT2::sw_exampleData
-swMarkov_Prob(sw_in) <- res[["mkv_doy"]]
-swMarkov_Conv(sw_in) <- res[["mkv_woy"]]
+swMarkov_Prob(sw_in) <- res2[["mkv_doy"]]
+swMarkov_Conv(sw_in) <- res2[["mkv_woy"]]
 
 }
 \seealso{
