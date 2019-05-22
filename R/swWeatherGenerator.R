@@ -39,16 +39,17 @@
 #'   in the input \code{weatherData} are excluded; if \code{FALSE}, then
 #'   missing values are propagated.
 #' @inheritParams set_missing_weather
-#' @param imputation_type A character string; currently, one of three options:
+#' @param imputation_type A character string; currently, one of three options
+#'   used as arguments to call \code{\link{impute_df}}:
 #'   \describe{
 #'     \item{\var{"none"}}{no imputation is carried out; note: any \code{NA}s
-#'       will likely cause a \pkg{SOILWAT2} simulation to fail;}
-#'     \item{\var{"meanX"}}{missing value will be replaced by the average
+#'       will likely cause a \var{SOILWAT2} simulation to fail;}
+#'     \item{\var{"meanX"}}{missing values will be replaced by the average
 #'       of \var{X} non-missing values before and \var{X} non-missing values
 #'       after; \var{X} must be a positive integer; note: this may fail if
 #'       there are less than \var{2 * X} non-missing values;}
-#'     \item{\var{"locf"}{missing values will be replaced by the
-#'       "last-obsevation-carried-forward" imputation method.}}
+#'     \item{\var{"locf"}}{missing values will be replaced by the
+#'       \var{"last-observation-carried-forward"} imputation method.}
 #'  }
 #'
 #' @return A list with two named elements:
@@ -104,6 +105,8 @@
 #' @export
 dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   na.rm = FALSE, valNA = NULL, imputation_type = c("none", "mean5", "locf")) {
+
+  imputation_type <- match.arg(imputation_type)
 
   if (grepl("mean", imputation_type)) {
     temp <- regexec("[[:digit:]]+", imputation_type)[[1]]
@@ -322,12 +325,12 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
 #' @param imputation_type A character string; currently, one of two values:
 #'   \describe{
 #'     \item{\var{"none"}}{no imputation is carried out;}
-#'     \item{\var{"mean"}}{missing value will be replaced by the average
+#'     \item{\var{"mean"}}{missing values will be replaced by the average
 #'       of \code{span} non-missing values before and \code{span} non-missing
 #'       values after; note: this may fail if there are less than
 #'       \code{2 * span} non-missing values;}
-#'     \item{\var{"locf"}{missing values will be replaced by the
-#'       "last-obsevation-carried-forward" imputation method.}
+#'     \item{\var{"locf"}}{missing values will be replaced by the
+#'       \var{"last-observation-carried-forward"} imputation method.}
 #'  }
 #' @param span An integer value. The number of non-missing values considered
 #'   if \code{imputation_type = "mean"}.

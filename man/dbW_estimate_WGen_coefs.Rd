@@ -5,11 +5,12 @@
 \title{Estimate coefficients for use by \var{SOILWAT2} weather generator}
 \usage{
 dbW_estimate_WGen_coefs(weatherData, WET_limit_cm = 0, na.rm = FALSE,
-  valNA = NULL)
+  valNA = NULL, imputation_type = c("none", "mean5", "locf"))
 }
 \arguments{
 \item{weatherData}{A list of elements of class
-\code{\linkS4class{swWeatherData}}.}
+\code{\linkS4class{swWeatherData}} or a \code{data.frame} as returned by
+\code{\link{dbW_weatherData_to_dataframe}}.}
 
 \item{WET_limit_cm}{A numeric value. A day with more precipitation than
 this value is considered \var{wet} instead of \var{dry}. Default is 0.
@@ -22,6 +23,19 @@ missing values are propagated.}
 
 \item{valNA}{The (numerical) value of missing weather data.
 If \code{NULL}, then default values are interpreted as missing.}
+
+\item{imputation_type}{A character string; currently, one of three options
+ used as arguments to call \code{\link{impute_df}}:
+ \describe{
+   \item{\var{"none"}}{no imputation is carried out; note: any \code{NA}s
+     will likely cause a \var{SOILWAT2} simulation to fail;}
+   \item{\var{"meanX"}}{missing values will be replaced by the average
+     of \var{X} non-missing values before and \var{X} non-missing values
+     after; \var{X} must be a positive integer; note: this may fail if
+     there are less than \var{2 * X} non-missing values;}
+   \item{\var{"locf"}}{missing values will be replaced by the
+     \var{"last-observation-carried-forward"} imputation method.}
+}}
 }
 \value{
 A list with two named elements:
@@ -72,7 +86,9 @@ Markov weather generator in \var{SOILWAT2} \var{> v4.2.5}.
 }
 
 \examples{
-res <- dbW_estimate_WGen_coefs(rSOILWAT2::weatherData)
+res1 <- dbW_estimate_WGen_coefs(rSOILWAT2::weatherData)
+wdata <- data.frame(dbW_weatherData_to_dataframe(weatherData, valNA = NULL))
+res2 <- dbW_estimate_WGen_coefs(wdata)
 
 sw_in <- rSOILWAT2::sw_exampleData
 swMarkov_Prob(sw_in) <- res[["mkv_doy"]]
