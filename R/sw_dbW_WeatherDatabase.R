@@ -1158,26 +1158,63 @@ dbW_weatherData_to_monthly <- function(dailySW, na.rm = FALSE, valNA = NULL) {
   monthly
 }
 
+
+#' Aggregate daily weather data.frame to weekly, monthly, or yearly values
+#' @export
+dbW_dataframe_aggregate <- function(dailySW,
+  time_step = c("Year", "Month", "Week", "Day"), na.rm = FALSE) {
+
+  time_step <- match.arg(time_step)
+
+  if (time_step == "Day") {
+    return(dailySW)
+  }
+
+  icol_day <- grep("DOY|Day", colnames(dailySW), ignore.case = TRUE,
+    value = TRUE)
+
+  temp <- apply(dailySW[, c("Year", icol_day)], 1, paste, collapse = "-")
+  temp <- as.POSIXlt(temp, format = "%Y-%j", tz = "UTC")
+  ytemp <- 1900L + unique(temp$year)
+
+  if (time_step == "Year") {
+    idaggs <- list(dailySW[, "Year"])
+    hout <- data.frame(Year = ytemp)
+
+  } else if (time_step == "Month") {
+    idaggs <- list(1L + temp$mon, dailySW[, "Year"])
+    hout <- data.frame(
+      Year = rep(ytemp, each = 12),
+      Month = rep(seq_len(12), times = length(ytemp))
+    )
+
+  } else if (time_step == "Week") {
+    idaggs <- list(1L + floor(temp$yday / 7), dailySW[, "Year"])
+    hout <- data.frame(
+      Year = rep(ytemp, each = 53),
+      Week = rep(seq_len(53), times = length(ytemp))
+    )
+  }
+
+  as.matrix(cbind(hout,
+    Tmax_C = as.vector(tapply(dailySW[, "Tmax_C"], INDEX = idaggs, FUN = mean,
+      na.rm = na.rm)),
+    Tmin_C = as.vector(tapply(dailySW[, "Tmin_C"], INDEX = idaggs, FUN = mean,
+      na.rm = na.rm)),
+    PPT_cm = as.vector(tapply(dailySW[, "PPT_cm"], INDEX = idaggs, FUN = sum,
+      na.rm = na.rm))
+  ))
+
+}
+
 #' Conversion: object of daily weather data.frame to matrix of monthly values
 #' (\var{mean Tmax}, \var{mean Tmin}, \var{sum PPT})
 #' @export
 dbW_dataframe_to_monthly <- function(dailySW, na.rm = FALSE) {
-  temp <- apply(dailySW[, c("Year", "DOY")], 1, paste, collapse = "-")
-  temp <- as.POSIXlt(temp, format = "%Y-%j", tz = "UTC")
-  ytemp <- unique(temp$year)
-  year <- rep(1900L + ytemp, each = 12)
-  month <- rep(seq_len(12), times = length(ytemp))
-  ltemp <- list(1L + temp$mon, dailySW[, "Year"])
-
-  as.matrix(cbind(Year = year, Month = month,
-    Tmax_C = as.vector(tapply(dailySW[, "Tmax_C"], INDEX = ltemp, FUN = mean,
-      na.rm = na.rm)),
-    Tmin_C = as.vector(tapply(dailySW[, "Tmin_C"], INDEX = ltemp, FUN = mean,
-      na.rm = na.rm)),
-    PPT_cm = as.vector(tapply(dailySW[, "PPT_cm"], INDEX = ltemp, FUN = sum,
-      na.rm = na.rm))
-  ))
+  dbW_dataframe_aggregate(dailySW, time_step = "Month", na.rm = na.rm)
 }
+
+
 
 
 #' Assign years to weather data.frame
