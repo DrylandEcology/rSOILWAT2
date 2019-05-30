@@ -116,9 +116,13 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
 
   n_days <- nrow(wdata)
 
+  imputation_type <- match.arg(imputation_type)
 
   #-----------------------------------------------------------------------------
   #------ calculate mkv_prob.in
+  icol_day <- grep("DOY|Day", colnames(wdata), ignore.case = TRUE,
+    value = TRUE)
+
   #--- calculate WET days
   wdata[["WET"]] <- wdata[["PPT_cm"]] > WET_limit_cm
   wdata[["WET_yesterday"]] <- c(wdata[["WET"]][n_days], wdata[["WET"]][-n_days])
@@ -138,9 +142,9 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   mkv_prob[, "DOY"] <- seq_len(doys)
 
   #--- mean/sd of precipitation across years for doy i if it is a wet day
-  temp <- by(wdata[, c("WET", "PPT_cm")], INDICES = wdata[, "DOY"],
+  temp <- by(wdata[, c("WET", "PPT_cm")], INDICES = wdata[, icol_day],
     function(x) {
-      ppt <- x[x[, "WET"], "PPT_cm"]
+      ppt <- x[which(x[, "WET"]), "PPT_cm"]
       if (length(ppt) > 0) {
         c(PPT_avg = mean(ppt, na.rm = na.rm), PPT_sd = sd(ppt, na.rm = na.rm))
       } else {
@@ -158,7 +162,7 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   #    = probability that it precipitates today if it was dry
   #      (did not precipitate) yesterday
   temp <- by(wdata[, c("WET", "WET_yesterday", "WW", "WD")],
-    INDICES = wdata[, "DOY"], function(x) {
+    INDICES = wdata[, icol_day], function(x) {
       # p(wet): probability that today is wet
       p_W <- mean(x[, "WET"], na.rm = na.rm)
       # number of DOY = i that follow a wet day
@@ -170,24 +174,28 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
         # `wetprob` calculated as the number of years with doy being wet
         # given previous day is wet divided by the number of years with
         # the previous day being wet
-        p_W_W = if (n_Wy > 0) sum(x[, "WW"], na.rm = na.rm) / n_Wy else p_W,
+        p_W_W = if (isTRUE(n_Wy > 0)) {
+            sum(x[, "WW"], na.rm = na.rm) / n_Wy
+          } else {
+            p_W
+          },
          # `dryprob` calculated as the number of years with doy being wet
         # given previous day is dry divided by the number of years with
         # the previous day being dry
-        p_W_D = if (n_Dy > 0) sum(x[, "WD"], na.rm = na.rm) / n_Dy else p_W)
+        p_W_D = if (isTRUE(n_Dy > 0)) {
+            sum(x[, "WD"], na.rm = na.rm) / n_Dy
+          } else {
+            p_W
+          })
     })
   mkv_prob[, c("p_W_W", "p_W_D")] <- do.call(rbind, temp)
 
   #--- Make sure probability values are well formed: finite & 0 <= p <= 1
-  ids_bad0 <- !is.finite(mkv_prob[, "p_W_W"]) | mkv_prob[, "p_W_W"] < 0
-  if (any(ids_bad0, na.rm = na.rm)) {
-    mkv_prob[ids_bad0, "p_W_W"] <- 0
-  }
+  ids_bad0 <- which(!is.finite(mkv_prob[, "p_W_W"]) | mkv_prob[, "p_W_W"] < 0)
+  mkv_prob[ids_bad0, "p_W_W"] <- 0
 
-  ids_bad1 <- mkv_prob[, "p_W_W"] > 1
-  if (any(ids_bad1, na.rm = na.rm)) {
-    mkv_prob[ids_bad1, "p_W_W"] <- 1
-  }
+  ids_bad1 <- which(mkv_prob[, "p_W_W"] > 1)
+  mkv_prob[ids_bad1, "p_W_W"] <- 1
 
 
   #--- Check that no missing coefficients
@@ -212,7 +220,7 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   #------ mkv_covar.in
 
   #--- week as interpreted by SOILWAT2 function `Doy2Week`
-  wdata[["WEEK"]] <- 1 + floor((wdata[["DOY"]] - 1) / 7)
+  wdata[["WEEK"]] <- 1 + floor((wdata[[icol_day]] - 1) / 7)
 
   #--- output container: dataframe for storing mkv_cov.in data
   weeks <- 53 # see SOILWAT2 constant `MAX_WEEKS`
@@ -248,10 +256,10 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   # increase minimum daily temperature and decrease maximum daily tempature)
   temp <- by(wdata[, c("WET", "Tmax_C", "Tmin_C")], INDICES = wdata[, "WEEK"],
     function(x) {
-      iswet <- x[, "WET"]
-      isanywet <- any(iswet, na.rm = na.rm)
+      iswet <- which(x[, "WET"])
+      isanywet <- isTRUE(any(iswet, na.rm = na.rm))
       isdry <- !iswet
-      isanydry <- any(isdry, na.rm = na.rm)
+      isanydry <- isTRUE(any(isdry, na.rm = na.rm))
 
       c(Tmax_mean_wet = if (isanywet) {
             mean(x[iswet, "Tmax_C"], na.rm = na.rm)
