@@ -1,5 +1,6 @@
 Meta
 doc
+
 # Compiled source #
 ###################
 *.com
@@ -20,14 +21,26 @@ doc
 .Trashes
 ehthumbs.db
 Thumbs.db
-#eclipse project files
+
+# eclipse project files
 .cproject
 .project
 .settings/
+
 # R stuff
 .RData
 .Rhistory
+.Rproj.user
+
+
+# Package check files
 ..Rcheck
+rSOILWAT2.Rcheck
+rSOILWAT_IntegrationTestOutput/
+
+# Package builds
+*tar.gz
+
 # Example code in package build process
 *-Ex.R
 inst/doc

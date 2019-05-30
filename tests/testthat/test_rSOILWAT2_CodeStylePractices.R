@@ -7,6 +7,7 @@ pkg_path <- pkg_temp_dir()
 #--- Code style
 test_that("Package code style", {
   # Check locally and on travis
+  skip_if_not(identical(tolower(Sys.getenv("RSOILWAT_ALLTESTS")), "true"))
   skip_on_cran()
   skip_on_appveyor()
   # minimum version of lintr required for:
@@ -60,6 +61,7 @@ test_that("Package code style", {
 test_that("Package good practices", {
   skip(paste("rSOILWAT2 is not ready for 'good practices' ...;",
     "'goodpractice' should be run manually instead"))
+  skip_if_not(identical(tolower(Sys.getenv("RSOILWAT_ALLTESTS")), "true"))
   skip_on_cran()
   skip_on_travis()
   skip_on_appveyor()

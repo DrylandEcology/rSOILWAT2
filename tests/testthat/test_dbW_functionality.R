@@ -329,7 +329,7 @@ unlink(fdbWeather2, force = TRUE)
 
 
 #--- Non-dbW functions
-test_that("Manipulate weather data", {
+test_that("Manipulate weather data: years", {
 
   datA <- getWeatherData_folders(LookupWeatherFolder = file.path(path_extdata,
     paste0("example1"), "Input"), weatherDirName = "data_weather",
