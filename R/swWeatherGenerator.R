@@ -430,3 +430,328 @@ print_mkv_files <- function(mkv_doy, mkv_woy, path, digits = 5) {
 
   invisible(TRUE)
 }
+
+
+
+# Check that \code{weather} meets expectations
+check_weather <- function(weather, required_variables) {
+  stopifnot(
+    length(dim(weather)) == 2,
+    sapply(required_variables, function(p)
+      length(grep(p, x = colnames(weather))) == 1)
+  )
+}
+
+# Aggregate daily weather for each time step
+prepare_weather <- function(data_daily,
+  time_steps = c("Year", "Month", "Week", "Day")) {
+
+  weather_list <- list()
+  id_daily <- "Day" == time_steps
+
+  for (it in time_steps[!id_daily]) {
+    weather_list[[it]] <- dbW_dataframe_aggregate(data_daily, it)
+  }
+
+  weather_list[["Day"]] <- data_daily
+  weather_list
+}
+
+# Prepare weather data object for \code{\link{compare_dailyweather}}
+prepare_weather_for_comparison <- function(weather,
+  time_steps = c("Year", "Month", "Week", "Day")) {
+  req_vars <- c("Year", "Tmax_C", "Tmin_C", "PPT_cm")
+
+  if (length(weather) == length(time_steps) &&
+      inherits(weather, "list")) {
+    # if a list, then four suitable elements one for each time step
+    stopifnot(time_steps %in% names(weather))
+    for (it in time_steps) {
+      required_variables <- c(req_vars, switch(it,
+        Year = NULL, Month = "Month", Week = "Week", Day = "DOY|Day"))
+      check_weather(weather[[it]], required_variables)
+      if (it == "Day") {
+        colnames(weather[[it]])[2] <- "Day"
+      }
+    }
+
+    res <- weather
+
+  } else if (inherits(weather, c("matrix", "data.frame"))) {
+    # if a two-dim object, then it has to be daily data and we need to
+    # aggregate for each time step
+    check_weather(weather, c("DOY|Day", req_vars))
+    colnames(weather)[2] <- "Day"
+    res <- prepare_weather(weather)
+
+  } else {
+    stop("Structure of `weather` not suitable")
+  }
+
+  res
+}
+
+#' Compare two weather datasets: produces comparison plots for means, quantiles,
+#' and Markov weather generator input parameters for all time steps
+#'
+#' @section Notes: The number of days represented by \code{ref_weather} and by
+#'   \code{weather} does not need to be the same.
+#' @section Notes: See also the Weather generator integration tests (in file
+#'   \var{"tests/testthat/test_WeatherGenerator_functionality.R}).
+#'
+#' @param ref_weather A \code{list} of or a two-dimensional numerical object,
+#'   e.g., \code{data.frame} or \code{matrix}. If a \code{list} then four
+#'   suitable elements one for each \code{time_step}. Otherwise, daily weather
+#'   data with columns \var{Year}, \var{DOY}, \var{Tmax_C}, \var{Tmin_C},
+#'   and \var{PPT_cm}; for instance, the result of
+#'   function \code{\link{dbW_weatherData_to_dataframe}}. This represents the
+#'   reference weather against which \code{weather} is compared.
+#' @param weather A \code{list} of elements such as described for
+#'   \code{ref_weather} or an object such as \code{ref_weather}. This represents
+#'   the weather data (potentially from many sites and/or runs) that are
+#'   compared against \code{ref_weather}.
+#' @param N An integer number representing the number of runs or sites contained
+#'   in \code{weather}.
+#' @inheritParams dbW_estimate_WGen_coefs
+#' @param path A character string. The directory path in which output figures
+#'   will be saved.
+#' @param tag A character string to uniquely identify a set of output figures.
+#'
+#' @return This function is called for its side effects of producing figures
+#'   that are saved as \var{png} files on the disk.
+#'
+#' @examples
+#' \dontrun{
+#' path <- tempdir()
+#'
+#' ## Example with default rSOILWAT2 weather data
+#' w0 <- dbW_weatherData_to_dataframe(rSOILWAT2::weatherData)
+#' w1 <- w0
+#' w1[, "Tmax_C"] <- w1[, "Tmax_C"] + 2
+#' w1[, "Tmin_C"] <- w1[, "Tmin_C"] - 2
+#'
+#' compare_weather(ref_weather = w0, weather = w1, N = 1,
+#'   path = path, tag = "Example1-Silly")
+#'
+#' ## Example with STEPWAT2 output data averaged across iterations (`-o` option)
+#' cols_STEPWAT2 <- c("Year", "Day", "PRECIP_ppt_Mean", "TEMP_max_C_Mean",
+#'   "TEMP_min_C_Mean")
+#' cols_rSOILWAT2 <- c("Year", "Day", "PPT_cm", "Tmax_C", "Tmin_C")
+#' w0 <- read.csv("file_STEPWAT2_master.csv")[, cols_STEPWAT2]
+#' colnames(w0) <- cols_rSOILWAT2
+#' w1 <- read.csv("file_STEPWAT2_dev.csv")[, cols_STEPWAT2]
+#' colnames(w1) <- cols_rSOILWAT2
+#'
+#' # Note: Since values are averages across many iterations, most days
+#' # have average precipitation values > 0; thus, we need to adjust
+#' # `WET_limit_cm` accordingly (here, with a guess)
+#' compare_weather(ref_weather = w0, weather = w1, N = 1, WET_limit_cm = 0.1,
+#'   path = path, tag = "Example2-STEPWAT2")
+#'
+#' ## Cleanup
+#' unlink(list.files(path), force = TRUE)
+#' }
+#'
+#' @export
+compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
+  path, tag) {
+
+  dir.create(path, recursive = TRUE, showWarnings = FALSE)
+  time_steps <- c("Year", "Month", "Week", "Day")
+  weather_vars <- c("Tmax_C", "Tmin_C", "PPT_cm")
+
+  #--- Prepare reference weather
+  ref_df <- list(prepare_weather_for_comparison(ref_weather))
+
+  #--- Prepare other weather
+  if (N > 1 && length(weather) == N && inherits(weather, "list") &&
+      !all(time_steps %in% names(weather))) {
+    # many runs/sites: each element consists of an element as `ref_weather`
+    comp_df <- lapply(weather, prepare_weather_for_comparison)
+
+  } else if (N == 1) {
+    # one run/site
+    comp_df <- list(prepare_weather_for_comparison(weather))
+
+  } else {
+    stop("Structure of `weather` not suitable")
+  }
+
+
+  #------- OUTPUTS
+  #--- Compare means and SDs: boxplots
+  calculate_MeansSDs <- function(data) {
+    temp <- lapply(weather_vars, function(var)
+      sapply(time_steps, function(ts)
+        sapply(data, function(x) {
+          temp <- x[[ts]][, var]
+          c(mean(temp, na.rm = TRUE), sd(temp, na.rm = TRUE))
+        })
+      ))
+
+    array(unlist(temp),
+      dim = c(2, length(data), length(time_steps), length(weather_vars)),
+      dimnames = list(c("mean", "sd"), names(data), time_steps, weather_vars))
+  }
+
+  foo_bxp <- function(data, ref_data, ylab, legend = FALSE) {
+    if (is.null(dim(data))) {
+      data <- matrix(data, nrow = 1, dimnames = list(NULL, names(data)))
+    }
+    stopifnot(ncol(data) == length(ref_data))
+    ylim <- range(data, ref_data)
+    boxplot(data, ylim = ylim, ylab = ylab)
+    points(seq_along(ref_data), ref_data, col = "red", pch = 4, lwd = 2)
+
+    if (legend) {
+      legend("topright", legend = c("Reference", "Weather"),
+        col = c("red", "black"), pch = c(4, 16), pt.lwd = 2)
+    }
+  }
+
+
+  # Calculate means and sds
+  ref_MeanSD <- calculate_MeansSDs(ref_df)
+  comp_MeanSD <- calculate_MeansSDs(comp_df)
+
+  # Make figure
+  panels <- c(3, 2)
+  png(units = "in", res = 150, height = 3 * panels[1], width = 6 * panels[2],
+    file = file.path(path, paste0(tag, "_CompareWeather_Boxplots_MeanSD.png")))
+  par_prev <- par(mfrow = panels, mar = c(2, 2.5, 0.5, 0.5), mgp = c(1, 0, 0),
+    tcl = 0.3, cex = 1)
+
+  foo_bxp(data = comp_MeanSD["mean", , , "PPT_cm"],
+    ref_data = ref_MeanSD["mean", , , "PPT_cm"],
+    ylab = "Mean Precipitation (cm)", legend = TRUE)
+  foo_bxp(data = comp_MeanSD["sd", , , "PPT_cm"],
+    ref_data = ref_MeanSD["sd", , , "PPT_cm"],
+    ylab = "SD Precipitation (cm)")
+
+  foo_bxp(data = comp_MeanSD["mean", , , "Tmax_C"],
+    ref_data = ref_MeanSD["mean", , , "Tmax_C"],
+    ylab = "Mean Daily Max Temperature (C)")
+  foo_bxp(data = comp_MeanSD["sd", , , "Tmax_C"],
+    ref_data = ref_MeanSD["sd", , , "Tmax_C"],
+    ylab = "SD Daily Max Temperature (C)")
+
+  foo_bxp(data = comp_MeanSD["mean", , , "Tmin_C"],
+    ref_data = ref_MeanSD["mean", , , "Tmin_C"],
+    ylab = "Mean Daily Min Temperature (C)")
+  foo_bxp(data = comp_MeanSD["sd", , , "Tmin_C"],
+    ref_data = ref_MeanSD["sd", , , "Tmin_C"],
+    ylab = "SD Daily Min Temperature (C)")
+
+  par(par_prev)
+  dev.off()
+
+
+  #--- Quantile-quantile comparisons: scatterplots
+  foo_qq <- function(data, ref_data, var, time, lab, legend = FALSE) {
+
+    vlim <- range(sapply(c(ref_data, data),
+      function(x) range(x[[time]][, var])))
+
+    probs <- seq(0, 1, length.out = 1000)
+
+    x <- quantile(ref_data[[1]][[time]][, var], probs = probs, na.rm = TRUE)
+    plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
+      xlab = paste0(time, "ly : reference ", lab),
+      ylab = paste0(time, "ly : weather ", lab))
+    for (k in seq_along(data)) {
+      points(x, quantile(data[[k]][[time]][, var], probs = probs, na.rm = TRUE),
+        pch = 46)
+    }
+
+    abline(h = 0, lty = 2)
+    abline(v = 0, lty = 2)
+    segments(x0 = vlim[1], y0 = vlim[1],
+      x1 = vlim[2], y1 = vlim[2], col = "red", lwd = 2)
+
+
+    if (legend) {
+      legend("topleft", legend = c("Reference", "Weather"),
+        col = c("red", "black"), pch = c(NA, 16), pt.lwd = 2,
+        lty = c(1, NA), lwd = 2, merge = TRUE)
+    }
+  }
+
+  # Make figure
+  panels <- c(length(time_steps), 3)
+  png(units = "in", res = 150, height = 3 * panels[1], width = 3 * panels[2],
+    file = file.path(path, paste0(tag, "_CompareWeather_QQplots.png")))
+  par_prev <- par(mfrow = panels, mar = c(2, 2.5, 0.5, 0.5), mgp = c(1, 0, 0),
+    tcl = 0.3, cex = 1)
+
+  for (ts in time_steps) {
+    foo_qq(comp_df, ref_df, var = "PPT_cm", time = ts,
+      lab = "precipitation (cm)", legend = ts == time_steps[1])
+    foo_qq(comp_df, ref_df, var = "Tmax_C", time = ts, lab = "max temp (C)")
+    foo_qq(comp_df, ref_df, var = "Tmin_C", time = ts, lab = "min temp (C)")
+  }
+
+  par(par_prev)
+  dev.off()
+
+
+  #--- Does output weather recreate weather generator inputs?
+  ref_wgin <- dbW_estimate_WGen_coefs(ref_df[[1]][["Day"]],
+    WET_limit_cm = WET_limit_cm, imputation_type = "mean")
+  comp_wgin <- lapply(comp_df, function(x)
+      dbW_estimate_WGen_coefs(x[["Day"]],
+        WET_limit_cm = WET_limit_cm, imputation_type = "mean")
+    )
+
+
+  foo_scatter_wgin <- function(data, ref_data, obj, fname) {
+    vars <- colnames(ref_data[[obj]])[-1]
+    panels <- if (length(vars) == 4) {
+      c(2, 2)
+    } else if (length(vars) == 10) {
+      c(4, 3)
+    } else {
+      rep(ceiling(sqrt(length(vars))), 2)
+    }
+
+    png(units = "in", res = 150, height = 3 * panels[1], width = 3 * panels[2],
+      file = fname)
+    par_prev <- par(mfrow = panels, mar = c(2, 2.5, 0.5, 0.5), mgp = c(1, 0, 0),
+      tcl = 0.3, cex = 1)
+
+    for (v in vars) {
+      x <- ref_data[[obj]][, v]
+
+      vlim_obs <- range(x, na.rm = TRUE)
+      vlim <- range(sapply(data, function(x)
+        range(x[[obj]][, v], na.rm = TRUE)))
+
+      plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
+        xlab = paste0("Reference ", v), ylab = paste0("Weather ", v))
+      for (k in seq_along(data)) {
+        lines(lowess(x, data[[k]][[obj]][, v]), col = "gray")
+      }
+
+      abline(h = 0, lty = 2)
+      abline(v = 0, lty = 2)
+      segments(x0 = vlim_obs[1], y0 = vlim_obs[1],
+        x1 = vlim_obs[2], y1 = vlim_obs[2], col = "red", lwd = 2)
+
+      if (v == vars[1]) {
+        legend("topleft", legend = c("Reference", "Weather"),
+          col = c("red", "black"), lwd = 2)
+      }
+    }
+
+    par(par_prev)
+    dev.off()
+  }
+
+
+  foo_scatter_wgin(data = comp_wgin, ref_data = ref_wgin, obj = "mkv_doy",
+    fname = file.path(path,
+      paste0(tag, "_CompareWeather_WGenInputs_DayOfYear.png")))
+  foo_scatter_wgin(data = comp_wgin, ref_data = ref_wgin, obj = "mkv_woy",
+    fname = file.path(path,
+      paste0(tag, "_CompareWeather_WGenInputs_WeekOfYear.png")))
+
+}
