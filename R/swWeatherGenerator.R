@@ -149,7 +149,8 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
       iswet <- if (na.rm) which(x[, "WET"]) else x[, "WET"]
       ppt <- x[iswet, "PPT_cm"]
       if (length(ppt) > 0) {
-        c(PPT_avg = mean(ppt, na.rm = na.rm), PPT_sd = sd(ppt, na.rm = na.rm))
+        c(PPT_avg = mean(ppt, na.rm = na.rm),
+          PPT_sd = stats::sd(ppt, na.rm = na.rm))
       } else {
         # there are no wet days for this DOY; thus PPT = 0
         c(PPT_avg = 0, PPT_sd = 0)
@@ -252,7 +253,7 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
     na.rm = na.rm)
 
   # Variance-covariance values among maximum and minimum temperature
-  temp <- by(wdata[, c("Tmax_C", "Tmin_C")], wdata[["WEEK"]], cov,
+  temp <- by(wdata[, c("Tmax_C", "Tmin_C")], wdata[["WEEK"]], stats::cov,
     use = if (na.rm) "na.or.complete" else "everything")
   temp <- sapply(temp, function(x) c(x[1, 1], x[1, 2], x[2, 1], x[2, 2]))
   mkv_cov[, "var_MAX"] <- temp[1, ]
@@ -600,7 +601,7 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
       sapply(time_steps, function(ts)
         sapply(data, function(x) {
           temp <- x[[ts]][, var]
-          c(mean(temp, na.rm = TRUE), sd(temp, na.rm = TRUE))
+          c(mean(temp, na.rm = TRUE), stats::sd(temp, na.rm = TRUE))
         })
       ))
 
@@ -615,11 +616,12 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
     }
     stopifnot(ncol(data) == length(ref_data))
     ylim <- range(data, ref_data)
-    boxplot(data, ylim = ylim, ylab = ylab)
-    points(seq_along(ref_data), ref_data, col = "red", pch = 4, lwd = 2)
+    graphics::boxplot(data, ylim = ylim, ylab = ylab)
+    graphics::points(seq_along(ref_data), ref_data, col = "red", pch = 4,
+      lwd = 2)
 
     if (legend) {
-      legend("topright", legend = c("Reference", "Weather"),
+      graphics::legend("topright", legend = c("Reference", "Weather"),
         col = c("red", "black"), pch = c(4, 16), pt.lwd = 2)
     }
   }
@@ -631,10 +633,11 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 
   # Make figure
   panels <- c(3, 2)
-  png(units = "in", res = 150, height = 3 * panels[1], width = 6 * panels[2],
+  grDevices::png(units = "in", res = 150,
+    height = 3 * panels[1], width = 6 * panels[2],
     file = file.path(path, paste0(tag, "_CompareWeather_Boxplots_MeanSD.png")))
-  par_prev <- par(mfrow = panels, mar = c(2, 2.5, 0.5, 0.5), mgp = c(1, 0, 0),
-    tcl = 0.3, cex = 1)
+  par_prev <- graphics::par(mfrow = panels, mar = c(2, 2.5, 0.5, 0.5),
+    mgp = c(1, 0, 0), tcl = 0.3, cex = 1)
 
   foo_bxp(data = comp_MeanSD["mean", , , "PPT_cm"],
     ref_data = ref_MeanSD["mean", , , "PPT_cm"],
@@ -657,8 +660,8 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
     ref_data = ref_MeanSD["sd", , , "Tmin_C"],
     ylab = "SD Daily Min Temperature (C)")
 
-  par(par_prev)
-  dev.off()
+  graphics::par(par_prev)
+  grDevices::dev.off()
 
 
   #--- Quantile-quantile comparisons: scatterplots
@@ -669,23 +672,25 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 
     probs <- seq(0, 1, length.out = 1000)
 
-    x <- quantile(ref_data[[1]][[time]][, var], probs = probs, na.rm = TRUE)
-    plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
+    x <- stats::quantile(ref_data[[1]][[time]][, var], probs = probs,
+      na.rm = TRUE)
+    graphics::plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
       xlab = paste0(time, "ly : reference ", lab),
       ylab = paste0(time, "ly : weather ", lab))
     for (k in seq_along(data)) {
-      points(x, quantile(data[[k]][[time]][, var], probs = probs, na.rm = TRUE),
-        pch = 46)
+      qy <- stats::quantile(data[[k]][[time]][, var], probs = probs,
+        na.rm = TRUE)
+      graphics::points(x, qy, pch = 46)
     }
 
-    abline(h = 0, lty = 2)
-    abline(v = 0, lty = 2)
-    segments(x0 = vlim[1], y0 = vlim[1],
+    graphics::abline(h = 0, lty = 2)
+    graphics::abline(v = 0, lty = 2)
+    graphics::segments(x0 = vlim[1], y0 = vlim[1],
       x1 = vlim[2], y1 = vlim[2], col = "red", lwd = 2)
 
 
     if (legend) {
-      legend("topleft", legend = c("Reference", "Weather"),
+      graphics::legend("topleft", legend = c("Reference", "Weather"),
         col = c("red", "black"), pch = c(NA, 16), pt.lwd = 2,
         lty = c(1, NA), lwd = 2, merge = TRUE)
     }
@@ -693,10 +698,11 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 
   # Make figure
   panels <- c(length(time_steps), 3)
-  png(units = "in", res = 150, height = 3 * panels[1], width = 3 * panels[2],
+  grDevices::png(units = "in", res = 150,
+    height = 3 * panels[1], width = 3 * panels[2],
     file = file.path(path, paste0(tag, "_CompareWeather_QQplots.png")))
-  par_prev <- par(mfrow = panels, mar = c(2, 2.5, 0.5, 0.5), mgp = c(1, 0, 0),
-    tcl = 0.3, cex = 1)
+  par_prev <- graphics::par(mfrow = panels, mar = c(2, 2.5, 0.5, 0.5),
+    mgp = c(1, 0, 0), tcl = 0.3, cex = 1)
 
   for (ts in time_steps) {
     foo_qq(comp_df, ref_df, var = "PPT_cm", time = ts,
@@ -705,8 +711,8 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
     foo_qq(comp_df, ref_df, var = "Tmin_C", time = ts, lab = "min temp (C)")
   }
 
-  par(par_prev)
-  dev.off()
+  graphics::par(par_prev)
+  grDevices::dev.off()
 
 
   #--- Does output weather recreate weather generator inputs?
@@ -728,10 +734,11 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
       rep(ceiling(sqrt(length(vars))), 2)
     }
 
-    png(units = "in", res = 150, height = 3 * panels[1], width = 3 * panels[2],
+    grDevices::png(units = "in", res = 150,
+      height = 3 * panels[1], width = 3 * panels[2],
       file = fname)
-    par_prev <- par(mfrow = panels, mar = c(2, 2.5, 0.5, 0.5), mgp = c(1, 0, 0),
-      tcl = 0.3, cex = 1)
+    par_prev <- graphics::par(mfrow = panels, mar = c(2, 2.5, 0.5, 0.5),
+      mgp = c(1, 0, 0), tcl = 0.3, cex = 1)
 
     for (v in vars) {
       x <- ref_data[[obj]][, v]
@@ -740,25 +747,25 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
       vlim <- range(sapply(data, function(x)
         range(x[[obj]][, v], na.rm = TRUE)))
 
-      plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
+      graphics::plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
         xlab = paste0("Reference ", v), ylab = paste0("Weather ", v))
       for (k in seq_along(data)) {
-        lines(lowess(x, data[[k]][[obj]][, v]), col = "gray")
+        graphics::lines(stats::lowess(x, data[[k]][[obj]][, v]), col = "gray")
       }
 
-      abline(h = 0, lty = 2)
-      abline(v = 0, lty = 2)
-      segments(x0 = vlim_obs[1], y0 = vlim_obs[1],
+      graphics::abline(h = 0, lty = 2)
+      graphics::abline(v = 0, lty = 2)
+      graphics::segments(x0 = vlim_obs[1], y0 = vlim_obs[1],
         x1 = vlim_obs[2], y1 = vlim_obs[2], col = "red", lwd = 2)
 
       if (v == vars[1]) {
-        legend("topleft", legend = c("Reference", "Weather"),
+        graphics::legend("topleft", legend = c("Reference", "Weather"),
           col = c("red", "black"), lwd = 2)
       }
     }
 
-    par(par_prev)
-    dev.off()
+    graphics::par(par_prev)
+    grDevices::dev.off()
   }
 
 
