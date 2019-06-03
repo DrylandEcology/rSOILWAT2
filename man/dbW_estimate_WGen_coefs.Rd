@@ -99,7 +99,7 @@ Markov weather generator in \var{SOILWAT2} \var{> v4.2.5}.
 
 \examples{
 res1 <- dbW_estimate_WGen_coefs(rSOILWAT2::weatherData)
-wdata <- data.frame(dbW_weatherData_to_dataframe(weatherData, valNA = NULL))
+wdata <- data.frame(dbW_weatherData_to_dataframe(rSOILWAT2::weatherData))
 res2 <- dbW_estimate_WGen_coefs(wdata)
 
 sw_in <- rSOILWAT2::sw_exampleData

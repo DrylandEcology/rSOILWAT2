@@ -93,7 +93,7 @@
 #'
 #' @examples
 #' res1 <- dbW_estimate_WGen_coefs(rSOILWAT2::weatherData)
-#' wdata <- data.frame(dbW_weatherData_to_dataframe(weatherData, valNA = NULL))
+#' wdata <- data.frame(dbW_weatherData_to_dataframe(rSOILWAT2::weatherData))
 #' res2 <- dbW_estimate_WGen_coefs(wdata)
 #'
 #' sw_in <- rSOILWAT2::sw_exampleData
@@ -144,7 +144,10 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   #--- mean/sd of precipitation across years for doy i if it is a wet day
   temp <- by(wdata[, c("WET", "PPT_cm")], INDICES = wdata[, icol_day],
     function(x) {
-      ppt <- x[which(x[, "WET"]), "PPT_cm"]
+      # if `na.rm` is TRUE, then remove NAs in `WET`; if only NAs -> PPT_avg = 0
+      # if `na.rm` is FALSE, then any NA propagates to PPT_avg = NA
+      iswet <- if (na.rm) which(x[, "WET"]) else x[, "WET"]
+      ppt <- x[iswet, "PPT_cm"]
       if (length(ppt) > 0) {
         c(PPT_avg = mean(ppt, na.rm = na.rm), PPT_sd = sd(ppt, na.rm = na.rm))
       } else {
@@ -198,8 +201,8 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
     })
   mkv_prob[, c("p_W_W", "p_W_D")] <- do.call(rbind, temp)
 
-  #--- Make sure probability values are well formed: finite & 0 <= p <= 1
-  ids_bad0 <- which(!is.finite(mkv_prob[, "p_W_W"]) | mkv_prob[, "p_W_W"] < 0)
+  #--- Make sure probability values are well formed: 0 <= p <= 1
+  ids_bad0 <- which(mkv_prob[, "p_W_W"] < 0)
   mkv_prob[ids_bad0, "p_W_W"] <- 0
 
   ids_bad1 <- which(mkv_prob[, "p_W_W"] > 1)
@@ -250,7 +253,7 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
 
   # Variance-covariance values among maximum and minimum temperature
   temp <- by(wdata[, c("Tmax_C", "Tmin_C")], wdata[["WEEK"]], cov,
-    use = "na.or.complete")
+    use = if (na.rm) "na.or.complete" else "everything")
   temp <- sapply(temp, function(x) c(x[1, 1], x[1, 2], x[2, 1], x[2, 2]))
   mkv_cov[, "var_MAX"] <- temp[1, ]
   mkv_cov[, "cov_MAXMIN"] <- temp[2, ]
@@ -264,7 +267,9 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   # increase minimum daily temperature and decrease maximum daily tempature)
   temp <- by(wdata[, c("WET", "Tmax_C", "Tmin_C")], INDICES = wdata[, "WEEK"],
     function(x) {
-      iswet <- which(x[, "WET"])
+      # if `na.rm` is TRUE, then consider `WET` = NA as FALSE
+      # if `na.rm` is FALSE, then propagate NAs in `WET` -> neither wet nor dry
+      iswet <- if (na.rm) which(x[, "WET"]) else x[, "WET"]
       isanywet <- isTRUE(any(iswet, na.rm = na.rm))
       isdry <- !iswet
       isanydry <- isTRUE(any(isdry, na.rm = na.rm))
