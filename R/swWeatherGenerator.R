@@ -171,20 +171,28 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
       n_Dy <- sum(!x[, "WET_yesterday"], na.rm = na.rm)
 
       c(
-        # `wetprob` calculated as the number of years with doy being wet
-        # given previous day is wet divided by the number of years with
-        # the previous day being wet
         p_W_W = if (isTRUE(n_Wy > 0)) {
+            # `p(wet|wet)` estimated as the number of years with doy being wet
+            # given previous day is wet divided by the number of years with
+            # the previous day being wet
             sum(x[, "WW"], na.rm = na.rm) / n_Wy
           } else {
+            # `p(wet|wet)` approximated with frequency that today is wet for
+            # data where yesterday is never wet (avoid division by zero);
+            # this value is likely near 0 because p(wet yesterday) = 0
+            # and p(wet today) ~ p(wet yesterday)
             p_W
           },
-         # `dryprob` calculated as the number of years with doy being wet
-        # given previous day is dry divided by the number of years with
-        # the previous day being dry
         p_W_D = if (isTRUE(n_Dy > 0)) {
+            # `p(wet|dry)` estimated as the number of years with doy being wet
+            # given previous day is dry divided by the number of years with
+            # the previous day being dry
             sum(x[, "WD"], na.rm = na.rm) / n_Dy
           } else {
+            # `p(wet|dry)` approximated with frequency that today is wet for
+            # data where yesterday is never dry (avoid division by zero);
+            # this value is likely near 1 because p(wet yesterday) = 1
+            # and p(wet today) ~ p(wet yesterday)
             p_W
           })
     })
@@ -261,6 +269,8 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
       isdry <- !iswet
       isanydry <- isTRUE(any(isdry, na.rm = na.rm))
 
+      # if no wet/dry days in week of year, then use overall mean instead
+      # of conditional mean (i.e., given wet/dry)
       c(Tmax_mean_wet = if (isanywet) {
             mean(x[iswet, "Tmax_C"], na.rm = na.rm)
           } else {
