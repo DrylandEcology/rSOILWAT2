@@ -49,7 +49,7 @@ for (it in tests) {
   Tmax <- 100 # C
   H2Omax <- 1000 # cm day-1
 
-  if (it == "Ex2") {
+  if (swWeather_UseMarkov(sw_input)) {
     # Markov-weather generator is turned on to fill in missing weather data
     # see `data-raw/prepare_testInput_objects.R`
     weather_extremes <- data.frame(
@@ -105,8 +105,17 @@ for (it in tests) {
 
   dbW_df_day <- dbW_weatherData_to_dataframe(sw_weather)
   test_that("Check weather", {
-    expect_equivalent(dbW_dataframe_to_monthly(dbW_df_day),
-      dbW_weatherData_to_monthly(sw_weather), info = info1)
+    expect_equivalent(
+      dbW_dataframe_to_monthly(dbW_df_day),
+      dbW_weatherData_to_monthly(sw_weather),
+      info = info1)
+
+    if (anyNA(dbW_df_day)) {
+      expect_equivalent(
+        dbW_dataframe_to_monthly(dbW_df_day, na.rm = TRUE),
+        dbW_weatherData_to_monthly(sw_weather, na.rm = TRUE),
+        info = info1)
+    }
   })
 
   test_that("Simulate and aggregate", {

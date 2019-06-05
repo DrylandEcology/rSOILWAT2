@@ -62,8 +62,10 @@ setMethod("initialize", signature = "swMarkov", function(.Object, ...) {
   # We have to explicitly give column names (as defined in `onGet_MKV_prob` and
   # `onGet_MKV_conv`) because they are not read in by C code if the weather
   # generator is turned off
-  ctemp_Prob <- c("day", "wet", "dry", "avg_ppt", "std_ppt")
-  ctemp_Conv <- c("week", "t1", "t2", "t3", "t4", "t5", "t6")
+  ctemp_Prob <- c("DOY", "p_wet_wet", "p_wet_dry", "avg_ppt", "std_ppt")
+  ctemp_Conv <- c("WEEK", "wTmax_C", "wTmin_C", "var_wTmax",
+    "cov_wTmaxmin", "cov_wTminmax", "var_wTmin",
+    "cfmax_wet", "cfmax_dry", "cfmin_wet", "cfmin_dry")
 
   if ("Prob" %in% dns) {
     temp <- dots[["Prob"]]
@@ -73,7 +75,7 @@ setMethod("initialize", signature = "swMarkov", function(.Object, ...) {
   } else {
     temp <- matrix(NA_real_, nrow = 366, ncol = length(ctemp_Prob),
       dimnames = list(NULL, ctemp_Prob))
-    temp[, "day"] <- 1:366
+    temp[, "DOY"] <- 1:366
   }
   .Object@Prob <- temp
 
@@ -85,7 +87,7 @@ setMethod("initialize", signature = "swMarkov", function(.Object, ...) {
   } else {
     temp <- matrix(NA_real_, nrow = 53, ncol = length(ctemp_Conv),
       dimnames = list(NULL, ctemp_Conv))
-    temp[, "week"] <- 1:53
+    temp[, "WEEK"] <- 1:53
   }
   .Object@Conv <- temp
 
@@ -110,8 +112,8 @@ swMarkov_validity <- function(object) {
 
   temp <- dim(object@Conv)
   if (!isTRUE(all.equal(temp, c(0, 0))) &&
-      !isTRUE(all.equal(temp, c(53, 7)))) {
-      msg <- paste("@Conv must be a 0x0 or a 53x7 matrix.")
+      !isTRUE(all.equal(temp, c(53, 11)))) {
+      msg <- paste("@Conv must be a 0x0 or a 53x11 matrix.")
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
@@ -151,7 +153,7 @@ setReplaceMethod("swMarkov_Prob", signature = "swMarkov",
     if (ncol(value) == ncol(object@Prob)) {
       colnames(value) <- dimnames(object@Prob)[[2]]
     }
-    object@Prob <- value
+    object@Prob <- as.matrix(value)
     validObject(object)
     object
 })
@@ -163,7 +165,7 @@ setReplaceMethod("swMarkov_Conv", signature = "swMarkov",
     if (ncol(value) == ncol(object@Conv)) {
       colnames(value) <- dimnames(object@Conv)[[2]]
     }
-    object@Conv <- value
+    object@Conv <- as.matrix(value)
     validObject(object)
     object
 })
@@ -190,9 +192,9 @@ setMethod("swReadLines", signature = c(object = "swMarkov", file = "character"),
     if (length(infiletext) != 53)
       stop("Markov Prod wrong number of lines")
 
-    object@Conv <- matrix(0, 53, 7)
-    for (i in seq_len(366)) {
-      object@Conv[i, ] <- readNumerics(infiletext[i], 7)
+    object@Conv <- matrix(0, 53, 11)
+    for (i in seq_len(53)) {
+      object@Conv[i, ] <- readNumerics(infiletext[i], 11)
     }
 
     object

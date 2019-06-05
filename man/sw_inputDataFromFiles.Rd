@@ -10,7 +10,7 @@ sw_inputDataFromFiles(dir = "", files.in = "files.in")
 \item{dir}{A character string. The path to the simulation project directory.}
 
 \item{files.in}{A character string. The file name (and path relative to
-\code{dir}) of the \var{files} input file that contains in formation
+\code{dir}) of the \var{files} input file that contains information
 about the remaining input files.}
 }
 \value{

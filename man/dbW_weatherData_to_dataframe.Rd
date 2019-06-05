@@ -4,7 +4,11 @@
 \alias{dbW_weatherData_to_dataframe}
 \title{Convert an object of class \code{\linkS4class{swWeatherData}} to a data.frame}
 \usage{
-dbW_weatherData_to_dataframe(weatherData)
+dbW_weatherData_to_dataframe(weatherData, valNA = NULL)
+}
+\arguments{
+\item{valNA}{The (numerical) value of missing weather data.
+If \code{NULL}, then default values are interpreted as missing.}
 }
 \description{
 Convert an object of class \code{\linkS4class{swWeatherData}} to a data.frame

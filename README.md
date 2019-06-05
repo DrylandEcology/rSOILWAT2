@@ -167,6 +167,71 @@ __Tests, documentation, and code__ form a trinity
       str(x)
       ```
 
+
+  * __Run the following steps locally__
+    in order to prepare a pull-request or commit that will be reviewed.
+    Fix any problem and repeat as necessary.
+
+    1. Make sure that the documentation is up-to-date with:
+       ```{r}
+       pkgbuild::compile_dll()
+       devtools::document()
+       ```
+
+    1. Run and check the code from the examples and vignettes:
+       ```{r}
+       devtools::run_examples()
+       ```
+       Note: "devtools" v2.0.1 mixed up the logic for "dontrun" examples (see
+       https://github.com/r-lib/devtools/issues/2003); until this is fixed,
+       use `devtools::run_examples(run = FALSE)`.
+
+    1. Run tests as if not on CRAN in an interactive R session.
+       ```{r}
+       # Run in R.app, RStudio, or in an R terminal-session:
+       Sys.setenv(NOT_CRAN = "true")
+       devtools::test()
+       ```
+       Notes:
+        - Make sure that no test is skipped. Investigate if any is skipped.
+        - Investigate if any warning is reported.
+        - This combines unit tests, documentation and code-style checks;
+          the latter take a substantial amount of time to complete.
+       The environmental variable `RSOILWAT_ALLTESTS` determines whether or not
+       long-running expectations/unit-tests are skipped; the default is "true",
+       i.e., run all expectations/unit-tests. You may decide to run tests
+       while temporary skipping time-intensive tests, e.g.,
+       - `Sys.setenv(RSOILWAT_ALLTESTS = "false"); devtools::test()`
+       - `RSOILWAT_ALLTESTS="false" R CMD check *tar.gz`
+
+    1. Run tests as if not on CRAN in an non-interactive session.
+       ```{bash}
+       # Run via shell in the terminal:
+       R CMD INSTALL .
+       Rscript -e 'Sys.setenv(NOT_CRAN = "true"); devtools::test()'
+       ```
+
+    1. The environmental variable `RSOILWAT_INTEGRATIONTESTS` determines
+       whether intensive (and potentially interactive) integration tests are
+       executed; the default is "false".
+       To set it to true, e.g.,
+         * `Sys.setenv(RSOILWAT_INTEGRATIONTESTS = "true"); devtools::test()`
+         * `RSOILWAT_INTEGRATIONTESTS="true" R CMD check *tar.gz`
+
+
+    1. Run R package-level checks as if on CRAN.
+       ```{r}
+       # Run in R.app, RStudio, or in an R terminal-session:
+       Sys.setenv(NOT_CRAN = "false")
+       devtools::check(cran = TRUE)
+       ```
+       Notes:
+        - Avoid adding new `R CMD check` warnings and/or notes; see, milestone
+          [Clean code](https://github.com/DrylandEcology/rSOILWAT2/milestone/2)
+
+
+
+
 __Debugging compiled code__
   * Compile C code in `src/` and `src/SOILWAT2/` in 'debugging' mode.
     This will define 'SWDEBUG' in 'SOILWAT2' source code

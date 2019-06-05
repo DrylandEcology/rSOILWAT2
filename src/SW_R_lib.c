@@ -113,59 +113,118 @@ void initSOILWAT2(SEXP inputOptions) {
 
 
 SEXP onGetInputDataFromFiles(SEXP inputOptions) {
-	SEXP swInputData, SW_DataList, swLog, oRlogfile;
+  SEXP swInputData, SW_DataList, swLog, oRlogfile;
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
 
-	collectInData = TRUE;
-	logged = FALSE;
-	logfp = NULL;
+  collectInData = TRUE;
+  logged = FALSE;
+  logfp = NULL;
 
-	#ifdef RSWDEBUG
-	if (debug) swprintf("Set log\n");
-	#endif
-	PROTECT(swLog = MAKE_CLASS("swLog"));
-	PROTECT(oRlogfile = NEW_OBJECT(swLog));
-	PROTECT(Rlogfile = GET_SLOT(oRlogfile,install("LogData")));
+  #ifdef RSWDEBUG
+  if (debug) swprintf("Set log\n");
+  #endif
+  PROTECT(swLog = MAKE_CLASS("swLog"));
+  PROTECT(oRlogfile = NEW_OBJECT(swLog));
+  PROTECT(Rlogfile = GET_SLOT(oRlogfile,install("LogData")));
 
-	initSOILWAT2(inputOptions);
+  initSOILWAT2(inputOptions);
 
-	#ifdef RSWDEBUG
-	if (debug) swprintf("Read input from disk files\n");
-	#endif
-	SW_CTL_read_inputs_from_disk();
+  #ifdef RSWDEBUG
+  if (debug) swprintf("Read input from disk files into SOILWAT2 variables\n");
+  #endif
+  rSW_CTL_obtain_inputs(TRUE);
 
-	#ifdef RSWDEBUG
-  if (debug) swprintf("Copy data to classes\n");
-	#endif
-	PROTECT(swInputData = MAKE_CLASS("swInputData"));
-	PROTECT(SW_DataList = NEW_OBJECT(swInputData));
+  #ifdef RSWDEBUG
+  if (debug) swprintf("onGetInputDataFromFiles: copy data from SOILWAT2 "
+    "variables to rSOILWAT2 S4 classes: ");
+  #endif
 
-	SET_SLOT(SW_DataList, install("files"), onGet_SW_F());
-	SET_SLOT(SW_DataList, install("years"), onGet_SW_MDL());
-	SET_SLOT(SW_DataList, install("weather"), onGet_SW_WTH());
-	SET_SLOT(SW_DataList, install("cloud"), onGet_SW_SKY());
-	SET_SLOT(SW_DataList, install("weatherHistory"), onGet_WTH_DATA());
-	if (LOGICAL(GET_SLOT(GET_SLOT(SW_DataList, install("weather")), install("use_Markov")))[0]) {
-		SET_SLOT(SW_DataList, install("markov"), onGet_MKV());
-	}
-	SET_SLOT(SW_DataList, install("prod"), onGet_SW_VPD());
-	SET_SLOT(SW_DataList, install("site"), onGet_SW_SIT());
-	SET_SLOT(SW_DataList, install("soils"), onGet_SW_LYR());
-	SET_SLOT(SW_DataList, install("estab"), onGet_SW_VES());
-	SET_SLOT(SW_DataList, install("carbon"), onGet_SW_CARBON());
-	SET_SLOT(SW_DataList, install("output"), onGet_SW_OUT());
-	SET_SLOT(SW_DataList, install("swc"), onGet_SW_SWC());
-	SET_SLOT(SW_DataList, install("log"), oRlogfile);
+  PROTECT(swInputData = MAKE_CLASS("swInputData"));
+  PROTECT(SW_DataList = NEW_OBJECT(swInputData));
 
-	#ifdef RSWDEBUG
-	if (debug) swprintf("De-allocate most memory\n");
-	#endif
-	SW_CTL_clear_model(FALSE); // de-allocate all memory, but `p_OUT`
 
-	UNPROTECT(5);
-	return SW_DataList;
+  SET_SLOT(SW_DataList, install("files"), onGet_SW_F());
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" 'files'");
+  #endif
+
+  SET_SLOT(SW_DataList, install("years"), onGet_SW_MDL());
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" > 'model'");
+  #endif
+
+  SET_SLOT(SW_DataList, install("weather"), onGet_SW_WTH());
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" > 'weather-setup'");
+  #endif
+
+  SET_SLOT(SW_DataList, install("weatherHistory"), onGet_WTH_DATA());
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" > 'weather-data'");
+  #endif
+
+  SET_SLOT(SW_DataList, install("cloud"), onGet_SW_SKY());
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" > 'climate'");
+  #endif
+
+  if (LOGICAL(GET_SLOT(GET_SLOT(SW_DataList, install("weather")), install("use_Markov")))[0]) {
+    SET_SLOT(SW_DataList, install("markov"), onGet_MKV());
+    #ifdef RSWDEBUG
+    if (debug) swprintf(" > 'mwgen'");
+    #endif
+  }
+
+  SET_SLOT(SW_DataList, install("prod"), onGet_SW_VPD());
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" > 'veg'");
+  #endif
+
+  SET_SLOT(SW_DataList, install("site"), onGet_SW_SIT());
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" > 'site'");
+  #endif
+
+  SET_SLOT(SW_DataList, install("soils"), onGet_SW_LYR());
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" > 'soils'");
+  #endif
+
+  SET_SLOT(SW_DataList, install("estab"), onGet_SW_VES());
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" > 'establishment'");
+  #endif
+
+  SET_SLOT(SW_DataList, install("output"), onGet_SW_OUT());
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" > 'ouput'");
+  #endif
+
+  SET_SLOT(SW_DataList, install("carbon"), onGet_SW_CARBON());
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" > 'CO2'");
+  #endif
+
+  SET_SLOT(SW_DataList, install("swc"), onGet_SW_SWC());
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" > 'swc'");
+  #endif
+
+  SET_SLOT(SW_DataList, install("log"), oRlogfile);
+
+  #ifdef RSWDEBUG
+  if (debug) swprintf("De-allocate most memory\n");
+  #endif
+  SW_CTL_clear_model(FALSE); // de-allocate all memory, but `p_OUT`
+
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" completed.\n");
+  #endif
+
+  UNPROTECT(5);
+  return SW_DataList;
 }
 
 SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
@@ -213,7 +272,7 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 	if (debug) swprintf(" obtain inputs ...");
 	#endif
 	//Obtain the input data either from files or from memory (depending on useFiles)
-	rSW_CTL_obtain_inputs();
+	rSW_CTL_obtain_inputs(useFiles);
 
   #ifdef RSWDEBUG
   if (debug) swprintf(" setup output variables ...");

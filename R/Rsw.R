@@ -221,7 +221,7 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
 #'
 #' @param dir A character string. The path to the simulation project directory.
 #' @param files.in A character string. The file name (and path relative to
-#'   \code{dir}) of the \var{files} input file that contains in formation
+#'   \code{dir}) of the \var{files} input file that contains information
 #'   about the remaining input files.
 #'
 #' @return An object of class \code{\linkS4class{swInputData}}.

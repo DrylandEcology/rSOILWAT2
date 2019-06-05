@@ -8,6 +8,7 @@ pkg_path <- pkg_temp_dir()
 #--- Spell check
 test_that("Package spell checks", {
   # Check locally and on travis
+  skip_if_not(identical(tolower(Sys.getenv("RSOILWAT_ALLTESTS")), "true"))
   skip_on_cran()
   skip_on_appveyor()
   skip_if_not_installed("spelling", minimum_version = "1.1.0")

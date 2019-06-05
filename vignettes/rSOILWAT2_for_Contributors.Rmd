@@ -3,15 +3,18 @@ title: "Background information about rSOILWAT2 for contributors"
 author: "Daniel R Schlaepfer"
 date: "`r Sys.Date()`"
 output:
-  rmarkdown::html_vignette:
+  bookdown::pdf_document2:
     toc: true
-    toc_depth: 3
-    #toc_float: true
-    collapsed: false
-    smooth_scroll: false
-    #theme: united
-    #highlight: tango
-    smart: false
+    toc_depth: 2
+#  rmarkdown::html_vignette:
+#    toc: true
+#    toc_depth: 3
+#    #toc_float: true
+#    collapsed: false
+#    smooth_scroll: false
+#    #theme: united
+#    #highlight: tango
+#    smart: false
 vignette: >
   %\VignetteIndexEntry{rSOILWAT2_contributors}
   %\VignetteEngine{knitr::rmarkdown}

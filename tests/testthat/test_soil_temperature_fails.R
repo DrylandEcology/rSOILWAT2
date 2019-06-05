@@ -25,12 +25,9 @@ for (it in tests) {
   test_that("Check weather", {
     dbW_df_day <- dbW_weatherData_to_dataframe(sw_weather)
 
-    expect_equivalent(dbW_dataframe_to_monthly(dbW_df_day),
-      dbW_weatherData_to_monthly(sw_weather))
-
     info <- paste("test-data", it)
-    expect_true(all(dbW_df_day[, "Tmin_C"] > -100), info = info)
-    expect_true(all(dbW_df_day[, "Tmax_C"] < +100), info = info)
+    expect_true(all(dbW_df_day[, "Tmin_C"] > -100, na.rm = TRUE), info = info)
+    expect_true(all(dbW_df_day[, "Tmax_C"] < +100, na.rm = TRUE), info = info)
   })
 
 

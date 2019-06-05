@@ -1089,11 +1089,43 @@ getWeatherData_folders <- function(LookupWeatherFolder, weatherDirName = NULL,
   weathDataList
 }
 
-#' Convert an object of class \code{\linkS4class{swWeatherData}} to a data.frame
+
+#' Deal with missing weather values: convert to NAs
+#'
+#' Missing weather values may be coded with \code{NA},
+#'   with the corresponding \var{SOILWAT2} value (i.e.,
+#'   \code{rSOILWAT2:::rSW2_glovars[["kSOILWAT2"]][["kNUM"]][["SW_MISSING"]]}),
+#'   or with the value of the argument \code{valNA}.
+#'
+#' @param data A numerical object.
+#' @param valNA The (numerical) value of missing weather data.
+#'   If \code{NULL}, then default values are interpreted as missing.
+#'
+#' @return \code{data} where \pkg{SOILWAT2} missing values are converted to
+#'   R-compatible \code{NA}s.
 #' @export
-dbW_weatherData_to_dataframe <- function(weatherData){
+set_missing_weather <- function(data, valNA = NULL) {
+  if (is.null(valNA)) {
+    # missing values coded as NA or in SOILWAT2' format
+    data[data == rSW2_glovars[["kSOILWAT2"]][["kNUM"]][["SW_MISSING"]]] <- NA
+
+  } else if (is.finite(valNA)) {
+    # missing values coded as 'valNA'
+    data[data == valNA] <- NA
+  }
+
+  data
+}
+
+
+#' Convert an object of class \code{\linkS4class{swWeatherData}} to a data.frame
+#'
+#' @inheritParams set_missing_weather
+#'
+#' @export
+dbW_weatherData_to_dataframe <- function(weatherData, valNA = NULL) {
   do.call(rbind, lapply(weatherData, FUN = function(x) {
-              temp <- x@data
+              temp <- set_missing_weather(x@data, valNA = valNA)
               Year <- rep(x@year, times = nrow(temp))
               cbind(Year, temp)
             }))
@@ -1101,8 +1133,11 @@ dbW_weatherData_to_dataframe <- function(weatherData){
 
 #' Conversion: object of class \code{\linkS4class{swWeatherData}} to
 #' matrix of monthly values (\var{mean Tmax}, \var{mean Tmin}, \var{sum PPT})
+#'
+#' @inheritParams set_missing_weather
+#'
 #' @export
-dbW_weatherData_to_monthly <- function(dailySW) {
+dbW_weatherData_to_monthly <- function(dailySW, na.rm = FALSE, valNA = NULL) {
   monthly <- matrix(NA, nrow = length(dailySW) * 12, ncol = 5,
     dimnames = list(NULL, c("Year", "Month", "Tmax_C", "Tmin_C", "PPT_cm")))
 
@@ -1110,34 +1145,76 @@ dbW_weatherData_to_monthly <- function(dailySW) {
     weath <- dailySW[[y]]
     month <- as.POSIXlt(paste(weath@year, weath@data[, "DOY"], sep = "-"),
                         format = "%Y-%j", tz = "UTC")$mon + 1
+    temp <- set_missing_weather(weath@data, valNA = valNA)
     monthly[1:12 + 12 * (y - 1), ] <- data.matrix(cbind(
       Year = weath@year, Month = 1:12,
-      aggregate(weath@data[, c("Tmax_C", "Tmin_C")],
-        by = list(month), FUN = mean)[, 2:3],
-      PPT_cm = aggregate(weath@data[, "PPT_cm"],
-        by = list(month), FUN = sum)[, 2]))
+      aggregate(temp[, c("Tmax_C", "Tmin_C")],
+        by = list(month), FUN = mean, na.rm = na.rm)[, 2:3],
+      PPT_cm = as.vector(tapply(temp[, "PPT_cm"], month, FUN = sum,
+        na.rm = na.rm))
+    ))
   }
 
   monthly
 }
 
+
+#' Aggregate daily weather data.frame to weekly, monthly, or yearly values
+#' @export
+dbW_dataframe_aggregate <- function(dailySW,
+  time_step = c("Year", "Month", "Week", "Day"), na.rm = FALSE) {
+
+  time_step <- match.arg(time_step)
+
+  if (time_step == "Day") {
+    return(dailySW)
+  }
+
+  icol_day <- grep("DOY|Day", colnames(dailySW), ignore.case = TRUE,
+    value = TRUE)
+
+  temp <- apply(dailySW[, c("Year", icol_day)], 1, paste, collapse = "-")
+  temp <- as.POSIXlt(temp, format = "%Y-%j", tz = "UTC")
+  ytemp <- 1900L + unique(temp$year)
+
+  if (time_step == "Year") {
+    idaggs <- list(dailySW[, "Year"])
+    hout <- data.frame(Year = ytemp)
+
+  } else if (time_step == "Month") {
+    idaggs <- list(1L + temp$mon, dailySW[, "Year"])
+    hout <- data.frame(
+      Year = rep(ytemp, each = 12),
+      Month = rep(seq_len(12), times = length(ytemp))
+    )
+
+  } else if (time_step == "Week") {
+    idaggs <- list(1L + floor(temp$yday / 7), dailySW[, "Year"])
+    hout <- data.frame(
+      Year = rep(ytemp, each = 53),
+      Week = rep(seq_len(53), times = length(ytemp))
+    )
+  }
+
+  as.matrix(cbind(hout,
+    Tmax_C = as.vector(tapply(dailySW[, "Tmax_C"], INDEX = idaggs, FUN = mean,
+      na.rm = na.rm)),
+    Tmin_C = as.vector(tapply(dailySW[, "Tmin_C"], INDEX = idaggs, FUN = mean,
+      na.rm = na.rm)),
+    PPT_cm = as.vector(tapply(dailySW[, "PPT_cm"], INDEX = idaggs, FUN = sum,
+      na.rm = na.rm))
+  ))
+
+}
+
 #' Conversion: object of daily weather data.frame to matrix of monthly values
 #' (\var{mean Tmax}, \var{mean Tmin}, \var{sum PPT})
 #' @export
-dbW_dataframe_to_monthly <- function(dailySW) {
-  temp <- apply(dailySW[, c("Year", "DOY")], 1, paste, collapse = "-")
-  temp <- as.POSIXlt(temp, format = "%Y-%j", tz = "UTC")
-  ytemp <- unique(temp$year)
-  year <- rep(1900L + ytemp, each = 12)
-  month <- rep(seq_len(12), times = length(ytemp))
-  ltemp <- list(1L + temp$mon, dailySW[, "Year"])
-
-  as.matrix(cbind(Year = year, Month = month,
-    Tmax_C = as.vector(tapply(dailySW[, "Tmax_C"], INDEX = ltemp, FUN = mean)),
-    Tmin_C = as.vector(tapply(dailySW[, "Tmin_C"], INDEX = ltemp, FUN = mean)),
-    PPT_cm = as.vector(tapply(dailySW[, "PPT_cm"], INDEX = ltemp, FUN = sum))
-  ))
+dbW_dataframe_to_monthly <- function(dailySW, na.rm = FALSE) {
+  dbW_dataframe_aggregate(dailySW, time_step = "Month", na.rm = na.rm)
 }
+
+
 
 
 #' Assign years to weather data.frame
