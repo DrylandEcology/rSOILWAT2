@@ -122,9 +122,10 @@ test_that("Vegetation: estimate land cover composition", {
       fill_empty_with_BareGround = FALSE)
   )
 
+  # converted from error into warning:
   # (iii) cover to estimate is 0, fixed types are less than 1, and bare-ground
   # is fixed
-  expect_error(
+  expect_warning(
     estimate_PotNatVeg_composition(
       MAP_mm = 900, MAT_C = -10,
       mean_monthly_ppt_mm = c(0, 0, rep(100, 9), 0),
@@ -146,17 +147,6 @@ test_that("Vegetation: estimate land cover composition", {
       fix_shrubs = TRUE, Shrubs_Fraction = 0,
       fix_forbs = TRUE, Forbs_Fraction = 0,
       fix_trees = TRUE, Trees_Fraction = 0,
-      fix_BareGround = FALSE, fill_empty_with_BareGround = TRUE)
-  )
-
-  expect_pnv(pnv[1:2])
-  expect_equivalent(pnv[["Rel_Abundance_L0"]][ibar], 1)
-
-  expect_silent(
-    pnv <- estimate_PotNatVeg_composition(
-      MAP_mm = 900, MAT_C = -10,
-      mean_monthly_ppt_mm = c(0, 0, rep(100, 9), 0),
-      mean_monthly_Temp_C = rep(-10, 12),
       fix_BareGround = FALSE, fill_empty_with_BareGround = TRUE)
   )
 
