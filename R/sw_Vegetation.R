@@ -27,7 +27,7 @@
 #'  on sites with \var{MAT} from 2 C to 21.2 C and \var{MAP} from 117 to
 #'  1011 mm. If \code{warn_extrapolation} is set to \code{TRUE}, then
 #'  inputs are checked against supported ranges, i.e., if \var{MAT} is below
-#'  2 C, then it is reset to 2 C with a warning. If other inputs exceed their
+#'  1 C, then it is reset to 1 C with a warning. If other inputs exceed their
 #'  ranges, then a warning is issued and the code proceeds.
 #'
 #' @param MAP_mm A numeric value. Mean annual precipitation in millimeter.
@@ -284,7 +284,9 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
 
         # MAT limits:
         if (MAT_C < 1) {
-          # Note: MAT = 1 C as limit instead of 2 C based on empirical testing
+          # Note: MAT = 1 C as limit instead of 2 C based on empirical testing;
+          # also because log(x) is undefined for x < 0 and results in negative
+          # values for x < 1. Hence the threshold of 1.
           warning("Equations used outside supported range (2 - 21.2 C): ",
            "MAT = ", round(MAT_C, 2), " C reset to 1 C.")
           MAT_C <- 1

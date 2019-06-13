@@ -155,7 +155,7 @@ fixed input values.
  on sites with \var{MAT} from 2 C to 21.2 C and \var{MAP} from 117 to
  1011 mm. If \code{warn_extrapolation} is set to \code{TRUE}, then
  inputs are checked against supported ranges, i.e., if \var{MAT} is below
- 2 C, then it is reset to 2 C with a warning. If other inputs exceed their
+ 1 C, then it is reset to 1 C with a warning. If other inputs exceed their
  ranges, then a warning is issued and the code proceeds.
 }
 
