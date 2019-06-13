@@ -283,10 +283,11 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
         #   from 117 to 1011 mm"
 
         # MAT limits:
-        if (MAT_C < 2) {
-           warning("Equations used outside supported range (2 - 21.2 C): ",
-             "MAT = ", round(MAT_C, 2), " C reset to 2 C.")
-           MAT_C <- 2
+        if (MAT_C < 1) {
+          # Note: MAT = 1 C as limit instead of 2 C based on empirical testing
+          warning("Equations used outside supported range (2 - 21.2 C): ",
+           "MAT = ", round(MAT_C, 2), " C reset to 1 C.")
+          MAT_C <- 1
         }
 
         if (MAT_C > 21.2) {
