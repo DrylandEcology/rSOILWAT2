@@ -6,22 +6,29 @@
 #' cover the surface (i.e., they sum to 1) of a site specified by climate and/or
 #' fixed input values.
 #'
-#' @section Note: Some of the land cover/vegetation types, i.e., trees, annual
-#'   grasses, and bare-ground are not estimated from climate relationships; they
-#'   are either set to 0, or alternatively fixed at the value of the input
-#'   argument(s).
+#' @section Details: Some of the land cover/vegetation types, i.e., trees,
+#'   annual grasses, and bare-ground are not estimated from climate
+#'   relationships; they are either set to 0, or alternatively fixed at the
+#'   value of the input argument(s).
 #'
-#' @section Note: The remaining vegetation types, i.e., shrubs, C3 grasses, C4
-#'   grasses, forbs, and succulents, are estimated from climate relationships
+#' @section Details: The remaining vegetation types, i.e., shrubs, C3 grasses,
+#'   C4 grasses, forbs, and succulents, are estimated from climate relationships
 #'   using equations developed by Paruelo & Lauenroth 1996, or alternatively
 #'   fixed at the value of the input argument(s). If values for
 #'   \code{dailyC4vars} are provided, then equations developed by Teeri & Stowe
 #'   1976 are used to limit the occurrence of C4 grasses.
 #'
-#' @section Note: The relative abundance values of the the vegetation types
+#' @section Details: The relative abundance values of the the vegetation types
 #'   that can be estimated and are not fixed by inputs, are estimated in two
 #'   steps: (i) as if they cover the entire surface; (ii) scaled to the
 #'   proportion of the surface that is not fixed by inputs.
+#'
+#' @section Notes: The equations developed Paruelo & Lauenroth 1996 are based
+#'  on sites with \var{MAT} from 2 C to 21.2 C and \var{MAP} from 117 to
+#'  1011 mm. If \code{warn_extrapolation} is set to \code{TRUE}, then
+#'  inputs are checked against supported ranges, i.e., if \var{MAT} is below
+#'  1 C, then it is reset to 1 C with a warning. If other inputs exceed their
+#'  ranges, then a warning is issued and the code proceeds.
 #'
 #' @param MAP_mm A numeric value. Mean annual precipitation in millimeter.
 #' @param MAT_C A numeric value. Mean annual temperature in degree Celsius.
@@ -84,6 +91,9 @@
 #'   \code{FALSE}, then some hacks are used to "fill in" incomplete land cover
 #'   with grasses and/or shrubs, and additionally,
 #'   if \code{fix_BareGround} is \code{FALSE} with bare-ground.
+#' @param warn_extrapolation A logical value. If \code{TRUE}, then
+#'   warnings are issued if climate inputs \code{MAP_mm} and/or \code{MAT_C}
+#'   fall outside the range of supported values. See notes.
 #'
 #' @return A list with three named numeric vectors. \describe{
 #'   \item{Rel_Abundance_L0}{A numeric vector of length 8 with
@@ -123,6 +133,13 @@
 #'   mean_monthly_ppt_mm = 10 * clim1[["meanMonthlyPPTcm"]],
 #'   mean_monthly_Temp_C = clim1[["meanMonthlyTempC"]])
 #'
+#' ## Climate is outside supported range with MAT < 0 C:
+#' estimate_PotNatVeg_composition(
+#'   MAP_mm = 10 * clim1[["MAP_cm"]],
+#'   MAT_C = clim1[["MAT_C"]] - clim1[["MAT_C"]],
+#'   mean_monthly_ppt_mm = 10 * clim1[["meanMonthlyPPTcm"]],
+#'   mean_monthly_Temp_C = clim1[["meanMonthlyTempC"]] - clim1[["MAT_C"]])
+#'
 #' ## Some land cover types are fixed and others are estimated, and
 #' ## the C4-grass adjustment is used:
 #' estimate_PotNatVeg_composition(
@@ -145,7 +162,8 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
   fix_forbs = FALSE, Forbs_Fraction = NA,
   fix_trees = TRUE, Trees_Fraction = 0,
   fix_BareGround = TRUE, BareGround_Fraction = 0,
-  fill_empty_with_BareGround = TRUE) {
+  fill_empty_with_BareGround = TRUE,
+  warn_extrapolation = TRUE) {
 
   veg_types <- c("Succulents", "Forbs",
     "Grasses_C3", "Grasses_C4", "Grasses_Annuals",
@@ -241,6 +259,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
 
       estim_cover <- rep(NA, Nveg)
 
+      # Estimate climate variables
       if (isNorth) {
         Months_WinterTF <- c(12, 1:2)
         Months_SummerTF <- c(6:8)
@@ -253,9 +272,37 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
       ppt.SummerToMAP <- sum(mean_monthly_ppt_mm[Months_SummerTF]) / MAP_mm
       ppt.WinterToMAP <- sum(mean_monthly_ppt_mm[Months_WinterTF]) / MAP_mm
 
-      # temperature in July minus temperature in January
+      # Temperature in July minus temperature in January
       therm_amp <- mean_monthly_Temp_C[Months_SummerTF[2]] -
         mean_monthly_Temp_C[Months_WinterTF[2]]
+
+      if (warn_extrapolation) {
+        # Adjust climate variables to limits underlying the data used to develop
+        # equations Paruelo & Lauenroth (1996): "The selected sites cover a
+        #   range of MAT from 2 C to 21.2 C and a range of precipitation (MAP)
+        #   from 117 to 1011 mm"
+
+        # MAT limits:
+        if (MAT_C < 1) {
+          # Note: MAT = 1 C as limit instead of 2 C based on empirical testing;
+          # also because log(x) is undefined for x < 0 and results in negative
+          # values for x < 1. Hence the threshold of 1.
+          warning("Equations used outside supported range (2 - 21.2 C): ",
+           "MAT = ", round(MAT_C, 2), " C reset to 1 C.")
+          MAT_C <- 1
+        }
+
+        if (MAT_C > 21.2) {
+          warning("Equations used outside supported range (2 - 21.2 C): ",
+            "MAT = ", round(MAT_C, 2), " C.")
+        }
+
+        if (MAP_mm < 117 || MAP_mm > 1011) {
+          warning("Equations used outside supported range (117-1011 mm): ",
+            "MAP = ", round(MAP_mm), " mm.")
+        }
+      }
+
 
       # 1. step: estimate relative abundance based on
       # Paruelo & Lauenroth (1996): shrub climate-relationship:
@@ -315,7 +362,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
 
       # Paruelo & Lauenroth (1996): forb climate-relationship:
       if (MAP_mm < 1 || MAT_C <= 0) {
-        estim_cover[ifor] <- 0
+        estim_cover[ifor] <- NA
       } else {
         estim_cover[ifor] <- cut0Inf(-0.2035 + 0.07975 * log(MAP_mm) -
           0.0623 * log(MAT_C), val = 0)

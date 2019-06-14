@@ -13,7 +13,7 @@ estimate_PotNatVeg_composition(MAP_mm, MAT_C, mean_monthly_ppt_mm,
   C3_Fraction = NA, fix_shrubs = FALSE, Shrubs_Fraction = NA,
   fix_forbs = FALSE, Forbs_Fraction = NA, fix_trees = TRUE,
   Trees_Fraction = 0, fix_BareGround = TRUE, BareGround_Fraction = 0,
-  fill_empty_with_BareGround = TRUE)
+  fill_empty_with_BareGround = TRUE, warn_extrapolation = TRUE)
 }
 \arguments{
 \item{MAP_mm}{A numeric value. Mean annual precipitation in millimeter.}
@@ -100,6 +100,10 @@ incomplete land cover is considered (additional) bare-ground. If
 \code{FALSE}, then some hacks are used to "fill in" incomplete land cover
 with grasses and/or shrubs, and additionally,
 if \code{fix_BareGround} is \code{FALSE} with bare-ground.}
+
+\item{warn_extrapolation}{A logical value. If \code{TRUE}, then
+warnings are issued if climate inputs \code{MAP_mm} and/or \code{MAT_C}
+fall outside the range of supported values. See notes.}
 }
 \value{
 A list with three named numeric vectors. \describe{
@@ -127,14 +131,14 @@ The function returns relative abundance/land cover values that completely
 cover the surface (i.e., they sum to 1) of a site specified by climate and/or
 fixed input values.
 }
-\section{Note}{
- Some of the land cover/vegetation types, i.e., trees, annual
-  grasses, and bare-ground are not estimated from climate relationships; they
-  are either set to 0, or alternatively fixed at the value of the input
-  argument(s).
+\section{Details}{
+ Some of the land cover/vegetation types, i.e., trees,
+  annual grasses, and bare-ground are not estimated from climate
+  relationships; they are either set to 0, or alternatively fixed at the
+  value of the input argument(s).
 
- The remaining vegetation types, i.e., shrubs, C3 grasses, C4
-  grasses, forbs, and succulents, are estimated from climate relationships
+ The remaining vegetation types, i.e., shrubs, C3 grasses,
+  C4 grasses, forbs, and succulents, are estimated from climate relationships
   using equations developed by Paruelo & Lauenroth 1996, or alternatively
   fixed at the value of the input argument(s). If values for
   \code{dailyC4vars} are provided, then equations developed by Teeri & Stowe
@@ -144,6 +148,15 @@ fixed input values.
   that can be estimated and are not fixed by inputs, are estimated in two
   steps: (i) as if they cover the entire surface; (ii) scaled to the
   proportion of the surface that is not fixed by inputs.
+}
+
+\section{Notes}{
+ The equations developed Paruelo & Lauenroth 1996 are based
+ on sites with \var{MAT} from 2 C to 21.2 C and \var{MAP} from 117 to
+ 1011 mm. If \code{warn_extrapolation} is set to \code{TRUE}, then
+ inputs are checked against supported ranges, i.e., if \var{MAT} is below
+ 1 C, then it is reset to 1 C with a warning. If other inputs exceed their
+ ranges, then a warning is issued and the code proceeds.
 }
 
 \examples{
@@ -157,6 +170,13 @@ estimate_PotNatVeg_composition(
   MAP_mm = 10 * clim1[["MAP_cm"]], MAT_C = clim1[["MAT_C"]],
   mean_monthly_ppt_mm = 10 * clim1[["meanMonthlyPPTcm"]],
   mean_monthly_Temp_C = clim1[["meanMonthlyTempC"]])
+
+## Climate is outside supported range with MAT < 0 C:
+estimate_PotNatVeg_composition(
+  MAP_mm = 10 * clim1[["MAP_cm"]],
+  MAT_C = clim1[["MAT_C"]] - clim1[["MAT_C"]],
+  mean_monthly_ppt_mm = 10 * clim1[["meanMonthlyPPTcm"]],
+  mean_monthly_Temp_C = clim1[["meanMonthlyTempC"]] - clim1[["MAT_C"]])
 
 ## Some land cover types are fixed and others are estimated, and
 ## the C4-grass adjustment is used:
