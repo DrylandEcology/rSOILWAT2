@@ -16,7 +16,7 @@ Depends:
 Imports:
   RSQLite (>= 2.1),
   DBI (>= 1.0),
-  blob (>= 1.1.0),
+  blob (>= 1.2.0),
   methods
 Suggests:
   digest (>= 0.6.12),
