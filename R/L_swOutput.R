@@ -51,7 +51,8 @@ sw_out_flags <- function() {
     sw_transp = "TRANSP",
     sw_vwcbulk = "VWCBULK",
     sw_vwcmatric = "VWCMATRIC",
-    sw_veg = "CO2EFFECTS",
+    sw_co2effects = "CO2EFFECTS",
+    sw_veg = "BIOMASS",
     sw_wetdays = "WETDAY",
     sw_logfile = "LOG")
 }
@@ -182,7 +183,8 @@ setClass(
     SOILTEMP = "swOutput_KEY",
     ALLVEG = "swOutput_KEY",
     ESTABL = "swOutput_KEY",
-    CO2EFFECTS = "swOutput_KEY"
+    CO2EFFECTS = "swOutput_KEY",
+    BIOMASS = "swOutput_KEY"
   )
 )
 
