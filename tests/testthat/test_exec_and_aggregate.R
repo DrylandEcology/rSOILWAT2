@@ -10,10 +10,10 @@ tests <- unique(temp)
 
 test_that("Test data availability", expect_gt(length(tests), 0))
 
-var_SumNotZero <- c("TEMP", "PRECIP", "SOILINFILT", "VWCBULK", "VWCMATRIC",
-  "SWCBULK", "SWABULK", "SWAMATRIC", "SWA", "SWPMATRIC", "TRANSP", "EVAPSOIL",
-  "EVAPSURFACE", "INTERCEPTION", "LYRDRAIN", "HYDRED", "ET", "AET", "PET",
-  "WETDAY", "SNOWPACK", "DEEPSWC", "CO2EFFECTS")
+var_maybeZero <- c("ESTABL", "RUNOFF", "SOILTEMP", "SURFACEWATER", "LOG")
+var_SumNotZero <- sw_out_flags()
+var_SumNotZero <- var_SumNotZero[!(var_SumNotZero %in% var_maybeZero)]
+
 
 expect_within <- function(object, expected, ..., info = NULL,
   tol = sqrt(.Machine$double.eps), digits_N = 4L) {
@@ -75,6 +75,7 @@ for (it in tests) {
   var_limits2["SNOWPACK", ] <- c(0, Inf) # SWE is cumulative
   var_limits2["DEEPSWC", ] <- c(0, H2Omax)
   var_limits2["CO2EFFECTS", ] <- c(0, Inf)
+  var_limits2["BIOMASS", ] <- c(0, Inf)
 
   tempSL <- data.frame(matrix(NA, nrow = layer_N, ncol = 2,
     dimnames = list(NULL, c("min", "max"))))

@@ -423,7 +423,7 @@ dbW_getWeatherData <- function(Site_id = NULL, lat = NULL, long = NULL,
   sql <- "SELECT data FROM WeatherData WHERE Site_id = :x1 AND Scenario = :x2"
   res <- DBI::dbGetQuery(rSW2_glovars$con, sql,
     params = list(x1 = IDs[["site_id"]], x2 = IDs[["scenario_id"]]))[1, 1]
-  if (is.na(res)) {
+  if (is.na(res) || all(lengths(res) == 0)) {
     stop(paste("Weather data for site", shQuote(IDs[["site_id"]]),
       "and scenario", shQuote(IDs[["scenario_id"]]),
       "does not exist in weather database."))
@@ -1006,7 +1006,7 @@ dbW_blob_to_weatherData <- function(data_blob, type = "gzip") {
 #' @seealso \code{\link[base]{memCompress}}, \code{\link{serialize}}
 #' @export
 dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
-  blob::as.blob(memCompress(serialize(weatherData, connection = NULL),
+  blob::as_blob(memCompress(serialize(weatherData, connection = NULL),
     type = type))
 }
 

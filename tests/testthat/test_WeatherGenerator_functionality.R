@@ -103,3 +103,4 @@ test_that("Weather generator (integration tests): compare input/output", {
     path = dir_inttests, tag = "IntegrationTest-WeatherGenerator")
 
 })
+
