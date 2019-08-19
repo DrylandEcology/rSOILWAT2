@@ -6,6 +6,9 @@ clim <- calc_SiteClimate(weatherList = weatherData,
   year.start = 1949, year.end = 2010,
   do_C4vars = FALSE, simTime2 = NULL)
 
+data("sw_exampleData", package = "rSOILWAT2")
+
+
 # Tests
 test_that("Vegetation: estimate land cover composition", {
 
@@ -152,4 +155,44 @@ test_that("Vegetation: estimate land cover composition", {
 
   expect_pnv(pnv[1:2])
   expect_equivalent(pnv[["Rel_Abundance_L0"]][ibar], 1)
+})
+
+
+test_that("Vegetation: adjust phenology", {
+  phen_in <- list()
+  phen_in[["x1n"]] <- swProd_MonProd_grass(sw_exampleData)
+  phen_in[["x11"]] <- phen_in[["x1n"]][, 2]
+  phen_in[["xnn"]] <- list(
+    swProd_MonProd_forb(sw_exampleData),
+    swProd_MonProd_grass(sw_exampleData),
+    swProd_MonProd_shrub(sw_exampleData),
+    swProd_MonProd_tree(sw_exampleData)
+  )
+
+  # Note: `predict_season` issues several warnings that can be ignored, e.g.,
+  #  pseudoinverse, neighborhood radius, reciprocal condition,
+  #  near singularities, NaNs produced
+  for (k in seq_along(phen_in)) {
+    # Adjust phenology from the reference Mar-Oct to a target Nov-Jun
+    # growing season
+    res <- suppressWarnings(adjBiom_by_temp(
+      x = phen_in[[k]],
+      mean_monthly_temp_C = c(rep(10, 6), rep(0, 4), rep(10, 2))
+    ))
+
+    # Check that number of rows/columns are correct
+    for (i in seq_along(res)) {
+      expect_equal(NROW(res[[i]]), NROW(phen_in[[k]][[i]]))
+      expect_equal(NCOL(res[[i]]), NCOL(phen_in[[k]][[i]]))
+    }
+
+    # Adjust phenology from and to the reference Mar-Oct growing season
+    res <- suppressWarnings(adjBiom_by_temp(
+      x = phen_in[[k]],
+      mean_monthly_temp_C = c(rep(0, 2), rep(10, 8), rep(0, 2))
+    ))
+
+    # Check that output values are equal to input
+    expect_equivalent(res, phen_in[[k]])
+  }
 })

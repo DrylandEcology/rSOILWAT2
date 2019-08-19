@@ -468,12 +468,86 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
   )
 }
 
-predict_season <- function(biomass_Standard, std.season.padded, std.season.seq,
-  site.season.seq) {
+
+#' Predict seasonal phenology
+#'
+#' Fits a loess-curve to a seasonal subset of monthly values and uses the fit
+#' to make a prediction for a different subset of months.
+#'
+#' @param x A two-dimensional object. Rows correspond to month of the year,
+#'   i.e., there must be 12 rows, and columns correspond to variables that are
+#'   adjusted.
+#' @param ref_season A numeric vector. The season as months (integers in 1-12)
+#'   for which the values of \code{x} serve as reference (used for fitting).
+#' @param target_season A numeric vector. The season as months (1-12)
+#'   for which the prediction is made.
+#'
+#' @return A two-dimensional object with rows that correspond to
+#'   \code{target_season} and columns that correspond to the adjusted variable
+#'   values from \code{x}.
+#'
+#' @section Details: You may want to apply the function \code{\link{cut0Inf}}
+#'   to the results to eliminate negative values that may arise
+#'   from the fitting/prediction process.
+#'
+#' @examples
+#' sw_in <- rSOILWAT2::sw_exampleData
+#' biomass_reference <- swProd_MonProd_grass(sw_in)[, 2:3]
+#' biomass_adj <- biomass_reference
+#' biomass_adj[] <- NA
+#'
+#' ## Adjust phenology from a reference Nov-Feb to a target Jul-Oct
+#' ## non-growing season
+#' ref_season <- c(11:12, 1:2) # November-February
+#' target_season <- 7:10 # July-October
+#' biomass_adj[target_season, ] <- predict_season(biomass_reference,
+#'   ref_season, target_season)
+#'
+#' ## Adjust phenology from a reference Mar-Oct to a target Nov-Jun
+#' ## growing season
+#' ref_season <- 3:10 # March-October
+#' target_season <- c(11:12, 1:6) # November-June
+#' biomass_adj[target_season, ] <- predict_season(biomass_reference,
+#'   ref_season, target_season)
+#'
+#' ## Plot reference and adjusted monthly values
+#' \dontrun{
+#' par_prev <- par(mfrow = c(2, 1))
+#'
+#' plot(1:12, biomass_reference[, 1], type = "l", col = "red",
+#'   ylim = c(0, 250), xlab = "Month")
+#' lines(1:12, biomass_adj[, 1])
+#'
+#' plot(1:12, biomass_reference[, 2], type = "l", col = "red",
+#'   ylim = c(0, 1), xlab = "Month")
+#' lines(1:12, biomass_adj[, 2])
+#'
+#' par(par_prev)
+#' }
+#'
+# @export
+predict_season <- function(x, ref_season, target_season) {
+
+  # `x` must be a two-dimensional object with 12 rows (corresponding to months)
+  if (!inherits(x, c("matrix", "data.frame"))) {
+    x <- as.matrix(x)
+  }
+
+  stopifnot(nrow(x) == 12L)
+
+  # calculate padded reference season: add one month on either side so that
+  # `stats::loess` does not introduce weird step predictions at season start/end
+  temp <- c(ref_season[1] - 1, ref_season, ref_season[length(ref_season)] + 1)
+  ref_padded <- (temp - 1) %% 12 + 1
+  ref_seq <- 0:(length(ref_padded) - 1)
+
+  # calculate sequence of target season
+  target_seq <- seq(from = 1, to = length(ref_season),
+    length = length(target_season))
 
   # length(std.season.seq) >= 3 because of padding and
   # test that season duration > 0
-  lcoef <- calc.loess_coeff(N = length(std.season.seq), span = 0.4)
+  lcoef <- calc.loess_coeff(N = length(ref_seq), span = 0.4)
 
   op <- options(c("warn", "error"))
   on.exit(options(op))
@@ -481,13 +555,167 @@ predict_season <- function(biomass_Standard, std.season.padded, std.season.seq,
   # 'pseudoinverse used', see calc.loess_coeff(), etc.
   options(warn = -1, error = traceback)
 
-  sapply(apply(biomass_Standard, 2, function(x) {
-      lf <- stats::loess(x[std.season.padded] ~ std.season.seq,
-        span = lcoef$span, degree = lcoef$degree)
-      stats::predict(lf, newdata = data.frame(std.season.seq = site.season.seq))
-    }),
-    FUN = function(x) max(0, x)) # guarantee that > 0
+  # Fit loess to reference season and predict to target season
+  apply(x, 2, function(x) {
+    lf <- stats::loess(
+      x[ref_padded] ~ ref_seq,
+      span = lcoef$span,
+      degree = lcoef$degree)
+
+    stats::predict(lf, newdata = data.frame(ref_seq = target_seq))
+  })
 }
+
+
+#' Adjust biomass phenology by pattern of growing/non-growing seasons to
+#' site-specific climatic conditions
+#'
+#' @param x A two-dimensional object or a list of such objects. Rows of each
+#'   such object correspond to month of the year, i.e., there must be 12 rows,
+#'   and columns correspond to variables that are adjusted.
+#' @param mean_monthly_temp_C A numeric vector of length 12. Mean monthly
+#'   temperatures in Celsius. The default inputs have March-October as
+#'   growing season.
+#' @param growing_limit_C A numeric value. \code{mean_monthly_temp_C} equal or
+#'   above this limit are considered suitable for growth (growing season).
+#'   Default value is 4 C.
+#' @param isNorth A logical value. \code{TRUE} for locations on the northern
+#'   hemisphere, \code{FALSE} for locations on the southern hemisphere.
+#'
+#' @return An object as \code{x}, i.e., a two-dimensional object or a list of
+#'   such objects, where the values were adjusted.
+#'
+#' @examples
+#' sw_in <- rSOILWAT2::sw_exampleData
+#' biomass_reference <- swProd_MonProd_grass(sw_in)[, 2:3]
+#'
+#' ## Adjust phenology from the reference Mar-Oct to a target Nov-Jun
+#' ## growing season
+#' biomass_adj <- adjBiom_by_temp(
+#'   x = biomass_reference,
+#'   mean_monthly_temp_C = c(rep(10, 6), rep(0, 4), rep(10, 2)),
+#'   growing_limit_C = 4)
+#'
+#' ## Plot reference and adjusted monthly values
+#' \dontrun{
+#' par_prev <- par(mfrow = c(2, 1))
+#'
+#' plot(1:12, biomass_reference[, 1], type = "l", col = "red",
+#'   ylim = c(0, 250), xlab = "Month")
+#' lines(1:12, biomass_adj[, 1])
+#'
+#' plot(1:12, biomass_reference[, 2], type = "l", col = "red",
+#'   ylim = c(0, 1), xlab = "Month")
+#' lines(1:12, biomass_adj[, 2])
+#'
+#' par(par_prev)
+#' }
+#'
+#' @export
+adjBiom_by_temp <- function(x, mean_monthly_temp_C, growing_limit_C = 4,
+  isNorth = TRUE) {
+
+  # Convert `x` to a list
+  return_list <- inherits(x, "list")
+  if (!return_list) {
+    x <- list(x)
+  }
+
+  # Convert each element of x into a two-dimensional object with 12 rows
+  for (k in seq_along(x)) {
+    if (!inherits(x[[k]], c("matrix", "data.frame"))) {
+      x[[k]] <- as.matrix(x[[k]])
+    }
+  }
+
+  stopifnot(sapply(x, nrow) == 12L, length(mean_monthly_temp_C) == 12L)
+
+  # Determine seasons
+  mo_growingseason_TF <- as.vector(mean_monthly_temp_C >= growing_limit_C)
+  n_nonseason <- sum(!mo_growingseason_TF)
+  n_season <- sum(mo_growingseason_TF)
+
+  # Describe conditions for which the default vegetation biomass values are
+  # valid
+  ref_winter <- c(11:12, 1:2) # Assumes that the "growing season"
+  # (valid for growing_limit_C == 4) in x = tr_VegetationComposition starts in
+  # March and ends after October, for all functional groups.
+  ref_growing <- rSW2_glovars[["st_mo"]][-ref_winter] # Assumes that the
+  # "growing season" in x = tr_VegetationComposition starts in March and ends
+  # after October, for all functional groups.
+
+  # Standard growing season is for northern hemisphere:
+  # target needs to be adjusted for southern Hemisphere
+  if (!isNorth) {
+    mo_growingseason_TF <- c(
+      mo_growingseason_TF[7:12],
+      mo_growingseason_TF[1:6])
+  }
+
+  # save reference: reference values required for "overlap" between seasons
+  x_ref <- x
+
+  # Adjust for timing and duration of non-growing season
+  if (n_nonseason > 0) {
+    if (n_nonseason < 12) {
+      site_winter <- which(!mo_growingseason_TF)
+      # Calculate first month of winter == last start of non-growing season
+      starts <- calc_starts(!mo_growingseason_TF)
+      site.winter.start <- starts[length(starts)]
+      temp <- site.winter.start + seq_len(n_nonseason) - 2
+      site.winter.months <- temp %% 12 + 1
+
+      for (k in seq_along(x)) {
+        x[[k]][site.winter.months, ] <- cut0Inf(
+          predict_season(x_ref[[k]], ref_winter, site_winter),
+          val = 0)
+      }
+
+    } else {
+      # if winter lasts 12 months: take the mean of the winter months
+      for (k in seq_along(x)) {
+        temp <- apply(x_ref[[k]][ref_winter, ], 2, mean)
+        x[[k]][] <- matrix(temp, nrow = 12, ncol = ncol(x[[k]]), byrow = TRUE)
+      }
+    }
+  }
+
+  #Adjust for timing and duration of growing season
+  if (n_season > 0) {
+    if (n_season < 12) {
+      site_growing <- which(mo_growingseason_TF)
+      # Calculate first month of growing season == first start of
+      # growing season
+      starts <- calc_starts(mo_growingseason_TF)
+      site.growing.start <- starts[1]
+      temp <- site.growing.start + seq_len(n_season) - 2
+      site.growing.months <- temp %% 12 + 1
+
+      for (k in seq_along(x)) {
+        x[[k]][site.growing.months, ] <- cut0Inf(
+          predict_season(x_ref[[k]], ref_growing, site_growing),
+          val = 0)
+      }
+
+    } else {
+      # if growing season lasts 12 months
+      for (k in seq_along(x)) {
+        temp <- apply(x_ref[[k]][ref_growing, ], 2, max)
+        x[[k]][] <- matrix(temp, nrow = 12, ncol = ncol(x[[k]]), byrow = TRUE)
+      }
+    }
+  }
+
+  # Adjustements were done as if on northern hemisphere
+  if (!isNorth) {
+    for (k in seq_along(x)) {
+      x[[k]] <- rbind(x[[k]][7:12, ], x[[k]][1:6, ])
+    }
+  }
+
+  if (return_list) x else x[[1L]]
+}
+
 
 #' Biomass equations
 #'
@@ -596,16 +824,9 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #' @param fgrass_c3c4ann A numeric vector of length 3. Relative contribution
 #'   [0-1] of the C3-grasses, C4-grasses, and annuals functional groups. The sum
 #'   of \code{fgrass_c3c4ann} is 1.
-#' @param growing_limit_C A numeric value. Mean monthly temperatures equal or
-#'   above this limit are here considered suitable for growth (growing season).
-#'   Default value is 4 C.
-#' @param isNorth A logical value. \code{TRUE} for locations on northern
-#'   hemisphere.
 #' @param MAP_mm A numeric value. Mean annual precipitation in millimeter of the
 #'   location.
-#' @param mean_monthly_temp_C A numeric vector of length 12. Mean monthly
-#'   temperature in Celsius. The default inputs considered March-October as
-#'   growing season.
+#' @inheritParams adjBiom_by_temp
 #'
 #' @section Default inputs: \itemize{
 #'   \item Shrubs are based on location \var{\sQuote{IM_USC00107648_Reynolds}}
@@ -637,14 +858,6 @@ estimate_PotNatVeg_biomass <- function(tr_VegBiom,
 
   # Default shrub biomass input is at MAP = 450 mm/yr, and default grass
   # biomass input is at MAP = 340 mm/yr
-  # Describe conditions for which the default vegetation biomass values are
-  # valid
-  std.winter <- c(11:12, 1:2) # Assumes that the "growing season"
-  # (valid for growing_limit_C == 4) in 'tr_VegetationComposition' starts in
-  # March and ends after October, for all functional groups.
-  std.growing <- rSW2_glovars[["st_mo"]][-std.winter] # Assumes that the
-  # "growing season" in 'tr_VegetationComposition' starts in March and ends
-  # after October, for all functional groups.
 
   #Default site for the grass description is SGS LTER
   StandardGrasses_MAP_mm <- 340
@@ -668,114 +881,22 @@ estimate_PotNatVeg_biomass <- function(tr_VegBiom,
   tr_VegBiom[, itemp] <- sweep(tr_VegBiom[, itemp], MARGIN = 2,
     STATS = colmax, FUN = "/")
 
-  #Pull different vegetation types
-  biom_shrubs <- biom_std_shrubs <- tr_VegBiom[, grepl("Sh", names(tr_VegBiom))]
-  biom_C3 <- biom_std_C3 <- tr_VegBiom[, grepl("C3", names(tr_VegBiom))]
-  biom_C4 <- biom_std_C4 <- tr_VegBiom[, grepl("C4", names(tr_VegBiom))]
-  biom_annuals <- biom_std_annuals <- tr_VegBiom[,
-    grepl("Annual", names(tr_VegBiom))]
+  # Pull vegetation types
+  x <- list()
+  x[["biom_shrubs"]] <- tr_VegBiom[, grepl("Sh", names(tr_VegBiom))]
+  x[["biom_C3"]] <- tr_VegBiom[, grepl("C3", names(tr_VegBiom))]
+  x[["biom_C4"]] <- tr_VegBiom[, grepl("C4", names(tr_VegBiom))]
+  x[["biom_annuals"]] <- tr_VegBiom[, grepl("Annual", names(tr_VegBiom))]
 
-  #adjust phenology for mean monthly temperatures
+  # adjust phenology for mean monthly temperatures
   if (do_adjBiom_by_temp) {
-    growing.season <- as.vector(mean_monthly_temp_C >= growing_limit_C)
-    n_nonseason <- sum(!growing.season)
-    n_season <- sum(growing.season)
-
-    if (!isNorth)
-      # Standard growing season needs to be adjusted for southern Hemisphere
-      growing.season <- c(growing.season[7:12], growing.season[1:6])
-
-    #Adjust for timing and duration of non-growing season
-    if (n_nonseason > 0) {
-      if (n_nonseason < 12) {
-        temp <- c(std.winter[1] - 1, std.winter,
-          std.winter[length(std.winter)] + 1) - 1
-        std.winter.padded <- temp %% 12 + 1
-        std.winter.seq <- 0:(length(std.winter.padded) - 1)
-        site.winter.seq <- seq(from = 1, to = length(std.winter),
-          length = n_nonseason)
-        starts <- calc_starts(!growing.season)
-        # Calculate first month of winter == last start of non-growing season
-        site.winter.start <- starts[length(starts)]
-        temp <- site.winter.start + seq_len(n_nonseason) - 2
-        site.winter.months <- temp %% 12 + 1
-
-        biom_shrubs[site.winter.months, ] <- predict_season(biom_std_shrubs,
-          std.winter.padded, std.winter.seq, site.winter.seq)
-        biom_C3[site.winter.months, ] <- predict_season(biom_std_C3,
-          std.winter.padded, std.winter.seq, site.winter.seq)
-        biom_C4[site.winter.months, ] <- predict_season(biom_std_C4,
-          std.winter.padded, std.winter.seq, site.winter.seq)
-        biom_annuals[site.winter.months, ] <- predict_season(biom_std_annuals,
-          std.winter.padded, std.winter.seq, site.winter.seq)
-
-      } else {
-        # if winter lasts 12 months: take the mean of the winter months
-        temp <- apply(biom_std_shrubs[std.winter, ], 2, mean)
-        biom_shrubs[] <- matrix(temp, nrow = 12, ncol = ncol(biom_shrubs),
-          byrow = TRUE)
-        temp <- apply(biom_std_C3[std.winter, ], 2, mean)
-        biom_C3[] <- matrix(temp, nrow = 12, ncol = ncol(biom_C3), byrow = TRUE)
-        temp <- apply(biom_std_C4[std.winter, ], 2, mean)
-        biom_C4[] <- matrix(temp, nrow = 12, ncol = ncol(biom_C4), byrow = TRUE)
-        temp <- apply(biom_std_annuals[std.winter, ], 2, mean)
-        biom_annuals[] <- matrix(temp, nrow = 12, ncol = ncol(biom_annuals),
-          byrow = TRUE)
-      }
-    }
-
-    #Adjust for timing and duration of growing season
-    if (n_season > 0) {
-      if (n_season < 12) {
-        temp <- c(std.growing[1] - 1, std.growing,
-          std.growing[length(std.growing)] + 1) - 1
-        std.growing.padded <- temp %% 12 + 1
-        std.growing.seq <- 0:(length(std.growing.padded) - 1)
-        site.growing.seq <- seq(from = 1, to = length(std.growing),
-          length = n_season)
-        starts <- calc_starts(growing.season)
-        # Calculate first month of growing season == first start of
-        # growing season
-        site.growing.start <- starts[1]
-        temp <- site.growing.start + seq_len(n_season) - 2
-        site.growing.months <- temp %% 12 + 1
-
-        biom_shrubs[site.growing.months, ] <- predict_season(biom_std_shrubs,
-          std.growing.padded, std.growing.seq, site.growing.seq)
-        biom_C3[site.growing.months, ] <- predict_season(biom_std_C3,
-          std.growing.padded, std.growing.seq, site.growing.seq)
-        biom_C4[site.growing.months, ] <- predict_season(biom_std_C4,
-          std.growing.padded, std.growing.seq, site.growing.seq)
-        biom_annuals[site.growing.months, ] <- predict_season(biom_std_annuals,
-          std.growing.padded, std.growing.seq, site.growing.seq)
-
-      } else {
-        # if growing season lasts 12 months
-        temp <- apply(biom_std_shrubs[std.growing, ], 2, max)
-        biom_shrubs[] <- matrix(temp, nrow = 12, ncol = ncol(biom_shrubs),
-          byrow = TRUE)
-        temp <- apply(biom_std_C3[std.growing, ], 2, max)
-        biom_C3[] <- matrix(temp, nrow = 12, ncol = ncol(biom_C3), byrow = TRUE)
-        temp <- apply(biom_std_C4[std.growing, ], 2, max)
-        biom_C4[] <- matrix(temp, nrow = 12, ncol = ncol(biom_C4), byrow = TRUE)
-        temp <- apply(biom_std_annuals[std.growing, ], 2, max)
-        biom_annuals[] <- matrix(temp, nrow = 12, ncol = ncol(biom_annuals),
-          byrow = TRUE)
-      }
-    }
-
-    if (!isNorth) {
-      # Adjustements were done as if on northern hemisphere
-      biom_shrubs <- rbind(biom_shrubs[7:12, ], biom_shrubs[1:6, ])
-      biom_C3 <- rbind(biom_C3[7:12, ], biom_C3[1:6, ])
-      biom_C4 <- rbind(biom_C4[7:12, ], biom_C4[1:6, ])
-      biom_annuals <- rbind(biom_annuals[7:12, ], biom_annuals[1:6, ])
-    }
+    x <- adjBiom_by_temp(x, mean_monthly_temp_C, growing_limit_C, isNorth)
   }
 
   # if (do_adjBiom_by_ppt) then adjust biomass amounts by productivity
   # relationship with MAP
-  temp <- adjBiom_by_ppt(biom_shrubs, biom_C3, biom_C4, biom_annuals,
+  temp <- adjBiom_by_ppt(
+    x[["biom_shrubs"]], x[["biom_C3"]], x[["biom_C4"]], x[["biom_annuals"]],
     biom_maxs = colmax,
     map_mm_shrubs = if (do_adjBiom_by_ppt) MAP_mm else StandardShrub_MAP_mm,
     map_mm_std_shrubs = StandardShrub_MAP_mm,
@@ -784,15 +905,17 @@ estimate_PotNatVeg_biomass <- function(tr_VegBiom,
     vegcomp_std_shrubs = StandardShrub_VegComposition,
     vegcomp_std_grass = StandardGrasses_VegComposition)
 
-  biom_grasses <- temp$biom_C3 * fgrass_c3c4ann[1] +
-    temp$biom_C4 * fgrass_c3c4ann[2] +
-    temp$biom_annuals * fgrass_c3c4ann[3]
+  biom_grasses <-
+    x[["biom_C3"]] * fgrass_c3c4ann[1] +
+    x[["biom_C4"]] * fgrass_c3c4ann[2] +
+    x[["biom_annuals"]] * fgrass_c3c4ann[3]
+
   cn <- dimnames(biom_grasses)[[2]]
   cn <- sapply(strsplit(cn, split = ".", fixed = TRUE),
     function(x) paste0(x[-1], collapse = "."))
   dimnames(biom_grasses)[[2]] <- cn
 
-  biom_shrubs <- temp$biom_shrubs
+  biom_shrubs <- x[["biom_shrubs"]]
   dimnames(biom_shrubs)[[2]] <- cn
 
   list(grass = as.matrix(biom_grasses),
