@@ -630,78 +630,59 @@ adjBiom_by_temp <- function(x, mean_monthly_temp_C, growing_limit_C = 4,
 
   stopifnot(sapply(x, nrow) == 12L, length(mean_monthly_temp_C) == 12L)
 
-  # Determine seasons
-  mo_growingseason_TF <- as.vector(mean_monthly_temp_C >= growing_limit_C)
-  n_nonseason <- sum(!mo_growingseason_TF)
-  n_season <- sum(mo_growingseason_TF)
+  # Determine seasons: non-growing season, growing season
+  mo_seasons_TF <- matrix(NA, nrow = 12, ncol = 2,
+    dimnames = list(NULL, c("nongrowing", "growing")))
+  mo_seasons_TF[, 1] <- as.vector(mean_monthly_temp_C < growing_limit_C)
+  mo_seasons_TF[, 2] <- !mo_seasons_TF[, 1]
+  n_seasons <- apply(mo_seasons_TF, 2, sum)
+
 
   # Describe conditions for which the default vegetation biomass values are
-  # valid
-  ref_winter <- c(11:12, 1:2) # Assumes that the "growing season"
-  # (valid for growing_limit_C == 4) in x = tr_VegetationComposition starts in
-  # March and ends after October, for all functional groups.
-  ref_growing <- rSW2_glovars[["st_mo"]][-ref_winter] # Assumes that the
-  # "growing season" in x = tr_VegetationComposition starts in March and ends
-  # after October, for all functional groups.
+  # valid:
+  #   Assumes that the "growing season" (valid for growing_limit_C == 4)
+  #   in x = tr_VegetationComposition starts in March and ends after October,
+  #   for all functional groups.
+  ref_seasons <- list(
+    nongrowing = tmp <- c(11:12, 1:2),
+    growing = rSW2_glovars[["st_mo"]][-tmp]
+  )
 
   # Standard growing season is for northern hemisphere:
   # target needs to be adjusted for southern Hemisphere
   if (!isNorth) {
-    mo_growingseason_TF <- c(
-      mo_growingseason_TF[7:12],
-      mo_growingseason_TF[1:6])
+    mo_seasons_TF <- rbind(mo_seasons_TF[7:12, ], mo_seasons_TF[1:6, ])
   }
 
   # save reference: reference values required for "overlap" between seasons
   x_ref <- x
 
-  # Adjust for timing and duration of non-growing season
-  if (n_nonseason > 0) {
-    if (n_nonseason < 12) {
-      site_winter <- which(!mo_growingseason_TF)
-      # Calculate first month of winter == last start of non-growing season
-      starts <- calc_starts(!mo_growingseason_TF)
-      site.winter.start <- starts[length(starts)]
-      temp <- site.winter.start + seq_len(n_nonseason) - 2
-      site.winter.months <- temp %% 12 + 1
+  # Adjust for timing and duration of non-growing/growing seasons
+  for (iseason in 1:2) {
+    if (n_seasons[iseason] > 0) {
+      if (n_seasons[iseason] < 12) {
+        site_season <- which(mo_seasons_TF[, iseason])
+        # Calculate first month of season == last start in (circular) year
+        starts <- calc_starts(mo_seasons_TF[, iseason])
+        site_season_start <- starts[length(starts)]
+        temp <- site_season_start + seq_len(n_seasons[iseason]) - 2
+        site_season_months <- temp %% 12 + 1
 
-      for (k in seq_along(x)) {
-        x[[k]][site.winter.months, ] <- cut0Inf(
-          predict_season(x_ref[[k]], ref_winter, site_winter),
-          val = 0)
-      }
+        for (k in seq_along(x)) {
+          x[[k]][site_season_months, ] <- cut0Inf(
+            predict_season(x_ref[[k]], ref_seasons[[iseason]], site_season),
+            val = 0)
+        }
 
-    } else {
-      # if winter lasts 12 months: take the mean of the winter months
-      for (k in seq_along(x)) {
-        temp <- apply(x_ref[[k]][ref_winter, ], 2, mean)
-        x[[k]][] <- matrix(temp, nrow = 12, ncol = ncol(x[[k]]), byrow = TRUE)
-      }
-    }
-  }
-
-  #Adjust for timing and duration of growing season
-  if (n_season > 0) {
-    if (n_season < 12) {
-      site_growing <- which(mo_growingseason_TF)
-      # Calculate first month of growing season == first start of
-      # growing season
-      starts <- calc_starts(mo_growingseason_TF)
-      site.growing.start <- starts[1]
-      temp <- site.growing.start + seq_len(n_season) - 2
-      site.growing.months <- temp %% 12 + 1
-
-      for (k in seq_along(x)) {
-        x[[k]][site.growing.months, ] <- cut0Inf(
-          predict_season(x_ref[[k]], ref_growing, site_growing),
-          val = 0)
-      }
-
-    } else {
-      # if growing season lasts 12 months
-      for (k in seq_along(x)) {
-        temp <- apply(x_ref[[k]][ref_growing, ], 2, max)
-        x[[k]][] <- matrix(temp, nrow = 12, ncol = ncol(x[[k]]), byrow = TRUE)
+      } else {
+        # if season lasts 12 months
+        for (k in seq_along(x)) {
+          # if non-growing/growing season: mean/max of the season's months
+          fun <- switch(iseason, "mean", "max")
+          temp <- apply(x_ref[[k]][ref_seasons[[iseason]], , drop = FALSE],
+            MARGIN = 2, FUN = fun)
+          x[[k]][] <- matrix(temp, nrow = 12, ncol = ncol(x[[k]]), byrow = TRUE)
+        }
       }
     }
   }
