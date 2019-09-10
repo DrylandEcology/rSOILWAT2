@@ -6,27 +6,35 @@
 site-specific climatic conditions}
 \usage{
 adjBiom_by_temp(x, mean_monthly_temp_C, growing_limit_C = 4,
-  isNorth = TRUE)
+  reference_growing_season = 3:10, isNorth = TRUE)
 }
 \arguments{
 \item{x}{A two-dimensional object or a list of such objects. Rows of each
 such object correspond to month of the year, i.e., there must be 12 rows,
-and columns correspond to variables that are adjusted.}
+and columns correspond to variables that are adjusted. These values
+reflect the phenological pattern described by
+\code{reference_growing_season}.}
 
 \item{mean_monthly_temp_C}{A numeric vector of length 12. Mean monthly
-temperatures in Celsius. The default inputs have March-October as
-growing season.}
+temperatures in Celsius of a target site for which \code{x} is
+adjusted.}
 
 \item{growing_limit_C}{A numeric value. \code{mean_monthly_temp_C} equal or
 above this limit are considered suitable for growth (growing season).
 Default value is 4 C.}
+
+\item{reference_growing_season}{A numeric vector with values
+between 1 and 12. Number of months that describe the potential
+active (growing) season of the input data \code{x}.
+Default values \code{3:10} describe a March-October growing season.}
 
 \item{isNorth}{A logical value. \code{TRUE} for locations on the northern
 hemisphere, \code{FALSE} for locations on the southern hemisphere.}
 }
 \value{
 An object as \code{x}, i.e., a two-dimensional object or a list of
-  such objects, where the values were adjusted.
+  such objects with values adjusted to represent the phenology of a target
+  described by \code{mean_monthly_temp_C}.
 }
 \description{
 Adjust biomass phenology by pattern of growing/non-growing seasons to
@@ -40,8 +48,7 @@ biomass_reference <- swProd_MonProd_grass(sw_in)[, 2:3]
 ## growing season
 biomass_adj <- adjBiom_by_temp(
   x = biomass_reference,
-  mean_monthly_temp_C = c(rep(10, 6), rep(0, 4), rep(10, 2)),
-  growing_limit_C = 4)
+  mean_monthly_temp_C = c(rep(10, 6), rep(0, 4), rep(10, 2)))
 
 ## Plot reference and adjusted monthly values
 \dontrun{

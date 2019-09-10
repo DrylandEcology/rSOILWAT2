@@ -39,8 +39,8 @@ hemisphere, \code{FALSE} for locations on the southern hemisphere.}
 location.}
 
 \item{mean_monthly_temp_C}{A numeric vector of length 12. Mean monthly
-temperatures in Celsius. The default inputs have March-October as
-growing season.}
+temperatures in Celsius of a target site for which \code{x} is
+adjusted.}
 }
 \value{
 A list with two elements \code{grass}, \code{shrub}. Each element is

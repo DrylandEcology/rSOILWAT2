@@ -572,10 +572,16 @@ predict_season <- function(x, ref_season, target_season) {
 #'
 #' @param x A two-dimensional object or a list of such objects. Rows of each
 #'   such object correspond to month of the year, i.e., there must be 12 rows,
-#'   and columns correspond to variables that are adjusted.
+#'   and columns correspond to variables that are adjusted. These values
+#'   reflect the phenological pattern described by
+#'   \code{reference_growing_season}.
+#' @param reference_growing_season A numeric vector with values
+#'   between 1 and 12. Number of months that describe the potential
+#'   active (growing) season of the input data \code{x}.
+#'   Default values \code{3:10} describe a March-October growing season.
 #' @param mean_monthly_temp_C A numeric vector of length 12. Mean monthly
-#'   temperatures in Celsius. The default inputs have March-October as
-#'   growing season.
+#'   temperatures in Celsius of a target site for which \code{x} is
+#'   adjusted.
 #' @param growing_limit_C A numeric value. \code{mean_monthly_temp_C} equal or
 #'   above this limit are considered suitable for growth (growing season).
 #'   Default value is 4 C.
@@ -583,7 +589,8 @@ predict_season <- function(x, ref_season, target_season) {
 #'   hemisphere, \code{FALSE} for locations on the southern hemisphere.
 #'
 #' @return An object as \code{x}, i.e., a two-dimensional object or a list of
-#'   such objects, where the values were adjusted.
+#'   such objects with values adjusted to represent the phenology of a target
+#'   described by \code{mean_monthly_temp_C}.
 #'
 #' @examples
 #' sw_in <- rSOILWAT2::sw_exampleData
@@ -593,8 +600,7 @@ predict_season <- function(x, ref_season, target_season) {
 #' ## growing season
 #' biomass_adj <- adjBiom_by_temp(
 #'   x = biomass_reference,
-#'   mean_monthly_temp_C = c(rep(10, 6), rep(0, 4), rep(10, 2)),
-#'   growing_limit_C = 4)
+#'   mean_monthly_temp_C = c(rep(10, 6), rep(0, 4), rep(10, 2)))
 #'
 #' ## Plot reference and adjusted monthly values
 #' \dontrun{
@@ -613,7 +619,7 @@ predict_season <- function(x, ref_season, target_season) {
 #'
 #' @export
 adjBiom_by_temp <- function(x, mean_monthly_temp_C, growing_limit_C = 4,
-  isNorth = TRUE) {
+  reference_growing_season = 3:10, isNorth = TRUE) {
 
   # Convert `x` to a list
   return_list <- inherits(x, "list")
@@ -628,7 +634,13 @@ adjBiom_by_temp <- function(x, mean_monthly_temp_C, growing_limit_C = 4,
     }
   }
 
-  stopifnot(sapply(x, nrow) == 12L, length(mean_monthly_temp_C) == 12L)
+  # Make sure that inputs represent twelve months
+  stopifnot(
+    sapply(x, nrow) == 12L,
+    length(mean_monthly_temp_C) == 12L,
+    all(reference_growing_season >= 1L),
+    all(reference_growing_season <= 12L)
+  )
 
   # Determine seasons: non-growing season, growing season
   mo_seasons_TF <- matrix(NA, nrow = 12, ncol = 2,
@@ -638,14 +650,10 @@ adjBiom_by_temp <- function(x, mean_monthly_temp_C, growing_limit_C = 4,
   n_seasons <- apply(mo_seasons_TF, 2, sum)
 
 
-  # Describe conditions for which the default vegetation biomass values are
-  # valid:
-  #   Assumes that the "growing season" (valid for growing_limit_C == 4)
-  #   in x = tr_VegetationComposition starts in March and ends after October,
-  #   for all functional groups.
+  # Describe seasonal conditions for which the input values are valid:
   ref_seasons <- list(
-    nongrowing = tmp <- c(11:12, 1:2),
-    growing = rSW2_glovars[["st_mo"]][-tmp]
+    nongrowing = rSW2_glovars[["st_mo"]][-reference_growing_season],
+    growing = reference_growing_season
   )
 
   # Standard growing season is for northern hemisphere:
