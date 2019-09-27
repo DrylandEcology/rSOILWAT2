@@ -469,6 +469,14 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
 }
 
 
+get_season <- function(mo_season_TF, N_season) {
+  # Calculate first month of season == last start in (circular) year
+  starts <- calc_starts(mo_season_TF)
+  tmp <- starts[length(starts)] + seq_len(N_season) - 2
+  tmp %% 12 + 1
+}
+
+
 #' Predict seasonal phenology
 #'
 #' Fits a loess-curve to a seasonal subset of monthly values and uses the fit
@@ -652,8 +660,20 @@ adjBiom_by_temp <- function(x, mean_monthly_temp_C, growing_limit_C = 4,
 
   # Describe seasonal conditions for which the input values are valid:
   ref_seasons <- list(
-    nongrowing = rSW2_glovars[["st_mo"]][-reference_growing_season],
-    growing = reference_growing_season
+    nongrowing = {
+      tmp <- rep(FALSE, 12)
+      tmp[rSW2_glovars[["st_mo"]][-reference_growing_season]] <- TRUE
+      get_season(
+        mo_season_TF = tmp,
+        N_season = sum(tmp)
+      )},
+    growing = {
+      tmp <- rep(FALSE, 12)
+      tmp[reference_growing_season] <- TRUE
+      get_season(
+        mo_season_TF = tmp,
+        N_season = sum(tmp)
+      )}
   )
 
   # Standard growing season is for northern hemisphere:
@@ -670,11 +690,11 @@ adjBiom_by_temp <- function(x, mean_monthly_temp_C, growing_limit_C = 4,
     if (n_seasons[iseason] > 0) {
       if (n_seasons[iseason] < 12) {
         site_season <- which(mo_seasons_TF[, iseason])
-        # Calculate first month of season == last start in (circular) year
-        starts <- calc_starts(mo_seasons_TF[, iseason])
-        site_season_start <- starts[length(starts)]
-        temp <- site_season_start + seq_len(n_seasons[iseason]) - 2
-        site_season_months <- temp %% 12 + 1
+
+        site_season_months <- get_season(
+          mo_season_TF = mo_seasons_TF[, iseason],
+          N_season = n_seasons[iseason]
+        )
 
         for (k in seq_along(x)) {
           x[[k]][site_season_months, ] <- cut0Inf(
