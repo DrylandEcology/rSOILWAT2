@@ -434,6 +434,8 @@ impute_df <- function(x, imputation_type = c("none", "mean", "locf"),
 #'
 #' @export
 print_mkv_files <- function(mkv_doy, mkv_woy, path, digits = 5) {
+  dir.create(path, recursive = TRUE, showWarnings = FALSE)
+
   colnames(mkv_doy)[1] <- paste0("#", colnames(mkv_doy)[1])
   write.table(format(mkv_doy, digits = digits),
     file = file.path(path, "mkv_prob.in"),
