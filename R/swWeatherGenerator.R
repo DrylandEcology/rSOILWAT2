@@ -777,3 +777,103 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
       paste0(tag, "_CompareWeather_WGenInputs_WeekOfYear.png")))
 
 }
+
+
+#' Generate daily weather data using SOILWAT2's weather generator
+#'
+#' This function is a convience wrapper for
+#' \code{\link{dbW_estimate_WGen_coefs}}.
+#'
+#' @inheritParams dbW_estimate_WGen_coefs
+#' @param years An integer vector. The calendar years for which to generate
+#'   daily weather. If \code{NULL}, then extracted from \code{weatherData}.
+#' @param wgen_coeffs A list with two named elements \var{mkv_doy} and
+#'   \var{mkv_woy}, i.e., the return value of
+#'   \code{\link{dbW_estimate_WGen_coefs}}. If \code{NULL}, then determined
+#'   based on \code{weatherData}.
+#' @inheritParams impute_df
+#' @param seed An integer value or \code{NULL}. See \code{\link{set.seed}}.
+#'
+#' @return A list of elements of class \code{\linkS4class{swWeatherData}}.
+#'
+#' @examples
+#' # Load data for 1949-2010
+#' wdata <- data.frame(dbW_weatherData_to_dataframe(rSOILWAT2::weatherData))
+#'
+#' # Treat data for 2005-2010 as our 'dataset'
+#' ids <- wdata[, "Year"] >= 2005
+#' x <- wdata[ids, ]
+#'
+#' # Set June-August of 2008 as missing
+#' ids <- x[, "Year"] == 2008 &
+#'   x[, "DOY"] >= 153 & x[, "DOY"] <= 244
+#' x[ids, -(1:2)] <- NA
+#'
+#' ## Example 1: generate weather for our 'dataset' but impute missing values
+#' wout1 <- dbW_generateWeather(x)
+#'
+#' ## Example 2: generate weather based on our 'dataset' but for
+#' ## years 2005-2015 and use estimated weather generator coefficients from
+#' ## a different dataset
+#' wgen_coeffs <- dbW_estimate_WGen_coefs(wdata,
+#'   imputation_type = "mean", imputation_span = 5)
+#' # Set seed to make output reproducible
+#' wout2 <- dbW_generateWeather(x, years = 2005:2015,
+#'   wgen_coeffs = wgen_coeffs, seed = 123)
+#'
+#' @export
+dbW_generateWeather <- function(weatherData, years = NULL, wgen_coeffs = NULL,
+  imputation_type = "mean", imputation_span = 5L, seed = NULL) {
+
+  #--- Obtain missing/null arguments
+  if (is.null(wgen_coeffs)) {
+    wgen_coeffs <- dbW_estimate_WGen_coefs(weatherData,
+      imputation_type = imputation_type, imputation_span = imputation_span)
+  }
+
+  if (is.data.frame(weatherData)) {
+    weatherData <- dbW_dataframe_to_weatherData(weatherData)
+  }
+
+  if (is.null(years)) {
+    years <- get_years_from_weatherData(weatherData)
+  }
+
+  #--- Put rSOILWAT2 run together to produce imputed daily weather
+  sw_in <- sw_exampleData
+
+  # Set years
+  swWeather_FirstYearHistorical(sw_in) <- min(years)
+  swYears_EndYear(sw_in) <- max(years)
+  swYears_StartYear(sw_in) <- min(years)
+
+  # Set weather data
+  set_WeatherHistory(sw_in) <- weatherData
+
+  # Turn on weather generator
+  swWeather_UseMarkov(sw_in) <- TRUE
+
+  # Set weather generator coefficients
+  swMarkov_Prob(sw_in) <- wgen_coeffs[["mkv_doy"]]
+  swMarkov_Conv(sw_in) <- wgen_coeffs[["mkv_woy"]]
+
+  # Turn off CO2-effects to avoid any issues
+  swCarbon_Use_Bio(sw_in) <- 0
+  swCarbon_Use_WUE(sw_in) <- 0
+
+  #--- Execute SOILWAT2 to generate weather
+  set.seed(seed)
+  sw_out <- sw_exec(inputData = sw_in)
+
+
+  #--- Extract weather generator imputed daily weather
+  xdf <- slot(slot(sw_out, "TEMP"), "Day")[, c("Year", "Day", "max_C", "min_C")]
+  colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C")
+  xdf <- data.frame(
+    xdf,
+    PPT_cm = slot(slot(sw_out, "PRECIP"), "Day")[, "ppt"]
+  )
+
+  # Convert to rSOILWAT2 weather data format
+  dbW_dataframe_to_weatherData(xdf)
+}
