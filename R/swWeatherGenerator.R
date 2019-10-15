@@ -463,13 +463,13 @@ check_weather <- function(weather, required_variables) {
 
 # Aggregate daily weather for each time step
 prepare_weather <- function(data_daily,
-  time_steps = c("Year", "Month", "Week", "Day")) {
+  time_steps = c("Year", "Month", "Week", "Day"), na.rm = FALSE) {
 
   weather_list <- list()
   id_daily <- "Day" == time_steps
 
   for (it in time_steps[!id_daily]) {
-    weather_list[[it]] <- dbW_dataframe_aggregate(data_daily, it)
+    weather_list[[it]] <- dbW_dataframe_aggregate(data_daily, it, na.rm = na.rm)
   }
 
   weather_list[["Day"]] <- data_daily
@@ -478,7 +478,7 @@ prepare_weather <- function(data_daily,
 
 # Prepare weather data object for \code{\link{compare_dailyweather}}
 prepare_weather_for_comparison <- function(weather,
-  time_steps = c("Year", "Month", "Week", "Day")) {
+  time_steps = c("Year", "Month", "Week", "Day"), na.rm = FALSE) {
   req_vars <- c("Year", "Tmax_C", "Tmin_C", "PPT_cm")
 
   if (length(weather) == length(time_steps) &&
@@ -501,7 +501,7 @@ prepare_weather_for_comparison <- function(weather,
     # aggregate for each time step
     check_weather(weather, c("DOY|Day", req_vars))
     colnames(weather)[2] <- "Day"
-    res <- prepare_weather(weather)
+    res <- prepare_weather(weather, na.rm = na.rm)
 
   } else {
     stop("Structure of `weather` not suitable")
@@ -580,7 +580,7 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
   weather_vars <- c("Tmax_C", "Tmin_C", "PPT_cm")
 
   #--- Prepare reference weather
-  ref_df <- list(prepare_weather_for_comparison(ref_weather))
+  ref_df <- list(prepare_weather_for_comparison(ref_weather, na.rm = TRUE))
 
   #--- Prepare other weather
   if (N > 1 && length(weather) == N && inherits(weather, "list") &&
@@ -590,7 +590,7 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 
   } else if (N == 1) {
     # one run/site
-    comp_df <- list(prepare_weather_for_comparison(weather))
+    comp_df <- list(prepare_weather_for_comparison(weather, na.rm = TRUE))
 
   } else {
     stop("Structure of `weather` not suitable")
@@ -618,14 +618,20 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
       data <- matrix(data, nrow = 1, dimnames = list(NULL, names(data)))
     }
     stopifnot(ncol(data) == length(ref_data))
-    ylim <- range(data, ref_data)
-    graphics::boxplot(data, ylim = ylim, ylab = ylab)
-    graphics::points(seq_along(ref_data), ref_data, col = "red", pch = 4,
-      lwd = 2)
+    ylim <- range(data, ref_data, na.rm = TRUE)
 
-    if (legend) {
-      graphics::legend("topright", legend = c("Reference", "Weather"),
-        col = c("red", "black"), pch = c(4, 16), pt.lwd = 2)
+    if (all(is.finite(ylim))) {
+      graphics::boxplot(data, ylim = ylim, ylab = ylab)
+      graphics::points(seq_along(ref_data), ref_data, col = "red", pch = 4,
+        lwd = 2)
+
+      if (legend) {
+        graphics::legend("topright", legend = c("Reference", "Weather"),
+          col = c("red", "black"), pch = c(4, 16), pt.lwd = 2)
+      }
+
+    } else {
+      plot.new()
     }
   }
 
@@ -673,29 +679,34 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
     vlim <- range(sapply(c(ref_data, data),
       function(x) range(x[[time]][, var], na.rm = TRUE)))
 
-    probs <- seq(0, 1, length.out = 1000)
+    if (all(is.finite(vlim))) {
+      probs <- seq(0, 1, length.out = 1000)
 
-    x <- stats::quantile(ref_data[[1]][[time]][, var], probs = probs,
-      na.rm = TRUE)
-    graphics::plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
-      xlab = paste0(time, "ly : reference ", lab),
-      ylab = paste0(time, "ly : weather ", lab))
-    for (k in seq_along(data)) {
-      qy <- stats::quantile(data[[k]][[time]][, var], probs = probs,
+      x <- stats::quantile(ref_data[[1]][[time]][, var], probs = probs,
         na.rm = TRUE)
-      graphics::points(x, qy, pch = 46)
-    }
+      graphics::plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
+        xlab = paste0(time, "ly : reference ", lab),
+        ylab = paste0(time, "ly : weather ", lab))
+      for (k in seq_along(data)) {
+        qy <- stats::quantile(data[[k]][[time]][, var], probs = probs,
+          na.rm = TRUE)
+        graphics::points(x, qy, pch = 46)
+      }
 
-    graphics::abline(h = 0, lty = 2)
-    graphics::abline(v = 0, lty = 2)
-    graphics::segments(x0 = vlim[1], y0 = vlim[1],
-      x1 = vlim[2], y1 = vlim[2], col = "red", lwd = 2)
+      graphics::abline(h = 0, lty = 2)
+      graphics::abline(v = 0, lty = 2)
+      graphics::segments(x0 = vlim[1], y0 = vlim[1],
+        x1 = vlim[2], y1 = vlim[2], col = "red", lwd = 2)
 
 
-    if (legend) {
-      graphics::legend("topleft", legend = c("Reference", "Weather"),
-        col = c("red", "black"), pch = c(NA, 16), pt.lwd = 2,
-        lty = c(1, NA), lwd = 2, merge = TRUE)
+      if (legend) {
+        graphics::legend("topleft", legend = c("Reference", "Weather"),
+          col = c("red", "black"), pch = c(NA, 16), pt.lwd = 2,
+          lty = c(1, NA), lwd = 2, merge = TRUE)
+      }
+
+    } else {
+      plot.new()
     }
   }
 
@@ -710,8 +721,10 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
   for (ts in time_steps) {
     foo_qq(comp_df, ref_df, var = "PPT_cm", time = ts,
       lab = "precipitation (cm)", legend = ts == time_steps[1])
-    foo_qq(comp_df, ref_df, var = "Tmax_C", time = ts, lab = "max temp (C)")
-    foo_qq(comp_df, ref_df, var = "Tmin_C", time = ts, lab = "min temp (C)")
+    foo_qq(comp_df, ref_df, var = "Tmax_C", time = ts,
+      lab = "max temp (C)")
+    foo_qq(comp_df, ref_df, var = "Tmin_C", time = ts,
+      lab = "min temp (C)")
   }
 
   graphics::par(par_prev)
@@ -750,20 +763,27 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
       vlim <- range(sapply(data, function(x)
         range(x[[obj]][, v], na.rm = TRUE)))
 
-      graphics::plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
-        xlab = paste0("Reference ", v), ylab = paste0("Weather ", v))
-      for (k in seq_along(data)) {
-        graphics::lines(stats::lowess(x, data[[k]][[obj]][, v]), col = "gray")
-      }
+      if (all(is.finite(vlim_obs)) && all(is.finite(vlim))) {
+        graphics::plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
+          xlab = paste0("Reference ", v), ylab = paste0("Weather ", v))
+        for (k in seq_along(data)) {
+          isgood <- stats::complete.cases(cbind(x, data[[k]][[obj]][, v]))
+          graphics::lines(stats::lowess(x[isgood], data[[k]][[obj]][isgood, v]),
+            col = "gray")
+        }
 
-      graphics::abline(h = 0, lty = 2)
-      graphics::abline(v = 0, lty = 2)
-      graphics::segments(x0 = vlim_obs[1], y0 = vlim_obs[1],
-        x1 = vlim_obs[2], y1 = vlim_obs[2], col = "red", lwd = 2)
+        graphics::abline(h = 0, lty = 2)
+        graphics::abline(v = 0, lty = 2)
+        graphics::segments(x0 = vlim_obs[1], y0 = vlim_obs[1],
+          x1 = vlim_obs[2], y1 = vlim_obs[2], col = "red", lwd = 2)
 
-      if (v == vars[1]) {
-        graphics::legend("topleft", legend = c("Reference", "Weather"),
-          col = c("red", "black"), lwd = 2)
+        if (v == vars[1]) {
+          graphics::legend("topleft", legend = c("Reference", "Weather"),
+            col = c("red", "black"), lwd = 2)
+        }
+
+      } else {
+        plot.new()
       }
     }
 
