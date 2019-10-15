@@ -26,7 +26,8 @@
 #'
 #' @section Notes: This code is a complete overhaul compared to the version
 #'   from \var{rSFSTEP2} on \code{2019-Feb-10}
-#'   \url{https://github.com/DrylandEcology/rSFSTEP2/commit/cd9e161971136e1e56d427a4f76062bbb0f3d03a}
+#'   commit cd9e161971136e1e56d427a4f76062bbb0f3d03a
+#'   \url{https://github.com/DrylandEcology/rSFSTEP2}.
 #'
 #' @section Notes: This function will produce \code{NA}s in the output if there
 #'   are insufficient weather observation in the input data \code{weatherData}
@@ -670,7 +671,7 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
   foo_qq <- function(data, ref_data, var, time, lab, legend = FALSE) {
 
     vlim <- range(sapply(c(ref_data, data),
-      function(x) range(x[[time]][, var])))
+      function(x) range(x[[time]][, var], na.rm = TRUE)))
 
     probs <- seq(0, 1, length.out = 1000)
 
