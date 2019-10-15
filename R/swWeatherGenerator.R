@@ -783,7 +783,7 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 
 #' Generate daily weather data using SOILWAT2's weather generator
 #'
-#' This function is a convience wrapper for
+#' This function is a convenience wrapper for
 #' \code{\link{dbW_estimate_WGen_coefs}}.
 #'
 #' @inheritParams dbW_estimate_WGen_coefs
@@ -811,7 +811,7 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 #'   x[, "DOY"] >= 153 & x[, "DOY"] <= 244
 #' x[ids, -(1:2)] <- NA
 #'
-#' ## Example 1: generate weather for our 'dataset' but impute missing values
+#' ## Example 1: generate weather for any missing values in our 'dataset'
 #' wout1 <- dbW_generateWeather(x)
 #'
 #' ## Example 2: generate weather based on our 'dataset' but for
@@ -823,14 +823,35 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 #' wout2 <- dbW_generateWeather(x, years = 2005:2015,
 #'   wgen_coeffs = wgen_coeffs, seed = 123)
 #'
+#' ## Example 3: generate weather based only on estimated weather generator
+#' ## coefficients from a different dataset
+#' x_empty <- list(new("swWeatherData"))
+#' wout3 <- dbW_generateWeather(x_empty, years = 2050:2055,
+#'   wgen_coeffs = wgen_coeffs, seed = 123)
+#'
+#' ## Compare input weather with generated weather
+#' \dontrun{
+#' path <- tempdir()
+#' compare_weather(
+#'   ref_weather = x,
+#'   weather = dbW_weatherData_to_dataframe(wout1),
+#'   N = 1,
+#'   path = path,
+#'   tag = "Example1-WeatherGenerator"
+#' )
+#' unlink(list.files(path), force = TRUE)
+#' }
+#'
 #' @export
 dbW_generateWeather <- function(weatherData, years = NULL, wgen_coeffs = NULL,
-  imputation_type = "mean", imputation_span = 5L, seed = NULL) {
+  na.rm = FALSE, imputation_type = "mean", imputation_span = 5L, seed = NULL) {
 
   #--- Obtain missing/null arguments
   if (is.null(wgen_coeffs)) {
     wgen_coeffs <- dbW_estimate_WGen_coefs(weatherData,
-      imputation_type = imputation_type, imputation_span = imputation_span)
+      na.rm = na.rm,
+      imputation_type = imputation_type,
+      imputation_span = imputation_span)
   }
 
   if (is.data.frame(weatherData)) {
@@ -842,7 +863,7 @@ dbW_generateWeather <- function(weatherData, years = NULL, wgen_coeffs = NULL,
   }
 
   #--- Put rSOILWAT2 run together to produce imputed daily weather
-  sw_in <- sw_exampleData
+  sw_in <- rSOILWAT2::sw_exampleData
 
   # Set years
   swWeather_FirstYearHistorical(sw_in) <- min(years)

@@ -5,7 +5,8 @@
 \title{Generate daily weather data using SOILWAT2's weather generator}
 \usage{
 dbW_generateWeather(weatherData, years = NULL, wgen_coeffs = NULL,
-  imputation_type = "mean", imputation_span = 5L, seed = NULL)
+  na.rm = FALSE, imputation_type = "mean", imputation_span = 5L,
+  seed = NULL)
 }
 \arguments{
 \item{weatherData}{A list of elements of class
@@ -19,6 +20,10 @@ daily weather. If \code{NULL}, then extracted from \code{weatherData}.}
 \var{mkv_woy}, i.e., the return value of
 \code{\link{dbW_estimate_WGen_coefs}}. If \code{NULL}, then determined
 based on \code{weatherData}.}
+
+\item{na.rm}{A logical value. If \code{TRUE}, then missing weather values
+in the input \code{weatherData} are excluded; if \code{FALSE}, then
+missing values are propagated.}
 
 \item{imputation_type}{A character string describing the imputation method;
  currently, one of three values: \describe{
@@ -41,7 +46,7 @@ considered if \code{imputation_type = "mean"}.}
 A list of elements of class \code{\linkS4class{swWeatherData}}.
 }
 \description{
-This function is a convience wrapper for
+This function is a convenience wrapper for
 \code{\link{dbW_estimate_WGen_coefs}}.
 }
 \examples{
@@ -57,7 +62,7 @@ ids <- x[, "Year"] == 2008 &
   x[, "DOY"] >= 153 & x[, "DOY"] <= 244
 x[ids, -(1:2)] <- NA
 
-## Example 1: generate weather for our 'dataset' but impute missing values
+## Example 1: generate weather for any missing values in our 'dataset'
 wout1 <- dbW_generateWeather(x)
 
 ## Example 2: generate weather based on our 'dataset' but for
@@ -68,5 +73,24 @@ wgen_coeffs <- dbW_estimate_WGen_coefs(wdata,
 # Set seed to make output reproducible
 wout2 <- dbW_generateWeather(x, years = 2005:2015,
   wgen_coeffs = wgen_coeffs, seed = 123)
+
+## Example 3: generate weather based only on estimated weather generator
+## coefficients from a different dataset
+x_empty <- list(new("swWeatherData"))
+wout3 <- dbW_generateWeather(x_empty, years = 2050:2055,
+  wgen_coeffs = wgen_coeffs, seed = 123)
+
+## Compare input weather with generated weather
+\dontrun{
+path <- tempdir()
+compare_weather(
+  ref_weather = x,
+  weather = dbW_weatherData_to_dataframe(wout1),
+  N = 1,
+  path = path,
+  tag = "Example1-WeatherGenerator"
+)
+unlink(list.files(path), force = TRUE)
+}
 
 }
