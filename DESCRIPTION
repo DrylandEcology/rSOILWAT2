@@ -24,7 +24,7 @@ Suggests:
   rmarkdown,
   bookdown,
   testthat,
-  lintr (>= 1.0.3),
+  lintr (>= 2.0.0),
   covr,
   spelling (>= 1.1.0),
   goodpractice

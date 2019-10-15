@@ -26,7 +26,7 @@
 #'
 #' @section Notes: This code is a complete overhaul compared to the version
 #'   from \var{rSFSTEP2} on \code{2019-Feb-10}
-#'   commit cd9e161971136e1e56d427a4f76062bbb0f3d03a
+#'   commit \var{cd9e161971136e1e56d427a4f76062bbb0f3d03a}
 #'   \url{https://github.com/DrylandEcology/rSFSTEP2}.
 #'
 #' @section Notes: This function will produce \code{NA}s in the output if there
