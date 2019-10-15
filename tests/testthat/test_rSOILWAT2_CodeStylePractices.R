@@ -19,6 +19,10 @@ test_that("Package code style", {
     "rSOILWAT2_deprecated.R" # this is deprecated
   )
 
+  dirs_not_tolint <- c(
+    "rSOILWAT2.Rcheck"
+  )
+
   # Note: working directory when these tests are run is at `tests/testthat/`
   if (FALSE) {
     # `expect_lint_free` as of v1.0.2.9000 (built 2018-05-27)
@@ -34,14 +38,20 @@ test_that("Package code style", {
   } else {
     # easier to work with interactively than `lintr::expect_lint_free`
     # additionally, `lintr::expect_lint_free` calls `lintr:::lint_package`
-    # which only considers code in "R", "tests", "inst", but not in "data-raw"
-    # or "demo"
-    dir_code <- file.path(pkg_path, c("data-raw", "demo", "R", "tests", "inst"))
+    # which only considers code in "R", "tests", "inst", but not in "data-raw",
+    # "doc", or "demo"
+    dir_code <- file.path(pkg_path,
+      c("data-raw", "doc", "demo", "R", "tests", "inst"))
     pkg_code_files <- list.files(path = dir_code, pattern = "\\.R$",
       ignore.case = TRUE, full.names = TRUE, recursive = TRUE)
+    pkg_code_files <- normalizePath(pkg_code_files)
 
     ids <- !(basename(pkg_code_files) %in% files_not_tolint)
     files_tolint <- pkg_code_files[ids]
+    for (k in seq_along(dirs_not_tolint)) {
+      ids <- !grepl(dirs_not_tolint[k], files_tolint)
+      files_tolint <- files_tolint[ids]
+    }
 
     for (k in seq_along(files_tolint)) {
       badstyle <- lintr::lint(files_tolint[k])
