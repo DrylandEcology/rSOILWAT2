@@ -553,19 +553,23 @@ prepare_weather_for_comparison <- function(weather,
 #'   path = path, tag = "Example1-Silly")
 #'
 #' ## Example with STEPWAT2 output data averaged across iterations (`-o` option)
-#' cols_STEPWAT2 <- c("Year", "Day", "PRECIP_ppt_Mean", "TEMP_max_C_Mean",
-#'   "TEMP_min_C_Mean")
-#' cols_rSOILWAT2 <- c("Year", "Day", "PPT_cm", "Tmax_C", "Tmin_C")
-#' w0 <- read.csv("file_STEPWAT2_master.csv")[, cols_STEPWAT2]
-#' colnames(w0) <- cols_rSOILWAT2
-#' w1 <- read.csv("file_STEPWAT2_dev.csv")[, cols_STEPWAT2]
-#' colnames(w1) <- cols_rSOILWAT2
+#' fname_master <- "file_STEPWAT2_master.csv"
+#' fname_dev <- "file_STEPWAT2_dev.csv"
+#' if (all(file.exists(fname_master, fname_dev))) {
+#'   cols_STEPWAT2 <- c("Year", "Day", "PRECIP_ppt_Mean", "TEMP_max_C_Mean",
+#'     "TEMP_min_C_Mean")
+#'   cols_rSOILWAT2 <- c("Year", "Day", "PPT_cm", "Tmax_C", "Tmin_C")
+#'   w0 <- read.csv(fname_master)[, cols_STEPWAT2]
+#'   colnames(w0) <- cols_rSOILWAT2
+#'   w1 <- read.csv(fname_dev)[, cols_STEPWAT2]
+#'   colnames(w1) <- cols_rSOILWAT2
 #'
-#' # Note: Since values are averages across many iterations, most days
-#' # have average precipitation values > 0; thus, we need to adjust
-#' # `WET_limit_cm` accordingly (here, with a guess)
-#' compare_weather(ref_weather = w0, weather = w1, N = 1, WET_limit_cm = 0.1,
-#'   path = path, tag = "Example2-STEPWAT2")
+#'   # Note: Since values are averages across many iterations, most days
+#'   # have average precipitation values > 0; thus, we need to adjust
+#'   # `WET_limit_cm` accordingly (here, with a guess)
+#'   compare_weather(ref_weather = w0, weather = w1, N = 1, WET_limit_cm = 0.1,
+#'     path = path, tag = "Example2-STEPWAT2")
+#' }
 #'
 #' ## Cleanup
 #' unlink(list.files(path), force = TRUE)
