@@ -20,7 +20,7 @@ test_that("Package code style", {
   )
 
   dirs_not_tolint <- c(
-    "rSOILWAT2.Rcheck"
+    "rSOILWAT2.Rcheck" # no need to lint
   )
 
   # Note: working directory when these tests are run is at `tests/testthat/`
