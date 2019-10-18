@@ -1,4 +1,22 @@
-#DOY	p_W_W	p_W_D	PPT_avg	PPT_sd
+#------ Input file used if weather generator is turned on: probability table
+
+# USER: The weather generator is activated/deactivated via the
+#       input file `weathsetup.in`.
+
+# USER: `rSOILWAT2` provides functionality to calculate values with
+#       function dbW_estimate_WGen_coefs() and write them to this file with
+#       function print_mkv_files().
+
+# A table with 366 rows (day of year) and 5 columns:
+#   - DOY = Day of year
+#   - p_W_W = Probability that doy is wet if the previous day (doy - 1) was wet
+#   - p_W_D = Probability that doy is wet if the previous day (doy - 1) was dry
+#   - PPT_avg = Average amount of precipitation (cm) on doy if it is wet
+#   - PPT_sd = Standard deviation of amount of precipitation (cm) on doy if
+#     it is wet
+
+
+# DOY	p_W_W	p_W_D	PPT_avg	PPT_sd
   1	0.77778	0.230769	0.26647	0.295168
   2	0.58824	0.285714	0.46000	0.426037
   3	0.85714	0.176471	0.44867	0.611122

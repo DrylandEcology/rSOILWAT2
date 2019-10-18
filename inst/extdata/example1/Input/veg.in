@@ -1,18 +1,34 @@
-# Plant production data file for SOILWAT2
-# Location:
+#------ Input file for land cover and vegetation types:
+#       parameters and mean monthly biomass values
 
-# ---- Composition of vegetation type components (0-1; must add up to 1)
-# Grasses	Shrubs	Trees	Forbs	BareGround
+# USER: The vegetation composition and the mean monthly biomass values should
+#       be adjusted for site-specific run conditions.
+
+# USER: Most of the other values in this file are parameters that
+#       describe the four available vegetation types and should not be
+#       modified unless a vegetation type itself is altered.
+
+
+#---- Composition of vegetation type components (0-1; must add up to 1)
+#	Grasses	Shrubs	Trees	Forbs	BareGround
 	0.2	0.2	0.2	0.2	0.2
 
 
-# ---- Albedo
-# Grasses	Shrubs	Trees	Forbs	BareGround
-	0.167	0.143	0.106	0.167	0.15 # albedo: (Houldcroft et al. 2009) MODIS snowfree 'grassland', 'open shrub', ‘evergreen needle forest’ with MODIS albedo aggregated over pure IGBP cells where NDVI is greater than the 98th percentile NDVI
+#---- Albedo
+# Default values from Houldcroft et al. 2009:
+# MODIS snowfree 'grassland', 'open shrub', ‘evergreen needle forest’ with
+# MODIS albedo aggregated over pure IGBP cells where NDVI is greater than
+# the 98th percentile NDVI
+
+#	Grasses	Shrubs	Trees	Forbs	BareGround
+	0.167	0.143	0.106	0.167	0.15
 
 
-# -- Canopy height (cm) parameters either constant through season or as tanfunc with respect to biomass (g/m^2)
-# Grasses	Shrubs	Trees	Forbs
+#--- Canopy height (cm) parameters
+# Canopy height is either constant through season or
+# is a function of monthly biomass (g / m^2)
+
+#	Grasses	Shrubs	Trees	Forbs
 	300.0	0.0	0.0	300.0	# xinflec
 	29.5	5.0	5.0	29.5	# yinflec
 	85.	100.	3000.	85.	# range
@@ -20,29 +36,38 @@
 	0.0	50.	1200.	0.0	# if > 0 then constant canopy height (cm)
 
 
-# --- Vegetation interception parameters: kSmax * log10(1 + LAI_live + kdead * LAI_dead)
-# Grasses	Shrubs	Trees	Forbs
-	1.0			2.6			2.0		1.0	# kSmax (mm)
-	1.0			0.1			0.01	0.5	# kdead (0-1 fraction)
+#--- Vegetation interception parameters
+# Equation: kSmax * log10(1 + LAI_live + kdead * LAI_dead)
+
+#	Grasses	Shrubs	Trees	Forbs
+	1.0	2.6	2.0	1.0	# kSmax (mm)
+	1.0	0.1	0.01	0.5	# kdead (0-1 fraction)
 
 
-# --- Litter interception parameters: kSmax * log10(1 + litter_density)
-# Grasses	Shrubs	Trees	Forbs
-	0.113		0.113		0.290	0.113	# kSmax (mm)
+#--- Litter interception parameters
+# Equation: kSmax * log10(1 + litter_density)
+
+#	Grasses	Shrubs	Trees	Forbs
+	0.113	0.113	0.290	0.113	# kSmax (mm)
 
 
-# ---- Parameter for partitioning of bare-soil evaporation and transpiration as in Es = exp(-param*LAI)
-# Grasses	Shrubs	Trees	Forbs
-	1.	1.	0.41	1.	# Trees: According to a regression based on a review by Daikoku, K., S. Hattori, A. Deguchi, Y. Aoki, M. Miyashita, K. Matsumoto, J. Akiyama, S. Iida, T. Toba, Y. Fujita, and T. Ohta. 2008. Influence of evaporation from the forest floor on evapotranspiration from the dry canopy. Hydrological Processes 22:4083-4096.
+#---- Parameter for partitioning of bare-soil evaporation and transpiration
+# Equation: Es = exp(-param*LAI)
+# Default value for trees derived from a regression based on data from a
+# review by Daikoku et al. (2008) Hydrological Processes 22:4083-4096.
+
+#	Grasses	Shrubs	Trees	Forbs
+	1.	1.	0.41	1.
 
 
-# ---- Parameter for scaling and limiting bare soil evaporation rate: if totagb (g/m2) > param then no bare-soil evaporation
-# Grasses	Shrubs	Trees	Forbs
-	999.	999.	2099.	999.	#
+# --- Parameter for scaling and limiting bare soil evaporation rate
+# If totagb (g / m2) > param then no bare-soil evaporation
+#	Grasses	Shrubs	Trees	Forbs
+	999.	999.	2099.	999.
 
 
-# --- Shade effects on transpiration based on live and dead biomass
-# Grasses	Shrubs	Trees	Forbs
+#--- Shade effects on transpiration based on live and dead biomass
+#	Grasses	Shrubs	Trees	Forbs
 	0.3	0.3	0.3	0.3	# shade scale
 	150.	150.	150.	150.	# shade maximal dead biomass
 	300.	300.	0.	300.	# tanfunc: xinflec
@@ -51,37 +76,58 @@
 	0.002	0.002	0.0002	0.002	# slope
 
 
-# ---- Hydraulic redistribution: Ryel, Ryel R, Caldwell, Caldwell M, Yoder, Yoder C, Or, Or D, Leffler, Leffler A. 2002. Hydraulic redistribution in a stand of Artemisia tridentata: evaluation of benefits to transpiration assessed with a simulation model. Oecologia 130: 173-184.
-# Grasses	Shrubs	Trees	Forbs
+#---- Hydraulic redistribution
+# Implemenation based on Ryel et al. (2002)  Oecologia 130: 173-184.
+#	Grasses	Shrubs	Trees	Forbs
 	1	1	1	1	# flag to turn on/off (1/0) hydraulic redistribution
 	-0.2328	-0.2328	-0.2328	-0.2328	# maxCondroot - maximum radial soil-root conductance of the entire active root system for water (cm/-bar/day) = 0.097 cm/MPa/h
 	10.	10.	10.	10.	# swp50 - soil water potential (-bar) where conductance is reduced by 50% = -1. MPa
 	3.22	3.22	3.22	3.22	# shapeCond - shaping parameter for the empirical relationship from van Genuchten to model relative soil-root conductance for water
 
 
-# ---- Critical soil water potential (MPa), i.e., when transpiration rates cannot sustained anymore, for instance, for many crop species -1.5 MPa is assumed and called wilting point
-# Grasses	Shrubs	Trees	Forbs
+#---- Critical soil water potential (MPa)
+# Soil water potential below which transpiration rates cannot be sustained,
+# for instance, for many crop species -1.5 MPa is assumed (wilting point)
+
+#	Grasses	Shrubs	Trees	Forbs
 	-3.5	-3.9	-2.0	-2.0
 
 
-# ---- CO2 Coefficients: multiplier = Coeff1 * x^Coeff2
-# Coefficients assume that monthly biomass inputs reflect values for conditions at
-# 360 ppm CO2, i.e., multiplier = 1 for x = 360 ppm CO2
-# Grasses  Shrubs  Trees  Forbs
+#---- Effects of atmospheric CO2 concentrations
+# Equation: multiplier = Coeff1 * x^Coeff2
+# Coefficients assume that monthly biomass inputs reflect values for conditions
+# at 360 ppm CO2, i.e., multiplier = 1 for x = 360 ppm CO2
+
+#	Grasses  Shrubs  Trees  Forbs
 	0.1319	0.1319	0.1319	0.1319	# Biomass Coeff1
 	0.3442	0.3442	0.3442	0.3442	# Biomass Coeff2
 	25.158	25.158	25.158	25.158	# WUE Coeff1
 	-0.548	-0.548	-0.548	-0.548	# WUE Coeff2
 
 
-# Grasslands component:
-# -------------- Monthly production values ------------
+#------ Mean monthly biomass values
+# Input biomass per unit area (g / m2) for each vegetation type represent
+# values as if that vegetation type covers 100% of the simulated surface.
+# That way input biomass values are independent of the input composition values.
+# For example,
+#   - inputs for forbs: fCover = 0.4, biomass = 300 g/m2
+#   - inputs for grasses: fCover = 0.6, biomass = 450 g/m2
+# Then, SOILWAT2 simulates a surface with vegetation of
+#     fCover = 1 (= 0.4 + 0.6)
+# and a
+#     total biomass = 390 g / m2 (= 0.4 * 300 + 0.6 * 450)
+# of which
+#     forb biomass = 120 g / m2 (0.4 * 300)
+# and
+#     grass biomass = 270 g/m2 (= 0.6 * 450).
+
 # Litter   - dead leafy material on the ground (g/m^2 ).
 # Biomass  - living and dead/woody aboveground standing biomass (g/m^2).
 # %Live    - proportion of Biomass that is actually living (0-1.0).
 # LAI_conv - monthly amount of biomass needed to produce LAI=1.0 (g/m^2).
 # There should be 12 rows, one for each month, starting with January.
-#
+
+# Grasslands component:
 #Litter  Biomass  %Live LAI_conv
  75.0    150.0    0.00  300.     # January
  80.0    150.0    0.00  300.     # February

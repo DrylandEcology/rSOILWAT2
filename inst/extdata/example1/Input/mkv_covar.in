@@ -1,4 +1,29 @@
-#WEEK	wTmax_C	wTmin_C	var_MAX	cov_MAXMIN	cov_MINMAX	var_MIN	CF_Tmax_wet	CF_Tmax_dry	CF_Tmin_wet	CF_Tmin_dry
+#------ Input file used if weather generator is turned on: covariance table
+
+# USER: The weather generator is activated/deactivated via the
+#       input file `weathsetup.in`.
+
+# USER: `rSOILWAT2` provides functionality to calculate values with
+#       function dbW_estimate_WGen_coefs() and write them to this file with
+#       function print_mkv_files().
+
+# A table with 53 rows (week of year) and 11 columns:
+#   - WEEK = Week of year (note: these are SOILWAT2 weeks of year, i.e.,
+#     counted as consecutive heptads of days)
+#   - wTmax_C = Average daily maximum temperature (C) for week
+#   - wTmin_C = Average daily minimum temperature (C) for week
+#   - var_MAX = Variance of daily maximum temperature for week
+#   - cov_MAXMIN = Covariance of daily maximum and minimum temperatures for week
+#   - cov_MINMAX = Identical to cov_MAXMIN
+#   - var_MIN = Variance of daily minimum temperature for week
+#   - CF_Tmax_wet = Difference between average daily maximum temperature (C)
+#     for wet days of week and wTmax_C
+#   - CF_Tmax_dry = Difference between average daily maximum temperature (C)
+#     for dry days of week and wTmax_C
+#   - CF_Tmin_wet = Same as CF_Tmax_wet but for daily minimum temperature
+#   - CF_Tmin_dry = Same as CF_Tmax_dry but for daily minimum temperature
+
+# WEEK	wTmax_C	wTmin_C	var_MAX	cov_MAXMIN	cov_MINMAX	var_MIN	CF_Tmax_wet	CF_Tmax_dry	CF_Tmin_wet	CF_Tmin_dry
  1	-3.240922	-16.10290	20.1975	22.73186	22.73186	37.1880	 0.64495	-0.94544	 2.070423	-3.03505
  2	-2.337465	-15.17783	19.2403	18.84129	18.84129	34.3495	-0.40288	 0.47137	 1.613988	-1.88837
  3	-3.067880	-16.45599	27.9085	30.45613	30.45613	44.9735	-0.35838	 0.46894	 0.886804	-1.16039
