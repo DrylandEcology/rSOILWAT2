@@ -37,7 +37,8 @@ vignette: >
   v <- try(utils::packageVersion("rSOILWAT2"), silent = TRUE)
   if (inherits(v, "try-error") || v < "2.5.0") {
     # Download rSOILWAT2 package code from github repository
-    args <- paste("clone -b feature_fun_from_rSFSW2 --single-branch --recursive",
+    args <- paste("clone -b feature_fun_from_rSFSW2",
+      "--single-branch --recursive",
       "https://github.com/DrylandEcology/rSOILWAT2.git rSOILWAT2")
     system2(command = "git", args = args)
     # Install package and build vignettes
@@ -72,7 +73,7 @@ vignette: >
   # --> Soil temperature regime is "Cryic"
   Tregime <- colMeans(SMTR[["STR"]]) >= crit_agree_frac
   print(Tregime)
-  
+
   # --> Soil moisture regime is "Ustic" / "Typic-Tempustic"
   Sregime <- colMeans(SMTR[["SMR"]]) >= crit_agree_frac
   print(Sregime)
@@ -82,19 +83,19 @@ vignette: >
 ###  Explore the conditions that define the [cryic](#Cryic) STR:
 ```{r, cryic, collapse = TRUE}
   # The STR of the example site is cryic because:
-  cryic <- 
+  cryic <-
     #   - there is no permafrost:
     SMTR[["permafrost_yrs"]] == 0 &&
-  
+
     #   - annual soil temperature at 50-cm depth is between 0 and 8 C:
     mean(x[, "MAT50"] > 0 & x[, "MAT50"] < 8) >= crit_agree_frac &&
-  
+
     #  - soil is not saturated with water during some part of the summer:
     mean(x[, "CSPartSummer"] == 0) >= crit_agree_frac &&
-  
+
     #  - soil does not have an O-horizon:
     !SMTR[["has_Ohorizon"]] &&
-  
+
     #  - summer soil temperature at 50-cm depth is below 15 C:
     mean(x[, "T50jja"] < 15) >= crit_agree_frac
   
@@ -105,35 +106,35 @@ vignette: >
 ### Explore the conditions that define the [ustic](#ustic) SMR:
 ```{r, ustic, collapse = TRUE}
   # The SMR of the example site is ustic because:
-  ustic <- 
+  ustic <-
     #   - there is no permafrost:
     SMTR[["permafrost_yrs"]] == 0 &&
 
     #   - moisture control section is not dry for less than 90 cumulative days
     !(mean(x[, "COND3"]) >= crit_agree_frac) &&
-  
+
     #   - annual soil temperature at 50-cm depth is not more than 22 C
     !(mean(x[, "COND4"]) >= crit_agree_frac) &&
-  
+
     #   - soils are not completely dry for more than half the days of the year
     #     when soil temperature ato 50-cm depth is more than 5 C
     !(mean(x[, "COND1"]) >= crit_agree_frac) &&
-  
-    #   - soils are not moist for more than 45 consecutive days following 
+
+    #   - soils are not moist for more than 45 consecutive days following
     #     the winter soltice
     !(mean(x[, "COND9"]) >= crit_agree_frac)
-  
+
   print(ustic)
 
   # The SMR of the example site is typic-tempustic because:
-  typic_tempustic <- 
+  typic_tempustic <-
     #   - SMR is ustic
     ustic &&
-    
-    #   - soils are not moist for more than 45 consecutive days following 
+
+    #   - soils are not moist for more than 45 consecutive days following
     #     the winter soltice
     !(mean(x[, "COND9"]) >= crit_agree_frac)
-  
+
   print(typic_tempustic)
 ```
 

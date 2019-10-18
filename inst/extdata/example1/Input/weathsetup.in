@@ -1,13 +1,20 @@
-# Weather setup parameters
-#
-1			# 1 = simulate snow processes; 0 = no snow effects
-0.0			# % of snow drift per snow event (+ indicates snow addition, - indicates snow taken away from site)
-0.0			# % of snowmelt water as runoff/on per event (>0 indicates runoff, <0 indicates runon)
-0			# 0 = use historical data only; 1 = use markov process for missing weather
-1980			# first year to begin historical weather.
-5			# number of days to use in the running average of temperature.
+#------ Input file for weather-related parameters and weather generator settings
 
-# Monthly scaling parameters:
+#--- Activate/deactivate simulation of snow-related processes
+1			# 1 = do/don't simulate snow processes
+0.0			# snow drift/blowing snow (% per snow event): > 0 is adding snow, < 0 is removing snow
+0.0			# runoff/runon of snowmelt water (% per snowmelt event): > 0 is runoff, < 0 is runon
+
+
+#--- Activate/deactivate weather generator / historical daily weather inputs
+0			# 0 = use historical data only; 1 = use markov process for missing weather
+1980			# first year to begin historical weather
+			# (filename, e.g., Input/data_weather/weath.1949; see `files.in` for
+			# relative pathname and basis of filename)
+5			# number of days to use in a moving average of temperature
+
+
+#--- Monthly scaling parameters:
 # Month 1 = January, Month 2 = February, etc.
 # PPT = multiplicative for daily PPT; max(0, scale * ppt)
 # MaxT = additive for daily max temperature [C]; scale + maxtemp

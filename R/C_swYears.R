@@ -83,7 +83,7 @@ swYears_validity <- function(object) {
 
   if (length(object@StartYear) != 1 ||
       (!anyNA(object@StartYear) && isTRUE(object@StartYear < 0))) {
-    msg <- "There must be exactly one non-negative @StartYear value."
+    msg <- "There must be exactly one NA or non-negative @StartYear value."
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
@@ -91,8 +91,8 @@ swYears_validity <- function(object) {
       (!anyNA(object@EndYear) && isTRUE(object@EndYear < 0)) ||
       (!anyNA(object@EndYear) && !anyNA(object@StartYear) &&
           isTRUE(object@EndYear < object@StartYear))) {
-    msg <- paste("There must be exactly one non-negative @EndYear value that",
-      "is not smaller than @StartYear.")
+    msg <- paste("There must be exactly NA or one non-negative @EndYear value ",
+      "that is not smaller than @StartYear.")
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
@@ -119,6 +119,7 @@ swYears_validity <- function(object) {
   val
 }
 setValidity("swYears", swYears_validity)
+
 
 
 

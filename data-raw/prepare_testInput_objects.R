@@ -61,7 +61,7 @@ for (it in seq_along(tests)) {
 
   ftemp <- file.path(dir_in, examples[2], "files.in")
   fin <- readLines(ftemp)
-  line <- grep("data file containing historical weather", fin,
+  line <- grep("historical weather data", fin,
     ignore.case = TRUE)
   stopifnot(length(line) == 1, line > 0, line < length(fin))
   fin[line] <- sub("Input/data_weather/weath",
@@ -80,10 +80,10 @@ for (it in seq_along(tests)) {
 # example4: turn on CO2-effects
   ftemp <- file.path(dir_in, examples[4], "Input", "siteparam.in")
   fin <- readLines(ftemp)
-  line <- grep("Use biomass multiplier", fin)
+  line <- grep("biomass multiplier", fin)
   stopifnot(length(line) == 1, line > 0, line < length(fin))
   substr(fin[line + 1], 1, 1) <- "1"
-  line <- grep("Use water-usage efficiency multiplier", fin)
+  line <- grep("water-usage efficiency multiplier", fin)
   stopifnot(length(line) == 1, line > 0, line < length(fin))
   substr(fin[line + 1], 1, 1) <- "1"
   writeLines(fin, con = ftemp)

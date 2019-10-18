@@ -1,6 +1,14 @@
-# Setup parameters for measured swc
-#
-0			# 1=use swcdata history data file, 0= don't use
-swcdata			 # input data file prefix
-1949			# first year of measurement data files
-2			# method: 1=average with model; 2=measured+/- stderr
+#------ Input file for soil moisture measurements
+
+
+#--- Activate/deactivate incorporation of historical soil moisture measurements
+
+0	# 1/0 = do/don't use historical soil moisture data if available
+
+
+#--- Inputs only used if activated
+
+swcdata	# prefix of input data filename
+1949	# first year of available measurement data files;
+	# used as filename extension (e.g., `swcdata.1949`)
+2	# method: 1 = average with model; 2 = measured+/- stderr

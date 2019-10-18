@@ -21,9 +21,16 @@ This function is called for its side effect, i.e., writing values
 Print Markov weather generator files as required by \var{SOILWAT2}
 }
 \examples{
+path <- tempdir()
+
 res <- dbW_estimate_WGen_coefs(rSOILWAT2::weatherData)
-print_mkv_files(mkv_doy = res[["mkv_doy"]], mkv_woy = res[["mkv_woy"]],
-  path = normalizePath("."))
+print_mkv_files(
+  mkv_doy = res[["mkv_doy"]],
+  mkv_woy = res[["mkv_woy"]],
+  path = path)
+
+## Cleanup
+unlink(list.files(path), force = TRUE)
 
 }
 \seealso{

@@ -236,9 +236,11 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 	collectInData = FALSE;
 	logged = FALSE;
 	if (LOGICAL(coerceVector(quiet, LGLSXP))[0]) {
-	  logfp = NULL; // so that 'LogError' knows that R should NOT print messages to the console
+		// tell 'LogError' that R should NOT print messages to the console
+		logfp = NULL;
 	} else {
-	  logfp = stdin; // just any non-NULL FILE pointer so that 'LogError' knows that R should print messages to the console
+		// tell 'LogError' that R should print messages to the console
+		logfp = stdout; // any non-NULL file pointer
 	}
 
 	if (isNull(inputData)) {

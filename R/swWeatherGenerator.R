@@ -26,7 +26,8 @@
 #'
 #' @section Notes: This code is a complete overhaul compared to the version
 #'   from \var{rSFSTEP2} on \code{2019-Feb-10}
-#'   \url{https://github.com/DrylandEcology/rSFSTEP2/commit/cd9e161971136e1e56d427a4f76062bbb0f3d03a}
+#'   commit \var{cd9e161971136e1e56d427a4f76062bbb0f3d03a}
+#'   \url{https://github.com/DrylandEcology/rSFSTEP2}.
 #'
 #' @section Notes: This function will produce \code{NA}s in the output if there
 #'   are insufficient weather observation in the input data \code{weatherData}
@@ -428,12 +429,21 @@ impute_df <- function(x, imputation_type = c("none", "mean", "locf"),
 #'   to files \var{\dQuote{mkv_prob.in}} and \var{\dQuote{mkv_covar.in}}.
 #'
 #' @examples
+#' path <- tempdir()
+#'
 #' res <- dbW_estimate_WGen_coefs(rSOILWAT2::weatherData)
-#' print_mkv_files(mkv_doy = res[["mkv_doy"]], mkv_woy = res[["mkv_woy"]],
-#'   path = normalizePath("."))
+#' print_mkv_files(
+#'   mkv_doy = res[["mkv_doy"]],
+#'   mkv_woy = res[["mkv_woy"]],
+#'   path = path)
+#'
+#' ## Cleanup
+#' unlink(list.files(path), force = TRUE)
 #'
 #' @export
 print_mkv_files <- function(mkv_doy, mkv_woy, path, digits = 5) {
+  dir.create(path, recursive = TRUE, showWarnings = FALSE)
+
   colnames(mkv_doy)[1] <- paste0("#", colnames(mkv_doy)[1])
   write.table(format(mkv_doy, digits = digits),
     file = file.path(path, "mkv_prob.in"),
@@ -460,13 +470,13 @@ check_weather <- function(weather, required_variables) {
 
 # Aggregate daily weather for each time step
 prepare_weather <- function(data_daily,
-  time_steps = c("Year", "Month", "Week", "Day")) {
+  time_steps = c("Year", "Month", "Week", "Day"), na.rm = FALSE) {
 
   weather_list <- list()
   id_daily <- "Day" == time_steps
 
   for (it in time_steps[!id_daily]) {
-    weather_list[[it]] <- dbW_dataframe_aggregate(data_daily, it)
+    weather_list[[it]] <- dbW_dataframe_aggregate(data_daily, it, na.rm = na.rm)
   }
 
   weather_list[["Day"]] <- data_daily
@@ -475,7 +485,7 @@ prepare_weather <- function(data_daily,
 
 # Prepare weather data object for \code{\link{compare_dailyweather}}
 prepare_weather_for_comparison <- function(weather,
-  time_steps = c("Year", "Month", "Week", "Day")) {
+  time_steps = c("Year", "Month", "Week", "Day"), na.rm = FALSE) {
   req_vars <- c("Year", "Tmax_C", "Tmin_C", "PPT_cm")
 
   if (length(weather) == length(time_steps) &&
@@ -498,7 +508,7 @@ prepare_weather_for_comparison <- function(weather,
     # aggregate for each time step
     check_weather(weather, c("DOY|Day", req_vars))
     colnames(weather)[2] <- "Day"
-    res <- prepare_weather(weather)
+    res <- prepare_weather(weather, na.rm = na.rm)
 
   } else {
     stop("Structure of `weather` not suitable")
@@ -550,19 +560,23 @@ prepare_weather_for_comparison <- function(weather,
 #'   path = path, tag = "Example1-Silly")
 #'
 #' ## Example with STEPWAT2 output data averaged across iterations (`-o` option)
-#' cols_STEPWAT2 <- c("Year", "Day", "PRECIP_ppt_Mean", "TEMP_max_C_Mean",
-#'   "TEMP_min_C_Mean")
-#' cols_rSOILWAT2 <- c("Year", "Day", "PPT_cm", "Tmax_C", "Tmin_C")
-#' w0 <- read.csv("file_STEPWAT2_master.csv")[, cols_STEPWAT2]
-#' colnames(w0) <- cols_rSOILWAT2
-#' w1 <- read.csv("file_STEPWAT2_dev.csv")[, cols_STEPWAT2]
-#' colnames(w1) <- cols_rSOILWAT2
+#' fname_master <- "file_STEPWAT2_master.csv"
+#' fname_dev <- "file_STEPWAT2_dev.csv"
+#' if (all(file.exists(fname_master, fname_dev))) {
+#'   cols_STEPWAT2 <- c("Year", "Day", "PRECIP_ppt_Mean", "TEMP_max_C_Mean",
+#'     "TEMP_min_C_Mean")
+#'   cols_rSOILWAT2 <- c("Year", "Day", "PPT_cm", "Tmax_C", "Tmin_C")
+#'   w0 <- read.csv(fname_master)[, cols_STEPWAT2]
+#'   colnames(w0) <- cols_rSOILWAT2
+#'   w1 <- read.csv(fname_dev)[, cols_STEPWAT2]
+#'   colnames(w1) <- cols_rSOILWAT2
 #'
-#' # Note: Since values are averages across many iterations, most days
-#' # have average precipitation values > 0; thus, we need to adjust
-#' # `WET_limit_cm` accordingly (here, with a guess)
-#' compare_weather(ref_weather = w0, weather = w1, N = 1, WET_limit_cm = 0.1,
-#'   path = path, tag = "Example2-STEPWAT2")
+#'   # Note: Since values are averages across many iterations, most days
+#'   # have average precipitation values > 0; thus, we need to adjust
+#'   # `WET_limit_cm` accordingly (here, with a guess)
+#'   compare_weather(ref_weather = w0, weather = w1, N = 1, WET_limit_cm = 0.1,
+#'     path = path, tag = "Example2-STEPWAT2")
+#' }
 #'
 #' ## Cleanup
 #' unlink(list.files(path), force = TRUE)
@@ -577,7 +591,7 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
   weather_vars <- c("Tmax_C", "Tmin_C", "PPT_cm")
 
   #--- Prepare reference weather
-  ref_df <- list(prepare_weather_for_comparison(ref_weather))
+  ref_df <- list(prepare_weather_for_comparison(ref_weather, na.rm = TRUE))
 
   #--- Prepare other weather
   if (N > 1 && length(weather) == N && inherits(weather, "list") &&
@@ -587,7 +601,7 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 
   } else if (N == 1) {
     # one run/site
-    comp_df <- list(prepare_weather_for_comparison(weather))
+    comp_df <- list(prepare_weather_for_comparison(weather, na.rm = TRUE))
 
   } else {
     stop("Structure of `weather` not suitable")
@@ -615,14 +629,20 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
       data <- matrix(data, nrow = 1, dimnames = list(NULL, names(data)))
     }
     stopifnot(ncol(data) == length(ref_data))
-    ylim <- range(data, ref_data)
-    graphics::boxplot(data, ylim = ylim, ylab = ylab)
-    graphics::points(seq_along(ref_data), ref_data, col = "red", pch = 4,
-      lwd = 2)
+    ylim <- range(data, ref_data, na.rm = TRUE)
 
-    if (legend) {
-      graphics::legend("topright", legend = c("Reference", "Weather"),
-        col = c("red", "black"), pch = c(4, 16), pt.lwd = 2)
+    if (all(is.finite(ylim))) {
+      graphics::boxplot(data, ylim = ylim, ylab = ylab)
+      graphics::points(seq_along(ref_data), ref_data, col = "red", pch = 4,
+        lwd = 2)
+
+      if (legend) {
+        graphics::legend("topright", legend = c("Reference", "Weather"),
+          col = c("red", "black"), pch = c(4, 16), pt.lwd = 2)
+      }
+
+    } else {
+      plot.new()
     }
   }
 
@@ -668,31 +688,36 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
   foo_qq <- function(data, ref_data, var, time, lab, legend = FALSE) {
 
     vlim <- range(sapply(c(ref_data, data),
-      function(x) range(x[[time]][, var])))
+      function(x) range(x[[time]][, var], na.rm = TRUE)))
 
-    probs <- seq(0, 1, length.out = 1000)
+    if (all(is.finite(vlim))) {
+      probs <- seq(0, 1, length.out = 1000)
 
-    x <- stats::quantile(ref_data[[1]][[time]][, var], probs = probs,
-      na.rm = TRUE)
-    graphics::plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
-      xlab = paste0(time, "ly : reference ", lab),
-      ylab = paste0(time, "ly : weather ", lab))
-    for (k in seq_along(data)) {
-      qy <- stats::quantile(data[[k]][[time]][, var], probs = probs,
+      x <- stats::quantile(ref_data[[1]][[time]][, var], probs = probs,
         na.rm = TRUE)
-      graphics::points(x, qy, pch = 46)
-    }
+      graphics::plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
+        xlab = paste0(time, "ly : reference ", lab),
+        ylab = paste0(time, "ly : weather ", lab))
+      for (k in seq_along(data)) {
+        qy <- stats::quantile(data[[k]][[time]][, var], probs = probs,
+          na.rm = TRUE)
+        graphics::points(x, qy, pch = 46)
+      }
 
-    graphics::abline(h = 0, lty = 2)
-    graphics::abline(v = 0, lty = 2)
-    graphics::segments(x0 = vlim[1], y0 = vlim[1],
-      x1 = vlim[2], y1 = vlim[2], col = "red", lwd = 2)
+      graphics::abline(h = 0, lty = 2)
+      graphics::abline(v = 0, lty = 2)
+      graphics::segments(x0 = vlim[1], y0 = vlim[1],
+        x1 = vlim[2], y1 = vlim[2], col = "red", lwd = 2)
 
 
-    if (legend) {
-      graphics::legend("topleft", legend = c("Reference", "Weather"),
-        col = c("red", "black"), pch = c(NA, 16), pt.lwd = 2,
-        lty = c(1, NA), lwd = 2, merge = TRUE)
+      if (legend) {
+        graphics::legend("topleft", legend = c("Reference", "Weather"),
+          col = c("red", "black"), pch = c(NA, 16), pt.lwd = 2,
+          lty = c(1, NA), lwd = 2, merge = TRUE)
+      }
+
+    } else {
+      plot.new()
     }
   }
 
@@ -707,8 +732,10 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
   for (ts in time_steps) {
     foo_qq(comp_df, ref_df, var = "PPT_cm", time = ts,
       lab = "precipitation (cm)", legend = ts == time_steps[1])
-    foo_qq(comp_df, ref_df, var = "Tmax_C", time = ts, lab = "max temp (C)")
-    foo_qq(comp_df, ref_df, var = "Tmin_C", time = ts, lab = "min temp (C)")
+    foo_qq(comp_df, ref_df, var = "Tmax_C", time = ts,
+      lab = "max temp (C)")
+    foo_qq(comp_df, ref_df, var = "Tmin_C", time = ts,
+      lab = "min temp (C)")
   }
 
   graphics::par(par_prev)
@@ -747,20 +774,27 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
       vlim <- range(sapply(data, function(x)
         range(x[[obj]][, v], na.rm = TRUE)))
 
-      graphics::plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
-        xlab = paste0("Reference ", v), ylab = paste0("Weather ", v))
-      for (k in seq_along(data)) {
-        graphics::lines(stats::lowess(x, data[[k]][[obj]][, v]), col = "gray")
-      }
+      if (all(is.finite(vlim_obs)) && all(is.finite(vlim))) {
+        graphics::plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
+          xlab = paste0("Reference ", v), ylab = paste0("Weather ", v))
+        for (k in seq_along(data)) {
+          isgood <- stats::complete.cases(cbind(x, data[[k]][[obj]][, v]))
+          graphics::lines(stats::lowess(x[isgood], data[[k]][[obj]][isgood, v]),
+            col = "gray")
+        }
 
-      graphics::abline(h = 0, lty = 2)
-      graphics::abline(v = 0, lty = 2)
-      graphics::segments(x0 = vlim_obs[1], y0 = vlim_obs[1],
-        x1 = vlim_obs[2], y1 = vlim_obs[2], col = "red", lwd = 2)
+        graphics::abline(h = 0, lty = 2)
+        graphics::abline(v = 0, lty = 2)
+        graphics::segments(x0 = vlim_obs[1], y0 = vlim_obs[1],
+          x1 = vlim_obs[2], y1 = vlim_obs[2], col = "red", lwd = 2)
 
-      if (v == vars[1]) {
-        graphics::legend("topleft", legend = c("Reference", "Weather"),
-          col = c("red", "black"), lwd = 2)
+        if (v == vars[1]) {
+          graphics::legend("topleft", legend = c("Reference", "Weather"),
+            col = c("red", "black"), lwd = 2)
+        }
+
+      } else {
+        plot.new()
       }
     }
 
@@ -776,4 +810,125 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
     fname = file.path(path,
       paste0(tag, "_CompareWeather_WGenInputs_WeekOfYear.png")))
 
+}
+
+
+#' Generate daily weather data using SOILWAT2's weather generator
+#'
+#' This function is a convenience wrapper for
+#' \code{\link{dbW_estimate_WGen_coefs}}.
+#'
+#' @inheritParams dbW_estimate_WGen_coefs
+#' @param years An integer vector. The calendar years for which to generate
+#'   daily weather. If \code{NULL}, then extracted from \code{weatherData}.
+#' @param wgen_coeffs A list with two named elements \var{mkv_doy} and
+#'   \var{mkv_woy}, i.e., the return value of
+#'   \code{\link{dbW_estimate_WGen_coefs}}. If \code{NULL}, then determined
+#'   based on \code{weatherData}.
+#' @inheritParams impute_df
+#' @param seed An integer value or \code{NULL}. See \code{\link{set.seed}}.
+#'
+#' @return A list of elements of class \code{\linkS4class{swWeatherData}}.
+#'
+#' @examples
+#' # Load data for 1949-2010
+#' wdata <- data.frame(dbW_weatherData_to_dataframe(rSOILWAT2::weatherData))
+#'
+#' # Treat data for 2005-2010 as our 'dataset'
+#' ids <- wdata[, "Year"] >= 2005
+#' x <- wdata[ids, ]
+#'
+#' # Set June-August of 2008 as missing
+#' ids <- x[, "Year"] == 2008 &
+#'   x[, "DOY"] >= 153 & x[, "DOY"] <= 244
+#' x[ids, -(1:2)] <- NA
+#'
+#' ## Example 1: generate weather for any missing values in our 'dataset'
+#' wout1 <- dbW_generateWeather(x)
+#'
+#' ## Example 2: generate weather based on our 'dataset' but for
+#' ## years 2005-2015 and use estimated weather generator coefficients from
+#' ## a different dataset
+#' wgen_coeffs <- dbW_estimate_WGen_coefs(wdata,
+#'   imputation_type = "mean", imputation_span = 5)
+#' # Set seed to make output reproducible
+#' wout2 <- dbW_generateWeather(x, years = 2005:2015,
+#'   wgen_coeffs = wgen_coeffs, seed = 123)
+#'
+#' ## Example 3: generate weather based only on estimated weather generator
+#' ## coefficients from a different dataset
+#' x_empty <- list(new("swWeatherData"))
+#' wout3 <- dbW_generateWeather(x_empty, years = 2050:2055,
+#'   wgen_coeffs = wgen_coeffs, seed = 123)
+#'
+#' ## Compare input weather with generated weather
+#' \dontrun{
+#' path <- tempdir()
+#' compare_weather(
+#'   ref_weather = x,
+#'   weather = dbW_weatherData_to_dataframe(wout1),
+#'   N = 1,
+#'   path = path,
+#'   tag = "Example1-WeatherGenerator"
+#' )
+#' unlink(list.files(path), force = TRUE)
+#' }
+#'
+#' @export
+dbW_generateWeather <- function(weatherData, years = NULL, wgen_coeffs = NULL,
+  na.rm = FALSE, imputation_type = "mean", imputation_span = 5L, seed = NULL) {
+
+  #--- Obtain missing/null arguments
+  if (is.null(wgen_coeffs)) {
+    wgen_coeffs <- dbW_estimate_WGen_coefs(weatherData,
+      na.rm = na.rm,
+      imputation_type = imputation_type,
+      imputation_span = imputation_span)
+  }
+
+  if (is.data.frame(weatherData)) {
+    weatherData <- dbW_dataframe_to_weatherData(weatherData)
+  }
+
+  if (is.null(years)) {
+    years <- get_years_from_weatherData(weatherData)
+  }
+
+  #--- Put rSOILWAT2 run together to produce imputed daily weather
+  sw_in <- rSOILWAT2::sw_exampleData
+
+  # Set years
+  swWeather_FirstYearHistorical(sw_in) <- min(years)
+  swYears_EndYear(sw_in) <- max(years)
+  swYears_StartYear(sw_in) <- min(years)
+
+  # Set weather data
+  set_WeatherHistory(sw_in) <- weatherData
+
+  # Turn on weather generator
+  swWeather_UseMarkov(sw_in) <- TRUE
+
+  # Set weather generator coefficients
+  swMarkov_Prob(sw_in) <- wgen_coeffs[["mkv_doy"]]
+  swMarkov_Conv(sw_in) <- wgen_coeffs[["mkv_woy"]]
+
+  # Turn off CO2-effects to avoid any issues
+  swCarbon_Use_Bio(sw_in) <- 0
+  swCarbon_Use_WUE(sw_in) <- 0
+
+  #--- Execute SOILWAT2 to generate weather
+  set.seed(seed)
+  sw_out <- sw_exec(inputData = sw_in)
+
+
+  #--- Extract weather generator imputed daily weather
+  xdf <- slot(slot(sw_out, "TEMP"), "Day")[, c("Year", "Day", "max_C", "min_C")]
+  colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C")
+  xdf <- data.frame(
+    xdf,
+    PPT_cm = slot(slot(sw_out, "PRECIP"), "Day")[, "ppt"]
+  )
+
+  # Convert to rSOILWAT2 weather data format
+  dbW_dataframe_to_weatherData(xdf)
 }
