@@ -1,40 +1,44 @@
-# List of input files for SOILWAT2
-# This is the first file read.
+#------ This is the master file for a SOILWAT2 run and is read in first
 
-# Model
-Input/years.in	# years for model operation
-Output/logfile.log	# errors or important info (can also be stdout)
+# List of path names and file names for input and output
+# All names are relative to current directory of execution
+# USER: change path and file names as suitable for own application
 
-#Site
-Input/siteparam.in	# site parameters
-Input/soils.in	# soil layer definitions
+#--- Description of a model run
+Input/years.in		# Input file for model time: start - end years
+Output/logfile.log	# Output file to which warnings, errors, and other important information is written (can also be stdout)
 
-#Weather & climate
-Input/weathsetup.in	# weather parameters
-Input/data_weather/weath	# data file containing historical weather (can include path); PROGRAMMER NOTE: This is currently the 5th position; if this changes then update function SW_Files.c/SW_F_read()
-Input/mkv_prob.in	# precip probs; required for markov weather
-Input/mkv_covar.in	# covariance table required for markov weather
-Input/climate.in	# general atmospheric params
+#--- Description of simulated site
+Input/siteparam.in	# Input file for site location, initialization, and miscellaneous model parameters
+Input/soils.in		# Input for soil information: soil layer, soil texture, etc.
 
-#Vegetation
-Input/veg.in	# productivity values
-Input/estab.in	# plant establishment start file
+#--- Inputs of weather forcing and description of climate conditions
+Input/weathsetup.in	# Input file for weather-related parameters and weather generator settings
+Input/data_weather/weath	# Path that contains historical weather data files; PROGRAMMER NOTE: This is currently the 5th position; if this changes then update function SW_Files.c/SW_F_read()
+Input/mkv_prob.in	# Input file used if weather generator is turned on: probability table
+Input/mkv_covar.in	# Input file used if weather generator is turned on: covariance table
+Input/climate.in	# Input file for mean monthly atmospheric parameters
 
-#CO2
-Input/carbon.in
+#--- Description of vegetation
+Input/veg.in		# Input file for land cover and vegetation types: parameters and mean monthly biomass values
+Input/estab.in		# Input file for settings used if (optional) plant establishments should be simulated
 
-#SWC measurements
-Input/swcsetup.in	# params for handling measured swc
+#--- Description of CO2 effects
+Input/carbon.in		# Input file for yearly atmospheric CO2 concentration
 
-#Output
-Output/	# 'relative' path for output files: / for same directory, or e.g., Output/; PROGRAMMER NOTE: This is currently the 13th position; if this changes then update function SW_Files.c/SW_F_read()
-Input/outsetup.in	# define output quantities
-Output/sw2_daily.csv	#output
-Output/sw2_weekly.csv	#output
-Output/sw2_monthly.csv	#output
-Output/sw2_yearly.csv	#output
+#--- Description of (optional) soil moisture measurements
+Input/swcsetup.in	# Input file for settings used if soil moisture measurements should be incorporated at run time
 
-Output/sw2_daily_slyrs.csv	#output
-Output/sw2_weekly_slyrs.csv	#output
-Output/sw2_monthly_slyrs.csv	#output
-Output/sw2_yearly_slyrs.csv	#output
+#--- Simulation outputs
+Output/			# Path for output files: / for same directory, or e.g., Output/; PROGRAMMER NOTE: This is currently the 13th position; if this changes then update function SW_Files.c/SW_F_read()
+Input/outsetup.in	# Input file that determines time periods, aggregation functions, and variables
+
+Output/sw2_daily.csv	# Output file if daily output time period was selected
+Output/sw2_weekly.csv	# Output file if weekly output time period was selected
+Output/sw2_monthly.csv	# Output file if monthly output time period was selected
+Output/sw2_yearly.csv	# Output file if yearly output time period was selected
+
+Output/sw2_daily_slyrs.csv	# Output file for soil layer specific variables if daily output time period was selected
+Output/sw2_weekly_slyrs.csv	# Output file for soil layer specific variables if weekly output time period was selected
+Output/sw2_monthly_slyrs.csv	# Output file for soil layer specific variables if monthly output time period was selected
+Output/sw2_yearly_slyrs.csv	# Output file for soil layer specific variables if yearly output time period was selected

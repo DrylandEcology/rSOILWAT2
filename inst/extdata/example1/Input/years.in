@@ -1,7 +1,10 @@
-# Model time definition file
+#------ Input file for model time
 
-1980			# first year of simulation (but see weather and swc inputs)
-2010			# last year of simulation
-1			# first day of first year
-365			# last day of last year
-N			# hemisphere (N, S)
+# USER: years must be consistent with `weathsetup.in`, `carbon.in`,
+#       and (if used) `swcsetup.in`.
+
+1980			# First (Gregorian) calendar year of simulation
+2010			# Last (Gregorian) calendar year of simulation
+1			# First day of first year
+365			# Last day of last year (365 is equivalent to 366)
+N			# Hemisphere (N, S)

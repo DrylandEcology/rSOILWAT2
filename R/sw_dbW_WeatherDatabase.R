@@ -1233,7 +1233,7 @@ dbW_dataframe_to_monthly <- function(dailySW, na.rm = FALSE) {
 #' }
 #' @export
 
-get_years_from_weatherDF <- function(weatherDF, years, weatherDF_dataColumns){
+get_years_from_weatherDF <- function(weatherDF, years, weatherDF_dataColumns) {
   if (!is.null(years)) {
     if (length(years) == nrow(weatherDF)) {
       year_ts <- years

@@ -1,21 +1,38 @@
 linters: with_defaults(
-  #--- DEFAULT LINTERS
-  # Default line length:
-  line_length_linter(80L),
+  #------ DEFAULT LINTERS
+  assignment_linter,
   closed_curly_linter(allow_single_line = TRUE),
-  # Turn off default linters for now:
+  commas_linter,
+  commented_code_linter,
+  equals_na_linter,
+  function_left_parentheses_linter,
+  infix_spaces_linter,
+  line_length_linter(80L),
+  no_tab_linter,
+  object_length_linter,
+  object_usage_linter,
+  open_curly_linter,
+  paren_brace_linter,
+  pipe_continuation_linter,
+  seq_linter,
+  single_quotes_linter,
+  spaces_inside_linter,
+  spaces_left_parentheses_linter,
+  trailing_blank_lines_linter,
+  trailing_whitespace_linter,
+  #--- Turn off default linters for now:
   object_name_linter = NULL,
-  #--- NON-DEFAULT LINTERS
-  # Not activated non-default linters:
+  cyclocomp_linter = NULL,
+  #------ NON-DEFAULT LINTERS
+  #--- Not activated non-default linters:
   #extraction_operator_linter,
   #implicit_integer_linter,
   #todo_comment_linter,
-  # Activated non-default linters:
-  T_and_F_symbol_linter,
+  #--- Activated non-default linters:
   absolute_path_linter(lax = TRUE),
+  T_and_F_symbol_linter,
   nonportable_path_linter(lax = TRUE),
   semicolon_terminator_linter(semicolon = c("compound", "trailing")),
-  seq_linter,
   undesirable_function_linter,
   undesirable_operator_linter,
   unneeded_concatenation_linter)

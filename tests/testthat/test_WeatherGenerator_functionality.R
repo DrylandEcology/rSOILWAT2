@@ -18,6 +18,8 @@ sw_weather <- lapply(tests, function(it)
 
 
 #---TESTS
+
+
 test_that("Weather generator: estimate input parameters", {
   for (k in seq_along(tests)) {
     test_dat <- sw_weather[[k]]
@@ -44,6 +46,65 @@ test_that("Weather generator: estimate input parameters", {
     sw_in <- rSOILWAT2::sw_exampleData
     expect_equal(swMarkov_Prob(sw_in) <- res[["mkv_doy"]], res[["mkv_doy"]])
     expect_equal(swMarkov_Conv(sw_in) <- res[["mkv_woy"]], res[["mkv_woy"]])
+  }
+})
+
+
+test_that("Weather generator: generate weather", {
+  for (k in seq_along(tests)) {
+    test_dat <- sw_weather[[k]]
+    years <- get_years_from_weatherData(test_dat)
+    n <- length(test_dat)
+
+    wout <- list()
+
+    # Case 1: generate weather for dataset and impute missing values
+    wout[[1]] <- dbW_generateWeather(test_dat,
+      na.rm = TRUE,
+      imputation_type = "mean",
+      imputation_span = 5)
+
+    # Case 2: generate weather based on partial dataset,
+    #   use estimated weather generator coefficients from full dataset
+    wgen_coeffs <- dbW_estimate_WGen_coefs(test_dat,
+      na.rm = TRUE,
+      imputation_type = "mean",
+      imputation_span = 5)
+    wout[[2]] <- dbW_generateWeather(test_dat[(n - 5):n],
+      years = years[length(years)] + 0:10 - 5,
+      wgen_coeffs = wgen_coeffs)
+
+    # Case 3: generate weather based only on estimated weather generator
+    #   coefficients from full dataset
+    x_empty <- list(new("swWeatherData"))
+    wout[[3]] <- dbW_generateWeather(x_empty,
+      years = years[length(years)] + 30:40,
+      wgen_coeffs = wgen_coeffs)
+
+    # Expectations
+    for (k in seq_along(wout)) {
+      x <- wout[[k]]
+      iyrs <- seq_along(x)
+
+      for (i in iyrs) {
+        # It is a valid object of class "swWeatherData"
+        expect_true(swWeatherData_validity(x[[i]]))
+
+        # Prepare weather data.frame
+        wdf <- slot(x[[i]], "data")
+        wdf <- set_missing_weather(wdf)
+
+        # It meets weather data requirements
+        expect_silent(
+          check_weather(
+            weather = wdf,
+            required_variables = c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+        ))
+
+        # There are no missing data
+        expect_false(anyNA(wdf))
+      }
+    }
   }
 })
 
@@ -103,4 +164,3 @@ test_that("Weather generator (integration tests): compare input/output", {
     path = dir_inttests, tag = "IntegrationTest-WeatherGenerator")
 
 })
-

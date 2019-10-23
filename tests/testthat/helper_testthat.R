@@ -20,10 +20,8 @@ pkg_temp_dir <- function() {
     path <- file.path("..", "..")
   }
 
-  if (interactive() && requireNamespace("devtools") &&
-    !devtools::is.package(path)) {
-
-    path <- devtools::as.package(".")[["path"]]
+  if (!dir.exists(path) && interactive() && requireNamespace("pkgload")) {
+    path <- pkgload::pkg_path()
   }
 
   path
