@@ -1,0 +1,411 @@
+---
+title: "Demonstration of rSOILWAT2 (User Manual)"
+author: "Daniel R Schlaepfer"
+date: "`r Sys.Date()`"
+output:
+  bookdown::pdf_document2:
+    toc: true
+    toc_depth: 2
+#  rmarkdown::html_vignette:
+#    toc: true
+#    toc_depth: 3
+#    #toc_float: true
+#    collapsed: false
+#    smooth_scroll: false
+#    #theme: united
+#    #highlight: tango
+#    smart: false
+vignette: >
+  %\VignetteIndexEntry{rSOILWAT2_demo}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+\pagebreak
+
+
+# General setup, installation, and R recap
+
+## Install a sufficiently recent rSOILWAT2 package version:
+```{r, install, results = "hide"}
+  v <- try(utils::packageVersion("rSOILWAT2"), silent = TRUE)
+  if (inherits(v, "try-error") || v < "3.1.4") {
+    # Download rSOILWAT2 package code from github repository
+    args <- paste("clone -b feature_fun_from_rSFSW2",
+      "--single-branch --recursive",
+      "https://github.com/DrylandEcology/rSOILWAT2.git rSOILWAT2")
+    system2(command = "git", args = args)
+    # Install package and build vignettes
+    devtools::install(build_vignettes = TRUE)
+  }
+
+  stopifnot(require("rSOILWAT2", quietly = TRUE))
+```
+  
+
+## How to find help and documentation
+```{r, help, results = "hide"}
+  # Package documention
+  help(package = "rSOILWAT2")
+  
+  # Documentation of a specific function, e.g.,
+  ?sw_exec
+  
+  # Code of a specifici function, e.g.,
+  sw_exec
+```
+
+## Quick R re-cap: how to subset data.frames, matrices, and lists
+```{r, subset, results = "hide"}
+  ?Extract
+  
+  #--- Subset a list
+  x <- list(ID = 1, Lyr_1 = 1:10, Lyr_2 = 11:30)
+  
+  x[[1]] # extract element by position
+  x[["Lyr_1"]] # extract element by name
+  
+  x[1:2] # subset by position
+  
+  
+  #--- Subset a data.frame
+  x <- as.data.frame(x)
+  
+  # extract column by column number
+  x[[1]]
+  x[, 1]
+  
+  # subset by column numbers
+  x[1:2]
+  x[, 1:2]
+  
+  # extract column by column name
+  x[["Lyr_1"]]
+  x[, "Lyr_1"]
+  x$Lyr_1
+
+  
+  #--- Subset a matrix
+  x <- as.matrix(x)
+  
+  x[, 1] # extract element by position
+  x[, "Lyr_1"] # extract element by name
+  
+  x[, 1:2] # subset by position
+```
+
+
+
+# Run example rSOILWAT2 simulation
+```{r, simulate0}
+  # Load data for an example site: see ?sw_exampleData
+  sw_in0 <- rSOILWAT2::sw_exampleData
+  # Run SOILWAT2 for the example site
+  sw_out0 <- sw_exec(inputData = sw_in0)
+```
+
+```{r, exploreS4}
+  class(sw_out0)
+  slotNames(sw_out0)
+```
+
+
+Task: Create daily/monthly/yearly plots of soil moisture, transpiration,
+      evaporation, etc.
+```{r, plot1}
+  x <- slot(slot(sw_out0, "VWCBULK"), "Day")
+  
+  ids <- grep("Lyr", colnames(x))
+  vwc <- x[, ids]
+  matplot(vwc,
+    ylim = c(0, max(vwc)),
+    xlab = "Time",
+    ylab = "Volumetric water content (bulk; m3 / m3)",
+    type = "l"
+  )
+  legend("bottom",
+    ncol = 4,
+    legend = colnames(vwc),
+    lty = 1,
+    col = seq_along(ids)
+  )
+  
+  
+  x <- slot(slot(sw_out0, "TRANSP"), "Month")
+  ids <- grep("transp_total", colnames(x))
+  matplot(x[1:24, ids], type = "l")
+  
+  
+  x <- slot(slot(sw_out0, "EVAPSOIL"), "Year")
+  ids <- grep("Lyr", colnames(x))
+  es <- apply(x[, ids], 1, sum)
+  plot(x = x[, "Year"], y = es,
+    ylim = c(0, max(es)),
+    xlab = "Time",
+    ylab = "Bare-soil evaporation (cm)",
+    type = "l"
+  )
+```
+
+
+## Read inputs from local files on disk (including daily weather forcing)
+Task: Use function `sw_inputDataFromFiles` to read inputs from location
+      `path_demo` (e.g., this could be inputs for your site)
+
+```{r, path}
+  path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
+```
+
+```{r, simulate1}
+  # Read data from input files
+  sw_in1 <- sw_inputDataFromFiles(dir = path_demo)
+  
+  # Then run simulation
+  sw_out <- sw_exec(inputData = sw_in1)
+```
+
+
+## Read weather data separately from files on disk
+```{r, weather1}
+  wdata <- getWeatherData_folders(
+    LookupWeatherFolder = file.path(path_demo, "Input"),
+    weatherDirName = "data_weather"
+  )
+  
+  sw_out <- sw_exec(
+    inputData = sw_in1,
+    weatherList = wdata
+  )
+```
+
+
+# Handling missing weather data
+
+## Read weather data with missing values
+Task: use function `getWeatherData_folders` to read weather data with
+      missing values from folder `data_weather_missing`
+```{r, weather2}
+  wdata_gaps <- getWeatherData_folders(
+    LookupWeatherFolder = file.path(path_demo, "Input"),
+    weatherDirName = "data_weather_missing",
+  )
+  
+  # This will fail: missing data
+  sw_out <- try(sw_exec(
+    inputData = sw_in1,
+    weatherList = wdata_gaps
+  ))
+```
+
+
+Option 1: estimate weather generator coefficients with
+          function `dbW_estimate_WGen_coefs`,
+          generate weather with function `dbW_generateWeather`,
+          and run SOILWAT2 with filled-in data
+```{r, weather3}
+  wgen_coeffs <- dbW_estimate_WGen_coefs(weatherData = wdata)
+  
+  wdata_filled <- dbW_generateWeather(
+    weatherData = wdata_gaps,
+    years = swYears_StartYear(sw_in1):swYears_EndYear(sw_in1),
+    wgen_coeffs = wgen_coeffs,
+    seed = 123
+  )
+  
+  sw_out <- sw_exec(
+    inputData = sw_in1,
+    weatherList = wdata_filled
+  )
+```
+
+Option 2: estimate weather generator coefficients and
+          run SOILWAT2 with activated weather generator
+```{r, weather4}
+  sw_in <- sw_in1
+  swWeather_UseMarkov(sw_in) <- TRUE
+  swMarkov_Prob(sw_in) <- wgen_coeffs[["mkv_doy"]]
+  swMarkov_Conv(sw_in) <- wgen_coeffs[["mkv_woy"]]
+  
+  sw_out <- sw_exec(
+    inputData = sw_in,
+    weatherList = wdata_gaps
+  )
+```
+
+# Compare weather and climate based on weather inputs
+Task: plot a comparison between `wdata` and `wdata_filled` for
+      mean monthly precipitation and mean monthly temperature using the output
+      of function `calc_SiteClimate`
+```{r, compare1}
+  clim1 <- calc_SiteClimate(wdata)
+  clim2 <- calc_SiteClimate(wdata_filled)
+  
+  
+  plot(clim1[["meanMonthlyPPTcm"]], clim2[["meanMonthlyPPTcm"]])
+  abline(0, 1, col = "red")
+  
+  plot(clim1[["meanMonthlyTempC"]], clim2[["meanMonthlyTempC"]])
+  abline(0, 1, col = "red")
+```
+
+Task: compare weather data `wdata` with `wdata_filled` using function
+      `compare_weather`
+```{r, compare2, results = "hide"}
+  compare_weather(
+    ref_weather = dbW_weatherData_to_dataframe(wdata),
+    weather = dbW_weatherData_to_dataframe(wdata_filled),
+    N = 1,
+    path = tempdir(),
+    tag = "test"
+  )
+```
+
+
+# Access other weather data sources
+## Download weather data from DayMet
+```{r, daymetr, results = "hide"}
+  if (!requireNamespace("daymetr", 
+    versionCheck = list(op = ">=", version = "1.4"))) {
+    install.packages("daymetr")
+  }
+```
+
+```{r, daymetr_data, results = "hide"}
+  dm_Laramie <- daymetr::download_daymet(
+    site = "testsite_name",
+    lat = 41.3167,
+    lon = -105.6833,
+    start = 1980,
+    end = 2018,
+    internal = TRUE,
+    simplify = FALSE
+  )
+```
+
+Task: convert DayMet data `dm_Laramie` into a data.frame with the columns
+      "Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm" and create a rSOILWAT2
+      weather object list with function `dbW_dataframe_to_weatherData`
+```{r, daymetr_data2}
+  vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
+  xdf <- dm_Laramie[["data"]][, vars]
+  xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
+  colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+  
+  wdata_dm <- dbW_dataframe_to_weatherData(weatherDF = xdf)
+  
+  # This will fail: no leap days
+  sw_out <- try(sw_exec(
+    inputData = sw_in1,
+    weatherList = wdata_dm
+  ))
+```
+
+
+
+Task: Add leap days to data.frame and estimate those with weather generator
+```{r, daymetr_data3}
+  xdf2 <- dbW_convert_to_GregorianYears(weatherData = wdata_dm)
+
+  wdata_dm2 <- dbW_generateWeather(
+    weatherData = dbW_dataframe_to_weatherData(weatherDF = xdf2),
+    seed = 123
+  )
+  
+  sw_out <- sw_exec(
+    inputData = sw_in1,
+    weatherList = wdata_dm2
+  )
+```
+
+
+# Specifing soils
+```{r, soils}
+  sw_in <- sw_in1
+  
+  soil_has <- swSoils_Layers(sw_in)
+  soil_new <- data.frame(soil_has[0, ])
+  
+  soil_def <- data.frame(
+    depth = c(5, 10, 20, 50),
+    bulkd = 1.3,
+    gravel = 0.1,
+    evco = c(0.9, 0.1, 0, 0),
+    trco_grass = c(0.1, 0.5, 0.3, 0.1),
+    trco_shrub = c(0.1, 0.3, 0.2, 0.4),
+    trco_tree = c(0.2, 0.3, 0.3, 0.2),
+    trco_forb = c(0.1, 0.3, 0.3, 0.3),
+    sand = 0.65,
+    clay = 0.05,
+    impermbeability = 0,
+    soil_temp = 0
+  )
+  
+  soil_new[1:4, ] <- soil_def
+  
+  swSoils_Layers(sw_in) <- data.matrix(soil_new)
+  
+  trre <- data.frame(
+    ndx = 1:2,
+    layer = c(2, 4)
+  )
+  swSite_TranspirationRegions(sw_in) <- data.matrix(trre)
+  
+  sw_out <- sw_exec(
+    inputData = sw_in,
+    weatherList = wdata
+  )
+```
+
+
+# Estimating vegetation based on climate relationships
+
+## Vegetation composition (land cover)
+Task: estimate vegetation composition with
+     function `estimate_PotNatVeg_composition`
+```{r, vegcomp}
+  clim <- calc_SiteClimate(
+    weatherList = wdata,
+    do_C4vars = TRUE
+  )
+  
+  
+  pnv_comp <- estimate_PotNatVeg_composition(
+    MAP_mm = 10 * clim[["MAP_cm"]],
+    MAT_C = clim[["MAT_C"]],
+    mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
+    mean_monthly_Temp_C = clim[["meanMonthlyTempC"]],
+    dailyC4vars = clim[["dailyC4vars"]]
+  )
+  
+  sw_in <- sw_in1
+  ids <- sapply(names(swProd_Composition(sw_in)), function(x) {
+    grep(
+      pattern = substr(x, 1, 4),
+      x = names(pnv_comp[["Rel_Abundance_L1"]]),
+      ignore.case = TRUE)
+  })
+  swProd_Composition(sw_in) <- pnv_comp[["Rel_Abundance_L1"]][ids]
+  
+  
+  sw_out <- sw_exec(
+    inputData = sw_in,
+    weatherList = wdata
+  )
+```
+
+
+# Modifing climate conditions
+```{r, climmod}
+  sw_in <- sw_in1
+  
+  # Task: 50% reduction in June-Aug precipitation
+  swWeather_MonScalingParams(sw_in)[6:8, "PPT"] <- 0.5
+  
+  # Task: 2 C warming
+  swWeather_MonScalingParams(sw_in)[, c("MaxT", "MinT")] <- 2
+  
+  
+  sw_out <- sw_exec(
+    inputData = sw_in,
+    weatherList = wdata
+  )
+```

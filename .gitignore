@@ -40,7 +40,12 @@ rSOILWAT_IntegrationTestOutput/
 
 # Package builds
 *tar.gz
+*.tgz
+*.zip
 
 # Example code in package build process
 *-Ex.R
 inst/doc
+
+# Locally knitted vignettes
+vignettes/*.pdf
