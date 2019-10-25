@@ -469,9 +469,14 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
 }
 
 
-get_season <- function(mo_season_TF, N_season) {
+get_season <- function(mo_season_TF, N_season = NULL) {
   # Calculate first month of season == last start in (circular) year
   starts <- calc_starts(mo_season_TF)
+
+  if (is.null(N_season)) {
+    N_season <- sum(mo_season_TF)
+  }
+
   tmp <- starts[length(starts)] + seq_len(N_season) - 2
   tmp %% 12 + 1
 }
