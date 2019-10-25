@@ -1347,6 +1347,127 @@ dbW_weather_to_SOILWATfiles <- function(path, site.label,
 }
 
 
+#' Transfer existing weather data to a different (Gregorian) calendar (period)
+#'
+#' This function can transfer from existing weather data to, e.g.,
+#' different years / a subset of years (partially overlapping or not), or
+#' can convert from a non-leap to a Gregorian calendar.
+#'
+#' @inheritParams dbW_estimate_WGen_coefs
+#' @param new_startYear An integer value. The first Calendar year of the new
+#'   time period. If \code{NULL}, then the first year of \code{weatherData}.
+#' @param new_endYear An integer value. The last Calendar year of the new
+#'   time period. If \code{NULL}, then the last year of \code{weatherData}.
+#' @param type A string that affects how years of \code{weatherData} are
+#'   used for transfer. If \code{"asis"}, then years of are used as is.
+#'   If \code{"sequential"}, then years are re-coded to start with
+#'   \code{new_startYear}.
+#' @param name_year A string. Column name of the weather data that corresponds
+#'   to year.
+#' @param name_DOY A string. Column name of the weather data that corresponds
+#'   to day of year.
+#' @param name_data A vector of strings. Column names of the weather data.
+#' @inheritParams set_missing_weather
+#'
+#' @return A data.frame formatted as a return object from function
+#'   \code{\link{dbW_weatherData_to_dataframe}} with column names as given by
+#'   \code{name_year}, \code{name_DOY}, and \code{name_data}.
+#'
+#' @section Note: The returned object may contain \code{NA}, e.g., for
+#'   leap days that were added. Use function \code{\link{dbW_generateWeather}}
+#'   to fill in.
+#'
+#' @examples
+#' wdata <- rSOILWAT2::weatherData
+#'
+#' ## Transfer to different years (partially overlapping)
+#' wnew <- dbW_convert_to_GregorianYears(wdata,
+#'   new_startYear = 2000, new_endYear = 2020
+#' )
+#' all.equal(unique(wnew[, "Year"]), 2000:2020)
+#' anyNA(wnew) # --> use `dbW_generateWeather`
+#'
+#' ## Transfer to a subset of years (i.e., subset)
+#' wnew <- dbW_convert_to_GregorianYears(wdata,
+#'   new_startYear = 2000, new_endYear = 2005
+#' )
+#' all.equal(unique(wnew[, "Year"]), 2000:2005)
+#' anyNA(wnew)
+#'
+#' ## Correct/convert from a non-leap to a Gregorian calendar
+#' wempty <- data.frame(dbW_weatherData_to_dataframe(
+#'   list(new("swWeatherData"))))[1:365, ]
+#'
+#' wnew <- dbW_convert_to_GregorianYears(wempty,
+#'   new_startYear = 2016, new_endYear = 2016
+#' )
+#' all.equal(unique(wnew[, "Year"]), 2016:2016)
+#' all.equal(nrow(wnew), 366) # leap year
+#'
+#' @export
+dbW_convert_to_GregorianYears <- function(weatherData,
+  new_startYear = NULL, new_endYear = NULL, type = c("asis", "sequential"),
+  name_year = "Year", name_DOY = "DOY",
+  name_data = c("Tmax_C", "Tmin_C", "PPT_cm"), valNA = NULL) {
+
+  # daily weather data
+  if (inherits(weatherData, "list") &&
+      all(sapply(weatherData, inherits, what = "swWeatherData"))) {
+    wdata <- data.frame(dbW_weatherData_to_dataframe(weatherData,
+      valNA = valNA))
+  } else {
+    wdata <- data.frame(set_missing_weather(weatherData, valNA = valNA))
+  }
+
+  # new Calendar years
+  if (is.null(new_startYear)) {
+    new_startYear <- min(wdata[, name_year])
+  }
+
+  if (is.null(new_endYear)) {
+    new_endYear <- max(wdata[, name_year])
+  }
+
+  # Relabel input years (if requested)
+  type <- match.arg(type)
+
+  if (type == "sequential") {
+    old_startYear <- min(wdata[, name_year])
+
+    if (old_startYear != new_startYear) {
+      delta <- new_startYear - old_startYear
+      wdata[, name_year] <- wdata[, name_year] + delta
+    }
+  }
+
+  # Create data.frame for new Calendar years
+  tdays <- days_in_years(
+    start_year = new_startYear,
+    end_year = new_endYear
+  )
+
+  tdays1 <- as.POSIXlt(tdays)
+
+  wdata2 <- data.frame(
+    Year = 1900 + tdays1$year,
+    DOY = 1 + tdays1$yday,
+    var1 = NA,
+    var2 = NA,
+    var3 = NA
+  )
+  colnames(wdata2) <- c(name_year, name_DOY, name_data)
+
+  # Transfer existing values
+  tmp <- apply(wdata[, c(name_year, name_DOY)], 1, paste, collapse = "/")
+  id_xdf <- format(as.Date(tmp, format = "%Y/%j"))
+  id_xdf2 <- format(as.Date(tdays))
+  id_match <- match(id_xdf2, id_xdf, nomatch = 0)
+
+  wdata2[id_match > 0, name_data] <- wdata[id_match, name_data]
+
+  wdata2
+}
+
 
 # nolint start
 ## ------ Scanning of SOILWAT input text files
