@@ -17,6 +17,10 @@ warnings_are_errors: false # set to true: This option forces all WARNINGS from R
   # to become build failures (default true). This is especially helpful when preparing
   # your package for submission to CRAN
 
+# Vignette `rSOILWAT2_demo` only works locally
+r_build_args: '--no-build-vignettes'
+r_check_args: '--ignore-vignettes'
+
 cache: packages
 
 after_success:
