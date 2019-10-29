@@ -38,6 +38,21 @@
 #'   estimates; see \code{\link{impute_df}}, but please note that any such
 #'   imputation likely introduces biases in the generated weather.
 #'
+#' @section Details: Most users will likely want to set \code{propagate_NAs} to
+#'   \code{FALSE}. Note: \code{propagate_NAs} corresponds to \code{!na.rm}
+#'   from previous versions of this function with a different default value.
+#'   Consider an example: a the 30-year long input \code{weatherData} is
+#'   complete except for missing values on Jan 1, 2018.
+#'   \itemize{
+#'     \item If \code{propagate_NAs} is set to \code{TRUE}, then the
+#'     coefficients for day 1 and week 1 of year will be \code{NA} --
+#'     despite all the available data. In this case, the missing coefficients
+#'     for day 1 and week 1 of year will be imputed.
+#'   \item If \code{propagate_NAs} is set to \code{FALSE}, then the coefficients
+#'     for day 1 and week 1 of year will be calculated based on the non-missing
+#'     values for that day respectively that week of year. No imputation occurs.
+#'   }
+#'
 #' @param weatherData A list of elements of class
 #'   \code{\linkS4class{swWeatherData}} or a \code{data.frame} as returned by
 #'   \code{\link{dbW_weatherData_to_dataframe}}.
@@ -45,9 +60,9 @@
 #'   this value is considered \var{wet} instead of \var{dry}. Default is 0.
 #'   This values should be equal to the corresponding value used in
 #'   \var{SOILWAT2}'s function \code{SW_MKV_today}.
-#' @param na.rm A logical value. If \code{TRUE}, then missing weather values
-#'   in the input \code{weatherData} are excluded; if \code{FALSE}, then
-#'   missing values are propagated.
+#' @param propagate_NAs A logical value. If \code{TRUE}, then missing weather
+#'   values in the input \code{weatherData} are excluded; if \code{FALSE}, then
+#'   missing values are propagated to the estimation. See Details.
 #' @inheritParams set_missing_weather
 #' @inheritParams impute_df
 #'
@@ -103,7 +118,8 @@
 #'
 #' @export
 dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
-  na.rm = FALSE, valNA = NULL, imputation_type = c("none", "mean", "locf"),
+  propagate_NAs = FALSE, valNA = NULL,
+  imputation_type = c("none", "mean", "locf"),
   imputation_span = 5L) {
 
   # daily weather data
@@ -118,6 +134,8 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   n_days <- nrow(wdata)
 
   imputation_type <- match.arg(imputation_type)
+
+  na.rm <- !propagate_NAs
 
   #-----------------------------------------------------------------------------
   #------ calculate mkv_prob.in
@@ -222,8 +240,11 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
       warning("Insufficient weather data to estimate ", msg)
     } else {
       message("Impute missing `mkv_prob` ", msg)
-      mkv_prob <- impute_df(mkv_prob, imputation_type = imputation_type,
-        imputation_span = imputation_span)
+      mkv_prob <- impute_df(mkv_prob,
+        imputation_type = imputation_type,
+        imputation_span = imputation_span,
+        cyclic = TRUE
+      )
     }
   }
 
@@ -320,8 +341,11 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
       warning("Insufficient weather data to estimate ", msg)
     } else {
       message("Impute missing `mkv_cov` ", msg)
-      mkv_cov <- impute_df(mkv_cov, imputation_type = imputation_type,
-        imputation_span = imputation_span)
+      mkv_cov <- impute_df(mkv_cov,
+        imputation_type = imputation_type,
+        imputation_span = imputation_span,
+        cyclic = TRUE
+      )
     }
   }
 
@@ -330,9 +354,10 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
 }
 
 
-#' Imputes missing values in a data.frame
+#' Imputes missing values in a \code{data.frame}
 #'
-#' @param x A \code{\link{data.frame}} with numerical columns.
+#' @param x A \code{\link{data.frame}} with numerical columns. Imputation
+#'   works on each column separately.
 #' @param imputation_type A character string describing the imputation method;
 #'   currently, one of three values: \describe{
 #'     \item{\var{"none"}}{no imputation is carried out;}
@@ -346,12 +371,15 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
 #'  }
 #' @param imputation_span An integer value. The number of non-missing values
 #'   considered if \code{imputation_type = "mean"}.
+#' @param cyclic A logical value. If \code{TRUE}, then the last row of \code{x}
+#'   is considered to be a direct neighbor of the first row, e.g., rows of
+#'   \code{x} represent day of year for an average year.
 #'
 #' @return An updated version of \code{x}.
 #'
 #' @export
 impute_df <- function(x, imputation_type = c("none", "mean", "locf"),
-  imputation_span = 5L) {
+  imputation_span = 5L, cyclic = FALSE) {
 
   imputation_type <- match.arg(imputation_type)
   if (imputation_type == "mean") {
@@ -361,6 +389,9 @@ impute_df <- function(x, imputation_type = c("none", "mean", "locf"),
   if (imputation_type == "none") {
     return(x)
   }
+
+  cycle <- nrow(x)
+  irows <- seq_len(cycle)
 
   #--- imputations
   icols_withNAs <- which(apply(x, 2, anyNA))
@@ -375,19 +406,25 @@ impute_df <- function(x, imputation_type = c("none", "mean", "locf"),
 
         # locate a sufficient number of non-missing neighbors
         repeat {
-          temp <- 1 + (seq(k2 - spank, k2 + spank) - 1) %% 366
+          temp <- seq(k2 - spank, k2 + spank)
+          if (cyclic) {
+            temp <- 1 + (temp - 1) %% cycle
+          } else {
+            temp <- temp[temp %in% irows]
+          }
           ids_source <- temp[!(temp %in% irows_withNA)]
 
-          if (length(ids_source) >= 2 * imputation_span || spank >= 366) {
-            break
-          } else {
+          if (length(ids_source) < 2 * imputation_span && spank < cycle) {
             spank <- spank + 1
+          } else {
+            break
           }
         }
 
         # impute mean of neighbors
-        x[k2, k1] <- mean(x[ids_source, k1])
-
+        if (length(ids_source) > 0 && all(is.finite(ids_source))) {
+          x[k2, k1] <- mean(x[ids_source, k1])
+        }
 
       } else if (imputation_type == "locf") {
         #--- imputation by last-observation carried forward
@@ -395,10 +432,15 @@ impute_df <- function(x, imputation_type = c("none", "mean", "locf"),
 
         # locate last non-missing value
         repeat {
-          temp <- 1 + (k2 - dlast - 1) %% 366
+          temp <- k2 - dlast
+          if (cyclic) {
+            temp <- 1 + (temp - 1) %% cycle
+          } else {
+            temp <- temp[temp %in% irows]
+          }
           ids_source <- temp[!(temp %in% irows_withNA)]
 
-          if (length(ids_source) == 1 || dlast >= 366) {
+          if (length(ids_source) == 1 || dlast >= cycle) {
             break
           } else {
             dlast <- dlast + 1
@@ -406,9 +448,15 @@ impute_df <- function(x, imputation_type = c("none", "mean", "locf"),
         }
 
         # impute locf
-        x[k2, k1] <- x[ids_source, k1]
+        if (length(ids_source) > 0 && all(is.finite(ids_source))) {
+          x[k2, k1] <- x[ids_source, k1]
+        }
       }
     }
+  }
+
+  if (anyNA(x)) {
+    warning("It was not possible to impute all missing values.")
   }
 
   x
@@ -876,14 +924,15 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 #'
 #' @export
 dbW_generateWeather <- function(weatherData, years = NULL, wgen_coeffs = NULL,
-  na.rm = FALSE, imputation_type = "mean", imputation_span = 5L, seed = NULL) {
+  imputation_type = "mean", imputation_span = 5L, seed = NULL) {
 
   #--- Obtain missing/null arguments
   if (is.null(wgen_coeffs)) {
     wgen_coeffs <- dbW_estimate_WGen_coefs(weatherData,
-      na.rm = na.rm,
+      propagate_NAs = FALSE,
       imputation_type = imputation_type,
-      imputation_span = imputation_span)
+      imputation_span = imputation_span
+    )
   }
 
   if (is.data.frame(weatherData)) {
