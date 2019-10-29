@@ -2,13 +2,14 @@
 % Please edit documentation in R/swWeatherGenerator.R
 \name{impute_df}
 \alias{impute_df}
-\title{Imputes missing values in a data.frame}
+\title{Imputes missing values in a \code{data.frame}}
 \usage{
 impute_df(x, imputation_type = c("none", "mean", "locf"),
-  imputation_span = 5L)
+  imputation_span = 5L, cyclic = FALSE)
 }
 \arguments{
-\item{x}{A \code{\link{data.frame}} with numerical columns.}
+\item{x}{A \code{\link{data.frame}} with numerical columns. Imputation
+works on each column separately.}
 
 \item{imputation_type}{A character string describing the imputation method;
  currently, one of three values: \describe{
@@ -24,10 +25,14 @@ impute_df(x, imputation_type = c("none", "mean", "locf"),
 
 \item{imputation_span}{An integer value. The number of non-missing values
 considered if \code{imputation_type = "mean"}.}
+
+\item{cyclic}{A logical value. If \code{TRUE}, then the last row of \code{x}
+is considered to be a direct neighbor of the first row, e.g., rows of
+\code{x} represent day of year for an average year.}
 }
 \value{
 An updated version of \code{x}.
 }
 \description{
-Imputes missing values in a data.frame
+Imputes missing values in a \code{data.frame}
 }
