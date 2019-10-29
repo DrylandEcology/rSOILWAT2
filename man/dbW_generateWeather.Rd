@@ -5,8 +5,7 @@
 \title{Generate daily weather data using SOILWAT2's weather generator}
 \usage{
 dbW_generateWeather(weatherData, years = NULL, wgen_coeffs = NULL,
-  na.rm = FALSE, imputation_type = "mean", imputation_span = 5L,
-  seed = NULL)
+  imputation_type = "mean", imputation_span = 5L, seed = NULL)
 }
 \arguments{
 \item{weatherData}{A list of elements of class
@@ -20,10 +19,6 @@ daily weather. If \code{NULL}, then extracted from \code{weatherData}.}
 \var{mkv_woy}, i.e., the return value of
 \code{\link{dbW_estimate_WGen_coefs}}. If \code{NULL}, then determined
 based on \code{weatherData}.}
-
-\item{na.rm}{A logical value. If \code{TRUE}, then missing weather values
-in the input \code{weatherData} are excluded; if \code{FALSE}, then
-missing values are propagated.}
 
 \item{imputation_type}{A character string describing the imputation method;
  currently, one of three values: \describe{

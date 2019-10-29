@@ -4,9 +4,9 @@
 \alias{dbW_estimate_WGen_coefs}
 \title{Estimate coefficients for use by \var{SOILWAT2} weather generator}
 \usage{
-dbW_estimate_WGen_coefs(weatherData, WET_limit_cm = 0, na.rm = FALSE,
-  valNA = NULL, imputation_type = c("none", "mean", "locf"),
-  imputation_span = 5L)
+dbW_estimate_WGen_coefs(weatherData, WET_limit_cm = 0,
+  propagate_NAs = FALSE, valNA = NULL, imputation_type = c("none",
+  "mean", "locf"), imputation_span = 5L)
 }
 \arguments{
 \item{weatherData}{A list of elements of class
@@ -18,9 +18,9 @@ this value is considered \var{wet} instead of \var{dry}. Default is 0.
 This values should be equal to the corresponding value used in
 \var{SOILWAT2}'s function \code{SW_MKV_today}.}
 
-\item{na.rm}{A logical value. If \code{TRUE}, then missing weather values
-in the input \code{weatherData} are excluded; if \code{FALSE}, then
-missing values are propagated.}
+\item{propagate_NAs}{A logical value. If \code{TRUE}, then missing weather
+values in the input \code{weatherData} are excluded; if \code{FALSE}, then
+missing values are propagated to the estimation. See Details.}
 
 \item{valNA}{The (numerical) value of missing weather data.
 If \code{NULL}, then default values are interpreted as missing.}
@@ -96,6 +96,23 @@ Markov weather generator in \var{SOILWAT2} \var{> v4.2.5}.
   imputation approaches in order to fill in those failed coefficient
   estimates; see \code{\link{impute_df}}, but please note that any such
   imputation likely introduces biases in the generated weather.
+}
+
+\section{Details}{
+ Most users will likely want to set \code{propagate_NAs} to
+  \code{FALSE}. Note: \code{propagate_NAs} corresponds to \code{!na.rm}
+  from previous versions of this function with a different default value.
+  Consider an example: a the 30-year long input \code{weatherData} is
+  complete except for missing values on Jan 1, 2018.
+  \itemize{
+    \item If \code{propagate_NAs} is set to \code{TRUE}, then the
+    coefficients for day 1 and week 1 of year will be \code{NA} --
+    despite all the available data. In this case, the missing coefficients
+    for day 1 and week 1 of year will be imputed.
+  \item If \code{propagate_NAs} is set to \code{FALSE}, then the coefficients
+    for day 1 and week 1 of year will be calculated based on the non-missing
+    values for that day respectively that week of year. No imputation occurs.
+  }
 }
 
 \examples{

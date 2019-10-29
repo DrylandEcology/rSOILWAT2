@@ -38,6 +38,21 @@
 #'   estimates; see \code{\link{impute_df}}, but please note that any such
 #'   imputation likely introduces biases in the generated weather.
 #'
+#' @section Details: Most users will likely want to set \code{propagate_NAs} to
+#'   \code{FALSE}. Note: \code{propagate_NAs} corresponds to \code{!na.rm}
+#'   from previous versions of this function with a different default value.
+#'   Consider an example: a the 30-year long input \code{weatherData} is
+#'   complete except for missing values on Jan 1, 2018.
+#'   \itemize{
+#'     \item If \code{propagate_NAs} is set to \code{TRUE}, then the
+#'     coefficients for day 1 and week 1 of year will be \code{NA} --
+#'     despite all the available data. In this case, the missing coefficients
+#'     for day 1 and week 1 of year will be imputed.
+#'   \item If \code{propagate_NAs} is set to \code{FALSE}, then the coefficients
+#'     for day 1 and week 1 of year will be calculated based on the non-missing
+#'     values for that day respectively that week of year. No imputation occurs.
+#'   }
+#'
 #' @param weatherData A list of elements of class
 #'   \code{\linkS4class{swWeatherData}} or a \code{data.frame} as returned by
 #'   \code{\link{dbW_weatherData_to_dataframe}}.
@@ -45,9 +60,9 @@
 #'   this value is considered \var{wet} instead of \var{dry}. Default is 0.
 #'   This values should be equal to the corresponding value used in
 #'   \var{SOILWAT2}'s function \code{SW_MKV_today}.
-#' @param na.rm A logical value. If \code{TRUE}, then missing weather values
-#'   in the input \code{weatherData} are excluded; if \code{FALSE}, then
-#'   missing values are propagated.
+#' @param propagate_NAs A logical value. If \code{TRUE}, then missing weather
+#'   values in the input \code{weatherData} are excluded; if \code{FALSE}, then
+#'   missing values are propagated to the estimation. See Details.
 #' @inheritParams set_missing_weather
 #' @inheritParams impute_df
 #'
@@ -103,7 +118,8 @@
 #'
 #' @export
 dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
-  na.rm = FALSE, valNA = NULL, imputation_type = c("none", "mean", "locf"),
+  propagate_NAs = FALSE, valNA = NULL,
+  imputation_type = c("none", "mean", "locf"),
   imputation_span = 5L) {
 
   # daily weather data
@@ -118,6 +134,8 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   n_days <- nrow(wdata)
 
   imputation_type <- match.arg(imputation_type)
+
+  na.rm <- !propagate_NAs
 
   #-----------------------------------------------------------------------------
   #------ calculate mkv_prob.in
@@ -906,14 +924,15 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 #'
 #' @export
 dbW_generateWeather <- function(weatherData, years = NULL, wgen_coeffs = NULL,
-  na.rm = FALSE, imputation_type = "mean", imputation_span = 5L, seed = NULL) {
+  imputation_type = "mean", imputation_span = 5L, seed = NULL) {
 
   #--- Obtain missing/null arguments
   if (is.null(wgen_coeffs)) {
     wgen_coeffs <- dbW_estimate_WGen_coefs(weatherData,
-      na.rm = na.rm,
+      propagate_NAs = FALSE,
       imputation_type = imputation_type,
-      imputation_span = imputation_span)
+      imputation_span = imputation_span
+    )
   }
 
   if (is.data.frame(weatherData)) {
