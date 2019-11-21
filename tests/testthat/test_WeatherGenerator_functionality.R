@@ -26,10 +26,12 @@ test_that("Weather generator: estimate input parameters", {
     test_df <- data.frame(dbW_weatherData_to_dataframe(test_dat, valNA = NULL))
 
     if (anyNA(test_df)) {
-      expect_warning(res <- dbW_estimate_WGen_coefs(test_df),
+      expect_warning(res <- dbW_estimate_WGen_coefs(test_df,
+        propagate_NAs = TRUE),
         "Insufficient weather data to estimate values")
 
-      expect_message(res <- dbW_estimate_WGen_coefs(test_df, na.rm = TRUE,
+      expect_message(res <- dbW_estimate_WGen_coefs(test_df,
+        propagate_NAs = FALSE,
         imputation_type = "mean"),
         "Impute missing")
 
@@ -60,14 +62,12 @@ test_that("Weather generator: generate weather", {
 
     # Case 1: generate weather for dataset and impute missing values
     wout[[1]] <- dbW_generateWeather(test_dat,
-      na.rm = TRUE,
       imputation_type = "mean",
       imputation_span = 5)
 
     # Case 2: generate weather based on partial dataset,
     #   use estimated weather generator coefficients from full dataset
     wgen_coeffs <- dbW_estimate_WGen_coefs(test_dat,
-      na.rm = TRUE,
       imputation_type = "mean",
       imputation_span = 5)
     wout[[2]] <- dbW_generateWeather(test_dat[(n - 5):n],

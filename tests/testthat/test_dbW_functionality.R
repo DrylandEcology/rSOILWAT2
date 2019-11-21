@@ -378,3 +378,42 @@ test_that("Manipulate weather data: years", {
     }
   }
 })
+
+
+test_that("Convert calendar years", {
+  wdata <- rSOILWAT2::weatherData
+
+  ## Transfer to different years (partially overlapping)
+  wnew <- dbW_convert_to_GregorianYears(wdata,
+    new_startYear = 2000, new_endYear = 2020
+  )
+  expect_equal(unique(wnew[, "Year"]), 2000:2020)
+  expect_false(anyNA(wnew[wnew[, "Year"] %in% names(wdata), ]))
+  expect_true(anyNA(wnew))
+
+  ## Transfer to a subset of years (i.e., subset)
+  wnew <- dbW_convert_to_GregorianYears(wdata,
+    new_startYear = 2000, new_endYear = 2005
+  )
+  expect_equal(unique(wnew[, "Year"]), 2000:2005)
+  expect_false(anyNA(wnew))
+
+  ## Correct/convert from a non-leap to a Gregorian calendar
+  wempty <- dbW_weatherData_to_dataframe(list(new("swWeatherData")))[1:365, ]
+
+  wnew <- dbW_convert_to_GregorianYears(wempty,
+    new_startYear = 2016, new_endYear = 2016
+  )
+  expect_equal(unique(wnew[, "Year"]), 2016:2016)
+  expect_equal(nrow(wnew), 366) # leap year
+  expect_true(anyNA(wnew))
+
+
+  wnew <- dbW_convert_to_GregorianYears(wdata["1981"],
+    new_startYear = 2016, new_endYear = 2016,
+    type = "sequential"
+  )
+  expect_equal(unique(wnew[, "Year"]), 2016:2016)
+  expect_equal(nrow(wnew), 366) # leap year
+  expect_equal(sum(is.na(wnew)), 3) # 3 variables on leap day are missing
+})
