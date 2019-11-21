@@ -538,7 +538,7 @@ get_season <- function(mo_season_TF, N_season = NULL) {
 #' par(par_prev)
 #' }
 #'
-# @export
+#' @export
 predict_season <- function(x, ref_season, target_season) {
 
   # `x` must be a two-dimensional object with 12 rows (corresponding to months)
@@ -634,6 +634,8 @@ predict_season <- function(x, ref_season, target_season) {
 adjBiom_by_temp <- function(x, mean_monthly_temp_C, growing_limit_C = 4,
   reference_growing_season = 3:10, isNorth = TRUE) {
 
+  .Deprecated(new = "adj_phenology_by_temp")
+
   # Convert `x` to a list
   return_list <- inherits(x, "list")
   if (!return_list) {
@@ -728,6 +730,337 @@ adjBiom_by_temp <- function(x, mean_monthly_temp_C, growing_limit_C = 4,
   }
 
   if (return_list) x else x[[1L]]
+}
+
+
+
+#' Find location of minimum and maximum
+get_season_description_v2 <- function(x) {
+  c(
+    min = {
+      tmp <- which(abs(x - min(x)) < rSW2_glovars[["tol"]])
+      as.integer(stats::quantile(tmp, probs = 0.5, type = 3, names = FALSE))
+    },
+    peak = {
+      tmp <- which(abs(x - max(x)) < rSW2_glovars[["tol"]])
+      as.integer(stats::quantile(tmp, probs = 0.5, type = 3, names = FALSE))
+    }
+  )
+}
+
+
+#' Adjust a phenological pattern to a different temperature regime
+#'
+#' Extract the characteristics of seasonal (mean monthly) values of biomass,
+#' activity, etc. (i.e., phenology) that were observed for a specific
+#' (reference) climate (at a specific site), and project those characteristics
+#' to the mean monthly temperature values of a different site and/or different
+#' climate conditions.
+#'
+#' The algorithm attempts to adjust for the following patterns:
+#' \itemize{
+#'   \item Shifts in timing of highest/lowest seasonal biomass/activity
+#'   \item Effects of residual temperature differences not accounted
+#'         for by shifts in timing while maintaining a unimodal phenological
+#'         pattern
+#'   \item Maintain inactive period if present
+#'   \item Maintain seasonality expressed as correlation between phenology
+#'         and mean monthly temperature values
+#' }
+#'
+#' @param x A numeric vector of length 12. The values
+#'   reflect the phenological pattern that occur on average under
+#'   reference mean monthly temperature values \code{ref_temp}.
+#' @param ref_temp A numeric vector of length 12. Reference mean monthly
+#'   temperature values in degree Celsius under which \code{x} was
+#'   determined / is valid.
+#' @param target_temp A numeric vector of length 12. Mean monthly
+#'   temperature values in degree Celsius of a target site / condition
+#'   for which \code{x} is to be adjusted.
+#'
+#' @return An updated copy of \code{x} where the values have been adjusted
+#'   to represent the phenology of a target climate described by
+#'   \code{target_temp}.
+#'
+#' @examples
+#' sw_in <- rSOILWAT2::sw_exampleData
+#' phen_reference <- as.data.frame(
+#'   swProd_MonProd_grass(sw_in)[, c("Biomass", "Live_pct")]
+#' )
+#'
+#' clim <- calc_SiteClimate(weatherList = rSOILWAT2::weatherData)
+#' ref_temp <- clim[["meanMonthlyTempC"]]
+#' temp_randomwarmer3C <- ref_temp + stats::rnorm(12, 3, 1)
+#'
+#' ## Adjust phenology from the reference Mar-Oct to a target Nov-Jun
+#' ## growing season
+#' phen_adj <- sapply(phen_reference, function(x) adj_phenology_by_temp(
+#'   x = x,
+#'   ref_temp = ref_temp,
+#'   target_temp = temp_randomwarmer3C
+#' ))
+#'
+#' ## Plot reference and adjusted monthly values
+#' \dontrun{
+#' par_prev <- par(mfrow = c(2, 1))
+#'
+#' plot(1:12, phen_reference[, 1], type = "l", col = "red",
+#'   ylim = c(0, 250), xlab = "Month")
+#' lines(1:12, phen_adj[, 1])
+#' legend("bottom", ncol = 2,
+#'   legend = c("reference", "adjusted"),
+#'   lwd = 2, lty = 1, col = c("red", "black")
+#' )
+#'
+#' plot(1:12, phen_reference[, 2], type = "l", col = "red",
+#'   ylim = c(0, 1), xlab = "Month")
+#' lines(1:12, phen_adj[, 2])
+#'
+#' par(par_prev)
+#' }
+#'
+#' @export
+adj_phenology_by_temp <- function(x, ref_temp, target_temp) {
+
+  stopifnot(
+    length(x) == 12,
+    length(ref_temp) == 12,
+    length(target_temp) == 12
+  )
+
+  mon <- rSW2_glovars[["st_mo"]]
+
+  #------ Step 1) Estimate month of peak and of minimum, and
+  # calculate differences in timing
+  ref_desc <- get_season_description_v2(ref_temp)
+  target_desc <- get_season_description_v2(target_temp)
+
+  name_periods <- names(ref_desc)
+  n_periods <- length(ref_desc)
+
+  desc_diffs <- as.integer(circ_minus(target_desc, ref_desc, int = 12))
+  names(desc_diffs) <- names(ref_desc)
+
+
+  #------ Step 2) Translate sequence of months from the reference to the target
+  # based on season descriptions of two points: minimum and peak
+
+  #--- Adjust lengths of sub-periods: (i) peak to min, (ii) min to peak
+  seq_periods <- name_periods[1 + (seq_along(name_periods) - 2) %% n_periods]
+
+  target_mon <- NULL
+  id_peak <- NA
+
+  for (p in seq_periods) {
+    i <- which(p == name_periods)
+    iprev <- 1 + (i - 2) %% n_periods
+
+    # Identify months of sub-period `p` in reference
+    ids <- circ_seq(
+      from = ref_desc[iprev],
+      to = ref_desc[p],
+      int = 12
+    )
+
+    n_ids <- length(ids)
+
+    # Target sub-period duration
+    n_ids2 <- n_ids + desc_diffs[p] - desc_diffs[iprev]
+
+    # Resample sub-period to adjusted duration in target
+    ids2 <- if (n_ids2 == 0L) {
+      NULL
+    } else if (n_ids2 == 1L) {
+      mean(ids)
+    } else {
+      circ_seq(
+        from = ids[1],
+        to = ids[n_ids],
+        int = 12,
+        length.out = n_ids2
+      )[-1]
+    }
+
+    # Add to new month sequence
+    target_mon <- c(target_mon, ids2)
+
+    if (p == "peak") {
+      id_peak <- length(target_mon)
+    }
+  }
+
+
+  #--- Fix shift in seasonality by difference in peak month
+  shift <- target_desc["peak"] - id_peak
+
+  if (shift != 0L) {
+    ids <- 1 + (mon - shift - 1) %% 12L
+    target_mon <- target_mon[ids]
+  }
+
+  stopifnot(length(target_mon) == 12L)
+
+
+  #------ Step 3) estimate periodic spline and apply to adjusted target months
+  res <- predict(
+    splines::periodicSpline(x ~ mon, period = 12),
+    target_mon)[["y"]]
+
+
+  #------- Step 4) Scale up/down to correct for residual temperature effects
+  res2 <- res
+
+  ttmp <- predict(
+    splines::periodicSpline(ref_temp ~ mon, period = 12),
+    target_mon)[["y"]]
+
+  # Assume: temperature span above 0 C corresponds to activity span above mean
+  temp_span <- max(0, mean(sort(ref_temp, decreasing = TRUE)[1:3]) - 0)
+  x_span <- max(0, mean(sort(x, decreasing = TRUE)[1:3]) - mean(x))
+
+  if (temp_span > 0 && x_span > 0) {
+    tmp <- (target_temp - ttmp) / temp_span * x_span
+    tmp_res <- res
+    tmp2 <- tmp
+
+    if (diff(range(tmp)) / diff(range(res)) > 0.1) {
+      # apply minimal up/down shift
+      dmin <- min(tmp)
+      tmp_res <- res + dmin
+      tmp2 <- tmp - dmin
+
+      # smooth the rest with a (concave) quadratic function
+      # to avoid "false secondary peaks" in the result
+      # (phenological activity is mostly unimodal)
+      is_to_smooth <- get_season(mo_season_TF = tmp2 > rSW2_glovars[["tol"]])
+
+      m <- stats::lm(tmp2[is_to_smooth] ~
+          stats::poly(seq_along(is_to_smooth), 2))
+
+      if (coef(m)[3] < 0) {
+        # only use if concave
+        tmp2[is_to_smooth] <- stats::fitted(m)
+      }
+    }
+
+    res2 <- pmax(min(x), tmp_res + tmp2)
+  }
+
+  # If climate has any months with sub-zero temps, then
+  # don't apply additive correction to low activity months
+  if (any(target_temp <= 0)) {
+    low_value <- 0.1 * diff(range(x))
+    res2 <- ifelse(res <= low_value, res, res2)
+  }
+
+
+  #----- Step 5) Inactive phase: allow activity to go/stay at 0
+  res3 <- res2
+  is_x_zero <- x < rSW2_glovars[["tol"]]
+  is_res_zero <- res2 < rSW2_glovars[["tol"]]
+
+  if (any(is_x_zero) && sum(is_res_zero) / sum(is_x_zero) <= 0.5) {
+    # Do we have a flat lower level or a minimum valley?
+    ids_res_low <- get_season(abs(res2 - min(res2)) < rSW2_glovars[["tol"]])
+    low_duration <- length(ids_res_low)
+
+    if (low_duration > 0) {
+      # Zap flat lower level to zero
+      if (low_duration > 1) {
+        # Ease transition down to zero if longer than 5 month
+        # by not zapping first/last month
+        if (low_duration > 5) {
+          ids_res_low <- ids_res_low[-c(1, length(ids_res_low))]
+        }
+
+      } else {
+        # Zap minimum and contiguous surroundings to zero
+        low_surroundings <- min(res2) + min(
+          min(x[x > 0]) / diff(range(x)) * diff(range(res2)),
+          stats::quantile(x, probs = mean(is_x_zero))
+        )
+
+        tmp <- low_surroundings > res2
+
+        # periodic running median with window = 3 (see ?runmed)
+        ids_res_low <- c(
+          median(tmp[c(12, 1:2)]),
+          apply(stats::embed(tmp, 3), 1, median),
+          median(tmp[c(11:12, 1)])
+        )
+      }
+
+      # Zap low values to zero
+      res3[ids_res_low] <- 0
+    }
+  }
+
+  #------ Step 6) Maintain seasonality
+  res5 <- res3
+  rho_ref <- suppressWarnings(cor(x, ref_temp))
+  rho_delta <- cor(res5, target_temp) - rho_ref
+
+  if (is.finite(rho_delta) && abs(rho_delta) > 0.05) {
+
+    # Define bounds within which optimization is attempted
+    #  - Stay within band of (1 - fudge[1, 1], 1 + fudge[2, 1]) of annual range
+    #  - Stay within (1 - fudge[1, 2], 1 + fudge[2, 2]) of monthly values
+    #  - If overall temperature increases, then make positive band larger
+    #  - If overall temperature decreases, then make negative band larger
+    #  - Keep zeros at zero
+    tdelta <- mean(target_temp) - mean(ref_temp)
+    ff <- if (tdelta > 0.5) {
+      c(0.1, 1)
+    } else if (tdelta < -0.5) {
+      c(1, 0.1)
+    } else {
+      c(0.5, 0.5)
+    }
+    fband <- c(0.25, 0.75)
+    fudge <- rbind(ff[1] * fband, ff[2] * fband)
+    is_res_zero <- res5 < rSW2_glovars[["tol"]]
+
+    lower <- pmax(0,
+      (1 - fudge[1, 1]) * min(res5),
+      (1 - fudge[1, 2]) * res5
+    )
+
+    upper <- pmax(0,
+      lower + 0.01,
+      pmin(
+        (1 + fudge[2, 1]) * max(res5),
+        (1 + fudge[2, 2]) * res5
+      )
+    )
+
+    # Ideally: keep zeros at zero, but cannot optimize 0-0 because of
+    # "non-finite finite-difference value" error
+    lower <- ifelse(is_res_zero, 0, lower)
+    upper <- ifelse(is_res_zero, 0.01, upper)
+
+    # Optimize target values so that they maintain seasonality
+    # as good as possible
+    tmp <- try(stats::optim(
+      par = res5,
+      fn = function(res, cor_ref = rho_ref) {
+        abs(cor_ref - cor(res, target_temp))
+      },
+      method = "L-BFGS-B",
+      lower = lower,
+      upper = upper
+    )$par,
+      silent = TRUE
+    )
+
+    res5 <- if (inherits(tmp, "try-error")) res5 else tmp
+
+    # Zap back to zero if needed
+    res5 <- ifelse(is_res_zero, 0, res5)
+  }
+
+
+  # Make sure that we don't get negative biomass/activity values
+  ifelse(res5 < 0, 0, res5)
 }
 
 
