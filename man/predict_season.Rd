@@ -27,8 +27,7 @@ Fits a loess-curve to a seasonal subset of monthly values and uses the fit
 to make a prediction for a different subset of months.
 }
 \section{Details}{
- You may want to apply the function \code{\link{cut0Inf}}
-  to the results to eliminate negative values that may arise
+ You may want to eliminate negative values that may arise
   from the fitting/prediction process.
 }
 

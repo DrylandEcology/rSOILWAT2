@@ -196,7 +196,7 @@ circ_sd <- function(x, int, na.rm = FALSE) {
   if (length(x) - sum(is.na(x)) > 1 && requireNamespace("circular",
     quietly = TRUE)) {
 
-    if (stats::sd(x, na.rm = TRUE) > 0) {
+    if (sd(x, na.rm = TRUE) > 0) {
       circ <- 2 * pi / int
       x_circ <- circular::circular(x * circ,
         type = "angles",

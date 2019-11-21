@@ -499,8 +499,7 @@ get_season <- function(mo_season_TF, N_season = NULL) {
 #'   \code{target_season} and columns that correspond to the adjusted variable
 #'   values from \code{x}.
 #'
-#' @section Details: You may want to apply the function \code{\link{cut0Inf}}
-#'   to the results to eliminate negative values that may arise
+#' @section Details: You may want to eliminate negative values that may arise
 #'   from the fitting/prediction process.
 #'
 #' @examples
@@ -575,7 +574,7 @@ predict_season <- function(x, ref_season, target_season) {
       span = lcoef$span,
       degree = lcoef$degree)
 
-    stats::predict(lf, newdata = data.frame(ref_seq = target_seq))
+    predict(lf, newdata = data.frame(ref_seq = target_seq))
   })
 }
 
@@ -739,11 +738,11 @@ get_season_description_v2 <- function(x) {
   c(
     min = {
       tmp <- which(abs(x - min(x)) < rSW2_glovars[["tol"]])
-      as.integer(stats::quantile(tmp, probs = 0.5, type = 3, names = FALSE))
+      as.integer(quantile(tmp, probs = 0.5, type = 3, names = FALSE))
     },
     peak = {
       tmp <- which(abs(x - max(x)) < rSW2_glovars[["tol"]])
-      as.integer(stats::quantile(tmp, probs = 0.5, type = 3, names = FALSE))
+      as.integer(quantile(tmp, probs = 0.5, type = 3, names = FALSE))
     }
   )
 }
@@ -939,7 +938,7 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp) {
 
       if (coef(m)[3] < 0) {
         # only use if concave
-        tmp2[is_to_smooth] <- stats::fitted(m)
+        tmp2[is_to_smooth] <- fitted(m)
       }
     }
 
@@ -977,7 +976,7 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp) {
         # Zap minimum and contiguous surroundings to zero
         low_surroundings <- min(res2) + min(
           min(x[x > 0]) / diff(range(x)) * diff(range(res2)),
-          stats::quantile(x, probs = mean(is_x_zero))
+          quantile(x, probs = mean(is_x_zero))
         )
 
         tmp <- low_surroundings > res2
@@ -1293,7 +1292,7 @@ TranspCoeffByVegType <- function(tr_input_code, tr_input_coeff,
   trco.code <- as.character(tr_input_code[,
     which(colnames(tr_input_code) == trco_type)])
   trco <- rep(0, times = soillayer_no)
-  trco.raw <- stats::na.omit(tr_input_coeff[,
+  trco.raw <- na.omit(tr_input_coeff[,
     which(colnames(tr_input_coeff) == trco_type)])
 
   if (trco.code == "DepthCM") {

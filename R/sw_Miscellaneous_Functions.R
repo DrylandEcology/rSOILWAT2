@@ -26,7 +26,7 @@ sw_dailyC4_TempVar <- function(dailyTempMin, dailyTempMean, simTime2) {
   nyrs <- seq_along(Month7th_MinTemp_C)
   temp <- cbind(Month7th_MinTemp_C[nyrs], FrostFree_Days[nyrs],
     DegreeDaysAbove65F_DaysC[nyrs])
-  res <- c(apply(temp, 2, mean), apply(temp, 2, stats::sd))
+  res <- c(apply(temp, 2, mean), apply(temp, 2, sd))
   temp <- c("Month7th_NSadj_MinTemp_C",
     "LengthFreezeFreeGrowingPeriod_NSadj_Days",
     "DegreeDaysAbove65F_NSadj_DaysC")
@@ -106,7 +106,7 @@ sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
   temp <- cbind(Month7th_PPT_mm[nyrs], MeanTemp_ofDriestQuarter_C[nyrs],
     MinTemp_of2ndMonth_C[nyrs])
 
-  res <- c(apply(temp, 2, mean), apply(temp, 2, stats::sd))
+  res <- c(apply(temp, 2, mean), apply(temp, 2, sd))
   temp <- c("Month7th_PPT_mm", "MeanTemp_ofDriestQuarter_C",
     "MinTemp_of2ndMonth_C")
   names(res) <- c(temp, paste0(temp, "_SD"))
