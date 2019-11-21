@@ -240,7 +240,7 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 		logfp = NULL;
 	} else {
 		// tell 'LogError' that R should print messages to the console
-		logfp = stdout; // any non-NULL file pointer
+		logfp = (FILE *) swTRUE; // any non-NULL file pointer
 	}
 
 	if (isNull(inputData)) {
