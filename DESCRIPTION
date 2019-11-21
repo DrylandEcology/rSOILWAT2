@@ -17,6 +17,7 @@ Imports:
   RSQLite (>= 2.1),
   DBI (>= 1.0),
   blob (>= 1.2.0),
+  circular (>= 0.4.93),
   methods
 Suggests:
   digest (>= 0.6.12),
