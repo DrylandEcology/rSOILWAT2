@@ -54,6 +54,7 @@ rSW2_glovars <- new.env()
 #' @importFrom stats aggregate coef complete.cases cor cov fitted median
 #'   na.exclude na.omit predict quantile sd weighted.mean
 #' @importFrom utils data read.csv read.table str write.table
+#' @import rSW2utils
 NULL
 
 ##------ Access SOILWAT2 C code

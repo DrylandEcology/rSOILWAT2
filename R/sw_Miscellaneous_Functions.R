@@ -35,20 +35,6 @@ sw_dailyC4_TempVar <- function(dailyTempMin, dailyTempMean, simTime2) {
   res
 }
 
-#' @seealso \code{\link[raster]{movingFun}}
-window <- function(x, n = 3, win_fun = sum) {
-  ids <- seq_len(n)
-  lng <- length(x)
-  x <- c(x, x[ids])
-
-  m <- matrix(ncol = 3, nrow = lng)
-  for (i in ids) {
-    m[, i] <- x[i:(lng + i - 1)]
-  }
-
-  apply(m, MARGIN = 1, FUN = win_fun)
-}
-
 #' Calculate climate variables required to estimate percent cheatgrass cover
 #' in North America
 #'

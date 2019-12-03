@@ -12,12 +12,12 @@ Authors@R: c(
   person("Brenden", "Bernal", role = "ctb"),
   person("Ashish", "Tiwari", role = "ctb"))
 Depends:
-  R (>= 3.5.0)
+  R (>= 3.5.0),
+  rSW2utils
 Imports:
   RSQLite (>= 2.1),
   DBI (>= 1.0),
   blob (>= 1.2.0),
-  circular (>= 0.4.93),
   methods
 Suggests:
   digest (>= 0.6.12),
@@ -33,7 +33,7 @@ NeedsCompilation: yes
 License: GPL-3 + file LICENSE
 URL: https://github.com/DrylandEcology/rSOILWAT2
 BugReports: https://github.com/DrylandEcology/rSOILWAT2/issues
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.1
 LazyData: true
 ByteCompile: true
 Language: en-US

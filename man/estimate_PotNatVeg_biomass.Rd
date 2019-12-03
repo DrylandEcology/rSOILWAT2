@@ -5,11 +5,17 @@
 \title{Adjust mean monthly biomass values of grass and shrub functional groups by
 climate relationships}
 \usage{
-estimate_PotNatVeg_biomass(tr_VegBiom, do_adjBiom_by_temp = FALSE,
-  do_adjBiom_by_ppt = FALSE, fgrass_c3c4ann = c(1, 0, 0),
-  growing_limit_C = 4, isNorth = TRUE, MAP_mm = 450,
-  mean_monthly_temp_C = c(rep(growing_limit_C - 1, 2),
-  rep(growing_limit_C + 1, 8), rep(growing_limit_C - 1, 2)))
+estimate_PotNatVeg_biomass(
+  tr_VegBiom,
+  do_adjBiom_by_temp = FALSE,
+  do_adjBiom_by_ppt = FALSE,
+  fgrass_c3c4ann = c(1, 0, 0),
+  growing_limit_C = 4,
+  isNorth = TRUE,
+  MAP_mm = 450,
+  mean_monthly_temp_C = c(rep(growing_limit_C - 1, 2), rep(growing_limit_C + 1, 8),
+    rep(growing_limit_C - 1, 2))
+)
 }
 \arguments{
 \item{tr_VegBiom}{A data.frame with 12 rows (one for each month) and columns

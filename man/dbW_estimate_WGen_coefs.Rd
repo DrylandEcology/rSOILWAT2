@@ -4,9 +4,14 @@
 \alias{dbW_estimate_WGen_coefs}
 \title{Estimate coefficients for use by \var{SOILWAT2} weather generator}
 \usage{
-dbW_estimate_WGen_coefs(weatherData, WET_limit_cm = 0,
-  propagate_NAs = FALSE, valNA = NULL, imputation_type = c("none",
-  "mean", "locf"), imputation_span = 5L)
+dbW_estimate_WGen_coefs(
+  weatherData,
+  WET_limit_cm = 0,
+  propagate_NAs = FALSE,
+  valNA = NULL,
+  imputation_type = c("none", "mean", "locf"),
+  imputation_span = 5L
+)
 }
 \arguments{
 \item{weatherData}{A list of elements of class

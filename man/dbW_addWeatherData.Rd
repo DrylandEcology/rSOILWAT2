@@ -4,10 +4,20 @@
 \alias{dbW_addWeatherData}
 \title{Adds daily weather data to a registered weather database}
 \usage{
-dbW_addWeatherData(Site_id = NULL, lat = NULL, long = NULL,
-  weatherFolderPath = NULL, weatherData = NULL, Label = NULL,
-  Scenario_id = NULL, Scenario = "Current", weather_tag = "weath",
-  ignore.case = FALSE, overwrite = FALSE, verbose = FALSE)
+dbW_addWeatherData(
+  Site_id = NULL,
+  lat = NULL,
+  long = NULL,
+  weatherFolderPath = NULL,
+  weatherData = NULL,
+  Label = NULL,
+  Scenario_id = NULL,
+  Scenario = "Current",
+  weather_tag = "weath",
+  ignore.case = FALSE,
+  overwrite = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{Site_id}{Numeric. Used to identify site and extract weather data.}

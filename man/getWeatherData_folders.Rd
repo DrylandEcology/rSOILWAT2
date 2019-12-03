@@ -4,8 +4,13 @@
 \alias{getWeatherData_folders}
 \title{Reads daily weather data from files}
 \usage{
-getWeatherData_folders(LookupWeatherFolder, weatherDirName = NULL,
-  filebasename = "weath", startYear = NULL, endYear = NULL)
+getWeatherData_folders(
+  LookupWeatherFolder,
+  weatherDirName = NULL,
+  filebasename = "weath",
+  startYear = NULL,
+  endYear = NULL
+)
 }
 \arguments{
 \item{LookupWeatherFolder}{A character string. The path to the parent folder
