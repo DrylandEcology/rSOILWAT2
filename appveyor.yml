@@ -9,6 +9,8 @@ init:
 
 install:
   - ps: Bootstrap
+  - travis-tool.sh install_r circular
+  - travis-tool.sh install_github DrylandEcology/rSW2utils
   - git submodule update --init --recursive
 
 
