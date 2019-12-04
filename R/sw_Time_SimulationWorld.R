@@ -1,6 +1,8 @@
 #------ FUNCTIONS THAT DEAL WITH SIMULATION TIME
 
 
+#' Calculate start year of simulation period after \var{spin-up}
+#' @export
 getStartYear <- function(simstartyr, spinup_N = 1L) {
   as.integer(simstartyr + spinup_N)
 }
