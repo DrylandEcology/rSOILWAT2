@@ -18,7 +18,7 @@ install:
 environment:
   USE_RTOOLS: true
   global:
-    WARNINGS_ARE_ERRORS:
+    WARNINGS_ARE_ERRORS: false
   matrix:
     - R_VERSION: release
       R_ARCH: i386
