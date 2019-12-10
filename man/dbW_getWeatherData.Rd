@@ -4,10 +4,18 @@
 \alias{dbW_getWeatherData}
 \title{Extracts daily weather data from a registered weather database}
 \usage{
-dbW_getWeatherData(Site_id = NULL, lat = NULL, long = NULL,
-  Label = NULL, startYear = NULL, endYear = NULL,
-  Scenario = "Current", Scenario_id = NULL, ignore.case = FALSE,
-  verbose = FALSE)
+dbW_getWeatherData(
+  Site_id = NULL,
+  lat = NULL,
+  long = NULL,
+  Label = NULL,
+  startYear = NULL,
+  endYear = NULL,
+  Scenario = "Current",
+  Scenario_id = NULL,
+  ignore.case = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{Site_id}{Numeric. Used to identify site and extract weather data.}

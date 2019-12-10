@@ -4,10 +4,16 @@
 \alias{dbW_convert_to_GregorianYears}
 \title{Transfer existing weather data to a different (Gregorian) calendar (period)}
 \usage{
-dbW_convert_to_GregorianYears(weatherData, new_startYear = NULL,
-  new_endYear = NULL, type = c("asis", "sequential"),
-  name_year = "Year", name_DOY = "DOY", name_data = c("Tmax_C",
-  "Tmin_C", "PPT_cm"), valNA = NULL)
+dbW_convert_to_GregorianYears(
+  weatherData,
+  new_startYear = NULL,
+  new_endYear = NULL,
+  type = c("asis", "sequential"),
+  name_year = "Year",
+  name_DOY = "DOY",
+  name_data = c("Tmax_C", "Tmin_C", "PPT_cm"),
+  valNA = NULL
+)
 }
 \arguments{
 \item{weatherData}{A list of elements of class

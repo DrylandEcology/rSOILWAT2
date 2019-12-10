@@ -5,11 +5,19 @@
 \title{Calculate soil moisture and soil temperature regimes and underlying
 conditions}
 \usage{
-calc_SMTRs(sim_in, sim_out = NULL, sim_agg = NULL, soil_TOC = NULL,
-  has_soil_temperature = TRUE, opt_SMTR = list(aggregate_at =
-  "conditions", crit_agree_frac = 0.9, use_normal = TRUE, SWP_dry = -1.5,
-  SWP_sat = -0.033, impermeability = 0.9), simTime1 = NULL,
-  simTime2 = NULL, verbose = FALSE, msg_tag = NULL)
+calc_SMTRs(
+  sim_in,
+  sim_out = NULL,
+  sim_agg = NULL,
+  soil_TOC = NULL,
+  has_soil_temperature = TRUE,
+  opt_SMTR = list(aggregate_at = "conditions", crit_agree_frac = 0.9, use_normal = TRUE,
+    SWP_dry = -1.5, SWP_sat = -0.033, impermeability = 0.9),
+  simTime1 = NULL,
+  simTime2 = NULL,
+  verbose = FALSE,
+  msg_tag = NULL
+)
 }
 \arguments{
 \item{sim_in}{An object of class \code{\linkS4class{swInputData}}. The

@@ -4,9 +4,17 @@
 \alias{dbW_getIDs}
 \title{Locate keys for weather database tables in the registered weather database}
 \usage{
-dbW_getIDs(site_id = NULL, site_label = NULL, long = NULL,
-  lat = NULL, scenario = NULL, scenario_id = NULL,
-  add_if_missing = FALSE, ignore.case = FALSE, verbose = FALSE)
+dbW_getIDs(
+  site_id = NULL,
+  site_label = NULL,
+  long = NULL,
+  lat = NULL,
+  scenario = NULL,
+  scenario_id = NULL,
+  add_if_missing = FALSE,
+  ignore.case = FALSE,
+  verbose = FALSE
+)
 }
 \value{
 A list with two elements \code{site_id} and \code{scenario_id}.

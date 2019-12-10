@@ -4,8 +4,9 @@
 \alias{setup_time_simulation_run}
 \title{Describe the time of a simulation run}
 \usage{
-setup_time_simulation_run(sim_time = list(spinup_N = NULL, simstartyr =
-  NA, startyr = NULL, endyr = NA))
+setup_time_simulation_run(
+  sim_time = list(spinup_N = NULL, simstartyr = NA, startyr = NULL, endyr = NA)
+)
 }
 \arguments{
 \item{sim_time}{A list with at least values for three named elements:

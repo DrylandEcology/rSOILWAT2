@@ -4,8 +4,14 @@
 \alias{dbW_generateWeather}
 \title{Generate daily weather data using SOILWAT2's weather generator}
 \usage{
-dbW_generateWeather(weatherData, years = NULL, wgen_coeffs = NULL,
-  imputation_type = "mean", imputation_span = 5L, seed = NULL)
+dbW_generateWeather(
+  weatherData,
+  years = NULL,
+  wgen_coeffs = NULL,
+  imputation_type = "mean",
+  imputation_span = 5L,
+  seed = NULL
+)
 }
 \arguments{
 \item{weatherData}{A list of elements of class
