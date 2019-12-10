@@ -94,8 +94,12 @@ NULL
 #' @export
 dbW_has_sites <- function(Labels, ignore.case = FALSE) {
   stopifnot(dbW_IsValid())
-  sql <- paste("SELECT COUNT(*) FROM Sites WHERE Label=:x",
-    if (ignore.case) "COLLATE NOCASE")
+
+  sql <- paste(
+    "SELECT COUNT(*) FROM Sites WHERE Label=:x",
+    if (ignore.case) "COLLATE NOCASE"
+  )
+
   DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = Labels))[, 1] > 0
 }
 
@@ -106,7 +110,9 @@ dbW_has_sites <- function(Labels, ignore.case = FALSE) {
 #' @export
 dbW_has_siteIDs <- function(Site_ids) {
   stopifnot(dbW_IsValid())
+
   sql <- "SELECT COUNT(*) FROM Sites WHERE Site_id=:x"
+
   DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = Site_ids))[, 1] > 0
 }
 
@@ -118,9 +124,14 @@ dbW_has_siteIDs <- function(Site_ids) {
 #' @export
 dbW_has_scenarioIDs <- function(Scenario_ids) {
   stopifnot(dbW_IsValid())
+
   sql <- "SELECT COUNT(*) FROM Scenarios WHERE id=:x"
-  DBI::dbGetQuery(rSW2_glovars$con, sql,
-    params = list(x = Scenario_ids))[, 1] > 0
+
+  DBI::dbGetQuery(
+    rSW2_glovars$con,
+    sql,
+    params = list(x = Scenario_ids)
+  )[, 1] > 0
 }
 
 #' @rdname check_content
@@ -131,8 +142,12 @@ dbW_has_scenarioIDs <- function(Scenario_ids) {
 #' @export
 dbW_has_scenarios <- function(Scenarios, ignore.case = FALSE) {
   stopifnot(dbW_IsValid())
-  sql <- paste("SELECT COUNT(*) FROM Scenarios WHERE Scenario=:x",
-    if (ignore.case) "COLLATE NOCASE")
+
+  sql <- paste(
+    "SELECT COUNT(*) FROM Scenarios WHERE Scenario=:x",
+    if (ignore.case) "COLLATE NOCASE"
+  )
+
   DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = Scenarios))[, 1] > 0
 }
 
@@ -145,22 +160,50 @@ dbW_has_scenarios <- function(Scenarios, ignore.case = FALSE) {
 dbW_has_weatherData <- function(Site_ids, Scenario_ids) {
   stopifnot(dbW_IsValid())
 
-  sql <- paste("SELECT COUNT(*) FROM WeatherData",
-    "WHERE Site_id = :x1 AND Scenario IN (:x2)")
-
+  sites_N <- length(Site_ids)
   scen_N <- length(Scenario_ids)
-  res <- sapply(Site_ids, function(x) {
-    res <- DBI::dbGetQuery(rSW2_glovars$con, sql,
-      params = list(x1 = rep(x, scen_N), x2 = Scenario_ids))
-    res[, 1] == 1L
-  })
 
-  if (!is.matrix(res)) {
-    res <- as.matrix(res)
+  if (sites_N > scen_N) {
+    sql <- paste(
+      "SELECT COUNT(*) FROM WeatherData",
+      "WHERE Site_id IN (:x1) AND Scenario = :x2"
+    )
+
+    res <- lapply(Scenario_ids, function(x) {
+      res <- DBI::dbGetQuery(
+        rSW2_glovars$con,
+        sql,
+        params = list(x1 = Site_ids, x2 = rep(x, sites_N))
+      )
+      res[, 1] == 1L
+    })
+
+    res <- do.call(cbind, res)
+
+  } else {
+    sql <- paste(
+      "SELECT COUNT(*) FROM WeatherData",
+      "WHERE Site_id = :x1 AND Scenario IN (:x2)"
+    )
+
+    res <- lapply(Site_ids, function(x) {
+      res <- DBI::dbGetQuery(
+        rSW2_glovars$con,
+        sql,
+        params = list(x1 = rep(x, scen_N), x2 = Scenario_ids)
+      )
+      res[, 1] == 1L
+    })
+
+    res <- do.call(rbind, res)
   }
-  dimnames(res) <- list(paste("Scenario", Scenario_ids, sep = "_"),
-    paste("Site", Site_ids, sep = "_"))
-  t(res)
+
+  dimnames(res) <- list(
+    paste("Site", Site_ids, sep = "_"),
+    paste("Scenario", Scenario_ids, sep = "_")
+  )
+
+  res
 }
 
 
