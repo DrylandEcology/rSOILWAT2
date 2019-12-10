@@ -5,8 +5,12 @@
 \title{Replace selected biomass values of a
 \link[rSOILWAT2:swProd-class]{rSOILWAT2::swProd} object}
 \usage{
-update_biomass(fg = c("Grass", "Shrub", "Tree", "Forb"), use, prod_input,
-  prod_default)
+update_biomass(
+  fg = c("Grass", "Shrub", "Tree", "Forb"),
+  use,
+  prod_input,
+  prod_default
+)
 }
 \arguments{
 \item{fg}{A character string. One of the functional groups represented by

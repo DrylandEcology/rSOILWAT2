@@ -5,9 +5,14 @@
 \title{Conversion: object of class \code{\linkS4class{swWeatherData}} or
 data.frame to \pkg{SOILWAT} input text files}
 \usage{
-dbW_weather_to_SOILWATfiles(path, site.label, weatherData = NULL,
-  weatherDF = NULL, years = NULL, weatherDF_dataColumns = c("DOY",
-  "Tmax_C", "Tmin_C", "PPT_cm"))
+dbW_weather_to_SOILWATfiles(
+  path,
+  site.label,
+  weatherData = NULL,
+  weatherDF = NULL,
+  years = NULL,
+  weatherDF_dataColumns = c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+)
 }
 \description{
 Conversion: object of class \code{\linkS4class{swWeatherData}} or

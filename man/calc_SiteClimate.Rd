@@ -4,9 +4,15 @@
 \alias{calc_SiteClimate}
 \title{Calculate climate variables from daily weather}
 \usage{
-calc_SiteClimate(weatherList, year.start = NA, year.end = NA,
-  do_C4vars = FALSE, do_Cheatgrass_ClimVars = FALSE, simTime2 = NULL,
-  latitude = 90)
+calc_SiteClimate(
+  weatherList,
+  year.start = NA,
+  year.end = NA,
+  do_C4vars = FALSE,
+  do_Cheatgrass_ClimVars = FALSE,
+  simTime2 = NULL,
+  latitude = 90
+)
 }
 \arguments{
 \item{weatherList}{A list. Each element is an object of class

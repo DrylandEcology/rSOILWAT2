@@ -4,8 +4,12 @@
 \alias{dbW_setConnection}
 \title{Registers/connects a SQLite weather database with the package}
 \usage{
-dbW_setConnection(dbFilePath, create_if_missing = FALSE,
-  check_version = FALSE, verbose = FALSE)
+dbW_setConnection(
+  dbFilePath,
+  create_if_missing = FALSE,
+  check_version = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{dbFilePath}{A character string. The weather database file path.}

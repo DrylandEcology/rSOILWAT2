@@ -4,8 +4,11 @@
 \alias{dbW_dataframe_aggregate}
 \title{Aggregate daily weather data.frame to weekly, monthly, or yearly values}
 \usage{
-dbW_dataframe_aggregate(dailySW, time_step = c("Year", "Month", "Week",
-  "Day"), na.rm = FALSE)
+dbW_dataframe_aggregate(
+  dailySW,
+  time_step = c("Year", "Month", "Week", "Day"),
+  na.rm = FALSE
+)
 }
 \description{
 Aggregate daily weather data.frame to weekly, monthly, or yearly values

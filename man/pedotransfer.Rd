@@ -9,11 +9,27 @@
 \title{Pedotransfer functions to convert between soil moisture (volumetric water
 content, \var{VWC}) and soil water potential (\var{SWP})}
 \usage{
-pdf_to_vwc(swp, sand, clay, thetas, psis, b, MPa_toBar = -10,
-  bar_conversion = 1024)
+pdf_to_vwc(
+  swp,
+  sand,
+  clay,
+  thetas,
+  psis,
+  b,
+  MPa_toBar = -10,
+  bar_conversion = 1024
+)
 
-pdf_to_swp(vwc, sand, clay, thetas, psis, b, bar_toMPa = -0.1,
-  bar_conversion = 1024)
+pdf_to_swp(
+  vwc,
+  sand,
+  clay,
+  thetas,
+  psis,
+  b,
+  bar_toMPa = -0.1,
+  bar_conversion = 1024
+)
 
 SWPtoVWC(swp, sand, clay)
 

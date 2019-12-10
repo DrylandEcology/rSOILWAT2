@@ -4,9 +4,14 @@
 \alias{simTiming_ForEachUsedTimeUnit}
 \title{Calculate indices along different time steps for simulation time}
 \usage{
-simTiming_ForEachUsedTimeUnit(useyrs, sim_tscales = c("daily", "weekly",
-  "monthly", "yearly"), use_doy_range = FALSE, doy_ranges = list(),
-  latitude = 90, account_NorthSouth = TRUE)
+simTiming_ForEachUsedTimeUnit(
+  useyrs,
+  sim_tscales = c("daily", "weekly", "monthly", "yearly"),
+  use_doy_range = FALSE,
+  doy_ranges = list(),
+  latitude = 90,
+  account_NorthSouth = TRUE
+)
 }
 \arguments{
 \item{useyrs}{A numeric vector. The ordered vector of simulation years.}

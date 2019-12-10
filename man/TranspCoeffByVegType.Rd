@@ -4,9 +4,14 @@
 \alias{TranspCoeffByVegType}
 \title{Lookup transpiration coefficients}
 \usage{
-TranspCoeffByVegType(tr_input_code, tr_input_coeff, soillayer_no,
-  trco_type, layers_depth, adjustType = c("positive", "inverse",
-  "allToLast"))
+TranspCoeffByVegType(
+  tr_input_code,
+  tr_input_coeff,
+  soillayer_no,
+  trco_type,
+  layers_depth,
+  adjustType = c("positive", "inverse", "allToLast")
+)
 }
 \description{
 Lookup transpiration coefficients for grasses, shrubs, and trees per soil

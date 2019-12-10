@@ -4,8 +4,12 @@
 \alias{impute_df}
 \title{Imputes missing values in a \code{data.frame}}
 \usage{
-impute_df(x, imputation_type = c("none", "mean", "locf"),
-  imputation_span = 5L, cyclic = FALSE)
+impute_df(
+  x,
+  imputation_type = c("none", "mean", "locf"),
+  imputation_span = 5L,
+  cyclic = FALSE
+)
 }
 \arguments{
 \item{x}{A \code{\link{data.frame}} with numerical columns. Imputation

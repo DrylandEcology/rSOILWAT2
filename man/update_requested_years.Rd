@@ -4,8 +4,14 @@
 \alias{update_requested_years}
 \title{Check requested years}
 \usage{
-update_requested_years(start_year, end_year, has_start_year, has_end_year,
-  temp_call = NULL, verbose = FALSE)
+update_requested_years(
+  start_year,
+  end_year,
+  has_start_year,
+  has_end_year,
+  temp_call = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{start_year}{An integer value. The requested first year to extract
