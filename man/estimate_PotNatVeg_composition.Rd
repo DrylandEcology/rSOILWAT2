@@ -5,15 +5,33 @@
 \title{Calculate the composition (land cover) representing a
 potential natural vegetation based on climate relationships}
 \usage{
-estimate_PotNatVeg_composition(MAP_mm, MAT_C, mean_monthly_ppt_mm,
-  mean_monthly_Temp_C, dailyC4vars = NULL, isNorth = TRUE,
-  shrub_limit = 0.2, fix_succulents = FALSE,
-  Succulents_Fraction = NA, fix_annuals = TRUE, Annuals_Fraction = 0,
-  fix_C4grasses = FALSE, C4_Fraction = NA, fix_C3grasses = FALSE,
-  C3_Fraction = NA, fix_shrubs = FALSE, Shrubs_Fraction = NA,
-  fix_forbs = FALSE, Forbs_Fraction = NA, fix_trees = TRUE,
-  Trees_Fraction = 0, fix_BareGround = TRUE, BareGround_Fraction = 0,
-  fill_empty_with_BareGround = TRUE, warn_extrapolation = TRUE)
+estimate_PotNatVeg_composition(
+  MAP_mm,
+  MAT_C,
+  mean_monthly_ppt_mm,
+  mean_monthly_Temp_C,
+  dailyC4vars = NULL,
+  isNorth = TRUE,
+  shrub_limit = 0.2,
+  fix_succulents = FALSE,
+  Succulents_Fraction = NA,
+  fix_annuals = TRUE,
+  Annuals_Fraction = 0,
+  fix_C4grasses = FALSE,
+  C4_Fraction = NA,
+  fix_C3grasses = FALSE,
+  C3_Fraction = NA,
+  fix_shrubs = FALSE,
+  Shrubs_Fraction = NA,
+  fix_forbs = FALSE,
+  Forbs_Fraction = NA,
+  fix_trees = TRUE,
+  Trees_Fraction = 0,
+  fix_BareGround = TRUE,
+  BareGround_Fraction = 0,
+  fill_empty_with_BareGround = TRUE,
+  warn_extrapolation = TRUE
+)
 }
 \arguments{
 \item{MAP_mm}{A numeric value. Mean annual precipitation in millimeter.}

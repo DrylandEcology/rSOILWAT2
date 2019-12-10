@@ -20,11 +20,12 @@
 
 .onAttach <- function(library, pkgname) {
   if (interactive())  {
-    meta <- utils::packageDescription(pkgname)
-    packageStartupMessage("Package ", shQuote(pkgname), " v", meta$Version,
-      " (", meta$Date, ") attached/loaded.")
-    packageStartupMessage("Daily weather database version ",
-      rSW2_glovars$dbW_version)
+    packageStartupMessage(
+      "Package ", shQuote(pkgname),
+      " v", utils::packageVersion(pkgname),
+      " (daily weather database v", rSW2_glovars$dbW_version, ")",
+      " attached/loaded."
+    )
   }
 
   invisible()

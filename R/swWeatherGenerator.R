@@ -690,7 +690,7 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
       }
 
     } else {
-      plot.new()
+      graphics::plot.new()
     }
   }
 
@@ -765,7 +765,7 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
       }
 
     } else {
-      plot.new()
+      graphics::plot.new()
     }
   }
 
@@ -842,7 +842,7 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
         }
 
       } else {
-        plot.new()
+        graphics::plot.new()
       }
     }
 

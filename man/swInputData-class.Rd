@@ -443,8 +443,7 @@
 
 \S4method{swProd_CO2Coefficients}{swInputData}(object) <- value
 
-\S4method{swProd_MonProd_veg}{swInputData,ANY,ANY}(object,
-  vegtype) <- value
+\S4method{swProd_MonProd_veg}{swInputData,ANY,ANY}(object, vegtype) <- value
 
 \S4method{swProd_MonProd_grass}{swInputData}(object) <- value
 

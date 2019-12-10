@@ -4,8 +4,11 @@
 \alias{seq_month_ofeach_day}
 \title{The sequence of month numbers for each day in the period from - to}
 \usage{
-seq_month_ofeach_day(from = list(year = 1900, month = 1, day = 1),
-  to = list(year = 1900, month = 12, day = 31), tz = "UTC")
+seq_month_ofeach_day(
+  from = list(year = 1900, month = 1, day = 1),
+  to = list(year = 1900, month = 12, day = 31),
+  tz = "UTC"
+)
 }
 \description{
 The sequence of month numbers for each day in the period from - to

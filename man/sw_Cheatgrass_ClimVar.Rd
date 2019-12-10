@@ -5,8 +5,11 @@
 \title{Calculate climate variables required to estimate percent cheatgrass cover
 in North America}
 \usage{
-sw_Cheatgrass_ClimVar(monthlyPPT_cm, monthlyTempMean_C = NULL,
-  monthlyTempMin_C = NULL)
+sw_Cheatgrass_ClimVar(
+  monthlyPPT_cm,
+  monthlyTempMean_C = NULL,
+  monthlyTempMin_C = NULL
+)
 }
 \arguments{
 \item{monthlyPPT_cm}{A numeric matrix of monthly precipitation values in

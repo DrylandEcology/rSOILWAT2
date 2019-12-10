@@ -10,13 +10,17 @@
 \alias{backup_copy}
 \title{Weather database upgrade functions}
 \usage{
-dbW_upgrade_to_rSOILWAT2(dbWeatherDataFile, fbackup = NULL,
-  check_all = FALSE, with_resume = TRUE, clean_cache = TRUE)
+dbW_upgrade_to_rSOILWAT2(
+  dbWeatherDataFile,
+  fbackup = NULL,
+  check_all = FALSE,
+  with_resume = TRUE,
+  clean_cache = TRUE
+)
 
 dbW_upgrade_v31to32(dbWeatherDataFile, fbackup = NULL)
 
-dbW_upgrade_v3to31(dbWeatherDataFile, fbackup = NULL,
-  type_new = "gzip")
+dbW_upgrade_v3to31(dbWeatherDataFile, fbackup = NULL, type_new = "gzip")
 
 dbW_upgrade_v2to3(dbWeatherDataFile, fbackup = NULL)
 

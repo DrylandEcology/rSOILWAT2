@@ -5,8 +5,13 @@
 \title{Extract table keys to connect sites with weather data in the registered
 weather database}
 \usage{
-dbW_getSiteId(lat = NULL, long = NULL, Labels = NULL,
-  ignore.case = FALSE, verbose = FALSE)
+dbW_getSiteId(
+  lat = NULL,
+  long = NULL,
+  Labels = NULL,
+  ignore.case = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{lat}{A numeric vector or \code{NULL}. The latitude in decimal degrees
