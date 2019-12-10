@@ -280,18 +280,51 @@ test_that("dbW weather data manipulation", {
     long = site_data1[3, "Longitude"], weatherData = sw_weather[[2]],
     Scenario = scenarios[2]))
 
-  # Check presence of weather data
-  expect_true(dbW_has_weatherData(Site_ids = 1, Scenario_ids = 1))
-  expect_equal(as.vector(dbW_has_weatherData(Site_ids = 1, Scenario_ids = 1:2)),
-    c(TRUE, TRUE))
-  expect_equal(as.vector(dbW_has_weatherData(Site_ids = 1, Scenario_ids = 1:3)),
-    c(TRUE, TRUE, FALSE))
-  res_exp <- matrix(c(TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, rep(FALSE, 6)),
-    nrow = 3, ncol = 4, dimnames = list(paste("Site", 1:3, sep = "_"),
-    paste("Scenario", 1:4, sep = "_")))
-  expect_equal(dbW_has_weatherData(Site_ids = 1:3, Scenario_ids = 1:4), res_exp)
+  #--- Check presence of weather data
+  # Check one site x one scenario
+  expect_true(
+    dbW_has_weatherData(Site_ids = 1, Scenario_ids = 1)
+  )
 
-  # Retrieve weather data
+  # Check one site x multiple scenarios
+  expect_equal(
+    as.vector(dbW_has_weatherData(Site_ids = 1, Scenario_ids = 1:2)),
+    c(TRUE, TRUE)
+  )
+
+  expect_equal(
+    as.vector(dbW_has_weatherData(Site_ids = 1, Scenario_ids = 1:3)),
+    c(TRUE, TRUE, FALSE)
+  )
+
+  # Check multiple sites x one scenario
+  expect_equal(
+    as.vector(dbW_has_weatherData(Site_ids = 1:2, Scenario_ids = 1)),
+    c(TRUE, TRUE)
+  )
+
+  expect_equal(
+    as.vector(dbW_has_weatherData(Site_ids = c(1:2, 4), Scenario_ids = 1)),
+    c(TRUE, TRUE, FALSE)
+  )
+
+
+  # Check multiple sites x multiple scenarios
+  res_exp <- matrix(
+    c(TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, rep(FALSE, 6)),
+    nrow = 3,
+    ncol = 4,
+    dimnames = list(
+      paste("Site", 1:3, sep = "_"),
+      paste("Scenario", 1:4, sep = "_")
+    )
+  )
+  expect_equal(
+    dbW_has_weatherData(Site_ids = 1:3, Scenario_ids = 1:4),
+    res_exp
+  )
+
+  #--- Retrieve weather data
   expect_equal(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[1]),
     sw_weather[[1]])
   expect_equal(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[2]),
