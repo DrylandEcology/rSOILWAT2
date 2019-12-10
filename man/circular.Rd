@@ -7,8 +7,7 @@
 \alias{circ_sd}
 \title{Functions for circular descriptive statistics}
 \usage{
-circ_mean(x, int, type = c("minusPiPlusPi", "ZeroPlus2Pi"),
-  na.rm = FALSE)
+circ_mean(x, int, type = c("minusPiPlusPi", "ZeroPlus2Pi"), na.rm = FALSE)
 
 circ_range(x, int, na.rm = FALSE)
 

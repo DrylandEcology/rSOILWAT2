@@ -5,8 +5,13 @@
 \title{Adjust biomass phenology by pattern of growing/non-growing seasons to
 site-specific climatic conditions}
 \usage{
-adjBiom_by_temp(x, mean_monthly_temp_C, growing_limit_C = 4,
-  reference_growing_season = 3:10, isNorth = TRUE)
+adjBiom_by_temp(
+  x,
+  mean_monthly_temp_C,
+  growing_limit_C = 4,
+  reference_growing_season = 3:10,
+  isNorth = TRUE
+)
 }
 \arguments{
 \item{x}{A two-dimensional object or a list of such objects. Rows of each
