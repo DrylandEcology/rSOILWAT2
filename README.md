@@ -273,9 +273,11 @@ if the `SOILWAT2` updated included changes to the input files.
 
 We attempt to follow guidelines of [semantic versioning](http://semver.org/)
 with version numbers of `MAJOR.MINOR.PATCH`.
-If the version numbers changes, then the following files must be updated
-* `DESCRIPTION``: adjust lines 'Version' and 'Date'
-* optionally, `R/zzz.R`: adjust package startup message in function `.onAttach`
+
+When the version numbers changes, then the package `DESCRIPTION` file
+must be adjusted as well
+(i.e., update 'Version' in the last commit before PR into master
+which will be the new release/version).
 
 ### How to contribute
 You can help us in different ways:
