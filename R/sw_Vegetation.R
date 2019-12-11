@@ -1001,12 +1001,8 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp) {
 
         tmp <- low_surroundings > res2
 
-        # periodic running median with window = 3 (see ?runmed)
-        ids_res_low <- c(
-          median(tmp[c(12, 1:2)]),
-          apply(stats::embed(tmp, 3), 1, median),
-          median(tmp[c(11:12, 1)])
-        )
+        # periodic running median with window = 3
+        ids_res_low <- moving_function(tmp, 3, median, circular = TRUE)
       }
 
       # Zap low values to zero
