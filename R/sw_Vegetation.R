@@ -1236,20 +1236,29 @@ estimate_PotNatVeg_biomass <- function(tr_VegBiom,
 
   # adjust phenology for mean monthly temperatures
   if (do_adjBiom_by_temp) {
-    x <- adjBiom_by_temp(x, mean_monthly_temp_C, growing_limit_C, isNorth)
+    x <- adjBiom_by_temp(
+      x = x,
+      mean_monthly_temp_C = mean_monthly_temp_C,
+      growing_limit_C = growing_limit_C,
+      isNorth = isNorth
+    )
   }
 
   # if (do_adjBiom_by_ppt) then adjust biomass amounts by productivity
   # relationship with MAP
-  temp <- adjBiom_by_ppt(
-    x[["biom_shrubs"]], x[["biom_C3"]], x[["biom_C4"]], x[["biom_annuals"]],
+  x <- adjBiom_by_ppt(
+    biom_shrubs = x[["biom_shrubs"]],
+    biom_C3 = x[["biom_C3"]],
+    biom_C4 = x[["biom_C4"]],
+    biom_annuals = x[["biom_annuals"]],
     biom_maxs = colmax,
     map_mm_shrubs = if (do_adjBiom_by_ppt) MAP_mm else StandardShrub_MAP_mm,
     map_mm_std_shrubs = StandardShrub_MAP_mm,
     map_mm_grasses = if (do_adjBiom_by_ppt) MAP_mm else StandardGrasses_MAP_mm,
     map_mm_std_grasses = StandardGrasses_MAP_mm,
     vegcomp_std_shrubs = StandardShrub_VegComposition,
-    vegcomp_std_grass = StandardGrasses_VegComposition)
+    vegcomp_std_grass = StandardGrasses_VegComposition
+  )
 
   biom_grasses <-
     x[["biom_C3"]] * fgrass_c3c4ann[1] +
