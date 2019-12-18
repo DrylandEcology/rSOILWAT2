@@ -15,7 +15,7 @@ install:
 # Adapt as necessary starting from here
 environment:
   USE_RTOOLS: true
-  WARNINGS_ARE_ERRORS: false
+  WARNINGS_ARE_ERRORS:
   R_REMOTES_STANDALONE: true
   matrix:
     - R_VERSION: release
