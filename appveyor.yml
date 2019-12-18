@@ -15,8 +15,8 @@ install:
 # Adapt as necessary starting from here
 environment:
   USE_RTOOLS: true
-  global:
-    WARNINGS_ARE_ERRORS: false
+  WARNINGS_ARE_ERRORS: false
+  R_REMOTES_STANDALONE: true
   matrix:
     - R_VERSION: release
       R_ARCH: i386
