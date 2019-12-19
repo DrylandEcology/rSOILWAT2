@@ -1211,12 +1211,18 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #'
 #' @export
 estimate_PotNatVeg_biomass <- function(tr_VegBiom,
-  do_adjBiom_by_temp = FALSE, do_adjBiom_by_ppt = FALSE,
-  fgrass_c3c4ann = c(1, 0, 0), growing_limit_C = 4, isNorth = TRUE,
+  do_adjBiom_by_temp = FALSE,
+  do_adjBiom_by_ppt = FALSE,
+  fgrass_c3c4ann = c(1, 0, 0),
+  growing_limit_C = 4,
+  isNorth = TRUE,
   MAP_mm = 450,
-  mean_monthly_temp_C = c(rep(growing_limit_C - 1, 2),
+  mean_monthly_temp_C = c(
+    rep(growing_limit_C - 1, 2),
     rep(growing_limit_C + 1, 8),
-    rep(growing_limit_C - 1, 2))) {
+    rep(growing_limit_C - 1, 2)
+  )
+) {
 
   # Default shrub biomass input is at MAP = 450 mm/yr, and default grass
   # biomass input is at MAP = 340 mm/yr
@@ -1229,43 +1235,57 @@ estimate_PotNatVeg_biomass <- function(tr_VegBiom,
   StandardShrub_VegComposition <- c(0.7, 0.3, 0) # shrubs, C3, and C4
 
   #Calculate 'live biomass amount'
-  tr_VegBiom$Sh.Amount.Live <- tr_VegBiom$Sh.Biomass * tr_VegBiom$Sh.Perc.Live
-  tr_VegBiom$C3.Amount.Live <- tr_VegBiom$C3.Biomass * tr_VegBiom$C3.Perc.Live
-  tr_VegBiom$C4.Amount.Live <- tr_VegBiom$C4.Biomass * tr_VegBiom$C4.Perc.Live
-  tr_VegBiom$Annual.Amount.Live <- tr_VegBiom$Annual.Biomass *
-    tr_VegBiom$Annual.Perc.Live
+  vtypes <- c("Sh", "C3", "C4", "Annual")
+  for (vt in vtypes) {
+    tr_VegBiom[, paste0(vt, ".Amount.Live")] <-
+      tr_VegBiom[, paste0(vt, ".Biomass")] *
+      tr_VegBiom[, paste0(vt, ".Perc.Live")]
+  }
 
   # Scale monthly values of litter and live biomass amount by column-max;
   # total biomass will be back calculated
-  itemp <- grepl("Litter", names(tr_VegBiom)) |
-    grepl("Amount.Live", names(tr_VegBiom))
+  ns_VegBiom <- names(tr_VegBiom)
+  itemp <- grepl("(Litter)|(Amount.Live)", ns_VegBiom)
   colmax <- apply(tr_VegBiom[, itemp], MARGIN = 2, FUN = max)
-  tr_VegBiom[, itemp] <- sweep(tr_VegBiom[, itemp], MARGIN = 2,
-    STATS = colmax, FUN = "/")
+  tr_VegBiom[, itemp] <- sweep(
+    x = tr_VegBiom[, itemp],
+    MARGIN = 2,
+    STATS = colmax,
+    FUN = "/"
+  )
 
   # Pull vegetation types
   x <- list()
-  x[["biom_shrubs"]] <- tr_VegBiom[, grepl("Sh", names(tr_VegBiom))]
-  x[["biom_C3"]] <- tr_VegBiom[, grepl("C3", names(tr_VegBiom))]
-  x[["biom_C4"]] <- tr_VegBiom[, grepl("C4", names(tr_VegBiom))]
-  x[["biom_annuals"]] <- tr_VegBiom[, grepl("Annual", names(tr_VegBiom))]
+  x[["biom_shrubs"]] <- tr_VegBiom[, grepl("Sh", ns_VegBiom)]
+  x[["biom_C3"]] <- tr_VegBiom[, grepl("C3", ns_VegBiom)]
+  x[["biom_C4"]] <- tr_VegBiom[, grepl("C4", ns_VegBiom)]
+  x[["biom_annuals"]] <- tr_VegBiom[, grepl("Annual", ns_VegBiom)]
 
   # adjust phenology for mean monthly temperatures
   if (do_adjBiom_by_temp) {
-    x <- adjBiom_by_temp(x, mean_monthly_temp_C, growing_limit_C, isNorth)
+    x <- adjBiom_by_temp(
+      x = x,
+      mean_monthly_temp_C = mean_monthly_temp_C,
+      growing_limit_C = growing_limit_C,
+      isNorth = isNorth
+    )
   }
 
   # if (do_adjBiom_by_ppt) then adjust biomass amounts by productivity
   # relationship with MAP
-  temp <- adjBiom_by_ppt(
-    x[["biom_shrubs"]], x[["biom_C3"]], x[["biom_C4"]], x[["biom_annuals"]],
+  x <- adjBiom_by_ppt(
+    biom_shrubs = x[["biom_shrubs"]],
+    biom_C3 = x[["biom_C3"]],
+    biom_C4 = x[["biom_C4"]],
+    biom_annuals = x[["biom_annuals"]],
     biom_maxs = colmax,
     map_mm_shrubs = if (do_adjBiom_by_ppt) MAP_mm else StandardShrub_MAP_mm,
     map_mm_std_shrubs = StandardShrub_MAP_mm,
     map_mm_grasses = if (do_adjBiom_by_ppt) MAP_mm else StandardGrasses_MAP_mm,
     map_mm_std_grasses = StandardGrasses_MAP_mm,
     vegcomp_std_shrubs = StandardShrub_VegComposition,
-    vegcomp_std_grass = StandardGrasses_VegComposition)
+    vegcomp_std_grass = StandardGrasses_VegComposition
+  )
 
   biom_grasses <-
     x[["biom_C3"]] * fgrass_c3c4ann[1] +
@@ -1273,15 +1293,19 @@ estimate_PotNatVeg_biomass <- function(tr_VegBiom,
     x[["biom_annuals"]] * fgrass_c3c4ann[3]
 
   cn <- dimnames(biom_grasses)[[2]]
-  cn <- sapply(strsplit(cn, split = ".", fixed = TRUE),
-    function(x) paste0(x[-1], collapse = "."))
+  cn <- sapply(
+    strsplit(cn, split = ".", fixed = TRUE),
+    function(x) paste0(x[-1], collapse = ".")
+  )
   dimnames(biom_grasses)[[2]] <- cn
 
   biom_shrubs <- x[["biom_shrubs"]]
   dimnames(biom_shrubs)[[2]] <- cn
 
-  list(grass = as.matrix(biom_grasses),
-       shrub = as.matrix(biom_shrubs))
+  list(
+    grass = as.matrix(biom_grasses),
+    shrub = as.matrix(biom_shrubs)
+  )
 }
 
 #' Lookup transpiration coefficients
