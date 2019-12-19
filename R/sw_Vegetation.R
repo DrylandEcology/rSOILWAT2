@@ -748,6 +748,33 @@ get_season_description_v2 <- function(x) {
 }
 
 
+# Smoothed representation of outcome as linear combination of lower/upper bounds
+fix_optimized_seasonality <- function(vals, lower, upper, is_res_zero) {
+  lc <- cbind(vals / lower, vals / upper)
+  itmp <- abs(lc[, 1] - 1) < rSW2_glovars[["tol"]]
+  lc[itmp, 1] <- 2
+  lc[itmp, 2] <- 0
+  itmp <- abs(lc[, 2] - 1) < rSW2_glovars[["tol"]]
+  lc[itmp, 1] <- 0
+  lc[itmp, 2] <- 2
+  lc[is_res_zero, ] <- 0
+
+  lc2 <- apply(
+    X = lc / 2,
+    MARGIN = 2,
+    FUN = rSW2utils::moving_function,
+    k = 2,
+    win_fun = mean,
+    na.rm = TRUE,
+    circular = TRUE
+  )
+
+  lc2[is_res_zero, ] <- 0
+
+  lower * lc2[, 1] + upper * lc2[, 2]
+}
+
+
 #' Adjust a phenological pattern to a different temperature regime
 #'
 #' Extract the characteristics of seasonal (mean monthly) values of biomass,
@@ -1041,8 +1068,11 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp) {
     # as good as possible
     tmp <- try(stats::optim(
       par = res5,
-      fn = function(res, cor_ref = rho_ref) {
-        abs(cor_ref - cor(res, target_temp))
+      fn = function(res, cor_ref = rho_ref,
+        llimit = lower, ulimit = upper, zeros = is_res_zero) {
+
+        tmp <- fix_optimized_seasonality(res, llimit, ulimit, zeros)
+        abs(cor_ref - cor(tmp, target_temp))
       },
       method = "L-BFGS-B",
       lower = lower,
@@ -1051,10 +1081,15 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp) {
       silent = TRUE
     )
 
-    res5 <- if (inherits(tmp, "try-error")) res5 else tmp
+    res5 <- if (inherits(tmp, "try-error")) {
+      res5
+    } else {
+      fix_optimized_seasonality(tmp, lower, upper, is_res_zero)
+    }
 
     # Zap back to zero if needed
     res5 <- ifelse(is_res_zero, 0, res5)
+
   }
 
 
