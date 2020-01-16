@@ -15,6 +15,8 @@ estimate_PotNatVeg_composition(
   shrub_limit = 0.2,
   fix_succulents = FALSE,
   Succulents_Fraction = NA,
+  fix_sumgrasses = FALSE,
+  SumGrasses_Fraction = NA,
   fix_annuals = TRUE,
   Annuals_Fraction = 0,
   fix_C4grasses = FALSE,
@@ -68,11 +70,19 @@ calculated from climatic relationships.}
 \item{Succulents_Fraction}{A numeric value between 0 and 1. \code{NA} is
 treated as if \code{fix_succulents} is \code{FALSE}.}
 
+\item{fix_sumgrasses}{A logical value. If \code{TRUE}, then the summed
+values of the three grass types, i.e., annuals, C3, and C4 grasses,
+is fixed at \code{SumGrasses_Fraction}. If they are not fixed themselves,
+then their values are estimated and scaled to sum to
+\code{SumGrasses_Fraction}.}
+
+\item{SumGrasses_Fraction}{A numeric value between 0 and 1.
+\code{NA} is treated as if \code{fix_sumgrasses} is \code{FALSE}.}
+
 \item{fix_annuals}{A logical value. If \code{TRUE}, then value for the annual
 component is fixed at \code{Annuals_Fraction}.}
 
-\item{Annuals_Fraction}{A numeric value. Default value is 0. A value between
-0 and 1.}
+\item{Annuals_Fraction}{A numeric value between 0 and 1. Default value is 0.}
 
 \item{fix_C4grasses}{A logical value. If \code{TRUE}, then value for the
 C4-grass component is fixed at \code{C4_Fraction} instead of calculated
@@ -98,20 +108,18 @@ as if \code{fix_shrubs} is \code{FALSE}.}
 \item{fix_forbs}{A logical value. If \code{TRUE}, then value for the forb
 component is fixed at \code{Forbs_Fraction}.}
 
-\item{Forbs_Fraction}{A numeric value. Default value is 0. A value between 0
-and 1.}
+\item{Forbs_Fraction}{A numeric value between 0 and 1. Default value is 0.}
 
 \item{fix_trees}{A logical value. If \code{TRUE}, then value for the tree
-component is fixed at \code{Forbs_Fraction}.}
+component is fixed at \code{Trees_Fraction}.}
 
-\item{Trees_Fraction}{A numeric value. Default value is 0. A value between 0
-and 1.}
+\item{Trees_Fraction}{A numeric value between 0 and 1. Default value is 0.}
 
 \item{fix_BareGround}{A logical value. If \code{TRUE}, then value for the
 bare ground component is fixed at \code{BareGround_Fraction}.}
 
-\item{BareGround_Fraction}{A numeric value. Default value is 0. A value
-between 0 and 1.}
+\item{BareGround_Fraction}{A numeric value between 0 and 1.
+Default value is 0.}
 
 \item{fill_empty_with_BareGround}{A logical value. If \code{TRUE}, then
 incomplete land cover is considered (additional) bare-ground. If
@@ -187,14 +195,16 @@ clim2 <- calc_SiteClimate(weatherList = weatherData, do_C4vars = TRUE)
 estimate_PotNatVeg_composition(
   MAP_mm = 10 * clim1[["MAP_cm"]], MAT_C = clim1[["MAT_C"]],
   mean_monthly_ppt_mm = 10 * clim1[["meanMonthlyPPTcm"]],
-  mean_monthly_Temp_C = clim1[["meanMonthlyTempC"]])
+  mean_monthly_Temp_C = clim1[["meanMonthlyTempC"]]
+)
 
 ## Climate is outside supported range with MAT < 0 C:
 estimate_PotNatVeg_composition(
   MAP_mm = 10 * clim1[["MAP_cm"]],
   MAT_C = clim1[["MAT_C"]] - clim1[["MAT_C"]],
   mean_monthly_ppt_mm = 10 * clim1[["meanMonthlyPPTcm"]],
-  mean_monthly_Temp_C = clim1[["meanMonthlyTempC"]] - clim1[["MAT_C"]])
+  mean_monthly_Temp_C = clim1[["meanMonthlyTempC"]] - clim1[["MAT_C"]]
+)
 
 ## Some land cover types are fixed and others are estimated, and
 ## the C4-grass adjustment is used:
@@ -204,7 +214,19 @@ estimate_PotNatVeg_composition(
   mean_monthly_Temp_C = clim2[["meanMonthlyTempC"]],
   dailyC4vars = clim2[["dailyC4vars"]],
   fix_shrubs = TRUE, Shrubs_Fraction = 0.5,
-  fix_BareGround = TRUE, BareGround_Fraction = 0.25)
+  fix_BareGround = TRUE, BareGround_Fraction = 0.25
+)
+
+## Fix total grass cover and annual grass cover,
+## but estimate relative proportions of C3 and C4 grasses:
+estimate_PotNatVeg_composition(
+  MAP_mm = 10 * clim2[["MAP_cm"]], MAT_C = clim2[["MAT_C"]],
+  mean_monthly_ppt_mm = 10 * clim2[["meanMonthlyPPTcm"]],
+  mean_monthly_Temp_C = clim2[["meanMonthlyTempC"]],
+  dailyC4vars = clim2[["dailyC4vars"]],
+  fix_sumgrasses = TRUE, SumGrasses_Fraction = 0.8,
+  fix_annuals = TRUE, Annuals_Fraction = 0.3
+)
 
 }
 \references{
