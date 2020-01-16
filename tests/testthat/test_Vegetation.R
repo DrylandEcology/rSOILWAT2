@@ -2,9 +2,13 @@ context("Vegetation functions")
 
 # Inputs
 data("weatherData", package = "rSOILWAT2")
-clim <- calc_SiteClimate(weatherList = weatherData,
-  year.start = 1949, year.end = 2010,
-  do_C4vars = FALSE, simTime2 = NULL)
+clim <- calc_SiteClimate(
+  weatherList = weatherData,
+  year.start = 1949,
+  year.end = 2010,
+  do_C4vars = FALSE,
+  simTime2 = NULL
+)
 
 # Tests
 test_that("Vegetation: estimate land cover composition", {
@@ -60,10 +64,12 @@ test_that("Vegetation: estimate land cover composition", {
 
   expect_silent(
     pnv <- estimate_PotNatVeg_composition(
-      MAP_mm = 10 * clim[["MAP_cm"]], MAT_C = clim[["MAT_C"]],
+      MAP_mm = 10 * clim[["MAP_cm"]],
+      MAT_C = clim[["MAT_C"]],
       mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
-      mean_monthly_Temp_C = clim[["meanMonthlyTempC"]])
+      mean_monthly_Temp_C = clim[["meanMonthlyTempC"]]
     )
+  )
 
   expect_pnv(pnv)
   expect_equal(pnv, pnv0_expected)
@@ -80,11 +86,13 @@ test_that("Vegetation: estimate land cover composition", {
 
   expect_silent(
     pnv <- estimate_PotNatVeg_composition(
-      MAP_mm = 10 * clim[["MAP_cm"]], MAT_C = clim[["MAT_C"]],
+      MAP_mm = 10 * clim[["MAP_cm"]],
+      MAT_C = clim[["MAT_C"]],
       mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
       mean_monthly_Temp_C = clim[["meanMonthlyTempC"]],
       fix_shrubs = TRUE, Shrubs_Fraction = Shrubs_Fraction,
-      fix_BareGround = TRUE, BareGround_Fraction = BareGround_Fraction)
+      fix_BareGround = TRUE, BareGround_Fraction = BareGround_Fraction
+    )
   )
 
   expect_pnv(pnv)
@@ -94,21 +102,51 @@ test_that("Vegetation: estimate land cover composition", {
   expect_equal(sum(pnv[["Rel_Abundance_L0"]][[ibar]]), BareGround_Fraction)
 
 
+  #--- Fix total grass cover and annual grass cover,
+  # but estimate relative proportions of C3 and C4 grasses:
+  SumGrasses_Fraction <- 0.8
+  Annuals_Fraction <- 0.3
+
+  expect_silent(
+    pnv <- estimate_PotNatVeg_composition(
+      MAP_mm = 10 * clim[["MAP_cm"]],
+      MAT_C = clim[["MAT_C"]],
+      mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
+      mean_monthly_Temp_C = clim[["meanMonthlyTempC"]],
+      dailyC4vars = clim[["dailyC4vars"]],
+      fix_sumgrasses = TRUE, SumGrasses_Fraction = SumGrasses_Fraction,
+      fix_annuals = TRUE, Annuals_Fraction = 0.3
+    )
+  )
+
+  expect_pnv(pnv)
+
+  # The fixed types retained their input values
+  expect_equal(sum(pnv[["Rel_Abundance_L0"]][[igan]]), Annuals_Fraction)
+  expect_equal(
+    sum(pnv[["Rel_Abundance_L1"]][["SW_GRASS"]]),
+    SumGrasses_Fraction
+  )
+
+
   #--- The function `estimate_PotNatVeg_composition` can fail under a few
   # situations:
   # (i) fixed sum is more than 1
   expect_error(
     estimate_PotNatVeg_composition(
-      MAP_mm = 0, MAT_C = 0,
+      MAP_mm = 0,
+      MAT_C = 0,
       mean_monthly_ppt_mm = rep(0, 12),
       mean_monthly_Temp_C = rep(0, 12),
-      fix_succulents = TRUE, Succulents_Fraction = 10)
+      fix_succulents = TRUE, Succulents_Fraction = 10
+    )
   )
 
   # (ii) all fixed but sum is less than 1 and !fill_empty_with_BareGround
   expect_error(
     estimate_PotNatVeg_composition(
-      MAP_mm = 0, MAT_C = 0,
+      MAP_mm = 0,
+      MAT_C = 0,
       mean_monthly_ppt_mm = rep(0, 12),
       mean_monthly_Temp_C = rep(0, 12),
       fix_succulents = TRUE, Succulents_Fraction = 0,
@@ -119,7 +157,8 @@ test_that("Vegetation: estimate land cover composition", {
       fix_forbs = TRUE, Forbs_Fraction = 0,
       fix_trees = TRUE, Trees_Fraction = 0,
       fix_BareGround = TRUE, BareGround_Fraction = 0,
-      fill_empty_with_BareGround = FALSE)
+      fill_empty_with_BareGround = FALSE
+    )
   )
 
   # converted from error into warning:
@@ -127,17 +166,20 @@ test_that("Vegetation: estimate land cover composition", {
   # is fixed
   expect_warning(
     estimate_PotNatVeg_composition(
-      MAP_mm = 900, MAT_C = -10,
+      MAP_mm = 900,
+      MAT_C = -10,
       mean_monthly_ppt_mm = c(0, 0, rep(100, 9), 0),
       mean_monthly_Temp_C = rep(-10, 12),
-      fill_empty_with_BareGround = FALSE)
+      fill_empty_with_BareGround = FALSE
+    )
   )
 
   # The last errors are avoided if `fill_empty_with_BareGround = TRUE`
   # and bare-ground is not fixed; we get 100% bare-ground cover
   expect_silent(
     pnv <- estimate_PotNatVeg_composition(
-      MAP_mm = 0, MAT_C = 0,
+      MAP_mm = 0,
+      MAT_C = 0,
       mean_monthly_ppt_mm = rep(0, 12),
       mean_monthly_Temp_C = rep(0, 12),
       fix_succulents = TRUE, Succulents_Fraction = 0,
@@ -147,7 +189,8 @@ test_that("Vegetation: estimate land cover composition", {
       fix_shrubs = TRUE, Shrubs_Fraction = 0,
       fix_forbs = TRUE, Forbs_Fraction = 0,
       fix_trees = TRUE, Trees_Fraction = 0,
-      fix_BareGround = FALSE, fill_empty_with_BareGround = TRUE)
+      fix_BareGround = FALSE, fill_empty_with_BareGround = TRUE
+    )
   )
 
   expect_pnv(pnv[1:2])
