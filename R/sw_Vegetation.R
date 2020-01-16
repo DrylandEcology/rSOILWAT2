@@ -57,8 +57,9 @@
 #'   treated as if \code{fix_succulents} is \code{FALSE}.
 #' @param fix_sumgrasses A logical value. If \code{TRUE}, then the summed
 #'   values of the three grass types, i.e., annuals, C3, and C4 grasses,
-#'   is fixed at \code{SumGrasses_Fraction}. If they are not fixed, then their
-#'   values are estimated and scaled to sum to \code{SumGrasses_Fraction}.
+#'   is fixed at \code{SumGrasses_Fraction}. If they are not fixed themselves,
+#'   then their values are estimated and scaled to sum to
+#'   \code{SumGrasses_Fraction}.
 #' @param SumGrasses_Fraction A numeric value between 0 and 1.
 #'   \code{NA} is treated as if \code{fix_sumgrasses} is \code{FALSE}.
 #' @param fix_annuals A logical value. If \code{TRUE}, then value for the annual
@@ -83,7 +84,7 @@
 #'   component is fixed at \code{Forbs_Fraction}.
 #' @param Forbs_Fraction A numeric value between 0 and 1. Default value is 0.
 #' @param fix_trees A logical value. If \code{TRUE}, then value for the tree
-#'   component is fixed at \code{Forbs_Fraction}.
+#'   component is fixed at \code{Trees_Fraction}.
 #' @param Trees_Fraction A numeric value between 0 and 1. Default value is 0.
 #' @param fix_BareGround A logical value. If \code{TRUE}, then value for the
 #'   bare ground component is fixed at \code{BareGround_Fraction}.
