@@ -27,11 +27,25 @@ expect_within <- function(object, expected, ..., info = NULL,
   lte <- rexp[2] - robj[2] >= -tol
   within <- gte & lte
 
-  expect_equivalent(within, TRUE, info = paste(info,
-    if (!gte) paste("min =", signif(robj[2], digits_N),
-      "smaller than expected", signif(rexp[1], digits_N)),
-    if (!lte) paste("max =", signif(robj[2], digits_N),
-      "larger than expected", signif(rexp[2], digits_N))))
+  expect_equivalent(within, TRUE,
+    info = paste(
+      info,
+      if (!gte) {
+        paste(
+          "min =",
+          signif(robj[2], digits_N),
+          "smaller than expected", signif(rexp[1], digits_N)
+        )
+      },
+      if (!lte) {
+        paste(
+          "max =",
+          signif(robj[2], digits_N),
+          "larger than expected", signif(rexp[2], digits_N)
+        )
+      }
+    )
+  )
 }
 
 
@@ -53,17 +67,25 @@ for (it in tests) {
     # Markov-weather generator is turned on to fill in missing weather data
     # see `data-raw/prepare_testInput_objects.R`
     weather_extremes <- data.frame(
-      Tmax_C = c(-Tmax, Tmax), Tmin_C = c(-Tmax, Tmax), PPT_cm = c(0, H2Omax))
+      Tmax_C = c(-Tmax, Tmax),
+      Tmin_C = c(-Tmax, Tmax),
+      PPT_cm = c(0, H2Omax)
+    )
   } else {
     nid <- 1:2
     temp <- dbW_weatherData_to_dataframe(sw_weather)[, -nid]
     weather_extremes <- apply(temp, 2, range)
   }
 
-  var_limits2 <- data.frame(matrix(NA, nrow = 0, ncol = 2,
-    dimnames = list(NULL, c("min", "max"))))
-  var_limits2["TEMP", ] <- c(max(-Tmax, weather_extremes[1, "Tmin_C"]),
-    min(Tmax, weather_extremes[2, "Tmax_C"]))
+  var_limits2 <- data.frame(matrix(NA,
+    nrow = 0,
+    ncol = 2,
+    dimnames = list(NULL, c("min", "max"))
+  ))
+  var_limits2["TEMP", ] <- c(
+    max(-Tmax, weather_extremes[1, "Tmin_C"]),
+    min(Tmax, weather_extremes[2, "Tmax_C"])
+  )
   var_limits2["SOILTEMP", ] <- c(-Tmax, Tmax)
   var_limits2["PRECIP", ] <- c(0, min(H2Omax, weather_extremes[2, "PPT_cm"]))
   var_limits2["SOILINFT", ] <- c(0, H2Omax)
@@ -77,8 +99,11 @@ for (it in tests) {
   var_limits2["CO2EFFECTS", ] <- c(0, Inf)
   var_limits2["BIOMASS", ] <- c(0, Inf)
 
-  tempSL <- data.frame(matrix(NA, nrow = layer_N, ncol = 2,
-    dimnames = list(NULL, c("min", "max"))))
+  tempSL <- data.frame(matrix(NA,
+    nrow = layer_N,
+    ncol = 2,
+    dimnames = list(NULL, c("min", "max"))
+  ))
 
   var_limitsSL <- list()
 
@@ -109,32 +134,44 @@ for (it in tests) {
     expect_equivalent(
       dbW_dataframe_to_monthly(dbW_df_day),
       dbW_weatherData_to_monthly(sw_weather),
-      info = info1)
+      info = info1
+    )
 
     if (anyNA(dbW_df_day)) {
       expect_equivalent(
         dbW_dataframe_to_monthly(dbW_df_day, na.rm = TRUE),
         dbW_weatherData_to_monthly(sw_weather, na.rm = TRUE),
-        info = info1)
+        info = info1
+      )
     }
   })
 
   test_that("Simulate and aggregate", {
     # Run SOILWAT
-    rd <- sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE,
-      quiet = TRUE)
+    rd <- sw_exec(
+      inputData = sw_input,
+      weatherList = sw_weather,
+      echo = FALSE,
+      quiet = TRUE
+    )
     expect_s4_class(rd, "swOutput")
     expect_false(has_soilTemp_failed())
 
     # Run silently/verbosely
-    expect_silent(sw_exec(inputData = sw_input, weatherList = sw_weather,
-      echo = FALSE, quiet = TRUE))
+    expect_silent(sw_exec(
+      inputData = sw_input,
+      weatherList = sw_weather,
+      echo = FALSE, quiet = TRUE
+    ))
 
     # This doesn't work; apparently, testthat::expect_message and similar
     # functions don't capture text written by LogError directly to the console.
     if (FALSE) {
-      expect_message(sw_exec(inputData = sw_input, weatherList = sw_weather,
-        echo = FALSE, quiet = FALSE))
+      expect_message(sw_exec(
+        inputData = sw_input,
+        weatherList = sw_weather,
+        echo = FALSE, quiet = FALSE
+      ))
     }
 
 
@@ -196,8 +233,11 @@ for (it in tests) {
             val_extremes <- apply(x2[, -ch[[its]], drop = FALSE], 2, range)
 
             if (vars[k] %in% rownames(var_limits2)) {
-              expect_within(range(val_extremes), var_limits2[vars[k], ],
-                info = info3)
+              expect_within(
+                range(val_extremes),
+                var_limits2[vars[k], ],
+                info = info3
+              )
             }
 
             if (vars[k] %in% names(var_limitsSL)) {
@@ -206,9 +246,11 @@ for (it in tests) {
 
                 if (length(itemp) > 0) {
                   # `itemp` could be empty because of soil-evaporation
-                  expect_within(range(val_extremes[, itemp]),
+                  expect_within(
+                    range(val_extremes[, itemp]),
                     var_limitsSL[[vars[k]]][isl, ],
-                    info = paste(info3, "- soillayer", isl))
+                    info = paste(info3, "- soillayer", isl)
+                  )
                 }
               }
             }
@@ -222,16 +264,23 @@ for (it in tests) {
       #   * SWP is not additive; SOILWAT uses pedotransfer functions
       if (all(unlist(has_times))) {
         if (fun_agg[k] %in% c("mean", "sum") &&
-            !(vars[k] %in% c("SWPMATRIC", "ESTABL"))) {
+            !(vars[k] %in% c("SWPMATRIC", "ESTABL"))
+        ) {
 
           res_true <- matrix(TRUE, nrow = rd@yr_nrow, ncol = x1@Columns)
           expect_equivalent({
               nid <- 1:2
-              temp1d <- aggregate(x1@Day[, -nid], by = list(x1@Day[, 1]),
-                FUN = fun_agg[k])
+              temp1d <- aggregate(
+                x1@Day[, -nid],
+                by = list(x1@Day[, 1]),
+                FUN = fun_agg[k]
+              )
               diff1d <- data.matrix(x1@Year[, -1]) - data.matrix(temp1d[, -1])
               abs(diff1d) < tol
-          }, res_true, info = info2)
+            },
+            res_true,
+            info = info2
+          )
         }
 
       } else {
