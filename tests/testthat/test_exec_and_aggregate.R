@@ -1,7 +1,12 @@
 context("rSOILWAT2 annual aggregation")
 
 #---CONSTANTS
-tol <- 1e-6
+tols <- list(
+  aggregations = 1e-6,
+  ranges = sqrt(.Machine$double.eps),
+  compare_yearly = 1e-4
+)
+
 OutSum <- c("off", "sum", "mean", "fnl")
 dir_test_data <- file.path("..", "test_data")
 temp <- list.files(dir_test_data, pattern = "Ex")
@@ -16,7 +21,7 @@ var_SumNotZero <- var_SumNotZero[!(var_SumNotZero %in% var_maybeZero)]
 
 
 expect_within <- function(object, expected, ..., info = NULL,
-  tol = sqrt(.Machine$double.eps), digits_N = 4L) {
+  tol = tols[["ranges"]], digits_N = 4L) {
 
   robj <- range(object)
   rexp <- range(expected)
@@ -146,8 +151,8 @@ for (it in tests) {
     }
   })
 
+  #------ Run SOILWAT2
   test_that("Simulate and aggregate", {
-    # Run SOILWAT
     rd <- sw_exec(
       inputData = sw_input,
       weatherList = sw_weather,
@@ -276,7 +281,7 @@ for (it in tests) {
                 FUN = fun_agg[k]
               )
               diff1d <- data.matrix(x1@Year[, -1]) - data.matrix(temp1d[, -1])
-              abs(diff1d) < tol
+              abs(diff1d) < tols[["aggregations"]]
             },
             res_true,
             info = info2
@@ -290,4 +295,28 @@ for (it in tests) {
       }
     }
   })
+
+
+  #------ Run SOILWAT2 and compare yearly output to previous simulation run
+  if (!swWeather_UseMarkov(sw_input)) {
+    sw_output <- readRDS(file.path(dir_test_data, paste0(it, "_output.rds")))
+
+    test_that("Compare to previous runs", {
+      swOUT_TimeStepsForEveryKey(sw_input) <- 3 # produce yearly output only
+
+      rdy <- sw_exec(
+        inputData = sw_input,
+        weatherList = sw_weather,
+        echo = FALSE,
+        quiet = TRUE
+      )
+
+      expect_equal(
+        object = rdy,
+        expected = sw_output,
+        tolerance = tols[["compare_yearly"]],
+        info = info1
+      )
+    })
+  }
 }
