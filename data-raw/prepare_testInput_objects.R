@@ -101,10 +101,32 @@ for (it in seq_along(tests)) {
   slot(sw_input, "weatherHistory") <- list(new("swWeatherData"))
 
   #---Files for unit testing
-  saveRDS(sw_weather, file = file.path(dir_out,
-    paste0("Ex", tests[it], "_weather.rds")))
-  saveRDS(sw_input, file = file.path(dir_out,
-    paste0("Ex", tests[it], "_input.rds")))
+  saveRDS(
+    object = sw_weather,
+    file = file.path(dir_out, paste0("Ex", tests[it], "_weather.rds"))
+  )
+  saveRDS(
+    object = sw_input,
+    file = file.path(dir_out, paste0("Ex", tests[it], "_input.rds"))
+  )
+
+
+  #--- Run with yearly output and save it
+  if (!swWeather_UseMarkov(sw_input)) {
+    swOUT_TimeStepsForEveryKey(sw_input) <- 3
+
+    rdy <- sw_exec(
+      inputData = sw_input,
+      weatherList = sw_weather,
+      echo = FALSE,
+      quiet = TRUE
+    )
+
+    saveRDS(
+      object = rdy,
+      file = file.path(dir_out, paste0("Ex", tests[it], "_output.rds"))
+    )
+  }
 }
 
 
