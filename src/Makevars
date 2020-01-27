@@ -11,6 +11,7 @@ PKG_LIBS = -L$(path_target) -l$(target)  # $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 $(SHLIB): $(path_target)/$(lib_target)
 
 $(path_target)/$(lib_target):
+#	@(echo `"$(CC)" --version`)
 	@(cd $(path_target) && $(MAKE) $(lib_target) \
 		CC="$(CC)" CPPFLAGS="$(ALL_CPPFLAGS)" CFLAGS="$(ALL_CFLAGS)" AR="$(AR)" \
 		sw_sources="$(sw_sources)")
