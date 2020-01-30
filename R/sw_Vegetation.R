@@ -528,31 +528,37 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
         ids_to_estim <- setdiff(ids_to_estim, igrasses)
       }
 
-      estim_cover_sum <- sum(estim_cover[ids_to_estim])
+      # Scale fractions to 0-1 with a sum equal to 1 (if needed)
+      tot_veg_cover_sum <- sum(veg_cover)
 
-      # Scale fractions to 0-1 with a sum equal to 1
-      if (estim_cover_sum > 0) {
-        # Scale estimable fractions so that total sums to 1, but
-        # scaling doesn't affect those that are fixed
-        veg_cover[ids_to_estim] <- veg_cover[ids_to_estim] *
-          (1 - sum(veg_cover[ifixed])) / estim_cover_sum
+      if (abs(tot_veg_cover_sum - 1) > rSW2_glovars[["tol"]]) {
 
-      } else {
-        # cover to estimate is 0 and fixed_cover_sum < 1
-        if (fill_empty_with_BareGround && !fix_BareGround) {
-          # ==> fill land cover up with bare-ground
-          veg_cover[ibar] <- 1 - sum(veg_cover[-ibar])
+        estim_cover_sum <- sum(estim_cover[ids_to_estim])
+
+        if (estim_cover_sum > 0) {
+          # Scale estimable fractions so that total sums to 1, but
+          # scaling doesn't affect those that are fixed
+          veg_cover[ids_to_estim] <- veg_cover[ids_to_estim] *
+            (1 - sum(veg_cover[ifixed])) / estim_cover_sum
 
         } else {
-          stop(
-            "'estimate_PotNatVeg_composition': ",
-            "The estimated vegetation cover values are 0, ",
-            "the user fixed relative abundance values sum to less than 1, ",
-            "and bare-ground is fixed. ",
-            "Thus, the function cannot compute complete land cover composition."
-          )
+          # cover to estimate is 0 and fixed_cover_sum < 1
+          if (fill_empty_with_BareGround && !fix_BareGround) {
+            # ==> fill land cover up with bare-ground
+            veg_cover[ibar] <- 1 - sum(veg_cover[-ibar])
+
+          } else {
+            stop(
+              "'estimate_PotNatVeg_composition': ",
+              "The estimated vegetation cover values are 0, ",
+              "the user fixed relative abundance values sum to less than 1, ",
+              "and bare-ground is fixed. ",
+              "Thus, the function cannot compute complete land cover composition."
+            )
+          }
         }
       }
+
     }
   }
 
