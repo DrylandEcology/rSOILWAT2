@@ -116,7 +116,7 @@ test_that("Vegetation: estimate land cover composition", {
   #--- Fix total grass cover and annual grass cover,
   # but estimate relative proportions of C3 and C4 grasses (in addition to
   # other components)
-  if (k in 1:2) {
+  for (k in 1:2) {
     if (k == 1) {
       SumGrasses_Fraction <- 0.8
       Annuals_Fraction <- 0.3
@@ -144,7 +144,7 @@ test_that("Vegetation: estimate land cover composition", {
     expect_equal(sum(pnv[["Rel_Abundance_L0"]][[igan]]), Annuals_Fraction)
 
     # Grass types sum up to the fixed total grass value
-    if (is.finite(SumGrasses_Fraction) {
+    if (is.finite(SumGrasses_Fraction)) {
       expect_equal(
         sum(pnv[["Rel_Abundance_L1"]][["SW_GRASS"]]),
         SumGrasses_Fraction

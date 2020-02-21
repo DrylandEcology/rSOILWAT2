@@ -559,7 +559,8 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
               "The estimated vegetation cover values are 0, ",
               "the user fixed relative abundance values sum to less than 1, ",
               "and bare-ground is fixed. ",
-              "Thus, the function cannot compute complete land cover composition."
+              "Thus, the function cannot compute ",
+              "complete land cover composition."
             )
           }
         }
