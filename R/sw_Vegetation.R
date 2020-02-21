@@ -232,10 +232,10 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
 
 
   #--- Check individual components if the sum of grasses is fixed
-  fix_sumgrasses <- fix_sumgrasses || isTRUE(!is.na(SumGrasses_Fraction))
+  fix_sumgrasses <- fix_sumgrasses && isTRUE(!is.na(SumGrasses_Fraction))
 
   if (fix_sumgrasses) {
-    SumGrasses_Fraction <- cut0Inf(SumGrasses_Fraction, val = NA)
+    SumGrasses_Fraction <- cut0Inf(SumGrasses_Fraction, val = 0)
 
     input_sum_grasses <- replace_NAs_with_val(
       x = sum(input_cover[igrasses], na.rm = TRUE),
