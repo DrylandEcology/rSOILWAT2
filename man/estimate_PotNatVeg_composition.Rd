@@ -146,7 +146,8 @@ A list with three named numeric vectors. \describe{
     \var{SW_FORBS}, \var{SW_GRASS}, and \var{SW_BAREGROUND}.
   }
   \item{Grasses}{A numeric vector of length 3 with
-    relative abundance/cover [0-1] values of the grass types that sum to 1.
+    relative abundance/cover [0-1] values of the grass types that sum to 1,
+    if there is any grass cover; otherwise, the values are 0.
     The names of the 3 sub-types are: \var{Grasses_C3}, \var{Grasses_C4},
     and \var{Grasses_Annuals}.
   }
