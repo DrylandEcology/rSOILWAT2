@@ -113,7 +113,8 @@
 #'     \var{SW_FORBS}, \var{SW_GRASS}, and \var{SW_BAREGROUND}.
 #'   }
 #'   \item{Grasses}{A numeric vector of length 3 with
-#'     relative abundance/cover [0-1] values of the grass types that sum to 1.
+#'     relative abundance/cover [0-1] values of the grass types that sum to 1,
+#'     if there is any grass cover; otherwise, the values are 0.
 #'     The names of the 3 sub-types are: \var{Grasses_C3}, \var{Grasses_C4},
 #'     and \var{Grasses_Annuals}.
 #'   }
@@ -250,17 +251,22 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
         "sum to more than user defined total grass cover."
       )
 
-    } else if (add_sum_grasses > 0) {
+    }
 
-      ids_to_estim_grasses <- is.na(input_cover[igrasses])
+    ids_to_estim_grasses <- is.na(input_cover[igrasses])
 
+    if (add_sum_grasses > 0) {
       if (sum(ids_to_estim_grasses) == 1) {
-        #--- One grass component to estimate: difference from rest
+        # One grass component to estimate: difference from rest
         input_cover[igrasses[ids_to_estim_grasses]] <-
           SumGrasses_Fraction - input_sum_grasses
 
         add_sum_grasses <- 0
       }
+
+    } else {
+      # No grass component to add: set all to zero
+      input_cover[igrasses[ids_to_estim_grasses]] <- 0
     }
   }
 

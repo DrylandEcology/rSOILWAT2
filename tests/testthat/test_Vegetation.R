@@ -13,10 +13,21 @@ clim <- calc_SiteClimate(
 # Tests
 test_that("Vegetation: estimate land cover composition", {
 
-  # Each of the returned vectors sums to 1 and each element is finite and >= 0
+  # Each of the returned vectors sums to 1
+  # (unless there are no grasses, then the sum of grass components is 0) and
+  # each element is finite and >= 0
   expect_pnv <- function(pnv) {
     for (k in seq_along(pnv)) {
-      expect_equal(sum(pnv[[k]]), 1)
+      sumval <- if (
+        grepl("Rel_Abundance", names(pnv)[k]) ||
+        pnv[["Rel_Abundance_L1"]][["SW_GRASS"]] > 0
+      ) {
+        1
+      } else {
+        0
+      }
+      expect_equal(sum(pnv[[k]]), sumval)
+
       expect_true(all(is.finite(pnv[[k]])))
       expect_true(all(pnv[[k]] >= 0))
     }
