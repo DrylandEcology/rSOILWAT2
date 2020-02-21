@@ -134,57 +134,67 @@ test_that("Vegetation: estimate land cover composition", {
 
   #--- Fix total cover including total grass cover,
   # and only estimate relative proportions of C3 and C4 grasses:
-  SumGrasses_Fraction <- 0.8
-  Annuals_Fraction <- 0.3
-  Shrubs_Fraction <- 0.2
   BareGround_Fraction <- 0
   Forbs_Fraction <- 0
   Trees_Fraction <- 0
   Succulents_Fraction <- 0
 
-  expect_equal(
-    SumGrasses_Fraction + Shrubs_Fraction +
-      BareGround_Fraction + Forbs_Fraction + Trees_Fraction +
-      Succulents_Fraction,
-    1
-  )
+  for (k in 1:2) {
+    if (k == 1) {
+      SumGrasses_Fraction <- 0.8
+      Annuals_Fraction <- 0.3
+      Shrubs_Fraction <- 0.2
 
-  expect_silent(
-    pnv <- estimate_PotNatVeg_composition(
-      MAP_mm = 10 * clim[["MAP_cm"]],
-      MAT_C = clim[["MAT_C"]],
-      mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
-      mean_monthly_Temp_C = clim[["meanMonthlyTempC"]],
-      dailyC4vars = clim[["dailyC4vars"]],
-      fix_succulents = TRUE, Succulents_Fraction = Succulents_Fraction,
-      fix_sumgrasses = TRUE, SumGrasses_Fraction = SumGrasses_Fraction,
-      fix_annuals = TRUE, Annuals_Fraction = Annuals_Fraction,
-      fix_C4grasses = FALSE, C4_Fraction = NA,
-      fix_C3grasses = FALSE, C3_Fraction = NA,
-      fix_shrubs = TRUE, Shrubs_Fraction = Shrubs_Fraction,
-      fix_forbs = TRUE, Forbs_Fraction = Forbs_Fraction,
-      fix_trees = TRUE, Trees_Fraction = Trees_Fraction,
-      fix_BareGround = TRUE, BareGround_Fraction = BareGround_Fraction,
-      fill_empty_with_BareGround = TRUE
+    } else {
+      SumGrasses_Fraction <- 0
+      Annuals_Fraction <- 0
+      Shrubs_Fraction <- 1
+    }
+
+
+    expect_equal(
+      SumGrasses_Fraction + Shrubs_Fraction +
+        BareGround_Fraction + Forbs_Fraction + Trees_Fraction +
+        Succulents_Fraction,
+      1
     )
-  )
 
-  expect_pnv(pnv)
+    expect_silent(
+      pnv <- estimate_PotNatVeg_composition(
+        MAP_mm = 10 * clim[["MAP_cm"]],
+        MAT_C = clim[["MAT_C"]],
+        mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
+        mean_monthly_Temp_C = clim[["meanMonthlyTempC"]],
+        dailyC4vars = clim[["dailyC4vars"]],
+        fix_succulents = TRUE, Succulents_Fraction = Succulents_Fraction,
+        fix_sumgrasses = TRUE, SumGrasses_Fraction = SumGrasses_Fraction,
+        fix_annuals = TRUE, Annuals_Fraction = Annuals_Fraction,
+        fix_C4grasses = FALSE, C4_Fraction = NA,
+        fix_C3grasses = FALSE, C3_Fraction = NA,
+        fix_shrubs = TRUE, Shrubs_Fraction = Shrubs_Fraction,
+        fix_forbs = TRUE, Forbs_Fraction = Forbs_Fraction,
+        fix_trees = TRUE, Trees_Fraction = Trees_Fraction,
+        fix_BareGround = TRUE, BareGround_Fraction = BareGround_Fraction,
+        fill_empty_with_BareGround = TRUE
+      )
+    )
 
-  # The fixed types retained their input values
-  expect_equal(sum(pnv[["Rel_Abundance_L0"]][[isuc]]), Succulents_Fraction)
-  expect_equal(sum(pnv[["Rel_Abundance_L0"]][[ishr]]), Shrubs_Fraction)
-  expect_equal(sum(pnv[["Rel_Abundance_L0"]][[ibar]]), BareGround_Fraction)
-  expect_equal(sum(pnv[["Rel_Abundance_L0"]][[ifor]]), Forbs_Fraction)
-  expect_equal(sum(pnv[["Rel_Abundance_L0"]][[itre]]), Trees_Fraction)
-  expect_equal(sum(pnv[["Rel_Abundance_L0"]][[igan]]), Annuals_Fraction)
+    expect_pnv(pnv)
 
-  # Grass types sum up to the fixed total grass value
-  expect_equal(
-    sum(pnv[["Rel_Abundance_L1"]][["SW_GRASS"]]),
-    SumGrasses_Fraction
-  )
+    # The fixed types retained their input values
+    expect_equal(sum(pnv[["Rel_Abundance_L0"]][[isuc]]), Succulents_Fraction)
+    expect_equal(sum(pnv[["Rel_Abundance_L0"]][[ishr]]), Shrubs_Fraction)
+    expect_equal(sum(pnv[["Rel_Abundance_L0"]][[ibar]]), BareGround_Fraction)
+    expect_equal(sum(pnv[["Rel_Abundance_L0"]][[ifor]]), Forbs_Fraction)
+    expect_equal(sum(pnv[["Rel_Abundance_L0"]][[itre]]), Trees_Fraction)
+    expect_equal(sum(pnv[["Rel_Abundance_L0"]][[igan]]), Annuals_Fraction)
 
+    # Grass types sum up to the fixed total grass value
+    expect_equal(
+      sum(pnv[["Rel_Abundance_L1"]][["SW_GRASS"]]),
+      SumGrasses_Fraction
+    )
+  }
 
   #--- The function `estimate_PotNatVeg_composition` can fail under a few
   # situations:
