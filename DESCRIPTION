@@ -19,15 +19,17 @@ Imports:
   blob (>= 1.2.0),
   methods
 Suggests:
-  digest (>= 0.6.12),
-  knitr,
-  rmarkdown,
   bookdown,
-  testthat,
-  lintr (>= 2.0.0),
   covr,
+  daymetr,
+  digest (>= 0.6.12),
+  goodpractice,
+  knitr,
+  lintr (>= 2.0.0),
+  pkgload,
+  rmarkdown,
   spelling (>= 1.1.0),
-  goodpractice
+  testthat
 NeedsCompilation: yes
 License: GPL-3 + file LICENSE
 URL: https://github.com/DrylandEcology/rSOILWAT2
