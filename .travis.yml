@@ -23,6 +23,9 @@ r_check_args: '--ignore-vignettes'
 
 cache: packages
 
+r_github_packages:
+  - DrylandEcology/rSW2utils
+
 after_success:
   # code coverage but exclude all SOILWAT2 submodule files in scr/
   - Rscript -e 'covr::coveralls(line_exclusions = as.list(file.path("src", list.files("src", recursive = TRUE))))'

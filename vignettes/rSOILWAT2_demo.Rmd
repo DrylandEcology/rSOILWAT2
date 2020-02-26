@@ -29,27 +29,25 @@ vignette: >
 ```{r, install, results = "hide"}
   v <- try(utils::packageVersion("rSOILWAT2"), silent = TRUE)
   if (inherits(v, "try-error") || v < "3.1.4") {
-    # Download rSOILWAT2 package code from github repository
-    args <- paste("clone -b feature_fun_from_rSFSW2",
-      "--single-branch --recursive",
-      "https://github.com/DrylandEcology/rSOILWAT2.git rSOILWAT2")
-    system2(command = "git", args = args)
-    # Install package and build vignettes
-    devtools::install(build_vignettes = TRUE)
+    message(
+      "There is no or an outdated rSOILWAT2 version present. ",
+      "Please update to a more recent version and build vignettes: see",
+      "https://github.com/DrylandEcology/rSOILWAT2#installation"
+    )
   }
 
   stopifnot(require("rSOILWAT2", quietly = TRUE))
 ```
-  
+
 
 ## How to find help and documentation
 ```{r, help, results = "hide"}
   # Package documention
   help(package = "rSOILWAT2")
-  
+
   # Documentation of a specific function, e.g.,
   ?sw_exec
-  
+
   # Code of a specifici function, e.g.,
   sw_exec
 ```
@@ -57,39 +55,39 @@ vignette: >
 ## Quick R re-cap: how to subset data.frames, matrices, and lists
 ```{r, subset, results = "hide"}
   ?Extract
-  
+
   #--- Subset a list
   x <- list(ID = 1, Lyr_1 = 1:10, Lyr_2 = 11:30)
-  
+
   x[[1]] # extract element by position
   x[["Lyr_1"]] # extract element by name
-  
+
   x[1:2] # subset by position
-  
-  
+
+
   #--- Subset a data.frame
   x <- as.data.frame(x)
-  
+
   # extract column by column number
   x[[1]]
   x[, 1]
-  
+
   # subset by column numbers
   x[1:2]
   x[, 1:2]
-  
+
   # extract column by column name
   x[["Lyr_1"]]
   x[, "Lyr_1"]
   x$Lyr_1
 
-  
+
   #--- Subset a matrix
   x <- as.matrix(x)
-  
+
   x[, 1] # extract element by position
   x[, "Lyr_1"] # extract element by name
-  
+
   x[, 1:2] # subset by position
 ```
 
@@ -113,7 +111,7 @@ Task: Create daily/monthly/yearly plots of soil moisture, transpiration,
       evaporation, etc.
 ```{r, plot1}
   x <- slot(slot(sw_out0, "VWCBULK"), "Day")
-  
+
   ids <- grep("Lyr", colnames(x))
   vwc <- x[, ids]
   matplot(vwc,
@@ -128,13 +126,13 @@ Task: Create daily/monthly/yearly plots of soil moisture, transpiration,
     lty = 1,
     col = seq_along(ids)
   )
-  
-  
+
+
   x <- slot(slot(sw_out0, "TRANSP"), "Month")
   ids <- grep("transp_total", colnames(x))
   matplot(x[1:24, ids], type = "l")
-  
-  
+
+
   x <- slot(slot(sw_out0, "EVAPSOIL"), "Year")
   ids <- grep("Lyr", colnames(x))
   es <- apply(x[, ids], 1, sum)
@@ -158,7 +156,7 @@ Task: Use function `sw_inputDataFromFiles` to read inputs from location
 ```{r, simulate1}
   # Read data from input files
   sw_in1 <- sw_inputDataFromFiles(dir = path_demo)
-  
+
   # Then run simulation
   sw_out <- sw_exec(inputData = sw_in1)
 ```
@@ -170,7 +168,7 @@ Task: Use function `sw_inputDataFromFiles` to read inputs from location
     LookupWeatherFolder = file.path(path_demo, "Input"),
     weatherDirName = "data_weather"
   )
-  
+
   sw_out <- sw_exec(
     inputData = sw_in1,
     weatherList = wdata
@@ -188,7 +186,7 @@ Task: use function `getWeatherData_folders` to read weather data with
     LookupWeatherFolder = file.path(path_demo, "Input"),
     weatherDirName = "data_weather_missing",
   )
-  
+
   # This will fail: missing data
   sw_out <- try(sw_exec(
     inputData = sw_in1,
@@ -203,14 +201,14 @@ Option 1: estimate weather generator coefficients with
           and run SOILWAT2 with filled-in data
 ```{r, weather3}
   wgen_coeffs <- dbW_estimate_WGen_coefs(weatherData = wdata)
-  
+
   wdata_filled <- dbW_generateWeather(
     weatherData = wdata_gaps,
     years = swYears_StartYear(sw_in1):swYears_EndYear(sw_in1),
     wgen_coeffs = wgen_coeffs,
     seed = 123
   )
-  
+
   sw_out <- sw_exec(
     inputData = sw_in1,
     weatherList = wdata_filled
@@ -224,7 +222,7 @@ Option 2: estimate weather generator coefficients and
   swWeather_UseMarkov(sw_in) <- TRUE
   swMarkov_Prob(sw_in) <- wgen_coeffs[["mkv_doy"]]
   swMarkov_Conv(sw_in) <- wgen_coeffs[["mkv_woy"]]
-  
+
   sw_out <- sw_exec(
     inputData = sw_in,
     weatherList = wdata_gaps
@@ -238,11 +236,11 @@ Task: plot a comparison between `wdata` and `wdata_filled` for
 ```{r, compare1}
   clim1 <- calc_SiteClimate(wdata)
   clim2 <- calc_SiteClimate(wdata_filled)
-  
-  
+
+
   plot(clim1[["meanMonthlyPPTcm"]], clim2[["meanMonthlyPPTcm"]])
   abline(0, 1, col = "red")
-  
+
   plot(clim1[["meanMonthlyTempC"]], clim2[["meanMonthlyTempC"]])
   abline(0, 1, col = "red")
 ```
@@ -263,7 +261,7 @@ Task: compare weather data `wdata` with `wdata_filled` using function
 # Access other weather data sources
 ## Download weather data from DayMet
 ```{r, daymetr, results = "hide"}
-  if (!requireNamespace("daymetr", 
+  if (!requireNamespace("daymetr",
     versionCheck = list(op = ">=", version = "1.4"))) {
     install.packages("daymetr")
   }
@@ -289,9 +287,9 @@ Task: convert DayMet data `dm_Laramie` into a data.frame with the columns
   xdf <- dm_Laramie[["data"]][, vars]
   xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
   colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
-  
+
   wdata_dm <- dbW_dataframe_to_weatherData(weatherDF = xdf)
-  
+
   # This will fail: no leap days
   sw_out <- try(sw_exec(
     inputData = sw_in1,
@@ -309,7 +307,7 @@ Task: Add leap days to data.frame and estimate those with weather generator
     weatherData = dbW_dataframe_to_weatherData(weatherDF = xdf2),
     seed = 123
   )
-  
+
   sw_out <- sw_exec(
     inputData = sw_in1,
     weatherList = wdata_dm2
@@ -320,10 +318,10 @@ Task: Add leap days to data.frame and estimate those with weather generator
 # Specifing soils
 ```{r, soils}
   sw_in <- sw_in1
-  
+
   soil_has <- swSoils_Layers(sw_in)
   soil_new <- data.frame(soil_has[0, ])
-  
+
   soil_def <- data.frame(
     depth = c(5, 10, 20, 50),
     bulkd = 1.3,
@@ -338,17 +336,17 @@ Task: Add leap days to data.frame and estimate those with weather generator
     impermbeability = 0,
     soil_temp = 0
   )
-  
+
   soil_new[1:4, ] <- soil_def
-  
+
   swSoils_Layers(sw_in) <- data.matrix(soil_new)
-  
+
   trre <- data.frame(
     ndx = 1:2,
     layer = c(2, 4)
   )
   swSite_TranspirationRegions(sw_in) <- data.matrix(trre)
-  
+
   sw_out <- sw_exec(
     inputData = sw_in,
     weatherList = wdata
@@ -366,8 +364,8 @@ Task: estimate vegetation composition with
     weatherList = wdata,
     do_C4vars = TRUE
   )
-  
-  
+
+
   pnv_comp <- estimate_PotNatVeg_composition(
     MAP_mm = 10 * clim[["MAP_cm"]],
     MAT_C = clim[["MAT_C"]],
@@ -375,7 +373,7 @@ Task: estimate vegetation composition with
     mean_monthly_Temp_C = clim[["meanMonthlyTempC"]],
     dailyC4vars = clim[["dailyC4vars"]]
   )
-  
+
   sw_in <- sw_in1
   ids <- sapply(names(swProd_Composition(sw_in)), function(x) {
     grep(
@@ -384,8 +382,8 @@ Task: estimate vegetation composition with
       ignore.case = TRUE)
   })
   swProd_Composition(sw_in) <- pnv_comp[["Rel_Abundance_L1"]][ids]
-  
-  
+
+
   sw_out <- sw_exec(
     inputData = sw_in,
     weatherList = wdata
@@ -396,14 +394,14 @@ Task: estimate vegetation composition with
 # Modifing climate conditions
 ```{r, climmod}
   sw_in <- sw_in1
-  
+
   # Task: 50% reduction in June-Aug precipitation
   swWeather_MonScalingParams(sw_in)[6:8, "PPT"] <- 0.5
-  
+
   # Task: 2 C warming
   swWeather_MonScalingParams(sw_in)[, c("MaxT", "MinT")] <- 2
-  
-  
+
+
   sw_out <- sw_exec(
     inputData = sw_in,
     weatherList = wdata

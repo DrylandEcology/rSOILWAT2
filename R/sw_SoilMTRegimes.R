@@ -551,13 +551,13 @@ calc_SMTRs <- function(
         }
 
         MAP <- c(mean(sim_agg[["prcp.yr"]][["ppt"]]),
-          stats::sd(sim_agg[["prcp.yr"]][["ppt"]]))
+          sd(sim_agg[["prcp.yr"]][["ppt"]]))
         normal1 <- as.vector(
           (sim_agg[["prcp.yr"]][["ppt"]] >= MAP[1] - MAP[2]) &
           (sim_agg[["prcp.yr"]][["ppt"]] <= MAP[1] + MAP[2]))
         MMP <- tapply(sim_agg[["prcp.mo"]][["ppt"]],
           st2[["month_ForEachUsedMonth_NSadj"]],
-          function(x) c(mean(x), stats::sd(x)))
+          function(x) c(mean(x), sd(x)))
         MMP <- matrix(unlist(MMP), nrow = 2, ncol = 12)
         normal2 <- tapply(sim_agg[["prcp.mo"]][["ppt"]],
           st2[["yearno_ForEachUsedMonth_NSadj"]],
@@ -614,12 +614,12 @@ calc_SMTRs <- function(
             nheader = soiltemp_nrsc[["yr"]][["nheader"]]),
           mo = list(data = {
               temp <- st2[["month_ForEachUsedMonth"]][st_NRCS[["i_mo_used"]]]
-              stats::aggregate(soiltemp_nrsc[["mo"]][["data"]],
+              aggregate(soiltemp_nrsc[["mo"]][["data"]],
                 by = list(temp), mean)[, -1]},
             nheader = soiltemp_nrsc[["mo"]][["nheader"]]),
           dy = list(data = {
               temp <- st2[["doy_ForEachUsedDay"]][st_NRCS[["i_dy_used"]]]
-              stats::aggregate(soiltemp_nrsc[["dy"]][["data"]],
+              aggregate(soiltemp_nrsc[["dy"]][["data"]],
                 by = list(temp), mean)[, -1]},
             nheader = soiltemp_nrsc[["dy"]][["nheader"]])
         )
@@ -627,7 +627,7 @@ calc_SMTRs <- function(
           function(x) {
             temp1 <- st1[["index.usedy"]][st_NRCS[["i_dy_used"]]]
             temp2 <- st2[["doy_ForEachUsedDay"]][st_NRCS[["i_dy_used"]]]
-            stats::aggregate(as.matrix(x)[temp1, ], list(temp2), mean)[, -1]
+            aggregate(as.matrix(x)[temp1, ], list(temp2), mean)[, -1]
           })
 
         temp <- dim(vwc_dy_nrsc[["val"]])[1]
@@ -682,8 +682,8 @@ calc_SMTRs <- function(
       # the depth to which a dry soil will be moistened by 7.5 cm of water
       # within 48 hours."
       layers_width <- getLayersWidth(soildat[, "depth_cm"])
-      sand_temp <- stats::weighted.mean(soildat[, "sand_frac"], layers_width)
-      clay_temp <- stats::weighted.mean(soildat[, "clay_frac"], layers_width)
+      sand_temp <- weighted.mean(soildat[, "sand_frac"], layers_width)
+      clay_temp <- weighted.mean(soildat[, "clay_frac"], layers_width)
       # Practical depth definition of MCS
       #  - 10 to 30 cm below the soil surface if the particle-size class of
       #    the soil is fine-loamy, coarse-silty, fine-silty, or clayey
@@ -826,7 +826,7 @@ calc_SMTRs <- function(
         #mean soil temperature in Lahn depths (10 - 70 cm)
         SMTR[["cond_annual"]][, "MATLanh"] <- apply(
           soiltemp_nrsc[["yr"]][, 1 + i_Lanh, drop = FALSE], 1,
-          stats::weighted.mean, w = soildat[i_Lanh, "depth_cm"])
+          weighted.mean, w = soildat[i_Lanh, "depth_cm"])
 
         #---Calculate variables
         crit_agree <- opt_SMTR[["crit_agree_frac"]] * st_NRCS[["N_yr_used"]]
@@ -1141,13 +1141,13 @@ calc_SMTRs <- function(
           SMTR[["cond_annual"]][, icols1] <- as.matrix(
             ACS_CondsDF_yrs[, icols1])
           SMTR[["cond_annual"]][, icols2] <- as.matrix(
-            stats::aggregate(ACS_CondsDF_day[, icols2],
+            aggregate(ACS_CondsDF_day[, icols2],
               by = list(ACS_CondsDF_day$Years), mean)[, -1])
 
           SMTR[["cond_annual"]][, icols3] <- as.matrix(
             MCS_CondsDF_yrs[, icols3])
           SMTR[["cond_annual"]][, icols4] <- as.matrix(
-            stats::aggregate(MCS_CondsDF_day[, icols4],
+            aggregate(MCS_CondsDF_day[, icols4],
               by = list(MCS_CondsDF_day$Years), mean)[, -1])
 
           SMTR[["regimes_done"]] <- TRUE

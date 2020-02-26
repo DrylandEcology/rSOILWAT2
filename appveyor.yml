@@ -15,8 +15,8 @@ install:
 # Adapt as necessary starting from here
 environment:
   USE_RTOOLS: true
-  global:
-    WARNINGS_ARE_ERRORS:
+  WARNINGS_ARE_ERRORS:
+  R_REMOTES_STANDALONE: true
   matrix:
     - R_VERSION: release
       R_ARCH: i386
@@ -32,6 +32,8 @@ cache:
   - C:\RLibrary -> .appveyor_clear_cache.txt
 
 build_script:
+  - travis-tool.sh install_r circular
+  - travis-tool.sh install_github DrylandEcology/rSW2utils
   - travis-tool.sh install_deps
 
 test_script:

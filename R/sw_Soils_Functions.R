@@ -127,7 +127,7 @@ add_layer_to_soil <- function(x, il, w, method = c("interpolate", "exhaust")) {
 identify_soillayers <- function(depths, sdepth) {
   it <- findInterval(depths, sdepth)
   if (any(is.na(it))) {
-    as.integer(stats::na.exclude(it))
+    as.integer(na.exclude(it))
   } else if (length(it) > 1 && diff(it) > 0) {
     (1 + it[1]):(it[2])
   } else {

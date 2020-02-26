@@ -169,7 +169,7 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
       ppt <- x[iswet, "PPT_cm"]
       if (length(ppt) > 0) {
         c(PPT_avg = mean(ppt, na.rm = na.rm),
-          PPT_sd = stats::sd(ppt, na.rm = na.rm))
+          PPT_sd = sd(ppt, na.rm = na.rm))
       } else {
         # there are no wet days for this DOY; thus PPT = 0
         c(PPT_avg = 0, PPT_sd = 0)
@@ -275,7 +275,7 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
     na.rm = na.rm)
 
   # Variance-covariance values among maximum and minimum temperature
-  temp <- by(wdata[, c("Tmax_C", "Tmin_C")], wdata[["WEEK"]], stats::cov,
+  temp <- by(wdata[, c("Tmax_C", "Tmin_C")], wdata[["WEEK"]], cov,
     use = if (na.rm) "na.or.complete" else "everything")
   temp <- sapply(temp, function(x) c(x[1, 1], x[1, 2], x[2, 1], x[2, 2]))
   mkv_cov[, "var_MAX"] <- temp[1, ]
@@ -663,7 +663,7 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
       sapply(time_steps, function(ts)
         sapply(data, function(x) {
           temp <- x[[ts]][, var]
-          c(mean(temp, na.rm = TRUE), stats::sd(temp, na.rm = TRUE))
+          c(mean(temp, na.rm = TRUE), sd(temp, na.rm = TRUE))
         })
       ))
 
@@ -741,13 +741,13 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
     if (all(is.finite(vlim))) {
       probs <- seq(0, 1, length.out = 1000)
 
-      x <- stats::quantile(ref_data[[1]][[time]][, var], probs = probs,
+      x <- quantile(ref_data[[1]][[time]][, var], probs = probs,
         na.rm = TRUE)
       graphics::plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
         xlab = paste0(time, "ly : reference ", lab),
         ylab = paste0(time, "ly : weather ", lab))
       for (k in seq_along(data)) {
-        qy <- stats::quantile(data[[k]][[time]][, var], probs = probs,
+        qy <- quantile(data[[k]][[time]][, var], probs = probs,
           na.rm = TRUE)
         graphics::points(x, qy, pch = 46)
       }
@@ -826,7 +826,7 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
         graphics::plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
           xlab = paste0("Reference ", v), ylab = paste0("Weather ", v))
         for (k in seq_along(data)) {
-          isgood <- stats::complete.cases(cbind(x, data[[k]][[obj]][, v]))
+          isgood <- complete.cases(cbind(x, data[[k]][[obj]][, v]))
           graphics::lines(stats::lowess(x[isgood], data[[k]][[obj]][isgood, v]),
             col = "gray")
         }

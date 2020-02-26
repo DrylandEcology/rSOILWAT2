@@ -34,19 +34,19 @@ is adjusted by precipitation.}
 [0-1] of the C3-grasses, C4-grasses, and annuals functional groups. The sum
 of \code{fgrass_c3c4ann} is 1.}
 
-\item{growing_limit_C}{A numeric value. Mean monthly temperatures equal or
-above this limit are here considered suitable for growth (growing season).
+\item{growing_limit_C}{A numeric value. \code{mean_monthly_temp_C} equal or
+above this limit are considered suitable for growth (growing season).
 Default value is 4 C.}
 
-\item{isNorth}{A logical value. \code{TRUE} for locations on northern
-hemisphere.}
+\item{isNorth}{A logical value. \code{TRUE} for locations on the northern
+hemisphere, \code{FALSE} for locations on the southern hemisphere.}
 
 \item{MAP_mm}{A numeric value. Mean annual precipitation in millimeter of the
 location.}
 
 \item{mean_monthly_temp_C}{A numeric vector of length 12. Mean monthly
-temperature in Celsius. The default inputs considered March-October as
-growing season.}
+temperatures in Celsius of a target site for which \code{x} is
+adjusted.}
 }
 \value{
 A list with two elements \code{grass}, \code{shrub}. Each element is

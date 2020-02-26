@@ -1,5 +1,5 @@
 Package: rSOILWAT2
-Version: 3.1.10
+Version: 3.2.0
 Title: An Ecohydrological Ecosystem-Scale Water Balance Simulation Model
 Description: Access to the C-based SOILWAT2 v5.4.0 and functionality for
   SQLite-database of weather data.
@@ -11,22 +11,25 @@ Authors@R: c(
   person("Brenden", "Bernal", role = "ctb"),
   person("Ashish", "Tiwari", role = "ctb"))
 Depends:
-  R (>= 3.5.0)
+  R (>= 3.5.0),
+  rSW2utils
 Imports:
   RSQLite (>= 2.1),
   DBI (>= 1.0),
   blob (>= 1.2.0),
   methods
 Suggests:
-  digest (>= 0.6.12),
-  knitr,
-  rmarkdown,
   bookdown,
-  testthat,
-  lintr (>= 2.0.0),
   covr,
+  daymetr,
+  digest (>= 0.6.12),
+  goodpractice,
+  knitr,
+  lintr (>= 2.0.0),
+  pkgload,
+  rmarkdown,
   spelling (>= 1.1.0),
-  goodpractice
+  testthat
 NeedsCompilation: yes
 License: GPL-3 + file LICENSE
 URL: https://github.com/DrylandEcology/rSOILWAT2
