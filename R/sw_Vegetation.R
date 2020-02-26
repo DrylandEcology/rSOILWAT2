@@ -113,7 +113,8 @@
 #'     \var{SW_FORBS}, \var{SW_GRASS}, and \var{SW_BAREGROUND}.
 #'   }
 #'   \item{Grasses}{A numeric vector of length 3 with
-#'     relative abundance/cover [0-1] values of the grass types that sum to 1.
+#'     relative abundance/cover [0-1] values of the grass types that sum to 1,
+#'     if there is any grass cover; otherwise, the values are 0.
 #'     The names of the 3 sub-types are: \var{Grasses_C3}, \var{Grasses_C4},
 #'     and \var{Grasses_Annuals}.
 #'   }
@@ -231,10 +232,10 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
 
 
   #--- Check individual components if the sum of grasses is fixed
-  fix_sumgrasses <- fix_sumgrasses || isTRUE(!is.na(SumGrasses_Fraction))
+  fix_sumgrasses <- fix_sumgrasses && isTRUE(!is.na(SumGrasses_Fraction))
 
   if (fix_sumgrasses) {
-    SumGrasses_Fraction <- cut0Inf(SumGrasses_Fraction, val = NA)
+    SumGrasses_Fraction <- cut0Inf(SumGrasses_Fraction, val = 0)
 
     input_sum_grasses <- replace_NAs_with_val(
       x = sum(input_cover[igrasses], na.rm = TRUE),
@@ -250,17 +251,22 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
         "sum to more than user defined total grass cover."
       )
 
-    } else if (add_sum_grasses > 0) {
+    }
 
-      ids_to_estim_grasses <- is.na(input_cover[igrasses])
+    ids_to_estim_grasses <- is.na(input_cover[igrasses])
 
+    if (add_sum_grasses > 0) {
       if (sum(ids_to_estim_grasses) == 1) {
-        #--- One grass component to estimate: difference from rest
+        # One grass component to estimate: difference from rest
         input_cover[igrasses[ids_to_estim_grasses]] <-
           SumGrasses_Fraction - input_sum_grasses
 
         add_sum_grasses <- 0
       }
+
+    } else {
+      # No grass component to add: set all to zero
+      input_cover[igrasses[ids_to_estim_grasses]] <- 0
     }
   }
 
@@ -528,31 +534,38 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
         ids_to_estim <- setdiff(ids_to_estim, igrasses)
       }
 
-      estim_cover_sum <- sum(estim_cover[ids_to_estim])
+      # Scale fractions to 0-1 with a sum equal to 1 (if needed)
+      tot_veg_cover_sum <- sum(veg_cover)
 
-      # Scale fractions to 0-1 with a sum equal to 1
-      if (estim_cover_sum > 0) {
-        # Scale estimable fractions so that total sums to 1, but
-        # scaling doesn't affect those that are fixed
-        veg_cover[ids_to_estim] <- veg_cover[ids_to_estim] *
-          (1 - sum(veg_cover[ifixed])) / estim_cover_sum
+      if (abs(tot_veg_cover_sum - 1) > rSW2_glovars[["tol"]]) {
 
-      } else {
-        # cover to estimate is 0 and fixed_cover_sum < 1
-        if (fill_empty_with_BareGround && !fix_BareGround) {
-          # ==> fill land cover up with bare-ground
-          veg_cover[ibar] <- 1 - sum(veg_cover[-ibar])
+        estim_cover_sum <- sum(estim_cover[ids_to_estim])
+
+        if (estim_cover_sum > 0) {
+          # Scale estimable fractions so that total sums to 1, but
+          # scaling doesn't affect those that are fixed
+          veg_cover[ids_to_estim] <- veg_cover[ids_to_estim] *
+            (1 - sum(veg_cover[ifixed])) / estim_cover_sum
 
         } else {
-          stop(
-            "'estimate_PotNatVeg_composition': ",
-            "The estimated vegetation cover values are 0, ",
-            "the user fixed relative abundance values sum to less than 1, ",
-            "and bare-ground is fixed. ",
-            "Thus, the function cannot compute complete land cover composition."
-          )
+          # cover to estimate is 0 and fixed_cover_sum < 1
+          if (fill_empty_with_BareGround && !fix_BareGround) {
+            # ==> fill land cover up with bare-ground
+            veg_cover[ibar] <- 1 - sum(veg_cover[-ibar])
+
+          } else {
+            stop(
+              "'estimate_PotNatVeg_composition': ",
+              "The estimated vegetation cover values are 0, ",
+              "the user fixed relative abundance values sum to less than 1, ",
+              "and bare-ground is fixed. ",
+              "Thus, the function cannot compute ",
+              "complete land cover composition."
+            )
+          }
         }
       }
+
     }
   }
 
@@ -587,6 +600,26 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
   )
 }
 
+
+
+
+calc.loess_coeff <- function(N, span) {
+  # prevent call to loessc.c:ehg182(104):
+  # error msg: "span too small.   fewer data values than degrees of freedom"
+  lcoef <- list(span = min(1, span), degree = 2)
+  if (span <= 1) {
+    # see code for: R/trunk/src/library/stats/src/loessf.f:ehg136()
+    nf <- floor(lcoef$span * N) - 1
+    if (nf > 2) {
+      lcoef$degree <- 2
+    } else if (nf > 1) {
+      lcoef$degree <- 1
+    } else {
+      lcoef <- Recall(N, lcoef$span + 0.1)
+    }
+  }
+  lcoef
+}
 
 get_season <- function(mo_season_TF, N_season = NULL) {
   # Calculate first month of season == last start in (circular) year
@@ -1127,12 +1160,8 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp) {
 
         tmp <- low_surroundings > res2
 
-        # periodic running median with window = 3 (see ?runmed)
-        ids_res_low <- c(
-          median(tmp[c(12, 1:2)]),
-          apply(stats::embed(tmp, 3), 1, median),
-          median(tmp[c(11:12, 1)])
-        )
+        # periodic running median with window = 3
+        ids_res_low <- moving_function(tmp, 3, median, circular = TRUE)
       }
 
       # Zap low values to zero

@@ -35,20 +35,6 @@ sw_dailyC4_TempVar <- function(dailyTempMin, dailyTempMean, simTime2) {
   res
 }
 
-#' @seealso \code{\link[raster]{movingFun}}
-window <- function(x, n = 3, win_fun = sum) {
-  ids <- seq_len(n)
-  lng <- length(x)
-  x <- c(x, x[ids])
-
-  m <- matrix(ncol = 3, nrow = lng)
-  for (i in ids) {
-    m[, i] <- x[i:(lng + i - 1)]
-  }
-
-  apply(m, MARGIN = 1, FUN = win_fun)
-}
-
 #' Calculate climate variables required to estimate percent cheatgrass cover
 #' in North America
 #'
@@ -85,11 +71,18 @@ sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
   # Mean temperature of driest quarter (Bioclim variable 9)
   # see \code{link[dismo]{biovars}}
   if (!is.null(monthlyTempMean_C)) {
-    wet <- t(apply(monthlyPPT_cm, 2, window))
-    tmp <- t(apply(monthlyTempMean_C, 2, window, win_fun = mean))
-    dryqrt <- cbind(seq_len(ncol(monthlyPPT_cm)),
-      as.integer(apply(wet, 1, which.min)))
+    wet <- t(apply(monthlyPPT_cm, 2, moving_function,
+      k = 3, win_fun = sum, na.rm = TRUE, circular = TRUE
+    ))
+    tmp <- t(apply(monthlyTempMean_C, 2, moving_function,
+      k = 3, win_fun = mean, na.rm = TRUE, circular = TRUE
+    ))
+    dryqrt <- cbind(
+      seq_len(ncol(monthlyPPT_cm)),
+      as.integer(apply(wet, 1, which.min))
+    )
     MeanTemp_ofDriestQuarter_C <- tmp[dryqrt]
+
   } else {
     MeanTemp_ofDriestQuarter_C <- rep(NA, length(Month7th_PPT_mm))
   }
@@ -103,8 +96,11 @@ sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
 
 
   # Aggregate
-  temp <- cbind(Month7th_PPT_mm[nyrs], MeanTemp_ofDriestQuarter_C[nyrs],
-    MinTemp_of2ndMonth_C[nyrs])
+  temp <- cbind(
+    Month7th_PPT_mm[nyrs],
+    MeanTemp_ofDriestQuarter_C[nyrs],
+    MinTemp_of2ndMonth_C[nyrs]
+  )
 
   res <- c(apply(temp, 2, mean), apply(temp, 2, sd))
   temp <- c("Month7th_PPT_mm", "MeanTemp_ofDriestQuarter_C",
@@ -227,9 +223,11 @@ calc_SiteClimate <- function(weatherList, year.start = NA, year.end = NA,
   # Calculate monthly values
   index <- st2[["month_ForEachUsedDay"]] + 100 * x[, "Year"]
 
-  mon_Temp <- vapply(list(Tmean_C, x[, "Tmin_C"], x[, "Tmax_C"]),
+  mon_Temp <- vapply(
+    list(Tmean_C, x[, "Tmin_C"], x[, "Tmax_C"]),
     function(data) matrix(tapply(data, index, mean, na.rm = TRUE), nrow = 12),
-    FUN.VALUE = matrix(NA_real_, nrow = 12, ncol = length(years)))
+    FUN.VALUE = matrix(NA_real_, nrow = 12, ncol = length(years))
+  )
 
   mon_PPT <- matrix(tapply(x[, "PPT_cm"], index, sum, na.rm = TRUE), nrow = 12)
 
@@ -257,9 +255,11 @@ calc_SiteClimate <- function(weatherList, year.start = NA, year.end = NA,
 
     # If cheatgrass-variables are requested
     Cheatgrass_ClimVars = if (do_Cheatgrass_ClimVars) {
-      sw_Cheatgrass_ClimVar(monthlyPPT_cm = mon_PPT,
+      sw_Cheatgrass_ClimVar(
+        monthlyPPT_cm = mon_PPT,
         monthlyTempMean_C = mon_Temp[, , 1, drop = FALSE],
-        monthlyTempMin_C = mon_Temp[, , 2, drop = FALSE])
+        monthlyTempMin_C = mon_Temp[, , 2, drop = FALSE]
+      )
     } else NA
   )
 }
