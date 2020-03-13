@@ -4,7 +4,8 @@
 \name{weatherData}
 \alias{weatherData}
 \title{Daily weather data for a site}
-\format{A list of 62 elements. Each element corresponds to one gregorian
+\format{
+A list of 62 elements. Each element corresponds to one gregorian
  year and is an object of class \code{\linkS4class{swWeather}}. Each
  element contains two slots:
  \describe{
@@ -16,7 +17,8 @@
      \item{Tmin_C}{minimum air temperature in degree Celsius}
      \item{PPT_cm}{total precipitation in centimeters}
    }}
-}}
+}
+}
 \usage{
 weatherData
 }

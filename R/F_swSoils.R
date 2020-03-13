@@ -58,10 +58,12 @@ swSoilLayers_validity <- function(object) {
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
   if (temp[2] != 12) {
-    msg <- paste("@Layers must have exactly 12 columns corresponding to",
+    msg <- paste(
+      "@Layers must have exactly 12 columns corresponding to",
       "depth_cm, bulkDensity_g/cm^3, gravel_content, EvapBareSoil_frac,",
       "transpGrass_frac,transpShrub_frac, transpTree_frac, transpForb_frac,",
-      "sand_frac, clay_frac, impermeability_frac, soilTemp_c")
+      "sand_frac, clay_frac, impermeability_frac, soilTemp_c"
+    )
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
   if (!all(is.na(object@Layers[, 1])) && (any(object@Layers[, 1] <= 0) ||
