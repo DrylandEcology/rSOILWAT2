@@ -43,26 +43,41 @@ temp_randomwarmer3C <- ref_temp + stats::rnorm(12, 3, 1)
 
 ## Adjust phenology from the reference Mar-Oct to a target Nov-Jun
 ## growing season
-phen_adj <- sapply(phen_reference, function(x) adj_phenology_by_temp_v2(
-  x = x,
+phen_adj <- sapply(
+  phen_reference,
+  adj_phenology_by_temp_v2,
   ref_temp = ref_temp,
   target_temp = temp_randomwarmer3C
-))
+)
 
 ## Plot reference and adjusted monthly values
 \dontrun{
 par_prev <- par(mfrow = c(2, 1))
 
-plot(1:12, phen_reference[, 1], type = "l", col = "red",
-  ylim = c(0, 250), xlab = "Month")
+plot(
+  1:12,
+  phen_reference[, 1],
+  type = "l",
+  col = "red",
+  ylim = c(0, 300),
+  xlab = "Month"
+)
 lines(1:12, phen_adj[, 1])
-legend("bottom", ncol = 2,
+legend(
+  "bottom",
+  ncol = 2,
   legend = c("reference", "adjusted"),
   lwd = 2, lty = 1, col = c("red", "black")
 )
 
-plot(1:12, phen_reference[, 2], type = "l", col = "red",
-  ylim = c(0, 1), xlab = "Month")
+plot(
+  1:12,
+  phen_reference[, 2],
+  type = "l",
+  col = "red",
+  ylim = c(0, 1),
+  xlab = "Month"
+)
 lines(1:12, phen_adj[, 2])
 
 par(par_prev)
