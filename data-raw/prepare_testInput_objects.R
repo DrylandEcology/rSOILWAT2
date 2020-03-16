@@ -23,11 +23,16 @@ examples <- paste0("example", tests)
 
 #-----------------------
 #--- BACKUP PREVIOUS FILES
-print(paste("Create backup of 'inst/extdata/' as", shQuote(dir_backup)))
+print(paste("Create backup of ", shQuote(dir_in), " as", shQuote(dir_backup)))
 dir.create(dir_backup, showWarnings = FALSE)
 stopifnot(dir.exists(dir_backup))
-file.copy(from = dir_in, to = dir_backup, recursive = TRUE, copy.mode = TRUE,
-  copy.date = TRUE)
+file.copy(
+  from = dir_in,
+  to = dir_backup,
+  recursive = TRUE,
+  copy.mode = TRUE,
+  copy.date = TRUE
+)
 
 unlink(dir_in, recursive = TRUE)
 dir.create(dir_in, showWarnings = FALSE)
@@ -37,10 +42,17 @@ stopifnot(dir.exists(dir_in))
 #-----------------------
 #--- COPY AND CREATE EXTDATA EXAMPLES FROM ORIGINAL SOILWAT2 INPUTS
 for (it in seq_along(tests)) {
-  file.copy(from = dir_orig, to = dir_in, recursive = TRUE, copy.mode = TRUE,
-    copy.date = TRUE)
-  file.rename(from = file.path(dir_in, dSOILWAT2_inputs), to = file.path(dir_in,
-    examples[it]))
+  file.copy(
+    from = dir_orig,
+    to = dir_in,
+    recursive = TRUE,
+    copy.mode = TRUE,
+    copy.date = TRUE
+  )
+  file.rename(
+    from = file.path(dir_in, dSOILWAT2_inputs),
+    to = file.path(dir_in, examples[it])
+  )
 }
 
 # example1: default run
@@ -64,8 +76,11 @@ for (it in seq_along(tests)) {
   line <- grep("historical weather data", fin,
     ignore.case = TRUE)
   stopifnot(length(line) == 1, line > 0, line < length(fin))
-  fin[line] <- sub("Input/data_weather/weath",
-    "Input/data_weather_missing/weath", x = fin[line])
+  fin[line] <- sub(
+    file.path("Input", "data_weather", "weath"),
+    file.path("Input", "data_weather_missing", "weath"),
+    x = fin[line]
+  )
   writeLines(fin, con = ftemp)
 
 
@@ -94,8 +109,10 @@ for (it in seq_along(tests)) {
 #--- USE EXTDATA EXAMPLES AS BASIS FOR UNIT-TESTS
 for (it in seq_along(tests)) {
   #---rSOILWAT2 inputs using development version
-  sw_input <- sw_inputDataFromFiles(file.path(dir_in, examples[it]),
-    files.in = "files.in")
+  sw_input <- sw_inputDataFromFiles(
+    file.path(dir_in, examples[it]),
+    files.in = "files.in"
+  )
 
   sw_weather <- slot(sw_input, "weatherHistory")
   slot(sw_input, "weatherHistory") <- list(new("swWeatherData"))
@@ -132,8 +149,10 @@ for (it in seq_along(tests)) {
 
 #-----------------------
 #--- USE DEFAULT EXTDATA EXAMPLE AS PACKAGE DATA
-sw_exampleData <- sw_inputDataFromFiles(file.path(dir_in, examples[1]),
-  files.in = "files.in")
+sw_exampleData <- sw_inputDataFromFiles(
+  file.path(dir_in, examples[1]),
+  files.in = "files.in"
+)
 usethis::use_data(sw_exampleData, internal = FALSE, overwrite = TRUE)
 
 
@@ -144,5 +163,8 @@ for (it in seq_along(tests)[-1]) {
 }
 
 #-----------------------
-print(paste("NOTE: Remove", shQuote(dir_backup), "before pushing to",
-  "repository if script worked well."))
+print(paste(
+  "NOTE: Remove",
+  shQuote(dir_backup),
+  "before pushing to repository if script worked well."
+))
