@@ -1492,13 +1492,13 @@ adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp) {
   tmp2 <- temp_zero + target_temp
   temp_2max <- 2 * max(tmp1, tmp2)
 
-  ref_temp_norm <- tmp1 / temp_2max
-  target_temp_norm <- tmp2 / temp_2max
+  ref_temp_norm <- tmp1 / temp_2max # nolint (false positive 'local variable assigned but may not be used')
+  target_temp_norm <- tmp2 / temp_2max # nolint (false positive 'local variable assigned but may not be used')
 
   # Normalize vegetation values (on y-axis) into [0, 0.5]
   # so that range = 0.5 = radius; their minimum is 0, i.e., no shift needed
   veg_2max <- 2 * max(x)
-  veg_norm <- x / veg_2max
+  veg_norm <- x / veg_2max # nolint (false positive 'local variable assigned but may not be used')
 
 
   # Shift temperature and vegetation values (on x-axis)
@@ -1513,7 +1513,7 @@ adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp) {
     int = 12,
     type = "ZeroPlus2Pi"
   ) / nmon
-  mon_norm_center <- mon_norm + 0.5 - tpeak_norm
+  mon_norm_center <- mon_norm + 0.5 - tpeak_norm # nolint (false positive 'local variable assigned but may not be used')
 
 
   #------ Step 2) Fit periodic cubic splines to normalized values
@@ -1666,11 +1666,11 @@ adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp) {
   isgood <- complete.cases(vadj2)
 
   # De-normalize vegetation values (`veg_2max`) back to original scale
-  veg_new <- veg_2max * vadj2[isgood, 2]
+  veg_new <- veg_2max * vadj2[isgood, 2] # nolint (false positive 'local variable assigned but may not be used')
 
   # Revert temporal shifts due to centering
   sx <- tpeak_norm - 0.5
-  toy_new <- (sx + vadj2[isgood, 1]) %% 1
+  toy_new <- (sx + vadj2[isgood, 1]) %% 1# nolint (false positive 'local variable assigned but may not be used')
 
   # Use linear (instead of cubic) spline to smooth across potential steps
   # between cold- and warm-season adjustments
