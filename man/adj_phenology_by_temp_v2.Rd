@@ -4,7 +4,7 @@
 \alias{adj_phenology_by_temp_v2}
 \title{Adjust a phenological pattern to a different temperature regime (v2)}
 \usage{
-adj_phenology_by_temp_v2(x, ref_temp, target_temp)
+adj_phenology_by_temp_v2(x, ref_temp, target_temp, x_asif = NULL)
 }
 \arguments{
 \item{x}{A numeric vector of length 12. The values
@@ -18,6 +18,9 @@ determined / is valid.}
 \item{target_temp}{A numeric vector of length 12. Mean monthly
 temperature values in degree Celsius of a target site / condition
 for which \code{x} is to be adjusted.}
+
+\item{x_asif}{A numeric vector of length 12. If not \code{NULL}, then
+the adjustments applied to \code{x} are based on values of \code{x_asif}.}
 }
 \value{
 An updated copy of \code{x} where the values have been adjusted
@@ -41,8 +44,6 @@ clim <- calc_SiteClimate(weatherList = rSOILWAT2::weatherData)
 ref_temp <- clim[["meanMonthlyTempC"]]
 temp_randomwarmer3C <- ref_temp + stats::rnorm(12, 3, 1)
 
-## Adjust phenology from the reference Mar-Oct to a target Nov-Jun
-## growing season
 phen_adj <- sapply(
   phen_reference,
   adj_phenology_by_temp_v2,

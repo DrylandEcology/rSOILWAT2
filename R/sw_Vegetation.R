@@ -1264,6 +1264,8 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp) {
 #' @param target_temp A numeric vector of length 12. Mean monthly
 #'   temperature values in degree Celsius of a target site / condition
 #'   for which \code{x} is to be adjusted.
+#' @param x_asif A numeric vector of length 12. If not \code{NULL}, then
+#'   the adjustments applied to \code{x} are based on values of \code{x_asif}.
 #'
 #' @return An updated copy of \code{x} where the values have been adjusted
 #'   to represent the phenology of a target climate described by
@@ -1279,8 +1281,6 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp) {
 #' ref_temp <- clim[["meanMonthlyTempC"]]
 #' temp_randomwarmer3C <- ref_temp + stats::rnorm(12, 3, 1)
 #'
-#' ## Adjust phenology from the reference Mar-Oct to a target Nov-Jun
-#' ## growing season
 #' phen_adj <- sapply(
 #'   phen_reference,
 #'   adj_phenology_by_temp_v2,
@@ -1322,105 +1322,170 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp) {
 #' }
 #'
 #' @export
-adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp) {
+adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp, x_asif = NULL) {
 
   mon <- rSW2_glovars[["st_mo"]]
   nmon <- 12 # number of months `mon`
   nwks <- 53
-  Nr <- 2 * nwks # number of steps for adjustements (1 full circle)
-  infl_warm <- 21 / nwks # influence of warm-season circle along x-axis
-  infl_cold <- 21 / nwks # influence of cold-season circle along x-axis
+
+  tol <- rSW2_glovars[["tol"]]
+  tol2 <- sqrt(tol)
+
+  if (is.null(x_asif)) {
+    x_asif <- x
+  }
 
   stopifnot(
     length(x) == nmon,
+    length(x_asif) == nmon,
     length(ref_temp) == nmon,
     length(target_temp) == nmon
   )
 
+  #--- Free parameters
+  Nr <- 2 * nwks # number of steps for adjustements (1 full circle)
+  Ninfl <- 19 #17 # number of `nwks` units of seasonal influence
+  p_voffset <- 1 / 4 # vertical offset of season centers beyond 0-0.5 values
 
-  #------ Step 1) Define cold- and warm-season circles
 
-  # Cold-season circle with radius 0.5, anti-clockwise dir.; start at (0; 0)
-  ctr_cold <- c(0, 0.5)
-  circ_cold <- rSW2utils::f_circle(ctr_cold[1], ctr_cold[2], 0.5, -pi / 2)
+  #------ Step 1) Define cold- and warm-season circles/ellipses
+  yr_std_d <- 1 # duration of 1 year = diameter
+  yr_std_r <- yr_std_d / 2 # radius of year
+  yr_ctrs <- c(0, yr_std_r) # time (x-axis) centers of cold-/warm-seasons
+  vals_std <- c(0, yr_std_r) # y-axis band of cold-/warm-season activity
+  vals_std_off <- vals_std[2] * p_voffset # y-axis offset of season centers
 
-  # Warm-season circle with radius 0.5, clockwise direction; start at (0; 0)
-  ctr_warm <- c(0.5, 0)
-  circ_warm <- rSW2utils::f_circle(ctr_warm[1], ctr_warm[2], 0.5, pi, -1)
+  infl_warm <- Ninfl / nwks
+  infl_cold <- Ninfl / nwks
 
-  # Identify which points fall to the influence of cold- vs. warm-circles
+
+  # Cold-season ellipse with center (0, 1), radii 0.5/1,
+  # anti-clockwise direction, and start at (-0.5, -0.5)
+  ctr_cold <- c(yr_ctrs[1], max(vals_std) + vals_std_off)
+  fun_cold <- rSW2utils::f_ellipse(
+    x0 = ctr_cold[1],
+    y0 = ctr_cold[2],
+    a = yr_std_r,
+    b = vals_std[2] + vals_std_off,
+    theta0 = pi
+  )
+
+  # Warm-season ellipse with center (0.5, -0.5), radii 0.5/1,
+  # anti-clockwise direction, and start at (0, 0)
+  ctr_warm <- c(yr_ctrs[2], min(vals_std) - vals_std_off)
+  fun_warm <- rSW2utils::f_ellipse(
+    x0 = ctr_warm[1],
+    y0 = ctr_warm[2],
+    a = yr_std_r,
+    b = vals_std[2] + vals_std_off,
+    theta0 = pi,
+    dir = -1
+  )
+
+
+  # Identify which points fall to the influence of cold- vs. warm-ellipses
   # (with some overlap)
   xrange_warm <- ctr_warm[1] + c(-1, 1) * infl_warm
+  xrange_warm2 <- ctr_warm[1] + c(-1, 1) * infl_warm / 2
   xrange_cold <- ctr_cold[1] + c(-1, 1) * infl_cold
+  xrange_cold2 <- ctr_cold[1] + c(-1, 1) * infl_cold / 2
 
-  seq_angle <- seq_len(Nr) / Nr * 2 * pi
+  # Season sequences
+  #   - must be continuous for "continuous adjustment sections"
+  #   - make sure season ellipses' vertices are included in sequence
+  #   - increase density of points near season ellipses' vertices
+  #     (where uniroot tends to fail and vegetation curve often changes fast)
+  tmp <- pi / 2
+  seq_angle1 <- sort(unique(c(
+    c(-1, 1) * tmp,
+    seq_len(Nr) / Nr * 2 * pi
+  )))
+  seq_angle2 <- seq_len(2 * Nr) / Nr * pi
 
-  seq_cold <- circ_cold(seq_angle)
-  ids_cold <- which(
-    seq_cold[, 2] <= ctr_cold[2] &
-      seq_cold[, 1] >= xrange_cold[1] &
-      seq_cold[, 1] <= xrange_cold[2]
+  seq_cold1 <- fun_cold(seq_angle1)
+  ids_cold1 <- which(
+    seq_cold1[, 2] <= ctr_cold[2] &
+      seq_cold1[, 1] >= xrange_cold[1] &
+      seq_cold1[, 1] <= xrange_cold[2]
   )
-
-  seq_warm <- circ_warm(seq_angle)
-  ids_warm <- which(
-    seq_warm[, 2] >= ctr_warm[2] &
-      seq_warm[, 1] >= xrange_warm[1] &
-      seq_warm[, 1] <= xrange_warm[2]
+  seq_cold2 <- fun_cold(seq_angle2)
+  ids_cold2 <- which(
+    seq_cold2[, 2] <= ctr_cold[2] &
+      seq_cold2[, 1] >= xrange_cold2[1] &
+      seq_cold2[, 1] <= xrange_cold2[2]
   )
+  seq_cold <- unique(rbind(seq_cold1[ids_cold1, ], seq_cold2[ids_cold2, ]))
+  seq_cold <- seq_cold[order(seq_cold[, 1]), ]
 
-  n_cold <- length(ids_cold)
-  n_warm <- length(ids_warm)
+  seq_warm1 <- fun_warm(seq_angle1)
+  ids_warm1 <- which(
+    seq_warm1[, 2] >= ctr_warm[2] &
+      seq_warm1[, 1] >= xrange_warm[1] &
+      seq_warm1[, 1] <= xrange_warm[2]
+  )
+  seq_warm2 <- fun_warm(seq_angle2)
+  ids_warm2 <- which(
+    seq_warm2[, 2] >= ctr_warm[2] &
+      seq_warm2[, 1] >= xrange_warm2[1] &
+      seq_warm2[, 1] <= xrange_warm2[2]
+  )
+  seq_warm <- unique(rbind(seq_warm1[ids_warm1, ], seq_warm2[ids_warm2, ]))
+  seq_warm <- seq_warm[order(seq_warm[, 1]), ]
+
+  n_cold <- nrow(seq_cold)
+  n_warm <- nrow(seq_warm)
   Nadj <- n_cold + n_warm
 
 
   # Information about the points that define the lines which are used
   # to intersect values for adjustments
   # columns:
-  #   1:2 = x/y-coords of center of cold-/warm-season circle
-  #   3:4 = x/y-coords of points along cold-/warm-season circle
-  #   5:6 = min/max of x-coord under influence of cold-/warm-season circle
-  #   7 = x-extent of influence around center of cold-/warm-season circle
+  #   1:2 = x/y-coords of center of cold-/warm-season ellipses
+  #   3:4 = x/y-coords of points along cold-/warm-season ellipses
+  #   5:6 = min/max of x-coord under influence of cold-/warm-season ellipses
+  #   7 = x-extent of influence around center of cold-/warm-season ellipses
   ptadj <- matrix(NA, nrow = Nadj, ncol = 7)
 
   tmp <- seq_len(n_cold)
   ptadj[tmp, 1:2] <- rep(ctr_cold, each = n_cold)
-  ptadj[tmp, 3:4] <- seq_cold[ids_cold, ]
+  ptadj[tmp, 3:4] <- seq_cold
   ptadj[tmp, 5:6] <- rep(xrange_cold, each = n_cold)
   ptadj[tmp, 7] <- infl_cold
 
   tmp <- n_cold + seq_len(n_warm)
   ptadj[tmp, 1:2] <- rep(ctr_warm, each = n_warm)
-  ptadj[tmp, 3:4] <- seq_warm[ids_warm, ]
+  ptadj[tmp, 3:4] <- seq_warm
   ptadj[tmp, 5:6] <- rep(xrange_warm, each = n_warm)
   ptadj[tmp, 7] <- infl_warm
 
 
   #------ Step 2) Normalize (shift and scale) all values
-  # so that they fit into the season circles
+  # so that they fit into the season ellipses
 
   # Normalize time of year values (on x-axis) into [0, 1]
-  # so that range = 1 = 2 * radius; their minimum is 0, i.e., no shift needed
   mon_norm <- mon / nmon
 
   # Normalize temperature values (on y-axis) into [0, 0.5]
-  # so that range = 0.5 = radius (i.e., arc of circle where y > 0)
   temp_zero <- -min(ref_temp, target_temp)
   tmp1 <- temp_zero + ref_temp
   tmp2 <- temp_zero + target_temp
-  temp_2max <- 2 * max(tmp1, tmp2)
+  temp_2max <- max(tmp1, tmp2) / vals_std[2]
 
-  ref_temp_norm <- tmp1 / temp_2max # nolint (false positive 'local variable assigned but may not be used')
-  target_temp_norm <- tmp2 / temp_2max # nolint (false positive 'local variable assigned but may not be used')
+  ref_temp_norm <- tmp1 / temp_2max
+  ref_temp_norm_mean <- mean(ref_temp_norm)
+  target_temp_norm <- tmp2 / temp_2max
 
-  # Normalize vegetation values (on y-axis) into [0, 0.5]
-  # so that range = 0.5 = radius; their minimum is 0, i.e., no shift needed
-  veg_2max <- 2 * max(x)
-  veg_norm <- x / veg_2max # nolint (false positive 'local variable assigned but may not be used')
+  # Normalize vegetation values (on y-axis) into [0, 0.5] so that mean = 0.25
+  veg_min <- c(0, 0) #c(min(x), min(x_asif))
+  veg_2max <- (c(max(x), max(x_asif)) - veg_min) / vals_std[2]
+  veg_4mean <- (c(mean(x), mean(x_asif)) - veg_min) / (vals_std[2] / 2)
+  veg_scale <- pmax(veg_2max, veg_4mean)
+  veg_norm <- (x - veg_min[1]) / veg_scale[1]
+  veg_asif_norm <- (x_asif - veg_min[2]) / veg_scale[2]
 
 
   # Shift temperature and vegetation values (on x-axis)
-  # so that their circles are centered on the warm- and cold-season centers
+  # so that their ellipses are centered on the warm- and cold-season centers
   # i.e., shift time of year so that peaks lie at warm-season x-center of 0.5
 
   # Original centers = time of peak season as mean month weighted by values
@@ -1428,32 +1493,40 @@ adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp) {
   tpeak_norm <- rSW2utils::circ_mean_weighted(
     x = tmp,
     w = ref_temp_norm[tmp],
-    int = 12,
+    int = nmon,
     type = "ZeroPlus2Pi"
   ) / nmon
-  mon_norm_center <- mon_norm + 0.5 - tpeak_norm # nolint (false positive 'local variable assigned but may not be used')
+
+  sx <- yr_std_r - tpeak_norm
+  mon_norm_center <- mon_norm + sx
+
 
 
   #------ Step 2) Fit periodic cubic splines to normalized values
   psps <- list(
     t_ref = splines::periodicSpline(
       ref_temp_norm ~ mon_norm_center,
-      period = 1
+      period = yr_std_d
     ),
 
     t_target = splines::periodicSpline(
       target_temp_norm ~ mon_norm_center,
-      period = 1
+      period = yr_std_d
     ),
 
     veg = splines::periodicSpline(
       veg_norm ~ mon_norm_center,
-      period = 1
+      period = yr_std_d
+    ),
+
+    veg_asif = splines::periodicSpline(
+      veg_asif_norm ~ mon_norm_center,
+      period = yr_std_d
     )
   )
 
-  itcurves <- seq_len(2)
-  ivcurve <- 3
+  itcurves <- 1:2
+  ivcurves <- 3:4
 
 
   #------ Step 3) Correct vegetation
@@ -1462,15 +1535,15 @@ adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp) {
   # Prepare container for adjusted (normalized) vegetation points (xy)
   vadj <- vector("list", length = Nadj)
   k_vadj <- 1
+  ksc <- 1 # counter of continous adjustment sections
+  kce <- c(1, 0, 0) # counter of continuous failure sections
 
-
-  #--- Locate intersection between target temperature function and
-  # line connecting points (time of year, reference temperature function) and
-  # center point `mpeak_ref` (for warm season) or `mlow_ref` (for cold season)
-
-  # Loop through points along season-circles (`ptadj`)
+  # Loop through points along season-ellipses (`ptadj`)
   for (k in seq_len(Nadj)) {
 
+    #--- Locate intersection between target temperature function and
+    # line connecting points (time of year, reference temperature function) and
+    # season center points
     if (abs(ptadj[k, 3] - ptadj[k, 1]) > rSW2_glovars[["tol"]]) {
 
       # Function describing line that is connecting the circle-center point
@@ -1482,10 +1555,10 @@ adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp) {
 
       # Search limits for locating intersections
       if (ptadj[k, 3] > ptadj[k, 1]) {
-        # limits: circle center to max influence
+        # limits: ellipse center to max influence
         olims <- c(ptadj[k, 1], ptadj[k, 6])
       } else {
-        # limits: min influence to circle center
+        # limits: min influence to ellipse center
         olims <- c(ptadj[k, 5], ptadj[k, 1])
       }
       olims <- rSW2utils::extend_range(olims, 1 + ptadj[k, 7] / 2)
@@ -1494,112 +1567,272 @@ adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp) {
       #   (i) normalized reference temperature curve
       #   (ii) normalized target temperature curve
       xcrosses_tcurves <- lapply(
-        X = psps[itcurves],
-        FUN = locate_intersections,
-        linfun = fline_radial,
-        xlim = olims,
-        expected_nroots = 1
+        X = itcurves,
+        FUN = function(itp) {
+          rSW2utils::uniroots(
+            f = function(x) {
+              predict(psps[[itp]], x)[["y"]] - fline_radial(x)[, 2]
+            },
+            xlim = olims,
+            tol = tol,
+            expected_nroots = 1
+          )
+        }
       )
 
       # Success of detection of temperature curves intersections
-      good_tcurves <- has_intersections(xcrosses_tcurves)
+      good_tcurves <- sapply(
+        xcrosses_tcurves,
+        rSW2utils::has_uniroots,
+        tol = tol2
+      )
 
       if (all(good_tcurves)) {
         # Locate (all) x-axis values where line crosses
-        #   (iii) nomarlized vegetation curve
-        xcrosses_vcurves <- locate_intersections(
-          psp = psps[[ivcurve]],
-          linfun = fline_radial,
-          xlim = olims,
-          expected_nroots = 100
+        #   (iii) nomarlized vegetation curves
+        xcrosses_vcurves <- lapply(
+          X = ivcurves,
+          FUN = function(ivp) {
+            rSW2utils::uniroots(
+              f = function(x) {
+                predict(psps[[ivp]], x)[["y"]] - fline_radial(x)[, 2]
+              },
+              xlim = olims,
+              tol = tol,
+              expected_nroots = 100
+            )
+          }
         )
 
         # Success of detection of vegetation curve intersections
-        good_vcurves <- has_intersections(xcrosses_vcurves)
+        good_vcurves <- lapply(
+          xcrosses_vcurves,
+          rSW2utils::has_uniroots,
+          tol = tol2
+        )
+
+        if (!identical(good_vcurves[[1]], good_vcurves[[2]])) {
+          good_vcurves <- FALSE
+        }
 
       } else {
         good_vcurves <- FALSE
       }
 
     } else {
-      # Vertical line (`f_abline` fails because slope would be inf)
-      tmp <- list(root = ptadj[k, 3])
+      # Vertical line (`f_2pline` fails because slope would be inf)
+      tmp <- list(list(root = ptadj[k, 3]))
 
       xcrosses_tcurves <- lapply(seq_along(itcurves), function(...) tmp)
       good_tcurves <- TRUE
 
-      xcrosses_vcurves <- list(tmp)
-      good_vcurves <- TRUE
+      xcrosses_vcurves <- lapply(seq_along(ivcurves), function(...) tmp)
+      good_vcurves <- lapply(seq_along(ivcurves), function(...) TRUE)
     }
 
 
-    # If detection of intersections successful, then calculate and apply
-    # radial expansion/contraction
-    if (all(good_tcurves) && any(good_vcurves)) {
+
+    #--- Calculate and apply radial expansion/contraction
+    if (all(good_tcurves) && all(sapply(good_vcurves, any))) {
 
       # Intersection points: reference temp, target temp
-      x_tvals <- sapply(xcrosses_tcurves, function(x) x[["root"]])
-      y_tvals <- sapply(seq_along(x_tvals), function(i)
-        predict(psps[[i]], x_tvals[i])[["y"]]
+      x_tvals <- sapply(xcrosses_tcurves, function(x) x[[1]][["root"]])
+      y_tvals <- sapply(
+        seq_along(x_tvals),
+        function(i) predict(psps[[i]], x_tvals[i])[["y"]]
       )
 
       # Calculate radial x- and y-expansion/contraction
       # (from ref temps to target temps)
-      # as fraction of reference temps to circle center
+      # as fraction of reference temps to season center
       rx <- (x_tvals[2] - x_tvals[1]) / (x_tvals[1] - ptadj[k, 1])
       rx <- if (is.finite(rx)) rx else 0
       ry <- (y_tvals[2] - y_tvals[1]) / (y_tvals[1] - ptadj[k, 2])
       ry <- if (is.finite(ry)) ry else 0
 
       # Intersection points: vegetation(s)
-      x_vvals <- sapply(
-        xcrosses_vcurves[good_vcurves],
-        function(x) x[["root"]]
+      x_vvals <- lapply(
+        seq_along(ivcurves),
+        function(kvc) {
+          sapply(
+            xcrosses_vcurves[[kvc]][good_vcurves[[kvc]]],
+            function(x) x[["root"]]
+          )
+        }
       )
-      y_vvals <- sapply(seq_along(x_vvals), function(i)
-        predict(psps[[ivcurve]], x_vvals[i])[["y"]]
+      y_vvals <- lapply(
+        seq_along(ivcurves),
+        function(kvc) {
+          predict(psps[[ivcurves[kvc]]], x_vvals[[kvc]])[["y"]]
+        }
       )
 
-      # Calculate adjusted vegetation point
-      for (kv in seq_along(x_vvals)) {
+      # Calculate adjusted vegetation point(s)
+      # based on `x_asif` (index 2) but applied to `x` (index 1)
+      for (kv in seq_along(x_vvals[[2]])) {
         vadj[[k_vadj]] <- c(
-          x_vvals[kv] + rx * (x_vvals[kv] - ptadj[k, 1]),
-          y_vvals[kv] + ry * (y_vvals[kv] - ptadj[k, 2])
+          # xy-coordinates
+          x_vvals[[1]][kv] + rx * (x_vvals[[2]][kv] - ptadj[k, 1]),
+          y_vvals[[1]][kv] + ry * (y_vvals[[2]][kv] - ptadj[k, 2]),
+          # season that adjusts
+          ptadj[k, 1],
+          # number of continous adjustment section
+          ksc
         )
 
         k_vadj <- k_vadj + 1
+      }
+
+    } else {
+      # discontinuation in adjustment sections
+      ksc <- ksc + 1
+
+      # count longest continuous failure section
+      if (kce[1] == k - 1) {
+        kce[1:2] <- c(k, kce[2] + 1)
+      } else {
+        if (kce[2] > kce[3]) {
+          kce[3] <- kce[2]
+        }
+        kce[1:2] <- c(k, 1)
       }
     }
   }
 
 
-  # Sort adjusted vegetation values
+
+  if (ksc > 0.2 * Nadj) {
+    warning("More than 20% of adjustement points failed.")
+  }
+
+  if (max(kce[2:3]) > 0.1 * Nadj) {
+    warning(
+      "The longest contiguous section of failed adjustements ",
+      "is longer than 10% of all points.")
+  }
+
+
+  #--- Pre-process adjusted vegetation values separately for seasons
+  # (in case certain time points received both cold- and warm-season adj.)
+
+  # Clean, sort, and separate adjusted vegetation values
   vadj <- vadj[seq_len(k_vadj - 1)]
-  vadj2 <- matrix(unlist(vadj), nrow = length(vadj), ncol = 2, byrow = TRUE)
-  vadj2 <- vadj2[!duplicated(vadj2), ]
-  vadj2 <- vadj2[order(vadj2[, 1]), ]
+
+  vadj2 <- matrix(unlist(vadj), nrow = length(vadj), ncol = 4, byrow = TRUE)
+  vadj2 <- vadj2[complete.cases(vadj2), ]
+
+  # determine duplicated values: see `smooth.spline`
+  tmp <- vadj2[, 1]
+  isdup <- duplicated(round((tmp - mean(tmp)) / (1e-6 * stats::IQR(tmp))))
+  vadj2 <- vadj2[!isdup, ]
+
+  vadj2 <- vadj2[order(vadj2[, 1]), , drop = FALSE]
+
+  vadj2 <- lapply(
+    c(ctr_cold[1], ctr_warm[1]),
+    function(ctr) vadj2[abs(vadj2[, 3] - ctr) < tol, , drop = FALSE]
+  )
+
+  # Continous adjustment sections
+  scs <- lapply(vadj2, function(x) sort(unique(x[, 4])))
+
+
+  # Fit periodic linear spline to adjusted vegetation values per season
+  # and predict along regular sequence (for each continuous section)
+  fxpsp_adj_norm2 <- lapply(
+    vadj2,
+    function(x) {
+      if (nrow(x) >= 4) {
+        splines::interpSpline(x[, 2] ~ x[, 1])
+      }
+    }
+  )
+
+
+  itmp <- seq_len(Nadj) / Nadj - 1 / (2 * Nadj)
+  vadj3 <- lapply(
+    seq_along(vadj2),
+    function(k2) {
+      tmp <- matrix(NA, nrow = Nadj, ncol = 1 + length(scs[[k2]]))
+      tmp[, 1] <- itmp
+      tmp
+    }
+  )
+
+  # Columns: (1) x-axis location, (2) cold-season adj. veg,
+  #          (3) warm-season adj. veg, (4) across season averaged adj. veg
+  vadj4 <- matrix(NA, nrow = Nadj, ncol = 4)
+  vadj4[, 1] <- itmp
+
+
+  # Predict seasonaly adjusted vegetation for each continous section
+  for (k2 in seq_along(vadj2)) {
+    if (!is.null(fxpsp_adj_norm2[[k2]])) {
+      for (k3 in seq_along(scs[[k2]])) {
+        ids <- vadj2[[k2]][, 4] %in% scs[[k2]][k3]
+        xl <- round(Nadj * range(vadj2[[k2]][ids, 1]))
+        xt2 <- seq(xl[1], xl[2])
+
+        tmp <- predict(
+          fxpsp_adj_norm2[[k2]],
+          xt2 / Nadj - 1 / (2 * Nadj)
+        )
+
+        tmp <- aggregate(
+          tmp[["y"]],
+          by = list(tmp[["x"]] %% yr_std_d),
+          FUN = mean
+        )
+
+        xt2p <- sapply(
+          tmp[, 1],
+          function(x) which.min(abs(x - vadj3[[k2]][, 1] %% yr_std_d))
+        )
+
+        vadj3[[k2]][xt2p, 1 + k3] <- tmp[, 2]
+      }
+
+      # Average across continous sections (within season)
+      vadj4[, 1 + k2] <- apply(
+        vadj3[[k2]][, -1, drop = FALSE],
+        MARGIN = 1,
+        FUN = mean,
+        na.rm = TRUE
+      )
+    }
+  }
+
+  # Average values across seasons
+  vadj4[, 4] <- apply(vadj4[, -1], 1, mean, na.rm = TRUE)
+  isgood <- complete.cases(vadj4[, c(1, 4)])
+  vadj4 <- vadj4[isgood, , drop = FALSE]
 
 
   #------ Step 4) Fit periodic linear spline to adjusted vegetation values
-  isgood <- complete.cases(vadj2)
+  # De-normalize vegetation values back to original scale
+  veg_new <- veg_min[1] + veg_scale[1] * vadj4[, 4]
 
-  # De-normalize vegetation values (`veg_2max`) back to original scale
-  veg_new <- veg_2max * vadj2[isgood, 2] # nolint (false positive 'local variable assigned but may not be used')
+  # Revert temporal shifts due to centering of refs, target temps and veg
+  toy_new <- (vadj4[, 1] - sx) %% yr_std_d
 
-  # Revert temporal shifts due to centering
-  sx <- tpeak_norm - 0.5
-  toy_new <- (sx + vadj2[isgood, 1]) %% 1# nolint (false positive 'local variable assigned but may not be used')
+  if (nrow(vadj4) >= 2) {
+    # Use linear (instead of cubic) spline to smooth across potential steps
+    # between cold- and warm-season adjustments
+    fxpsp_adj <- splines::periodicSpline(
+      veg_new ~ toy_new,
+      period = yr_std_d,
+      ord = 2 # linear spline
+    )
 
-  # Use linear (instead of cubic) spline to smooth across potential steps
-  # between cold- and warm-season adjustments
-  fxpsp_adj <- splines::periodicSpline(
-    veg_new ~ toy_new,
-    period = 1,
-    ord = 2 # linear spline
-  )
+    # Obtain monthly adjusted vegetation values
+    pres <- predict(fxpsp_adj, mon_norm)[["y"]]
 
-  # Obtain monthly adjusted vegetation values
-  pmax(0, predict(fxpsp_adj, mon_norm)[["y"]])
+  } else {
+    warning("Less than 3 adjustement points succeeded: return mean value.")
+    pres <- rep(mean(veg_new), nmon)
+  }
+
+  pmax(0, pres)
 }
 
 
