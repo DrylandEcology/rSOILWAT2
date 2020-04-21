@@ -287,10 +287,9 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 
 Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year) {
 	SW_WEATHER_HIST *wh = &SW_Weather.hist;
-	int x, lineno = 0, k = 0, i, j, days;
+	int lineno = 0, i, j, days;
 	Bool has_values = FALSE;
 	RealD *p_WTH_DATA;
-	RealF acc = 0.0;
 	TimeInt doy;
 
 	if (isnull(WTH_DATA_YEAR)) {
@@ -339,35 +338,7 @@ Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year) {
 			wh->ppt[doy] = p_WTH_DATA[j];
 			has_values = TRUE;
 		}
-
-		if (!missing(wh->temp_max[doy]) && !missing(wh->temp_min[doy])) {
-			k++;
-			wh->temp_avg[doy] = (wh->temp_max[doy] + wh->temp_min[doy]) / 2.0;
-			acc += wh->temp_avg[doy];
-			has_values = TRUE;
-		}
 	} /* end of input lines */
-
-	wh->temp_year_avg = acc / (k + 0.0);
-
-	x = 0;
-	for (i = 0; i < MAX_MONTHS; i++) {
-		k = 31;
-		if (i == 8 || i == 3 || i == 5 || i == 10)
-		k = 30; // september, april, june, & november all have 30 days...
-		else if (i == 1) {
-			k = 28; // february has 28 days, except if it's a leap year, in which case it has 29 days...
-			if (isleapyear(year))
-			k = 29;
-		}
-		acc = 0.0;
-		for (j = 0; j < k; j++) {
-		  acc += wh->temp_avg[j + x];
-		}
-		wh->temp_month_avg[i] = acc / (k + 0.0);
-		x += k;
-	}
-
 
 	return has_values;
 }

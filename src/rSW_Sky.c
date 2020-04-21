@@ -101,7 +101,6 @@ SEXP onGet_SW_SKY() {
 
 void onSet_SW_SKY(SEXP sxp_SW_SKY) {
 	int i, k = 6;
-	SW_WEATHER *w = &SW_Weather;
 	SW_SKY *v = &SW_Sky;
 	RealD *p_Cloud;
 	PROTECT(sxp_SW_SKY);
@@ -117,10 +116,6 @@ void onSet_SW_SKY(SEXP sxp_SW_SKY) {
 		v->snow_density[i] = p_Cloud[4 + k * i];
 		v->n_rain_per_day[i] = p_Cloud[5 + k * i];
 	}
-
-	// must be called after `onSet_SW_WTH`
-	SW_SKY_init(w->scale_skyCover, w->scale_wind, w->scale_rH,
-		w->scale_transmissivity);
 
 	UNPROTECT(1);
 }
