@@ -50,7 +50,7 @@ extern SEXP InputData;
 /** Additional initialization to be performed for rSOILWAT2
     This function is meant to be run immediately after calling SW_CTL_init_model()
  */
-void rSW_CTL_init_model2(void) {
+void rSW_CTL_setup_model2(void) {
   rSW_SWC_construct();
 }
 
@@ -133,6 +133,4 @@ void rSW_CTL_obtain_inputs(Bool from_files) {
     if (debug) swprintf(" completed.\n");
     #endif
   }
-
-  calculate_CO2_multipliers();
 }

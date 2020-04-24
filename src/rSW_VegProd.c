@@ -624,8 +624,6 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 
   SW_VPD_fix_cover();
 
-	SW_VPD_init();
-
 	if (EchoInits)
 		_echo_VegProd();
 

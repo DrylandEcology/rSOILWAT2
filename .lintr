@@ -28,10 +28,10 @@ linters: with_defaults(
   #extraction_operator_linter,
   #implicit_integer_linter,
   #todo_comment_linter,
+  #nonportable_path_linter(lax = TRUE), # see https://github.com/jimhester/lintr/issues/468
   #--- Activated non-default linters:
   absolute_path_linter(lax = TRUE),
   T_and_F_symbol_linter,
-  nonportable_path_linter(lax = TRUE),
   semicolon_terminator_linter(semicolon = c("compound", "trailing")),
   undesirable_function_linter,
   undesirable_operator_linter,
