@@ -43,7 +43,6 @@ SEXP Rlogfile;
 SEXP InputData;
 SEXP WeatherList;
 Bool useFiles;
-Bool collectInData;
 Bool bWeatherList;
 
 extern char _firstfile[1024];
@@ -75,7 +74,9 @@ SEXP tempError(void) {
 }
 
 
-void initSOILWAT2(SEXP inputOptions) {
+/** Setup and construct model (independent of inputs)
+*/
+void setupSOILWAT2(SEXP inputOptions) {
 	int i, argc;
 	char *argv[7];
   #ifdef RSWDEBUG
@@ -107,8 +108,8 @@ void initSOILWAT2(SEXP inputOptions) {
   if (debug) swprintf("Initialize SOILWAT ...");
 	#endif
 
-	SW_CTL_init_model(_firstfile);
-	rSW_CTL_init_model2();
+	SW_CTL_setup_model(_firstfile);
+	rSW_CTL_setup_model2();
 }
 
 
@@ -118,7 +119,6 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   int debug = 0;
   #endif
 
-  collectInData = TRUE;
   logged = FALSE;
   logfp = NULL;
 
@@ -129,12 +129,20 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   PROTECT(oRlogfile = NEW_OBJECT(swLog));
   PROTECT(Rlogfile = GET_SLOT(oRlogfile,install("LogData")));
 
-  initSOILWAT2(inputOptions);
+  // setup and construct model (independent of inputs)
+  setupSOILWAT2(inputOptions);
 
+  // read user inputs: from files
   #ifdef RSWDEBUG
   if (debug) swprintf("Read input from disk files into SOILWAT2 variables\n");
   #endif
   rSW_CTL_obtain_inputs(TRUE);
+
+  // initialize simulation run (based on user inputs)
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" init simulation run ...");
+  #endif
+  SW_CTL_init_run();
 
   #ifdef RSWDEBUG
   if (debug) swprintf("onGetInputDataFromFiles: copy data from SOILWAT2 "
@@ -214,10 +222,11 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 
   SET_SLOT(SW_DataList, install("log"), oRlogfile);
 
+  // de-allocate all memory, but `p_OUT`
   #ifdef RSWDEBUG
   if (debug) swprintf("De-allocate most memory\n");
   #endif
-  SW_CTL_clear_model(FALSE); // de-allocate all memory, but `p_OUT`
+  SW_CTL_clear_model(FALSE);
 
   #ifdef RSWDEBUG
   if (debug) swprintf(" completed.\n");
@@ -233,7 +242,6 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
   int debug = 0;
   #endif
 
-	collectInData = FALSE;
 	logged = FALSE;
 	if (LOGICAL(coerceVector(quiet, LGLSXP))[0]) {
 		// tell 'LogError' that R should NOT print messages to the console
@@ -265,17 +273,25 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 	PROTECT(oRlogfile = NEW_OBJECT(swLog));
 	PROTECT(Rlogfile = GET_SLOT(oRlogfile,install("LogData")));
 
+  // setup and construct model (independent of inputs)
   #ifdef RSWDEBUG
-  if (debug) swprintf(" input arguments ...");
+  if (debug) swprintf(" input arguments & setup model ...");
   #endif
-	initSOILWAT2(inputOptions);
+	setupSOILWAT2(inputOptions);
 
+	// read user inputs: either from files or from memory (depending on useFiles)
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" obtain inputs ...");
 	#endif
-	//Obtain the input data either from files or from memory (depending on useFiles)
 	rSW_CTL_obtain_inputs(useFiles);
 
+	// initialize simulation run (based on user inputs)
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" init simulation run ...");
+	#endif
+	SW_CTL_init_run();
+
+  // initialize output
   #ifdef RSWDEBUG
   if (debug) swprintf(" setup output variables ...");
   #endif
@@ -284,15 +300,17 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 	PROTECT(outputData = onGetOutput(inputData));
 	setGlobalrSOILWAT2_OutputVariables(outputData);
 
+  // run simulation: loop through each year
   #ifdef RSWDEBUG
-  if (debug) swprintf(" run SOILWAT ...");
+  if (debug) swprintf(" run SOILWAT2 ...");
   #endif
 	SW_CTL_main();
 
+   // de-allocate all memory, but let R handle `p_OUT`
   #ifdef RSWDEBUG
   if (debug) swprintf(" clean up ...");
   #endif
-	SW_CTL_clear_model(FALSE); // de-allocate all memory, but let R handle `p_OUT`
+	SW_CTL_clear_model(FALSE);
 
   #ifdef RSWDEBUG
   if (debug) swprintf(" completed.\n");

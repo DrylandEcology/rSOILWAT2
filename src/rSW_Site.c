@@ -41,7 +41,6 @@
 /* --------------------------------------------------- */
 
 
-extern Bool collectInData;
 extern SEXP InputData;
 extern SW_SITE SW_Site;
 extern Bool EchoInits;
@@ -229,9 +228,6 @@ void onSet_SW_LYR(SEXP SW_SOILS) {
 		lyrno = _newlayer();
 		v->lyr[lyrno]->width = 1.0;
 	}
-
-
-	init_site_info();
 
 	UNPROTECT(1);
 }

@@ -1,1 +1,3 @@
 2018-07-03: clear appveyor cache
+2020-04-24: Error: package 'remotes' was installed before R 4.0.0: please re-install it
+

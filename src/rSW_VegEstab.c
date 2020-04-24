@@ -102,7 +102,7 @@ void onSet_SW_VES(SEXP VES) {
 	if (EchoInits)
 		LogError(logfp, LOGNOTE, "Establishment not used.\n");
 
-	Init_SW_VegEstab();
+	SW_VegEstab_construct();
 
 	if (EchoInits)
 		_echo_VegEstab();
