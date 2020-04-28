@@ -7,14 +7,12 @@ climate relationships}
 \usage{
 estimate_PotNatVeg_biomass(
   tr_VegBiom,
-  do_adjBiom_by_temp = FALSE,
-  do_adjBiom_by_ppt = FALSE,
+  do_adjust_phenology = FALSE,
+  do_adjust_biomass = FALSE,
   fgrass_c3c4ann = c(1, 0, 0),
-  growing_limit_C = 4,
-  isNorth = TRUE,
   MAP_mm = 450,
-  mean_monthly_temp_C = c(rep(growing_limit_C - 1, 2), rep(growing_limit_C + 1, 8),
-    rep(growing_limit_C - 1, 2))
+  ref_temp,
+  target_temp
 )
 }
 \arguments{
@@ -24,29 +22,26 @@ estimate_PotNatVeg_biomass(
 \code{X = Sh}; C3-grasses, \code{X = C3}; C4-grasses, \code{X = C4}; and
 annuals, \code{X = Annual} containing default input values.}
 
-\item{do_adjBiom_by_temp}{A logical value. If \code{TRUE} then monthly
+\item{do_adjust_phenology}{A logical value. If \code{TRUE} then monthly
 phenology is adjusted by temperature.}
 
-\item{do_adjBiom_by_ppt}{A logical value. If \code{TRUE} then monthly biomass
+\item{do_adjust_biomass}{A logical value. If \code{TRUE} then monthly biomass
 is adjusted by precipitation.}
 
 \item{fgrass_c3c4ann}{A numeric vector of length 3. Relative contribution
 [0-1] of the C3-grasses, C4-grasses, and annuals functional groups. The sum
 of \code{fgrass_c3c4ann} is 1.}
 
-\item{growing_limit_C}{A numeric value. \code{mean_monthly_temp_C} equal or
-above this limit are considered suitable for growth (growing season).
-Default value is 4 C.}
-
-\item{isNorth}{A logical value. \code{TRUE} for locations on the northern
-hemisphere, \code{FALSE} for locations on the southern hemisphere.}
-
 \item{MAP_mm}{A numeric value. Mean annual precipitation in millimeter of the
 location.}
 
-\item{mean_monthly_temp_C}{A numeric vector of length 12. Mean monthly
-temperatures in Celsius of a target site for which \code{x} is
-adjusted.}
+\item{ref_temp}{A numeric vector of length 12. Reference mean monthly
+temperature values in degree Celsius under which \code{x} was
+determined / is valid.}
+
+\item{target_temp}{A numeric vector of length 12. Mean monthly
+temperature values in degree Celsius of a target site / condition
+for which \code{x} is to be adjusted.}
 }
 \value{
 A list with two elements \code{grass}, \code{shrub}. Each element is
@@ -74,4 +69,10 @@ Bradford, J.B., Schlaepfer, D.R., Lauenroth, W.K. & Burke, I.C.
   (2014). Shifts in plant functional types have time-dependent and regionally
   variable impacts on dryland ecosystem water balance. J Ecol, 102,
   1408-1418.
+}
+\seealso{
+Function \code{\link{adjBiom_by_ppt}} is called
+  if \code{do_adjust_biomass};
+  function \code{\link{adj_phenology_by_temp_v2}} is called
+  if \code{do_adjust_phenology}.
 }

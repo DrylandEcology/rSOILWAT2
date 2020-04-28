@@ -604,6 +604,8 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
 
 
 calc.loess_coeff <- function(N, span) {
+  .Deprecated(new = "adj_phenology_by_temp")
+
   # prevent call to loessc.c:ehg182(104):
   # error msg: "span too small.   fewer data values than degrees of freedom"
   lcoef <- list(span = min(1, span), degree = 2)
@@ -622,6 +624,8 @@ calc.loess_coeff <- function(N, span) {
 }
 
 get_season <- function(mo_season_TF, N_season = NULL) {
+  .Deprecated(new = "adj_phenology_by_temp")
+
   # Calculate first month of season == last start in (circular) year
   starts <- calc_starts(mo_season_TF)
 
@@ -691,6 +695,7 @@ get_season <- function(mo_season_TF, N_season = NULL) {
 #'
 #' @export
 predict_season <- function(x, ref_season, target_season) {
+  .Deprecated(new = "adj_phenology_by_temp")
 
   # `x` must be a two-dimensional object with 12 rows (corresponding to months)
   if (!inherits(x, c("matrix", "data.frame"))) {
@@ -887,6 +892,7 @@ adjBiom_by_temp <- function(x, mean_monthly_temp_C, growing_limit_C = 4,
 
 #' Find location of minimum and maximum
 get_season_description_v2 <- function(x) {
+  .Deprecated(new = "adj_phenology_by_temp")
   c(
     min = {
       tmp <- which(abs(x - min(x)) < rSW2_glovars[["tol"]])
@@ -902,6 +908,8 @@ get_season_description_v2 <- function(x) {
 
 # Smoothed representation of outcome as linear combination of lower/upper bounds
 fix_optimized_seasonality <- function(vals, lower, upper, is_res_zero) {
+  .Deprecated(new = "adj_phenology_by_temp")
+
   lc <- cbind(vals / lower, vals / upper)
   itmp <- abs(lc[, 1] - 1) < rSW2_glovars[["tol"]]
   lc[itmp, 1] <- 2
@@ -999,6 +1007,7 @@ fix_optimized_seasonality <- function(vals, lower, upper, is_res_zero) {
 #'
 #' @export
 adj_phenology_by_temp <- function(x, ref_temp, target_temp) {
+  .Deprecated(new = "adj_phenology_by_temp")
 
   stopifnot(
     length(x) == 12,
@@ -1273,8 +1282,12 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp) {
 #'
 #' @examples
 #' sw_in <- rSOILWAT2::sw_exampleData
-#' phen_reference <- as.data.frame(
-#'   swProd_MonProd_grass(sw_in)[, c("Biomass", "Live_pct")]
+#' tmp <- swProd_MonProd_grass(sw_in)
+#' phen_reference <- data.frame(
+#'   tmp,
+#'   Litter_pct = tmp[, "Litter"] / max(tmp[, "Litter"]),
+#'   Biomass_pct = tmp2 <- tmp[, "Biomass"] / max(tmp[, "Biomass"]),
+#'   Biomass2_pct = {tmp2[6:8] <- 1; tmp2}
 #' )
 #'
 #' clim <- calc_SiteClimate(weatherList = rSOILWAT2::weatherData)
@@ -1285,7 +1298,32 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp) {
 #'   phen_reference,
 #'   adj_phenology_by_temp_v2,
 #'   ref_temp = ref_temp,
-#'   target_temp = temp_randomwarmer3C
+#'   target_temp = temp_randomwarmer3C,
+#'   x_asif = phen_reference[, "Live_pct"]
+#' )
+#'
+#' ## Note: depending on what `x` represents, post-adjustment scaling may
+#' ## be necessary
+#'
+#' # Maintain previous peak
+#' rSW2utils::scale_to_reference_fun(
+#'   x = phen_adj[, "Litter_pct"],
+#'   x_ref = phen_reference[, "Litter_pct"],
+#'   fun = max
+#' )
+#'
+#' # Maintain previous sum
+#' rSW2utils::scale_to_reference_fun(
+#'   x = phen_adj[, "Biomass"],
+#'   x_ref = phen_reference[, "Biomass"],
+#'   fun = sum
+#' )
+#'
+#' # Maintain previous frequency of peaks and cap the peaks at that value
+#' rSW2utils::scale_to_reference_peak_frequency(
+#'   x = phen_adj[, "Biomass2_pct"],
+#'   x_ref = phen_reference[, "Biomass2_pct"],
+#'   cap_at_peak = TRUE
 #' )
 #'
 #' ## Plot reference and adjusted monthly values
@@ -1472,16 +1510,16 @@ adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp, x_asif = NULL) {
   temp_2max <- max(tmp1, tmp2) / vals_std[2]
 
   ref_temp_norm <- tmp1 / temp_2max
-  ref_temp_norm_mean <- mean(ref_temp_norm)
-  target_temp_norm <- tmp2 / temp_2max
+  ref_temp_norm_mean <- mean(ref_temp_norm)  # nolint
+  target_temp_norm <- tmp2 / temp_2max  # nolint
 
   # Normalize vegetation values (on y-axis) into [0, 0.5] so that mean = 0.25
-  veg_min <- c(0, 0) #c(min(x), min(x_asif))
+  veg_min <- c(0, 0)
   veg_2max <- (c(max(x), max(x_asif)) - veg_min) / vals_std[2]
   veg_4mean <- (c(mean(x), mean(x_asif)) - veg_min) / (vals_std[2] / 2)
   veg_scale <- pmax(veg_2max, veg_4mean)
-  veg_norm <- (x - veg_min[1]) / veg_scale[1]
-  veg_asif_norm <- (x_asif - veg_min[2]) / veg_scale[2]
+  veg_norm <- (x - veg_min[1]) / veg_scale[1] # nolint
+  veg_asif_norm <- (x_asif - veg_min[2]) / veg_scale[2]  # nolint
 
 
   # Shift temperature and vegetation values (on x-axis)
@@ -1498,7 +1536,7 @@ adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp, x_asif = NULL) {
   ) / nmon
 
   sx <- yr_std_r - tpeak_norm
-  mon_norm_center <- mon_norm + sx
+  mon_norm_center <- mon_norm + sx  # nolint
 
 
 
@@ -1813,7 +1851,7 @@ adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp, x_asif = NULL) {
   veg_new <- veg_min[1] + veg_scale[1] * vadj4[, 4]
 
   # Revert temporal shifts due to centering of refs, target temps and veg
-  toy_new <- (vadj4[, 1] - sx) %% yr_std_d
+  toy_new <- (vadj4[, 1] - sx) %% yr_std_d # nolint
 
   if (nrow(vadj4) >= 2) {
     # Use linear (instead of cubic) spline to smooth across potential steps
@@ -1936,16 +1974,16 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #'   \code{X.Litter} where \code{X} are for the functional groups shrubs,
 #'   \code{X = Sh}; C3-grasses, \code{X = C3}; C4-grasses, \code{X = C4}; and
 #'   annuals, \code{X = Annual} containing default input values.
-#' @param do_adjBiom_by_temp A logical value. If \code{TRUE} then monthly
+#' @param do_adjust_phenology A logical value. If \code{TRUE} then monthly
 #'   phenology is adjusted by temperature.
-#' @param do_adjBiom_by_ppt A logical value. If \code{TRUE} then monthly biomass
+#' @param do_adjust_biomass A logical value. If \code{TRUE} then monthly biomass
 #'   is adjusted by precipitation.
 #' @param fgrass_c3c4ann A numeric vector of length 3. Relative contribution
 #'   [0-1] of the C3-grasses, C4-grasses, and annuals functional groups. The sum
 #'   of \code{fgrass_c3c4ann} is 1.
 #' @param MAP_mm A numeric value. Mean annual precipitation in millimeter of the
 #'   location.
-#' @inheritParams adjBiom_by_temp
+#' @inheritParams adj_phenology_by_temp_v2
 #'
 #' @section Default inputs: \itemize{
 #'   \item Shrubs are based on location \var{\sQuote{IM_USC00107648_Reynolds}}
@@ -1961,6 +1999,11 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #'   a matrix with 12 rows (one for each month) and columns \code{Biomass},
 #'   \code{Amount.Live}, \code{Perc.Live}, and \code{Litter}.
 #'
+#' @seealso Function \code{\link{adjBiom_by_ppt}} is called
+#'   if \code{do_adjust_biomass};
+#'   function \code{\link{adj_phenology_by_temp_v2}} is called
+#'   if \code{do_adjust_phenology}.
+#'
 #' @references Bradford, J.B., Schlaepfer, D.R., Lauenroth, W.K. & Burke, I.C.
 #'   (2014). Shifts in plant functional types have time-dependent and regionally
 #'   variable impacts on dryland ecosystem water balance. J Ecol, 102,
@@ -1968,17 +2011,12 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #'
 #' @export
 estimate_PotNatVeg_biomass <- function(tr_VegBiom,
-  do_adjBiom_by_temp = FALSE,
-  do_adjBiom_by_ppt = FALSE,
+  do_adjust_phenology = FALSE,
+  do_adjust_biomass = FALSE,
   fgrass_c3c4ann = c(1, 0, 0),
-  growing_limit_C = 4,
-  isNorth = TRUE,
   MAP_mm = 450,
-  mean_monthly_temp_C = c(
-    rep(growing_limit_C - 1, 2),
-    rep(growing_limit_C + 1, 8),
-    rep(growing_limit_C - 1, 2)
-  )
+  ref_temp,
+  target_temp
 ) {
 
   # Default shrub biomass input is at MAP = 450 mm/yr, and default grass
@@ -2012,37 +2050,59 @@ estimate_PotNatVeg_biomass <- function(tr_VegBiom,
   )
 
   # Pull vegetation types
-  x <- list()
-  x[["biom_shrubs"]] <- tr_VegBiom[, grepl("Sh", ns_VegBiom)]
-  x[["biom_C3"]] <- tr_VegBiom[, grepl("C3", ns_VegBiom)]
-  x[["biom_C4"]] <- tr_VegBiom[, grepl("C4", ns_VegBiom)]
-  x[["biom_annuals"]] <- tr_VegBiom[, grepl("Annual", ns_VegBiom)]
+  x0 <- list()
+  x0[["biom_shrubs"]] <- tr_VegBiom[, grepl("Sh", ns_VegBiom)]
+  x0[["biom_C3"]] <- tr_VegBiom[, grepl("C3", ns_VegBiom)]
+  x0[["biom_C4"]] <- tr_VegBiom[, grepl("C4", ns_VegBiom)]
+  x0[["biom_annuals"]] <- tr_VegBiom[, grepl("Annual", ns_VegBiom)]
 
   # adjust phenology for mean monthly temperatures
-  if (do_adjBiom_by_temp) {
-    x <- adjBiom_by_temp(
-      x = x,
-      mean_monthly_temp_C = mean_monthly_temp_C,
-      growing_limit_C = growing_limit_C,
-      isNorth = isNorth
+  if (do_adjust_phenology) {
+    x <- lapply(
+      X = x0,
+      FUN = function(vt_data) {
+        sapply(
+          X = vt_data,
+          adj_phenology_by_temp_v2,
+          ref_temp = ref_temp,
+          target_temp = target_temp
+        )
+      }
     )
+
+    # Scale litter (percent) and percent live to previous peak frequency (0-1)
+    for (ns in names(x0)) {
+      ids_scale <- grep("(Litter)|(Perc.Live)", colnames(x0[[ns]]))
+
+      for (k in ids_scale) {
+        x[[ns]][, k] <- rSW2utils::scale_to_reference_peak_frequency(
+          x = x[[ns]][, k],
+          x_ref = x0[[ns]][, k],
+          cap_at_peak = TRUE
+        )
+      }
+    }
+
+  } else {
+    x <- x0
   }
 
   # if (do_adjBiom_by_ppt) then adjust biomass amounts by productivity
   # relationship with MAP
   x <- adjBiom_by_ppt(
-    biom_shrubs = x[["biom_shrubs"]],
-    biom_C3 = x[["biom_C3"]],
-    biom_C4 = x[["biom_C4"]],
-    biom_annuals = x[["biom_annuals"]],
+    biom_shrubs = as.data.frame(x[["biom_shrubs"]]),
+    biom_C3 = as.data.frame(x[["biom_C3"]]),
+    biom_C4 = as.data.frame(x[["biom_C4"]]),
+    biom_annuals = as.data.frame(x[["biom_annuals"]]),
     biom_maxs = colmax,
-    map_mm_shrubs = if (do_adjBiom_by_ppt) MAP_mm else StandardShrub_MAP_mm,
+    map_mm_shrubs = if (do_adjust_biomass) MAP_mm else StandardShrub_MAP_mm,
     map_mm_std_shrubs = StandardShrub_MAP_mm,
-    map_mm_grasses = if (do_adjBiom_by_ppt) MAP_mm else StandardGrasses_MAP_mm,
+    map_mm_grasses = if (do_adjust_biomass) MAP_mm else StandardGrasses_MAP_mm,
     map_mm_std_grasses = StandardGrasses_MAP_mm,
     vegcomp_std_shrubs = StandardShrub_VegComposition,
     vegcomp_std_grass = StandardGrasses_VegComposition
   )
+
 
   biom_grasses <-
     x[["biom_C3"]] * fgrass_c3c4ann[1] +

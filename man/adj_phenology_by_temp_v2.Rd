@@ -36,8 +36,12 @@ climate conditions.
 }
 \examples{
 sw_in <- rSOILWAT2::sw_exampleData
-phen_reference <- as.data.frame(
-  swProd_MonProd_grass(sw_in)[, c("Biomass", "Live_pct")]
+tmp <- swProd_MonProd_grass(sw_in)
+phen_reference <- data.frame(
+  tmp,
+  Litter_pct = tmp[, "Litter"] / max(tmp[, "Litter"]),
+  Biomass_pct = tmp2 <- tmp[, "Biomass"] / max(tmp[, "Biomass"]),
+  Biomass2_pct = {tmp2[6:8] <- 1; tmp2}
 )
 
 clim <- calc_SiteClimate(weatherList = rSOILWAT2::weatherData)
@@ -48,7 +52,32 @@ phen_adj <- sapply(
   phen_reference,
   adj_phenology_by_temp_v2,
   ref_temp = ref_temp,
-  target_temp = temp_randomwarmer3C
+  target_temp = temp_randomwarmer3C,
+  x_asif = phen_reference[, "Live_pct"]
+)
+
+## Note: depending on what `x` represents, post-adjustment scaling may
+## be necessary
+
+# Maintain previous peak
+rSW2utils::scale_to_reference_fun(
+  x = phen_adj[, "Litter_pct"],
+  x_ref = phen_reference[, "Litter_pct"],
+  fun = max
+)
+
+# Maintain previous sum
+rSW2utils::scale_to_reference_fun(
+  x = phen_adj[, "Biomass"],
+  x_ref = phen_reference[, "Biomass"],
+  fun = sum
+)
+
+# Maintain previous frequency of peaks and cap the peaks at that value
+rSW2utils::scale_to_reference_peak_frequency(
+  x = phen_adj[, "Biomass2_pct"],
+  x_ref = phen_reference[, "Biomass2_pct"],
+  cap_at_peak = TRUE
 )
 
 ## Plot reference and adjusted monthly values
