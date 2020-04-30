@@ -1521,6 +1521,29 @@ adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp, x_asif = NULL) {
   veg_norm <- (x - veg_min[1]) / veg_scale[1] # nolint
   veg_asif_norm <- (x_asif - veg_min[2]) / veg_scale[2]  # nolint
 
+  # Calculate factor to correct for different spreads between
+  # vegetation data and `x_asif`
+  tmp1 <- diff(range(x_asif))
+  if (abs(tmp1) < rSOILWAT2:::rSW2_glovars[["tol"]]) {
+    # if diff(range(x_asif)) -> 0,
+    # then max(x_asif) / diff(range(x_asif)) -> Inf
+    # ==> cap ratio at one to avoid overcorrection
+    cvtoasif <- 1
+
+  } else {
+    # if diff(range(x)) -> 0, then diff(range(x)) / max(x) -> 0
+    tmp2 <- max(x)
+    if (abs(tmp2) < rSOILWAT2:::rSW2_glovars[["tol"]]) {
+      cvtoasif <- 0
+
+    } else {
+      # cap at one to avoid overcorrection
+      cvtoasif <- rSW2utils::finite01(
+        diff(range(x)) / tmp2 * max(x_asif) / tmp1
+      )
+    }
+  }
+
 
   # Shift temperature and vegetation values (on x-axis)
   # so that their ellipses are centered on the warm- and cold-season centers
@@ -1710,8 +1733,8 @@ adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp, x_asif = NULL) {
       for (kv in seq_along(x_vvals[[2]])) {
         vadj[[k_vadj]] <- c(
           # xy-coordinates
-          x_vvals[[1]][kv] + rx * (x_vvals[[2]][kv] - ptadj[k, 1]),
-          y_vvals[[1]][kv] + ry * (y_vvals[[2]][kv] - ptadj[k, 2]),
+          x_vvals[[1]][kv] + rx * cvtoasif * (x_vvals[[2]][kv] - ptadj[k, 1]),
+          y_vvals[[1]][kv] + ry * cvtoasif * (y_vvals[[2]][kv] - ptadj[k, 2]),
           # season that adjusts
           ptadj[k, 1],
           # number of continous adjustment section
