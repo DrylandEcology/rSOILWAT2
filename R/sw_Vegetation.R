@@ -878,7 +878,7 @@ adjBiom_by_temp <- function(x, mean_monthly_temp_C, growing_limit_C = 4,
     }
   }
 
-  # Adjustements were done as if on northern hemisphere
+  # Adjustments were done as if on northern hemisphere
   if (!isNorth) {
     for (k in seq_along(x)) {
       x[[k]] <- rbind(x[[k]][7:12, ], x[[k]][1:6, ])
@@ -1276,7 +1276,7 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp) {
 #' @param x_asif A numeric vector of length 12. If not \code{NULL}, then
 #'   the adjustments applied to \code{x} are based on values of \code{x_asif}.
 #'
-#' @return An updated copy of \code{x} where the values have been adjusted
+#' @return A copy of \code{x} with values that have been adjusted
 #'   to represent the phenology of a target climate described by
 #'   \code{target_temp}.
 #'
@@ -1291,8 +1291,8 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp) {
 #' of values and half a year earlier (cold-season) above that band.
 #' From these centers, radial expansion or contraction rates are calculated
 #' as vectors from reference towards target temperatures and these vectors
-#' are applied as adjustement rates to vegetation values.
-#' Adjusted values are de-standardized before returning.
+#' are applied as adjustment rates to vegetation values.
+#' Adjusted values are destandardized before returning.
 #'
 #' @section Details: The purpose of \code{x_asif} is to adjust \code{x} based
 #'   on the phenological pattern of \code{x_asif} instead of \code{x}. This
@@ -1300,17 +1300,17 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp) {
 #'   \code{x_asif} fraction of live biomass and if we want the adjustments to
 #'   reflect that the live biomass fraction predominantly influences the
 #'   total biomass response to different temperatures.
-#' @section Details: Adjustements based on \code{x_asif} reflect the
+#' @section Details: Adjustments based on \code{x_asif} reflect the
 #'   amount of variation in \code{x} relative to the amount of variation in
 #'   \code{x_asif}. Thus, the less variation in \code{x} relative to
 #'   \code{x_asif}, the less \code{x} is adjusted; and if \code{x} does not
 #'   vary across months, then \code{x} is not adjusted at all regardless of the
 #'   values of \code{x_asif}. This may not be desired in all cases.
 #'
-#' @section Notes: Phenological adjustements applied to \code{x} will not
+#' @section Notes: Phenological adjustments applied to \code{x} will not
 #'   necessarily maintain any specific characteristic of \code{x}, e.g.,
 #'   values in \code{[0, 1]}, \code{sum(x) == 1}, \code{max(x) == peak}.
-#'   Thus, post-adjustment scaling of the returned valus may be required. See
+#'   Thus, post-adjustment scaling of the returned values may be required. See
 #'   examples.
 #'
 #'
@@ -1415,7 +1415,7 @@ adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp, x_asif = NULL) {
   )
 
   #--- Free parameters
-  Nr <- 2 * nwks # number of steps for adjustements (1 full circle)
+  Nr <- 2 * nwks # number of steps for adjustments (1 full circle)
   Ninfl <- 19 #17 # number of `nwks` units of seasonal influence
   p_voffset <- 1 / 4 # vertical offset of season centers beyond 0-0.5 values
 
@@ -1558,7 +1558,7 @@ adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp, x_asif = NULL) {
   # Calculate factor to correct for different spreads between
   # vegetation data and `x_asif`
   tmp1 <- diff(range(x_asif))
-  if (abs(tmp1) < rSOILWAT2:::rSW2_glovars[["tol"]]) {
+  if (abs(tmp1) < rSW2_glovars[["tol"]]) {
     # if diff(range(x_asif)) -> 0,
     # then max(x_asif) / diff(range(x_asif)) -> Inf
     # ==> cap ratio at one to avoid overcorrection
@@ -1567,7 +1567,7 @@ adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp, x_asif = NULL) {
   } else {
     # if diff(range(x)) -> 0, then diff(range(x)) / max(x) -> 0
     tmp2 <- max(x)
-    if (abs(tmp2) < rSOILWAT2:::rSW2_glovars[["tol"]]) {
+    if (abs(tmp2) < rSW2_glovars[["tol"]]) {
       cvtoasif <- 0
 
     } else {
@@ -1797,12 +1797,12 @@ adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp, x_asif = NULL) {
 
 
   if (ksc > 0.2 * Nadj) {
-    warning("More than 20% of adjustement points failed.")
+    warning("More than 20% of adjustment points failed.")
   }
 
   if (max(kce[2:3]) > 0.1 * Nadj) {
     warning(
-      "The longest contiguous section of failed adjustements ",
+      "The longest contiguous section of failed adjustments ",
       "is longer than 10% of all points.")
   }
 
@@ -1923,7 +1923,7 @@ adj_phenology_by_temp_v2 <- function(x, ref_temp, target_temp, x_asif = NULL) {
     pres <- predict(fxpsp_adj, mon_norm)[["y"]]
 
   } else {
-    warning("Less than 3 adjustement points succeeded: return mean value.")
+    warning("Less than 3 adjustment points succeeded: return mean value.")
     pres <- rep(mean(veg_new), nmon)
   }
 
@@ -2109,7 +2109,7 @@ estimate_PotNatVeg_biomass <- function(tr_VegBiom,
         MARGIN = 2,
         FUN = max
       )
-      names(tmp) = paste0(vtypes, ".Amount.Live")
+      names(tmp) <- paste0(vtypes, ".Amount.Live")
       tmp
     }
   )

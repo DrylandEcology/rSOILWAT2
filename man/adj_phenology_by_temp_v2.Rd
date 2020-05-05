@@ -23,7 +23,7 @@ for which \code{x} is to be adjusted.}
 the adjustments applied to \code{x} are based on values of \code{x_asif}.}
 }
 \value{
-An updated copy of \code{x} where the values have been adjusted
+A copy of \code{x} with values that have been adjusted
   to represent the phenology of a target climate described by
   \code{target_temp}.
 }
@@ -46,8 +46,8 @@ time of peak of temperature values (warm-season) below the standardized band
 of values and half a year earlier (cold-season) above that band.
 From these centers, radial expansion or contraction rates are calculated
 as vectors from reference towards target temperatures and these vectors
-are applied as adjustement rates to vegetation values.
-Adjusted values are de-standardized before returning.
+are applied as adjustment rates to vegetation values.
+Adjusted values are destandardized before returning.
 
  The purpose of \code{x_asif} is to adjust \code{x} based
   on the phenological pattern of \code{x_asif} instead of \code{x}. This
@@ -56,7 +56,7 @@ Adjusted values are de-standardized before returning.
   reflect that the live biomass fraction predominantly influences the
   total biomass response to different temperatures.
 
- Adjustements based on \code{x_asif} reflect the
+ Adjustments based on \code{x_asif} reflect the
   amount of variation in \code{x} relative to the amount of variation in
   \code{x_asif}. Thus, the less variation in \code{x} relative to
   \code{x_asif}, the less \code{x} is adjusted; and if \code{x} does not
@@ -65,10 +65,10 @@ Adjusted values are de-standardized before returning.
 }
 
 \section{Notes}{
- Phenological adjustements applied to \code{x} will not
+ Phenological adjustments applied to \code{x} will not
   necessarily maintain any specific characteristic of \code{x}, e.g.,
   values in \code{[0, 1]}, \code{sum(x) == 1}, \code{max(x) == peak}.
-  Thus, post-adjustment scaling of the returned valus may be required. See
+  Thus, post-adjustment scaling of the returned values may be required. See
   examples.
 }
 
