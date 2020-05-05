@@ -34,6 +34,44 @@ activity, etc. (i.e., phenology) that were observed for a specific
 to the mean monthly temperature values of a different site and/or different
 climate conditions.
 }
+\section{Details}{
+ The implementation takes a geometrical interpretation to
+the seasonal cycle.
+The time axis is represented by a standardized twelve month circle;
+temperature and vegetation values are standardized to lie within a band along
+the time circle;
+and warm- and cold-seasons are presumed to exist (i.e., temperate
+climates will work best) and are represented by ellipses with centers at the
+time of peak of temperature values (warm-season) below the standardized band
+of values and half a year earlier (cold-season) above that band.
+From these centers, radial expansion or contraction rates are calculated
+as vectors from reference towards target temperatures and these vectors
+are applied as adjustement rates to vegetation values.
+Adjusted values are de-standardized before returning.
+
+ The purpose of \code{x_asif} is to adjust \code{x} based
+  on the phenological pattern of \code{x_asif} instead of \code{x}. This
+  may be useful, for instance, if \code{x} represents total biomass and
+  \code{x_asif} fraction of live biomass and if we want the adjustments to
+  reflect that the live biomass fraction predominantly influences the
+  total biomass response to different temperatures.
+
+ Adjustements based on \code{x_asif} reflect the
+  amount of variation in \code{x} relative to the amount of variation in
+  \code{x_asif}. Thus, the less variation in \code{x} relative to
+  \code{x_asif}, the less \code{x} is adjusted; and if \code{x} does not
+  vary across months, then \code{x} is not adjusted at all regardless of the
+  values of \code{x_asif}. This may not be desired in all cases.
+}
+
+\section{Notes}{
+ Phenological adjustements applied to \code{x} will not
+  necessarily maintain any specific characteristic of \code{x}, e.g.,
+  values in \code{[0, 1]}, \code{sum(x) == 1}, \code{max(x) == peak}.
+  Thus, post-adjustment scaling of the returned valus may be required. See
+  examples.
+}
+
 \examples{
 sw_in <- rSOILWAT2::sw_exampleData
 tmp <- swProd_MonProd_grass(sw_in)
