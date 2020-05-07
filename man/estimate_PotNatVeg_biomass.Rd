@@ -73,6 +73,6 @@ Bradford, J.B., Schlaepfer, D.R., Lauenroth, W.K. & Burke, I.C.
 \seealso{
 Function \code{\link{adjBiom_by_ppt}} is called
   if \code{do_adjust_biomass};
-  function \code{\link{adj_phenology_by_temp_v2}} is called
+  function \code{\link{adj_phenology_by_temp}} is called
   if \code{do_adjust_phenology}.
 }

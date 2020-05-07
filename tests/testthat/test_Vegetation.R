@@ -315,7 +315,7 @@ test_that("Vegetation: adjust phenology", {
         FUN = function(x_asif) {
           sapply(
             X = phen_in[[k]],
-            FUN = adj_phenology_by_temp_v2,
+            FUN = adj_phenology_by_temp,
             ref_temp = ref_temp,
             target_temp = target_temps[[k2]],
             x_asif = x_asif
@@ -334,7 +334,7 @@ test_that("Vegetation: adjust phenology", {
     tol <- 1e-1
     res <- sapply(
       X = phen_in[[k]],
-      FUN = adj_phenology_by_temp_v2,
+      FUN = adj_phenology_by_temp,
       ref_temp = ref_temp,
       target_temp = ref_temp,
       x_asif = NULL
