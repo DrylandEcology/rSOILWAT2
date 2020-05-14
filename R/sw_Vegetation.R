@@ -1031,7 +1031,7 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp, x_asif = NULL) {
 
       if (all(good_tcurves)) {
         # Locate (all) x-axis values where line crosses
-        #   (iii) nomarlized vegetation curves
+        #   (iii) normalized vegetation curves
         xcrosses_vcurves <- lapply(
           X = ivcurves,
           FUN = function(ivp) {
@@ -1297,6 +1297,9 @@ Shrub_ANPP <- function(MAP_mm) 0.393 * MAP_mm - 10.2
 #' @rdname biomass
 Grass_ANPP <- function(MAP_mm) 0.646 * MAP_mm - 102.5
 
+#' Adjust mean monthly biomass values by precipitation
+#' @section Details: Internally used by
+#'   \code{\link{estimate_PotNatVeg_biomass}}.
 adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
   biom_maxs, map_mm_shrubs, map_mm_std_shrubs,
   map_mm_grasses, map_mm_std_grasses,
