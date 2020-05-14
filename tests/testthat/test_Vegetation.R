@@ -298,30 +298,53 @@ test_that("Vegetation: adjust phenology", {
     swProd_MonProd_tree(sw_exampleData)
   )
 
-  # Note: `predict_season` issues several warnings that can be ignored, e.g.,
-  #  pseudoinverse, neighborhood radius, reciprocal condition,
-  #  near singularities, NaNs produced
-  for (k in seq_along(phen_in)) {
-    # Adjust phenology from the reference Mar-Oct to a target Nov-Jun
-    # growing season
-    res <- suppressWarnings(adjBiom_by_temp(
-      x = phen_in[[k]],
-      mean_monthly_temp_C = c(rep(10, 6), rep(0, 4), rep(10, 2))
-    ))
+  phen_in <- lapply(phen_in, as.data.frame)
 
-    # Check that number of rows/columns are correct
-    for (i in seq_along(res)) {
-      expect_equal(NROW(res[[i]]), NROW(phen_in[[k]][[i]]))
-      expect_equal(NCOL(res[[i]]), NCOL(phen_in[[k]][[i]]))
+  clim <- calc_SiteClimate(weatherList = rSOILWAT2::weatherData)
+  ref_temp <- clim[["meanMonthlyTempC"]]
+  target_temps <- list(
+    randomwarmer3C = pmax(ref_temp + 0.1, ref_temp + stats::rnorm(12, 3, 1)),
+    randomcoolerr3C = pmin(ref_temp - 0.1, ref_temp - stats::rnorm(12, 3, 1))
+  )
+
+  for (k in seq_along(phen_in)) {
+    #--- Check phenology adjustments to temperature scenarios
+    for (k2 in seq_along(target_temps)) {
+      res <- lapply(
+        X = list(NULL, phen_in[["x1n"]][, "Live_pct"]),
+        FUN = function(x_asif) {
+          sapply(
+            X = phen_in[[k]],
+            FUN = adj_phenology_by_temp,
+            ref_temp = ref_temp,
+            target_temp = target_temps[[k2]],
+            x_asif = x_asif
+          )
+        }
+      )
+
+      # Check that number of rows/columns are correct
+      for (i in seq_along(res)) {
+        expect_equal(NROW(res[[i]]), NROW(phen_in[[k]]))
+        expect_equal(NCOL(res[[i]]), NCOL(phen_in[[k]]))
+      }
     }
 
-    # Adjust phenology from and to the reference Mar-Oct growing season
-    res <- suppressWarnings(adjBiom_by_temp(
-      x = phen_in[[k]],
-      mean_monthly_temp_C = c(rep(0, 2), rep(10, 8), rep(0, 2))
-    ))
+    #--- Check that inputs are reproduced if target = reference
+    tol <- 1e-1
+    res <- sapply(
+      X = phen_in[[k]],
+      FUN = adj_phenology_by_temp,
+      ref_temp = ref_temp,
+      target_temp = ref_temp,
+      x_asif = NULL
+    )
 
-    # Check that output values are equal to input
-    expect_equivalent(res, phen_in[[k]])
+    for (i in seq_len(NCOL(res))) {
+      diffs <- abs(res[, i] - phen_in[[k]][, i])
+      ids_rel <- diffs > tol & abs(res[, i]) > tol
+      diffs[ids_rel] <- diffs[ids_rel] / res[ids_rel, i]
+      expect_true(all(diffs < tol))
+    }
   }
 })

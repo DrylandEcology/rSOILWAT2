@@ -603,303 +603,6 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
 
 
 
-calc.loess_coeff <- function(N, span) {
-  # prevent call to loessc.c:ehg182(104):
-  # error msg: "span too small.   fewer data values than degrees of freedom"
-  lcoef <- list(span = min(1, span), degree = 2)
-  if (span <= 1) {
-    # see code for: R/trunk/src/library/stats/src/loessf.f:ehg136()
-    nf <- floor(lcoef$span * N) - 1
-    if (nf > 2) {
-      lcoef$degree <- 2
-    } else if (nf > 1) {
-      lcoef$degree <- 1
-    } else {
-      lcoef <- Recall(N, lcoef$span + 0.1)
-    }
-  }
-  lcoef
-}
-
-get_season <- function(mo_season_TF, N_season = NULL) {
-  # Calculate first month of season == last start in (circular) year
-  starts <- calc_starts(mo_season_TF)
-
-  if (is.null(N_season)) {
-    N_season <- sum(mo_season_TF)
-  }
-
-  tmp <- starts[length(starts)] + seq_len(N_season) - 2
-  tmp %% 12 + 1
-}
-
-
-#' Predict seasonal phenology
-#'
-#' Fits a loess-curve to a seasonal subset of monthly values and uses the fit
-#' to make a prediction for a different subset of months.
-#'
-#' @param x A two-dimensional object. Rows correspond to month of the year,
-#'   i.e., there must be 12 rows, and columns correspond to variables that are
-#'   adjusted.
-#' @param ref_season A numeric vector. The season as months (integers in 1-12)
-#'   for which the values of \code{x} serve as reference (used for fitting).
-#' @param target_season A numeric vector. The season as months (1-12)
-#'   for which the prediction is made.
-#'
-#' @return A two-dimensional object with rows that correspond to
-#'   \code{target_season} and columns that correspond to the adjusted variable
-#'   values from \code{x}.
-#'
-#' @section Details: You may want to eliminate negative values that may arise
-#'   from the fitting/prediction process.
-#'
-#' @examples
-#' sw_in <- rSOILWAT2::sw_exampleData
-#' biomass_reference <- swProd_MonProd_grass(sw_in)[, 2:3]
-#' biomass_adj <- biomass_reference
-#' biomass_adj[] <- NA
-#'
-#' ## Adjust phenology from a reference Nov-Feb to a target Jul-Oct
-#' ## non-growing season
-#' ref_season <- c(11:12, 1:2) # November-February
-#' target_season <- 7:10 # July-October
-#' biomass_adj[target_season, ] <- predict_season(biomass_reference,
-#'   ref_season, target_season)
-#'
-#' ## Adjust phenology from a reference Mar-Oct to a target Nov-Jun
-#' ## growing season
-#' ref_season <- 3:10 # March-October
-#' target_season <- c(11:12, 1:6) # November-June
-#' biomass_adj[target_season, ] <- predict_season(biomass_reference,
-#'   ref_season, target_season)
-#'
-#' ## Plot reference and adjusted monthly values
-#' \dontrun{
-#' par_prev <- par(mfrow = c(2, 1))
-#'
-#' plot(1:12, biomass_reference[, 1], type = "l", col = "red",
-#'   ylim = c(0, 250), xlab = "Month")
-#' lines(1:12, biomass_adj[, 1])
-#'
-#' plot(1:12, biomass_reference[, 2], type = "l", col = "red",
-#'   ylim = c(0, 1), xlab = "Month")
-#' lines(1:12, biomass_adj[, 2])
-#'
-#' par(par_prev)
-#' }
-#'
-#' @export
-predict_season <- function(x, ref_season, target_season) {
-
-  # `x` must be a two-dimensional object with 12 rows (corresponding to months)
-  if (!inherits(x, c("matrix", "data.frame"))) {
-    x <- as.matrix(x)
-  }
-
-  stopifnot(nrow(x) == 12L)
-
-  # calculate padded reference season: add one month on either side so that
-  # `stats::loess` does not introduce weird step predictions at season start/end
-  temp <- c(ref_season[1] - 1, ref_season, ref_season[length(ref_season)] + 1)
-  ref_padded <- (temp - 1) %% 12 + 1
-  ref_seq <- 0:(length(ref_padded) - 1)
-
-  # calculate sequence of target season
-  target_seq <- seq(from = 1, to = length(ref_season),
-    length = length(target_season))
-
-  # length(std.season.seq) >= 3 because of padding and
-  # test that season duration > 0
-  lcoef <- calc.loess_coeff(N = length(ref_seq), span = 0.4)
-
-  op <- options(c("warn", "error"))
-  on.exit(options(op))
-  # turn off warnings because stats::loess throws many warnings:
-  # 'pseudoinverse used', see calc.loess_coeff(), etc.
-  options(warn = -1, error = traceback)
-
-  # Fit loess to reference season and predict to target season
-  apply(x, 2, function(x) {
-    lf <- stats::loess(
-      x[ref_padded] ~ ref_seq,
-      span = lcoef$span,
-      degree = lcoef$degree)
-
-    predict(lf, newdata = data.frame(ref_seq = target_seq))
-  })
-}
-
-
-#' Adjust biomass phenology by pattern of growing/non-growing seasons to
-#' site-specific climatic conditions
-#'
-#' @param x A two-dimensional object or a list of such objects. Rows of each
-#'   such object correspond to month of the year, i.e., there must be 12 rows,
-#'   and columns correspond to variables that are adjusted. These values
-#'   reflect the phenological pattern described by
-#'   \code{reference_growing_season}.
-#' @param reference_growing_season A numeric vector with values
-#'   between 1 and 12. Number of months that describe the potential
-#'   active (growing) season of the input data \code{x}.
-#'   Default values \code{3:10} describe a March-October growing season.
-#' @param mean_monthly_temp_C A numeric vector of length 12. Mean monthly
-#'   temperatures in Celsius of a target site for which \code{x} is
-#'   adjusted.
-#' @param growing_limit_C A numeric value. \code{mean_monthly_temp_C} equal or
-#'   above this limit are considered suitable for growth (growing season).
-#'   Default value is 4 C.
-#' @param isNorth A logical value. \code{TRUE} for locations on the northern
-#'   hemisphere, \code{FALSE} for locations on the southern hemisphere.
-#'
-#' @return An object as \code{x}, i.e., a two-dimensional object or a list of
-#'   such objects with values adjusted to represent the phenology of a target
-#'   described by \code{mean_monthly_temp_C}.
-#'
-#' @examples
-#' sw_in <- rSOILWAT2::sw_exampleData
-#' biomass_reference <- swProd_MonProd_grass(sw_in)[, 2:3]
-#'
-#' ## Adjust phenology from the reference Mar-Oct to a target Nov-Jun
-#' ## growing season
-#' biomass_adj <- adjBiom_by_temp(
-#'   x = biomass_reference,
-#'   mean_monthly_temp_C = c(rep(10, 6), rep(0, 4), rep(10, 2)))
-#'
-#' ## Plot reference and adjusted monthly values
-#' \dontrun{
-#' par_prev <- par(mfrow = c(2, 1))
-#'
-#' plot(1:12, biomass_reference[, 1], type = "l", col = "red",
-#'   ylim = c(0, 250), xlab = "Month")
-#' lines(1:12, biomass_adj[, 1])
-#'
-#' plot(1:12, biomass_reference[, 2], type = "l", col = "red",
-#'   ylim = c(0, 1), xlab = "Month")
-#' lines(1:12, biomass_adj[, 2])
-#'
-#' par(par_prev)
-#' }
-#'
-#' @export
-adjBiom_by_temp <- function(x, mean_monthly_temp_C, growing_limit_C = 4,
-  reference_growing_season = 3:10, isNorth = TRUE) {
-
-  .Deprecated(new = "adj_phenology_by_temp")
-
-  # Convert `x` to a list
-  return_list <- inherits(x, "list")
-  if (!return_list) {
-    x <- list(x)
-  }
-
-  # Convert each element of x into a two-dimensional object with 12 rows
-  for (k in seq_along(x)) {
-    if (!inherits(x[[k]], c("matrix", "data.frame"))) {
-      x[[k]] <- as.matrix(x[[k]])
-    }
-  }
-
-  # Make sure that inputs represent twelve months
-  stopifnot(
-    sapply(x, nrow) == 12L,
-    length(mean_monthly_temp_C) == 12L,
-    all(reference_growing_season >= 1L),
-    all(reference_growing_season <= 12L)
-  )
-
-  # Determine seasons: non-growing season, growing season
-  mo_seasons_TF <- matrix(NA, nrow = 12, ncol = 2,
-    dimnames = list(NULL, c("nongrowing", "growing")))
-  mo_seasons_TF[, 1] <- as.vector(mean_monthly_temp_C < growing_limit_C)
-  mo_seasons_TF[, 2] <- !mo_seasons_TF[, 1]
-  n_seasons <- apply(mo_seasons_TF, 2, sum)
-
-
-  # Describe seasonal conditions for which the input values are valid:
-  ref_seasons <- list(
-    nongrowing = {
-      tmp <- rep(FALSE, 12)
-      tmp[rSW2_glovars[["st_mo"]][-reference_growing_season]] <- TRUE
-      get_season(
-        mo_season_TF = tmp,
-        N_season = sum(tmp)
-      )},
-    growing = {
-      tmp <- rep(FALSE, 12)
-      tmp[reference_growing_season] <- TRUE
-      get_season(
-        mo_season_TF = tmp,
-        N_season = sum(tmp)
-      )}
-  )
-
-  # Standard growing season is for northern hemisphere:
-  # target needs to be adjusted for southern Hemisphere
-  if (!isNorth) {
-    mo_seasons_TF <- rbind(mo_seasons_TF[7:12, ], mo_seasons_TF[1:6, ])
-  }
-
-  # save reference: reference values required for "overlap" between seasons
-  x_ref <- x
-
-  # Adjust for timing and duration of non-growing/growing seasons
-  for (iseason in 1:2) {
-    if (n_seasons[iseason] > 0) {
-      if (n_seasons[iseason] < 12) {
-        site_season <- which(mo_seasons_TF[, iseason])
-
-        site_season_months <- get_season(
-          mo_season_TF = mo_seasons_TF[, iseason],
-          N_season = n_seasons[iseason]
-        )
-
-        for (k in seq_along(x)) {
-          x[[k]][site_season_months, ] <- cut0Inf(
-            predict_season(x_ref[[k]], ref_seasons[[iseason]], site_season),
-            val = 0)
-        }
-
-      } else {
-        # if season lasts 12 months
-        for (k in seq_along(x)) {
-          # if non-growing/growing season: mean/max of the season's months
-          fun <- switch(iseason, "mean", "max")
-          temp <- apply(x_ref[[k]][ref_seasons[[iseason]], , drop = FALSE],
-            MARGIN = 2, FUN = fun)
-          x[[k]][] <- matrix(temp, nrow = 12, ncol = ncol(x[[k]]), byrow = TRUE)
-        }
-      }
-    }
-  }
-
-  # Adjustements were done as if on northern hemisphere
-  if (!isNorth) {
-    for (k in seq_along(x)) {
-      x[[k]] <- rbind(x[[k]][7:12, ], x[[k]][1:6, ])
-    }
-  }
-
-  if (return_list) x else x[[1L]]
-}
-
-
-
-#' Find location of minimum and maximum
-get_season_description_v2 <- function(x) {
-  c(
-    min = {
-      tmp <- which(abs(x - min(x)) < rSW2_glovars[["tol"]])
-      as.integer(quantile(tmp, probs = 0.5, type = 3, names = FALSE))
-    },
-    peak = {
-      tmp <- which(abs(x - max(x)) < rSW2_glovars[["tol"]])
-      as.integer(quantile(tmp, probs = 0.5, type = 3, names = FALSE))
-    }
-  )
-}
-
-
 #' Adjust a phenological pattern to a different temperature regime
 #'
 #' Extract the characteristics of seasonal (mean monthly) values of biomass,
@@ -907,17 +610,6 @@ get_season_description_v2 <- function(x) {
 #' (reference) climate (at a specific site), and project those characteristics
 #' to the mean monthly temperature values of a different site and/or different
 #' climate conditions.
-#'
-#' The algorithm attempts to adjust for the following patterns:
-#' \itemize{
-#'   \item Shifts in timing of highest/lowest seasonal biomass/activity
-#'   \item Effects of residual temperature differences not accounted
-#'         for by shifts in timing while maintaining a unimodal phenological
-#'         pattern
-#'   \item Maintain inactive period if present
-#'   \item Maintain seasonality expressed as correlation between phenology
-#'         and mean monthly temperature values
-#' }
 #'
 #' @param x A numeric vector of length 12. The values
 #'   reflect the phenological pattern that occur on average under
@@ -928,286 +620,661 @@ get_season_description_v2 <- function(x) {
 #' @param target_temp A numeric vector of length 12. Mean monthly
 #'   temperature values in degree Celsius of a target site / condition
 #'   for which \code{x} is to be adjusted.
+#' @param x_asif A numeric vector of length 12. If not \code{NULL}, then
+#'   the adjustments applied to \code{x} are based on values of \code{x_asif}.
 #'
-#' @return An updated copy of \code{x} where the values have been adjusted
+#' @return A copy of \code{x} with values that have been adjusted
 #'   to represent the phenology of a target climate described by
 #'   \code{target_temp}.
 #'
+#' @section Details: The implementation takes a geometrical interpretation to
+#' the seasonal cycle.
+#' The time axis is represented by a standardized twelve month circle;
+#' temperature and vegetation values are standardized to lie within a band along
+#' the time circle;
+#' and warm- and cold-seasons are presumed to exist (i.e., temperate
+#' climates will work best) and are represented by ellipses with centers at the
+#' time of peak of temperature values (warm-season) below the standardized band
+#' of values and half a year earlier (cold-season) above that band.
+#' From these centers, radial expansion or contraction rates are calculated
+#' as vectors from reference towards target temperatures and these vectors
+#' are applied as adjustment rates to vegetation values.
+#' Adjusted values are destandardized before returning.
+#'
+#' @section Details: The purpose of \code{x_asif} is to adjust \code{x} based
+#'   on the phenological pattern of \code{x_asif} instead of \code{x}. This
+#'   may be useful, for instance, if \code{x} represents total biomass and
+#'   \code{x_asif} fraction of live biomass and if we want the adjustments to
+#'   reflect that the live biomass fraction predominantly influences the
+#'   total biomass response to different temperatures.
+#' @section Details: Adjustments based on \code{x_asif} reflect the
+#'   amount of variation in \code{x} relative to the amount of variation in
+#'   \code{x_asif}. Thus, the less variation in \code{x} relative to
+#'   \code{x_asif}, the less \code{x} is adjusted; and if \code{x} does not
+#'   vary across months, then \code{x} is not adjusted at all regardless of the
+#'   values of \code{x_asif}. This may not be desired in all cases.
+#'
+#' @section Notes: Phenological adjustments applied to \code{x} will not
+#'   necessarily maintain any specific characteristic of \code{x}, e.g.,
+#'   values in \code{[0, 1]}, \code{sum(x) == 1}, \code{max(x) == peak}.
+#'   Thus, post-adjustment scaling of the returned values may be required. See
+#'   examples.
+#'
+#'
 #' @examples
 #' sw_in <- rSOILWAT2::sw_exampleData
-#' phen_reference <- as.data.frame(
-#'   swProd_MonProd_grass(sw_in)[, c("Biomass", "Live_pct")]
+#' tmp <- swProd_MonProd_grass(sw_in)
+#' phen_reference <- data.frame(
+#'   tmp,
+#'   Litter_pct = tmp[, "Litter"] / max(tmp[, "Litter"]),
+#'   Biomass_pct = tmp2 <- tmp[, "Biomass"] / max(tmp[, "Biomass"]),
+#'   Biomass2_pct = {tmp2[6:8] <- 1; tmp2}
 #' )
 #'
 #' clim <- calc_SiteClimate(weatherList = rSOILWAT2::weatherData)
 #' ref_temp <- clim[["meanMonthlyTempC"]]
 #' temp_randomwarmer3C <- ref_temp + stats::rnorm(12, 3, 1)
 #'
-#' ## Adjust phenology from the reference Mar-Oct to a target Nov-Jun
-#' ## growing season
-#' phen_adj <- sapply(phen_reference, function(x) adj_phenology_by_temp(
-#'   x = x,
+#' phen_adj <- sapply(
+#'   phen_reference,
+#'   adj_phenology_by_temp,
 #'   ref_temp = ref_temp,
-#'   target_temp = temp_randomwarmer3C
-#' ))
+#'   target_temp = temp_randomwarmer3C,
+#'   x_asif = phen_reference[, "Live_pct"]
+#' )
+#'
+#' ## Note: depending on what `x` represents, post-adjustment scaling may
+#' ## be necessary
+#'
+#' # Maintain previous peak
+#' rSW2utils::scale_to_reference_fun(
+#'   x = phen_adj[, "Litter_pct"],
+#'   x_ref = phen_reference[, "Litter_pct"],
+#'   fun = max
+#' )
+#'
+#' # Maintain previous sum
+#' rSW2utils::scale_to_reference_fun(
+#'   x = phen_adj[, "Biomass"],
+#'   x_ref = phen_reference[, "Biomass"],
+#'   fun = sum
+#' )
+#'
+#' # Maintain previous frequency of peaks and cap the peaks at that value
+#' rSW2utils::scale_to_reference_peak_frequency(
+#'   x = phen_adj[, "Biomass2_pct"],
+#'   x_ref = phen_reference[, "Biomass2_pct"],
+#'   cap_at_peak = TRUE
+#' )
 #'
 #' ## Plot reference and adjusted monthly values
 #' \dontrun{
 #' par_prev <- par(mfrow = c(2, 1))
 #'
-#' plot(1:12, phen_reference[, 1], type = "l", col = "red",
-#'   ylim = c(0, 250), xlab = "Month")
+#' plot(
+#'   1:12,
+#'   phen_reference[, 1],
+#'   type = "l",
+#'   col = "red",
+#'   ylim = c(0, 300),
+#'   xlab = "Month"
+#' )
 #' lines(1:12, phen_adj[, 1])
-#' legend("bottom", ncol = 2,
+#' legend(
+#'   "bottom",
+#'   ncol = 2,
 #'   legend = c("reference", "adjusted"),
 #'   lwd = 2, lty = 1, col = c("red", "black")
 #' )
 #'
-#' plot(1:12, phen_reference[, 2], type = "l", col = "red",
-#'   ylim = c(0, 1), xlab = "Month")
+#' plot(
+#'   1:12,
+#'   phen_reference[, 2],
+#'   type = "l",
+#'   col = "red",
+#'   ylim = c(0, 1),
+#'   xlab = "Month"
+#' )
 #' lines(1:12, phen_adj[, 2])
 #'
 #' par(par_prev)
 #' }
 #'
 #' @export
-adj_phenology_by_temp <- function(x, ref_temp, target_temp) {
-
-  stopifnot(
-    length(x) == 12,
-    length(ref_temp) == 12,
-    length(target_temp) == 12
-  )
+adj_phenology_by_temp <- function(x, ref_temp, target_temp, x_asif = NULL) {
 
   mon <- rSW2_glovars[["st_mo"]]
+  nmon <- 12 # number of months `mon`
+  nwks <- 53
 
-  #------ Step 1) Estimate month of peak and of minimum, and
-  # calculate differences in timing
-  ref_desc <- get_season_description_v2(ref_temp)
-  target_desc <- get_season_description_v2(target_temp)
+  tol <- rSW2_glovars[["tol"]]
+  tol2 <- sqrt(tol)
 
-  name_periods <- names(ref_desc)
-  n_periods <- length(ref_desc)
+  if (is.null(x_asif)) {
+    x_asif <- x
+  }
 
-  desc_diffs <- as.integer(circ_minus(target_desc, ref_desc, int = 12))
-  names(desc_diffs) <- names(ref_desc)
+  stopifnot(
+    length(x) == nmon,
+    length(x_asif) == nmon,
+    length(ref_temp) == nmon,
+    length(target_temp) == nmon
+  )
+
+  #--- Free parameters
+  Nr <- 2 * nwks # number of steps for adjustments (1 full circle)
+  Ninfl <- 19 #17 # number of `nwks` units of seasonal influence
+  p_voffset <- 1 / 4 # vertical offset of season centers beyond 0-0.5 values
 
 
-  #------ Step 2) Translate sequence of months from the reference to the target
-  # based on season descriptions of two points: minimum and peak
+  #------ Step 1) Define cold- and warm-season circles/ellipses
+  yr_std_d <- 1 # duration of 1 year = diameter
+  yr_std_r <- yr_std_d / 2 # radius of year
+  yr_ctrs <- c(0, yr_std_r) # time (x-axis) centers of cold-/warm-seasons
+  vals_std <- c(0, yr_std_r) # y-axis band of cold-/warm-season activity
+  vals_std_off <- vals_std[2] * p_voffset # y-axis offset of season centers
 
-  #--- Adjust lengths of sub-periods: (i) peak to min, (ii) min to peak
-  seq_periods <- name_periods[1 + (seq_along(name_periods) - 2) %% n_periods]
+  infl_warm <- Ninfl / nwks
+  infl_cold <- Ninfl / nwks
 
-  target_mon <- NULL
-  id_peak <- NA
 
-  for (p in seq_periods) {
-    i <- which(p == name_periods)
-    iprev <- 1 + (i - 2) %% n_periods
+  # Cold-season ellipse with center (0, 1), radii 0.5/1,
+  # anti-clockwise direction, and start at (-0.5, -0.5)
+  ctr_cold <- c(yr_ctrs[1], max(vals_std) + vals_std_off)
+  fun_cold <- rSW2utils::f_ellipse(
+    x0 = ctr_cold[1],
+    y0 = ctr_cold[2],
+    a = yr_std_r,
+    b = vals_std[2] + vals_std_off,
+    theta0 = pi
+  )
 
-    # Identify months of sub-period `p` in reference
-    ids <- circ_seq(
-      from = ref_desc[iprev],
-      to = ref_desc[p],
-      int = 12
-    )
+  # Warm-season ellipse with center (0.5, -0.5), radii 0.5/1,
+  # anti-clockwise direction, and start at (0, 0)
+  ctr_warm <- c(yr_ctrs[2], min(vals_std) - vals_std_off)
+  fun_warm <- rSW2utils::f_ellipse(
+    x0 = ctr_warm[1],
+    y0 = ctr_warm[2],
+    a = yr_std_r,
+    b = vals_std[2] + vals_std_off,
+    theta0 = pi,
+    dir = -1
+  )
 
-    n_ids <- length(ids)
 
-    # Target sub-period duration
-    n_ids2 <- n_ids + desc_diffs[p] - desc_diffs[iprev]
+  # Identify which points fall to the influence of cold- vs. warm-ellipses
+  # (with some overlap)
+  xrange_warm <- ctr_warm[1] + c(-1, 1) * infl_warm
+  xrange_warm2 <- ctr_warm[1] + c(-1, 1) * infl_warm / 2
+  xrange_cold <- ctr_cold[1] + c(-1, 1) * infl_cold
+  xrange_cold2 <- ctr_cold[1] + c(-1, 1) * infl_cold / 2
 
-    # Resample sub-period to adjusted duration in target
-    ids2 <- if (n_ids2 == 0L) {
-      NULL
-    } else if (n_ids2 == 1L) {
-      mean(ids)
+  # Season sequences
+  #   - must be continuous for "continuous adjustment sections"
+  #   - make sure season ellipses' vertices are included in sequence
+  #   - increase density of points near season ellipses' vertices
+  #     (where uniroot tends to fail and vegetation curve often changes fast)
+  tmp <- pi / 2
+  seq_angle1 <- sort(unique(c(
+    c(-1, 1) * tmp,
+    seq_len(Nr) / Nr * 2 * pi
+  )))
+  seq_angle2 <- seq_len(2 * Nr) / Nr * pi
+
+  seq_cold1 <- fun_cold(seq_angle1)
+  ids_cold1 <- which(
+    seq_cold1[, 2] <= ctr_cold[2] &
+      seq_cold1[, 1] >= xrange_cold[1] &
+      seq_cold1[, 1] <= xrange_cold[2]
+  )
+  seq_cold2 <- fun_cold(seq_angle2)
+  ids_cold2 <- which(
+    seq_cold2[, 2] <= ctr_cold[2] &
+      seq_cold2[, 1] >= xrange_cold2[1] &
+      seq_cold2[, 1] <= xrange_cold2[2]
+  )
+  seq_cold <- unique(rbind(seq_cold1[ids_cold1, ], seq_cold2[ids_cold2, ]))
+  seq_cold <- seq_cold[order(seq_cold[, 1]), ]
+
+  seq_warm1 <- fun_warm(seq_angle1)
+  ids_warm1 <- which(
+    seq_warm1[, 2] >= ctr_warm[2] &
+      seq_warm1[, 1] >= xrange_warm[1] &
+      seq_warm1[, 1] <= xrange_warm[2]
+  )
+  seq_warm2 <- fun_warm(seq_angle2)
+  ids_warm2 <- which(
+    seq_warm2[, 2] >= ctr_warm[2] &
+      seq_warm2[, 1] >= xrange_warm2[1] &
+      seq_warm2[, 1] <= xrange_warm2[2]
+  )
+  seq_warm <- unique(rbind(seq_warm1[ids_warm1, ], seq_warm2[ids_warm2, ]))
+  seq_warm <- seq_warm[order(seq_warm[, 1]), ]
+
+  n_cold <- nrow(seq_cold)
+  n_warm <- nrow(seq_warm)
+  Nadj <- n_cold + n_warm
+
+
+  # Information about the points that define the lines which are used
+  # to intersect values for adjustments
+  # columns:
+  #   1:2 = x/y-coords of center of cold-/warm-season ellipses
+  #   3:4 = x/y-coords of points along cold-/warm-season ellipses
+  #   5:6 = min/max of x-coord under influence of cold-/warm-season ellipses
+  #   7 = x-extent of influence around center of cold-/warm-season ellipses
+  ptadj <- matrix(NA, nrow = Nadj, ncol = 7)
+
+  tmp <- seq_len(n_cold)
+  ptadj[tmp, 1:2] <- rep(ctr_cold, each = n_cold)
+  ptadj[tmp, 3:4] <- seq_cold
+  ptadj[tmp, 5:6] <- rep(xrange_cold, each = n_cold)
+  ptadj[tmp, 7] <- infl_cold
+
+  tmp <- n_cold + seq_len(n_warm)
+  ptadj[tmp, 1:2] <- rep(ctr_warm, each = n_warm)
+  ptadj[tmp, 3:4] <- seq_warm
+  ptadj[tmp, 5:6] <- rep(xrange_warm, each = n_warm)
+  ptadj[tmp, 7] <- infl_warm
+
+
+  #------ Step 2) Normalize (shift and scale) all values
+  # so that they fit into the season ellipses
+
+  # Normalize time of year values (on x-axis) into [0, 1]
+  mon_norm <- mon / nmon
+
+  # Normalize temperature values (on y-axis) into [0, 0.5]
+  temp_zero <- -min(ref_temp, target_temp)
+  tmp1 <- temp_zero + ref_temp
+  tmp2 <- temp_zero + target_temp
+  temp_2max <- max(tmp1, tmp2) / vals_std[2]
+
+  ref_temp_norm <- tmp1 / temp_2max
+  ref_temp_norm_mean <- mean(ref_temp_norm)  # nolint
+  target_temp_norm <- tmp2 / temp_2max  # nolint
+
+  # Normalize vegetation values (on y-axis) into [0, 0.5] so that mean = 0.25
+  veg_min <- c(0, 0)
+  veg_2max <- (c(max(x), max(x_asif)) - veg_min) / vals_std[2]
+  veg_4mean <- (c(mean(x), mean(x_asif)) - veg_min) / (vals_std[2] / 2)
+  veg_scale <- pmax(veg_2max, veg_4mean)
+  veg_norm <- (x - veg_min[1]) / veg_scale[1] # nolint
+  veg_asif_norm <- (x_asif - veg_min[2]) / veg_scale[2]  # nolint
+
+  # Calculate factor to correct for different spreads between
+  # vegetation data and `x_asif`
+  tmp1 <- diff(range(x_asif))
+  if (abs(tmp1) < rSW2_glovars[["tol"]]) {
+    # if diff(range(x_asif)) -> 0,
+    # then max(x_asif) / diff(range(x_asif)) -> Inf
+    # ==> cap ratio at one to avoid overcorrection
+    cvtoasif <- 1
+
+  } else {
+    # if diff(range(x)) -> 0, then diff(range(x)) / max(x) -> 0
+    tmp2 <- max(x)
+    if (abs(tmp2) < rSW2_glovars[["tol"]]) {
+      cvtoasif <- 0
+
     } else {
-      circ_seq(
-        from = ids[1],
-        to = ids[n_ids],
-        int = 12,
-        length.out = n_ids2
-      )[-1]
-    }
-
-    # Add to new month sequence
-    target_mon <- c(target_mon, ids2)
-
-    if (p == "peak") {
-      id_peak <- length(target_mon)
+      # cap at one to avoid overcorrection
+      cvtoasif <- rSW2utils::finite01(
+        diff(range(x)) / tmp2 * max(x_asif) / tmp1
+      )
     }
   }
 
 
-  #--- Fix shift in seasonality by difference in peak month
-  shift <- target_desc["peak"] - id_peak
+  # Shift temperature and vegetation values (on x-axis)
+  # so that their ellipses are centered on the warm- and cold-season centers
+  # i.e., shift time of year so that peaks lie at warm-season x-center of 0.5
 
-  if (shift != 0L) {
-    ids <- 1 + (mon - shift - 1) %% 12L
-    target_mon <- target_mon[ids]
-  }
+  # Original centers = time of peak season as mean month weighted by values
+  tmp <- order(ref_temp_norm, decreasing = TRUE)
+  tpeak_norm <- rSW2utils::circ_mean_weighted(
+    x = tmp,
+    w = ref_temp_norm[tmp],
+    int = nmon,
+    type = "ZeroPlus2Pi"
+  ) / nmon
 
-  stopifnot(length(target_mon) == 12L)
+  sx <- yr_std_r - tpeak_norm
+  mon_norm_center <- mon_norm + sx  # nolint
 
 
-  #------ Step 3) estimate periodic spline and apply to adjusted target months
-  res <- predict(
-    splines::periodicSpline(x ~ mon, period = 12),
-    target_mon)[["y"]]
+
+  #------ Step 2) Fit periodic cubic splines to normalized values
+  psps <- list(
+    t_ref = splines::periodicSpline(
+      ref_temp_norm ~ mon_norm_center,
+      period = yr_std_d
+    ),
+
+    t_target = splines::periodicSpline(
+      target_temp_norm ~ mon_norm_center,
+      period = yr_std_d
+    ),
+
+    veg = splines::periodicSpline(
+      veg_norm ~ mon_norm_center,
+      period = yr_std_d
+    ),
+
+    veg_asif = splines::periodicSpline(
+      veg_asif_norm ~ mon_norm_center,
+      period = yr_std_d
+    )
+  )
+
+  itcurves <- 1:2
+  ivcurves <- 3:4
 
 
-  #------- Step 4) Scale up/down to correct for residual temperature effects
-  res2 <- res
+  #------ Step 3) Correct vegetation
+  # based on radial temperature expansion/contraction
 
-  ttmp <- predict(
-    splines::periodicSpline(ref_temp ~ mon, period = 12),
-    target_mon)[["y"]]
+  # Prepare container for adjusted (normalized) vegetation points (xy)
+  vadj <- vector("list", length = Nadj)
+  k_vadj <- 1
+  ksc <- 1 # counter of continous adjustment sections
+  kce <- c(1, 0, 0) # counter of continuous failure sections
 
-  # Assume: temperature span above 0 C corresponds to activity span above mean
-  temp_span <- max(0, mean(sort(ref_temp, decreasing = TRUE)[1:3]) - 0)
-  x_span <- max(0, mean(sort(x, decreasing = TRUE)[1:3]) - mean(x))
+  # Loop through points along season-ellipses (`ptadj`)
+  for (k in seq_len(Nadj)) {
 
-  if (temp_span > 0 && x_span > 0) {
-    tmp <- (target_temp - ttmp) / temp_span * x_span
-    tmp_res <- res
-    tmp2 <- tmp
+    #--- Locate intersection between target temperature function and
+    # line connecting points (time of year, reference temperature function) and
+    # season center points
+    if (abs(ptadj[k, 3] - ptadj[k, 1]) > rSW2_glovars[["tol"]]) {
 
-    if (diff(range(tmp)) / diff(range(res)) > 0.1) {
-      # apply minimal up/down shift
-      dmin <- min(tmp)
-      tmp_res <- res + dmin
-      tmp2 <- tmp - dmin
+      # Function describing line that is connecting the circle-center point
+      # with the k-th point on the season-circle
+      fline_radial <- rSW2utils::f_2pline(
+        x0 = ptadj[k, 1], y0 = ptadj[k, 2],
+        x1 = ptadj[k, 3], y1 = ptadj[k, 4]
+      )
 
-      # smooth the rest with a (concave) quadratic function
-      # to avoid "false secondary peaks" in the result
-      # (phenological activity is mostly unimodal)
-      is_to_smooth <- get_season(mo_season_TF = tmp2 > rSW2_glovars[["tol"]])
-
-      m <- stats::lm(tmp2[is_to_smooth] ~
-          stats::poly(seq_along(is_to_smooth), 2))
-
-      if (coef(m)[3] < 0) {
-        # only use if concave
-        tmp2[is_to_smooth] <- fitted(m)
+      # Search limits for locating intersections
+      if (ptadj[k, 3] > ptadj[k, 1]) {
+        # limits: ellipse center to max influence
+        olims <- c(ptadj[k, 1], ptadj[k, 6])
+      } else {
+        # limits: min influence to ellipse center
+        olims <- c(ptadj[k, 5], ptadj[k, 1])
       }
-    }
+      olims <- rSW2utils::extend_range(olims, 1 + ptadj[k, 7] / 2)
 
-    res2 <- pmax(min(x), tmp_res + tmp2)
-  }
+      # Locate the x-axis value where line crosses
+      #   (i) normalized reference temperature curve
+      #   (ii) normalized target temperature curve
+      xcrosses_tcurves <- lapply(
+        X = itcurves,
+        FUN = function(itp) {
+          rSW2utils::uniroots(
+            f = function(x) {
+              predict(psps[[itp]], x)[["y"]] - fline_radial(x)[, 2]
+            },
+            xlim = olims,
+            tol = tol,
+            expected_nroots = 1
+          )
+        }
+      )
 
-  # If climate has any months with sub-zero temps, then
-  # don't apply additive correction to low activity months
-  if (any(target_temp <= 0)) {
-    low_value <- 0.1 * diff(range(x))
-    res2 <- ifelse(res <= low_value, res, res2)
-  }
+      # Success of detection of temperature curves intersections
+      good_tcurves <- sapply(
+        xcrosses_tcurves,
+        rSW2utils::has_uniroots,
+        tol = tol2
+      )
 
+      if (all(good_tcurves)) {
+        # Locate (all) x-axis values where line crosses
+        #   (iii) normalized vegetation curves
+        xcrosses_vcurves <- lapply(
+          X = ivcurves,
+          FUN = function(ivp) {
+            rSW2utils::uniroots(
+              f = function(x) {
+                predict(psps[[ivp]], x)[["y"]] - fline_radial(x)[, 2]
+              },
+              xlim = olims,
+              tol = tol,
+              expected_nroots = 100
+            )
+          }
+        )
 
-  #----- Step 5) Inactive phase: allow activity to go/stay at 0
-  res3 <- res2
-  is_x_zero <- x < rSW2_glovars[["tol"]]
-  is_res_zero <- res2 < rSW2_glovars[["tol"]]
+        # Success of detection of vegetation curve intersections
+        good_vcurves <- lapply(
+          xcrosses_vcurves,
+          rSW2utils::has_uniroots,
+          tol = tol2
+        )
 
-  if (any(is_x_zero) && sum(is_res_zero) / sum(is_x_zero) <= 0.5) {
-    # Do we have a flat lower level or a minimum valley?
-    ids_res_low <- get_season(abs(res2 - min(res2)) < rSW2_glovars[["tol"]])
-    low_duration <- length(ids_res_low)
-
-    if (low_duration > 0) {
-      # Zap flat lower level to zero
-      if (low_duration > 1) {
-        # Ease transition down to zero if longer than 5 month
-        # by not zapping first/last month
-        if (low_duration > 5) {
-          ids_res_low <- ids_res_low[-c(1, length(ids_res_low))]
+        if (!identical(good_vcurves[[1]], good_vcurves[[2]])) {
+          good_vcurves <- FALSE
         }
 
       } else {
-        # Zap minimum and contiguous surroundings to zero
-        low_surroundings <- min(res2) + min(
-          min(x[x > 0]) / diff(range(x)) * diff(range(res2)),
-          quantile(x, probs = mean(is_x_zero))
-        )
-
-        tmp <- low_surroundings > res2
-
-        # periodic running median with window = 3
-        ids_res_low <- moving_function(tmp, 3, median, circular = TRUE)
+        good_vcurves <- FALSE
       }
 
-      # Zap low values to zero
-      res3[ids_res_low] <- 0
-    }
-  }
-
-  #------ Step 6) Maintain seasonality
-  res5 <- res3
-  rho_ref <- suppressWarnings(cor(x, ref_temp))
-  rho_delta <- cor(res5, target_temp) - rho_ref
-
-  if (is.finite(rho_delta) && abs(rho_delta) > 0.05) {
-
-    # Define bounds within which optimization is attempted
-    #  - Stay within band of (1 - fudge[1, 1], 1 + fudge[2, 1]) of annual range
-    #  - Stay within (1 - fudge[1, 2], 1 + fudge[2, 2]) of monthly values
-    #  - If overall temperature increases, then make positive band larger
-    #  - If overall temperature decreases, then make negative band larger
-    #  - Keep zeros at zero
-    tdelta <- mean(target_temp) - mean(ref_temp)
-    ff <- if (tdelta > 0.5) {
-      c(0.1, 1)
-    } else if (tdelta < -0.5) {
-      c(1, 0.1)
     } else {
-      c(0.5, 0.5)
+      # Vertical line (`f_2pline` fails because slope would be inf)
+      tmp <- list(list(root = ptadj[k, 3]))
+
+      xcrosses_tcurves <- lapply(seq_along(itcurves), function(...) tmp)
+      good_tcurves <- TRUE
+
+      xcrosses_vcurves <- lapply(seq_along(ivcurves), function(...) tmp)
+      good_vcurves <- lapply(seq_along(ivcurves), function(...) TRUE)
     }
-    fband <- c(0.25, 0.75)
-    fudge <- rbind(ff[1] * fband, ff[2] * fband)
-    is_res_zero <- res5 < rSW2_glovars[["tol"]]
 
-    lower <- pmax(0,
-      (1 - fudge[1, 1]) * min(res5),
-      (1 - fudge[1, 2]) * res5
-    )
 
-    upper <- pmax(0,
-      lower + 0.01,
-      pmin(
-        (1 + fudge[2, 1]) * max(res5),
-        (1 + fudge[2, 2]) * res5
+
+    #--- Calculate and apply radial expansion/contraction
+    if (all(good_tcurves) && all(sapply(good_vcurves, any))) {
+
+      # Intersection points: reference temp, target temp
+      x_tvals <- sapply(xcrosses_tcurves, function(x) x[[1]][["root"]])
+      y_tvals <- sapply(
+        seq_along(x_tvals),
+        function(i) predict(psps[[i]], x_tvals[i])[["y"]]
       )
-    )
 
-    # Ideally: keep zeros at zero, but cannot optimize 0-0 because of
-    # "non-finite finite-difference value" error
-    lower <- ifelse(is_res_zero, 0, lower)
-    upper <- ifelse(is_res_zero, 0.01, upper)
+      # Calculate radial x- and y-expansion/contraction
+      # (from ref temps to target temps)
+      # as fraction of reference temps to season center
+      rx <- (x_tvals[2] - x_tvals[1]) / (x_tvals[1] - ptadj[k, 1])
+      rx <- if (is.finite(rx)) rx else 0
+      ry <- (y_tvals[2] - y_tvals[1]) / (y_tvals[1] - ptadj[k, 2])
+      ry <- if (is.finite(ry)) ry else 0
 
-    # Optimize target values so that they maintain seasonality
-    # as good as possible
-    tmp <- try(stats::optim(
-      par = res5,
-      fn = function(res, cor_ref = rho_ref) {
-        abs(cor_ref - cor(res, target_temp))
-      },
-      method = "L-BFGS-B",
-      lower = lower,
-      upper = upper
-    )$par,
-      silent = TRUE
-    )
+      # Intersection points: vegetation(s)
+      x_vvals <- lapply(
+        seq_along(ivcurves),
+        function(kvc) {
+          sapply(
+            xcrosses_vcurves[[kvc]][good_vcurves[[kvc]]],
+            function(x) x[["root"]]
+          )
+        }
+      )
+      y_vvals <- lapply(
+        seq_along(ivcurves),
+        function(kvc) {
+          predict(psps[[ivcurves[kvc]]], x_vvals[[kvc]])[["y"]]
+        }
+      )
 
-    res5 <- if (inherits(tmp, "try-error")) res5 else tmp
+      # Calculate adjusted vegetation point(s)
+      # based on `x_asif` (index 2) but applied to `x` (index 1)
+      for (kv in seq_along(x_vvals[[2]])) {
+        vadj[[k_vadj]] <- c(
+          # xy-coordinates
+          x_vvals[[1]][kv] + rx * cvtoasif * (x_vvals[[2]][kv] - ptadj[k, 1]),
+          y_vvals[[1]][kv] + ry * cvtoasif * (y_vvals[[2]][kv] - ptadj[k, 2]),
+          # season that adjusts
+          ptadj[k, 1],
+          # number of continous adjustment section
+          ksc
+        )
 
-    # Zap back to zero if needed
-    res5 <- ifelse(is_res_zero, 0, res5)
+        k_vadj <- k_vadj + 1
+      }
+
+    } else {
+      # discontinuation in adjustment sections
+      ksc <- ksc + 1
+
+      # count longest continuous failure section
+      if (kce[1] == k - 1) {
+        kce[1:2] <- c(k, kce[2] + 1)
+      } else {
+        if (kce[2] > kce[3]) {
+          kce[3] <- kce[2]
+        }
+        kce[1:2] <- c(k, 1)
+      }
+    }
   }
 
 
-  # Make sure that we don't get negative biomass/activity values
-  ifelse(res5 < 0, 0, res5)
+
+  if (ksc > 0.2 * Nadj) {
+    warning("More than 20% of adjustment points failed.")
+  }
+
+  if (max(kce[2:3]) > 0.1 * Nadj) {
+    warning(
+      "The longest contiguous section of failed adjustments ",
+      "is longer than 10% of all points.")
+  }
+
+
+  #--- Pre-process adjusted vegetation values separately for seasons
+  # (in case certain time points received both cold- and warm-season adj.)
+
+  # Clean, sort, and separate adjusted vegetation values
+  vadj <- vadj[seq_len(k_vadj - 1)]
+
+  vadj2 <- matrix(unlist(vadj), nrow = length(vadj), ncol = 4, byrow = TRUE)
+  vadj2 <- vadj2[complete.cases(vadj2), ]
+
+  # determine duplicated values: see `smooth.spline`
+  tmp <- vadj2[, 1]
+  isdup <- duplicated(round((tmp - mean(tmp)) / (1e-6 * stats::IQR(tmp))))
+  vadj2 <- vadj2[!isdup, ]
+
+  vadj2 <- vadj2[order(vadj2[, 1]), , drop = FALSE]
+
+  vadj2 <- lapply(
+    c(ctr_cold[1], ctr_warm[1]),
+    function(ctr) vadj2[abs(vadj2[, 3] - ctr) < tol, , drop = FALSE]
+  )
+
+  # Continous adjustment sections
+  scs <- lapply(vadj2, function(x) sort(unique(x[, 4])))
+
+
+  # Fit periodic linear spline to adjusted vegetation values per season
+  # and predict along regular sequence (for each continuous section)
+  fxpsp_adj_norm2 <- lapply(
+    vadj2,
+    function(x) {
+      if (nrow(x) >= 4) {
+        splines::interpSpline(x[, 2] ~ x[, 1])
+      }
+    }
+  )
+
+
+  itmp <- seq_len(Nadj) / Nadj - 1 / (2 * Nadj)
+  vadj3 <- lapply(
+    seq_along(vadj2),
+    function(k2) {
+      tmp <- matrix(NA, nrow = Nadj, ncol = 1 + length(scs[[k2]]))
+      tmp[, 1] <- itmp
+      tmp
+    }
+  )
+
+  # Columns: (1) x-axis location, (2) cold-season adj. veg,
+  #          (3) warm-season adj. veg, (4) across season averaged adj. veg
+  vadj4 <- matrix(NA, nrow = Nadj, ncol = 4)
+  vadj4[, 1] <- itmp
+
+
+  # Predict seasonaly adjusted vegetation for each continous section
+  for (k2 in seq_along(vadj2)) {
+    if (!is.null(fxpsp_adj_norm2[[k2]])) {
+      for (k3 in seq_along(scs[[k2]])) {
+        ids <- vadj2[[k2]][, 4] %in% scs[[k2]][k3]
+        xl <- round(Nadj * range(vadj2[[k2]][ids, 1]))
+        xt2 <- seq(xl[1], xl[2])
+
+        tmp <- predict(
+          fxpsp_adj_norm2[[k2]],
+          xt2 / Nadj - 1 / (2 * Nadj)
+        )
+
+        tmp <- aggregate(
+          tmp[["y"]],
+          by = list(tmp[["x"]] %% yr_std_d),
+          FUN = mean
+        )
+
+        xt2p <- sapply(
+          tmp[, 1],
+          function(x) which.min(abs(x - vadj3[[k2]][, 1] %% yr_std_d))
+        )
+
+        vadj3[[k2]][xt2p, 1 + k3] <- tmp[, 2]
+      }
+
+      # Average across continous sections (within season)
+      vadj4[, 1 + k2] <- apply(
+        vadj3[[k2]][, -1, drop = FALSE],
+        MARGIN = 1,
+        FUN = mean,
+        na.rm = TRUE
+      )
+    }
+  }
+
+  # Average values across seasons
+  vadj4[, 4] <- apply(vadj4[, -1], 1, mean, na.rm = TRUE)
+  isgood <- complete.cases(vadj4[, c(1, 4)])
+  vadj4 <- vadj4[isgood, , drop = FALSE]
+
+
+  #------ Step 4) Fit periodic linear spline to adjusted vegetation values
+  # De-normalize vegetation values back to original scale
+  veg_new <- veg_min[1] + veg_scale[1] * vadj4[, 4]
+
+  # Revert temporal shifts due to centering of refs, target temps and veg
+  toy_new <- (vadj4[, 1] - sx) %% yr_std_d # nolint
+
+  if (nrow(vadj4) >= 2) {
+    # Use linear (instead of cubic) spline to smooth across potential steps
+    # between cold- and warm-season adjustments
+    fxpsp_adj <- splines::periodicSpline(
+      veg_new ~ toy_new,
+      period = yr_std_d,
+      ord = 2 # linear spline
+    )
+
+    # Obtain monthly adjusted vegetation values
+    pres <- predict(fxpsp_adj, mon_norm)[["y"]]
+
+  } else {
+    warning("Less than 3 adjustment points succeeded: return mean value.")
+    pres <- rep(mean(veg_new), nmon)
+  }
+
+  pmax(0, pres)
 }
 
 
@@ -1230,6 +1297,9 @@ Shrub_ANPP <- function(MAP_mm) 0.393 * MAP_mm - 10.2
 #' @rdname biomass
 Grass_ANPP <- function(MAP_mm) 0.646 * MAP_mm - 102.5
 
+#' Adjust mean monthly biomass values by precipitation
+#' @section Details: Internally used by
+#'   \code{\link{estimate_PotNatVeg_biomass}}.
 adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
   biom_maxs, map_mm_shrubs, map_mm_std_shrubs,
   map_mm_grasses, map_mm_std_grasses,
@@ -1311,16 +1381,16 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #'   \code{X.Litter} where \code{X} are for the functional groups shrubs,
 #'   \code{X = Sh}; C3-grasses, \code{X = C3}; C4-grasses, \code{X = C4}; and
 #'   annuals, \code{X = Annual} containing default input values.
-#' @param do_adjBiom_by_temp A logical value. If \code{TRUE} then monthly
+#' @param do_adjust_phenology A logical value. If \code{TRUE} then monthly
 #'   phenology is adjusted by temperature.
-#' @param do_adjBiom_by_ppt A logical value. If \code{TRUE} then monthly biomass
+#' @param do_adjust_biomass A logical value. If \code{TRUE} then monthly biomass
 #'   is adjusted by precipitation.
 #' @param fgrass_c3c4ann A numeric vector of length 3. Relative contribution
 #'   [0-1] of the C3-grasses, C4-grasses, and annuals functional groups. The sum
 #'   of \code{fgrass_c3c4ann} is 1.
 #' @param MAP_mm A numeric value. Mean annual precipitation in millimeter of the
 #'   location.
-#' @inheritParams adjBiom_by_temp
+#' @inheritParams adj_phenology_by_temp
 #'
 #' @section Default inputs: \itemize{
 #'   \item Shrubs are based on location \var{\sQuote{IM_USC00107648_Reynolds}}
@@ -1336,6 +1406,11 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #'   a matrix with 12 rows (one for each month) and columns \code{Biomass},
 #'   \code{Amount.Live}, \code{Perc.Live}, and \code{Litter}.
 #'
+#' @seealso Function \code{\link{adjBiom_by_ppt}} is called
+#'   if \code{do_adjust_biomass};
+#'   function \code{\link{adj_phenology_by_temp}} is called
+#'   if \code{do_adjust_phenology}.
+#'
 #' @references Bradford, J.B., Schlaepfer, D.R., Lauenroth, W.K. & Burke, I.C.
 #'   (2014). Shifts in plant functional types have time-dependent and regionally
 #'   variable impacts on dryland ecosystem water balance. J Ecol, 102,
@@ -1343,18 +1418,22 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #'
 #' @export
 estimate_PotNatVeg_biomass <- function(tr_VegBiom,
-  do_adjBiom_by_temp = FALSE,
-  do_adjBiom_by_ppt = FALSE,
+  do_adjust_phenology = FALSE,
+  do_adjust_biomass = FALSE,
   fgrass_c3c4ann = c(1, 0, 0),
-  growing_limit_C = 4,
-  isNorth = TRUE,
   MAP_mm = 450,
-  mean_monthly_temp_C = c(
-    rep(growing_limit_C - 1, 2),
-    rep(growing_limit_C + 1, 8),
-    rep(growing_limit_C - 1, 2)
-  )
+  ref_temp,
+  target_temp
 ) {
+
+  ns_VegBiom <- names(tr_VegBiom)
+  tmp <- strsplit(ns_VegBiom, split = ".", fixed = TRUE)
+  vtypes <- unique(sapply(tmp, function(x) x[[1]]))
+  stopifnot(identical(vtypes, c("Sh", "C3", "C4", "Annual")))
+
+  btypes <- unique(sapply(tmp, function(x) paste(x[-1], collapse = ".")))
+  stopifnot(identical(btypes, c("Litter", "Biomass", "Perc.Live")))
+  btypes2 <- c(btypes, "Amount.Live")
 
   # Default shrub biomass input is at MAP = 450 mm/yr, and default grass
   # biomass input is at MAP = 340 mm/yr
@@ -1366,79 +1445,117 @@ estimate_PotNatVeg_biomass <- function(tr_VegBiom,
   StandardShrub_MAP_mm <- 250
   StandardShrub_VegComposition <- c(0.7, 0.3, 0) # shrubs, C3, and C4
 
-  #Calculate 'live biomass amount'
-  vtypes <- c("Sh", "C3", "C4", "Annual")
-  for (vt in vtypes) {
-    tr_VegBiom[, paste0(vt, ".Amount.Live")] <-
-      tr_VegBiom[, paste0(vt, ".Biomass")] *
-      tr_VegBiom[, paste0(vt, ".Perc.Live")]
-  }
-
-  # Scale monthly values of litter and live biomass amount by column-max;
-  # total biomass will be back calculated
-  ns_VegBiom <- names(tr_VegBiom)
-  itemp <- grepl("(Litter)|(Amount.Live)", ns_VegBiom)
-  colmax <- apply(tr_VegBiom[, itemp], MARGIN = 2, FUN = max)
-  tr_VegBiom[, itemp] <- sweep(
-    x = tr_VegBiom[, itemp],
-    MARGIN = 2,
-    STATS = colmax,
-    FUN = "/"
+  # Scale monthly values of litter and biomass amount by column-max
+  colmax <- c(
+    apply(
+      tr_VegBiom,
+      MARGIN = 2,
+      FUN = max
+    ),
+    {
+      tmp <- apply(
+        tr_VegBiom[, grepl("Biomass", ns_VegBiom)] *
+          tr_VegBiom[, grepl("Perc.Live", ns_VegBiom)],
+        MARGIN = 2,
+        FUN = max
+      )
+      names(tmp) <- paste0(vtypes, ".Amount.Live")
+      tmp
+    }
   )
 
   # Pull vegetation types
-  x <- list()
-  x[["biom_shrubs"]] <- tr_VegBiom[, grepl("Sh", ns_VegBiom)]
-  x[["biom_C3"]] <- tr_VegBiom[, grepl("C3", ns_VegBiom)]
-  x[["biom_C4"]] <- tr_VegBiom[, grepl("C4", ns_VegBiom)]
-  x[["biom_annuals"]] <- tr_VegBiom[, grepl("Annual", ns_VegBiom)]
+  x0 <- lapply(
+    vtypes,
+    function(vt) tr_VegBiom[, grepl(vt, ns_VegBiom)]
+  )
+  names(x0) <- paste0("biom_", vtypes)
 
   # adjust phenology for mean monthly temperatures
-  if (do_adjBiom_by_temp) {
-    x <- adjBiom_by_temp(
-      x = x,
-      mean_monthly_temp_C = mean_monthly_temp_C,
-      growing_limit_C = growing_limit_C,
-      isNorth = isNorth
+  if (do_adjust_phenology) {
+    x <- lapply(
+      X = x0,
+      FUN = function(vt_data) {
+        sapply(
+          X = vt_data,
+          adj_phenology_by_temp,
+          ref_temp = ref_temp,
+          target_temp = target_temp,
+          x_asif = vt_data[, grepl("Perc.Live", colnames(vt_data))]
+        )
+      }
     )
+
+    # Scale to previous peak frequency (0-1)
+    for (ns in names(x0)) {
+      for (k in seq_len(ncol(x[[ns]]))) {
+        x[[ns]][, k] <- rSW2utils::scale_to_reference_peak_frequency(
+          x = x[[ns]][, k],
+          x_ref = x0[[ns]][, k],
+          cap_at_peak = FALSE
+        )
+      }
+    }
+
+  } else {
+    x <- x0
   }
+
+  for (vt in vtypes) {
+    ns <- paste0("biom_", vt)
+    ntmp <- colnames(x[[ns]])
+
+    x[[ns]] <- as.data.frame(x[[ns]])
+
+    # Calculate 'live biomass amount'
+    x[[ns]][, paste0(vt, ".Amount.Live")] <-
+      x[[ns]][, grepl("Biomass", ntmp)] *
+      x[[ns]][, grepl("Perc.Live", ntmp)]
+
+    # Scale so that 1 = previous peak (as required by `adjBiom_by_ppt`)
+    for (bt in btypes2[-3]) {
+      ctmp <- paste0(vt, ".", bt)
+      x[[ns]][, ctmp] <- x[[ns]][, ctmp] / colmax[ctmp]
+    }
+  }
+
+
 
   # if (do_adjBiom_by_ppt) then adjust biomass amounts by productivity
   # relationship with MAP
+  # total biomass is back calculated
   x <- adjBiom_by_ppt(
-    biom_shrubs = x[["biom_shrubs"]],
+    biom_shrubs = x[["biom_Sh"]],
     biom_C3 = x[["biom_C3"]],
     biom_C4 = x[["biom_C4"]],
-    biom_annuals = x[["biom_annuals"]],
+    biom_annuals = x[["biom_Annual"]],
     biom_maxs = colmax,
-    map_mm_shrubs = if (do_adjBiom_by_ppt) MAP_mm else StandardShrub_MAP_mm,
+    map_mm_shrubs = if (do_adjust_biomass) MAP_mm else StandardShrub_MAP_mm,
     map_mm_std_shrubs = StandardShrub_MAP_mm,
-    map_mm_grasses = if (do_adjBiom_by_ppt) MAP_mm else StandardGrasses_MAP_mm,
+    map_mm_grasses = if (do_adjust_biomass) MAP_mm else StandardGrasses_MAP_mm,
     map_mm_std_grasses = StandardGrasses_MAP_mm,
     vegcomp_std_shrubs = StandardShrub_VegComposition,
     vegcomp_std_grass = StandardGrasses_VegComposition
   )
+
 
   biom_grasses <-
     x[["biom_C3"]] * fgrass_c3c4ann[1] +
     x[["biom_C4"]] * fgrass_c3c4ann[2] +
     x[["biom_annuals"]] * fgrass_c3c4ann[3]
 
-  cn <- dimnames(biom_grasses)[[2]]
-  cn <- sapply(
-    strsplit(cn, split = ".", fixed = TRUE),
-    function(x) paste0(x[-1], collapse = ".")
-  )
-  dimnames(biom_grasses)[[2]] <- cn
+  dimnames(biom_grasses)[[2]] <- btypes2
 
   biom_shrubs <- x[["biom_shrubs"]]
-  dimnames(biom_shrubs)[[2]] <- cn
+  dimnames(biom_shrubs)[[2]] <- btypes2
 
   list(
     grass = as.matrix(biom_grasses),
     shrub = as.matrix(biom_shrubs)
   )
 }
+
+
 
 #' Lookup transpiration coefficients
 #'

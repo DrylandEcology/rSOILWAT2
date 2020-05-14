@@ -4,7 +4,7 @@
 \alias{adj_phenology_by_temp}
 \title{Adjust a phenological pattern to a different temperature regime}
 \usage{
-adj_phenology_by_temp(x, ref_temp, target_temp)
+adj_phenology_by_temp(x, ref_temp, target_temp, x_asif = NULL)
 }
 \arguments{
 \item{x}{A numeric vector of length 12. The values
@@ -18,9 +18,12 @@ determined / is valid.}
 \item{target_temp}{A numeric vector of length 12. Mean monthly
 temperature values in degree Celsius of a target site / condition
 for which \code{x} is to be adjusted.}
+
+\item{x_asif}{A numeric vector of length 12. If not \code{NULL}, then
+the adjustments applied to \code{x} are based on values of \code{x_asif}.}
 }
 \value{
-An updated copy of \code{x} where the values have been adjusted
+A copy of \code{x} with values that have been adjusted
   to represent the phenology of a target climate described by
   \code{target_temp}.
 }
@@ -31,50 +34,118 @@ activity, etc. (i.e., phenology) that were observed for a specific
 to the mean monthly temperature values of a different site and/or different
 climate conditions.
 }
-\details{
-The algorithm attempts to adjust for the following patterns:
-\itemize{
-  \item Shifts in timing of highest/lowest seasonal biomass/activity
-  \item Effects of residual temperature differences not accounted
-        for by shifts in timing while maintaining a unimodal phenological
-        pattern
-  \item Maintain inactive period if present
-  \item Maintain seasonality expressed as correlation between phenology
-        and mean monthly temperature values
+\section{Details}{
+ The implementation takes a geometrical interpretation to
+the seasonal cycle.
+The time axis is represented by a standardized twelve month circle;
+temperature and vegetation values are standardized to lie within a band along
+the time circle;
+and warm- and cold-seasons are presumed to exist (i.e., temperate
+climates will work best) and are represented by ellipses with centers at the
+time of peak of temperature values (warm-season) below the standardized band
+of values and half a year earlier (cold-season) above that band.
+From these centers, radial expansion or contraction rates are calculated
+as vectors from reference towards target temperatures and these vectors
+are applied as adjustment rates to vegetation values.
+Adjusted values are destandardized before returning.
+
+ The purpose of \code{x_asif} is to adjust \code{x} based
+  on the phenological pattern of \code{x_asif} instead of \code{x}. This
+  may be useful, for instance, if \code{x} represents total biomass and
+  \code{x_asif} fraction of live biomass and if we want the adjustments to
+  reflect that the live biomass fraction predominantly influences the
+  total biomass response to different temperatures.
+
+ Adjustments based on \code{x_asif} reflect the
+  amount of variation in \code{x} relative to the amount of variation in
+  \code{x_asif}. Thus, the less variation in \code{x} relative to
+  \code{x_asif}, the less \code{x} is adjusted; and if \code{x} does not
+  vary across months, then \code{x} is not adjusted at all regardless of the
+  values of \code{x_asif}. This may not be desired in all cases.
 }
+
+\section{Notes}{
+ Phenological adjustments applied to \code{x} will not
+  necessarily maintain any specific characteristic of \code{x}, e.g.,
+  values in \code{[0, 1]}, \code{sum(x) == 1}, \code{max(x) == peak}.
+  Thus, post-adjustment scaling of the returned values may be required. See
+  examples.
 }
+
 \examples{
 sw_in <- rSOILWAT2::sw_exampleData
-phen_reference <- as.data.frame(
-  swProd_MonProd_grass(sw_in)[, c("Biomass", "Live_pct")]
+tmp <- swProd_MonProd_grass(sw_in)
+phen_reference <- data.frame(
+  tmp,
+  Litter_pct = tmp[, "Litter"] / max(tmp[, "Litter"]),
+  Biomass_pct = tmp2 <- tmp[, "Biomass"] / max(tmp[, "Biomass"]),
+  Biomass2_pct = {tmp2[6:8] <- 1; tmp2}
 )
 
 clim <- calc_SiteClimate(weatherList = rSOILWAT2::weatherData)
 ref_temp <- clim[["meanMonthlyTempC"]]
 temp_randomwarmer3C <- ref_temp + stats::rnorm(12, 3, 1)
 
-## Adjust phenology from the reference Mar-Oct to a target Nov-Jun
-## growing season
-phen_adj <- sapply(phen_reference, function(x) adj_phenology_by_temp(
-  x = x,
+phen_adj <- sapply(
+  phen_reference,
+  adj_phenology_by_temp,
   ref_temp = ref_temp,
-  target_temp = temp_randomwarmer3C
-))
+  target_temp = temp_randomwarmer3C,
+  x_asif = phen_reference[, "Live_pct"]
+)
+
+## Note: depending on what `x` represents, post-adjustment scaling may
+## be necessary
+
+# Maintain previous peak
+rSW2utils::scale_to_reference_fun(
+  x = phen_adj[, "Litter_pct"],
+  x_ref = phen_reference[, "Litter_pct"],
+  fun = max
+)
+
+# Maintain previous sum
+rSW2utils::scale_to_reference_fun(
+  x = phen_adj[, "Biomass"],
+  x_ref = phen_reference[, "Biomass"],
+  fun = sum
+)
+
+# Maintain previous frequency of peaks and cap the peaks at that value
+rSW2utils::scale_to_reference_peak_frequency(
+  x = phen_adj[, "Biomass2_pct"],
+  x_ref = phen_reference[, "Biomass2_pct"],
+  cap_at_peak = TRUE
+)
 
 ## Plot reference and adjusted monthly values
 \dontrun{
 par_prev <- par(mfrow = c(2, 1))
 
-plot(1:12, phen_reference[, 1], type = "l", col = "red",
-  ylim = c(0, 250), xlab = "Month")
+plot(
+  1:12,
+  phen_reference[, 1],
+  type = "l",
+  col = "red",
+  ylim = c(0, 300),
+  xlab = "Month"
+)
 lines(1:12, phen_adj[, 1])
-legend("bottom", ncol = 2,
+legend(
+  "bottom",
+  ncol = 2,
   legend = c("reference", "adjusted"),
   lwd = 2, lty = 1, col = c("red", "black")
 )
 
-plot(1:12, phen_reference[, 2], type = "l", col = "red",
-  ylim = c(0, 1), xlab = "Month")
+plot(
+  1:12,
+  phen_reference[, 2],
+  type = "l",
+  col = "red",
+  ylim = c(0, 1),
+  xlab = "Month"
+)
 lines(1:12, phen_adj[, 2])
 
 par(par_prev)
