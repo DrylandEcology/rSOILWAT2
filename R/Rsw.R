@@ -191,6 +191,13 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
     inputData <- sw_inputDataFromFiles(dir = dir, files.in = files.in)
   }
 
+  if (!check_version(inputData)) {
+    warning(
+      "Object `inputData is outdated; ",
+      "SOILWAT2 may fail or produce unexpected outcomes."
+    )
+  }
+
   res <- .Call(C_start, input, inputData, weatherList, as.logical(quiet))
   slot(res, "version") <- rSW2_version()
   slot(res, "timestamp") <- rSW2_timestamp()

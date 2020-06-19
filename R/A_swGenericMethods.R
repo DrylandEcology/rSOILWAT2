@@ -33,26 +33,39 @@ setGeneric("swReadLines", function(object, file) standardGeneric("swReadLines"))
 #' Create \pkg{rSOILWAT2} version representation
 rSW2_version <- function() as.character(getNamespaceVersion("rSOILWAT2"))
 
-#' Create \pkg{rSOILWAT2} time stamp
-rSW2_timestamp <- function() unclass(Sys.time())
-
-
 #' \code{get_version}
 #' @param object An object of class \code{\linkS4class{swInputData}} or
 #'   \code{\linkS4class{swOutput}}.
 setGeneric("get_version", function(object) standardGeneric("get_version"))
+
+#' Check that version of an input or output object is up-to-date
+#' @param object An object of class \code{\linkS4class{swInputData}} or
+#'   \code{\linkS4class{swOutput}}.
+#' @return A logical value.
+#' @export
+check_version <- function(object) {
+  tmp <- get_version(object)
+  if (is.na(tmp)) {
+    FALSE
+  } else {
+    as.numeric_version(tmp) >= as.numeric_version(rSW2_version())
+  }
+}
+
+
+#' Create \pkg{rSOILWAT2} time stamp
+rSW2_timestamp <- function() unclass(Sys.time())
 
 #' \code{get_timestamp}
 #' @param object An object of class \code{\linkS4class{swInputData}} or
 #'   \code{\linkS4class{swOutput}}.
 setGeneric("get_timestamp", function(object) standardGeneric("get_timestamp"))
 
-
-
 #' Format time stamp of an input or output object
+#' @param object An object of class \code{\linkS4class{swInputData}} or
+#'   \code{\linkS4class{swOutput}}.
 #' @seealso \code{\link{get_timestamp}}
-#'
-#'export
+#' @export
 format_timestamp <- function(object) {
   as.POSIXct(get_timestamp(object), origin = "1970-01-01 00:00.00 UTC")
 }

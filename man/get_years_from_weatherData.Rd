@@ -2,10 +2,13 @@
 % Please edit documentation in R/sw_dbW_WeatherDatabase.R
 \name{get_years_from_weatherData}
 \alias{get_years_from_weatherData}
-\title{export}
+\title{Extract years from a \var{weatherData} object}
 \usage{
 get_years_from_weatherData(wd)
 }
+\arguments{
+\item{wd}{A list of elements of class \code{\linkS4class{swWeatherData}}}
+}
 \description{
-export
+Extract years from a \var{weatherData} object
 }

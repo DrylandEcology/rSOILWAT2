@@ -245,12 +245,26 @@ setValidity(
 # Methods for slot \code{version}
 #' @rdname swOutput-class
 #' @export
-setMethod("get_version", "swOutput", function(object) object@version)
+setMethod(
+  f = "get_version",
+  signature = "swOutput",
+  definition = function(object) {
+    tmp <- try(object@version, silent = TRUE)
+    if (inherits(tmp, "try-error")) NA else tmp
+  }
+)
 
 # Methods for slot \code{get_timestamp}
 #' @rdname swOutput-class
 #' @export
-setMethod("get_timestamp", "swOutput", function(object) object@timestamp)
+setMethod(
+  f = "get_timestamp",
+  signature = "swOutput",
+  definition = function(object) {
+    tmp <- try(object@timestamp, silent = TRUE)
+    if (inherits(tmp, "try-error")) NA else tmp
+  }
+)
 
 
 #' @rdname swOutput-class

@@ -6,11 +6,13 @@
 \usage{
 format_timestamp(object)
 }
+\arguments{
+\item{object}{An object of class \code{\linkS4class{swInputData}} or
+\code{\linkS4class{swOutput}}.}
+}
 \description{
 Format time stamp of an input or output object
 }
 \seealso{
 \code{\link{get_timestamp}}
-
-export
 }
