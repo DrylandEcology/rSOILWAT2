@@ -23,11 +23,40 @@
 # Author: Ryan J. Murphy (2013)
 ###############################################################################
 
-##########################GENERIC FUNCTIONS####################################
+##########################GENERIC METHODS/FUNCTIONS############################
 #' \code{swReadLines}
 #' @param object An object of a class such \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swInputData}}
 setGeneric("swReadLines", function(object, file) standardGeneric("swReadLines"))
+
+
+#' Create \pkg{rSOILWAT2} version representation
+rSW2_version <- function() as.character(getNamespaceVersion("rSOILWAT2"))
+
+#' Create \pkg{rSOILWAT2} time stamp
+rSW2_timestamp <- function() unclass(Sys.time())
+
+
+#' \code{get_version}
+#' @param object An object of class \code{\linkS4class{swInputData}} or
+#'   \code{\linkS4class{swOutput}}.
+setGeneric("get_version", function(object) standardGeneric("get_version"))
+
+#' \code{get_timestamp}
+#' @param object An object of class \code{\linkS4class{swInputData}} or
+#'   \code{\linkS4class{swOutput}}.
+setGeneric("get_timestamp", function(object) standardGeneric("get_timestamp"))
+
+
+
+#' Format time stamp of an input or output object
+#' @seealso \code{\link{get_timestamp}}
+#'
+#'export
+format_timestamp <- function(object) {
+  as.POSIXct(get_timestamp(object), origin = "1970-01-01 00:00.00 UTC")
+}
+
 
 #########FILES##########
 #' \code{get_swFiles}

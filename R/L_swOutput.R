@@ -28,7 +28,8 @@
 #'  \linkS4class{swOutput}.
 #' @export
 sw_out_flags <- function() {
-  c(sw_aet = "AET",
+  c(
+    sw_aet = "AET",
     sw_deepdrain = "DEEPSWC",
     sw_estabs = "ESTABL",
     sw_evsoil = "EVAPSOIL",
@@ -54,7 +55,8 @@ sw_out_flags <- function() {
     sw_co2effects = "CO2EFFECTS",
     sw_veg = "BIOMASS",
     sw_wetdays = "WETDAY",
-    sw_logfile = "LOG")
+    sw_logfile = "LOG"
+  )
 }
 
 ###################Generic Class to Hold One Output KEY########################
@@ -150,6 +152,8 @@ setReplaceMethod("swOutput_KEY_Period", signature = "swOutput_KEY",
 setClass(
   "swOutput",
   slot = c(
+    version = "character",
+    timestamp = "numeric",
     yr_nrow = "integer",
     mo_nrow = "integer",
     wk_nrow = "integer",
@@ -187,6 +191,41 @@ setClass(
     BIOMASS = "swOutput_KEY"
   )
 )
+
+
+#' @rdname swInputData-class
+#' @export
+setMethod(
+  "initialize",
+  signature = "swOutput",
+  function(.Object) {
+
+    slot(.Object, "version") <- rSW2_version()
+    slot(.Object, "timestamp") <- rSW2_timestamp()
+
+    validObject(.Object)
+
+    .Object
+  }
+)
+
+setValidity(
+  "swOutput",
+  function(object) {
+    TRUE
+  }
+)
+
+
+# Methods for slot \code{version}
+#' @rdname swInputData-class
+#' @export
+setMethod("get_version", "swOutput", function(object) object@version)
+
+# Methods for slot \code{get_timestamp}
+#' @rdname swInputData-class
+#' @export
+setMethod("get_timestamp", "swOutput", function(object) object@timestamp)
 
 
 #' @rdname swOutput-class

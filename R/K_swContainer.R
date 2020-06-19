@@ -73,31 +73,70 @@
 #'
 #' @name swInputData-class
 #' @export
-setClass("swInputData", slots = c(files = "swFiles", years = "swYears",
-  weather = "swWeather", cloud = "swCloud", weatherHistory = "list",
-  markov = "swMarkov", prod = "swProd", site = "swSite", soils = "swSoils",
-  estab = "swEstab", carbon = "swCarbon", output = "swOUT", swc = "swSWC",
-  log = "swLog"))
+setClass(
+  "swInputData",
+  slots = c(
+    version = "character",
+    timestamp = "numeric",
+    files = "swFiles",
+    years = "swYears",
+    weather = "swWeather",
+    cloud = "swCloud",
+    weatherHistory = "list",
+    markov = "swMarkov",
+    prod = "swProd",
+    site = "swSite",
+    soils = "swSoils",
+    estab = "swEstab",
+    carbon = "swCarbon",
+    output = "swOUT",
+    swc = "swSWC",
+    log = "swLog"
+  )
+)
 
 
 #' @rdname swInputData-class
 #' @export
-setMethod("initialize", signature = "swInputData", function(.Object) {
-  sns <- slotNames("swInputData")
-  scl <- getSlots("swInputData")
+setMethod(
+  "initialize",
+  signature = "swInputData",
+  function(.Object) {
+    sns <- slotNames("swInputData")
+    scl <- getSlots("swInputData")
 
-  for (i in seq_along(sns)) {
-    slot(.Object, sns[i]) <- new(scl[i])
+    for (i in seq_along(sns)) {
+      slot(.Object, sns[i]) <- new(scl[i])
+    }
+
+    slot(.Object, "version") <- rSW2_version()
+    slot(.Object, "timestamp") <- rSW2_timestamp()
+
+    validObject(.Object)
+
+    .Object
   }
-  validObject(.Object)
+)
 
-  .Object
-})
+setValidity(
+  "swInputData",
+  function(object) {
+    TRUE
+  }
+)
 
-setValidity("swInputData", function(object) {
-  TRUE
-})
 
+
+
+# Methods for slot \code{version}
+#' @rdname swInputData-class
+#' @export
+setMethod("get_version", "swInputData", function(object) object@version)
+
+# Methods for slot \code{get_timestamp}
+#' @rdname swInputData-class
+#' @export
+setMethod("get_timestamp", "swInputData", function(object) object@timestamp)
 
 # Methods for slot \code{files}
 #' @rdname swInputData-class
