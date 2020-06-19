@@ -4,6 +4,8 @@
 \name{swInputData-class}
 \alias{swInputData-class}
 \alias{initialize,swInputData-method}
+\alias{get_version,swInputData-method}
+\alias{get_timestamp,swInputData-method}
 \alias{get_swFiles,swInputData-method}
 \alias{swFiles_ProjDir,swInputData-method}
 \alias{swFiles_filesIn,swInputData-method}
@@ -196,6 +198,10 @@
 \title{Class \code{"swInputData"}}
 \usage{
 \S4method{initialize}{swInputData}(.Object)
+
+\S4method{get_version}{swInputData}(object)
+
+\S4method{get_timestamp}{swInputData}(object)
 
 \S4method{get_swFiles}{swInputData}(object)
 

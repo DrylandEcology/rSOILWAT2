@@ -82,40 +82,65 @@ sw_out_flags <- function() {
 #'
 #' @name swOutput_KEY-class
 #' @export
-setClass("swOutput_KEY", slot = c(Title = "character", TimeStep = "integer",
-  Columns = "integer", Day = "matrix", Week = "matrix", Month = "matrix",
-  Year = "matrix"))
+setClass(
+  "swOutput_KEY",
+  slot = c(
+    Title = "character",
+    TimeStep = "integer",
+    Columns = "integer",
+    Day = "matrix",
+    Week = "matrix",
+    Month = "matrix",
+    Year = "matrix"
+  )
+)
 
-setValidity("swOutput_KEY", function(object) {
-  val <- TRUE
-  ntemp <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
+setValidity(
+  "swOutput_KEY",
+  function(object) {
+    val <- TRUE
+    ntemp <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
 
-  if (length(object@TimeStep) != 1 || object@TimeStep > ntemp ||
-      object@TimeStep < 1) {
-    msg <- paste("@TimeStep must have exactly 1 value between 1 and",
-      "SW_OUTNPERIODS")
-    val <- if (isTRUE(val)) msg else c(val, msg)
+    if (
+      length(object@TimeStep) != 1 ||
+        object@TimeStep > ntemp ||
+        object@TimeStep < 1
+    ) {
+      msg <- "@TimeStep must have exactly 1 value between 1 and SW_OUTNPERIODS"
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    val
   }
-
-  val
-})
+)
 
 #' @rdname swOutput_KEY-class
-setMethod("swOutput_KEY_Period", signature = "swOutput_KEY",
+setMethod(
+  "swOutput_KEY_Period",
+  signature = "swOutput_KEY",
   function(object, index) {
     slot(object, rSW2_glovars[["sw_TimeSteps"]][index])
-})
+  }
+)
 
 #' @rdname swOutput_KEY-class
-setMethod("swOutput_KEY_TimeStep", signature = "swOutput_KEY",
-  function(object) object@TimeStep)
+setMethod(
+  "swOutput_KEY_TimeStep",
+  signature = "swOutput_KEY",
+  function(object) object@TimeStep
+)
 
 #' @rdname swOutput_KEY-class
-setMethod("swOutput_KEY_Columns", signature = "swOutput_KEY",
-  function(object) object@Columns)
+setMethod(
+  "swOutput_KEY_Columns",
+  signature = "swOutput_KEY",
+  function(object) object@Columns
+)
 
 #' @rdname swOutput_KEY-class
-setReplaceMethod("swOutput_KEY_Period", signature = "swOutput_KEY",
+setReplaceMethod(
+  "swOutput_KEY_Period",
+  signature = "swOutput_KEY",
   function(object, index, value) {
     slot(object, rSW2_glovars[["sw_TimeSteps"]][index]) <- value
     validObject(object)
@@ -193,7 +218,7 @@ setClass(
 )
 
 
-#' @rdname swInputData-class
+#' @rdname swOutput-class
 #' @export
 setMethod(
   "initialize",
@@ -218,12 +243,12 @@ setValidity(
 
 
 # Methods for slot \code{version}
-#' @rdname swInputData-class
+#' @rdname swOutput-class
 #' @export
 setMethod("get_version", "swOutput", function(object) object@version)
 
 # Methods for slot \code{get_timestamp}
-#' @rdname swInputData-class
+#' @rdname swOutput-class
 #' @export
 setMethod("get_timestamp", "swOutput", function(object) object@timestamp)
 
@@ -235,18 +260,23 @@ setMethod("$", signature = "swOutput", function(x, name) slot(x, name))
 #TODO: use C key2str to access slot
 #' @rdname swOutput-class
 #' @export
-setMethod("swOutput_getKEY", signature = "swOutput", function(object, index) {
-  nid <- seq_len(4)
-  slot(object, slotNames("swOutput")[-nid][index])
-})
+setMethod(
+  "swOutput_getKEY",
+  signature = "swOutput",
+  function(object, index) {
+    nid <- seq_len(6)
+    slot(object, slotNames("swOutput")[-nid][index])
+  }
+)
 
 #TODO: use C key2str to access slot
 #' @rdname swOutput-class
 #' @export
-setReplaceMethod("swOutput_setKEY",
+setReplaceMethod(
+  "swOutput_setKEY",
   signature = c(object = "swOutput", value = "swOutput_KEY"),
   function(object, index, value) {
-    nid <- seq_len(4)
+    nid <- seq_len(6)
     slot(object, slotNames("swOutput")[-nid][index]) <- value
     object
   }
