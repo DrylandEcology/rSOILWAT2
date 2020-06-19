@@ -53,10 +53,10 @@
 1.1		# range
 
 #---- Site location and topography
-0.681		# latitude of the site in radians
+39.59		# latitude of the site in degrees
 1000		# elevation of site (m a.s.l.)
-0		# slope at site (degrees): no slope = 0
--1		# aspect at site (degrees): N=0, E=90, S=180, W=270, no slope:-1
+0		# slope at site (degrees): no slope = 0, vertical = 90
+999		# aspect at site (degrees): S=0, E=-90, N=±180, W=90; ignored if slope = 0 or aspect = 999
 
 #---- Soil temperature
 # from Parton 1978, ch. 2.2.2 Temperature-profile Submodel

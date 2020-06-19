@@ -62,8 +62,8 @@ TIMESTEP dy wk mo yr # must be lowercase
  INTERCEPTION     SUM       MO       1     end    interception      /* intercepted rain (cm): total, trees, shrubs, forbs, grasses, and litter (cm) */
      LYRDRAIN     SUM       DY       1     end     percolation      /* water percolated from each layer (cm) */
        HYDRED     SUM       WK       1     end          hydred      /* hydraulic redistribution from each layer (cm): total, trees, shrubs, forbs, grasses */
-          AET     SUM       YR       1     end             aet      /* actual evapotr. (cm) */
-          PET     SUM       DY       1     end             pet      /* potential evaptr (cm) */
+          AET     SUM       YR       1     end             aet      /* actual evapotranspiration (cm) */
+          PET     SUM       DY       1     end             pet      /* potential evapotranspiration (cm), extraterrestrial horizontal solar irradiation [MJ/m2], extraterrestrial tilted solar irradiation [MJ/m2], global horizontal irradiation [MJ/m2], global tilted irradiation [MJ/m2] */
        WETDAY     SUM       DY       1     end         wetdays      /* days above swc_wet */
      SNOWPACK     AVG       WK       1     end        snowpack      /* snowpack water equivalent (cm), snowdepth (cm); since snowpack is already summed, use avg - sum sums the sums = nonsense */
       DEEPSWC     SUM       MO       1     end      deep_drain      /* deep drainage into lowest layer (cm) */

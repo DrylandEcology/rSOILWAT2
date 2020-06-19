@@ -60,9 +60,9 @@ SEXP onGet_SW_SKY() {
 	SEXP swCloud,SW_SKY;
 	SEXP Cloud;
 	SEXP Cloud_names, Cloud_names_x, Cloud_names_y;
-	int k = 6;
+	int k = 5;
   char *x_names[] = { "SkyCoverPCT", "WindSpeed_m/s", "HumidityPCT",
-    "Transmissivity", "SnowDensity_kg/m^3", "RainEvents_per_day" };
+    "SnowDensity_kg/m^3", "RainEvents_per_day" };
   char *y_names[] = { "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December" };
 	RealD *p_Cloud;
@@ -75,9 +75,8 @@ SEXP onGet_SW_SKY() {
 		p_Cloud[0 + k * i] = v->cloudcov[i];
 		p_Cloud[1 + k * i] = v->windspeed[i];
 		p_Cloud[2 + k * i] = v->r_humidity[i];
-		p_Cloud[3 + k * i] = v->transmission[i];
-		p_Cloud[4 + k * i] = v->snow_density[i];
-		p_Cloud[5 + k * i] = v->n_rain_per_day[i];
+		p_Cloud[3 + k * i] = v->snow_density[i];
+		p_Cloud[4 + k * i] = v->n_rain_per_day[i];
 	}
 
 	PROTECT(Cloud_names = allocVector(VECSXP, 2));
@@ -100,7 +99,7 @@ SEXP onGet_SW_SKY() {
 }
 
 void onSet_SW_SKY(SEXP sxp_SW_SKY) {
-	int i, k = 6;
+	int i, k = 5;
 	SW_SKY *v = &SW_Sky;
 	RealD *p_Cloud;
 	PROTECT(sxp_SW_SKY);
@@ -112,9 +111,8 @@ void onSet_SW_SKY(SEXP sxp_SW_SKY) {
 		v->cloudcov[i] = p_Cloud[0 + k * i];
 		v->windspeed[i] = p_Cloud[1 + k * i];
 		v->r_humidity[i] = p_Cloud[2 + k * i];
-		v->transmission[i] = p_Cloud[3 + k * i];
-		v->snow_density[i] = p_Cloud[4 + k * i];
-		v->n_rain_per_day[i] = p_Cloud[5 + k * i];
+		v->snow_density[i] = p_Cloud[3 + k * i];
+		v->n_rain_per_day[i] = p_Cloud[4 + k * i];
 	}
 
 	UNPROTECT(1);

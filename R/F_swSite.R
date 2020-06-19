@@ -47,12 +47,22 @@
 #'
 #' @name swSite-class
 #' @export
-setClass("swSite", slots = c(SWClimits = "numeric", ModelFlags = "logical",
-  ModelCoefficients = "numeric", SnowSimulationParameters = "numeric",
-  DrainageCoefficient = "numeric", EvaporationCoefficients = "numeric",
-  TranspirationCoefficients = "numeric", IntrinsicSiteParams = "numeric",
-  SoilTemperatureFlag = "logical", SoilTemperatureConstants = "numeric",
-  TranspirationRegions = "matrix"))
+setClass(
+  "swSite",
+  slots = c(
+    SWClimits = "numeric",
+    ModelFlags = "logical",
+    ModelCoefficients = "numeric",
+    SnowSimulationParameters = "numeric",
+    DrainageCoefficient = "numeric",
+    EvaporationCoefficients = "numeric",
+    TranspirationCoefficients = "numeric",
+    IntrinsicSiteParams = "numeric",
+    SoilTemperatureFlag = "logical",
+    SoilTemperatureConstants = "numeric",
+    TranspirationRegions = "matrix"
+  )
+)
 
 setValidity("swSite", function(object) {
   val <- TRUE
@@ -136,38 +146,42 @@ setValidity("swSite", function(object) {
 
 #' @rdname swSite-class
 #' @export
-setMethod(f = "initialize", signature = "swSite", function(.Object, ...) {
-  def <- slot(rSOILWAT2::sw_exampleData, "site")
-  sns <- slotNames(def)
-  dots <- list(...)
-  dns <- names(dots)
+setMethod(
+  f = "initialize",
+  signature = "swSite",
+  function(.Object, ...) {
+    def <- slot(rSOILWAT2::sw_exampleData, "site")
+    sns <- slotNames(def)
+    dots <- list(...)
+    dns <- names(dots)
 
-  # We don't set values for slots `IntrinsicSiteParams` and
-  # `TranspirationRegions`; this is to prevent simulation runs with
-  # accidentally incorrect values
-  if (!("IntrinsicSiteParams" %in% dns)) {
-    def@IntrinsicSiteParams[c("Latitude", "Altitude")] <- NA_real_
-  }
-  if (!("TranspirationRegions" %in% dns)) {
-    def@TranspirationRegions[, "layer"] <- NA_integer_
-  } else {
-    # Guarantee dimnames
-    dimnames(dots[["TranspirationRegions"]]) <-
-      dimnames(def@TranspirationRegions)
-  }
+    # We don't set values for slots `IntrinsicSiteParams` and
+    # `TranspirationRegions`; this is to prevent simulation runs with
+    # accidentally incorrect values
+    if (!("IntrinsicSiteParams" %in% dns)) {
+      def@IntrinsicSiteParams[c("Latitude", "Altitude")] <- NA_real_
+    }
+    if (!("TranspirationRegions" %in% dns)) {
+      def@TranspirationRegions[, "layer"] <- NA_integer_
+    } else {
+      # Guarantee dimnames
+      dimnames(dots[["TranspirationRegions"]]) <-
+        dimnames(def@TranspirationRegions)
+    }
 
-  for (sn in sns) {
-    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
-  }
+    for (sn in sns) {
+      slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
+    }
 
-  if (FALSE) {
-    # not needed because no relevant inheritance
-    .Object <- callNextMethod(.Object, ...)
-  }
+    if (FALSE) {
+      # not needed because no relevant inheritance
+      .Object <- callNextMethod(.Object, ...)
+    }
 
-  validObject(.Object)
-  .Object
-})
+    validObject(.Object)
+    .Object
+  }
+)
 
 
 #' @rdname swSite-class
