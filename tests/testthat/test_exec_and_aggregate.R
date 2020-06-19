@@ -202,7 +202,7 @@ for (it in tests) {
 
     # Loop through output
     temp <- slotNames(rd)
-    vars <- temp[!grepl("nrow", temp)]
+    vars <- temp[!grepl("nrow|version|timestamp", temp)]
     fun_agg <- OutSum[1 + slot(get_swOUT(sw_input), "sumtype")]
     expect_true(length(vars) == length(fun_agg))
 
@@ -290,7 +290,9 @@ for (it in tests) {
 
       } else {
         # slot 'vars[k]' contains
-        #   - meta information: "yr_nrow", "mo_nrow", "wk_nrow", "dy_nrow"
+        #   - meta information:
+        #     - "version", "timestamp"
+        #     - "yr_nrow", "mo_nrow", "wk_nrow", "dy_nrow"
         #   - empty slot: "WTHR", "ALLH2O", "ALLVEG"
       }
     }
