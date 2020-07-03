@@ -516,6 +516,11 @@ setMethod("swWeather_UseMarkov", "swInputData",
 
 #' @rdname swInputData-class
 #' @export
+setMethod("swWeather_UseMarkovOnly", "swInputData",
+  function(object) swWeather_UseMarkovOnly(object@weather))
+
+#' @rdname swInputData-class
+#' @export
 setMethod("swWeather_UseSnow", "swInputData",
   function(object) swWeather_UseSnow(object@weather))
 
@@ -575,6 +580,14 @@ setReplaceMethod("swWeather_UseMarkov", signature = "swInputData",
 
 #' @rdname swInputData-class
 #' @export
+setReplaceMethod("swWeather_UseMarkovOnly", signature = "swInputData",
+  function(object, value) {
+    swWeather_UseMarkovOnly(object@weather) <- as.logical(value)
+    object
+})
+
+#' @rdname swInputData-class
+#' @export
 setReplaceMethod("swWeather_UseSnow", signature = "swInputData",
   function(object, value) {
     swWeather_UseSnow(object@weather) <- as.logical(value)
@@ -610,11 +623,6 @@ setMethod("swCloud_WindSpeed", "swInputData", function(object)
 #' @export
 setMethod("swCloud_Humidity", "swInputData", function(object)
   swCloud_Humidity(object@cloud))
-
-#' @rdname swInputData-class
-#' @export
-setMethod("swCloud_Transmissivity", "swInputData",
-  function(object) swCloud_Transmissivity(object@cloud))
 
 #' @rdname swInputData-class
 #' @export
@@ -655,14 +663,6 @@ setReplaceMethod("swCloud_WindSpeed", signature = "swInputData",
 setReplaceMethod("swCloud_Humidity", signature = "swInputData",
   function(object, value) {
     swCloud_Humidity(object@cloud) <- value
-    object
-})
-
-#' @rdname swInputData-class
-#' @export
-setReplaceMethod("swCloud_Transmissivity", signature = "swInputData",
-  function(object, value) {
-    swCloud_Transmissivity(object@cloud) <- value
     object
 })
 

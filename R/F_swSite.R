@@ -116,8 +116,8 @@ setValidity("swSite", function(object) {
     msg <- "@TranspirationCoefficients length != 4."
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
-  if (length(object@IntrinsicSiteParams) != 4) {
-    msg <- "@IntrinsicSiteParams length != 4."
+  if (length(object@IntrinsicSiteParams) != 5) {
+    msg <- "@IntrinsicSiteParams length != 5."
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
   if (length(object@SoilTemperatureFlag) != 1) {
@@ -159,7 +159,8 @@ setMethod(
     # `TranspirationRegions`; this is to prevent simulation runs with
     # accidentally incorrect values
     if (!("IntrinsicSiteParams" %in% dns)) {
-      def@IntrinsicSiteParams[c("Latitude", "Altitude")] <- NA_real_
+      tmp <- c("Longitude", "Latitude", "Altitude")
+      def@IntrinsicSiteParams[tmp] <- NA_real_
     }
     if (!("TranspirationRegions" %in% dns)) {
       def@TranspirationRegions[, "layer"] <- NA_integer_

@@ -90,7 +90,9 @@ void rSW_CTL_obtain_inputs(Bool from_files) {
     if (debug) swprintf(" > 'climate'");
     #endif
 
-    if (LOGICAL(GET_SLOT(GET_SLOT(InputData, install("weather")), install("use_Markov")))[0]) {
+    if (
+      LOGICAL(GET_SLOT(GET_SLOT(InputData, install("weather")), install("use_weathergenerator")))[0]
+    ) {
       onSet_MKV(GET_SLOT(InputData, install("markov")));
       #ifdef RSWDEBUG
       if (debug) swprintf(" > 'mwgen'");

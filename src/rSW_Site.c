@@ -258,7 +258,7 @@ SEXP onGet_SW_SIT() {
 	char *cTranspirationCoefficients[] = { "RateShift", "RateShape", "InflectionPoint", "Range" };
 
 	SEXP IntrinsicSiteParams, IntrinsicSiteParams_names;
-	char *cIntrinsicSiteParams[] = { "Latitude", "Altitude", "Slope", "Aspect" };
+	char *cIntrinsicSiteParams[] = { "Longitude", "Latitude", "Altitude", "Slope", "Aspect" };
 
 	SEXP SoilTemperatureConstants_use, SoilTemperatureConstants, SoilTemperatureConstants_names;
 	char *cSoilTempValues[] = { "BiomassLimiter_g/m^2", "T1constant_a", "T1constant_b", "T1constant_c", "cs_constant_SoilThermCondct", "cs_constant", "sh_constant_SpecificHeatCapacity",
@@ -336,13 +336,14 @@ SEXP onGet_SW_SIT() {
 		SET_STRING_ELT(TranspirationCoefficients_names, i, mkChar(cTranspirationCoefficients[i]));
 	setAttrib(TranspirationCoefficients, R_NamesSymbol, TranspirationCoefficients_names);
 
-	PROTECT(IntrinsicSiteParams = allocVector(REALSXP,4));
-	REAL(IntrinsicSiteParams)[0] = v->latitude;
-	REAL(IntrinsicSiteParams)[1] = v->altitude;
-	REAL(IntrinsicSiteParams)[2] = v->slope;
-	REAL(IntrinsicSiteParams)[3] = v->aspect;
-	PROTECT(IntrinsicSiteParams_names = allocVector(STRSXP,4));
-	for (i = 0; i < 4; i++)
+	PROTECT(IntrinsicSiteParams = allocVector(REALSXP, 5));
+	REAL(IntrinsicSiteParams)[0] = v->longitude;
+	REAL(IntrinsicSiteParams)[1] = v->latitude;
+	REAL(IntrinsicSiteParams)[2] = v->altitude;
+	REAL(IntrinsicSiteParams)[3] = v->slope;
+	REAL(IntrinsicSiteParams)[4] = v->aspect;
+	PROTECT(IntrinsicSiteParams_names = allocVector(STRSXP, 5));
+	for (i = 0; i < 5; i++)
 		SET_STRING_ELT(IntrinsicSiteParams_names, i, mkChar(cIntrinsicSiteParams[i]));
 	setAttrib(IntrinsicSiteParams, R_NamesSymbol, IntrinsicSiteParams_names);
 
@@ -482,10 +483,11 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	#endif
 
 	PROTECT(IntrinsicSiteParams = GET_SLOT(SW_SIT, install("IntrinsicSiteParams")));
-	v->latitude = REAL(IntrinsicSiteParams)[0];
-	v->altitude = REAL(IntrinsicSiteParams)[1];
-	v->slope = REAL(IntrinsicSiteParams)[2];
-	v->aspect = REAL(IntrinsicSiteParams)[3];
+	v->longitude = REAL(IntrinsicSiteParams)[0];
+	v->latitude = REAL(IntrinsicSiteParams)[1];
+	v->altitude = REAL(IntrinsicSiteParams)[2];
+	v->slope = REAL(IntrinsicSiteParams)[3];
+	v->aspect = REAL(IntrinsicSiteParams)[4];
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" > 'location'");
 	#endif

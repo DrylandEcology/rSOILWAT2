@@ -9,6 +9,7 @@
 \alias{swWeather_pct_SnowDrift,swWeather-method}
 \alias{swWeather_pct_SnowRunoff,swWeather-method}
 \alias{swWeather_UseMarkov,swWeather-method}
+\alias{swWeather_UseMarkovOnly,swWeather-method}
 \alias{swWeather_UseSnow,swWeather-method}
 \alias{swWeather_MonScalingParams,swWeather-method}
 \alias{swWeather_DaysRunningAverage<-,swWeather-method}
@@ -16,6 +17,7 @@
 \alias{swWeather_pct_SnowDrift<-,swWeather-method}
 \alias{swWeather_pct_SnowRunoff<-,swWeather-method}
 \alias{swWeather_UseMarkov<-,swWeather-method}
+\alias{swWeather_UseMarkovOnly<-,swWeather-method}
 \alias{swWeather_UseSnow<-,swWeather-method}
 \alias{swWeather_MonScalingParams<-,swWeather-method}
 \alias{swReadLines,swWeather,character-method}
@@ -33,6 +35,8 @@
 
 \S4method{swWeather_UseMarkov}{swWeather}(object)
 
+\S4method{swWeather_UseMarkovOnly}{swWeather}(object)
+
 \S4method{swWeather_UseSnow}{swWeather}(object)
 
 \S4method{swWeather_MonScalingParams}{swWeather}(object)
@@ -46,6 +50,8 @@
 \S4method{swWeather_pct_SnowRunoff}{swWeather}(object) <- value
 
 \S4method{swWeather_UseMarkov}{swWeather}(object) <- value
+
+\S4method{swWeather_UseMarkovOnly}{swWeather}(object) <- value
 
 \S4method{swWeather_UseSnow}{swWeather}(object) <- value
 

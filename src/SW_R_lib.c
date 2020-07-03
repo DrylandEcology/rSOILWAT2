@@ -178,7 +178,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   if (debug) swprintf(" > 'climate'");
   #endif
 
-  if (LOGICAL(GET_SLOT(GET_SLOT(SW_DataList, install("weather")), install("use_Markov")))[0]) {
+  if (LOGICAL(GET_SLOT(GET_SLOT(SW_DataList, install("weather")), install("use_weathergenerator")))[0]) {
     SET_SLOT(SW_DataList, install("markov"), onGet_MKV());
     #ifdef RSWDEBUG
     if (debug) swprintf(" > 'mwgen'");

@@ -7,11 +7,11 @@
 
 
 #--- Activate/deactivate weather generator / historical daily weather inputs
-0			# 0 = use historical data only; 1 = use markov process for missing weather
-1980			# first year to begin historical weather
-			# (filename, e.g., Input/data_weather/weath.1949; see `files.in` for
-			# relative pathname and basis of filename)
-5			# number of days to use in a moving average of temperature
+0			# 0 = use historical data only
+			# 1 = use weather generator for (partially) missing weather inputs
+			# 2 = use weather generator for all weather (don't check weather inputs)
+-1		# first year to begin historical weather
+			# if -1, then use first year of simulation (see `years.in`)
 
 
 #--- Monthly scaling parameters:
@@ -22,17 +22,16 @@
 # SkyCover = additive for mean monthly sky cover [%]; min(100, max(0, scale + sky cover))
 # Wind = multiplicative for mean monthly wind speed; max(0, scale * wind speed)
 # rH = additive for mean monthly relative humidity [%]; min(100, max(0, scale + rel. Humidity))
-# Transmissivity = multiplicative for mean monthly relative transmissivity; min(1, max(0, scale * transmissivity))
-#Mon   PPT    MaxT    MinT  SkyCover   Wind    rH    Transmissivity
-1    1.000    0.00    0.00       0.0    1.0   0.0               1.0
-2    1.000    0.00    0.00       0.0    1.0   0.0               1.0
-3    1.000    0.00    0.00       0.0    1.0   0.0               1.0
-4    1.000    0.00    0.00       0.0    1.0   0.0               1.0
-5    1.000    0.00    0.00       0.0    1.0   0.0               1.0
-6    1.000    0.00    0.00       0.0    1.0   0.0               1.0
-7    1.000    0.00    0.00       0.0    1.0   0.0               1.0
-8    1.000    0.00    0.00       0.0    1.0   0.0               1.0
-9    1.000    0.00    0.00       0.0    1.0   0.0               1.0
-10   1.000    0.00    0.00       0.0    1.0   0.0               1.0
-11   1.000    0.00    0.00       0.0    1.0   0.0               1.0
-12   1.000    0.00    0.00       0.0    1.0   0.0               1.0
+#Mon   PPT    MaxT    MinT  SkyCover   Wind    rH
+1    1.000    0.00    0.00       0.0    1.0   0.0
+2    1.000    0.00    0.00       0.0    1.0   0.0
+3    1.000    0.00    0.00       0.0    1.0   0.0
+4    1.000    0.00    0.00       0.0    1.0   0.0
+5    1.000    0.00    0.00       0.0    1.0   0.0
+6    1.000    0.00    0.00       0.0    1.0   0.0
+7    1.000    0.00    0.00       0.0    1.0   0.0
+8    1.000    0.00    0.00       0.0    1.0   0.0
+9    1.000    0.00    0.00       0.0    1.0   0.0
+10   1.000    0.00    0.00       0.0    1.0   0.0
+11   1.000    0.00    0.00       0.0    1.0   0.0
+12   1.000    0.00    0.00       0.0    1.0   0.0

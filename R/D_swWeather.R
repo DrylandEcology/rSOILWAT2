@@ -51,9 +51,9 @@ setValidity("swMonthlyScalingParams", function(object) {
   val <- TRUE
   temp <- dim(object@MonthlyScalingParams)
 
-  if (temp[2] != 7) {
-    msg <- paste("@MonthlyScalingParams must have exactly 7 columns ",
-      "corresponding to PPT, MaxT, MinT, SkyCover, Wind, rH, Transmissivity")
+  if (temp[2] != 6) {
+    msg <- paste("@MonthlyScalingParams must have exactly 6 columns ",
+      "corresponding to PPT, MaxT, MinT, SkyCover, Wind, rH")
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
   if (temp[1] != 12) {
@@ -121,10 +121,18 @@ setMethod("initialize", signature = "swMonthlyScalingParams",
 #'
 #' @name swWeather-class
 #' @export
-setClass("swWeather", slots = c(UseSnow = "logical",
-  pct_SnowDrift = "numeric", pct_SnowRunoff = "numeric",
-  use_Markov = "logical", FirstYear_Historical = "integer",
-  DaysRunningAverage = "integer"), contains = "swMonthlyScalingParams")
+setClass(
+  "swWeather",
+  slots = c(
+    UseSnow = "logical",
+    pct_SnowDrift = "numeric",
+    pct_SnowRunoff = "numeric",
+    use_weathergenerator = "logical",
+    use_weathergenerator_only = "logical",
+    FirstYear_Historical = "integer"
+  ),
+  contains = "swMonthlyScalingParams"
+)
 
 setValidity("swWeather", function(object) {
   val <- TRUE
@@ -184,7 +192,12 @@ setMethod("swWeather_pct_SnowRunoff", "swWeather",
 #' @rdname swWeather-class
 #' @export
 setMethod("swWeather_UseMarkov", "swWeather",
-  function(object) object@use_Markov)
+  function(object) object@use_weathergenerator)
+
+#' @rdname swWeather-class
+#' @export
+setMethod("swWeather_UseMarkovOnly", "swWeather",
+  function(object) object@use_weathergenerator_only)
 
 #' @rdname swWeather-class
 #' @export
@@ -236,7 +249,19 @@ setReplaceMethod("swWeather_pct_SnowRunoff", signature = "swWeather",
 #' @export
 setReplaceMethod("swWeather_UseMarkov", signature = "swWeather",
   function(object, value) {
-    object@use_Markov <- as.logical(value)
+    object@use_weathergenerator <- as.logical(value)
+    validObject(object)
+    object
+})
+
+#' @rdname swWeather-class
+#' @export
+setReplaceMethod("swWeather_UseMarkovOnly", signature = "swWeather",
+  function(object, value) {
+    object@use_weathergenerator_only <- as.logical(value)
+    if (object@use_weathergenerator_only) {
+      object@use_weathergenerator <- TRUE
+    }
     validObject(object)
     object
 })
@@ -266,18 +291,20 @@ setReplaceMethod("swWeather_MonScalingParams", signature = "swWeather",
 setMethod("swReadLines",
   signature = c(object = "swWeather", file = "character"),
   function(object, file) {
+    print(paste(
+      "TODO: method 'swReadLines' for class 'swWeather' is not up-to-date;",
+      "hard-coded indices are incorrect"
+    ))
     infiletext <- readLines(con = file)
 
     object@UseSnow <- readLogical(infiletext[4])
     object@pct_SnowDrift <- readNumeric(infiletext[5])
     object@pct_SnowRunoff <- readNumeric(infiletext[6])
-    object@use_Markov <- readLogical(infiletext[7])
+    object@use_weathergenerator <- readLogical(infiletext[7])
     object@FirstYear_Historical <- readInteger(infiletext[8])
-    object@DaysRunningAverage <- readInteger(infiletext[9])
 
-    data <- matrix(data = c(rep(1, 12), rep(NA, 12 * 6)), nrow = 12, ncol = 7)
-    colnames(data) <- c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH",
-      "Transmissivity")
+    data <- matrix(data = c(rep(1, 12), rep(NA, 12 * 5)), nrow = 12, ncol = 6)
+    colnames(data) <- c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH")
     rownames(data) <- c("January", "February", "March", "April", "May",
       "June", "July", "August", "September", "October", "November", "December")
 

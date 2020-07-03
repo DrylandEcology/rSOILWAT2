@@ -62,19 +62,20 @@ for (it in seq_along(tests)) {
   # Turn on weather generator
   ftemp <- file.path(dir_in, examples[2], "Input", "weathsetup.in")
   fin <- readLines(ftemp)
-  line <- grep("Markov process for missing weather", fin, ignore.case = TRUE)
+  line <- grep("Activate/deactivate weather generator", fin, ignore.case = TRUE)
   stopifnot(length(line) == 1, line > 0, line < length(fin))
-  substr(fin[line], 1, 1) <- "1"
+  substr(fin[line + 1], 1, 1) <- "1"
   writeLines(fin, con = ftemp)
 
   # Use partial weather data
-  unlink(file.path(dir_in, examples[2], "Input", "data_weather"),
-    recursive = TRUE)
+  unlink(
+    file.path(dir_in, examples[2], "Input", "data_weather"),
+    recursive = TRUE
+  )
 
   ftemp <- file.path(dir_in, examples[2], "files.in")
   fin <- readLines(ftemp)
-  line <- grep("historical weather data", fin,
-    ignore.case = TRUE)
+  line <- grep("historical weather data", fin, ignore.case = TRUE)
   stopifnot(length(line) == 1, line > 0, line < length(fin))
   fin[line] <- sub(
     file.path("Input", "data_weather", "weath"),
