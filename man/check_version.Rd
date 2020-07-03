@@ -16,3 +16,6 @@ A logical value.
 \description{
 Check that version of an input or output object is up-to-date
 }
+\seealso{
+\code{\link{validObject}}
+}

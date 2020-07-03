@@ -42,6 +42,7 @@ setGeneric("get_version", function(object) standardGeneric("get_version"))
 #' @param object An object of class \code{\linkS4class{swInputData}} or
 #'   \code{\linkS4class{swOutput}}.
 #' @return A logical value.
+#' @seealso \code{\link{validObject}}
 #' @export
 check_version <- function(object) {
   tmp <- get_version(object)
