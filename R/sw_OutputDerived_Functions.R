@@ -55,4 +55,3 @@ get_evaporation <- function(x, timestep = c("Day", "Week", "Month", "Year")) {
   # convert [cm] to [mm]
   10 * (Etotalsurf + Esoil + Esnow)
 }
-
