@@ -159,7 +159,7 @@ setMethod(
     # `TranspirationRegions`; this is to prevent simulation runs with
     # accidentally incorrect values
     if (!("IntrinsicSiteParams" %in% dns)) {
-      tmp <- c("Longitude", "Latitude", "Altitude")
+      tmp <- c("Longitude", "Latitude", "Altitude", "Slope", "Aspect")
       def@IntrinsicSiteParams[tmp] <- NA_real_
     }
     if (!("TranspirationRegions" %in% dns)) {
