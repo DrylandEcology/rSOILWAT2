@@ -17,7 +17,7 @@ dir_in <- file.path("inst", "extdata")
 dir_backup <- sub("extdata", "extdata_copy", dir_in)
 dir_out <- file.path("tests", "test_data")
 
-tests <- 1:4
+tests <- 1:5
 examples <- paste0("example", tests)
 
 
@@ -104,6 +104,17 @@ for (it in seq_along(tests)) {
   substr(fin[line + 1], 1, 1) <- "1"
   writeLines(fin, con = ftemp)
 
+# example5: tilted surface
+  ftemp <- file.path(dir_in, examples[5], "Input", "siteparam.in")
+  fin <- readLines(ftemp)
+  line <- grep("slope \\(degrees\\)", fin)
+  stopifnot(length(line) == 1, line > 0, line < length(fin))
+  fin[line] <- paste0("30", substr(fin[line], 2, nchar(fin[line])))
+  line <- grep("aspect = surface azimuth angle \\(degrees\\)", fin)
+  stopifnot(length(line) == 1, line > 0, line < length(fin))
+  substr(fin[line], 1, 3) <- "-45"
+  writeLines(fin, con = ftemp)
+
 
 
 #-----------------------
@@ -111,7 +122,7 @@ for (it in seq_along(tests)) {
 for (it in seq_along(tests)) {
   #---rSOILWAT2 inputs using development version
   sw_input <- sw_inputDataFromFiles(
-    file.path(dir_in, examples[it]),
+    dir = file.path(dir_in, examples[it]),
     files.in = "files.in"
   )
 

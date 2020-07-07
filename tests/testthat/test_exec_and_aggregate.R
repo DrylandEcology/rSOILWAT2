@@ -4,7 +4,7 @@ context("rSOILWAT2 annual aggregation")
 tols <- list(
   aggregations = 1e-6,
   ranges = sqrt(.Machine$double.eps),
-  compare_yearly = 1e-4
+  compare_yearly = 1.5e-4
 )
 
 OutSum <- c("off", "sum", "mean", "fnl")
