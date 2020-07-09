@@ -336,12 +336,13 @@ SEXP onGet_SW_SIT() {
 		SET_STRING_ELT(TranspirationCoefficients_names, i, mkChar(cTranspirationCoefficients[i]));
 	setAttrib(TranspirationCoefficients, R_NamesSymbol, TranspirationCoefficients_names);
 
+	// SOILWAT2 calculates internally in radians, but input/output are in arc-degrees
 	PROTECT(IntrinsicSiteParams = allocVector(REALSXP, 5));
-	REAL(IntrinsicSiteParams)[0] = v->longitude;
-	REAL(IntrinsicSiteParams)[1] = v->latitude;
+	REAL(IntrinsicSiteParams)[0] = v->longitude * rad_to_deg;
+	REAL(IntrinsicSiteParams)[1] = v->latitude * rad_to_deg;
 	REAL(IntrinsicSiteParams)[2] = v->altitude;
-	REAL(IntrinsicSiteParams)[3] = v->slope;
-	REAL(IntrinsicSiteParams)[4] = v->aspect;
+	REAL(IntrinsicSiteParams)[3] = v->slope * rad_to_deg;
+	REAL(IntrinsicSiteParams)[4] = missing(v->aspect) ? SW_MISSING : v->aspect * rad_to_deg;
 	PROTECT(IntrinsicSiteParams_names = allocVector(STRSXP, 5));
 	for (i = 0; i < 5; i++)
 		SET_STRING_ELT(IntrinsicSiteParams_names, i, mkChar(cIntrinsicSiteParams[i]));
@@ -482,12 +483,14 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	if (debug) swprintf(" > 'transp-coef'");
 	#endif
 
+	// SOILWAT2 calculates internally in radians, but input/output are in arc-degrees
 	PROTECT(IntrinsicSiteParams = GET_SLOT(SW_SIT, install("IntrinsicSiteParams")));
-	v->longitude = REAL(IntrinsicSiteParams)[0];
-	v->latitude = REAL(IntrinsicSiteParams)[1];
+	v->longitude = REAL(IntrinsicSiteParams)[0] * deg_to_rad;
+	v->latitude = REAL(IntrinsicSiteParams)[1] * deg_to_rad;
 	v->altitude = REAL(IntrinsicSiteParams)[2];
-	v->slope = REAL(IntrinsicSiteParams)[3];
+	v->slope = REAL(IntrinsicSiteParams)[3] * deg_to_rad;
 	v->aspect = REAL(IntrinsicSiteParams)[4];
+	v->aspect = missing(v->aspect) ? SW_MISSING : v->aspect * deg_to_rad;
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" > 'location'");
 	#endif
