@@ -159,6 +159,9 @@ for (it in tests) {
       echo = FALSE,
       quiet = TRUE
     )
+
+    # Check rSOILWAT2 output object
+    expect_true(check_version(rd))
     expect_s4_class(rd, "swOutput")
     expect_false(has_soilTemp_failed())
 
