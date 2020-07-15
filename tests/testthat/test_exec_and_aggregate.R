@@ -1,4 +1,4 @@
-context("rSOILWAT2 annual aggregation")
+context("rSOILWAT2 runs")
 
 #---CONSTANTS
 tols <- list(
@@ -204,8 +204,13 @@ for (it in tests) {
 
 
     # Loop through output
-    temp <- slotNames(rd)
-    vars <- temp[!grepl("nrow|version|timestamp", temp)]
+    vars <- grep(
+      pattern = "nrow|version|timestamp",
+      x = slotNames(rd),
+      value = TRUE,
+      invert = TRUE
+    )
+
     fun_agg <- OutSum[1 + slot(get_swOUT(sw_input), "sumtype")]
     expect_true(length(vars) == length(fun_agg))
 
@@ -327,12 +332,26 @@ test_that("Compare to previous runs", {
         quiet = TRUE
       )
 
-      expect_equal(
-        object = rdy,
-        expected = sw_output,
-        tolerance = tols[["compare_yearly"]],
-        info = info1
+      vars <- grep(
+        pattern = "version|timestamp",
+        x = slotNames(rdy),
+        value = TRUE,
+        invert = TRUE
       )
+
+      # Expect SOILWAT2 output values to be equal to the stored values
+      for (sv in vars) {
+        expect_equal(
+          object = slot(rdy, sv),
+          expected = slot(sw_output, sv),
+          tolerance = tols[["compare_yearly"]],
+          info = paste(info1, "- slot", sv)
+        )
+      }
+
+      # Expect version number and timestamp to be >= than stored copy
+      expect_true(get_version(rdy) >= get_version(sw_output))
+      expect_gte(get_timestamp(rdy), get_timestamp(sw_output))
     }
   }
 })
