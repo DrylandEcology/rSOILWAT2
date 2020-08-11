@@ -73,30 +73,84 @@
 #'
 #' @name swInputData-class
 #' @export
-setClass("swInputData", slots = c(files = "swFiles", years = "swYears",
-  weather = "swWeather", cloud = "swCloud", weatherHistory = "list",
-  markov = "swMarkov", prod = "swProd", site = "swSite", soils = "swSoils",
-  estab = "swEstab", carbon = "swCarbon", output = "swOUT", swc = "swSWC",
-  log = "swLog"))
+setClass(
+  "swInputData",
+  slots = c(
+    version = "character",
+    timestamp = "numeric",
+    files = "swFiles",
+    years = "swYears",
+    weather = "swWeather",
+    cloud = "swCloud",
+    weatherHistory = "list",
+    markov = "swMarkov",
+    prod = "swProd",
+    site = "swSite",
+    soils = "swSoils",
+    estab = "swEstab",
+    carbon = "swCarbon",
+    output = "swOUT",
+    swc = "swSWC",
+    log = "swLog"
+  )
+)
 
 
 #' @rdname swInputData-class
 #' @export
-setMethod("initialize", signature = "swInputData", function(.Object) {
-  sns <- slotNames("swInputData")
-  scl <- getSlots("swInputData")
+setMethod(
+  "initialize",
+  signature = "swInputData",
+  function(.Object) {
+    sns <- slotNames("swInputData")
+    scl <- getSlots("swInputData")
 
-  for (i in seq_along(sns)) {
-    slot(.Object, sns[i]) <- new(scl[i])
+    for (i in seq_along(sns)) {
+      slot(.Object, sns[i]) <- new(scl[i])
+    }
+
+    slot(.Object, "version") <- rSW2_version()
+    slot(.Object, "timestamp") <- rSW2_timestamp()
+
+    validObject(.Object)
+
+    .Object
   }
-  validObject(.Object)
+)
 
-  .Object
-})
+setValidity(
+  "swInputData",
+  function(object) {
+    TRUE
+  }
+)
 
-setValidity("swInputData", function(object) {
-  TRUE
-})
+
+
+
+# Methods for slot \code{version}
+#' @rdname swInputData-class
+#' @export
+setMethod(
+  f = "get_version",
+  signature = "swInputData",
+  definition = function(object) {
+    tmp <- try(object@version, silent = TRUE)
+    if (inherits(tmp, "try-error")) NA else tmp
+  }
+)
+
+# Methods for slot \code{get_timestamp}
+#' @rdname swInputData-class
+#' @export
+setMethod(
+  f = "get_timestamp",
+  signature = "swInputData",
+  definition = function(object) {
+    tmp <- try(object@timestamp, silent = TRUE)
+    if (inherits(tmp, "try-error")) NA else tmp
+  }
+)
 
 
 # Methods for slot \code{files}
@@ -462,6 +516,11 @@ setMethod("swWeather_UseMarkov", "swInputData",
 
 #' @rdname swInputData-class
 #' @export
+setMethod("swWeather_UseMarkovOnly", "swInputData",
+  function(object) swWeather_UseMarkovOnly(object@weather))
+
+#' @rdname swInputData-class
+#' @export
 setMethod("swWeather_UseSnow", "swInputData",
   function(object) swWeather_UseSnow(object@weather))
 
@@ -521,6 +580,14 @@ setReplaceMethod("swWeather_UseMarkov", signature = "swInputData",
 
 #' @rdname swInputData-class
 #' @export
+setReplaceMethod("swWeather_UseMarkovOnly", signature = "swInputData",
+  function(object, value) {
+    swWeather_UseMarkovOnly(object@weather) <- as.logical(value)
+    object
+})
+
+#' @rdname swInputData-class
+#' @export
 setReplaceMethod("swWeather_UseSnow", signature = "swInputData",
   function(object, value) {
     swWeather_UseSnow(object@weather) <- as.logical(value)
@@ -556,11 +623,6 @@ setMethod("swCloud_WindSpeed", "swInputData", function(object)
 #' @export
 setMethod("swCloud_Humidity", "swInputData", function(object)
   swCloud_Humidity(object@cloud))
-
-#' @rdname swInputData-class
-#' @export
-setMethod("swCloud_Transmissivity", "swInputData",
-  function(object) swCloud_Transmissivity(object@cloud))
 
 #' @rdname swInputData-class
 #' @export
@@ -601,14 +663,6 @@ setReplaceMethod("swCloud_WindSpeed", signature = "swInputData",
 setReplaceMethod("swCloud_Humidity", signature = "swInputData",
   function(object, value) {
     swCloud_Humidity(object@cloud) <- value
-    object
-})
-
-#' @rdname swInputData-class
-#' @export
-setReplaceMethod("swCloud_Transmissivity", signature = "swInputData",
-  function(object, value) {
-    swCloud_Transmissivity(object@cloud) <- value
     object
 })
 

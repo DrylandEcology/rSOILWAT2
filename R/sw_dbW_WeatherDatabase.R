@@ -415,7 +415,9 @@ select_years <- function(years, start_year = NULL, end_year = NULL) {
   idx_start_year:idx_end_year
 }
 
-#' export
+#' Extract years from a \var{weatherData} object
+#' @param wd A list of elements of class \code{\linkS4class{swWeatherData}}
+#' @export
 get_years_from_weatherData <- function(wd) {
   as.integer(unlist(lapply(wd, FUN = slot, "year")))
 }

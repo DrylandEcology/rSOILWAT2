@@ -42,7 +42,6 @@ extern SEXP InputData;
 extern SEXP WeatherList;
 extern Bool bWeatherList;
 
-extern RealD *runavg_list; /* used in run_tmp_avg() */
 
 /* =================================================== */
 /*                Module-Level Variables               */
@@ -50,8 +49,10 @@ extern RealD *runavg_list; /* used in run_tmp_avg() */
 static char *MyFileName;
 
 static char *cSW_WTH_names[] = { "UseSnow", "pct_SnowDrift", "pct_SnowRunoff",
-  "use_Markov", "FirstYear_Historical", "DaysRunningAverage",
-  "MonthlyScalingParams" };
+  "use_weathergenerator", "use_weathergenerator_only",
+  "FirstYear_Historical",
+  "MonthlyScalingParams"
+};
 
 
 /* =================================================== */
@@ -92,21 +93,23 @@ Bool onSet_WTH_DATA_YEAR(TimeInt year) {
 
 SEXP onGet_SW_WTH() {
 	int i;
-	const int nitems = 7;
+	const int nitems = 6;
 	RealD *p_MonthlyValues;
 	SW_WEATHER *w = &SW_Weather;
 
 	SEXP swWeather;
 	SEXP SW_WTH;
 
-	SEXP use_snow, pct_snowdrift, pct_snowRunoff, use_markov, yr_first, days_in_runavg;
+	SEXP
+		use_snow, pct_snowdrift, pct_snowRunoff,
+		use_weathergenerator, use_weathergenerator_only, yr_first;
 	SEXP MonthlyScalingParams, MonthlyScalingParams_names, MonthlyScalingParams_names_x, MonthlyScalingParams_names_y;
 
-	char *cMonthlyScalingParams_names[] = {"PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "Transmissivity"};
+	char *cMonthlyScalingParams_names[] = {"PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH"};
 	char *cMonths[] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
 	PROTECT(swWeather = MAKE_CLASS("swWeather"));
-	PROTECT(SW_WTH = NEW_OBJECT(swWeather)); //allocVector(VECSXP, 9 + w->use_markov)
+	PROTECT(SW_WTH = NEW_OBJECT(swWeather));
 
 	PROTECT(use_snow = NEW_LOGICAL(1));
 	LOGICAL_POINTER(use_snow)[0] = w->use_snow;
@@ -114,12 +117,12 @@ SEXP onGet_SW_WTH() {
 	REAL(pct_snowdrift)[0] = w->pct_snowdrift;
 	PROTECT(pct_snowRunoff = NEW_NUMERIC(1));
 	REAL(pct_snowRunoff)[0] = w->pct_snowRunoff;
-	PROTECT(use_markov = NEW_LOGICAL(1));
-	LOGICAL_POINTER(use_markov)[0] = w->use_markov;
+	PROTECT(use_weathergenerator = NEW_LOGICAL(1));
+	LOGICAL_POINTER(use_weathergenerator)[0] = w->use_weathergenerator;
+	PROTECT(use_weathergenerator_only = NEW_LOGICAL(1));
+	LOGICAL_POINTER(use_weathergenerator_only)[0] = w->use_weathergenerator_only;
 	PROTECT(yr_first = NEW_INTEGER(1));
 	INTEGER_POINTER(yr_first)[0] = w->yr.first;
-	PROTECT(days_in_runavg = NEW_INTEGER(1));
-	INTEGER_POINTER(days_in_runavg)[0] = w->days_in_runavg;
 
 	PROTECT(MonthlyScalingParams = allocMatrix(REALSXP, 12, nitems));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
@@ -130,7 +133,6 @@ SEXP onGet_SW_WTH() {
 		p_MonthlyValues[i + 12 * 3] = w->scale_skyCover[i];
 		p_MonthlyValues[i + 12 * 4] = w->scale_wind[i];
 		p_MonthlyValues[i + 12 * 5] = w->scale_rH[i];
-		p_MonthlyValues[i + 12 * 6] = w->scale_transmissivity[i];
 	}
 	PROTECT(MonthlyScalingParams_names = allocVector(VECSXP, 2));
 	PROTECT(MonthlyScalingParams_names_x = allocVector(STRSXP, 12));
@@ -146,9 +148,9 @@ SEXP onGet_SW_WTH() {
 	SET_SLOT(SW_WTH, install(cSW_WTH_names[0]), use_snow);
 	SET_SLOT(SW_WTH, install(cSW_WTH_names[1]), pct_snowdrift);
 	SET_SLOT(SW_WTH, install(cSW_WTH_names[2]), pct_snowRunoff);
-	SET_SLOT(SW_WTH, install(cSW_WTH_names[3]), use_markov);
-	SET_SLOT(SW_WTH, install(cSW_WTH_names[4]), yr_first);
-	SET_SLOT(SW_WTH, install(cSW_WTH_names[5]), days_in_runavg);
+	SET_SLOT(SW_WTH, install(cSW_WTH_names[3]), use_weathergenerator);
+	SET_SLOT(SW_WTH, install(cSW_WTH_names[4]), use_weathergenerator_only);
+	SET_SLOT(SW_WTH, install(cSW_WTH_names[5]), yr_first);
 	SET_SLOT(SW_WTH, install(cSW_WTH_names[6]), MonthlyScalingParams);
 
 	UNPROTECT(12);
@@ -158,7 +160,9 @@ SEXP onGet_SW_WTH() {
 void onSet_SW_WTH(SEXP SW_WTH) {
 	int i;
 	SW_WEATHER *w = &SW_Weather;
-	SEXP use_snow, pct_snowdrift, pct_snowRunoff, use_markov, yr_first, days_in_runavg;
+	SEXP
+		use_snow, pct_snowdrift, pct_snowRunoff,
+		use_weathergenerator, use_weathergenerator_only, yr_first;
 	SEXP MonthlyScalingParams;
 	RealD *p_MonthlyValues;
 
@@ -170,13 +174,18 @@ void onSet_SW_WTH(SEXP SW_WTH) {
 	w->pct_snowdrift = *REAL(pct_snowdrift);
 	PROTECT(pct_snowRunoff = GET_SLOT(SW_WTH, install(cSW_WTH_names[2])));
 	w->pct_snowRunoff = *REAL(pct_snowRunoff);
-	PROTECT(use_markov = GET_SLOT(SW_WTH, install(cSW_WTH_names[3])));
-	w->use_markov = (Bool) *INTEGER(use_markov);
-	PROTECT(yr_first = GET_SLOT(SW_WTH, install(cSW_WTH_names[4])));
+
+	PROTECT(use_weathergenerator = GET_SLOT(SW_WTH, install(cSW_WTH_names[3])));
+	w->use_weathergenerator = (Bool) *INTEGER(use_weathergenerator);
+	PROTECT(use_weathergenerator_only = GET_SLOT(SW_WTH, install(cSW_WTH_names[4])));
+	w->use_weathergenerator_only = (Bool) *INTEGER(use_weathergenerator_only);
+	if (w->use_weathergenerator_only) {
+		w->use_weathergenerator = TRUE;
+	}
+
+	PROTECT(yr_first = GET_SLOT(SW_WTH, install(cSW_WTH_names[5])));
 	w->yr.first = *INTEGER(yr_first);
-	PROTECT(days_in_runavg = GET_SLOT(SW_WTH, install(cSW_WTH_names[5])));
-	w->days_in_runavg = *INTEGER(days_in_runavg);
-	runavg_list = (RealD *) Mem_Calloc(w->days_in_runavg, sizeof(RealD), "SW_WTH_read()");
+	w->yr.first = (w->yr.first < 0) ? SW_Model.startyr : w->yr.first;
 
 	PROTECT(MonthlyScalingParams = GET_SLOT(SW_WTH, install(cSW_WTH_names[6])));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
@@ -187,7 +196,6 @@ void onSet_SW_WTH(SEXP SW_WTH) {
 		w->scale_skyCover[i] = p_MonthlyValues[i + 12 * 3];
 		w->scale_wind[i] = p_MonthlyValues[i + 12 * 4];
 		w->scale_rH[i] = p_MonthlyValues[i + 12 * 5];
-		w->scale_transmissivity[i] = p_MonthlyValues[i + 12 * 6];
 	}
 
 	SW_WeatherPrefix(w->name_prefix);
@@ -195,10 +203,15 @@ void onSet_SW_WTH(SEXP SW_WTH) {
 	w->yr.last = SW_Model.endyr;
 	w->yr.total = w->yr.last - w->yr.first + 1;
 
-	if (!w->use_markov && SW_Model.startyr < w->yr.first) {
-		LogError(logfp, LOGFATAL, "weathersetup.in : Model year (%d) starts before weather files (%d)"
-				" and use_Markov=FALSE.\nPlease synchronize the years"
-				" or set up the Markov weather files", SW_Model.startyr, w->yr.first);
+	if (!w->use_weathergenerator && SW_Model.startyr < w->yr.first) {
+		LogError(
+			logfp,
+			LOGFATAL,
+			"%s : Model year (%d) starts before weather files (%d)"
+				" and use_weathergenerator=swFALSE.\nPlease synchronize the years"
+				" or set up the Markov weather files",
+			MyFileName, SW_Model.startyr, w->yr.first
+		);
 	}
 
 	UNPROTECT(7);
@@ -220,19 +233,28 @@ SEXP onGet_WTH_DATA(void) {
 		sprintf(cYear, "%4d", year);
 		SET_STRING_ELT(WTH_DATA_names, i, mkChar(cYear));
 
-		has_weather = _read_weather_hist(year);
+		if (SW_Weather.use_weathergenerator_only) {
+			has_weather = FALSE;
+
+		} else {
+			has_weather = _read_weather_hist(year);
+		}
 
 		if (has_weather) {
 			// copy values from SOILWAT2 variables to rSOILWAT2 S4 class object
 			SET_VECTOR_ELT(WTH_DATA, i, onGet_WTH_DATA_YEAR(year));
 
-		} else if (SW_Weather.use_markov) {
+		} else if (SW_Weather.use_weathergenerator) {
 			// set the missing values from SOILWAT2 into rSOILWAT2 S4 weather object
 			SET_VECTOR_ELT(WTH_DATA, i, onGet_WTH_DATA_YEAR(year));
 
 		} else {
-			LogError(logfp, LOGFATAL, "Markov Simulator turned off and weather "
-				"file found not for year %d", year);
+			LogError(
+				logfp,
+				LOGFATAL,
+				"Markov Simulator turned off and weather file found not for year %d",
+				year
+			);
 		}
 	}
 

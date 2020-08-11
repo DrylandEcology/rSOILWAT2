@@ -8,14 +8,12 @@
 \alias{swCloud_SkyCover,swCloud-method}
 \alias{swCloud_WindSpeed,swCloud-method}
 \alias{swCloud_Humidity,swCloud-method}
-\alias{swCloud_Transmissivity,swCloud-method}
 \alias{swCloud_SnowDensity,swCloud-method}
 \alias{swCloud_RainEvents,swCloud-method}
 \alias{set_swCloud<-,swCloud-method}
 \alias{swCloud_SkyCover<-,swCloud-method}
 \alias{swCloud_WindSpeed<-,swCloud-method}
 \alias{swCloud_Humidity<-,swCloud-method}
-\alias{swCloud_Transmissivity<-,swCloud-method}
 \alias{swCloud_SnowDensity<-,swCloud-method}
 \alias{swCloud_RainEvents<-,swCloud-method}
 \alias{swReadLines,swCloud,character-method}
@@ -31,8 +29,6 @@
 
 \S4method{swCloud_Humidity}{swCloud}(object)
 
-\S4method{swCloud_Transmissivity}{swCloud}(object)
-
 \S4method{swCloud_SnowDensity}{swCloud}(object)
 
 \S4method{swCloud_RainEvents}{swCloud}(object)
@@ -44,8 +40,6 @@
 \S4method{swCloud_WindSpeed}{swCloud}(object) <- value
 
 \S4method{swCloud_Humidity}{swCloud}(object) <- value
-
-\S4method{swCloud_Transmissivity}{swCloud}(object) <- value
 
 \S4method{swCloud_SnowDensity}{swCloud}(object) <- value
 

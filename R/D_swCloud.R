@@ -56,12 +56,15 @@ swCloud_validity <- function(object) {
   val <- TRUE
   temp <- dim(object@Cloud)
 
-  if (temp[1] != 6) {
-    msg <- paste("@Cloud must have exactly 6 rows corresponding to",
-      "SkyCoverPCT, WindSpeed_m/s, HumidityPCT, Transmissivity,",
-      "and SnowDensity_kg/m^3, RainEvents_per_day")
+  if (temp[1] != 5) {
+    msg <- paste(
+      "@Cloud must have exactly 5 rows corresponding to",
+      "SkyCoverPCT, WindSpeed_m/s, HumidityPCT,",
+      "SnowDensity_kg/m^3, and RainEvents_per_day"
+    )
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
+
   if (temp[2] != 12) {
     msg <- paste("@Cloud must have exactly 12 columns corresponding months.")
     val <- if (isTRUE(val)) msg else c(val, msg)
@@ -84,18 +87,12 @@ swCloud_validity <- function(object) {
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
-  if (!all(is.na(object@Cloud[4, ])) && (any(object@Cloud[4, ] < 0) ||
-      any(object@Cloud[4, ] > 1))) {
-    msg <- paste("@Cloud['Transmissivity', ] must be values between 0 and 1.")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  if (!all(is.na(object@Cloud[5, ])) && any(object@Cloud[5, ] < 0)) {
+  if (!all(is.na(object@Cloud[4, ])) && any(object@Cloud[4, ] < 0)) {
     msg <- paste("@Cloud['SnowDensity_kg/m^3', ] must be values >= 0.")
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
-  if (!all(is.na(object@Cloud[6, ])) && any(object@Cloud[6, ] < 1)) {
+  if (!all(is.na(object@Cloud[5, ])) && any(object@Cloud[5, ] < 1)) {
     msg <- paste("@Cloud['RainEvents_per_day', ] must be values >= 1.")
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
@@ -116,7 +113,7 @@ setMethod("initialize", signature = "swCloud", function(.Object, ...) {
   # passed via ...; this is to prevent simulation runs with accidentally
   # incorrect values
   if (!("Cloud" %in% dns)) {
-    def@Cloud[-5, ] <- NA_real_
+    def@Cloud[-4, ] <- NA_real_
   } else {
     # Guarantee dimnames
     dimnames(dots[["Cloud"]]) <- dimnames(def@Cloud)
@@ -151,14 +148,10 @@ setMethod("swCloud_WindSpeed", "swCloud", function(object) object@Cloud[2, ])
 setMethod("swCloud_Humidity", "swCloud", function(object) object@Cloud[3, ])
 #' @rdname swCloud-class
 #' @export
-setMethod("swCloud_Transmissivity", "swCloud",
-  function(object) object@Cloud[4, ])
+setMethod("swCloud_SnowDensity", "swCloud", function(object) object@Cloud[4, ])
 #' @rdname swCloud-class
 #' @export
-setMethod("swCloud_SnowDensity", "swCloud", function(object) object@Cloud[5, ])
-#' @rdname swCloud-class
-#' @export
-setMethod("swCloud_RainEvents", "swCloud", function(object) object@Cloud[6, ])
+setMethod("swCloud_RainEvents", "swCloud", function(object) object@Cloud[5, ])
 
 #' @rdname swCloud-class
 #' @export
@@ -194,7 +187,7 @@ setReplaceMethod("swCloud_Humidity", signature = "swCloud",
 })
 #' @rdname swCloud-class
 #' @export
-setReplaceMethod("swCloud_Transmissivity", signature = "swCloud",
+setReplaceMethod("swCloud_SnowDensity", signature = "swCloud",
   function(object, value) {
     object@Cloud[4, ] <- value
     validObject(object)
@@ -202,17 +195,9 @@ setReplaceMethod("swCloud_Transmissivity", signature = "swCloud",
 })
 #' @rdname swCloud-class
 #' @export
-setReplaceMethod("swCloud_SnowDensity", signature = "swCloud",
-  function(object, value) {
-    object@Cloud[5, ] <- value
-    validObject(object)
-    object
-})
-#' @rdname swCloud-class
-#' @export
 setReplaceMethod("swCloud_RainEvents", signature = "swCloud",
   function(object, value) {
-    object@Cloud[6, ] <- value
+    object@Cloud[5, ] <- value
     validObject(object)
     object
 })
@@ -226,12 +211,12 @@ setMethod("swReadLines", signature = c(object = "swCloud", file = "character"),
     #should be no empty lines
     infiletext <- infiletext[infiletext != ""]
 
-    object@Cloud <- matrix(data = NA, nrow = 6, ncol = 12, byrow = TRUE)
+    object@Cloud <- matrix(data = NA, nrow = 5, ncol = 12, byrow = TRUE)
 
     colnames(object@Cloud) <- c("January", "February", "March", "April", "May",
       "June", "July", "August", "September", "October", "November", "December")
     rownames(object@Cloud) <- c("SkyCoverPCT", "WindSpeed_m/s", "HumidityPCT",
-      "Transmissivity", "SnowDensity_kg/m^3", "RainEvents_per_day")
+      "SnowDensity_kg/m^3", "RainEvents_per_day")
 
     for (i in seq_along(infiletext)) {
       object@Cloud[i, ] <- readNumerics(infiletext[i], 12)

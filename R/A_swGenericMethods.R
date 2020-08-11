@@ -23,11 +23,54 @@
 # Author: Ryan J. Murphy (2013)
 ###############################################################################
 
-##########################GENERIC FUNCTIONS####################################
+##########################GENERIC METHODS/FUNCTIONS############################
 #' \code{swReadLines}
 #' @param object An object of a class such \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swInputData}}
 setGeneric("swReadLines", function(object, file) standardGeneric("swReadLines"))
+
+
+#' Create \pkg{rSOILWAT2} version representation
+rSW2_version <- function() as.character(getNamespaceVersion("rSOILWAT2"))
+
+#' \code{get_version}
+#' @param object An object of class \code{\linkS4class{swInputData}} or
+#'   \code{\linkS4class{swOutput}}.
+setGeneric("get_version", function(object) standardGeneric("get_version"))
+
+#' Check that version of an input or output object is up-to-date
+#' @param object An object of class \code{\linkS4class{swInputData}} or
+#'   \code{\linkS4class{swOutput}}.
+#' @return A logical value.
+#' @seealso \code{\link{validObject}}
+#' @export
+check_version <- function(object) {
+  tmp <- get_version(object)
+  if (is.na(tmp)) {
+    FALSE
+  } else {
+    as.numeric_version(tmp) >= as.numeric_version(rSW2_version())
+  }
+}
+
+
+#' Create \pkg{rSOILWAT2} time stamp
+rSW2_timestamp <- function() unclass(Sys.time())
+
+#' \code{get_timestamp}
+#' @param object An object of class \code{\linkS4class{swInputData}} or
+#'   \code{\linkS4class{swOutput}}.
+setGeneric("get_timestamp", function(object) standardGeneric("get_timestamp"))
+
+#' Format time stamp of an input or output object
+#' @param object An object of class \code{\linkS4class{swInputData}} or
+#'   \code{\linkS4class{swOutput}}.
+#' @seealso \code{\link{get_timestamp}}
+#' @export
+format_timestamp <- function(object) {
+  as.POSIXct(get_timestamp(object), origin = "1970-01-01 00:00.00 UTC")
+}
+
 
 #########FILES##########
 #' \code{get_swFiles}
@@ -439,6 +482,13 @@ setGeneric("swWeather_pct_SnowRunoff",
 setGeneric("swWeather_UseMarkov",
   function(object) standardGeneric("swWeather_UseMarkov"))
 
+#' \code{swWeather_UseMarkovOnly}
+#' @param object An object of class \code{\linkS4class{swWeather}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swWeather}} and \code{\linkS4class{swInputData}}
+setGeneric("swWeather_UseMarkovOnly",
+  function(object) standardGeneric("swWeather_UseMarkovOnly"))
+
 #' \code{swWeather_UseSnow}
 #' @param object An object of class \code{\linkS4class{swWeather}} or
 #'   \code{\linkS4class{swInputData}}.
@@ -507,6 +557,14 @@ setGeneric("swWeather_pct_SnowRunoff<-",
 #' @seealso \code{\linkS4class{swWeather}} and \code{\linkS4class{swInputData}}
 setGeneric("swWeather_UseMarkov<-",
   function(object, value) standardGeneric("swWeather_UseMarkov<-"))
+
+#' \code{swWeather_UseMarkovOnly<-}
+#' @param object An object of class \code{\linkS4class{swWeather}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swWeather}} and \code{\linkS4class{swInputData}}
+setGeneric("swWeather_UseMarkovOnly<-",
+  function(object, value) standardGeneric("swWeather_UseMarkovOnly<-"))
 
 #' \code{swWeather_UseSnow<-}
 #' @param object An object of class \code{\linkS4class{swWeather}} or
@@ -651,13 +709,6 @@ setGeneric("swCloud_WindSpeed",
 setGeneric("swCloud_Humidity",
   function(object) standardGeneric("swCloud_Humidity"))
 
-#' \code{swCloud_Transmissivity}
-#' @param object An object of class \code{\linkS4class{swCloud}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @seealso \code{\linkS4class{swCloud}} and \code{\linkS4class{swInputData}}
-setGeneric("swCloud_Transmissivity",
-  function(object) standardGeneric("swCloud_Transmissivity"))
-
 #' \code{swCloud_SnowDensity}
 #' @param object An object of class \code{\linkS4class{swCloud}} or
 #'   \code{\linkS4class{swInputData}}.
@@ -710,14 +761,6 @@ setGeneric("swCloud_WindSpeed<-",
 #' @seealso \code{\linkS4class{swCloud}} and \code{\linkS4class{swInputData}}
 setGeneric("swCloud_Humidity<-",
   function(object, value) standardGeneric("swCloud_Humidity<-"))
-
-#' \code{swCloud_Transmissivity<-}
-#' @param object An object of class \code{\linkS4class{swCloud}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
-#' @seealso \code{\linkS4class{swCloud}} and \code{\linkS4class{swInputData}}
-setGeneric("swCloud_Transmissivity<-",
-  function(object, value) standardGeneric("swCloud_Transmissivity<-"))
 
 #' \code{swCloud_SnowDensity<-}
 #' @param object An object of class \code{\linkS4class{swCloud}} or

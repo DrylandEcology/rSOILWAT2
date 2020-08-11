@@ -140,7 +140,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 
   // initialize simulation run (based on user inputs)
   #ifdef RSWDEBUG
-  if (debug) swprintf(" init simulation run ...");
+  if (debug) swprintf(" init simulation run ...\n");
   #endif
   SW_CTL_init_run();
 
@@ -178,7 +178,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   if (debug) swprintf(" > 'climate'");
   #endif
 
-  if (LOGICAL(GET_SLOT(GET_SLOT(SW_DataList, install("weather")), install("use_Markov")))[0]) {
+  if (LOGICAL(GET_SLOT(GET_SLOT(SW_DataList, install("weather")), install("use_weathergenerator")))[0]) {
     SET_SLOT(SW_DataList, install("markov"), onGet_MKV());
     #ifdef RSWDEBUG
     if (debug) swprintf(" > 'mwgen'");
@@ -224,12 +224,12 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 
   // de-allocate all memory, but `p_OUT`
   #ifdef RSWDEBUG
-  if (debug) swprintf("De-allocate most memory\n");
+  if (debug) swprintf(" > de-allocate most memory; \n");
   #endif
   SW_CTL_clear_model(FALSE);
 
   #ifdef RSWDEBUG
-  if (debug) swprintf(" completed.\n");
+  if (debug) swprintf(" onGetInputDataFromFiles completed.\n");
   #endif
 
   UNPROTECT(5);

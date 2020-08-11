@@ -4,6 +4,8 @@
 \name{swInputData-class}
 \alias{swInputData-class}
 \alias{initialize,swInputData-method}
+\alias{get_version,swInputData-method}
+\alias{get_timestamp,swInputData-method}
 \alias{get_swFiles,swInputData-method}
 \alias{swFiles_ProjDir,swInputData-method}
 \alias{swFiles_filesIn,swInputData-method}
@@ -60,6 +62,7 @@
 \alias{swWeather_pct_SnowDrift,swInputData-method}
 \alias{swWeather_pct_SnowRunoff,swInputData-method}
 \alias{swWeather_UseMarkov,swInputData-method}
+\alias{swWeather_UseMarkovOnly,swInputData-method}
 \alias{swWeather_UseSnow,swInputData-method}
 \alias{swWeather_MonScalingParams,swInputData-method}
 \alias{set_swWeather<-,swInputData-method}
@@ -68,18 +71,17 @@
 \alias{swWeather_pct_SnowDrift<-,swInputData-method}
 \alias{swWeather_pct_SnowRunoff<-,swInputData-method}
 \alias{swWeather_UseMarkov<-,swInputData-method}
+\alias{swWeather_UseMarkovOnly<-,swInputData-method}
 \alias{swWeather_UseSnow<-,swInputData-method}
 \alias{swWeather_MonScalingParams<-,swInputData-method}
 \alias{swCloud_SkyCover,swInputData-method}
 \alias{swCloud_WindSpeed,swInputData-method}
 \alias{swCloud_Humidity,swInputData-method}
-\alias{swCloud_Transmissivity,swInputData-method}
 \alias{swCloud_SnowDensity,swInputData-method}
 \alias{swCloud_RainEvents,swInputData-method}
 \alias{swCloud_SkyCover<-,swInputData-method}
 \alias{swCloud_WindSpeed<-,swInputData-method}
 \alias{swCloud_Humidity<-,swInputData-method}
-\alias{swCloud_Transmissivity<-,swInputData-method}
 \alias{swCloud_SnowDensity<-,swInputData-method}
 \alias{swCloud_RainEvents<-,swInputData-method}
 \alias{get_Markov,swInputData-method}
@@ -197,6 +199,10 @@
 \usage{
 \S4method{initialize}{swInputData}(.Object)
 
+\S4method{get_version}{swInputData}(object)
+
+\S4method{get_timestamp}{swInputData}(object)
+
 \S4method{get_swFiles}{swInputData}(object)
 
 \S4method{swFiles_ProjDir}{swInputData}(object)
@@ -309,6 +315,8 @@
 
 \S4method{swWeather_UseMarkov}{swInputData}(object)
 
+\S4method{swWeather_UseMarkovOnly}{swInputData}(object)
+
 \S4method{swWeather_UseSnow}{swInputData}(object)
 
 \S4method{swWeather_MonScalingParams}{swInputData}(object)
@@ -325,6 +333,8 @@
 
 \S4method{swWeather_UseMarkov}{swInputData}(object) <- value
 
+\S4method{swWeather_UseMarkovOnly}{swInputData}(object) <- value
+
 \S4method{swWeather_UseSnow}{swInputData}(object) <- value
 
 \S4method{swWeather_MonScalingParams}{swInputData}(object) <- value
@@ -337,8 +347,6 @@
 
 \S4method{swCloud_Humidity}{swInputData}(object)
 
-\S4method{swCloud_Transmissivity}{swInputData}(object)
-
 \S4method{swCloud_SnowDensity}{swInputData}(object)
 
 \S4method{swCloud_RainEvents}{swInputData}(object)
@@ -350,8 +358,6 @@
 \S4method{swCloud_WindSpeed}{swInputData}(object) <- value
 
 \S4method{swCloud_Humidity}{swInputData}(object) <- value
-
-\S4method{swCloud_Transmissivity}{swInputData}(object) <- value
 
 \S4method{swCloud_SnowDensity}{swInputData}(object) <- value
 

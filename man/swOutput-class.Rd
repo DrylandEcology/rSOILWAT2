@@ -3,11 +3,20 @@
 \docType{class}
 \name{swOutput-class}
 \alias{swOutput-class}
+\alias{initialize,swOutput-method}
+\alias{get_version,swOutput-method}
+\alias{get_timestamp,swOutput-method}
 \alias{$,swOutput-method}
 \alias{swOutput_getKEY,swOutput-method}
 \alias{swOutput_setKEY<-,swOutput,ANY,swOutput_KEY-method}
 \title{Class \code{"swOutput"}}
 \usage{
+\S4method{initialize}{swOutput}(.Object)
+
+\S4method{get_version}{swOutput}(object)
+
+\S4method{get_timestamp}{swOutput}(object)
+
 \S4method{$}{swOutput}(x, name)
 
 \S4method{swOutput_getKEY}{swOutput}(object, index)
@@ -15,11 +24,11 @@
 \S4method{swOutput_setKEY}{swOutput,ANY,swOutput_KEY}(object, index) <- value
 }
 \arguments{
+\item{object}{An object of class \code{\linkS4class{swOutput}}.}
+
 \item{x}{An object of class \code{\linkS4class{swOutput}}.}
 
 \item{name}{A character string. The name of the of the slots of this class.}
-
-\item{object}{An object of class \code{\linkS4class{swOutput}}.}
 
 \item{index}{An integer value. One of the four possible time steps.}
 

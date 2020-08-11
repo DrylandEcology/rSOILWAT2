@@ -191,7 +191,16 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
     inputData <- sw_inputDataFromFiles(dir = dir, files.in = files.in)
   }
 
+  if (!check_version(inputData)) {
+    warning(
+      "Object `inputData is outdated; ",
+      "SOILWAT2 may fail or produce unexpected outcomes."
+    )
+  }
+
   res <- .Call(C_start, input, inputData, weatherList, as.logical(quiet))
+  slot(res, "version") <- rSW2_version()
+  slot(res, "timestamp") <- rSW2_timestamp()
 
   if (.Call(C_tempError)) {
     # Error during soil temperature calculations
@@ -244,7 +253,7 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
 #' sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 #'
 #' ## Slots of the input object of \code{\linkS4class{swInputData}}
-#' str(sw_in2, max.level=2)
+#' str(sw_in2, max.level = 2)
 #'
 #' ## Execute the simulation run
 #' \dontrun{sw_out2 <- sw_exec(inputData = sw_in2)}
@@ -258,7 +267,11 @@ sw_inputDataFromFiles <- function(dir = "", files.in = "files.in") {
 
   input <- sw_args(dir, files.in, echo = FALSE, quiet = FALSE)
 
-  .Call(C_onGetInputDataFromFiles, input)
+  res <- .Call(C_onGetInputDataFromFiles, input)
+  slot(res, "version") <- rSW2_version()
+  slot(res, "timestamp") <- rSW2_timestamp()
+
+  res
 }
 
 
@@ -272,7 +285,11 @@ sw_outputData <- function(inputData) {
   dir_prev <- getwd()
   on.exit(setwd(dir_prev), add = TRUE)
 
-  .Call(C_onGetOutput, inputData)
+  res <- .Call(C_onGetOutput, inputData)
+  slot(res, "version") <- rSW2_version()
+  slot(res, "timestamp") <- rSW2_timestamp()
+
+  res
 }
 
 
@@ -296,7 +313,7 @@ sw_outputData <- function(inputData) {
 #' sw_in <- rSOILWAT2::sw_exampleData
 #'
 #' ## Slots of the input object of class \code{\linkS4class{swInputData}}
-#' str(sw_in, max.level=2)
+#' str(sw_in, max.level = 2)
 #'
 #' ## Execute the simulation run
 #' \dontrun{sw_out <- sw_exec(inputData = sw_in)}

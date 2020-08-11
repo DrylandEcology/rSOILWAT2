@@ -1,10 +1,10 @@
 Package: rSOILWAT2
-Version: 3.4.0
+Version: 4.0.0
 Title: An Ecohydrological Ecosystem-Scale Water Balance Simulation Model
-Description: Access to the C-based SOILWAT2 v5.5.0 and functionality for
+Description: Access to the C-based SOILWAT2 v6.0.0 and functionality for
   SQLite-database of weather data.
 Authors@R: c(
-  person("Daniel", "Schlaepfer", email = "daniel.schlaepfer@yale.edu",
+  person("Daniel", "Schlaepfer", email = "daniel.schlaepfer@alumni.ethz.ch",
     comment = c(ORCID = "0000-0001-9973-2065"), role = c("aut", "cre")),
   person("Ryan", "Murphy", role = "aut"),
   person("Zach", "Kramer", role = "ctb"),

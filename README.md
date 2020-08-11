@@ -243,7 +243,8 @@ __Debugging compiled code__
     * Using R package 'devtools' (e.g., while running R interactively):
       ```{r}
       Sys.setenv(PKG_DEBUG="-DRSWDEBUG")
-      devtools::load_all(recompile = TRUE)
+      devtools::clean_dll() # if you debug in `src/SOILWAT2`
+      devtools::load_all(compile = TRUE)
       ```
   * For a more formal approach using `gdb`/`lldb`, please see the
     [section 'Debugging-compiled-code' in the 'R-exts' manual](https://cran.r-project.org/doc/manuals/R-exts.html#Debugging-compiled-code)

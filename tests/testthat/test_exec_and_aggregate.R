@@ -1,10 +1,10 @@
-context("rSOILWAT2 annual aggregation")
+context("rSOILWAT2 runs")
 
 #---CONSTANTS
 tols <- list(
   aggregations = 1e-6,
   ranges = sqrt(.Machine$double.eps),
-  compare_yearly = 1e-4
+  compare_yearly = 1e-5
 )
 
 OutSum <- c("off", "sum", "mean", "fnl")
@@ -52,7 +52,6 @@ expect_within <- function(object, expected, ..., info = NULL,
     )
   )
 }
-
 
 
 for (it in tests) {
@@ -151,6 +150,7 @@ for (it in tests) {
     }
   })
 
+
   #------ Run SOILWAT2
   test_that("Simulate and aggregate", {
     rd <- sw_exec(
@@ -159,6 +159,9 @@ for (it in tests) {
       echo = FALSE,
       quiet = TRUE
     )
+
+    # Check rSOILWAT2 output object
+    expect_true(check_version(rd))
     expect_s4_class(rd, "swOutput")
     expect_false(has_soilTemp_failed())
 
@@ -201,8 +204,13 @@ for (it in tests) {
 
 
     # Loop through output
-    temp <- slotNames(rd)
-    vars <- temp[!grepl("nrow", temp)]
+    vars <- grep(
+      pattern = "nrow|version|timestamp",
+      x = slotNames(rd),
+      value = TRUE,
+      invert = TRUE
+    )
+
     fun_agg <- OutSum[1 + slot(get_swOUT(sw_input), "sumtype")]
     expect_true(length(vars) == length(fun_agg))
 
@@ -290,18 +298,31 @@ for (it in tests) {
 
       } else {
         # slot 'vars[k]' contains
-        #   - meta information: "yr_nrow", "mo_nrow", "wk_nrow", "dy_nrow"
+        #   - meta information:
+        #     - "version", "timestamp"
+        #     - "yr_nrow", "mo_nrow", "wk_nrow", "dy_nrow"
         #   - empty slot: "WTHR", "ALLH2O", "ALLVEG"
       }
     }
   })
+}
 
 
-  #------ Run SOILWAT2 and compare yearly output to previous simulation run
-  if (!swWeather_UseMarkov(sw_input)) {
-    sw_output <- readRDS(file.path(dir_test_data, paste0(it, "_output.rds")))
 
-    test_that("Compare to previous runs", {
+#------ Run SOILWAT2 and compare yearly output to previous simulation run
+test_that("Compare to previous runs", {
+  for (it in tests) {
+    info1 <- paste("test-data", it)
+
+    #---INPUTS
+    sw_input <- readRDS(file.path(dir_test_data, paste0(it, "_input.rds")))
+
+    if (!swWeather_UseMarkov(sw_input)) {
+      sw_weather <- readRDS(
+        file.path(dir_test_data, paste0(it, "_weather.rds"))
+      )
+      sw_output <- readRDS(file.path(dir_test_data, paste0(it, "_output.rds")))
+
       swOUT_TimeStepsForEveryKey(sw_input) <- 3 # produce yearly output only
 
       rdy <- sw_exec(
@@ -311,12 +332,26 @@ for (it in tests) {
         quiet = TRUE
       )
 
-      expect_equal(
-        object = rdy,
-        expected = sw_output,
-        tolerance = tols[["compare_yearly"]],
-        info = info1
+      vars <- grep(
+        pattern = "version|timestamp",
+        x = slotNames(rdy),
+        value = TRUE,
+        invert = TRUE
       )
-    })
+
+      # Expect SOILWAT2 output values to be equal to the stored values
+      for (sv in vars) {
+        expect_equal(
+          object = slot(rdy, sv),
+          expected = slot(sw_output, sv),
+          tolerance = tols[["compare_yearly"]],
+          info = paste(info1, "- slot", sv)
+        )
+      }
+
+      # Expect version number and timestamp to be >= than stored copy
+      expect_true(get_version(rdy) >= get_version(sw_output))
+      expect_gte(get_timestamp(rdy), get_timestamp(sw_output))
+    }
   }
-}
+})
