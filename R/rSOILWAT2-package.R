@@ -39,7 +39,7 @@
 #' @docType package
 #' @name rSOILWAT2
 #' @aliases rSOILWAT2 rSOILWAT2-package rSOILWAT2 SoilWat SOILWAT SOILWAT2
-#   rSOILWAT2-package Rsoilwat Rsoilwat31
+#   rSOILWAT2-package
 "_PACKAGE"
 
 

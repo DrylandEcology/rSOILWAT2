@@ -387,7 +387,7 @@ soil layers, not parts
             + __IF__ ([\!COND9^[\ref{def:COND9}]^] nccm <= 45)
               __THEN__ "typic-tempustic"
             + __ELSEIF__ ([\!COND6^[\ref{def:COND6}]^] nccd > 45)
-              __THEN__ "xerix-tempustic"
+              __THEN__ "xeric-tempustic"
             + __ELSE__ "wet-tempustic"
         + }  __ELSE__ {
             + __IF__ ([COND2_1^[\ref{def:COND2_1}]^] ncpm[2]) < 180)
@@ -558,7 +558,7 @@ soil layers, not parts
 
 # Soil Temperature Regimes
 We currently ignore the 'iso-' prefix, i.e., "the mean summer and mean winter
-soil temperatures differ by less than 6 oC at a depth of 50 cm or at a densic,
+soil temperatures differ by less than 6 C at a depth of 50 cm or at a densic,
 lithic, or paralithic contact, whichever is shallower", which is applicable to
 [frigid](#Frigid), [mesic](#Mesic), [thermic](#Thermic), and
 [hyperthermic](#Hyperthermic) regimes (SSS 2014^[\ref{def:SSS2014}]^)

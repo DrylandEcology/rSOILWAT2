@@ -1446,22 +1446,21 @@ estimate_PotNatVeg_biomass <- function(tr_VegBiom,
   StandardShrub_VegComposition <- c(0.7, 0.3, 0) # shrubs, C3, and C4
 
   # Scale monthly values of litter and biomass amount by column-max
+  tmp <- apply(
+    tr_VegBiom[, grepl("Biomass", ns_VegBiom)] *
+      tr_VegBiom[, grepl("Perc.Live", ns_VegBiom)],
+    MARGIN = 2,
+    FUN = max
+  )
+  names(tmp) <- paste0(vtypes, ".Amount.Live")
+
   colmax <- c(
     apply(
       tr_VegBiom,
       MARGIN = 2,
       FUN = max
     ),
-    {
-      tmp <- apply(
-        tr_VegBiom[, grepl("Biomass", ns_VegBiom)] *
-          tr_VegBiom[, grepl("Perc.Live", ns_VegBiom)],
-        MARGIN = 2,
-        FUN = max
-      )
-      names(tmp) <- paste0(vtypes, ".Amount.Live")
-      tmp
-    }
+    tmp
   )
 
   # Pull vegetation types
