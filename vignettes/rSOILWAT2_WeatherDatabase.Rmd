@@ -44,17 +44,17 @@ vignette: >
 
 ## Create a new weather database
 ```{r, new_dbW}
-  my_dbW <- "dbWeatherData.sqlite3"  
+  my_dbW <- "dbWeatherData.sqlite3"
   
   is_dbW_success <- dbW_createDatabase(
-    dbFilePath = my_dbW, 
-    site_data = sites1, 
-    Scenarios = scenario1, 
+    dbFilePath = my_dbW,
+    site_data = sites1,
+    Scenarios = scenario1,
     scen_ambient = scenario1
   )
   
   # Check that database was successfully created
-  stopifnot(is_dbW_success) 
+  stopifnot(is_dbW_success)
 ```
 We will see later how to add more sites and scenarios
 
@@ -93,7 +93,7 @@ Here, we create three replicates of our example data with the weather generator
   # Estimate weather generator coefficients
   wgen_coeffs <- dbW_estimate_WGen_coefs(
     weatherData = wdata,
-    imputation_type = "mean", 
+    imputation_type = "mean",
     imputation_span = 5
   )
 
@@ -108,14 +108,14 @@ Here, we create three replicates of our example data with the weather generator
       wgen_coeffs = wgen_coeffs,
       seed = k
     )
-    
+
     # Add to weather database
     tmp_add <- dbW_addWeatherData(
-      Label = sites1[k, "Label"], 
-      weatherData = tmp_wdata, 
+      Label = sites1[k, "Label"],
+      weatherData = tmp_wdata,
       Scenario = scenario1
     )
-    
+
     # Check that weather data was successfully added to the weather database
     stopifnot(tmp_add)
   }
@@ -131,11 +131,11 @@ Here, we create three replicates of our example data with the weather generator
     Scenario = scenario1[1]
   )
 
-  # Weather data is organized in a list 
+  # Weather data is organized in a list
   # where each element, representing daily data for one Gregorian calendar year,
-  # is of class "swWeatherData" 
+  # is of class "swWeatherData"
   stopifnot(
-    inherits(x, "list"), 
+    inherits(x, "list"),
     sapply(x, inherits, what = "swWeatherData")
   )
 
@@ -152,11 +152,11 @@ Here, we create three replicates of our example data with the weather generator
     Latitude = rep(sites1[1, "Latitude"], 2),
     Label = paste0("ExampleSite_", nrow(sites1) + seq_len(2))
   )
-  
+
   # Add sites to existing weather database
   tmp_add <- dbW_addSites(site_data = sites2)
   stopifnot(tmp_add)
-  
+
   # There is no weather data associated with the new sites yet!
   try(
     dbW_getWeatherData(Label = sites2[1, "Label"], Scenario = scenario1[1]),
@@ -176,25 +176,25 @@ Here, we create three replicates of our example data with the weather generator
       wgen_coeffs = wgen_coeffs,
       seed = k
     )
-    
+
     # Add to weather database
     tmp_add <- dbW_addWeatherData(
-      Label = sites2[k, "Label"], 
-      weatherData = tmp_wdata, 
+      Label = sites2[k, "Label"],
+      weatherData = tmp_wdata,
       Scenario = scenario1
     )
-    
+
     # Check that weather data was successfully added to the weather database
     stopifnot(tmp_add)
   }
 
   # Now, we can query the weather at the new sites
   x <- dbW_getWeatherData(
-    Label = sites2[1, "Label"], 
+    Label = sites2[1, "Label"],
     Scenario = scenario1[1]
   )
   stopifnot(
-    inherits(x, "list"), 
+    inherits(x, "list"),
     sapply(x, inherits, what = "swWeatherData")
   )
 ```
@@ -208,7 +208,7 @@ Here, we create three replicates of our example data with the weather generator
   # Add scenario to weather database
   tmp_add <- dbW_addScenarios(scenario2)
   stopifnot(tmp_add)
-  
+
   # All scenarios
   scenarios <- c(scenario1, scenario2)
 ```
@@ -226,13 +226,13 @@ Here, we use again the weather generator to generate weather that is 2 C warmer
   # Estimate weather generator coefficients
   wgen_coeffs_2C <- dbW_estimate_WGen_coefs(
     weatherData = wdata_2C,
-    imputation_type = "mean", 
+    imputation_type = "mean",
     imputation_span = 5
   )
-  
+
   # Loop over our three sites, generate weather, and add it to the database
   sites <- rbind(sites1, sites2)
-  
+
   for (k in seq_len(nrow(sites))) {
     # Generate weather
     tmp_wdata <- dbW_generateWeather(
@@ -241,14 +241,14 @@ Here, we use again the weather generator to generate weather that is 2 C warmer
       wgen_coeffs = wgen_coeffs_2C,
       seed = k
     )
-    
+
     # Add to weather database
     tmp_add <- dbW_addWeatherData(
-      Label = sites[k, "Label"], 
-      weatherData = tmp_wdata, 
+      Label = sites[k, "Label"],
+      weatherData = tmp_wdata,
       Scenario = scenario2
     )
-    
+
     # Check that weather data was successfully added to the weather database
     stopifnot(tmp_add)
   }
@@ -258,52 +258,52 @@ Here, we use again the weather generator to generate weather that is 2 C warmer
 ## Plot daily climate means for all sites and scenarios
 ```{r, plot_climate}
   vars <- c("Tmax_C", "Tmin_C", "PPT_cm")
-  
+
   x <- array(
     data = NA,
     dim = c(365, length(vars), nrow(sites), length(scenarios)),
     dimnames = list(NULL, vars, sites[, "Label"], scenarios)
   )
-  
+
   used_doys <- seq_len(365)
 
   # Query weather data for all sites and scenarios and calculate means
   for (k1 in seq_len(nrow(sites))) for (k2 in seq_along(scenarios)) {
     tmp <- dbW_getWeatherData(
-      Label = sites[k1, "Label"], 
+      Label = sites[k1, "Label"],
       Scenario = scenarios[k2]
     )
-    
+
     tmp_df <- dbW_weatherData_to_dataframe(tmp)
     tmp_clim <- aggregate(
-      x = tmp_df[, vars], 
-      by = list(DOY = tmp_df[, "DOY"]), 
+      x = tmp_df[, vars],
+      by = list(DOY = tmp_df[, "DOY"]),
       FUN = mean
     )
-    
+
     x[, vars, k1, k2] <- as.matrix(tmp_clim[used_doys, vars])
   }
-  
-  
+
+
   # Calculate overall means per variable and scenario
   round(apply(x, c(2, 4), mean, na.rm = TRUE), 2)
-  
-  
+
+
   # Plot mean climate variables
   colsc <- c("orange", "purple")
   colsc2 <- adjustcolor(colsc, alpha.f = 0.4)
-  
+
   par_prev <- par(
-    mfrow = c(2, 2), 
-    mar = c(2.5, 2.5, 0.5, 0.5), mgp = c(1, 0, 0), 
+    mfrow = c(2, 2),
+    mar = c(2.5, 2.5, 0.5, 0.5), mgp = c(1, 0, 0),
     tcl = 0.3
   )
-  
+
   for (k1 in seq_along(vars)) {
     for (k2 in seq_along(scenarios)) {
       if (k2 == 1) {
         matplot(
-          x[, k1, , k2], 
+          x[, k1, , k2],
           type = "l", lty = 1, lwd = 0.5, col = colsc2[k2],
           ylim = range(x[, k1, , ], na.rm = TRUE),
           xlab = "Time (day of year)", ylab = vars[k1]
@@ -312,7 +312,7 @@ Here, we use again the weather generator to generate weather that is 2 C warmer
         matlines(x[, k1, , k2], lty = 1, lwd = 0.5, col = colsc2[k2])
       }
     }
-    
+
     if (k1 == 1) {
       legend(
         "bottom",
@@ -323,7 +323,7 @@ Here, we use again the weather generator to generate weather that is 2 C warmer
       )
     }
   }
-  
+
   par(par_prev)
 ```
 
