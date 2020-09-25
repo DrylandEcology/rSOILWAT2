@@ -259,7 +259,7 @@ Task: compare weather data `wdata` with `wdata_filled` using function
 
 
 # Access other weather data sources
-## Download weather data from DayMet
+## Download weather data from `DayMet`
 ```{r, daymetr, results = "hide"}
   if (!requireNamespace("daymetr",
     versionCheck = list(op = ">=", version = "1.4"))) {
@@ -279,8 +279,8 @@ Task: compare weather data `wdata` with `wdata_filled` using function
   )
 ```
 
-Task: convert DayMet data `dm_Laramie` into a data.frame with the columns
-      "Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm" and create a rSOILWAT2
+Task: convert `DayMet` data `dm_Laramie` into a data.frame with the columns
+      `Year`, `DOY`, `Tmax_C`, `Tmin_C`, `PPT_cm` and create a `rSOILWAT2`
       weather object list with function `dbW_dataframe_to_weatherData`
 ```{r, daymetr_data2}
   vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
@@ -315,7 +315,7 @@ Task: Add leap days to data.frame and estimate those with weather generator
 ```
 
 
-# Specifing soils
+# Specifying soils
 ```{r, soils}
   sw_in <- sw_in1
 
@@ -391,7 +391,7 @@ Task: estimate vegetation composition with
 ```
 
 
-# Modifing climate conditions
+# Modifying climate conditions
 ```{r, climmod}
   sw_in <- sw_in1
 

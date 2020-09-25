@@ -1,6 +1,3 @@
-Meta
-doc
-
 # Compiled source #
 ###################
 *.com
@@ -30,6 +27,7 @@ Thumbs.db
 # R stuff
 .RData
 .Rhistory
+.Rapp.history
 .Rproj.user
 
 
@@ -37,15 +35,17 @@ Thumbs.db
 ..Rcheck
 rSOILWAT2.Rcheck
 rSOILWAT_IntegrationTestOutput/
+tests/spelling.Rout.save
 
-# Package builds
+# Package build files
 *tar.gz
 *.tgz
 *.zip
-
-# Example code in package build process
 *-Ex.R
 inst/doc
+Meta
+doc
 
 # Locally knitted vignettes
 vignettes/*.pdf
+vignettes/*.html

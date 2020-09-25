@@ -36,7 +36,7 @@ no warranty and no guarantees, expressed or implied, as to suitability,
 completeness, accuracy, and whatever other claim you would like to make.
 
 There is no graphical user interface, help pages and available documentation
-may be out of date, and you will need to write your own tools to analyse
+may be out of date, and you will need to write your own tools to analyze
 outputs.
 
 Note, the branch 'master' is deployable and is released with version numbers.
@@ -57,7 +57,7 @@ Some other references
   niche of sagebrush ecosystems. Ecohydrology 5:453-466.
 
 
-References for the original version of "Soilwat"
+References for the original version of `Soilwat`
 
 * Parton, W.J. (1978). Abiotic section of ELM. In: Grassland simulation model
   (ed. Innis, G.S.). Springer New York, NY, pp. 31-53.
@@ -83,14 +83,14 @@ There are several options:
 
 ### Installation
 
-'rSOILWAT2' will compile the c code of
+`rSOILWAT2` will compile the c code of
 [SOILWAT2](https://github.com/DrylandEcology/SOILWAT2). Your computer must be
 set up adequately.
 - If you use a Windows OS, then you need the
-  [Rtools](http://cran.us.r-project.org/bin/windows/Rtools/)
+  [`Rtools`](http://cran.us.r-project.org/bin/windows/Rtools/)
   installed that match your R version; please find further information for
   instance [here](https://www.biostat.wisc.edu/~kbroman/Rintro/Rwinpack.html).
-- If you use a macOS, then you need [Xcode](https://developer.apple.com/xcode/) and
+- If you use a `macOS`, then you need [`Xcode`](https://developer.apple.com/xcode/) and
   its [command-line tools](https://developer.apple.com/library/content/technotes/tn2339/_index.html)
   installed; please find further information for instance
   [here](https://railsapps.github.io/xcode-command-line-tools.html).
@@ -120,7 +120,7 @@ access, then you may consider using one of the cloud services (no endorsements):
 - http://win-builder.r-project.org/ offers Windows OS as target
 
 Alternatively, you may access the previous binary package version for
-Windows OS from our CI appveyor service if the build was successful and an
+Windows OS from CI `appveyor` service if the build was successful and an
 artifact was generated for the binary package (this would be named
 'rSOILWAT2_X.Y.Z.zip' with version number X.Y.Z) at
 - https://ci.appveyor.com/project/dschlaep/rSOILWAT2/build/artifacts
@@ -141,14 +141,14 @@ __Follow our guidelines__ as detailed [here](https://github.com/DrylandEcology/w
 
 __Tests, documentation, and code__ form a trinity
 - Code documentation
-  * Read the [section 'Object documentation' in Wickham's book 'R packages'](http://r-pkgs.had.co.nz/man.html)
+  * Read the [section 'Object documentation' in the book 'R packages' by Wickham](http://r-pkgs.had.co.nz/man.html)
   * Use [roxygen2](https://cran.r-project.org/web/packages/roxygen2/vignettes/formatting.html)
     to write inline code documentation
   * Update help pages and NAMESPACE with the command `devtools::document()`
   * Ideally, add examples to function documentation and check these examples
     with the command `devtools::run_examples()`
 - Code tests
-  * Read the [section 'Testing' in Wickham's book 'R packages'](http://r-pkgs.had.co.nz/tests.html)
+  * Read the [section 'Testing' in the book 'R packages' by Wickham](http://r-pkgs.had.co.nz/tests.html)
   * Unit tests
     * Use [testthat](https://github.com/hadley/testthat) to add unit tests to the
       existing framework
@@ -156,7 +156,7 @@ __Tests, documentation, and code__ form a trinity
     * These unit tests will also be run on the command-line with `R CMD check .`
       which you can run also with `devtools::check()`
     * The command-line check will be run on the continuous integration frameworks
-      'travis' and 'appveyor' when commits are pushed
+      `travis` and `appveyor` when commits are pushed
     * Development/feature branches can only be merged into master if they pass
       all checks
   * Integration tests/checks: run a default example and look at some of the
@@ -234,7 +234,7 @@ __Tests, documentation, and code__ form a trinity
 
 __Debugging compiled code__
   * Compile C code in `src/` and `src/SOILWAT2/` in 'debugging' mode.
-    This will define 'SWDEBUG' in 'SOILWAT2' source code
+    This will define `SWDEBUG` in `SOILWAT2` source code
     (see [SOILWAT2's README](https://github.com/DrylandEcology/SOILWAT2)):
     * Install package on the command line:
       ```
@@ -323,7 +323,7 @@ Dr. Daniel Schlaepfer.
 
 # Notes
 
-__Organization renamed from Burke-Lauenroth-Lab to DrylandEcology on Dec 22, 2017__
+__Organization renamed from Burke-Lauenroth-Lab to `DrylandEcology` on Dec 22, 2017__
 
 All existing information should [automatically be redirected](https://help.github.com/articles/renaming-a-repository/) to the new name.
 Contributors are encouraged, however, to update local clones to [point to the new URL](https://help.github.com/articles/changing-a-remote-s-url/), i.e.,
@@ -332,7 +332,7 @@ git remote set-url origin https://github.com/DrylandEcology/rSOILWAT2.git
 ```
 
 
-__Repository renamed from Rsoilwat (Rsoilwat31) to rSOILWAT2 on Feb 23, 2017__
+__Repository renamed from `Rsoilwat` (`Rsoilwat31`) to rSOILWAT2 on Feb 23, 2017__
 
 All existing information should [automatically be redirected](https://help.github.com/articles/renaming-a-repository/) to the new name.
 
