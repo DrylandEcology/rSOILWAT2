@@ -35,8 +35,8 @@
 #'   \var{SOILWAT2} run to fail (potentially non-graciously and
 #'   with non-obvious error messages). To avoid that, this function offers
 #'   imputation approaches in order to fill in those failed coefficient
-#'   estimates; see \code{\link{impute_df}}, but please note that any such
-#'   imputation likely introduces biases in the generated weather.
+#'   estimates; see \code{\link[rSW2utils]{impute_df}}, but please note that
+#'   any such imputation likely introduces biases in the generated weather.
 #'
 #' @section Details: Most users will likely want to set \code{propagate_NAs} to
 #'   \code{FALSE}. Note: \code{propagate_NAs} corresponds to \code{!na.rm}
@@ -64,7 +64,7 @@
 #'   values in the input \code{weatherData} are excluded; if \code{FALSE}, then
 #'   missing values are propagated to the estimation. See Details.
 #' @inheritParams set_missing_weather
-#' @inheritParams impute_df
+#' @inheritParams rSW2utils::impute_df
 #'
 #' @return A list with two named elements:
 #'   \describe{
@@ -240,7 +240,7 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
       warning("Insufficient weather data to estimate ", msg)
     } else {
       message("Impute missing `mkv_prob` ", msg)
-      mkv_prob <- impute_df(mkv_prob,
+      mkv_prob <- rSW2utils::impute_df(mkv_prob,
         imputation_type = imputation_type,
         imputation_span = imputation_span,
         cyclic = TRUE
@@ -341,7 +341,7 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
       warning("Insufficient weather data to estimate ", msg)
     } else {
       message("Impute missing `mkv_cov` ", msg)
-      mkv_cov <- impute_df(mkv_cov,
+      mkv_cov <- rSW2utils::impute_df(mkv_cov,
         imputation_type = imputation_type,
         imputation_span = imputation_span,
         cyclic = TRUE
@@ -351,115 +351,6 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
 
 
   list(mkv_woy = mkv_cov, mkv_doy = mkv_prob)
-}
-
-
-#' Imputes missing values in a \code{data.frame}
-#'
-#' @param x A \code{\link{data.frame}} with numerical columns. Imputation
-#'   works on each column separately.
-#' @param imputation_type A character string describing the imputation method;
-#'   currently, one of three values: \describe{
-#'     \item{\var{"none"}}{no imputation is carried out;}
-#'     \item{\var{"mean"}}{missing values will be replaced by the average
-#'       of \code{imputation_span} non-missing values before and
-#'       \code{imputation_span} non-missing values after; note:
-#'       this may fail if there are less than \code{2 * imputation_span}
-#'       non-missing values;}
-#'     \item{\var{"locf"}}{missing values will be replaced by the
-#'       \var{"last-observation-carried-forward"} imputation method.}
-#'  }
-#' @param imputation_span An integer value. The number of non-missing values
-#'   considered if \code{imputation_type = "mean"}.
-#' @param cyclic A logical value. If \code{TRUE}, then the last row of \code{x}
-#'   is considered to be a direct neighbor of the first row, e.g., rows of
-#'   \code{x} represent day of year for an average year.
-#'
-#' @return An updated version of \code{x}.
-#'
-#' @export
-impute_df <- function(x, imputation_type = c("none", "mean", "locf"),
-  imputation_span = 5L, cyclic = FALSE) {
-
-  imputation_type <- match.arg(imputation_type)
-  if (imputation_type == "mean") {
-    imputation_span <- round(imputation_span)
-  }
-
-  if (imputation_type == "none") {
-    return(x)
-  }
-
-  cycle <- nrow(x)
-  irows <- seq_len(cycle)
-
-  #--- imputations
-  icols_withNAs <- which(apply(x, 2, anyNA))
-
-  for (k1 in icols_withNAs) {
-    irows_withNA <- which(is.na(x[, k1]))
-
-    for (k2 in irows_withNA) {
-      if (imputation_type == "mean" && imputation_span > 0) {
-        #--- imputation by mean of neighbor values
-        spank <- imputation_span
-
-        # locate a sufficient number of non-missing neighbors
-        repeat {
-          temp <- seq(k2 - spank, k2 + spank)
-          if (cyclic) {
-            temp <- 1 + (temp - 1) %% cycle
-          } else {
-            temp <- temp[temp %in% irows]
-          }
-          ids_source <- temp[!(temp %in% irows_withNA)]
-
-          if (length(ids_source) < 2 * imputation_span && spank < cycle) {
-            spank <- spank + 1
-          } else {
-            break
-          }
-        }
-
-        # impute mean of neighbors
-        if (length(ids_source) > 0 && all(is.finite(ids_source))) {
-          x[k2, k1] <- mean(x[ids_source, k1])
-        }
-
-      } else if (imputation_type == "locf") {
-        #--- imputation by last-observation carried forward
-        dlast <- 1
-
-        # locate last non-missing value
-        repeat {
-          temp <- k2 - dlast
-          if (cyclic) {
-            temp <- 1 + (temp - 1) %% cycle
-          } else {
-            temp <- temp[temp %in% irows]
-          }
-          ids_source <- temp[!(temp %in% irows_withNA)]
-
-          if (length(ids_source) == 1 || dlast >= cycle) {
-            break
-          } else {
-            dlast <- dlast + 1
-          }
-        }
-
-        # impute locf
-        if (length(ids_source) > 0 && all(is.finite(ids_source))) {
-          x[k2, k1] <- x[ids_source, k1]
-        }
-      }
-    }
-  }
-
-  if (anyNA(x)) {
-    warning("It was not possible to impute all missing values.")
-  }
-
-  x
 }
 
 
