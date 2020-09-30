@@ -28,6 +28,8 @@ Suggests:
   rmarkdown,
   spelling (>= 2.1.0),
   testthat
+Remotes:
+    github::DrylandEcology/rSW2utils
 NeedsCompilation: yes
 License: GPL-3 + file LICENSE
 URL: https://github.com/DrylandEcology/rSOILWAT2
