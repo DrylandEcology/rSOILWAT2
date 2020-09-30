@@ -191,7 +191,7 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
     inputData <- sw_inputDataFromFiles(dir = dir, files.in = files.in)
   }
 
-  if (!check_version(inputData)) {
+  if (!check_version(inputData, level = "minor")) {
     warning(
       "Object `inputData is outdated; ",
       "SOILWAT2 may fail or produce unexpected outcomes."

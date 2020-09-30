@@ -4,17 +4,29 @@
 \alias{check_version}
 \title{Check that version of an input or output object is up-to-date}
 \usage{
-check_version(object)
+check_version(object, level = c("minor", "major", "patch"))
 }
 \arguments{
 \item{object}{An object of class \code{\linkS4class{swInputData}} or
 \code{\linkS4class{swOutput}}.}
+
+\item{level}{A character string. The level at which to detect changes
+in the version number \var{major.minor.patch}. A value of \var{"minor"}
+would ignore patch-level changes.}
 }
 \value{
 A logical value.
 }
 \description{
 Check that version of an input or output object is up-to-date
+}
+\examples{
+# Should pass
+check_version(rSOILWAT2::sw_exampleData, level = "minor")
+
+# May fail due to a recent patch
+check_version(rSOILWAT2::sw_exampleData, level = "patch")
+
 }
 \seealso{
 \code{\link{validObject}}
