@@ -764,7 +764,7 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 #'   \var{mkv_woy}, i.e., the return value of
 #'   \code{\link{dbW_estimate_WGen_coefs}}. If \code{NULL}, then determined
 #'   based on \code{weatherData}.
-#' @inheritParams impute_df
+#' @inheritParams rSW2utils::impute_df
 #' @param seed An integer value or \code{NULL}. See \code{\link{set.seed}}.
 #'
 #' @return A list of elements of class \code{\linkS4class{swWeatherData}}.
