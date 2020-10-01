@@ -161,7 +161,7 @@ for (it in tests) {
     )
 
     # Check rSOILWAT2 output object
-    expect_true(check_version(rd))
+    expect_true(check_version(rd, level = "minor"))
     expect_s4_class(rd, "swOutput")
     expect_false(has_soilTemp_failed())
 

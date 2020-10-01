@@ -99,8 +99,8 @@ Markov weather generator in \var{SOILWAT2} \var{> v4.2.5}.
   \var{SOILWAT2} run to fail (potentially non-graciously and
   with non-obvious error messages). To avoid that, this function offers
   imputation approaches in order to fill in those failed coefficient
-  estimates; see \code{\link{impute_df}}, but please note that any such
-  imputation likely introduces biases in the generated weather.
+  estimates; see \code{\link[rSW2utils]{impute_df}}, but please note that
+  any such imputation likely introduces biases in the generated weather.
 }
 
 \section{Details}{

@@ -39,17 +39,50 @@ rSW2_version <- function() as.character(getNamespaceVersion("rSOILWAT2"))
 setGeneric("get_version", function(object) standardGeneric("get_version"))
 
 #' Check that version of an input or output object is up-to-date
+#'
 #' @param object An object of class \code{\linkS4class{swInputData}} or
 #'   \code{\linkS4class{swOutput}}.
+#' @param level A character string. The level at which to detect changes
+#'   in the version number \var{major.minor.patch}. A value of \var{"minor"}
+#'   would ignore patch-level changes.
+#'
 #' @return A logical value.
+#'
 #' @seealso \code{\link{validObject}}
+#'
+#' @examples
+#' # Should pass
+#' check_version(rSOILWAT2::sw_exampleData, level = "minor")
+#'
+#' # May fail due to a recent patch
+#' check_version(rSOILWAT2::sw_exampleData, level = "patch")
+#'
 #' @export
-check_version <- function(object) {
-  tmp <- get_version(object)
-  if (is.na(tmp)) {
+check_version <- function(object, level = c("minor", "major", "patch")) {
+  has <- get_version(object)
+
+  if (is.na(has)) {
     FALSE
+
   } else {
-    as.numeric_version(tmp) >= as.numeric_version(rSW2_version())
+    has <- as.numeric_version(has)
+    current <- as.numeric_version(rSW2_version())
+
+    # Adjust for level to compare versions
+    level <- match.arg(level)
+    if (level %in% c("major", "minor")) {
+      # zero the patchlevel
+      has[[c(1, 3)]] <- 0
+      current[[c(1, 3)]] <- 0
+    }
+    if (level %in% "major") {
+      # zero the minor-level
+      has[[c(1, 2)]] <- 0
+      current[[c(1, 2)]] <- 0
+    }
+
+    # Compare
+    has >= current
   }
 }
 
