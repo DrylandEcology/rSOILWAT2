@@ -1486,7 +1486,7 @@ dbW_convert_to_GregorianYears <- function(weatherData,
   }
 
   # Create data.frame for new Calendar years
-  tdays <- days_in_years(
+  tdays <- rSW2utils::days_in_years(
     start_year = new_startYear,
     end_year = new_endYear
   )
