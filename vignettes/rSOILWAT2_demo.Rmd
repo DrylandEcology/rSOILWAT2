@@ -48,7 +48,7 @@ vignette: >
   # Documentation of a specific function, e.g.,
   ?sw_exec
 
-  # Code of a specifici function, e.g.,
+  # Code of a specific function, e.g.,
   sw_exec
 ```
 
@@ -97,6 +97,7 @@ vignette: >
 ```{r, simulate0}
   # Load data for an example site: see ?sw_exampleData
   sw_in0 <- rSOILWAT2::sw_exampleData
+
   # Run SOILWAT2 for the example site
   sw_out0 <- sw_exec(inputData = sw_in0)
 ```
@@ -107,14 +108,14 @@ vignette: >
 ```
 
 
-Task: Create daily/monthly/yearly plots of soil moisture, transpiration,
-      evaporation, etc.
+### Task: Create daily/monthly/yearly plots
 ```{r, plot1}
   x <- slot(slot(sw_out0, "VWCBULK"), "Day")
 
   ids <- grep("Lyr", colnames(x))
   vwc <- x[, ids]
-  matplot(vwc,
+  matplot(
+    vwc,
     ylim = c(0, max(vwc)),
     xlab = "Time",
     ylab = "Volumetric water content (bulk; m3 / m3)",
@@ -130,13 +131,19 @@ Task: Create daily/monthly/yearly plots of soil moisture, transpiration,
 
   x <- slot(slot(sw_out0, "TRANSP"), "Month")
   ids <- grep("transp_total", colnames(x))
-  matplot(x[1:24, ids], type = "l")
+  matplot(
+    x[1:24, ids],
+    type = "l",
+    xlab = "Time (Months)",
+    ylab = "Transpiration (cm)"
+  )
 
 
   x <- slot(slot(sw_out0, "EVAPSOIL"), "Year")
   ids <- grep("Lyr", colnames(x))
   es <- apply(x[, ids], 1, sum)
-  plot(x = x[, "Year"], y = es,
+  plot(
+    x = x[, "Year"], y = es,
     ylim = c(0, max(es)),
     xlab = "Time",
     ylab = "Bare-soil evaporation (cm)",
@@ -146,14 +153,14 @@ Task: Create daily/monthly/yearly plots of soil moisture, transpiration,
 
 
 ## Read inputs from local files on disk (including daily weather forcing)
-Task: Use function `sw_inputDataFromFiles` to read inputs from location
-      `path_demo` (e.g., this could be inputs for your site)
-
 ```{r, path}
   path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 ```
 
 ```{r, simulate1}
+  # Task: Use function `sw_inputDataFromFiles` to read inputs from location
+  # `path_demo` (e.g., this could be inputs for your site)
+
   # Read data from input files
   sw_in1 <- sw_inputDataFromFiles(dir = path_demo)
 
@@ -179,9 +186,9 @@ Task: Use function `sw_inputDataFromFiles` to read inputs from location
 # Handling missing weather data
 
 ## Read weather data with missing values
-Task: use function `getWeatherData_folders` to read weather data with
-      missing values from folder `data_weather_missing`
 ```{r, weather2}
+  # Task: use function `getWeatherData_folders` to read weather data with
+  # missing values from folder `data_weather_missing`
   wdata_gaps <- getWeatherData_folders(
     LookupWeatherFolder = file.path(path_demo, "Input"),
     weatherDirName = "data_weather_missing",
@@ -195,10 +202,12 @@ Task: use function `getWeatherData_folders` to read weather data with
 ```
 
 
-Option 1: estimate weather generator coefficients with
-          function `dbW_estimate_WGen_coefs`,
-          generate weather with function `dbW_generateWeather`,
-          and run SOILWAT2 with filled-in data
+### Option 1
+  (i) Estimate weather generator coefficients with 
+      function `dbW_estimate_WGen_coefs`,
+  (ii) generate weather with function `dbW_generateWeather`, and 
+  (iii) run SOILWAT2 with filled-in data
+
 ```{r, weather3}
   wgen_coeffs <- dbW_estimate_WGen_coefs(weatherData = wdata)
 
@@ -215,8 +224,10 @@ Option 1: estimate weather generator coefficients with
   )
 ```
 
-Option 2: estimate weather generator coefficients and
-          run SOILWAT2 with activated weather generator
+### Option 2
+  (i) estimate weather generator coefficients and 
+  (ii) run SOILWAT2 with activated weather generator
+  
 ```{r, weather4}
   sw_in <- sw_in1
   swWeather_UseMarkov(sw_in) <- TRUE
@@ -230,10 +241,10 @@ Option 2: estimate weather generator coefficients and
 ```
 
 # Compare weather and climate based on weather inputs
-Task: plot a comparison between `wdata` and `wdata_filled` for
-      mean monthly precipitation and mean monthly temperature using the output
-      of function `calc_SiteClimate`
 ```{r, compare1}
+  # Task: plot a comparison between `wdata` and `wdata_filled` for
+  # mean monthly precipitation and mean monthly temperature using the output
+  # of function `calc_SiteClimate`
   clim1 <- calc_SiteClimate(wdata)
   clim2 <- calc_SiteClimate(wdata_filled)
 
@@ -245,9 +256,9 @@ Task: plot a comparison between `wdata` and `wdata_filled` for
   abline(0, 1, col = "red")
 ```
 
-Task: compare weather data `wdata` with `wdata_filled` using function
-      `compare_weather`
 ```{r, compare2, results = "hide"}
+  # Task: compare weather data `wdata` with `wdata_filled` using function
+  # `compare_weather`
   compare_weather(
     ref_weather = dbW_weatherData_to_dataframe(wdata),
     weather = dbW_weatherData_to_dataframe(wdata_filled),
@@ -268,7 +279,7 @@ Task: compare weather data `wdata` with `wdata_filled` using function
 ```
 
 ```{r, daymetr_data, results = "hide"}
-  dm_Laramie <- daymetr::download_daymet(
+  dm_Laramie <- try(daymetr::download_daymet(
     site = "testsite_name",
     lat = 41.3167,
     lon = -105.6833,
@@ -276,42 +287,50 @@ Task: compare weather data `wdata` with `wdata_filled` using function
     end = 2018,
     internal = TRUE,
     simplify = FALSE
-  )
-```
-
-Task: convert `DayMet` data `dm_Laramie` into a data.frame with the columns
-      `Year`, `DOY`, `Tmax_C`, `Tmin_C`, `PPT_cm` and create a `rSOILWAT2`
-      weather object list with function `dbW_dataframe_to_weatherData`
-```{r, daymetr_data2}
-  vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
-  xdf <- dm_Laramie[["data"]][, vars]
-  xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
-  colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
-
-  wdata_dm <- dbW_dataframe_to_weatherData(weatherDF = xdf)
-
-  # This will fail: no leap days
-  sw_out <- try(sw_exec(
-    inputData = sw_in1,
-    weatherList = wdata_dm
   ))
 ```
 
+## Convert a `rSOILWAT2` weather object
+```{r, daymetr_data2}
+  if (!inherits(dm_Laramie, "try-error")) {
+    # Task: convert `DayMet` data `dm_Laramie` into a data.frame with the
+    # columns `Year`, `DOY`, `Tmax_C`, `Tmin_C`, `PPT_cm` and
+    # create a `rSOILWAT2` weather object list with
+    # function `dbW_dataframe_to_weatherData`
+
+    vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
+    xdf <- dm_Laramie[["data"]][, vars]
+    xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
+    colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+
+    wdata_dm <- dbW_dataframe_to_weatherData(weatherDF = xdf)
+
+    # This will fail: no leap days
+    sw_out <- try(sw_exec(
+      inputData = sw_in1,
+      weatherList = wdata_dm
+    ))
+  }
+```
 
 
-Task: Add leap days to data.frame and estimate those with weather generator
+
 ```{r, daymetr_data3}
-  xdf2 <- dbW_convert_to_GregorianYears(weatherData = wdata_dm)
+  if (!inherits(dm_Laramie, "try-error")) {
+    # Task: Add leap days to data.frame and estimate those with
+    # the weather generator
+    xdf2 <- dbW_convert_to_GregorianYears(weatherData = wdata_dm)
 
-  wdata_dm2 <- dbW_generateWeather(
-    weatherData = dbW_dataframe_to_weatherData(weatherDF = xdf2),
-    seed = 123
-  )
+    wdata_dm2 <- dbW_generateWeather(
+      weatherData = dbW_dataframe_to_weatherData(weatherDF = xdf2),
+      seed = 123
+    )
 
-  sw_out <- sw_exec(
-    inputData = sw_in1,
-    weatherList = wdata_dm2
-  )
+    sw_out <- sw_exec(
+      inputData = sw_in1,
+      weatherList = wdata_dm2
+    )
+  }
 ```
 
 
@@ -357,9 +376,9 @@ Task: Add leap days to data.frame and estimate those with weather generator
 # Estimating vegetation based on climate relationships
 
 ## Vegetation composition (land cover)
-Task: estimate vegetation composition with
-     function `estimate_PotNatVeg_composition`
 ```{r, vegcomp}
+  # Task: estimate vegetation composition with
+  # function `estimate_PotNatVeg_composition`
   clim <- calc_SiteClimate(
     weatherList = wdata,
     do_C4vars = TRUE
