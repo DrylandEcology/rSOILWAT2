@@ -256,7 +256,7 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
 #' str(sw_in2, max.level = 2)
 #'
 #' ## Execute the simulation run
-#' \dontrun{sw_out2 <- sw_exec(inputData = sw_in2)}
+#' sw_out2 <- sw_exec(inputData = sw_in2)
 #'
 #'
 #' @export
@@ -316,7 +316,7 @@ sw_outputData <- function(inputData) {
 #' str(sw_in, max.level = 2)
 #'
 #' ## Execute the simulation run
-#' \dontrun{sw_out <- sw_exec(inputData = sw_in)}
+#' sw_out <- sw_exec(inputData = sw_in)
 #'
 #' @export
 sw_inputData <- function() {

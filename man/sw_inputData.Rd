@@ -24,7 +24,7 @@ sw_in <- rSOILWAT2::sw_exampleData
 str(sw_in, max.level = 2)
 
 ## Execute the simulation run
-\dontrun{sw_out <- sw_exec(inputData = sw_in)}
+sw_out <- sw_exec(inputData = sw_in)
 
 }
 \seealso{

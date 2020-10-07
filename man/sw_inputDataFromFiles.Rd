@@ -32,7 +32,7 @@ sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 str(sw_in2, max.level = 2)
 
 ## Execute the simulation run
-\dontrun{sw_out2 <- sw_exec(inputData = sw_in2)}
+sw_out2 <- sw_exec(inputData = sw_in2)
 
 
 }
