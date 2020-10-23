@@ -68,14 +68,14 @@ compare_weather(
 )
 
 ## Example with STEPWAT2 output data averaged across iterations (`-o` option)
-fname_master <- "file_STEPWAT2_master.csv"
+fname_main <- "file_STEPWAT2_main.csv"
 fname_dev <- "file_STEPWAT2_dev.csv"
-if (all(file.exists(fname_master, fname_dev))) {
+if (all(file.exists(fname_main, fname_dev))) {
   cols_STEPWAT2 <- c(
     "Year", "Day", "PRECIP_ppt_Mean", "TEMP_max_C_Mean", "TEMP_min_C_Mean"
   )
   cols_rSOILWAT2 <- c("Year", "Day", "PPT_cm", "Tmax_C", "Tmin_C")
-  w0 <- read.csv(fname_master)[, cols_STEPWAT2]
+  w0 <- read.csv(fname_main)[, cols_STEPWAT2]
   colnames(w0) <- cols_rSOILWAT2
   w1 <- read.csv(fname_dev)[, cols_STEPWAT2]
   colnames(w1) <- cols_rSOILWAT2
