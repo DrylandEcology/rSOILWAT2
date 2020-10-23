@@ -71,10 +71,10 @@ sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
   # Mean temperature of driest quarter (Bioclim variable 9)
   # see \code{link[dismo]{biovars}}
   if (!is.null(monthlyTempMean_C)) {
-    wet <- t(apply(monthlyPPT_cm, 2, moving_function,
+    wet <- t(apply(monthlyPPT_cm, 2, rSW2utils::moving_function,
       k = 3, win_fun = sum, na.rm = TRUE, circular = TRUE
     ))
-    tmp <- t(apply(monthlyTempMean_C, 2, moving_function,
+    tmp <- t(apply(monthlyTempMean_C, 2, rSW2utils::moving_function,
       k = 3, win_fun = mean, na.rm = TRUE, circular = TRUE
     ))
     dryqrt <- cbind(
@@ -163,7 +163,7 @@ sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
 #'
 #' @examples
 #' ## Load weather dataset from rSOILWAT2
-#' data("weatherData", package = "rSOILWAT2")
+#' utils::data("weatherData", package = "rSOILWAT2")
 #' clim1 <- calc_SiteClimate(weatherList = weatherData)
 #' clim2 <- calc_SiteClimate(weatherList = weatherData, do_C4vars = TRUE)
 #' clim3 <- calc_SiteClimate(weatherList = weatherData,

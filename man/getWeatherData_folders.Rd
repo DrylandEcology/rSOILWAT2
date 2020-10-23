@@ -50,7 +50,7 @@ sw_weath3 <- getWeatherData_folders(
    startYear = 1979, endYear = 2010)
 
 ## List of the slots of the input objects of class 'swWeatherData'
-str(sw_weath3, max.level=1)
+utils::str(sw_weath3, max.level=1)
 
 ## Execute the simulation run
 sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)

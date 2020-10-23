@@ -384,14 +384,22 @@ print_mkv_files <- function(mkv_doy, mkv_woy, path, digits = 5) {
   dir.create(path, recursive = TRUE, showWarnings = FALSE)
 
   colnames(mkv_doy)[1] <- paste0("#", colnames(mkv_doy)[1])
-  write.table(format(mkv_doy, digits = digits),
+  utils::write.table(
+    format(mkv_doy, digits = digits),
     file = file.path(path, "mkv_prob.in"),
-    sep = "\t", row.names = FALSE, quote = FALSE)
+    sep = "\t",
+    row.names = FALSE,
+    quote = FALSE
+  )
 
   colnames(mkv_woy)[1] <- paste0("#", colnames(mkv_woy)[1])
-  write.table(format(mkv_woy, digits = digits),
+  utils::write.table(
+    format(mkv_woy, digits = digits),
     file = file.path(path, "mkv_covar.in"),
-    sep = "\t", row.names = FALSE, quote = FALSE)
+    sep = "\t",
+    row.names = FALSE,
+    quote = FALSE
+  )
 
   invisible(TRUE)
 }
@@ -510,9 +518,9 @@ prepare_weather_for_comparison <- function(weather,
 #'     "Year", "Day", "PRECIP_ppt_Mean", "TEMP_max_C_Mean", "TEMP_min_C_Mean"
 #'   )
 #'   cols_rSOILWAT2 <- c("Year", "Day", "PPT_cm", "Tmax_C", "Tmin_C")
-#'   w0 <- read.csv(fname_main)[, cols_STEPWAT2]
+#'   w0 <- utils::read.csv(fname_main)[, cols_STEPWAT2]
 #'   colnames(w0) <- cols_rSOILWAT2
-#'   w1 <- read.csv(fname_dev)[, cols_STEPWAT2]
+#'   w1 <- utils::read.csv(fname_dev)[, cols_STEPWAT2]
 #'   colnames(w1) <- cols_rSOILWAT2
 #'
 #'   # Note: Since values are averages across many iterations, most days

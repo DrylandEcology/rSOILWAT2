@@ -28,7 +28,7 @@
 #'   correspond to \code{example1}; see example code.
 #'
 #' @examples
-#' data(sw_exampleData)
+#' utils::data(sw_exampleData)
 #' path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 #' x <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 #' identical(x, sw_exampleData) ## TRUE

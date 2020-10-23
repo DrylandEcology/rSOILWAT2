@@ -1095,7 +1095,7 @@ dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
 #'    startYear = 1979, endYear = 2010)
 #'
 #' ## List of the slots of the input objects of class 'swWeatherData'
-#' str(sw_weath3, max.level=1)
+#' utils::str(sw_weath3, max.level=1)
 #'
 #' ## Execute the simulation run
 #' sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)
@@ -1377,15 +1377,30 @@ dbW_weather_to_SOILWATfiles <- function(path, site.label,
     sw.comments <- c(paste("# weather for site", site.label, "year = ",
       years[y]), "# DOY Tmax(C) Tmin(C) PPT(cm)")
 
-    write.table(sw.comments, file = sw.filename, sep = "\t", eol = "\r\n",
-      quote = FALSE, row.names = FALSE, col.names = FALSE)
-    write.table(
+    utils::write.table(
+      sw.comments,
+      file = sw.filename,
+      sep = "\t",
+      eol = "\r\n",
+      quote = FALSE,
+      row.names = FALSE,
+      col.names = FALSE
+    )
+
+    utils::write.table(
       data.frame(data.sw[, 1],
         formatC(data.sw[, 2], digits = 2, format = "f"),
         formatC(data.sw[, 3], digits = 2, format = "f"),
-        formatC(data.sw[, 4], digits = 2, format = "f")),
-      file = sw.filename, append = TRUE, sep = "\t", eol = "\r\n",
-      quote = FALSE, row.names = FALSE, col.names = FALSE)
+        formatC(data.sw[, 4], digits = 2, format = "f")
+      ),
+      file = sw.filename,
+      append = TRUE,
+      sep = "\t",
+      eol = "\r\n",
+      quote = FALSE,
+      row.names = FALSE,
+      col.names = FALSE
+    )
   }
 
   invisible(years)

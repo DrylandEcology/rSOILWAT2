@@ -75,9 +75,9 @@ if (all(file.exists(fname_main, fname_dev))) {
     "Year", "Day", "PRECIP_ppt_Mean", "TEMP_max_C_Mean", "TEMP_min_C_Mean"
   )
   cols_rSOILWAT2 <- c("Year", "Day", "PPT_cm", "Tmax_C", "Tmin_C")
-  w0 <- read.csv(fname_main)[, cols_STEPWAT2]
+  w0 <- utils::read.csv(fname_main)[, cols_STEPWAT2]
   colnames(w0) <- cols_rSOILWAT2
-  w1 <- read.csv(fname_dev)[, cols_STEPWAT2]
+  w1 <- utils::read.csv(fname_dev)[, cols_STEPWAT2]
   colnames(w1) <- cols_rSOILWAT2
 
   # Note: Since values are averages across many iterations, most days

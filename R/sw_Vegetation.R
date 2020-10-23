@@ -128,7 +128,7 @@
 #'
 #' @examples
 #' ## Load weather dataset from rSOILWAT2
-#' data("weatherData", package = "rSOILWAT2")
+#' utils::data("weatherData", package = "rSOILWAT2")
 #' clim1 <- calc_SiteClimate(weatherList = weatherData)
 #' clim2 <- calc_SiteClimate(weatherList = weatherData, do_C4vars = TRUE)
 #'
@@ -216,9 +216,21 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
   input_cover <- rep(NA, Nveg)
 
   # Groups that are either fixed or 0, i.e., cannot be NA = not estimated
-  input_cover[igan] <- if (fix_annuals) finite01(Annuals_Fraction) else 0
-  input_cover[itre] <- if (fix_trees) finite01(Trees_Fraction) else 0
-  input_cover[ibar] <- if (fix_BareGround) finite01(BareGround_Fraction) else 0
+  input_cover[igan] <- if (fix_annuals) {
+    rSW2utils::finite01(Annuals_Fraction)
+  } else {
+    0
+  }
+  input_cover[itre] <- if (fix_trees) {
+    rSW2utils::finite01(Trees_Fraction)
+  } else {
+    0
+  }
+  input_cover[ibar] <- if (fix_BareGround) {
+    rSW2utils::finite01(BareGround_Fraction)
+  } else {
+    0
+  }
 
   # Groups that are either fixed or estimated based on climate-relationships
   input_cover[igc4] <- if (fix_C4grasses) C4_Fraction else NA
@@ -228,16 +240,16 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
   input_cover[isuc] <- if (fix_succulents) Succulents_Fraction else NA
 
   # treat negative input values as if NA
-  input_cover <- cut0Inf(input_cover, val = NA)
+  input_cover <- rSW2utils::cut0Inf(input_cover, val = NA)
 
 
   #--- Check individual components if the sum of grasses is fixed
   fix_sumgrasses <- fix_sumgrasses && isTRUE(!is.na(SumGrasses_Fraction))
 
   if (fix_sumgrasses) {
-    SumGrasses_Fraction <- cut0Inf(SumGrasses_Fraction, val = 0)
+    SumGrasses_Fraction <- rSW2utils::cut0Inf(SumGrasses_Fraction, val = 0)
 
-    input_sum_grasses <- replace_NAs_with_val(
+    input_sum_grasses <- rSW2utils::replace_NAs_with_val(
       x = sum(input_cover[igrasses], na.rm = TRUE),
       val_replace = 0
     )
@@ -385,7 +397,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
       } else {
         # if not enough winter precipitation for a given MAP, then equation
         # results in negative values which we set to 0
-        estim_cover[ishr] <- cut0Inf(
+        estim_cover[ishr] <- rSW2utils::cut0Inf(
           1.7105 - 0.2918 * log(MAP_mm) + 1.5451 * ppt.WinterToMAP,
           val = 0
         )
@@ -398,7 +410,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
         # if either MAT < 0 or not enough summer precipitation or
         # too cold for a given MAP, then equation results in negative values
         # which we set to 0
-        estim_cover[igc4] <- cut0Inf(
+        estim_cover[igc4] <- rSW2utils::cut0Inf(
           -0.9837 + 0.000594 * MAP_mm +
             1.3528 * ppt.SummerToMAP + 0.2710 * log(MAT_C),
           val = 0
@@ -431,11 +443,11 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
       } else {
         # if not enough winter precipitation or too warm for a
         # given MAP, then equation results in negative values which we set to 0
-        c3_in_grassland <- cut0Inf(
+        c3_in_grassland <- rSW2utils::cut0Inf(
           1.1905 - 0.02909 * MAT_C + 0.1781 * log(ppt.WinterToMAP) - 0.2383 * 1,
           val = 0
         )
-        c3_in_shrubland <- cut0Inf(
+        c3_in_shrubland <- rSW2utils::cut0Inf(
           1.1905 - 0.02909 * MAT_C + 0.1781 * log(ppt.WinterToMAP) - 0.2383 * 2,
           val = 0
         )
@@ -448,7 +460,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
       if (MAP_mm < 1 || MAT_C <= 0) {
         estim_cover[ifor] <- NA
       } else {
-        estim_cover[ifor] <- cut0Inf(
+        estim_cover[ifor] <- rSW2utils::cut0Inf(
           -0.2035 + 0.07975 * log(MAP_mm) - 0.0623 * log(MAT_C),
           val = 0
         )
@@ -458,7 +470,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
       if (therm_amp <= 0 || ppt.WinterToMAP <= 0) {
         estim_cover[isuc] <- NA
       } else {
-        estim_cover[isuc] <- cut0Inf(
+        estim_cover[isuc] <- rSW2utils::cut0Inf(
           -1 + 1.20246 * therm_amp ^ -0.0689 * ppt.WinterToMAP ^ -0.0322,
           val = 0
         )
@@ -468,7 +480,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
       ngood <- sum(!is.na(estim_cover[iestim]))
 
       # Any remaining NAs are set to 0
-      estim_cover[iestim] <- replace_NAs_with_val(
+      estim_cover[iestim] <- rSW2utils::replace_NAs_with_val(
         x = estim_cover[iestim],
         val_replace = 0
       )
