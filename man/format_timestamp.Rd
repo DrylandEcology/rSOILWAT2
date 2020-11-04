@@ -13,6 +13,11 @@ format_timestamp(object)
 \description{
 Format time stamp of an input or output object
 }
+\examples{
+format_timestamp(rSOILWAT2::sw_exampleData)
+format_timestamp(sw_exec(rSOILWAT2::sw_exampleData))
+
+}
 \seealso{
 \code{\link{get_timestamp}}
 }

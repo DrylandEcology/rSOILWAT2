@@ -242,9 +242,7 @@ setValidity(
 )
 
 
-# Methods for slot \code{version}
-#' @rdname swOutput-class
-#' @export
+#' @rdname get_version
 setMethod(
   f = "get_version",
   signature = "swOutput",
@@ -254,9 +252,7 @@ setMethod(
   }
 )
 
-# Methods for slot \code{get_timestamp}
-#' @rdname swOutput-class
-#' @export
+#' @rdname get_timestamp
 setMethod(
   f = "get_timestamp",
   signature = "swOutput",
