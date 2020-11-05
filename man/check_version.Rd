@@ -25,7 +25,7 @@ Check that version of an input or output object is up-to-date
 check_version(rSOILWAT2::sw_exampleData, level = "minor")
 
 # May fail due to a recent patch
-check_version(rSOILWAT2::sw_exampleData, level = "patch")
+try(check_version(rSOILWAT2::sw_exampleData, level = "patch"))
 
 }
 \seealso{

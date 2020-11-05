@@ -33,10 +33,29 @@ setGeneric("swReadLines", function(object, file) standardGeneric("swReadLines"))
 #' Create \pkg{rSOILWAT2} version representation
 rSW2_version <- function() as.character(getNamespaceVersion("rSOILWAT2"))
 
-#' \code{get_version}
+#' Retrieve version of \pkg{rSOILWAT2} that was used to create object
+#'
 #' @param object An object of class \code{\linkS4class{swInputData}} or
 #'   \code{\linkS4class{swOutput}}.
+#'
+#' @seealso \code{\link{check_version}}
+#'
+#' @examples
+#' get_version(rSOILWAT2::sw_exampleData)
+#' get_version(sw_exec(rSOILWAT2::sw_exampleData))
+#'
+#' @export
 setGeneric("get_version", function(object) standardGeneric("get_version"))
+
+#' @rdname get_version
+setMethod(
+  f = "get_version",
+  signature = "ANY",
+  definition = function(object) {
+    NA
+  }
+)
+
 
 #' Check that version of an input or output object is up-to-date
 #'
@@ -55,7 +74,7 @@ setGeneric("get_version", function(object) standardGeneric("get_version"))
 #' check_version(rSOILWAT2::sw_exampleData, level = "minor")
 #'
 #' # May fail due to a recent patch
-#' check_version(rSOILWAT2::sw_exampleData, level = "patch")
+#' try(check_version(rSOILWAT2::sw_exampleData, level = "patch"))
 #'
 #' @export
 check_version <- function(object, level = c("minor", "major", "patch")) {
@@ -90,15 +109,40 @@ check_version <- function(object, level = c("minor", "major", "patch")) {
 #' Create \pkg{rSOILWAT2} time stamp
 rSW2_timestamp <- function() unclass(Sys.time())
 
-#' \code{get_timestamp}
+#' Retrieve time stamp of an object
+#'
 #' @param object An object of class \code{\linkS4class{swInputData}} or
 #'   \code{\linkS4class{swOutput}}.
+#'
+#' @seealso \code{\link{format_timestamp}}
+#'
+#' @examples
+#' get_timestamp(rSOILWAT2::sw_exampleData)
+#' get_timestamp(sw_exec(rSOILWAT2::sw_exampleData))
+#'
+#' @export
 setGeneric("get_timestamp", function(object) standardGeneric("get_timestamp"))
 
+#' @rdname get_timestamp
+setMethod(
+  f = "get_timestamp",
+  signature = "ANY",
+  definition = function(object) {
+    NA
+  }
+)
+
 #' Format time stamp of an input or output object
+#'
 #' @param object An object of class \code{\linkS4class{swInputData}} or
 #'   \code{\linkS4class{swOutput}}.
+#'
 #' @seealso \code{\link{get_timestamp}}
+#'
+#' @examples
+#' format_timestamp(rSOILWAT2::sw_exampleData)
+#' format_timestamp(sw_exec(rSOILWAT2::sw_exampleData))
+#'
 #' @export
 format_timestamp <- function(object) {
   as.POSIXct(get_timestamp(object), origin = "1970-01-01 00:00.00 UTC")
