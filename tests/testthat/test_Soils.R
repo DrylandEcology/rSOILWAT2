@@ -16,5 +16,6 @@ test_that("Manipulate soils", {
     silent = TRUE
   )
 
+  # Check that run did not fail due to SWP to infinity error in SOILWAT2
   expect_s4_class(sw_out, "swOutput")
 })
