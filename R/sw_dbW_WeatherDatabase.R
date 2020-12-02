@@ -1529,6 +1529,31 @@ dbW_convert_to_GregorianYears <- function(weatherData,
 }
 
 
+
+#' Check that weather data is well-formed
+#'
+#' Check that weather data is organized in a list
+#' where each element is of class "swWeatherData", and
+#' represents daily data for one Gregorian year
+#'
+#' @param x An object.
+#'
+#' @return A logical value.
+#'
+#' @export
+dbW_check_weatherData <- function(x) {
+  length(x) > 0 &&
+  inherits(x, "list") &&
+  all(sapply(x, inherits, what = "swWeatherData")) &&
+  isTRUE(all.equal(
+    unname(sapply(x, function(xyr) nrow(slot(xyr, "data")))),
+    365 + as.integer(rSW2utils::isLeapYear(
+      sapply(x, slot, name = "year")
+    ))
+  ))
+}
+
+
 # nolint start
 ## ------ Scanning of SOILWAT input text files
 readCharacter <- function(text, showWarnings = FALSE) {
