@@ -1386,11 +1386,15 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #' Adjust mean monthly biomass values of grass and shrub functional groups by
 #' climate relationships
 #'
+#' @inheritParams adj_phenology_by_temp
+#' @param MAP_mm A numeric value. Mean annual precipitation in millimeter of the
+#'   location.
 #' @param tr_VegBiom A data.frame with 12 rows (one for each month) and columns
 #'   \code{X.Biomass}, \code{X.Amount.Live}, \code{X.Perc.Live}, and
 #'   \code{X.Litter} where \code{X} are for the functional groups shrubs,
 #'   \code{X = Sh}; C3-grasses, \code{X = C3}; C4-grasses, \code{X = C4}; and
 #'   annuals, \code{X = Annual} containing default input values.
+#'   If missing, then read values from Bradford et al. 2014.
 #' @param do_adjust_phenology A logical value. If \code{TRUE} then monthly
 #'   phenology is adjusted by temperature.
 #' @param do_adjust_biomass A logical value. If \code{TRUE} then monthly biomass
@@ -1398,9 +1402,6 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #' @param fgrass_c3c4ann A numeric vector of length 3. Relative contribution
 #'   [0-1] of the C3-grasses, C4-grasses, and annuals functional groups. The sum
 #'   of \code{fgrass_c3c4ann} is 1.
-#' @param MAP_mm A numeric value. Mean annual precipitation in millimeter of the
-#'   location.
-#' @inheritParams adj_phenology_by_temp
 #'
 #' @section Default inputs: \itemize{
 #'   \item Shrubs are based on location \var{\sQuote{IM_USC00107648_Reynolds}}
@@ -1410,7 +1411,11 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #'   \item Grasses are based on location \var{\sQuote{GP_SGSLTER}}
 #'     (shortgrass steppe) which resulted in 12 \% shrubs, 22 \% C3-grasses,
 #'     and 66 \% C4-grasses. Default biomass values were estimated for
-#'     MAP = 340 mm yr-1. }
+#'     MAP = 340 mm yr-1.
+#'  \item Mean monthly reference temperature are the median values across
+#'    898 big sagebrush sites
+#'    (see https://github.com/DrylandEcology/rSFSTEP2/issues/195)
+#' }
 #'
 #' @return A list with two elements \code{grass}, \code{shrub}. Each element is
 #'   a matrix with 12 rows (one for each month) and columns \code{Biomass},
@@ -1426,15 +1431,63 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #'   variable impacts on dryland ecosystem water balance. J Ecol, 102,
 #'   1408-1418.
 #'
+#' @examples
+#' clim <- calc_SiteClimate(weatherList = rSOILWAT2::weatherData)
+#'
+#' veg_cover <- rSOILWAT2::estimate_PotNatVeg_composition(
+#'   MAP_mm = 10 * clim[["MAP_cm"]],
+#'   MAT_C = clim[["MAT_C"]],
+#'   mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
+#'   mean_monthly_Temp_C = clim[["meanMonthlyTempC"]],
+#'   dailyC4vars = clim[["dailyC4vars"]]
+#' )
+#'
+#' rSOILWAT2::estimate_PotNatVeg_biomass(
+#'   target_temp = clim[["meanMonthlyTempC"]],
+#'   target_MAP_mm = 10 * clim[["MAP_cm"]],
+#'   do_adjust_phenology = TRUE,
+#'   do_adjust_biomass = TRUE,
+#'   fgrass_c3c4ann = veg_cover[["Grasses"]]
+#' )
+#'
 #' @export
-estimate_PotNatVeg_biomass <- function(tr_VegBiom,
+estimate_PotNatVeg_biomass <- function(
+  target_temp,
+  target_MAP_mm,
+  ref_temp,
+  tr_VegBiom,
   do_adjust_phenology = FALSE,
   do_adjust_biomass = FALSE,
-  fgrass_c3c4ann = c(1, 0, 0),
-  MAP_mm = 450,
-  ref_temp,
-  target_temp
+  fgrass_c3c4ann = c(1, 0, 0)
 ) {
+
+  if (missing(ref_temp) || is.null(ref_temp)) {
+    # Mean monthly reference temperature
+    # corresponding to default phenology values:
+    # median values across 898 big sagebrush sites
+    # (see https://github.com/DrylandEcology/rSFSTEP2/issues/195)
+    ref_temp <- c(
+      -4.6768, -2.7282, 1.8257, 6.0538, 10.696, 15.3878,
+      19.7777, 18.8755, 13.7868, 7.2843, 0.4167, -4.6912
+    )
+  }
+
+  if (missing(target_MAP_mm) || is.null(target_MAP_mm)) {
+    target_MAP_mm <- 450
+  }
+
+  if (missing(tr_VegBiom) || is.null(tr_VegBiom)) {
+    tr_VegBiom <- utils::read.csv(
+      file = system.file(
+        "vegdata", "Vegetation_MeanMonthly_v5.csv",
+        package = "rSOILWAT2",
+        mustWork = TRUE
+      ),
+      skip = 1,
+      row.names = 1,
+      stringsAsFactors = FALSE
+    )
+  }
 
   ns_VegBiom <- names(tr_VegBiom)
   tmp <- strsplit(ns_VegBiom, split = ".", fixed = TRUE)
@@ -1539,9 +1592,17 @@ estimate_PotNatVeg_biomass <- function(tr_VegBiom,
     biom_C4 = x[["biom_C4"]],
     biom_annuals = x[["biom_Annual"]],
     biom_maxs = colmax,
-    map_mm_shrubs = if (do_adjust_biomass) MAP_mm else StandardShrub_MAP_mm,
+    map_mm_shrubs = if (do_adjust_biomass) {
+      target_MAP_mm
+    } else {
+      StandardShrub_MAP_mm
+    },
     map_mm_std_shrubs = StandardShrub_MAP_mm,
-    map_mm_grasses = if (do_adjust_biomass) MAP_mm else StandardGrasses_MAP_mm,
+    map_mm_grasses = if (do_adjust_biomass) {
+      target_MAP_mm
+    } else {
+      StandardGrasses_MAP_mm
+    },
     map_mm_std_grasses = StandardGrasses_MAP_mm,
     vegcomp_std_shrubs = StandardShrub_VegComposition,
     vegcomp_std_grass = StandardGrasses_VegComposition
