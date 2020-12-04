@@ -9,7 +9,7 @@ estimate_PotNatVeg_biomass(
   target_temp,
   target_MAP_mm,
   ref_temp,
-  tr_VegBiom,
+  tr_VegBiom = rSOILWAT2::sw2_tr_VegBiom,
   do_adjust_phenology = FALSE,
   do_adjust_biomass = FALSE,
   fgrass_c3c4ann = c(1, 0, 0)
@@ -29,7 +29,8 @@ determined / is valid.}
 \code{X.Litter} where \code{X} are for the functional groups shrubs,
 \code{X = Sh}; C3-grasses, \code{X = C3}; C4-grasses, \code{X = C4}; and
 annuals, \code{X = Annual} containing default input values.
-If missing, then read values from Bradford et al. 2014.}
+Function default values are from Bradford et al. 2014, see
+\code{\link{sw2_tr_VegBiom}}.}
 
 \item{do_adjust_phenology}{A logical value. If \code{TRUE} then monthly
 phenology is adjusted by temperature.}

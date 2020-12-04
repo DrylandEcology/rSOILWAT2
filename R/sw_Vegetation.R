@@ -1394,7 +1394,8 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #'   \code{X.Litter} where \code{X} are for the functional groups shrubs,
 #'   \code{X = Sh}; C3-grasses, \code{X = C3}; C4-grasses, \code{X = C4}; and
 #'   annuals, \code{X = Annual} containing default input values.
-#'   If missing, then read values from Bradford et al. 2014.
+#'   Function default values are from Bradford et al. 2014, see
+#'   \code{\link{sw2_tr_VegBiom}}.
 #' @param do_adjust_phenology A logical value. If \code{TRUE} then monthly
 #'   phenology is adjusted by temperature.
 #' @param do_adjust_biomass A logical value. If \code{TRUE} then monthly biomass
@@ -1455,7 +1456,7 @@ estimate_PotNatVeg_biomass <- function(
   target_temp,
   target_MAP_mm,
   ref_temp,
-  tr_VegBiom,
+  tr_VegBiom = rSOILWAT2::sw2_tr_VegBiom,
   do_adjust_phenology = FALSE,
   do_adjust_biomass = FALSE,
   fgrass_c3c4ann = c(1, 0, 0)
@@ -1476,18 +1477,6 @@ estimate_PotNatVeg_biomass <- function(
     target_MAP_mm <- 450
   }
 
-  if (missing(tr_VegBiom) || is.null(tr_VegBiom)) {
-    tr_VegBiom <- utils::read.csv(
-      file = system.file(
-        "vegdata", "Vegetation_MeanMonthly_v5.csv",
-        package = "rSOILWAT2",
-        mustWork = TRUE
-      ),
-      skip = 1,
-      row.names = 1,
-      stringsAsFactors = FALSE
-    )
-  }
 
   ns_VegBiom <- names(tr_VegBiom)
   tmp <- strsplit(ns_VegBiom, split = ".", fixed = TRUE)

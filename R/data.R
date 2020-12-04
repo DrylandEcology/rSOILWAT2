@@ -33,3 +33,20 @@
 #' x <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 #' identical(x, sw_exampleData) ## TRUE
 "sw_exampleData"
+
+
+#' Default vegetation biomass table
+#'
+#' @format A data.frame with 12 rows (one for each month) and columns
+#'   \code{X.Biomass}, \code{X.Amount.Live}, \code{X.Perc.Live}, and
+#'   \code{X.Litter} where \code{X} are for the functional groups shrubs,
+#'   \code{X = Sh}; C3-grasses, \code{X = C3}; C4-grasses, \code{X = C4}; and
+#'   annuals, \code{X = Annual} containing default biomass values [g / m2]
+#'   from Bradford et al. 2014.
+#'
+#' @references Bradford, J.B., Schlaepfer, D.R., Lauenroth, W.K. & Burke, I.C.
+#'   (2014). Shifts in plant functional types have time-dependent and regionally
+#'   variable impacts on dryland ecosystem water balance. J Ecol, 102,
+#'   1408-1418.
+#'
+"sw2_tr_VegBiom"
