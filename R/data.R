@@ -50,3 +50,26 @@
 #'   1408-1418.
 #'
 "sw2_tr_VegBiom"
+
+
+
+#' \var{Lookup} table of rooting profiles
+#'
+#' @format A named list with two elements:
+#' \describe{
+#'   \item{desc}{
+#'     A \code{data.frame} with one row. Column names are used to
+#'     look-up rooting profiles and are identical to those of \code{data}. The
+#'     only row are character strings with either
+#'     \var{\dQuote{Layer}} or \var{\dQuote{DepthCM}} as value.
+#'     \var{\dQuote{Layer}} identifies that the corresponding values in
+#'     \code{data} are organized by soil layers whereas
+#'     \var{\dQuote{DepthCM}} identifies that the \code{data} values
+#'     represent amount of roots per centimeter soil depth.
+#'   }
+#'   \item{data}{
+#'     A code{data.frame} with the rooting profile values.
+#'   }
+#' }
+#'
+"sw2_trco_table"

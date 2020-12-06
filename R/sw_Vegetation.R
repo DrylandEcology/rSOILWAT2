@@ -1692,6 +1692,193 @@ TranspCoeffByVegType <- function(tr_input_code, tr_input_coeff,
   trco
 }
 
+
+
+#' Calculate rooting profile for a soil profile from \var{lookup} tables
+#'
+#' @param layers_depth A numeric vector. Values describe
+#'   the lower soil layer depths [cm].
+#' @param trco_type_by_veg A named list of character strings.
+#'   The rooting profiles, i.e., column names in the \var{lookup} table,
+#'   for each vegetation type. A \code{NA} indicates that a rooting profile
+#'   is not calculated for that vegetation type.
+#'   The values will be passed to argument \var{trco_type} of function
+#'   \code{\link{TranspCoeffByVegType}}.
+#' @param trco_adj_by_veg A named list of character strings.
+#'   The type of adjustment from the full rooting profile
+#'   to the \code{layers_depth}.
+#'   The values will be passed to argument \var{adjustType} of function
+#'   \code{\link{TranspCoeffByVegType}}.
+#' @param fgrass_c3c4ann A named, numeric vector of length 3.
+#'   Relative contribution [0-1] of the C3-grasses, C4-grasses, and
+#'   annuals functional groups. The sum of \code{fgrass_c3c4ann} is 1.
+#' @param trco_table A named list with two elements. Default values
+#'   are taken from \code{\link{sw2_trco_table}}.
+#'
+#' @seealso \code{\link{TranspCoeffByVegType}}
+#'
+#' @examples
+#' sw_in <- rSOILWAT2::sw_exampleData
+#'
+#' clim <- calc_SiteClimate(weatherList = rSOILWAT2::weatherData)
+#'
+#' veg_cover <- rSOILWAT2::estimate_PotNatVeg_composition(
+#'   MAP_mm = 10 * clim[["MAP_cm"]],
+#'   MAT_C = clim[["MAT_C"]],
+#'   mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
+#'   mean_monthly_Temp_C = clim[["meanMonthlyTempC"]],
+#'   dailyC4vars = clim[["dailyC4vars"]]
+#' )
+#'
+#' estimate_PotNatVeg_roots(
+#'   layers_depth = c(5, 10, 20, 30, 40, 50, 100, 200),
+#'   fgrass_c3c4ann = veg_cover[["Grasses"]]
+#' )
+#'
+#' @export
+estimate_PotNatVeg_roots <- function(
+  layers_depth,
+  trco_type_by_veg = list(
+    grass_C3 = "SchenkJackson2003_PCdry_grasses",
+    grass_C4 = "SchenkJackson2003_PCdry_grasses",
+    grass_annuals = "Jacksonetal1996_crops",
+    shrub = "SchenkJackson2003_PCdry_shrubs",
+    forb = "SchenkJackson2003_PCdry_forbs",
+    tree = "Bradfordetal2014_LodgepolePine"
+  ),
+  trco_adj_by_veg = list(
+    grass_C3 = "positive",
+    grass_C4 = "positive",
+    grass_annuals = "positive",
+    shrub = "positive",
+    forb = "positive",
+    tree = "positive"
+  ),
+  fgrass_c3c4ann = c(grass_C3 = NA, grass_C4 = NA, grass_annuals = NA),
+  trco_table = rSOILWAT2::sw2_trco_table
+) {
+  n_slyrs <- length(layers_depth)
+  veg_types <- c("Grass", "Shrub", "Tree", "Forb")
+
+  res_trco <- array(
+    data = NA,
+    dim = c(n_slyrs, length(veg_types)),
+    dimnames = list(NULL, veg_types)
+  )
+
+  for (k1 in seq_along(veg_types)) {
+    tmp_type <- sort(grep(
+      veg_types[k1],
+      names(trco_type_by_veg),
+      ignore.case = TRUE,
+      value = TRUE
+    ))
+
+    tmp_adj <- sort(grep(
+      veg_types[k1],
+      names(trco_adj_by_veg),
+      ignore.case = TRUE,
+      value = TRUE
+    ))
+
+    if (!all(tmp_type == tmp_adj)) {
+      stop(
+        "Names of `trco_type_by_veg` do not match ",
+        "`trco_adj_by_veg` for ", shQuote(veg_types[k1])
+      )
+    }
+
+    if (
+      isTRUE(!anyNA(unlist(trco_type_by_veg[tmp_type]))) &&
+      isTRUE(!anyNA(unlist(trco_adj_by_veg[tmp_adj])))
+    ) {
+      if (length(tmp_type) > 1 && veg_types[k1] == "Grass") {
+
+        tmp1 <- sapply(
+          strsplit(names(fgrass_c3c4ann), split = "_", fixed = TRUE),
+          FUN = function(x) x[[2]]
+        )
+        tmp2 <- sapply(
+          strsplit(tmp_type, split = "_", fixed = TRUE),
+          FUN = function(x) x[[2]]
+        )
+        tmp_igfcov <- match(tolower(tmp2), tolower(tmp1), nomatch = NA)
+
+        if (anyNA(tmp_igfcov)) {
+          stop(
+            "Names of `fgrass_c3c4ann` do not match ",
+            "`trco_adj_by_veg` for ", shQuote(veg_types[k1])
+          )
+        }
+
+        tmp_root <- rep(0, n_slyrs)
+        for (k2 in seq_along(tmp_type)) {
+          if (isTRUE(fgrass_c3c4ann[tmp_igfcov[k2]] > 0)) {
+            tmp <- TranspCoeffByVegType(
+              tr_input_code = trco_table[["desc"]],
+              tr_input_coeff = trco_table[["data"]],
+              soillayer_no = n_slyrs,
+              trco_type = trco_type_by_veg[[tmp_type[k2]]],
+              layers_depth = layers_depth,
+              adjustType = trco_adj_by_veg[[tmp_adj[k2]]]
+            )
+
+            tmp_root <- tmp_root + fgrass_c3c4ann[tmp_igfcov[k2]] * tmp
+          }
+        }
+
+
+      } else if (length(tmp_type) == 1) {
+        tmp_root <- TranspCoeffByVegType(
+          tr_input_code = trco_table[["desc"]],
+          tr_input_coeff = trco_table[["data"]],
+          soillayer_no = n_slyrs,
+          trco_type = trco_type_by_veg[[tmp_type]],
+          layers_depth = layers_depth,
+          adjustType = trco_adj_by_veg[[tmp_adj]]
+        )
+
+      } else {
+        stop(
+          "Root information for ",
+          shQuote(veg_types[k1]),
+          " incomplete."
+        )
+      }
+
+      # Check values
+      is_good <-
+        !anyNA(tmp_root) &&
+        all(tmp_root >= 0) &&
+        sum(tmp_root) - 1 <= sqrt(.Machine$double.eps)
+
+      if (!is_good) {
+        warning(
+          "Root information for ",
+          shQuote(veg_types[k1]),
+          " is problematic: ",
+          paste0(round(tmp_root, 4), collapse = " / "),
+          "; it was re-set to 0s."
+        )
+
+        tmp_root <- rep(0, n_slyrs)
+      }
+
+      res_trco[, veg_types[k1]] <- tmp_root
+
+    } else {
+      warning(
+        "No rooting profile selected for ",
+        shQuote(veg_types[k1]), "."
+      )
+    }
+  }
+
+  res_trco
+}
+
+
+
 #' Replace selected biomass values of a
 #' \link[rSOILWAT2:swProd-class]{rSOILWAT2::swProd} object
 #'
