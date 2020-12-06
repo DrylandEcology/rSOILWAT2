@@ -1415,7 +1415,7 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #'     MAP = 340 mm yr-1.
 #'  \item Mean monthly reference temperature are the median values across
 #'    898 big sagebrush sites
-#'    (see https://github.com/DrylandEcology/rSFSTEP2/issues/195)
+#'    (see \url{https://github.com/DrylandEcology/rSFSTEP2/issues/195})
 #' }
 #'
 #' @return A list with two elements \code{grass}, \code{shrub}. Each element is

@@ -73,3 +73,22 @@
 #' }
 #'
 "sw2_trco_table"
+
+
+#' \var{Lookup} table of yearly atmospheric CO2 concentrations
+#'
+#' @format A \code{data.frame}.
+#'   The first column contains calendar years.
+#'   The remaining columns are scenarios and contain
+#'   global average, annual atmospheric CO2 concentrations in [ppm].
+#'   Currently implemented values are from
+#'   Meinshausen et al. 2011 for \var{CMIP5} scenarios.
+#'
+#' @references Meinshausen, M., S. J. Smith, K. V. Calvin, J. S. Daniel,
+#'   M. L. T. Kainuma, J.-F. Lamarque, K. Matsumoto, S. A. Montzka,
+#'   S. C. B. Raper, K. Riahi, A. M. Thomson, G. J. M. Velders and
+#'   D. van Vuuren (2011). The RCP Greenhouse Gas Concentrations and their
+#'   extension from 1765 to 2300.
+#'   Climatic Change (Special Issue), \url{DOI: 10.1007/s10584-011-0156-z}
+#'
+"sw2_tr_CO2a"

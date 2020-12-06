@@ -66,7 +66,7 @@ climate relationships
     MAP = 340 mm yr-1.
  \item Mean monthly reference temperature are the median values across
    898 big sagebrush sites
-   (see https://github.com/DrylandEcology/rSFSTEP2/issues/195)
+   (see \url{https://github.com/DrylandEcology/rSFSTEP2/issues/195})
 }
 }
 

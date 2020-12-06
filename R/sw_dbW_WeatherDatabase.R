@@ -1533,7 +1533,7 @@ dbW_convert_to_GregorianYears <- function(weatherData,
 #' Check that weather data is well-formed
 #'
 #' Check that weather data is organized in a list
-#' where each element is of class "swWeatherData", and
+#' where each element is of class \code{\linkS4class{swWeatherData}}, and
 #' represents daily data for one Gregorian year
 #'
 #' @param x An object.

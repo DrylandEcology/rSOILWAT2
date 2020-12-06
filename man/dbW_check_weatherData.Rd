@@ -14,6 +14,6 @@ A logical value.
 }
 \description{
 Check that weather data is organized in a list
-where each element is of class "swWeatherData", and
+where each element is of class \code{\linkS4class{swWeatherData}}, and
 represents daily data for one Gregorian year
 }
