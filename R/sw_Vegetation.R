@@ -1906,3 +1906,136 @@ update_biomass <- function(fg = c("Grass", "Shrub", "Tree", "Forb"), use,
 
   temp
 }
+
+
+# Determine minimal number of rooted soil layers with veg > 0
+get_min_rooted_soil_layers <- function(swInputData) {
+  veg_comp <- swProd_Composition(swInputData)
+  soils <- swSoils_Layers(swInputData)
+  var_veg1 <- c("Grass", "Shrub", "Tree", "Forb")
+  var_trco <- paste0("transp", var_veg1, "_frac")
+  var_comp <- sapply(
+    var_veg1,
+    function(x) grep(x, names(veg_comp), value = TRUE)
+  )
+
+  tmp <- apply(
+    soils[, var_trco, drop = FALSE],
+    MARGIN = 2,
+    FUN = function(x) sum(x > 0)
+  )
+
+  min(tmp[veg_comp[var_comp] > 0])
+}
+
+
+#' Check transpiration regions
+#'
+#' The transpiration regions are checked:
+#' \enumerate{
+#'  \item There is least one transpiration region
+#'  \item All transpiration regions include at least one soil layer
+#'  \item Transpiration regions are strictly increasing
+#'  \item Transpiration regions go no deeper than the most shallow
+#'       rooting profile of any active vegetation type
+#' }
+#'
+#' @param swInputData A \pkg{rSOILWAT2} input object of class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#' @return A logical value.
+#'
+#' @examples
+#' sw_in <- rSOILWAT2::sw_exampleData
+#' check_TranspirationRegions(sw_in) ## Expected: TRUE
+#'
+#' # Make a mistake: set a transpiration region deeper than the rooting profile
+#' swSite_TranspirationRegions(sw_in)[2, 2] <- 10
+#' check_TranspirationRegions(sw_in) ## Expected: FALSE
+#'
+#' @export
+check_TranspirationRegions <- function(swInputData) {
+  tr <- swSite_TranspirationRegions(swInputData)
+
+  # Checks
+  nrow(tr) > 0 &&
+  tr[1, 2] >= 1 &&
+  tr[nrow(tr), 2] <= get_min_rooted_soil_layers(swInputData) &&
+  !anyNA(
+    rSW2utils::check_monotonic_increase(
+      x = tr,
+      MARGIN = 2,
+      strictly = TRUE
+    )
+  )
+}
+
+
+
+#' Adjust transpiration regions for roots and soil layers
+#'
+#' @param swInputData A \pkg{rSOILWAT2} input object of class
+#'   \code{\linkS4class{swInputData}}.
+#'
+#' @return A transpiration region matrix.
+#'
+#' @examples
+#' sw_in <- rSOILWAT2::sw_exampleData
+#'
+#' adjust_TranspirationRegions(sw_in)
+#'
+#' @export
+adjust_TranspirationRegions <- function(swInputData) {
+  tr <- swSite_TranspirationRegions(swInputData)
+
+  n_tr <- min(4, nrow(tr))
+  tri_file <- cbind(Used_TF = 1, DeepestLayer = tr[, 2])
+
+  # adjust maximum transpiration region for minimum soil depth and rooting depth
+  n_max <- min(
+    nrow(swSoils_Layers(swInputData)),
+    get_min_rooted_soil_layers(swInputData)
+  )
+
+  if (max(tri_file[tri_file[, 1] > 0, 2], na.rm = TRUE) > n_max) {
+    for (k in rev(seq_len(n_tr))) {
+      if (tri_file[k, 1] > 0) {
+        if (tri_file[k, 2] > n_max) {
+          tri_file[k, 2] <- tr[k, 2] <- n_max
+        }
+
+        if (k > 1 && tri_file[k, 2] <= tri_file[k - 1, 2]) {
+          tr <- matrix(tr[-k, ], ncol = 2)
+        }
+      }
+    }
+  }
+
+  tr
+}
+
+
+
+#' Prepare transpiration regions
+#'
+#' Translate a soil vector of transpiration region values into a
+#' transpiration region matrix.
+#'
+#' @param tr_lyrs An integer vector.
+#'   The transpiration region for each soil layer.
+#'
+#' @return A transpiration region matrix.
+#'
+#' @seealso
+#'   \code{\link{adjust_TranspirationRegions}} and
+#'   \code{\link{check_TranspirationRegions}}
+#'
+#' @examples
+#' # Example values correspond to `CONUSSOIL_BSE_EVERY10cm` of \pkg{rSFSW2}:
+#' prepare_TranspirationRegions(tr_lyrs = c(1, 1, 1, 2, 2, 2, 2, 3, 3, 3))
+#'
+#' @export
+prepare_TranspirationRegions <- function(tr_lyrs) {
+  tmp <- cumsum(rle(tr_lyrs)[["lengths"]])
+  cbind(ndx = seq_along(tmp), layer = tmp)
+}
