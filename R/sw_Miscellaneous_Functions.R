@@ -266,3 +266,54 @@ calc_SiteClimate <- function(weatherList, year.start = NA, year.end = NA,
     } else NA
   )
 }
+
+
+#' \var{Look-up} yearly atmospheric CO2 concentration values
+#'
+#' @param start An integer value. First year for which to \var{look-up} values.
+#' @param end An integer value. Last year for which to \var{look-up} values.
+#' @param name_co2 A character string. The name of the CO2 series, i.e.,
+#'   a column name of \code{tr_CO2a}.
+#' @param tr_CO2a A numeric \code{data.frame} with the CO2 values [ppm].
+#'   Default values are taken from \code{\link{sw2_tr_CO2a}}.
+#'
+#' @seealso \code{\link{sw2_tr_CO2a}}
+#'
+#' @examples
+#' lookup_annual_CO2a(start = 1765, end = 2300, name_co2 = "RCP45")
+#' lookup_annual_CO2a(start = 1980, end = 2005, name_co2 = "historical")
+#'
+#' \dontrun{
+#' ## This fails because CMIP5-historical has no values after 2005
+#' lookup_annual_CO2a(start = 1980, end = 2020, name_co2 = "historical")
+#' }
+#'
+#' @export
+lookup_annual_CO2a <- function(start, end, name_co2,
+  tr_CO2a = rSOILWAT2::sw2_tr_CO2a
+) {
+  # Locate scenario
+  scenario_index <- which(
+    toupper(colnames(tr_CO2a)) == toupper(name_co2)
+  )
+
+  # Locate years
+  ids_years <- match(start:end, tr_CO2a[, "Year"], nomatch = 0)
+
+  # Do we have data?
+  if (length(scenario_index) && length(ids_years) > 0 && all(ids_years > 0)) {
+    scenarioCO2_ppm <- cbind(
+      Year = tr_CO2a[ids_years, "Year"],
+      CO2ppm = as.numeric(tr_CO2a[ids_years, scenario_index])
+    )
+
+    if (anyNA(scenarioCO2_ppm)) {
+      stop("Missing CO2 values for scenario ", shQuote(name_co2))
+    }
+
+  } else {
+    stop("Lookup of CO2 failed.")
+  }
+
+  scenarioCO2_ppm
+}
