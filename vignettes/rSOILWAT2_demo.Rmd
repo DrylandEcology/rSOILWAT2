@@ -272,6 +272,17 @@ You may organize weather data in a variety of ways:
 ```
 
 
+### Specify first year of observed weather data
+```{r, wyr}
+  # `FirstYearHistorical` can be set to a negative value (the default),
+  # then the code will use the first simulation year.
+  # That is, the two lines below will produce identical simulations:
+  rSOILWAT2::swWeather_FirstYearHistorical(sw_in) <-
+    rSOILWAT2::swYears_StartYear(sw_in)
+  rSOILWAT2::swWeather_FirstYearHistorical(sw_in) <- -1
+```
+
+
 ### Calculate site climate from daily values
 ```{r, siteclim}
   clim <- rSOILWAT2::calc_SiteClimate(weatherList = wdata, do_C4vars = TRUE)
@@ -335,7 +346,7 @@ You may organize weather data in a variety of ways:
 ```
 
 
-### Soils data from external datasets: for example, NRCS SSURGO/STATSGO via SDA
+### Soils data from external datasets: e.g., `NRCS SSURGO/STATSGO via SDA`
 ```{r, soils_sda, results = "hide", message = FALSE, warning = FALSE}
   if (requireNamespace("rSW2exter") && curl::has_internet()) {
     tmp <- rSOILWAT2::swSite_IntrinsicSiteParams(sw_in)
@@ -351,15 +362,15 @@ You may organize weather data in a variety of ways:
       progress_bar = FALSE,
       verbose = FALSE
     )
-    
-    
+
+
     # Add homogenized soil layers
     tmp <- grep("depth_L", colnames(soils_sda[["table_depths"]]))
     soils_sda2 <- rSW2data::update_soil_profile(
       soil_layers = soils_sda[["table_depths"]][1, tmp, drop = FALSE],
       requested_soil_layers = c(
-        5, 
-        seq(10, 100, by = 10), 
+        5,
+        seq(10, 100, by = 10),
         seq(120, 200, by = 20)
       ),
       soil_data = soils_sda[["table_texture"]],
@@ -547,7 +558,7 @@ You may organize weather data in a variety of ways:
 ## Transpiration regions
 ```{r, transp_regions}
   # Prepare transpiration regions based on soil layers
-  # Adjust to your specific soil depths, 
+  # Adjust to your specific soil depths,
   # e.g., if extracted from NRCS SDA without updating soil layers
   tr_example <- c(1, 1, 2, 3, 3)
 
