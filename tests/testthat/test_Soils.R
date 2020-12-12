@@ -6,7 +6,9 @@ test_that("Manipulate soils", {
 
   #--- Check that high volume of gravel/coarse fragments
   # does not error out with
-  #`invalid value of (theta / theta(saturated)) ^ b = 0.000000 (must be != 0)`
+  #`invalid value of (theta / theta(saturated)) ^ b = 0.000000 (must be != 0)` # nolint
+  # See https://github.com/DrylandEcology/SOILWAT2/issues/282
+  # and https://github.com/DrylandEcology/rSOILWAT2/issues/170
   soil_data <- rSOILWAT2::swSoils_Layers(sw_input)
   soil_data[, "gravel_content"] <- 0.99
   rSOILWAT2::swSoils_Layers(sw_input) <- soil_data
