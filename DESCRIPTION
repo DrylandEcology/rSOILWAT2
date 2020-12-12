@@ -22,11 +22,13 @@ Imports:
 Suggests:
   bookdown,
   covr,
+  curl,
   daymetr,
   digest (>= 0.6.12),
   knitr,
   lintr (>= 2.0.0),
   rmarkdown,
+  rSW2exter,
   spelling (>= 2.1.0),
   testthat
 Remotes:
