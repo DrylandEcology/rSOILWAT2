@@ -33,7 +33,8 @@ Suggests:
   testthat
 Remotes:
     github::DrylandEcology/rSW2utils,
-    github::DrylandEcology/rSW2data
+    github::DrylandEcology/rSW2data,
+    github::DrylandEcology/rSW2exter
 NeedsCompilation: yes
 License: GPL-3 + file LICENSE
 URL: https://github.com/DrylandEcology/rSOILWAT2
