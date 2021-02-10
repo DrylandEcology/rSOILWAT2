@@ -66,6 +66,8 @@ References for the original version of `Soilwat`
 
 
 <br>
+
+
 ### Installation
 
 `rSOILWAT2` will compile the c code of
@@ -113,7 +115,7 @@ Your computer must be set up adequately, i.e.,
 #### Install rSOILWAT2
   * Using the `remotes` R package
     ```{r}
-    remotes::install_github("DrylandEcology/rSFSW2", build_vignettes = TRUE)
+    remotes::install_github("DrylandEcology/rSOILWAT2", build_vignettes = TRUE)
     ```
 
   * On the command line
