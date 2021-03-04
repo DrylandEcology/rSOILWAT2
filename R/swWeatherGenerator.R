@@ -303,7 +303,7 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
       isanywet <- isTRUE(any(iswet, na.rm = na.rm))
       # previously isdry became all FALSE if na.rm = TRUE (because then iswet
       # was numeric  vector with all positive digits)
-      isdry <- !iswet 
+      isdry <- !iswet
       isanydry <- isTRUE(any(isdry, na.rm = na.rm))
 
       # if no wet/dry days in week of year, then use overall mean instead
