@@ -295,7 +295,8 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
       iswet <- if (na.rm) {
           which_wet <- which(x[, "WET"]) # numeric vector
           out <- rep(FALSE, length(x[, "WET"]))
-          out[which_wet] <- TRUE # only days where 'WET' is TRUE are considered wet
+          # only days where 'WET' is TRUE are considered wet
+          out[which_wet] <- TRUE
           out # logical vector same length as x[, "WET"]
         } else {
           x[, "WET"] # logical vector
