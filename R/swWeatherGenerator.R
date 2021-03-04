@@ -292,8 +292,18 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
     function(x) {
       # if `na.rm` is TRUE, then consider `WET` = NA as FALSE
       # if `na.rm` is FALSE, then propagate NAs in `WET` -> neither wet nor dry
-      iswet <- if (na.rm) which(x[, "WET"]) else x[, "WET"]
+      iswet <- if (na.rm) {
+          which_wet <- which(x[, "WET"]) # numeric vector
+          out <- rep(FALSE, length(x[, "WET"]))
+          # only days where 'WET' is TRUE are considered wet
+          out[which_wet] <- TRUE
+          out # logical vector same length as x[, "WET"]
+        } else {
+          x[, "WET"] # logical vector
+        }
       isanywet <- isTRUE(any(iswet, na.rm = na.rm))
+      # previously isdry became all FALSE if na.rm = TRUE (because then iswet
+      # was numeric  vector with all positive digits)
       isdry <- !iswet
       isanydry <- isTRUE(any(isdry, na.rm = na.rm))
 
