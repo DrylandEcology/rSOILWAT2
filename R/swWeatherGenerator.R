@@ -60,6 +60,12 @@
 #'   this value is considered \var{wet} instead of \var{dry}. Default is 0.
 #'   This values should be equal to the corresponding value used in
 #'   \var{SOILWAT2}'s function \code{SW_MKV_today}.
+#' @param type_cftemp A character string. Indicator for applying
+#'   temperature correction factors:
+#'   \var{all}, then correct min/max daily temperature on wet and dry days;
+#'   \var{dry}, then correct min/max daily temperature only on dry days;
+#'   \var{wet}, then correct min/max daily temperature only on wet days;
+#'   \var{none}, then do not correct min/max daily temperature for wet/dry days.
 #' @param propagate_NAs A logical value. If \code{TRUE}, then missing weather
 #'   values in the input \code{weatherData} are excluded; if \code{FALSE}, then
 #'   missing values are propagated to the estimation. See Details.
@@ -117,10 +123,15 @@
 #' swMarkov_Conv(sw_in) <- res2[["mkv_woy"]]
 #'
 #' @export
-dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
-  propagate_NAs = FALSE, valNA = NULL,
+dbW_estimate_WGen_coefs <- function(
+  weatherData,
+  WET_limit_cm = 0,
+  type_cftemp = c("all", "dry", "wet", "none"),
+  propagate_NAs = FALSE,
+  valNA = NULL,
   imputation_type = c("none", "mean", "locf"),
-  imputation_span = 5L) {
+  imputation_span = 5L
+) {
 
   # daily weather data
   if (inherits(weatherData, "list") &&
@@ -253,6 +264,8 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   #-----------------------------------------------------------------------------
   #------ mkv_covar.in
 
+  type_cftemp <- match.arg(type_cftemp)
+
   #--- week as interpreted by SOILWAT2 function `Doy2Week`
   wdata[["WEEK"]] <- 1 + floor((wdata[[icol_day]] - 1) / 7)
 
@@ -285,59 +298,82 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
 
 
   #--- Temperature correction factors (delta values)
-  # Used to correct random temperature values based on average conditions
-  # if that target day is wet or dry (e.g., overcast weather tends to
-  # increase minimum daily temperature and decrease maximum daily tempature)
-  temp <- by(wdata[, c("WET", "Tmax_C", "Tmin_C")], INDICES = wdata[, "WEEK"],
-    function(x) {
-      # if `na.rm` is TRUE, then consider `WET` = NA as FALSE
-      # if `na.rm` is FALSE, then propagate NAs in `WET` -> neither wet nor dry
-      iswet <- if (na.rm) {
-          which_wet <- which(x[, "WET"]) # numeric vector
-          out <- rep(FALSE, length(x[, "WET"]))
-          # only days where 'WET' is TRUE are considered wet
-          out[which_wet] <- TRUE
-          out # logical vector same length as x[, "WET"]
-        } else {
-          x[, "WET"] # logical vector
-        }
-      isanywet <- isTRUE(any(iswet, na.rm = na.rm))
-      # previously isdry became all FALSE if na.rm = TRUE (because then iswet
-      # was numeric  vector with all positive digits)
-      isdry <- !iswet
-      isanydry <- isTRUE(any(isdry, na.rm = na.rm))
+  if (type_cftemp != "none") {
+    # Used to correct random temperature values based on average conditions
+    # if that target day is wet or dry (e.g., overcast weather tends to
+    # increase minimum daily temperature and decrease maximum daily tempature)
+    temp <- by(
+      wdata[, c("WET", "Tmax_C", "Tmin_C")],
+      INDICES = wdata[, "WEEK"],
+      function(x) {
+        # if `na.rm` is TRUE, then consider `WET` = NA as FALSE
+        # if `na.rm` is FALSE, then propagate NAs in `WET`
+        #    --> neither wet nor dry
+        iswet <- if (na.rm) {
+            which_wet <- which(x[, "WET"]) # numeric vector
+            out <- rep(FALSE, length(x[, "WET"]))
+            # only days where 'WET' is TRUE are considered wet
+            out[which_wet] <- TRUE
+            out # logical vector same length as x[, "WET"]
+          } else {
+            x[, "WET"] # logical vector
+          }
+        isanywet <- isTRUE(any(iswet, na.rm = na.rm))
+        # previously isdry became all FALSE if na.rm = TRUE (because then iswet
+        # was numeric  vector with all positive digits)
+        isdry <- !iswet
+        isanydry <- isTRUE(any(isdry, na.rm = na.rm))
 
-      # if no wet/dry days in week of year, then use overall mean instead
-      # of conditional mean (i.e., given wet/dry)
-      c(Tmax_mean_wet = if (isanywet) {
+        # if no wet/dry days in week of year, then use overall mean instead
+        # of conditional mean (i.e., given wet/dry)
+        c(
+          Tmax_mean_wet = if (isanywet) {
             mean(x[iswet, "Tmax_C"], na.rm = na.rm)
           } else {
             mean(x[, "Tmax_C"], na.rm = na.rm)
           },
-        Tmax_mean_dry = if (isanydry) {
+          Tmax_mean_dry = if (isanydry) {
             mean(x[isdry, "Tmax_C"], na.rm = na.rm)
           } else {
             mean(x[, "Tmax_C"], na.rm = na.rm)
           },
-        Tmin_mean_wet = if (isanywet) {
+          Tmin_mean_wet = if (isanywet) {
             mean(x[iswet, "Tmin_C"], na.rm = na.rm)
           } else {
             mean(x[, "Tmin_C"], na.rm = na.rm)
           },
-        Tmin_mean_dry = if (isanydry) {
+          Tmin_mean_dry = if (isanydry) {
             mean(x[isdry, "Tmin_C"], na.rm = na.rm)
           } else {
             mean(x[, "Tmin_C"], na.rm = na.rm)
           }
-      )
-    }
-  )
-  temp <- do.call(rbind, temp)
+        )
+      }
+    )
+    temp <- do.call(rbind, temp)
 
-  mkv_cov[, "CF_Tmax_wet"] <- temp[, "Tmax_mean_wet"] - mkv_cov[, "wTmax_C"]
-  mkv_cov[, "CF_Tmax_dry"] <- temp[, "Tmax_mean_dry"] - mkv_cov[, "wTmax_C"]
-  mkv_cov[, "CF_Tmin_wet"] <- temp[, "Tmin_mean_wet"] - mkv_cov[, "wTmin_C"]
-  mkv_cov[, "CF_Tmin_dry"] <- temp[, "Tmin_mean_dry"] - mkv_cov[, "wTmin_C"]
+    if (type_cftemp %in% c("all", "wet")) {
+      mkv_cov[, "CF_Tmax_wet"] <- temp[, "Tmax_mean_wet"] - mkv_cov[, "wTmax_C"]
+      mkv_cov[, "CF_Tmin_wet"] <- temp[, "Tmin_mean_wet"] - mkv_cov[, "wTmin_C"]
+    } else {
+      mkv_cov[, "CF_Tmax_wet"] <- 0
+      mkv_cov[, "CF_Tmin_wet"] <- 0
+    }
+
+    if (type_cftemp %in% c("all", "dry")) {
+      mkv_cov[, "CF_Tmax_dry"] <- temp[, "Tmax_mean_dry"] - mkv_cov[, "wTmax_C"]
+      mkv_cov[, "CF_Tmin_dry"] <- temp[, "Tmin_mean_dry"] - mkv_cov[, "wTmin_C"]
+    } else {
+      mkv_cov[, "CF_Tmax_dry"] <- 0
+      mkv_cov[, "CF_Tmin_dry"] <- 0
+    }
+
+  } else {
+    mkv_cov[, "CF_Tmax_wet"] <- 0
+    mkv_cov[, "CF_Tmax_dry"] <- 0
+    mkv_cov[, "CF_Tmin_wet"] <- 0
+    mkv_cov[, "CF_Tmin_dry"] <- 0
+  }
 
 
   #--- Check that no missing coefficients
