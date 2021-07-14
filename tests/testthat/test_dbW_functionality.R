@@ -174,6 +174,13 @@ test_that("dbW site/scenario tables manipulation", {
     ignore.case = FALSE)
   expect_equal(site_id4, rep(NA_integer_, site_N))
 
+  site_id5b <- dbW_getSiteId(
+    Labels = c("not there", site_data1[, "Label"], "not there either"),
+    ignore.case = FALSE
+  )
+  expect_equal(site_id5b, c(NA_integer_, site_id1, NA_integer_))
+
+
   for (k in seq_len(site_N)) {
     #--- Obtain site_id one by one
     site_id1 <- dbW_getSiteId(lat = site_data1[k, "Latitude"],
@@ -251,6 +258,11 @@ test_that("dbW site/scenario tables manipulation", {
   site_id4 <- dbW_getSiteId(Labels = tolower(site_data1[, "Label"]),
     ignore.case = FALSE)
   expect_equal(site_id4, rep(NA_integer_, site_N))
+  site_id5 <- dbW_getSiteId(
+    Labels = c("not there", site_data1[, "Label"], "not there either"),
+    ignore.case = FALSE
+  )
+  expect_equal(site_id5, c(NA_integer_, site_id1, NA_integer_))
 
   id1 <- dbW_getIDs(long = site_data1[, "Longitude"],
     lat = site_data1[, "Latitude"], scenario = scenarios_added,

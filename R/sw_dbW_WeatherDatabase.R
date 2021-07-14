@@ -231,13 +231,43 @@ dbW_getSiteId <- function(lat = NULL, long = NULL, Labels = NULL,
   stopifnot(dbW_IsValid(), identical(length(lat), length(long)))
 
   x <- if (is.character(Labels)) {
-      sql <- paste0("SELECT Site_id FROM Sites WHERE Label=:x",
-        if (ignore.case) " COLLATE NOCASE")
-      sapply(Labels, function(x) {
-        temp <- DBI::dbGetQuery(rSW2_glovars$con, sql,
-          params = list(x = x))[, 1]
-        if (is.null(temp)) NA else temp
-      })
+      sql <- paste0(
+        "SELECT Site_id FROM Sites WHERE Label=:x",
+        if (ignore.case) " COLLATE NOCASE"
+      )
+
+      tmp <- DBI::dbGetQuery(
+        rSW2_glovars$con,
+        statement = sql,
+        params = list(x = Labels)
+      )[, 1]
+
+      ntmp <- length(tmp)
+
+      if (ntmp == 0) {
+        rep(NA, length(Labels))
+
+      } else if (ntmp == length(Labels)) {
+        tmp
+
+      } else {
+        # Some Labels are missing, but we don't know which ones
+        # Slowly go through Labels one by one
+        rs <- DBI::dbSendQuery(rSW2_glovars$con, sql)
+
+        tmp <- sapply(
+          Labels,
+          function(x) {
+            DBI::dbBind(rs, list(x = x))
+            tmp <- DBI::dbFetch(rs)[, 1]
+            if (is.null(tmp)) NA else tmp
+          }
+        )
+
+        DBI::dbClearResult(rs)
+        tmp
+      }
+
 
     } else if (is.numeric(lat) && is.numeric(long)) {
       sql <- "SELECT Site_id FROM Sites WHERE Latitude=:lat AND Longitude=:long"
