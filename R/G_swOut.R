@@ -206,6 +206,103 @@ setReplaceMethod("set_swOUT", signature = "swOUT", function(object, value) {
   object
 })
 
+
+#' @rdname swOUT-class
+#' @examples
+#' x <- new("swOUT")
+#' activate_swOUT_OutKey(x) <- c("VWCMATRIC", "HYDRED")
+#'
+#' @export
+setReplaceMethod(
+  "activate_swOUT_OutKey",
+  signature = "swOUT",
+  function(object, value) {
+    ids <- which(rSW2_glovars[["kSOILWAT2"]][["OutKeys"]] %in% value)
+
+    if (length(ids) < length(value)) {
+      tmp <- !(value %in% c(rSW2_glovars[["kSOILWAT2"]][["OutKeys"]], "LOG"))
+      if (any(tmp)) {
+        warning(
+          "Outkeys ",
+          paste0(shQuote(value[tmp]), collapse = "/"),
+          " are not available."
+        )
+      }
+    }
+
+    if (length(ids) > 0) {
+      eSW_NoTime <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]]
+      tmp_use <- slot(object, "use")
+
+      # Activate OutKeys by specifying output time periods (if not already set)
+      ids_ts <- which(apply(
+        slot(object, "timeSteps")[ids, , drop = FALSE],
+        MARGIN = 1,
+        function(x) all(x == eSW_NoTime)
+      ))
+
+      if (length(ids_ts) > 0) {
+        # Guess output time periods from already activated OutKeys
+        tmp <- unique(as.vector(slot(object, "timeSteps")))
+        used_ts <- tmp[!(tmp %in% eSW_NoTime)]
+        ts_toset <- matrix(
+          eSW_NoTime,
+          nrow = length(ids_ts),
+          ncol = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
+        )
+        ts_toset[, seq_along(used_ts)] <- rep(used_ts, each = length(ids_ts))
+        slot(object, "timeSteps")[ids[ids_ts], ] <- ts_toset
+      }
+
+      # Activate OutKeys by setting slot `use`
+      slot(object, "use")[ids] <- TRUE
+    }
+
+    validObject(object)
+    object
+  }
+)
+
+
+#' @rdname swOUT-class
+#' @examples
+#' x <- new("swOUT")
+#' deactivate_swOUT_OutKey(x) <- c("VWCMATRIC", "HYDRED")
+#'
+#' @export
+setReplaceMethod(
+  "deactivate_swOUT_OutKey",
+  signature = "swOUT",
+  function(object, value) {
+    ids <- which(rSW2_glovars[["kSOILWAT2"]][["OutKeys"]] %in% value)
+
+    if (length(ids) < length(value)) {
+      tmp <- !(value %in% c(rSW2_glovars[["kSOILWAT2"]][["OutKeys"]], "LOG"))
+      if (any(tmp)) {
+        warning(
+          "Outkeys ",
+          paste0(shQuote(value[tmp]), collapse = "/"),
+          " are not available."
+        )
+      }
+    }
+
+    if (length(ids) > 0) {
+      # Deactivate OutKeys by setting output time periods to `eSW_NoTime`
+      slot(object, "timeSteps")[ids, ] <-
+        rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]]
+
+      # Deactivate OutKeys by setting slot `use`
+      slot(object, "use")[ids] <- FALSE
+    }
+
+    validObject(object)
+    object
+  }
+)
+
+
+
 #' @rdname swOUT-class
 #' @export
 setReplaceMethod("swOUT_TimeStep", signature = "swOUT",

@@ -135,7 +135,31 @@ swCarbon_Use_Bio(sw_in5) <- 1L
 swCarbon_Use_WUE(sw_in5) <- 1L
 
 ## Execute the simulation run
-sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3, quiet = TRUE)
+sw_out5 <- sw_exec(inputData = sw_in5, weatherList = sw_weath3, quiet = TRUE)
+
+
+
+## ------ Simulation with reduced set of outputs ------------
+sw_in6 <- sw_in3
+
+swof <- rSOILWAT2::sw_out_flags()
+tmp <- c(
+  "sw_temp", "sw_precip", "sw_snow",
+  "sw_inf_soil", "sw_deepdrain",
+  "sw_vwcbulk", "sw_swcbulk", "sw_swp", "sw_soiltemp",
+  "sw_aet", "sw_pet",
+  "sw_veg"
+)
+
+slot(slot(sw_in6, "output"), "use")[] <- FALSE
+activate_swOUT_OutKey(sw_in6) <- swof[names(swof) \%in\% tmp]
+rSOILWAT2::swOUT_TimeStepsForEveryKey(sw_in6) <-
+  c(daily = 0, monthly = 2, yearly = 3)
+
+## Execute the simulation run
+sw_out6 <- sw_exec(inputData = sw_in6, weatherList = sw_weath3, quiet = TRUE)
+
+print(round(as.numeric(object.size(sw_out6) / object.size(sw_out5)), 2))
 
 
 ## See help(package = "rSOILWAT2") for a full list of functions

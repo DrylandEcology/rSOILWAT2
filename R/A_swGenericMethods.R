@@ -1661,6 +1661,23 @@ setGeneric("swOUT_TimeStepsForEveryKey<-",
 #' @seealso \code{\linkS4class{swOUT}} and \code{\linkS4class{swInputData}}
 setGeneric("swOUT_OutputSeparator<-",
   function(object, value) standardGeneric("swOUT_OutputSeparator<-"))
+
+#' \code{activate_swOUT_OutKey<-}
+#' @param object An object of class \code{\linkS4class{swOUT}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swOUT}} and \code{\linkS4class{swInputData}}
+setGeneric("activate_swOUT_OutKey<-",
+  function(object, value) standardGeneric("activate_swOUT_OutKey<-"))
+
+#' \code{deactivate_swOUT_OutKey<-}
+#' @param object An object of class \code{\linkS4class{swOUT}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swOUT}} and \code{\linkS4class{swInputData}}
+setGeneric("deactivate_swOUT_OutKey<-",
+  function(object, value) standardGeneric("deactivate_swOUT_OutKey<-"))
+
 ########################
 
 ########LOG#############
