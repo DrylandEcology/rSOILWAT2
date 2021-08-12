@@ -20,14 +20,34 @@ NULL
 #' @export
 get_transpiration <- function(x, timestep = c("Day", "Week", "Month", "Year")) {
   timestep <- match.arg(timestep)
-  tmp <- slot(slot(x, "TRANSP"), timestep)
+
+  res <- NULL
+
+  tmp <- slot(slot(x, "AET"), timestep)
+
+  if (all(dim(tmp) > 0)) {
+    res <- tmp[, "tran_cm"]
+
+  } else {
+    tmp <- slot(slot(x, "TRANSP"), timestep)
+
+    if (all(dim(tmp) > 0)) {
+      res <- apply(
+        X = tmp[, grep("transp_total_Lyr", colnames(tmp)), drop = FALSE],
+        MARGIN = 1,
+        FUN = sum
+      )
+
+    } else {
+      stop(
+        "Simulation run without producing transpiration output: ",
+        "consider turning on output keys 'AET' or 'TRANSP'."
+      )
+    }
+  }
 
   # convert [cm] to [mm]
-  10. * apply(
-    X = tmp[, grep("transp_total_Lyr", colnames(tmp)), drop = FALSE],
-    MARGIN = 1,
-    FUN = sum
-  )
+  10 * res
 }
 
 #' Calculate evaporation from output
@@ -44,14 +64,36 @@ get_transpiration <- function(x, timestep = c("Day", "Week", "Month", "Year")) {
 get_evaporation <- function(x, timestep = c("Day", "Week", "Month", "Year")) {
   timestep <- match.arg(timestep)
 
-  tmp <- slot(slot(x, "EVAPSURFACE"), timestep)
-  Etotalsurf <- tmp[, "evap_total"]
+  res <- NULL
 
-  tmp <- slot(slot(x, "EVAPSOIL"), timestep)
-  Esoil <- apply(tmp[, grep("Lyr", colnames(tmp)), drop = FALSE], 1, sum)
+  tmp <- slot(slot(x, "AET"), timestep)
 
-  Esnow <- slot(slot(x, "PRECIP"), timestep)[, "snowloss"]
+  if (all(dim(tmp) > 0)) {
+    res <- tmp[, "evapotr_cm"] - tmp[, "tran_cm"]
+
+  } else {
+    tmp1 <- slot(slot(x, "EVAPSURFACE"), timestep)
+    tmp2 <- slot(slot(x, "EVAPSOIL"), timestep)
+    tmp3 <- slot(slot(x, "PRECIP"), timestep)
+
+    if (all(dim(tmp1) > 0, dim(tmp2) > 0, dim(tmp3) > 0)) {
+      res <-
+        # evaporation from surface water (canopy, litter, ponded)
+        tmp1[, "evap_total"] +
+        # evaporation from bare soil
+        apply(tmp2[, grep("Lyr", colnames(tmp2)), drop = FALSE], 1, sum) +
+        # evaporation from snow (sublimation)
+        tmp3[, "snowloss"]
+
+    } else {
+      stop(
+        "Simulation run without producing evaporation output: ",
+        "consider turning on output keys 'AET' or ",
+        "'EVAPSURFACE', 'EVAPSOIL', and 'PRECIP'."
+      )
+    }
+  }
 
   # convert [cm] to [mm]
-  10 * (Etotalsurf + Esoil + Esnow)
+  10 * res
 }
