@@ -54,8 +54,12 @@ for (it in tests) {
 
   test_that("Water balance & cycle", {
     # Run SOILWAT
-    x <- sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE,
-      quiet = TRUE)
+    x <- sw_exec(
+      inputData = sw_input,
+      weatherList = sw_weather,
+      echo = FALSE,
+      quiet = TRUE
+    )
     expect_s4_class(x, "swOutput")
 
 
@@ -72,7 +76,9 @@ for (it in tests) {
     dates[, "DOY"] <- dates[, "Day"]
     temp <- as.POSIXlt(seq.Date(
       from = as.Date(ISOdate(dates[1, "Year"], 1, 1)),
-      to = as.Date(ISOdate(dates[nrow(dates), "Year"], 12, 31)), by = "day"))
+      to = as.Date(ISOdate(dates[nrow(dates), "Year"], 12, 31)),
+      by = "day"
+    ))
     dates[, "Month"] <- 1 + temp$mon
     dates[, "Day"] <- temp$mday
     # SOILWAT2 'weeks' are not calendar weeks as in
@@ -80,7 +86,10 @@ for (it in tests) {
     #   with \code{%U = US weeks}; \coe{%V = ISO 8601}; \code{%W = UK weeks}
     # instead SOILWAT2 numbers consecutive sets of 7-day periods
     dates[, "Week"] <- 1 + (dates[, "DOY"] - 1) %/% 7
-    dyt <- list(d = dates, ids1 = idelta1, ids2 = idelta2,
+    dyt <- list(
+      d = dates,
+      ids1 = idelta1,
+      ids2 = idelta2,
       # not first year:
       nfy = which(temp <- dates[, "Year"] != dates[1, "Year"]),
       # not first month of first year:
@@ -92,7 +101,8 @@ for (it in tests) {
     # change in ponded (surface) water
     list_delta_surfaceWater <- aggregate_for_each_timestep(
       x = surfaceWater[dyt[["ids2"]]] - surfaceWater[dyt[["ids1"]]],
-      dyt)
+      dyt = dyt
+    )
 
     # change in soil moisture
     temp <- slot(slot(x, "SWCBULK"), "Day")
@@ -104,7 +114,8 @@ for (it in tests) {
     list_delta_swcj <- aggregate_for_each_timestep(x = dy_delta_swcj, dyt)
     list_delta_swc_total <- aggregate_for_each_timestep(
       x = apply(dy_delta_swcj, 1, sum),
-      dyt)
+      dyt = dyt
+    )
 
 
     # Loop through time steps
@@ -112,7 +123,8 @@ for (it in tests) {
       info2 <- paste(info1, "/ time step:", OutPeriods[pd])
 
       # Get values
-      aet <- slot(slot(x, "AET"), OutPeriods[pd])[, "evapotr_cm"]
+      ets <- slot(slot(x, "AET"), OutPeriods[pd])
+      aet <- ets[, "evapotr_cm"]
       pet <- slot(slot(x, "PET"), OutPeriods[pd])[, "pet_cm"]
 
       temp <- seq_along(aet)
@@ -148,7 +160,22 @@ for (it in tests) {
           drop = FALSE])
       names(Tvegij) <- veg_types
 
-      # Get other water flux values
+
+      #--- Check that calculated transpiration and evaporation matches
+      # newly available ones from "AET" slot
+      expect_equal(Ttotal, ets[, "tran_cm"], tolerance = tol)
+      expect_equal(Esoil, ets[, "esoil_cm"], tolerance = tol)
+      expect_equal(Esnow, ets[, "esnow_cm"], tolerance = tol)
+      expect_equal(Eveg, ets[, "ecnw_cm"], tolerance = tol)
+      expect_equal(Eponded + Elitter, ets[, "esurf_cm"], tolerance = tol)
+
+      tmp_evars2 <- c("esoil_cm", "ecnw_cm", "esurf_cm", "esnow_cm")
+      Etotal2 <- apply(ets[, tmp_evars2], 1, sum)
+      expect_equal(Etotal, Etotal2, tolerance = tol)
+      expect_equal(aet, ets[, "tran_cm"] + Etotal2, tolerance = tol)
+
+
+      #--- Get other water flux values
       infiltration <- slot(slot(x, "SOILINFILT"),
         OutPeriods[pd])[, "soil_inf"]
       deepDrainage <- slot(slot(x, "DEEPSWC"),
@@ -183,6 +210,7 @@ for (it in tests) {
       delta_surfaceWater <- list_delta_surfaceWater[[OutPeriods[pd]]]
       delta_swcj <- list_delta_swcj[[OutPeriods[pd]]]
       delta_swc_total <- list_delta_swc_total[[OutPeriods[pd]]]
+
 
       #--- Water balance checks
       # (1) \code{AET <= PET}
