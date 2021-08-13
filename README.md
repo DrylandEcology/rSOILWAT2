@@ -24,7 +24,7 @@ A R package for SOILWAT2.
 ## Considerations
 
 We haven't really published the code yet nor prepared it for sharing (though
-through our use of github made it openly accessible), it is actively and
+through our use of `github` made it openly accessible), it is actively and
 gradually being developed by the Lauenroth lab and affiliates, and there is
 no manual either - we cannot give you individual support in setting up and
 running the model except if we agreed on a collaboration or similar agreement.
@@ -77,25 +77,27 @@ Your computer must be set up adequately, i.e.,
 
 #### Minimal requirements include
   - on any platform:
-    - the [gcc][] or [clang/llvm][] toolchains;
+    - the [`gcc`][] or [`clang`/`llvm`][] toolchains;
       ideally, `gcc >= v4.9` or `clang >= v3.3`
-    - POSIX- [make](https://pubs.opengroup.org/onlinepubs/9699919799/) or
-      GNU-compliant [make](https://www.gnu.org/software/make/)
-    - [git][] to download the code
+    - POSIX- [`make`](https://pubs.opengroup.org/onlinepubs/9699919799/) or
+      GNU-compliant [`make`](https://www.gnu.org/software/make/)
+    - [`git`][] to download the code
   - additionally, on Windows OS:
     - [`Rtools`](http://cran.us.r-project.org/bin/windows/Rtools/)
       installed that match your R version.
-  - on macOSX:
-    - xcode command line tools (run `xcode-select --install` on the command line)
-    - having agreed to the xcode license (run `xcodebuild -license`)
-    - or, alternatively, the full [xcode](https://developer.apple.com/xcode)
+  - on `macOS`:
+    - `xcode` command line tools (run `xcode-select --install` on the command line)
+    - having agreed to the `xcode` license (run `xcodebuild -license`)
+    - or, alternatively, the full [`xcode`](https://developer.apple.com/xcode)
       installation
   - optional:
-    - a minimal `latex` installation (see below) to generate package vignettes
+    - a minimal `latex` installation (see below) and
+      `pandoc` (`RStudio` comes bundled with `pandoc`)
+      to generate package vignettes
 
 
 #### Example instructions for a minimal `latex` installation
-  * details on [tinytex](https://yihui.name/tinytex/)
+  * details on [`tinytex`](https://yihui.name/tinytex/)
   * install the R package `tinytex`
     ```{r}
     install.packages("tinytex")
@@ -132,7 +134,7 @@ Your computer must be set up adequately, i.e.,
 If you want a binary version of the 'rSOILWAT2' package (e.g., to distribute to
 someone without development tools) for a platform to which you do not have
 access, then you may consider using one of the cloud services (no endorsements):
-- https://builder.r-hub.io offers different Linux, Windows, and macOSX flavors
+- https://builder.r-hub.io offers different Linux, Windows, and `macOS` flavors
   as targets
 - http://win-builder.r-project.org/ offers Windows OS as target
 
@@ -159,7 +161,7 @@ __Follow our guidelines__ as detailed [here](https://github.com/DrylandEcology/w
 __Tests, documentation, and code__ form a trinity
 - Code documentation
   * Read the [section 'Object documentation' in the book 'R packages' by Wickham](http://r-pkgs.had.co.nz/man.html)
-  * Use [roxygen2](https://cran.r-project.org/web/packages/roxygen2/vignettes/formatting.html)
+  * Use [`roxygen2`](https://cran.r-project.org/web/packages/roxygen2/vignettes/formatting.html)
     to write inline code documentation
   * Update help pages and NAMESPACE with the command `devtools::document()`
   * Ideally, add examples to function documentation and check these examples
@@ -167,7 +169,7 @@ __Tests, documentation, and code__ form a trinity
 - Code tests
   * Read the [section 'Testing' in the book 'R packages' by Wickham](http://r-pkgs.had.co.nz/tests.html)
   * Unit tests
-    * Use [testthat](https://github.com/hadley/testthat) to add unit tests to the
+    * Use [`testthat`](https://github.com/hadley/testthat) to add unit tests to the
       existing framework
     * Run unit tests locally with the command `devtools::test()`
     * These unit tests will also be run on the command-line with `R CMD check .`
@@ -199,7 +201,7 @@ __Tests, documentation, and code__ form a trinity
        ```{r}
        devtools::run_examples()
        ```
-       Note: "devtools" v2.0.1 mixed up the logic for "dontrun" examples (see
+       Note: `devtools` v2.0.1 mixed up the logic for "dontrun" examples (see
        https://github.com/r-lib/devtools/issues/2003); until this is fixed,
        use `devtools::run_examples(run = FALSE)`.
 
@@ -257,7 +259,7 @@ __Debugging compiled code__
       ```
       MAKEFLAGS="PKG_DEBUG=-DRSWDEBUG" R CMD INSTALL --preclean --clean .
       ```
-    * Using R package 'devtools' (e.g., while running R interactively):
+    * Using R package `devtools` (e.g., while running R interactively):
       ```{r}
       Sys.setenv(PKG_DEBUG="-DRSWDEBUG")
       devtools::clean_dll() # if you debug in `src/SOILWAT2`

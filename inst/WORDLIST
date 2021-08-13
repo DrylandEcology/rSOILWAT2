@@ -43,6 +43,8 @@ xeric
 MERCHANTABILITY
 deployable
 submodule
+symlink
+toolchain
 
 
 #------------------------------------
@@ -72,7 +74,6 @@ Bernal
 Brenden
 Brummer
 Clapp
-devtools
 Espinosa
 Ginn
 github
@@ -98,7 +99,6 @@ Pyke
 Rew
 Riahi
 Rotella
-roxygen
 rSOILWAT
 Sala
 Schlaepfer
@@ -106,7 +106,6 @@ SOILWAT
 Springer
 SQLite
 Teeri
-testthat
 Tiwari
 Velders
 Vuuren

@@ -20,7 +20,7 @@ input data. Output data is in the form of lists.
 \section{Version}{
  The version level of the package is given by the command
   \code{packageDescription("rSOILWAT2")}. The most recent version of the
-  package can be obtained from github at
+  package can be obtained via \var{github} at
   \url{https://github.com/DrylandEcology/rSOILWAT2}
 }
 
