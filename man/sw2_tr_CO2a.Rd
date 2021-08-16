@@ -5,12 +5,27 @@
 \alias{sw2_tr_CO2a}
 \title{\var{Lookup} table of yearly atmospheric CO2 concentrations}
 \format{
-A \code{data.frame}.
-  The first column contains calendar years.
-  The remaining columns are scenarios and contain
-  global average, annual atmospheric CO2 concentrations in [ppm].
-  Currently implemented values are from
-  Meinshausen et al. 2011 for \var{CMIP5} scenarios.
+A \code{data.frame}. The first column contains calendar years. The
+remaining columns hold values of global average, annual
+atmospheric CO2 concentrations in [ppm] for historical observations and
+projected values under different scenarios. Currently available values are
+from Meinshausen et al. 2011 for \var{CMIP5} and Meinshausen et
+al. 2020 for \var{CMIP6}:\tabular{lll}{
+   Name \tab Years \tab Published source data file \cr
+   CMIP5_historical \tab 1765-2005 \tab \var{20THCENTURY_MIDYEAR_CONCENTRATIONS.xls} \cr
+   CMIP5_RCP3PD \tab 1765-2500 \tab \var{RCP3PD_MIDYEAR_CONCENTRATIONS.xls} \cr
+   CMIP5_RCP45 \tab 1765-2500 \tab \var{RCP45_MIDYEAR_CONCENTRATIONS.xls} \cr
+   CMIP5_RCP60 \tab 1765-2500 \tab \var{RCP6_MIDYEAR_CONCENTRATIONS.xls} \cr
+   CMIP5_RCP85 \tab 1765-2500 \tab \var{RCP85_MIDYEAR_CONCENTRATIONS.xls} \cr
+   CMIP6_historical \tab 1750-2014 \tab \var{SUPPLEMENT_DataTables_Meinshausen_6May2020.xlsx} \cr
+   CMIP6_SSP119 \tab 2015-2500 \tab \var{SUPPLEMENT_DataTables_Meinshausen_6May2020.xlsx} \cr
+   CMIP6_SSP126 \tab 2015-2500 \tab \var{SUPPLEMENT_DataTables_Meinshausen_6May2020.xlsx} \cr
+   CMIP6_SSP245 \tab 2015-2500 \tab \var{SUPPLEMENT_DataTables_Meinshausen_6May2020.xlsx} \cr
+   CMIP6_SSP370 \tab 2015-2500 \tab \var{SUPPLEMENT_DataTables_Meinshausen_6May2020.xlsx} \cr
+   CMIP6_SSP434 \tab 2015-2500 \tab \var{SUPPLEMENT_DataTables_Meinshausen_6May2020.xlsx} \cr
+   CMIP6_SSP460 \tab 2015-2500 \tab \var{SUPPLEMENT_DataTables_Meinshausen_6May2020.xlsx} \cr
+   CMIP6_SSP585 \tab 2015-2500 \tab \var{SUPPLEMENT_DataTables_Meinshausen_6May2020.xlsx} \cr
+}
 }
 \usage{
 sw2_tr_CO2a
@@ -19,11 +34,25 @@ sw2_tr_CO2a
 \var{Lookup} table of yearly atmospheric CO2 concentrations
 }
 \references{
-Meinshausen, M., S. J. Smith, K. V. Calvin, J. S. Daniel,
-  M. L. T. Kainuma, J.-F. Lamarque, K. Matsumoto, S. A. Montzka,
-  S. C. B. Raper, K. Riahi, A. M. Thomson, G. J. M. Velders and
-  D. van Vuuren (2011). The RCP Greenhouse Gas Concentrations and their
-  extension from 1765 to 2300.
-  Climatic Change (Special Issue), \url{DOI: 10.1007/s10584-011-0156-z}
+Meinshausen, M., S. J. Smith, K. V. Calvin, J. S. Daniel, M. L.
+T. Kainuma, J.-F. Lamarque, K. Matsumoto, S. A. Montzka, S. C. B. Raper, K.
+Riahi, A. M. Thomson, G. J. M. Velders and D. van Vuuren (2011). The RCP
+Greenhouse Gas Concentrations and their extension from 1765 to 2300.
+Climatic Change (Special Issue),
+\url{https://doi.org/10.1007/s10584-011-0156-z}.
+Data tables downloaded from \url{http://www.pik-potsdam.de/~mmalte/rcps/}.
+
+Meinshausen, M., Z. R. J. Nicholls, J. Lewis, M. J. Gidden, E.
+Vogel, M. Freund, U. Beyerle, C. Gessner, A. Nauels, N. Bauer, J. G.
+Canadell, J. S. Daniel, A. John, P. B. Krummel, G. Luderer, N. Meinshausen,
+S. A. Montzka, P. J. Rayner, S. Reimann, S. J. Smith, M. van den Berg, G.
+J. M. Velders, M. K. Vollmer, and R. H. J. Wang. 2020. The shared
+socio-economic pathway (SSP) greenhouse gas concentrations and their
+extensions to 2500. Geoscientific Model Development 13:3571-3605.
+\url{https://doi.org/10.5194/gmd-13-3571-2020}.
+Data accessed from supplemental tables.
+}
+\seealso{
+\code{\link{lookup_annual_CO2a}} to extract specific values.
 }
 \keyword{datasets}

@@ -82,20 +82,54 @@
 "sw2_trco_table"
 
 
+
 #' \var{Lookup} table of yearly atmospheric CO2 concentrations
 #'
-#' @format A \code{data.frame}.
-#'   The first column contains calendar years.
-#'   The remaining columns are scenarios and contain
-#'   global average, annual atmospheric CO2 concentrations in [ppm].
-#'   Currently implemented values are from
-#'   Meinshausen et al. 2011 for \var{CMIP5} scenarios.
+#' @format A \code{data.frame}. The first column contains calendar years. The
+#'   remaining columns hold values of global average, annual
+#'   atmospheric CO2 concentrations in \[ppm\] for historical observations and
+#'   projected values under different scenarios. Currently available values are
+#'   from Meinshausen et al. 2011 for \var{CMIP5} and Meinshausen et
+#'   al. 2020 for \var{CMIP6}:
 #'
-#' @references Meinshausen, M., S. J. Smith, K. V. Calvin, J. S. Daniel,
-#'   M. L. T. Kainuma, J.-F. Lamarque, K. Matsumoto, S. A. Montzka,
-#'   S. C. B. Raper, K. Riahi, A. M. Thomson, G. J. M. Velders and
-#'   D. van Vuuren (2011). The RCP Greenhouse Gas Concentrations and their
-#'   extension from 1765 to 2300.
-#'   Climatic Change (Special Issue), \url{DOI: 10.1007/s10584-011-0156-z}
+# nolint start
+#'   | Name             | Years     | Published source data file |
+#'   | ---------------- | --------- | ------------------- |
+#'   | CMIP5_historical | 1765-2005 | \var{20THCENTURY_MIDYEAR_CONCENTRATIONS.xls} |
+#'   | CMIP5_RCP3PD     | 1765-2500 | \var{RCP3PD_MIDYEAR_CONCENTRATIONS.xls} |
+#'   | CMIP5_RCP45      | 1765-2500 | \var{RCP45_MIDYEAR_CONCENTRATIONS.xls} |
+#'   | CMIP5_RCP60      | 1765-2500 | \var{RCP6_MIDYEAR_CONCENTRATIONS.xls} |
+#'   | CMIP5_RCP85      | 1765-2500 | \var{RCP85_MIDYEAR_CONCENTRATIONS.xls} |
+#'   | CMIP6_historical | 1750-2014 | \var{SUPPLEMENT_DataTables_Meinshausen_6May2020.xlsx} |
+#'   | CMIP6_SSP119     | 2015-2500 | \var{SUPPLEMENT_DataTables_Meinshausen_6May2020.xlsx} |
+#'   | CMIP6_SSP126     | 2015-2500 | \var{SUPPLEMENT_DataTables_Meinshausen_6May2020.xlsx} |
+#'   | CMIP6_SSP245     | 2015-2500 | \var{SUPPLEMENT_DataTables_Meinshausen_6May2020.xlsx} |
+#'   | CMIP6_SSP370     | 2015-2500 | \var{SUPPLEMENT_DataTables_Meinshausen_6May2020.xlsx} |
+#'   | CMIP6_SSP434     | 2015-2500 | \var{SUPPLEMENT_DataTables_Meinshausen_6May2020.xlsx} |
+#'   | CMIP6_SSP460     | 2015-2500 | \var{SUPPLEMENT_DataTables_Meinshausen_6May2020.xlsx} |
+#'   | CMIP6_SSP585     | 2015-2500 | \var{SUPPLEMENT_DataTables_Meinshausen_6May2020.xlsx} |
 #'
+# nolint end
+#'
+#' @seealso \code{\link{lookup_annual_CO2a}} to extract specific values.
+#'
+#' @references Meinshausen, M., S. J. Smith, K. V. Calvin, J. S. Daniel, M. L.
+#'   T. Kainuma, J.-F. Lamarque, K. Matsumoto, S. A. Montzka, S. C. B. Raper, K.
+#'   Riahi, A. M. Thomson, G. J. M. Velders and D. van Vuuren (2011). The RCP
+#'   Greenhouse Gas Concentrations and their extension from 1765 to 2300.
+#'   Climatic Change (Special Issue),
+#'   \url{https://doi.org/10.1007/s10584-011-0156-z}.
+#'   Data tables downloaded from \url{http://www.pik-potsdam.de/~mmalte/rcps/}.
+#'
+#' @references Meinshausen, M., Z. R. J. Nicholls, J. Lewis, M. J. Gidden, E.
+#'   Vogel, M. Freund, U. Beyerle, C. Gessner, A. Nauels, N. Bauer, J. G.
+#'   Canadell, J. S. Daniel, A. John, P. B. Krummel, G. Luderer, N. Meinshausen,
+#'   S. A. Montzka, P. J. Rayner, S. Reimann, S. J. Smith, M. van den Berg, G.
+#'   J. M. Velders, M. K. Vollmer, and R. H. J. Wang. 2020. The shared
+#'   socio-economic pathway (SSP) greenhouse gas concentrations and their
+#'   extensions to 2500. Geoscientific Model Development 13:3571-3605.
+#'   \url{https://doi.org/10.5194/gmd-13-3571-2020}.
+#'   Data accessed from supplemental tables.
+#'
+#' @md
 "sw2_tr_CO2a"
