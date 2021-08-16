@@ -19,6 +19,7 @@ albedo
 aridic
 Bromus tectorum
 cheatgrass
+deployable
 destandardized
 dryland
 ecohydrological
@@ -26,10 +27,12 @@ ecohydrology
 et
 evapotranspiration
 forb
+geoscientific
 gregorian
 lodgepole
 loess
 matric
+MERCHANTABILITY
 operationalization
 pedotransfer
 phenological
@@ -38,32 +41,33 @@ rangeland
 sensu
 shortgrass
 shrubland
-transmissivity
-xeric
-MERCHANTABILITY
-deployable
+socio
 submodule
 symlink
 toolchain
+transmissivity
+xeric
 
 
 #------------------------------------
 #------ Abbreviations
 al
+CMIP
+dontrun
 doy
+exts
 GTR
 iso
 MPa
 ORCID
+pagebreak
 pre
 RCP
+README
 RMRS
+SSP
 th
 USGS
-dontrun
-exts
-pagebreak
-README
 
 
 #------------------------------------
@@ -71,31 +75,42 @@ README
 Appveyor
 Ashish
 Bernal
+Beyerle
 Brenden
 Brummer
+Canadell
 Clapp
 Espinosa
+Freund
+Gessner
+Gidden
 Ginn
 github
 Havlina
 Hornberger
 Innis
 Kainuma
+Krummel
 Lamarque
 Lauenroth
 Lavin
+Luderer
 Maestas
 Markov
 Matsumoto
 Meinshausen
 Milchunas
 Montzka
+Nauels
+Nicholls
 Oecologia
 Palmquist
 Parton
 Paruelo
 Pellant
 Pyke
+Rayner
+Reimann
 Rew
 Riahi
 Rotella
@@ -108,6 +123,8 @@ SQLite
 Teeri
 Tiwari
 Velders
+Vogel
+Vollmer
 Vuuren
 Wickham
 Wuenschel
