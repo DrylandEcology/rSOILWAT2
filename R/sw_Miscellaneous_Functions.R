@@ -272,43 +272,81 @@ calc_SiteClimate <- function(weatherList, year.start = NA, year.end = NA,
 #'
 #' @param start An integer value. First year for which to \var{look-up} values.
 #' @param end An integer value. Last year for which to \var{look-up} values.
-#' @param name_co2 A character string. The name of the CO2 series, i.e.,
-#'   a column name of \code{tr_CO2a}.
+#' @param name_co2 A character string. The (partial) name of the CO2 series,
+#'   i.e., a column name of \code{tr_CO2a}. See details.
 #' @param tr_CO2a A numeric \code{data.frame} with the CO2 values [ppm].
 #'   Default values are taken from \code{\link{sw2_tr_CO2a}}.
 #'
-#' @seealso \code{\link{sw2_tr_CO2a}}
+#' @section Details: \code{name_co2} may contain multiple data set names,
+#'   either as vector of strings, or as names separated by "|".
+#'   Values of the first match are used;
+#'   any missing values are filled in from the second matching column,
+#'   and so forth.
+#'
+#' @seealso \code{\link{sw2_tr_CO2a}} for description of data
 #'
 #' @examples
 #' lookup_annual_CO2a(start = 1765, end = 2300, name_co2 = "RCP45")
-#' lookup_annual_CO2a(start = 1980, end = 2005, name_co2 = "historical")
+#' lookup_annual_CO2a(start = 1765, end = 2300, name_co2 = "CMIP5_RCP45")
+#' lookup_annual_CO2a(start = 1980, end = 2005, name_co2 = "CMIP5_historical")
+#' lookup_annual_CO2a(
+#'   start = 1980,
+#'   end = 2021,
+#'   name_co2 = c("CMIP6_historical", "CMIP6_SSP119")
+#' )
+#' lookup_annual_CO2a(
+#'   start = 1980,
+#'   end = 2021,
+#'   name_co2 = "CMIP6_historical|CMIP6_SSP119"
+#' )
 #'
 #' \dontrun{
-#' ## This fails because CMIP5-historical has no values after 2005
-#' lookup_annual_CO2a(start = 1980, end = 2020, name_co2 = "historical")
+#' ## This fails because "CMIP5_historical" has no values after 2005
+#' lookup_annual_CO2a(start = 1980, end = 2020, name_co2 = "CMIP5_historical")
 #' }
 #'
 #' @export
-lookup_annual_CO2a <- function(start, end, name_co2,
+lookup_annual_CO2a <- function(
+  start,
+  end,
+  name_co2,
   tr_CO2a = rSOILWAT2::sw2_tr_CO2a
 ) {
   # Locate scenario
-  scenario_index <- which(
-    toupper(colnames(tr_CO2a)) == toupper(name_co2)
-  )
+  name_co2 <- paste0(name_co2, collapse = "|")
+  scenario_index <- grep(name_co2, colnames(tr_CO2a), ignore.case = TRUE)
+  n_sc <- length(scenario_index)
 
   # Locate years
-  ids_years <- match(start:end, tr_CO2a[, "Year"], nomatch = 0)
+  ids_years <- match(start:end, tr_CO2a[, "Year"], nomatch = NA)
 
-  # Do we have data?
-  if (length(scenario_index) && length(ids_years) > 0 && all(ids_years > 0)) {
+
+  if (n_sc > 0 && length(ids_years) > 0 && !anyNA(ids_years)) {
+    # Extract values
+    x <- tr_CO2a[ids_years, scenario_index]
+
+    if (n_sc > 1) {
+      # Take values from first match; if NA, then from second match, etc.
+      tmp <- rep(NA, length(ids_years))
+      for (k in seq_len(n_sc)) {
+        if (!anyNA(tmp)) break
+        ids <- is.na(tmp)
+        tmp[ids] <- x[ids, k]
+      }
+      x <- tmp
+    }
+
     scenarioCO2_ppm <- cbind(
       Year = tr_CO2a[ids_years, "Year"],
-      CO2ppm = as.numeric(tr_CO2a[ids_years, scenario_index])
+      CO2ppm = as.numeric(x)
     )
 
+    # Check for missing values
     if (anyNA(scenarioCO2_ppm)) {
-      stop("Missing CO2 values for scenario ", shQuote(name_co2))
+      stop(
+        "Some requested years have no CO2 values for scenario(s) ",
+        shQuote(name_co2)
+      )
     }
 
   } else {
