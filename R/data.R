@@ -117,8 +117,7 @@
 #'   T. Kainuma, J.-F. Lamarque, K. Matsumoto, S. A. Montzka, S. C. B. Raper, K.
 #'   Riahi, A. M. Thomson, G. J. M. Velders and D. van Vuuren (2011). The RCP
 #'   Greenhouse Gas Concentrations and their extension from 1765 to 2300.
-#'   Climatic Change (Special Issue),
-#'   \url{https://doi.org/10.1007/s10584-011-0156-z}.
+#'   Climatic Change (Special Issue), \doi{10.1007/s10584-011-0156-z}.
 #'   Data tables downloaded from \url{http://www.pik-potsdam.de/~mmalte/rcps/}.
 #'
 #' @references Meinshausen, M., Z. R. J. Nicholls, J. Lewis, M. J. Gidden, E.
@@ -128,7 +127,7 @@
 #'   J. M. Velders, M. K. Vollmer, and R. H. J. Wang. 2020. The shared
 #'   socio-economic pathway (SSP) greenhouse gas concentrations and their
 #'   extensions to 2500. Geoscientific Model Development 13:3571-3605.
-#'   \url{https://doi.org/10.5194/gmd-13-3571-2020}.
+#'   \doi{10.5194/gmd-13-3571-2020}.
 #'   Data accessed from supplemental tables.
 #'
 #' @md
