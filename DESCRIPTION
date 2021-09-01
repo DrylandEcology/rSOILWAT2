@@ -17,8 +17,8 @@ Imports:
   blob (>= 1.2.0),
   DBI (>= 1.0),
   RSQLite (>= 2.1),
-  rSW2utils,
-  rSW2data
+  rSW2utils (>= 0.1.0),
+  rSW2data (>= 0.1.1)
 Suggests:
   bookdown,
   covr,
@@ -28,7 +28,7 @@ Suggests:
   knitr,
   lintr (>= 2.0.0),
   rmarkdown,
-  rSW2exter,
+  rSW2exter (>= 0.1.0),
   spelling (>= 2.1.0),
   testthat
 Remotes:
