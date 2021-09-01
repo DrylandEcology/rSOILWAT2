@@ -4,6 +4,8 @@
 # script obtained 2021-Aug-13 from `usethis::use_github_action("check-standard")`
 # added step `Test coverage` (copied relevant sections from `usethis::use_github_action("test-coverage")`)
 
+# rSOILWAT2 contains submodules: these need to be checkout separately
+
 on:
   push:
     branches:
@@ -35,7 +37,10 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
 
       - uses: r-lib/actions/setup-r@v1
         with:
