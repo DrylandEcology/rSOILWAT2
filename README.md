@@ -1,25 +1,37 @@
+# rSOILWAT2: An Ecohydrological Ecosystem-Scale Water Balance Simulation Model
 
-| Unix | Windows | Release | License | Coverage | Downloads |
-| :---- | :---- | :---- | :---- | :---- | :---- |
-[ ![Travis build status][1]][2] | [![Appveyor build status][3]][4] | [ ![github release][5]][6] | [![license][7]][8] | [![coveralls status][9]][10] | [![github downloads][11]][12] |
+<!-- badges: start -->
+[ ![R build status][1]][2] [ ![github release][5]][6] [![license][7]][8] [![codecov status][9]][10]
+<!-- badges: end -->
 
-[1]: https://travis-ci.org/DrylandEcology/rSOILWAT2.svg?branch=master
-[2]: https://travis-ci.org/DrylandEcology/rSOILWAT2
-[3]: https://ci.appveyor.com/api/projects/status/3bgvcsokr27bo1uh/branch/master?svg=true
-[4]: https://ci.appveyor.com/project/DrylandEcologyGit/rSOILWAT2/branch/master
+[1]: https://github.com/DrylandEcology/rSOILWAT2/actions/workflows/check-standard.yml/badge.svg?branch=main
+[2]: https://github.com/DrylandEcology/rSOILWAT2/actions
 [5]: https://img.shields.io/github/release/DrylandEcology/rSOILWAT2.svg?label=current+release
 [6]: https://github.com/DrylandEcology/rSOILWAT2/releases
 [7]: https://img.shields.io/github/license/DrylandEcology/rSOILWAT2.svg
 [8]: https://www.gnu.org/licenses/gpl.html
-[9]: https://coveralls.io/repos/github/DrylandEcology/rSOILWAT2/badge.svg
-[10]: https://coveralls.io/github/DrylandEcology/rSOILWAT2
+[9]: https://codecov.io/gh/DrylandEcology/rSOILWAT2/branch/main/graph/badge.svg
+[10]: https://codecov.io/gh/DrylandEcology/rSOILWAT2
 [11]: https://img.shields.io/github/downloads/DrylandEcology/rSOILWAT2/total.svg
-[12]: https://github.com/DrylandEcology/rSOILWAT2
+[SOILWAT2]: https://github.com/DrylandEcology/SOILWAT2
+[STEPWAT2]: https://github.com/DrylandEcology/STEPWAT2
+[rSFSTEP2]: https://github.com/DrylandEcology/rSFSTEP2
+[rSW2utils]: https://github.com/DrylandEcology/rSW2utils
+[rSFSTEP2]: https://github.com/DrylandEcology/rSFSTEP2
+[rSOILWAT2]: https://github.com/DrylandEcology/rSOILWAT2
+[rSW2data]: https://github.com/DrylandEcology/rSW2data
+[rSFSW2]: https://github.com/DrylandEcology/rSFSW2
+[issues]: https://github.com/DrylandEcology/rSOILWAT2/issues
+[pull request]: https://github.com/DrylandEcology/rSOILWAT2/pulls
+[guidelines]: https://github.com/DrylandEcology/workflow_guidelines
+[semantic versioning]: https://semver.org/
+[testthat]: https://github.com/r-lib/testthat
+[roxygen2]: https://cran.r-project.org/package=roxygen2
+[r-pkgs man]: https://r-pkgs.org/man.html
+[r-pkgs tests]: https://r-pkgs.org/tests.html
+
 
 <br>
-
-# rSOILWAT2
-A R package for SOILWAT2.
 
 ## Considerations
 
@@ -39,7 +51,7 @@ There is no graphical user interface, help pages and available documentation
 may be out of date, and you will need to write your own tools to analyze
 outputs.
 
-Note, the branch 'master' is deployable and is released with version numbers.
+Note, the branch 'main' is released with version numbers.
 
 Please cite the package if you publish results based on simulations carried
 out with our package, see `citation("rSOILWAT2")`, and we would like to hear
@@ -68,25 +80,43 @@ References for the original version of `Soilwat`
 <br>
 
 
-### Installation
+## Table of contents
 
-`rSOILWAT2` will compile the c code of
-[SOILWAT2](https://github.com/DrylandEcology/SOILWAT2) -- see section on
+1. [How to get started](#get_started)
+    1. [Installation](#install)
+    2. [Documentation](#get_documentation)
+2. [How to contribute](#contribute)
+    1. [Code guidelines](#follow_guidelines)
+    2. [Code documentation](#code_documentation)
+    3. [Code tests](#code_tests)
+    4. [Code versioning](#code_versioning)
+3. [Additional notes](#more_notes)
+
+<br>
+
+<a name="get_started"></a>
+## How to get started
+
+<a name="install"></a>
+## Installation
+
+`rSOILWAT2` compiles the c code of [SOILWAT2][] -- see section on
 binary version below for alternatives.
 Your computer must be set up adequately, i.e.,
 
 #### Minimal requirements include
   - on any platform:
-    - the [`gcc`][] or [`clang`/`llvm`][] toolchains;
+    - `gcc` or `clang`/`llvm` toolchains;
       ideally, `gcc >= v4.9` or `clang >= v3.3`
     - POSIX- [`make`](https://pubs.opengroup.org/onlinepubs/9699919799/) or
       GNU-compliant [`make`](https://www.gnu.org/software/make/)
-    - [`git`][] to download the code
+    - `git` to download the code
   - additionally, on Windows OS:
     - [`Rtools`](http://cran.us.r-project.org/bin/windows/Rtools/)
-      installed that match your R version.
+      that match your R version
   - on `macOS`:
-    - `xcode` command line tools (run `xcode-select --install` on the command line)
+    - `xcode` command line tools
+      (run `xcode-select --install` on the command line)
     - having agreed to the `xcode` license (run `xcodebuild -license`)
     - or, alternatively, the full [`xcode`](https://developer.apple.com/xcode)
       installation
@@ -104,7 +134,7 @@ Your computer must be set up adequately, i.e.,
     tinytex::install_tinytex()
     ```
 
-  * if you don't have write permission to `/usr/local/bin`,
+  * if you don't have write permission for `/usr/local/bin`,
     then appropriate symlinks are not generated;
     thus, locate the path to `tlmgr`, e.g.,
     with help of `tinytex::tinytex_root()`, and
@@ -122,70 +152,90 @@ Your computer must be set up adequately, i.e.,
 
   * On the command line
     ```{bash}
-    git clone -b master --single-branch --recursive https://github.com/DrylandEcology/rSOILWAT2.git rSOILWAT2
+    git clone -b main --single-branch --recursive \
+        https://github.com/DrylandEcology/rSOILWAT2.git rSOILWAT2
     R CMD INSTALL rSOILWAT2
     ```
 
-<br>
-
-
 
 ### Binary package version
-If you want a binary version of the 'rSOILWAT2' package (e.g., to distribute to
-someone without development tools) for a platform to which you do not have
-access, then you may consider using one of the cloud services (no endorsements):
-- https://builder.r-hub.io offers different Linux, Windows, and `macOS` flavors
-  as targets
-- http://win-builder.r-project.org/ offers Windows OS as target
+If you require a binary version of the 'rSOILWAT2' package
+(e.g., to distribute to someone without development tools)
+for a platform to which you do not have access,
+then you may consider using one of the cloud services (no endorsements), e.g.,
+- [rhub](https://builder.r-hub.io) offers different Linux,
+  Windows, and `macOS` flavors as targets
 
-Alternatively, you may access the previous binary package version for
-Windows OS from CI `appveyor` service if the build was successful and an
-artifact was generated for the binary package (this would be named
-'rSOILWAT2_X.Y.Z.zip' with version number X.Y.Z) at
-- https://ci.appveyor.com/project/dschlaep/rSOILWAT2/build/artifacts
-If the latest build should have failed, then you may want to check out the
-'History' tab for binaries of older versions.
-- After you downloaded the binary package, open R, and run
-  ```{r}
-  install.packages(pkgs = "path/to/downloaded/zipfile.zip", repos = NULL)
-  ```
+<br>
+
+<a name="get_documentation"></a>
+### Documentation
+View package documentation in an interactive R session with
+`help(package = "rSOILWAT2")`
 
 
 <br>
 
+<a name="contribute"></a>
+## How to contribute
+You can help us in different ways:
 
-### For code contributors only
+1. Reporting [issues][]
+2. Contributing code and sending a [pull request][]
 
-__Follow our guidelines__ as detailed [here](https://github.com/DrylandEcology/workflow_guidelines)
+Please note that this project is released with a
+[Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this
+project you agree to abide by its terms.
 
-__Tests, documentation, and code__ form a trinity
-- Code documentation
-  * Read the [section 'Object documentation' in the book 'R packages' by Wickham](http://r-pkgs.had.co.nz/man.html)
-  * Use [`roxygen2`](https://cran.r-project.org/web/packages/roxygen2/vignettes/formatting.html)
-    to write inline code documentation
-  * Update help pages and NAMESPACE with the command `devtools::document()`
-  * Ideally, add examples to function documentation and check these examples
+<br>
+
+
+<a name="follow_guidelines"></a>
+### Follow our guidelines as detailed [here][guidelines]
+
+<br>
+
+
+### Tests, documentation, and code
+
+<a name="code_documentation"></a>
+#### Code documentation
+  * This is based on the section
+    ['Object documentation' of the book 'R packages' by Wickham][r-pkgs man]
+  * Use [roxygen2][] to write inline code documentation of functions
+  * Use regular R-style comments to additionally document code
+  * Update help pages and the `NAMESPACE` file with the command
+    `devtools::document()`
+  * Add examples to function documentation and check that these examples work
     with the command `devtools::run_examples()`
-- Code tests
-  * Read the [section 'Testing' in the book 'R packages' by Wickham](http://r-pkgs.had.co.nz/tests.html)
+
+<br>
+
+<a name="code_tests"></a>
+#### Code tests and package checks
+  * This is based on the section
+    ['Testing' of the book 'R packages' by Wickham][r-pkgs tests]
+
   * Unit tests
-    * Use [`testthat`](https://github.com/hadley/testthat) to add unit tests to the
-      existing framework
-    * Run unit tests locally with the command `devtools::test()`
-    * These unit tests will also be run on the command-line with `R CMD check .`
-      which you can run also with `devtools::check()`
-    * The command-line check will be run on the continuous integration frameworks
-      `travis` and `appveyor` when commits are pushed
-    * Development/feature branches can only be merged into master if they pass
+    * Use [testthat][] to add unit tests to the existing framework
+    * Run unit tests with the command `devtools::test()`
+
+  * Package checks
+    * Package checks are run with
+      `devtools::check(cran = TRUE, env_vars = c(NOT_CRAN = "true"))` or
+      `R CMD build . && NOT_CRAN = "true" R CMD check *.tar.gz`
+    * Package checks include unit tests, code style, and spelling
+    * These checks will be run on the continuous integration frameworks
+      via a workflow in `Github Action` for pull requests
+    * Development/feature branches can only be merged into main if they pass
       all checks
-  * Integration tests/checks: run a default example and look at some of the
+
+    * Integration tests: run a default example and examine the
       output (see also `?sw_exec`), e.g.,
       ```{r}
       path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
-      x <- sw_exec(dir = path_demo, files.in = "files.in", quiet = TRUE)
-      str(x)
+      x <- rSOILWAT2::sw_exec(dir = path_demo)
       ```
-
 
   * __Run the following steps locally__
     in order to prepare a pull-request or commit that will be reviewed.
@@ -201,9 +251,6 @@ __Tests, documentation, and code__ form a trinity
        ```{r}
        devtools::run_examples()
        ```
-       Note: `devtools` v2.0.1 mixed up the logic for "dontrun" examples (see
-       https://github.com/r-lib/devtools/issues/2003); until this is fixed,
-       use `devtools::run_examples(run = FALSE)`.
 
     1. Run tests as if not on CRAN in an interactive R session.
        ```{r}
@@ -237,7 +284,6 @@ __Tests, documentation, and code__ form a trinity
          * `Sys.setenv(RSOILWAT_INTEGRATIONTESTS = "true"); devtools::test()`
          * `RSOILWAT_INTEGRATIONTESTS="true" R CMD check *tar.gz`
 
-
     1. Run R package-level checks as if on CRAN.
        ```{r}
        # Run in R.app, RStudio, or in an R terminal-session:
@@ -254,7 +300,7 @@ __Tests, documentation, and code__ form a trinity
 __Debugging compiled code__
   * Compile C code in `src/` and `src/SOILWAT2/` in 'debugging' mode.
     This will define `SWDEBUG` in `SOILWAT2` source code
-    (see [SOILWAT2's README](https://github.com/DrylandEcology/SOILWAT2)):
+    (see the README of [SOILWAT2][]):
     * Install package on the command line:
       ```
       MAKEFLAGS="PKG_DEBUG=-DRSWDEBUG" R CMD INSTALL --preclean --clean .
@@ -268,6 +314,7 @@ __Debugging compiled code__
   * For a more formal approach using `gdb`/`lldb`, please see the
     [section 'Debugging-compiled-code' in the 'R-exts' manual](https://cran.r-project.org/doc/manuals/R-exts.html#Debugging-compiled-code)
 
+
 __How to update the submodule 'SOILWAT2'__ to the latest commit
 ```
 git submodule update --remote #--remote: uses the latest commit; without --remote: uses the previously defined commit
@@ -275,9 +322,9 @@ git commit -am "Pulled down latest commit 'COMMIT-FLAG' for submodule SOILWAT2"
 git push
 ```
 
-Change branch of submodule `SOILWAT2`
+Change the branch of submodule `SOILWAT2`
 ```
-nano .gitmodules # and change branch = <branch> to the desired <branch>
+open .gitmodules # and change branch = <branch> to the desired <branch>
 
 git submodule init
 git submodule update --remote #--remote: uses the latest commit; without --remote: uses the previously defined commit
@@ -288,41 +335,35 @@ git push
 Run the script `./data-raw/prepare_testInput_objects.R` from within `rSOILWAT2/`
 if the `SOILWAT2` updated included changes to the input files.
 
+<br>
 
-### Version numbers
+<a name="code_versioning"></a>
+#### Version numbers
 
-We attempt to follow guidelines of [semantic versioning](http://semver.org/)
-with version numbers of `MAJOR.MINOR.PATCH`.
+We attempt to follow guidelines of [semantic versioning][] with version
+numbers of `MAJOR.MINOR.PATCH`.
 
-When the version numbers changes, then the package `DESCRIPTION` file
-must be adjusted as well
-(i.e., update 'Version' in the last commit before PR into master
-which will be the new release/version).
-
-### How to contribute
-You can help us in different ways:
-
-1. Reporting [issues](https://github.com/DrylandEcology/rSOILWAT2/issues)
-2. Contributing code and sending a [pull request](https://github.com/DrylandEcology/rSOILWAT2/pulls)
-
-In order to contribute to the code base of this project, you should first
-contact the Lauenroth Lab. We retain any decision to accept your
-suggestions/contributions or not.
+If the version numbers changes, then the following files must be updated
+* `DESCRIPTION`: adjust lines 'Version'
 
 
 <br>
 
+<a name="more_notes"></a>
+## Notes
 
-# Code of conduct
-Please note that this project is released with a
-[Contributor Code of Conduct](CONDUCT.md). By participating in this project you
-agree to abide by its terms.
+### Funding
+Work on this package has been supported by various funds managed by
+Dr. John Bradford (USGS), Dr. Bill Lauenroth (Yale University),
+Dr. Kyle Palmquist (Marshall University), and Dr. Daniel Schlaepfer.
 
 
-# License
+<br>
+
+### License
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation, [version 3 of the License](LICENSE).
+the Free Software Foundation, [version 3 of the License](LICENSE.md).
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -331,37 +372,3 @@ GNU General Public License for more details.
 
 
 <br>
-
-# Funding
-Work on this package has been supported by various funds managed by
-Dr. Bill Lauenroth (Yale University), Dr. John Bradford (USGS), and
-Dr. Daniel Schlaepfer.
-
-
-<br>
-
-# Notes
-
-__Organization renamed from Burke-Lauenroth-Lab to `DrylandEcology` on Dec 22, 2017__
-
-All existing information should [automatically be redirected](https://help.github.com/articles/renaming-a-repository/) to the new name.
-Contributors are encouraged, however, to update local clones to [point to the new URL](https://help.github.com/articles/changing-a-remote-s-url/), i.e.,
-```
-git remote set-url origin https://github.com/DrylandEcology/rSOILWAT2.git
-```
-
-
-__Repository renamed from `Rsoilwat` (`Rsoilwat31`) to rSOILWAT2 on Feb 23, 2017__
-
-All existing information should [automatically be redirected](https://help.github.com/articles/renaming-a-repository/) to the new name.
-
-Contributors are encouraged, however, to update local clones to [point to the new URL](https://help.github.com/articles/changing-a-remote-s-url/), i.e.,
-```
-git remote set-url origin https://github.com/DrylandEcology/rSOILWAT2.git
-```
-If you have installed a previous version as R package, then you may consider
-removing the old version with
-```{r}
-remove.packages("Rsoilwat31")
-```
-
