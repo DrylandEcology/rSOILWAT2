@@ -37,11 +37,10 @@ Remotes:
     github::DrylandEcology/rSW2data,
     github::DrylandEcology/rSW2exter
 NeedsCompilation: yes
-License: GPL-3 + file LICENSE
+License: GPL-3
 URL: https://github.com/DrylandEcology/rSOILWAT2
 BugReports: https://github.com/DrylandEcology/rSOILWAT2/issues
 RoxygenNote: 7.1.1
 LazyData: true
-ByteCompile: true
 Language: en-US
 VignetteBuilder: knitr
