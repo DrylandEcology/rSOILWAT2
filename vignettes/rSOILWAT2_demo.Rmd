@@ -236,7 +236,12 @@ You may organize weather data in a variety of ways:
 
 ### Access external data sets: for example, `DayMet`
 ```{r, weather_daymetr, results = "hide", message = FALSE, warning = FALSE}
-  if (requireNamespace("daymetr") && curl::has_internet()) {
+  if (
+    requireNamespace("daymetr") &&
+    requireNamespace("curl") &&
+    curl::has_internet()
+  ) {
+
     # Download from `DayMet`
     dm_Laramie <- try(daymetr::download_daymet(
       site = "testsite_name",
@@ -348,7 +353,12 @@ You may organize weather data in a variety of ways:
 
 ### Soils data from external datasets: e.g., `NRCS SSURGO/STATSGO via SDA`
 ```{r, soils_sda, results = "hide", message = FALSE, warning = FALSE}
-  if (requireNamespace("rSW2exter") && curl::has_internet()) {
+  if (
+    requireNamespace("rSW2exter") &&
+    requireNamespace("soilDB") &&
+    requireNamespace("curl") &&
+    curl::has_internet()
+  ) {
     tmp <- rSOILWAT2::swSite_IntrinsicSiteParams(sw_in)
 
     soils_sda <- rSW2exter::extract_soils_NRCS_SDA(

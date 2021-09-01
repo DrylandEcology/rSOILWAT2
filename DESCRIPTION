@@ -29,6 +29,7 @@ Suggests:
   lintr (>= 2.0.0),
   rmarkdown,
   rSW2exter (>= 0.1.0),
+  soilDB,
   spelling (>= 2.1.0),
   testthat
 Remotes:
