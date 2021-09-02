@@ -361,7 +361,7 @@ You may organize weather data in a variety of ways:
   ) {
     tmp <- rSOILWAT2::swSite_IntrinsicSiteParams(sw_in)
 
-    soils_sda <- rSW2exter::extract_soils_NRCS_SDA(
+    soils_sda <- try(rSW2exter::extract_soils_NRCS_SDA(
       x = matrix(tmp[c("Longitude", "Latitude")], nrow = 1),
       method = "SSURGO_then_STATSGO",
       remove_organic_horizons = "at_surface",
@@ -371,44 +371,49 @@ You may organize weather data in a variety of ways:
       impute = TRUE,
       progress_bar = FALSE,
       verbose = FALSE
-    )
+    ))
 
-
-    # Add homogenized soil layers
-    tmp <- grep("depth_L", colnames(soils_sda[["table_depths"]]))
-    soils_sda2 <- rSW2data::update_soil_profile(
-      soil_layers = soils_sda[["table_depths"]][1, tmp, drop = FALSE],
-      requested_soil_layers = c(
-        5,
-        seq(10, 100, by = 10),
-        seq(120, 200, by = 20)
-      ),
-      soil_data = soils_sda[["table_texture"]],
-      variables = c("dbovendry_L", "sandtotal_L", "claytotal_L", "fragvol_L"),
-      vars_exhaust = NULL,
-      keep_prev_soildepth = TRUE,
-      keep_prev_soillayers = FALSE
-    )
-
-    # Copy wide-data to rSOILWAT2-style soil data table
-    soil_new <- data.frame(rSOILWAT2::swSoils_Layers(sw_in)[0, ])
-    ids <- seq_len(ncol(soils_sda2[["soil_layers"]]))
-
-    # Soil layer depths
-    tmp <- grep("depth_L", colnames(soils_sda2[["soil_layers"]]))
-    soil_new[ids, "depth_cm"] <- soils_sda2[["soil_layers"]][1, tmp]
-
-    # Soil density, texture, and gravel
-    tmp <- grep("dbovendry_L", colnames(soils_sda2[["soil_data"]]))
-    soil_new[ids, "bulkDensity_g.cm.3"] <- soils_sda2[["soil_data"]][1, tmp]
-
-    tmp <- grep("sandtotal_L", colnames(soils_sda2[["soil_data"]]))
-    soil_new[ids, "sand_frac"] <- soils_sda2[["soil_data"]][1, tmp]
-    tmp <- grep("claytotal_L", colnames(soils_sda2[["soil_data"]]))
-    soil_new[ids, "clay_frac"] <- soils_sda2[["soil_data"]][1, tmp]
-
-    tmp <- grep("fragvol_L", colnames(soils_sda2[["soil_data"]]))
-    soil_new[ids, "gravel_content"] <- soils_sda2[["soil_data"]][1, tmp]
+    
+    if (inherits(soils_sda, "try-error")) {
+      warning("Vignette was not able to extract soils from NRCS SDA!")
+      
+    } else {
+      # Add homogenized soil layers
+      tmp <- grep("depth_L", colnames(soils_sda[["table_depths"]]))
+      soils_sda2 <- rSW2data::update_soil_profile(
+        soil_layers = soils_sda[["table_depths"]][1, tmp, drop = FALSE],
+        requested_soil_layers = c(
+          5,
+          seq(10, 100, by = 10),
+          seq(120, 200, by = 20)
+        ),
+        soil_data = soils_sda[["table_texture"]],
+        variables = c("dbovendry_L", "sandtotal_L", "claytotal_L", "fragvol_L"),
+        vars_exhaust = NULL,
+        keep_prev_soildepth = TRUE,
+        keep_prev_soillayers = FALSE
+      )
+  
+      # Copy wide-data to rSOILWAT2-style soil data table
+      soil_new <- data.frame(rSOILWAT2::swSoils_Layers(sw_in)[0, ])
+      ids <- seq_len(ncol(soils_sda2[["soil_layers"]]))
+  
+      # Soil layer depths
+      tmp <- grep("depth_L", colnames(soils_sda2[["soil_layers"]]))
+      soil_new[ids, "depth_cm"] <- soils_sda2[["soil_layers"]][1, tmp]
+  
+      # Soil density, texture, and gravel
+      tmp <- grep("dbovendry_L", colnames(soils_sda2[["soil_data"]]))
+      soil_new[ids, "bulkDensity_g.cm.3"] <- soils_sda2[["soil_data"]][1, tmp]
+  
+      tmp <- grep("sandtotal_L", colnames(soils_sda2[["soil_data"]]))
+      soil_new[ids, "sand_frac"] <- soils_sda2[["soil_data"]][1, tmp]
+      tmp <- grep("claytotal_L", colnames(soils_sda2[["soil_data"]]))
+      soil_new[ids, "clay_frac"] <- soils_sda2[["soil_data"]][1, tmp]
+  
+      tmp <- grep("fragvol_L", colnames(soils_sda2[["soil_data"]]))
+      soil_new[ids, "gravel_content"] <- soils_sda2[["soil_data"]][1, tmp]
+    }
   }
 ```
 
@@ -459,7 +464,7 @@ You may organize weather data in a variety of ways:
 ### Fractional land cover (vegetation composition)
 ```{r, vegcomp}
   # Note: `estimate_PotNatVeg_composition()` does not estimate fractional cover
-  # of trees, bare-ground, etc. and sets those to zero are any other user
+  # of trees, bare-ground, etc. and sets those to zero or any other user
   # defined value
   veg_cover <- rSOILWAT2::estimate_PotNatVeg_composition(
     MAP_mm = 10 * clim[["MAP_cm"]],
