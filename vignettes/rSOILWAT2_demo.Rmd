@@ -373,10 +373,10 @@ You may organize weather data in a variety of ways:
       verbose = FALSE
     ))
 
-    
+
     if (inherits(soils_sda, "try-error")) {
       warning("Vignette was not able to extract soils from NRCS SDA!")
-      
+
     } else {
       # Add homogenized soil layers
       tmp <- grep("depth_L", colnames(soils_sda[["table_depths"]]))
@@ -393,24 +393,24 @@ You may organize weather data in a variety of ways:
         keep_prev_soildepth = TRUE,
         keep_prev_soillayers = FALSE
       )
-  
+
       # Copy wide-data to rSOILWAT2-style soil data table
       soil_new <- data.frame(rSOILWAT2::swSoils_Layers(sw_in)[0, ])
       ids <- seq_len(ncol(soils_sda2[["soil_layers"]]))
-  
+
       # Soil layer depths
       tmp <- grep("depth_L", colnames(soils_sda2[["soil_layers"]]))
       soil_new[ids, "depth_cm"] <- soils_sda2[["soil_layers"]][1, tmp]
-  
+
       # Soil density, texture, and gravel
       tmp <- grep("dbovendry_L", colnames(soils_sda2[["soil_data"]]))
       soil_new[ids, "bulkDensity_g.cm.3"] <- soils_sda2[["soil_data"]][1, tmp]
-  
+
       tmp <- grep("sandtotal_L", colnames(soils_sda2[["soil_data"]]))
       soil_new[ids, "sand_frac"] <- soils_sda2[["soil_data"]][1, tmp]
       tmp <- grep("claytotal_L", colnames(soils_sda2[["soil_data"]]))
       soil_new[ids, "clay_frac"] <- soils_sda2[["soil_data"]][1, tmp]
-  
+
       tmp <- grep("fragvol_L", colnames(soils_sda2[["soil_data"]]))
       soil_new[ids, "gravel_content"] <- soils_sda2[["soil_data"]][1, tmp]
     }
