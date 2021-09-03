@@ -33,52 +33,6 @@
 
 <br>
 
-## Considerations
-
-We haven't really published the code yet nor prepared it for sharing (though
-through our use of `github` made it openly accessible), it is actively and
-gradually being developed by the Lauenroth lab and affiliates, and there is
-no manual either - we cannot give you individual support in setting up and
-running the model except if we agreed on a collaboration or similar agreement.
-
-Not every part of the code has been extensively tested or is in a stable state.
-Similarly, not every combination of model inputs and options has been evaluated
-in depth and there is not guarantee for anything to work. The code comes with
-no warranty and no guarantees, expressed or implied, as to suitability,
-completeness, accuracy, and whatever other claim you would like to make.
-
-There is no graphical user interface, help pages and available documentation
-may be out of date, and you will need to write your own tools to analyze
-outputs.
-
-Note, the branch 'main' is released with version numbers.
-
-Please cite the package if you publish results based on simulations carried
-out with our package, see `citation("rSOILWAT2")`, and we would like to hear
-about your publication.
-
-Some other references
-
-* Bradford, J. B., D. R. Schlaepfer, and W. K. Lauenroth. 2014. Ecohydrology of
-  adjacent sagebrush and lodgepole pine ecosystems: The consequences of climate
-  change and disturbance. Ecosystems 17:590-605.
-* Palmquist, K.A., Schlaepfer, D.R., Bradford, J.B., and Lauenroth, W.K. 2016.
-  Mid-latitude shrub steppe plant communities: climate change consequences for
-  soil water resources. Ecology 97:2342–2354.
-* Schlaepfer, D. R., W. K. Lauenroth, and J. B. Bradford. 2012. Ecohydrological
-  niche of sagebrush ecosystems. Ecohydrology 5:453-466.
-
-
-References for the original version of `Soilwat`
-
-* Parton, W.J. (1978). Abiotic section of ELM. In: Grassland simulation model
-  (ed. Innis, G.S.). Springer New York, NY, pp. 31-53.
-* Sala, O.E., Lauenroth, W.K. & Parton, W.J. (1992). Long-term soil-water
-  dynamics in the shortgrass steppe. Ecology, 73, 1175-1181.
-
-
-<br>
-
 
 ## Table of contents
 
@@ -100,11 +54,62 @@ References for the original version of `Soilwat`
 <a name="install"></a>
 ## Installation
 
-`rSOILWAT2` compiles the c code of [SOILWAT2][] -- see section on
-binary version below for alternatives.
-Your computer must be set up adequately, i.e.,
 
-#### Minimal requirements include
+
+#### Install rSOILWAT2
+
+
+Please not that `rSOILWAT2` compiles C source code of [SOILWAT2][]
+-- see section on binary version below for alternatives.
+Your computer must be set up adequately (see below for requirements).
+
+
+  * On the command line
+    ```{bash}
+    git clone -b main --single-branch --recursive \
+        https://github.com/DrylandEcology/rSOILWAT2.git rSOILWAT2
+    R CMD INSTALL rSOILWAT2
+    ```
+
+  * Using R
+    ```
+    system2(
+      command = "git",
+      args = paste(
+        "clone -b main --single-branch --recursive",
+        "https://github.com/DrylandEcology/rSOILWAT2.git",
+        "rSOILWAT2"
+      )
+    )
+    tools::Rcmd(args = "INSTALL rSOILWAT2")
+    ```
+
+  * Using the `remotes` R package
+    ```{r}
+    remotes::install_github("DrylandEcology/rSOILWAT2", build_vignettes = TRUE)
+    ```
+
+    Please note that "remotes" will download the latest version of [SOILWAT2][]
+    irrespective of what the actual submodule status requests
+    (see [remotes issue #260](https://github.com/r-lib/remotes/issues/260)).
+    If it happens that the latest [SOILWAT2][] version doesn't yet work
+    correctly with the latest version of `rSOILWAT2`
+    (as has happened in [issue #175](https://github.com/DrylandEcology/rSOILWAT2/issues/175)),
+    then please use one of the other options above to
+    correctly install `rSOILWAT2` or explore one of the development branches.
+
+
+### Binary package
+If you require a binary version of the 'rSOILWAT2' package
+(e.g., to distribute to someone without development tools)
+for a platform to which you do not have access,
+then you may consider using one of the cloud services (no endorsements), e.g.,
+- [rhub](https://builder.r-hub.io) offers different
+  `Linux`, `Windows`, and `macOS` flavors as targets
+
+
+
+### Minimal requirements
   - on any platform:
     - `gcc` or `clang`/`llvm` toolchains;
       ideally, `gcc >= v4.9` or `clang >= v3.3`
@@ -127,8 +132,7 @@ Your computer must be set up adequately, i.e.,
 
 
 #### Example instructions for a minimal `latex` installation
-  * details on [`tinytex`](https://yihui.name/tinytex/)
-  * install the R package `tinytex`
+  * install the R package [`tinytex`](https://yihui.name/tinytex/)
     ```{r}
     install.packages("tinytex")
     tinytex::install_tinytex()
@@ -143,30 +147,8 @@ Your computer must be set up adequately, i.e.,
     sudo [path/to/]tlmgr path add
     ```
 
-
-#### Install rSOILWAT2
-  * Using the `remotes` R package
-    ```{r}
-    remotes::install_github("DrylandEcology/rSOILWAT2", build_vignettes = TRUE)
-    ```
-
-  * On the command line
-    ```{bash}
-    git clone -b main --single-branch --recursive \
-        https://github.com/DrylandEcology/rSOILWAT2.git rSOILWAT2
-    R CMD INSTALL rSOILWAT2
-    ```
-
-
-### Binary package version
-If you require a binary version of the 'rSOILWAT2' package
-(e.g., to distribute to someone without development tools)
-for a platform to which you do not have access,
-then you may consider using one of the cloud services (no endorsements), e.g.,
-- [rhub](https://builder.r-hub.io) offers different Linux,
-  Windows, and `macOS` flavors as targets
-
 <br>
+
 
 <a name="get_documentation"></a>
 ### Documentation
@@ -351,6 +333,51 @@ If the version numbers changes, then the following files must be updated
 
 <a name="more_notes"></a>
 ## Notes
+
+### Citation
+Please cite the package if you publish results based on simulations carried
+out with our package, see `citation("rSOILWAT2")`, and we would like to hear
+about your publication.
+
+Some other references
+
+* Schlaepfer, D. R., W. K. Lauenroth, and J. B. Bradford. 2012. Ecohydrological
+  niche of sagebrush ecosystems. Ecohydrology 5:453-466.
+* Bradford, J. B., D. R. Schlaepfer, and W. K. Lauenroth. 2014. Ecohydrology of
+  adjacent sagebrush and lodgepole pine ecosystems: The consequences of climate
+  change and disturbance. Ecosystems 17:590-605.
+* Palmquist, K.A., Schlaepfer, D.R., Bradford, J.B., and Lauenroth, W.K. 2016.
+  Mid-latitude shrub steppe plant communities: climate change consequences for
+  soil water resources. Ecology 97:2342–2354.
+
+
+References for the original version of `Soilwat`
+
+* Parton, W.J. (1978). Abiotic section of ELM. In: Grassland simulation model
+  (ed. Innis, G.S.). Springer New York, NY, pp. 31-53.
+* Sala, O.E., Lauenroth, W.K. & Parton, W.J. (1992). Long-term soil-water
+  dynamics in the shortgrass steppe. Ecology, 73, 1175-1181.
+
+
+### Considerations and Caveats
+
+We haven't really published the code yet nor prepared it for sharing (though
+through our use of `github` made it openly accessible), it is actively and
+gradually being developed by the Lauenroth lab and affiliates, and there is
+no manual either - we cannot give you individual support in setting up and
+running the model except if we agreed on a collaboration or similar agreement.
+
+Not every part of the code has been extensively tested or is in a stable state.
+Similarly, not every combination of model inputs and options has been evaluated
+in depth and there is not guarantee for anything to work. The code comes with
+no warranty and no guarantees, expressed or implied, as to suitability,
+completeness, accuracy, and whatever other claim you would like to make.
+
+There is no graphical user interface, help pages and available documentation
+may be out of date, and you will need to write your own tools to analyze
+outputs.
+
+
 
 ### Funding
 Work on this package has been supported by various funds managed by
