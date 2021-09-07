@@ -17,9 +17,12 @@
 [STEPWAT2]: https://github.com/DrylandEcology/STEPWAT2
 [rSFSTEP2]: https://github.com/DrylandEcology/rSFSTEP2
 [rSW2utils]: https://github.com/DrylandEcology/rSW2utils
+[rSW2st]: https://github.com/DrylandEcology/rSW2st
+[rSW2data]: https://github.com/DrylandEcology/rSW2data
+[rSW2exter]: https://github.com/DrylandEcology/rSW2exter
+[rSW2funs]: https://github.com/DrylandEcology/rSW2funs
 [rSFSTEP2]: https://github.com/DrylandEcology/rSFSTEP2
 [rSOILWAT2]: https://github.com/DrylandEcology/rSOILWAT2
-[rSW2data]: https://github.com/DrylandEcology/rSW2data
 [rSFSW2]: https://github.com/DrylandEcology/rSFSW2
 [issues]: https://github.com/DrylandEcology/rSOILWAT2/issues
 [pull request]: https://github.com/DrylandEcology/rSOILWAT2/pulls
@@ -39,12 +42,13 @@
 1. [How to get started](#get_started)
     1. [Installation](#install)
     2. [Documentation](#get_documentation)
-2. [How to contribute](#contribute)
+2. [Overview of rSW2](#rSW2)
+3. [How to contribute](#contribute)
     1. [Code guidelines](#follow_guidelines)
     2. [Code documentation](#code_documentation)
     3. [Code tests](#code_tests)
     4. [Code versioning](#code_versioning)
-3. [Additional notes](#more_notes)
+4. [Additional notes](#more_notes)
 
 <br>
 
@@ -154,6 +158,34 @@ then you may consider using one of the cloud services (no endorsements), e.g.,
 ### Documentation
 View package documentation in an interactive R session with
 `help(package = "rSOILWAT2")`
+
+
+
+<br>
+
+<a name="rSW2"></a>
+## Overview of rSW2
+
+The `DrylandEcology` team hosts a group of related repositories and R packages.
+
+They are organized around two simulation models, i.e.,
+[SOILWAT2][], an dryland ecosystem water balance simulation model,
+and [STEPWAT2][], an individual-based model for dryland plant communities.
+They are both written in compiled languages.
+
+
+We developed a family of R packages to support
+[SOILWAT2][] and [STEPWAT2][] simulation experiments:
+* [rSW2utils][] provides miscellaneous utility tools
+* [rSW2st][] provides spatiotemporal tools
+  including functions to create and interact with `netCDF` files
+* [rSW2data][] provides input data preparation
+* [rSW2exter][] provides access to external data
+* [rSOILWAT2][] is a R package that directly connects to [SOILWAT2][]
+  in memory, i.e., without writing/reading input and output files to/from disk
+* [rSW2funs][] calculates new response variables from [rSOILWAT2][] output
+* [rSFSW2][] manages large [rSOILWAT2][] simulation experiment
+* [rSFSTEP2][] manages large [STEPWAT2][] simulation experiment
 
 
 <br>

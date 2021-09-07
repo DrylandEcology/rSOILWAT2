@@ -26,6 +26,7 @@ ecohydrological
 ecohydrology
 et
 evapotranspiration
+exter
 forb
 geoscientific
 gregorian
@@ -42,6 +43,7 @@ sensu
 shortgrass
 shrubland
 socio
+spatiotemporal
 submodule
 symlink
 toolchain
@@ -56,6 +58,7 @@ CMIP
 dontrun
 doy
 exts
+funs
 GTR
 iso
 MPa
@@ -118,11 +121,14 @@ Riahi
 Rotella
 roxygen
 rSOILWAT
+rSFSTEP
+rSW
 Sala
 Schlaepfer
 SOILWAT
 Springer
 SQLite
+STEPWAT
 Teeri
 testthat
 Tiwari
