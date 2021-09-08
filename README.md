@@ -1,8 +1,9 @@
 # rSOILWAT2: An Ecohydrological Ecosystem-Scale Water Balance Simulation Model
 
 <!-- badges: start -->
-[ ![R build status][1]][2] [ ![github release][5]][6] [![license][7]][8] [![codecov status][9]][10]
+[ ![R build status][1]][2] [ ![github release][5]][6] [![DOI][12]][13] [![license][7]][8] [![codecov status][9]][10]
 <!-- badges: end -->
+
 
 [1]: https://github.com/DrylandEcology/rSOILWAT2/actions/workflows/check-standard.yml/badge.svg?branch=main
 [2]: https://github.com/DrylandEcology/rSOILWAT2/actions
@@ -13,6 +14,8 @@
 [9]: https://codecov.io/gh/DrylandEcology/rSOILWAT2/branch/main/graph/badge.svg
 [10]: https://codecov.io/gh/DrylandEcology/rSOILWAT2
 [11]: https://img.shields.io/github/downloads/DrylandEcology/rSOILWAT2/total.svg
+[12]: https://zenodo.org/badge/15520848.svg
+[13]: https://doi.org/10.5281/zenodo.5495139
 [SOILWAT2]: https://github.com/DrylandEcology/SOILWAT2
 [STEPWAT2]: https://github.com/DrylandEcology/STEPWAT2
 [rSFSTEP2]: https://github.com/DrylandEcology/rSFSTEP2
