@@ -1,11 +1,8 @@
-# Package stuff
 ^LICENSE\.md$
 ^CODE_OF_CONDUCT\.md$
 ^Meta$
 ^doc$
 ^data-raw$
-
-# git and continuous integration stuff
 \.git*
 ^\.travis\.yml$
 ^appveyor\.yml$
@@ -14,17 +11,10 @@
 ^codecov\.yml$
 ^\.lintr$
 ^\.github$
-
-# RStudio stuff
 ^.*\.Rproj$
 ^\.Rproj\.user$
-
-# CRAN stuff
 ^cran-comments\.md$
 ^NEWS\.md$
-
-
-# C code and other SOILWAT2 submodule stuff
 src/SOILWAT2/\.git
 src/SOILWAT2/doc
 src/SOILWAT2/googletest
