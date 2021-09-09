@@ -10,9 +10,9 @@ PKG_LIBS = -L$(path_target) -l$(target)  # $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
 
 # Targets
-.PHONY: all $(path_target)/$(lib_target)
+.PHONY: all $(path_target)/$(lib_target) clean
 
-all: $(SHLIB)
+all: clean $(SHLIB)
 
 $(SHLIB): $(path_target)/$(lib_target)
 
