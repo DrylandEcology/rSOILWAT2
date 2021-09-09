@@ -51,6 +51,7 @@ weatherDF_dataColumns <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
 # This function is needed for appveyor: for some reason 'dbW_createDatabase'
 # doesn't remove (in any situation) failed disk files 'fdbWeather'; this is not
 # a problem on travis or on my local macOS
+# It doesn't work on Github Actions Windows 64bit
 unlink_forcefully <- function(x, recursive = TRUE, force = TRUE, info = NULL) {
   if (file.exists(x)) {
     message(paste0(info, ": file ", x, " should not exists, but it does - ",
@@ -81,6 +82,7 @@ test_that("dbW creation", {
   # remove once issue #43 is fixed (unit tests for 'test_dbW_functionality.R'
   # fail on appveyor but not on travis)
   skip_on_appveyor()
+  skip_on_os("windows")
 
   #--- Attempt to connect to (no) weather database
   unlink(fdbWeather)
