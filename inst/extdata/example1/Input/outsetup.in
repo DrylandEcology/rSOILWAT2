@@ -44,9 +44,9 @@ OUTSEP c
 TIMESTEP dy wk mo yr # must be lowercase
 
 #         KEY     SUMTYPE   PERIOD   START END FILENAME_PREFIX      DESCRIPTION
-         TEMP     AVG       WK       1     end        temp_air      /* max., min, average temperature (C) */
-       PRECIP     SUM       MO       1     end          precip      /* total precip = sum(rain, snow), rain, snow-fall, snowmelt, and snowloss (cm) */
-   SOILINFILT     SUM       YR       1     end    infiltration      /* water to infiltrate in top soil layer (cm), runoff (cm); (not-intercepted rain)+(snowmelt-runoff) */
+         TEMP     AVG       WK       1     end        temp_air      /* max., min, average air temperature (C) */
+       PRECIP     SUM       MO       1     end          precip      /* precipitation, rainfall, snowfall, snowmelt, and snowloss (sublimation) (cm) */
+   SOILINFILT     SUM       YR       1     end    infiltration      /* water to infiltrate in top soil layer (cm) */
        RUNOFF     SUM       WK       1     end          runoff      /* runoff/runon (cm): net runoff, runoff from ponded water, runoff from snowmelt, runon of surface water from hypothetical upslope neighbor */
       VWCBULK     AVG       MO       1     end        vwc_bulk      /* bulk volumetric soilwater (cm / layer) */
     VWCMATRIC     AVG       YR       1     end      vwc_matric      /* matric volumetric soilwater (cm / layer) */
@@ -62,7 +62,7 @@ TIMESTEP dy wk mo yr # must be lowercase
  INTERCEPTION     SUM       MO       1     end    interception      /* intercepted rain (cm): total, trees, shrubs, forbs, grasses, and litter (cm) */
      LYRDRAIN     SUM       DY       1     end     percolation      /* water percolated from each layer (cm) */
        HYDRED     SUM       WK       1     end          hydred      /* hydraulic redistribution from each layer (cm): total, trees, shrubs, forbs, grasses */
-          AET     SUM       YR       1     end             aet      /* actual evapotranspiration (cm) */
+          AET     SUM       YR       1     end             aet      /* actual evapotranspiration (cm), transpiration (cm), bare-soil evaporation (cm), evaporation from canopy water (cm), evaporation from ponded water (cm), evaporation from snow (sublimation) (cm) */
           PET     SUM       DY       1     end             pet      /* potential evapotranspiration (cm), extraterrestrial horizontal solar irradiation [MJ/m2], extraterrestrial tilted solar irradiation [MJ/m2], global horizontal irradiation [MJ/m2], global tilted irradiation [MJ/m2] */
        WETDAY     SUM       DY       1     end         wetdays      /* days above swc_wet */
      SNOWPACK     AVG       WK       1     end        snowpack      /* snowpack water equivalent (cm), snowdepth (cm); since snowpack is already summed, use avg - sum sums the sums = nonsense */
@@ -70,5 +70,5 @@ TIMESTEP dy wk mo yr # must be lowercase
      SOILTEMP     AVG       MO       1     end       temp_soil      /* soil temperature from each soil layer (in celsius) */
        ESTABL     OFF       YR       1     end          estabs      /* yearly establishment results */
    CO2EFFECTS     AVG       DY       1     end      co2effects      /* vegetation CO2-effect (multiplier) for trees, shrubs, forbs, grasses; WUE CO2-effect (multiplier) for trees, shrubs, forbs, grasses */
-      BIOMASS     AVG       DY       1     end      vegetation      /* vegetation: cover (%) for trees, shrubs, forbs, grasses; biomass (g/m2 as component of total) for total, trees, shrubs, forbs, grasses, and litter; live biomass (g/m2 as component of total) total, trees, shrubs, forbs, grasses */
+      BIOMASS     AVG       DY       1     end      vegetation      /* vegetation: cover (%) for trees, shrubs, forbs, grasses; biomass (g/m2 as component of total) for total, trees, shrubs, forbs, grasses, and litter; live biomass (g/m2 as component of total) total, trees, shrubs, forbs, grasses; leaf area index LAI (m2/m2) */
 

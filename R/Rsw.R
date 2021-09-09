@@ -107,7 +107,7 @@ sw_args <- function(dir, files.in, echo, quiet) {
 #' sw_in <- rSOILWAT2::sw_exampleData
 #'
 #' ## Slots of the input object of \code{\linkS4class{swInputData}}
-#' str(sw_in, max.level = 2)
+#' utils::str(sw_in, max.level = 2)
 #'
 #' ## Execute the simulation run
 #' sw_out <- sw_exec(inputData = sw_in)
@@ -121,7 +121,7 @@ sw_args <- function(dir, files.in, echo, quiet) {
 #' sw_out1 <- sw_exec(dir = path_demo, files.in = "files.in", quiet = TRUE)
 #'
 #' ## Slots of the output object of class 'swOutput'
-#' str(sw_out1, max.level=2)
+#' utils::str(sw_out1, max.level=2)
 #'
 #'
 #' ## ------ Simulation with data prepared beforehand ------------
@@ -129,7 +129,7 @@ sw_args <- function(dir, files.in, echo, quiet) {
 #' sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 #'
 #' ## Slots of the input object of \code{\linkS4class{swInputData}}
-#' str(sw_in2, max.level = 2)
+#' utils::str(sw_in2, max.level = 2)
 #'
 #' ## Execute the simulation run
 #' sw_out2 <- sw_exec(inputData = sw_in2, quiet = TRUE)
@@ -147,7 +147,7 @@ sw_args <- function(dir, files.in, echo, quiet) {
 #'    startYear = 1979, endYear = 2010)
 #'
 #' ## List of the slots of the input objects of class 'swWeatherData'
-#' str(sw_weath3, max.level = 1)
+#' utils::str(sw_weath3, max.level = 1)
 #'
 #' ## Execute the simulation run
 #' sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3, quiet = TRUE)
@@ -173,7 +173,31 @@ sw_args <- function(dir, files.in, echo, quiet) {
 #' swCarbon_Use_WUE(sw_in5) <- 1L
 #'
 #' ## Execute the simulation run
-#' sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3, quiet = TRUE)
+#' sw_out5 <- sw_exec(inputData = sw_in5, weatherList = sw_weath3, quiet = TRUE)
+#'
+#'
+#'
+#' ## ------ Simulation with reduced set of outputs ------------
+#' sw_in6 <- sw_in3
+#'
+#' swof <- rSOILWAT2::sw_out_flags()
+#' tmp <- c(
+#'   "sw_temp", "sw_precip", "sw_snow",
+#'   "sw_inf_soil", "sw_deepdrain",
+#'   "sw_vwcbulk", "sw_swcbulk", "sw_swp", "sw_soiltemp",
+#'   "sw_aet", "sw_pet",
+#'   "sw_veg"
+#' )
+#'
+#' slot(slot(sw_in6, "output"), "use")[] <- FALSE
+#' activate_swOUT_OutKey(sw_in6) <- swof[names(swof) %in% tmp]
+#' rSOILWAT2::swOUT_TimeStepsForEveryKey(sw_in6) <-
+#'   c(daily = 0, monthly = 2, yearly = 3)
+#'
+#' ## Execute the simulation run
+#' sw_out6 <- sw_exec(inputData = sw_in6, weatherList = sw_weath3, quiet = TRUE)
+#'
+#' print(round(as.numeric(object.size(sw_out6) / object.size(sw_out5)), 2))
 #'
 #'
 #' ## See help(package = "rSOILWAT2") for a full list of functions
@@ -253,10 +277,10 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
 #' sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 #'
 #' ## Slots of the input object of \code{\linkS4class{swInputData}}
-#' str(sw_in2, max.level = 2)
+#' utils::str(sw_in2, max.level = 2)
 #'
 #' ## Execute the simulation run
-#' \dontrun{sw_out2 <- sw_exec(inputData = sw_in2)}
+#' sw_out2 <- sw_exec(inputData = sw_in2)
 #'
 #'
 #' @export
@@ -313,10 +337,10 @@ sw_outputData <- function(inputData) {
 #' sw_in <- rSOILWAT2::sw_exampleData
 #'
 #' ## Slots of the input object of class \code{\linkS4class{swInputData}}
-#' str(sw_in, max.level = 2)
+#' utils::str(sw_in, max.level = 2)
 #'
 #' ## Execute the simulation run
-#' \dontrun{sw_out <- sw_exec(inputData = sw_in)}
+#' sw_out <- sw_exec(inputData = sw_in)
 #'
 #' @export
 sw_inputData <- function() {
@@ -324,7 +348,7 @@ sw_inputData <- function() {
   on.exit(setwd(dir_prev), add = TRUE)
 
   temp <- new("swInputData") # data are from calls to `initialize`-methods
-  data(package = "rSOILWAT2", "weatherData", envir = environment())
+  utils::data(package = "rSOILWAT2", "weatherData", envir = environment())
   slot(temp, "weatherHistory") <- get("weatherData", envir = environment())
 
   temp

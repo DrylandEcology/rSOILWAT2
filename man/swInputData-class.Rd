@@ -191,6 +191,8 @@
 \alias{swOUT_TimeStep<-,swInputData-method}
 \alias{swOUT_TimeStepsForEveryKey<-,swInputData-method}
 \alias{swOUT_OutputSeparator<-,swInputData-method}
+\alias{activate_swOUT_OutKey<-,swInputData-method}
+\alias{deactivate_swOUT_OutKey<-,swInputData-method}
 \alias{swLog_setLine<-,swInputData-method}
 \alias{swReadLines,swInputData,character-method}
 \title{Class \code{"swInputData"}}
@@ -574,6 +576,10 @@
 \S4method{swOUT_TimeStepsForEveryKey}{swInputData}(object) <- value
 
 \S4method{swOUT_OutputSeparator}{swInputData}(object) <- value
+
+\S4method{activate_swOUT_OutKey}{swInputData}(object) <- value
+
+\S4method{deactivate_swOUT_OutKey}{swInputData}(object) <- value
 
 \S4method{swLog_setLine}{swInputData}(object) <- value
 

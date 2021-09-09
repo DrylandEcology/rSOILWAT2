@@ -1482,6 +1482,22 @@ setReplaceMethod("swOUT_OutputSeparator", signature = "swInputData",
     object
 })
 
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod("activate_swOUT_OutKey", signature = "swInputData",
+  function(object, value) {
+    activate_swOUT_OutKey(object@output) <- value
+    object
+})
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod("deactivate_swOUT_OutKey", signature = "swInputData",
+  function(object, value) {
+    deactivate_swOUT_OutKey(object@output) <- value
+    object
+})
+
 
 # Methods for slot \code{log}
 #' @rdname swInputData-class

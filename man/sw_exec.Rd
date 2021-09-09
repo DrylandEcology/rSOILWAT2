@@ -69,7 +69,7 @@ currently, \pkg{rSOILWAT2} does not contain code to estimate these values.
 sw_in <- rSOILWAT2::sw_exampleData
 
 ## Slots of the input object of \code{\linkS4class{swInputData}}
-str(sw_in, max.level = 2)
+utils::str(sw_in, max.level = 2)
 
 ## Execute the simulation run
 sw_out <- sw_exec(inputData = sw_in)
@@ -83,7 +83,7 @@ path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 sw_out1 <- sw_exec(dir = path_demo, files.in = "files.in", quiet = TRUE)
 
 ## Slots of the output object of class 'swOutput'
-str(sw_out1, max.level=2)
+utils::str(sw_out1, max.level=2)
 
 
 ## ------ Simulation with data prepared beforehand ------------
@@ -91,7 +91,7 @@ str(sw_out1, max.level=2)
 sw_in2 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 
 ## Slots of the input object of \code{\linkS4class{swInputData}}
-str(sw_in2, max.level = 2)
+utils::str(sw_in2, max.level = 2)
 
 ## Execute the simulation run
 sw_out2 <- sw_exec(inputData = sw_in2, quiet = TRUE)
@@ -109,7 +109,7 @@ sw_weath3 <- getWeatherData_folders(
    startYear = 1979, endYear = 2010)
 
 ## List of the slots of the input objects of class 'swWeatherData'
-str(sw_weath3, max.level = 1)
+utils::str(sw_weath3, max.level = 1)
 
 ## Execute the simulation run
 sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3, quiet = TRUE)
@@ -135,7 +135,31 @@ swCarbon_Use_Bio(sw_in5) <- 1L
 swCarbon_Use_WUE(sw_in5) <- 1L
 
 ## Execute the simulation run
-sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3, quiet = TRUE)
+sw_out5 <- sw_exec(inputData = sw_in5, weatherList = sw_weath3, quiet = TRUE)
+
+
+
+## ------ Simulation with reduced set of outputs ------------
+sw_in6 <- sw_in3
+
+swof <- rSOILWAT2::sw_out_flags()
+tmp <- c(
+  "sw_temp", "sw_precip", "sw_snow",
+  "sw_inf_soil", "sw_deepdrain",
+  "sw_vwcbulk", "sw_swcbulk", "sw_swp", "sw_soiltemp",
+  "sw_aet", "sw_pet",
+  "sw_veg"
+)
+
+slot(slot(sw_in6, "output"), "use")[] <- FALSE
+activate_swOUT_OutKey(sw_in6) <- swof[names(swof) \%in\% tmp]
+rSOILWAT2::swOUT_TimeStepsForEveryKey(sw_in6) <-
+  c(daily = 0, monthly = 2, yearly = 3)
+
+## Execute the simulation run
+sw_out6 <- sw_exec(inputData = sw_in6, weatherList = sw_weath3, quiet = TRUE)
+
+print(round(as.numeric(object.size(sw_out6) / object.size(sw_out5)), 2))
 
 
 ## See help(package = "rSOILWAT2") for a full list of functions

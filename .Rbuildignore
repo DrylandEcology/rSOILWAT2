@@ -1,7 +1,30 @@
+# Package stuff
+^LICENSE\.md$
+^CODE_OF_CONDUCT\.md$
 ^Meta$
 ^doc$
+^data-raw$
+
+# git and continuous integration stuff
 \.git*
-CONDUCT.md
+^\.travis\.yml$
+^appveyor\.yml$
+^\.appveyor\.yml$
+^\.appveyor_clear_cache\.txt$
+^codecov\.yml$
+^\.lintr$
+^\.github$
+
+# RStudio stuff
+^.*\.Rproj$
+^\.Rproj\.user$
+
+# CRAN stuff
+^cran-comments\.md$
+^NEWS\.md$
+
+
+# C code and other SOILWAT2 submodule stuff
 src/SOILWAT2/\.git
 src/SOILWAT2/doc
 src/SOILWAT2/googletest
@@ -21,9 +44,3 @@ src/*\.so
 src/*\.dll
 src/SOILWAT2/*\.o
 src/SOILWAT2/*\.a
-^\.travis\.yml$
-^appveyor\.yml$
-^\.appveyor_clear_cache\.txt$
-^codecov\.yml$
-^data-raw$
-^\.lintr$

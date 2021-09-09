@@ -80,7 +80,9 @@ void onSet_SW_OUT(SEXP OUT) {
 	int i, msg_type;
 	OutKey k;
 	SEXP sep, outfile, tp_convert;
-	int *use, *timePeriods, *mykey, *myobj, *sumtype, *first_orig, *last_orig;
+	int *use, *timePeriods, *sumtype, *first_orig, *last_orig;
+	// mykey and myobj are currently unused:
+	// int *mykey, *myobj;
 	char
 		stub[10],
 		msg[200]; // message to print
@@ -102,8 +104,9 @@ void onSet_SW_OUT(SEXP OUT) {
 	timePeriods = INTEGER(tp_convert);
 	used_OUTNPERIODS = INTEGER(GET_DIM(GET_SLOT(OUT, install("timeSteps"))))[1]; // number of columns
 
-	mykey = INTEGER(GET_SLOT(OUT, install("mykey")));
-	myobj = INTEGER(GET_SLOT(OUT, install("myobj")));
+	// mykey and myobj are currently unused:
+	// mykey = INTEGER(GET_SLOT(OUT, install("mykey")));
+	// myobj = INTEGER(GET_SLOT(OUT, install("myobj")));
 	sumtype = INTEGER(GET_SLOT(OUT, install("sumtype")));
 	use = LOGICAL(GET_SLOT(OUT, install("use")));
 	first_orig = INTEGER(GET_SLOT(OUT, install("first_orig")));
