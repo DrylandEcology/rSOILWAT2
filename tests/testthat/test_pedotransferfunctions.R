@@ -29,29 +29,42 @@ texture <- data.frame(
   sand = c(0.92, 0.82, 0.58, 0.43, 0.17, 0.58, 0.32, 0.10, 0.52, 0.06, 0.22),
   clay = c(0.03, 0.06, 0.10, 0.18, 0.13, 0.27, 0.34, 0.34, 0.42, 0.47, 0.58)
 )
-row.names(texture) <- c("Sand", "Loamy sand", "Sandy loam", "Loam",
+row.names(texture) <- c(
+  "Sand", "Loamy sand", "Sandy loam", "Loam",
   "Silty loam", "Sandy clay loam", "Clay loam", "Silty clay loam", "Sandy clay",
-  "Silty clay", "Clay")
+  "Silty clay", "Clay"
+)
 
 # Field capacity and agricultural permanent wilting point
 swp_fix <- c(fc = -0.0333, pwp = -1.5) # MPa
 vwc_fix <- data.frame(
-  fc = c(0.103519295200457, 0.138084712513314, 0.210684319180335,
+  fc = c(
+    0.103519295200457, 0.138084712513314, 0.210684319180335,
     0.276327910591054, 0.344767253784927, 0.259008902122202, 0.331526118930414,
-    0.391036796958834, 0.292943352979446, 0.4058577839142, 0.368820489547312),
-  pwp = c(0.0325953572147933, 0.05064269086372, 0.0903291990594713,
+    0.391036796958834, 0.292943352979446, 0.4058577839142, 0.368820489547312
+  ),
+  pwp = c(
+    0.0325953572147933, 0.05064269086372, 0.0903291990594713,
     0.143273427070284, 0.163171562436244, 0.152236773973314, 0.210032386550814,
-    0.248623511289573, 0.196521033130402, 0.282030801991246, 0.269525768616734)
+    0.248623511289573, 0.196521033130402, 0.282030801991246, 0.269525768616734
+  )
 )
 row.names(vwc_fix) <- row.names(texture)
 
 ftemp <- file.path("..", "test_data", "swp_values.rds")
 if (FALSE) {
-  swp_vals <- unlist(lapply(row.names(texture), function(itext)
-    VWCtoSWP(vwc_fix, texture[itext, "sand"], texture[itext, "clay"])))
+  swp_vals <- unlist(lapply(
+    row.names(texture),
+    function(itext) {
+      VWCtoSWP(vwc_fix, texture[itext, "sand"], texture[itext, "clay"])
+    }
+  ))
   dim(swp_vals) <- c(nrow(vwc_fix), ncol(vwc_fix), nrow(texture))
-  dimnames(swp_vals) <- list(row.names(texture), names(swp_fix),
-    row.names(texture))
+  dimnames(swp_vals) <- list(
+    row.names(texture),
+    names(swp_fix),
+    row.names(texture)
+  )
   saveRDS(swp_vals, file = ftemp)
 
 } else {
@@ -59,92 +72,122 @@ if (FALSE) {
 }
 
 #--- Tests
-test_that("To SWP", {
-  # 1. VWC in fraction [single value] + sand and clay in fraction [single vals]
-  #    --> SWP in MPa [single value]
-  for (ifix in names(swp_fix)) for (itext in row.names(texture))
-    expect_equivalent(swp_fix[ifix],
-      VWCtoSWP(vwc_fix[itext, ifix], texture[itext, "sand"],
-        texture[itext, "clay"]))
-
-  # 2. VWC in fraction [single value] + sand and clay in fraction
-  #    [vectors of length d]
-  #    --> SWP in MPa [vector of length d]
-  for (ifix in names(swp_fix)) for (itext in row.names(texture))
-    expect_equivalent(swp_vals[itext, ifix, ],
-      VWCtoSWP(vwc_fix[itext, ifix], texture[, "sand"], texture[, "clay"]))
-
-  # 3. VWC in fraction [vector of length l] + sand and clay in fraction
-  #    [single values]
-  #    --> SWP in MPa [vector of length l]
-  for (ifix in names(swp_fix)) for (itext in row.names(texture))
-    expect_equivalent(swp_vals[, ifix, itext],
-      VWCtoSWP(vwc_fix[, ifix], texture[itext, "sand"], texture[itext, "clay"]))
-
-  # 4. VWC in fraction [vector of length l] + sand and clay in fraction
-  #    [vectors of length d]
-  #    --> SWP in MPa [matrix with nrow = l and ncol = d, VWC vector repeated
-  #        for each column]: probably not used
-  for (ifix in names(swp_fix))
-    expect_equivalent(swp_vals[, ifix, ],
-      VWCtoSWP(vwc_fix[, ifix], texture[, "sand"], texture[, "clay"]))
-
-  # 5. VWC in fraction [matrix with nrow = l and ncol = d] + sand and clay in
-  #    fraction [single values]
-  #    --> SWP in MPa [matrix with nrow = l and ncol = d]
-  for (itext in row.names(texture))
-    expect_equivalent(swp_vals[, , itext],
-      VWCtoSWP(vwc_fix, texture[itext, "sand"], texture[itext, "clay"]))
-
-  # 6. VWC in fraction [matrix with nrow = l and ncol = d] + sand and clay in
-  #    fraction [vectors of length d]
-  #    --> SWP in MPa [matrix with nrow = l and ncol = d, sand/clay vector
-  #        repeated for each row]
+test_that("Use SWRC to convert between VWC/SWP", {
+  # 1. x [len = 1] + soils [len = 1] --> res [len = 1]
   for (ifix in names(swp_fix)) {
-    xin <- matrix(vwc_fix[, ifix], nrow = nrow(vwc_fix), ncol = nrow(texture),
-      byrow = TRUE)
-    xout <- matrix(swp_fix[ifix], nrow = nrow(vwc_fix), ncol = nrow(texture))
-    expect_equivalent(xout,
-      VWCtoSWP(xin, texture[, "sand"], texture[, "clay"]))
+    for (itext in row.names(texture)) {
+      expect_equivalent(
+        VWCtoSWP(
+          vwc_fix[itext, ifix],
+          sand = texture[itext, "sand"],
+          clay = texture[itext, "clay"]
+        ),
+        swp_fix[ifix]
+      )
+
+      expect_equivalent(
+        SWPtoVWC(
+          swp_fix[ifix],
+          sand = texture[itext, "sand"],
+          clay = texture[itext, "clay"]
+        ),
+        vwc_fix[itext, ifix]
+      )
+    }
   }
-})
 
 
-test_that("To VWC", {
-  # 1. SWP in MPa [single value] + sand and clay in fraction [single values]
-  #    --> VWC in fraction [single value]
-  for (ifix in names(swp_fix)) for (itext in row.names(texture))
-    expect_equivalent(vwc_fix[itext, ifix],
-      SWPtoVWC(swp_fix[ifix], texture[itext, "sand"], texture[itext, "clay"]))
+  # 2. x [len = 1] + soils [len = d] --> res [len = d]
+  for (ifix in names(swp_fix)) {
+    for (itext in row.names(texture)) {
+      expect_equivalent(
+        VWCtoSWP(
+          vwc_fix[itext, ifix],
+          sand = texture[, "sand"],
+          clay = texture[, "clay"]
+        ),
+        swp_vals[itext, ifix, ]
+      )
 
-  # 2. SWP in MPa [single value] + sand and clay in fraction
-  #    [vectors of length d]
-  #    --> VWC in fraction [vector of length d]
-  for (ifix in names(swp_fix)) for (itext in row.names(texture))
-    expect_equivalent(vwc_fix[, ifix],
-      SWPtoVWC(swp_fix[ifix], texture[, "sand"], texture[, "clay"]))
+      expect_equivalent(
+        SWPtoVWC(
+          swp_fix[ifix],
+          sand = texture[, "sand"],
+          clay = texture[, "clay"]
+        ),
+        vwc_fix[, ifix]
+      )
+    }
+  }
 
-  # 3. SWP in MPa [vector of length l] + sand and clay in fraction
-  #    [single values]
-  #    --> VWC in fraction [vector of length l]
-  for (ifix in names(swp_fix)) for (itext in row.names(texture))
+
+  # 3. x [len = l] + soils [len = 1] --> res [len = l]
+  for (ifix in names(swp_fix)) {
+    for (itext in row.names(texture)) {
+      expect_equivalent(
+        VWCtoSWP(
+          vwc_fix[, ifix],
+          sand = texture[itext, "sand"],
+          clay = texture[itext, "clay"]
+        ),
+        swp_vals[, ifix, itext]
+      )
+
+      expect_equivalent(
+        SWPtoVWC(
+          rep(swp_fix[ifix], nrow(texture)),
+          sand = texture[itext, "sand"],
+          clay = texture[itext, "clay"]
+        ),
+        rep(vwc_fix[itext, ifix], nrow(texture))
+      )
+    }
+  }
+
+  # 4. x [len = l] + soils [len = d] -> res [dim = l x d]
+  # (x vector repeated for each soil): probably not used
+  for (ifix in names(swp_fix)) {
     expect_equivalent(
-      SWPtoVWC(rep(swp_fix[ifix], nrow(texture)), texture[itext, "sand"],
-        texture[itext, "clay"]),
-      rep(vwc_fix[itext, ifix], nrow(texture)))
+      VWCtoSWP(
+        vwc_fix[, ifix],
+        sand = texture[, "sand"],
+        clay = texture[, "clay"]
+      ),
+      swp_vals[, ifix, ]
+    )
+  }
 
-  # 4. SWP in MPa [vector of length l] + sand and clay in fraction
-  #    [vectors of length d]
-  #    --> VWC in fraction [matrix with nrow = l and ncol = d, SWP vector
-  #        repeated for each column]: probably not used
+  # 5. x [dim = l x d] + soils [len = 1] --> res [dim = l x d]
+  for (itext in row.names(texture)) {
+    expect_equivalent(
+      VWCtoSWP(
+        vwc_fix,
+        sand = texture[itext, "sand"],
+        clay = texture[itext, "clay"]
+      ),
+      swp_vals[, , itext]
+    )
+  }
 
-  # 5. SWP in MPa [matrix with nrow = l and ncol = d] + sand and clay in
-  #    fraction [single values]
-  #    --> VWC in fraction [matrix with nrow = l and ncol = d]
-
-  # 6. SWP in MPa [matrix with nrow = l and ncol = d] + sand and clay in
-  #    fraction [vectors of length d]
-  #    --> VWC in fraction [matrix with nrow = l and ncol = d, sand/clay vector
-  #        repeated for each row]
-
+  # 6. x [dim = l x d] + soils [len = d] --> res [dim = l x d]
+  # (soils vectors repeated for each row of x)
+  for (ifix in names(swp_fix)) {
+    expect_equivalent(
+      VWCtoSWP(
+        matrix(
+          vwc_fix[, ifix],
+          nrow = nrow(vwc_fix),
+          ncol = nrow(texture),
+          byrow = TRUE
+        ),
+        sand = texture[, "sand"],
+        clay = texture[, "clay"]
+      ),
+      matrix(
+        swp_fix[ifix],
+        nrow = nrow(vwc_fix),
+        ncol = nrow(texture)
+      )
+    )
+  }
 })
