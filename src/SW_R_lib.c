@@ -47,9 +47,7 @@ Bool bWeatherList;
 
 extern char _firstfile[1024];
 
-extern SW_MODEL SW_Model;
-extern SW_SOILWAT SW_Soilwat;
-extern SW_VEGESTAB SW_VegEstab;
+extern SW_SOILWAT SW_Soilwat; // used by `tempError()`
 
 
 /* =================================================== */
