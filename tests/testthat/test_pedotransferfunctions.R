@@ -56,7 +56,11 @@ if (FALSE) {
   swp_vals <- unlist(lapply(
     row.names(texture),
     function(itext) {
-      VWCtoSWP(vwc_fix, texture[itext, "sand"], texture[itext, "clay"])
+      swrc_vwc_to_swp(
+        vwcBulk = vwc_fix,
+        sand = texture[itext, "sand"],
+        clay = texture[itext, "clay"]
+      )
     }
   ))
   dim(swp_vals) <- c(nrow(vwc_fix), ncol(vwc_fix), nrow(texture))
@@ -77,8 +81,8 @@ test_that("Use SWRC to convert between VWC/SWP", {
   for (ifix in names(swp_fix)) {
     for (itext in row.names(texture)) {
       expect_equivalent(
-        VWCtoSWP(
-          vwc_fix[itext, ifix],
+        swrc_vwc_to_swp(
+          vwcBulk = vwc_fix[itext, ifix],
           sand = texture[itext, "sand"],
           clay = texture[itext, "clay"]
         ),
@@ -86,8 +90,8 @@ test_that("Use SWRC to convert between VWC/SWP", {
       )
 
       expect_equivalent(
-        SWPtoVWC(
-          swp_fix[ifix],
+        swrc_swp_to_vwc(
+          swp_MPa = swp_fix[ifix],
           sand = texture[itext, "sand"],
           clay = texture[itext, "clay"]
         ),
@@ -101,8 +105,8 @@ test_that("Use SWRC to convert between VWC/SWP", {
   for (ifix in names(swp_fix)) {
     for (itext in row.names(texture)) {
       expect_equivalent(
-        VWCtoSWP(
-          vwc_fix[itext, ifix],
+        swrc_vwc_to_swp(
+          vwcBulk = vwc_fix[itext, ifix],
           sand = texture[, "sand"],
           clay = texture[, "clay"]
         ),
@@ -110,8 +114,8 @@ test_that("Use SWRC to convert between VWC/SWP", {
       )
 
       expect_equivalent(
-        SWPtoVWC(
-          swp_fix[ifix],
+        swrc_swp_to_vwc(
+          swp_MPa = swp_fix[ifix],
           sand = texture[, "sand"],
           clay = texture[, "clay"]
         ),
@@ -125,8 +129,8 @@ test_that("Use SWRC to convert between VWC/SWP", {
   for (ifix in names(swp_fix)) {
     for (itext in row.names(texture)) {
       expect_equivalent(
-        VWCtoSWP(
-          vwc_fix[, ifix],
+        swrc_vwc_to_swp(
+          vwcBulk = vwc_fix[, ifix],
           sand = texture[itext, "sand"],
           clay = texture[itext, "clay"]
         ),
@@ -134,8 +138,8 @@ test_that("Use SWRC to convert between VWC/SWP", {
       )
 
       expect_equivalent(
-        SWPtoVWC(
-          rep(swp_fix[ifix], nrow(texture)),
+        swrc_swp_to_vwc(
+          swp_MPa = rep(swp_fix[ifix], nrow(texture)),
           sand = texture[itext, "sand"],
           clay = texture[itext, "clay"]
         ),
@@ -148,8 +152,8 @@ test_that("Use SWRC to convert between VWC/SWP", {
   # (x vector repeated for each soil): probably not used
   for (ifix in names(swp_fix)) {
     expect_equivalent(
-      VWCtoSWP(
-        vwc_fix[, ifix],
+      swrc_vwc_to_swp(
+        vwcBulk = vwc_fix[, ifix],
         sand = texture[, "sand"],
         clay = texture[, "clay"]
       ),
@@ -160,8 +164,8 @@ test_that("Use SWRC to convert between VWC/SWP", {
   # 5. x [dim = l x d] + soils [len = 1] --> res [dim = l x d]
   for (itext in row.names(texture)) {
     expect_equivalent(
-      VWCtoSWP(
-        vwc_fix,
+      swrc_vwc_to_swp(
+        vwcBulk = vwc_fix,
         sand = texture[itext, "sand"],
         clay = texture[itext, "clay"]
       ),
@@ -173,8 +177,8 @@ test_that("Use SWRC to convert between VWC/SWP", {
   # (soils vectors repeated for each row of x)
   for (ifix in names(swp_fix)) {
     expect_equivalent(
-      VWCtoSWP(
-        matrix(
+      swrc_vwc_to_swp(
+        vwcBulk = matrix(
           vwc_fix[, ifix],
           nrow = nrow(vwc_fix),
           ncol = nrow(texture),

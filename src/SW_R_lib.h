@@ -32,4 +32,23 @@ SEXP onGetInputDataFromFiles(SEXP input);
 SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet);
 SEXP sw_consts(void);
 
+SEXP rSW2_SWRC_PDF_estimate_parameters(
+  SEXP swrc_type,
+  SEXP pdf_type,
+  SEXP sand,
+  SEXP clay,
+  SEXP gravel
+);
+
+SEXP rSW2_SWRC_check_parameters(SEXP swrc_type, SEXP swrcp);
+
+SEXP rSW2_SWRC(
+  SEXP x,
+  SEXP direction,
+  SEXP swrc_type,
+  SEXP swrcp,
+  SEXP gravel,
+  SEXP width
+);
+
 #endif /* SW_R_LIB_H_ */

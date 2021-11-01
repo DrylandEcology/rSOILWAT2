@@ -492,3 +492,322 @@ SEXP sw_consts(void) {
 
   return ret;
 }
+
+
+
+/**
+  @brief Estimate parameters of selected soil water retention curve (SWRC)
+    using selected pedotransfer function (PDF)
+
+  See SOILWAT2 function `SWRC_PDF_estimate_parameters()`.
+
+  Implemented SWRCs (`swrc_type`):
+    1. Campbell 1974 \cite Campbell1974
+
+  Implemented PDFs (`pdf_type`):
+    1. Cosby et al. 1984 \cite Cosby1984 PDF estimates parameters of
+       Campbell 1974 \cite Campbell1974 SWRC
+       see `SWRC_PDF_Cosby1984_for_Campbell1974()`
+
+  @param[in] swrc_type Identification number of selected SWRC
+  @param[in] pdf_type Identification number of selected PDF
+  @param[in] sand Sand content of the matric soil (< 2 mm fraction) [g/g]
+  @param[in] clay Clay content of the matric soil (< 2 mm fraction) [g/g]
+  @param[in] gravel Coarse fragments (> 2 mm; e.g., gravel)
+    of the whole soil [m3/m3]
+
+  @return Matrix of estimated SWRC parameters
+*/
+SEXP rSW2_SWRC_PDF_estimate_parameters(
+  SEXP swrc_type,
+  SEXP pdf_type,
+  SEXP sand,
+  SEXP clay,
+  SEXP gravel
+) {
+  int nlyrs = length(sand);
+
+  /* Check inputs */
+  if (
+    nlyrs != length(clay) ||
+    nlyrs != length(gravel) ||
+    nlyrs != length(swrc_type) ||
+    nlyrs != length(pdf_type)
+  ) {
+    error("inputs are not of the same length.");
+  }
+
+  /* Convert inputs to correct type */
+  swrc_type = PROTECT(coerceVector(swrc_type, INTSXP));
+  pdf_type = PROTECT(coerceVector(pdf_type, INTSXP));
+  sand = PROTECT(coerceVector(sand, REALSXP));
+  clay = PROTECT(coerceVector(clay, REALSXP));
+  gravel = PROTECT(coerceVector(gravel, REALSXP));
+
+  /* Allocate memory for SWRC parameters */
+  SEXP
+    swrcpk = PROTECT(allocVector(REALSXP, SWRC_PARAM_NMAX)),
+    res_swrcp = PROTECT(allocMatrix(REALSXP, nlyrs, SWRC_PARAM_NMAX));
+
+  /* Create convenience pointers */
+  unsigned int
+    *xswrc_type = (unsigned int *) INTEGER(swrc_type),
+    *xpdf_type = (unsigned int *) INTEGER(pdf_type);
+
+  double
+    *xsand = REAL(sand),
+    *xclay = REAL(clay),
+    *xgravel = REAL(gravel),
+    *xres = REAL(res_swrcp);
+
+
+  /* Loop over soil layers */
+  /* Ideally, SOILWAT2's `SWRC_PDF_estimate_parameters()`
+     would loop over soil layers internally,
+     but SOILWAT2 uses a list of soil layer structures instead of an array
+  */
+  int k1, k2;
+
+  for (k1 = 0; k1 < nlyrs; k1++) {
+    SWRC_PDF_estimate_parameters(
+      xswrc_type[k1],
+      xpdf_type[k1],
+      REAL(swrcpk),
+      xsand[k1],
+      xclay[k1],
+      xgravel[k1]
+    );
+
+    for (k2 = 0; k2 < SWRC_PARAM_NMAX; k2++) {
+      xres[k1 + nlyrs * k2] = REAL(swrcpk)[k2];
+    }
+  }
+
+  UNPROTECT(7);
+
+  return res_swrcp;
+}
+
+
+
+/**
+  @brief Check Soil Water Retention Curve (SWRC) parameters
+
+  See SOILWAT2 function `SWRC_check_parameters()`.
+
+  Implemented SWRCs:
+    1. Campbell 1974 \cite Campbell1974
+
+  @param[in] swrc_type Identification number of selected SWRC
+  @param[in] *swrcp SWRC parameters;
+    matrix (one row per set of parameters) or vector (treated as one set)
+
+  @return A logical vector indicating if parameters passed the checks.
+*/
+SEXP rSW2_SWRC_check_parameters(SEXP swrc_type, SEXP swrcp) {
+  /* Convert inputs to correct type */
+  swrcp = PROTECT(coerceVector(swrcp, REALSXP));
+  swrc_type = PROTECT(coerceVector(swrc_type, INTSXP));
+
+
+  /* Check SWRC parameters */
+  int
+    nrp, ncp,
+    nlyrs = length(swrc_type);
+
+  if (isMatrix(swrcp)) {
+    nrp = nrows(swrcp);
+    ncp = ncols(swrcp);
+  } else if (isVector(swrcp)) {
+    nrp = 1;
+    ncp = length(swrcp);
+  } else {
+    nrp = 0;
+    ncp = 0;
+  }
+
+  if (nlyrs != nrp) {
+    UNPROTECT(2); /* unprotect: swrcp, swrc_type */
+    error("`nrows(swrcp)` disagrees with length of `swrc_type`.");
+  }
+
+  if (ncp != SWRC_PARAM_NMAX) {
+    UNPROTECT(2); /* unprotect: swrcp, swrc_type */
+    error("`ncols(swrcp)` disagrees with required number of SWRC parameters.");
+  }
+
+
+  /* Allocate memory for result */
+  SEXP res = PROTECT(allocVector(LGLSXP, nlyrs));
+
+
+  /* Create convenience pointers */
+  unsigned int *xswrc_type = (unsigned int *) INTEGER(swrc_type);
+  int *xres = LOGICAL(res); /* LGLSXP are internally coded as int */
+  double *xswrcp = REAL(swrcp);
+
+
+  /* Loop over soil layers */
+  /* Ideally, SOILWAT2's `SWRC_check_parameters()`
+     would loop over soil layers internally,
+     but SOILWAT2 uses a list of soil layer structures instead of an array
+  */
+  int k1, k2;
+  double swrcpk[SWRC_PARAM_NMAX];
+
+  for (k1 = 0; k1 < nlyrs; k1++) {
+    for (k2 = 0; k2 < SWRC_PARAM_NMAX; k2++) {
+      swrcpk[k2] = xswrcp[k1 + nlyrs * k2];
+    }
+
+    xres[k1] = SWRC_check_parameters(xswrc_type[k1], swrcpk);
+  }
+
+  UNPROTECT(3);
+
+  return res;
+}
+
+
+
+/**
+  @brief Convert between soil water content and soil water potential using
+      specified soil water retention curve (SWRC)
+
+  See SOILWAT2 function `SWRC_SWCtoSWP()` and `SWRC_SWPtoSWC()`.
+
+  Implemented SWRCs (`swrc_type`):
+      1. Campbell 1974 \cite Campbell1974, see `SWRC_SWCtoSWP_Campbell1974()`
+
+  @param[in] x
+    Soil water content in the layer [cm] or soil water potential [-bar]\
+  @param[in] direction Direction of conversion, 1: SWP->SWC; 2: SWC->SWP
+  @param[in] swrc_type Identification number of selected SWRC
+  @param[in] *swrcp Vector or matrix of SWRC parameters
+  @param[in] gravel Coarse fragments (> 2 mm; e.g., gravel)
+    of the whole soil [m3/m3]
+  @param[in] width Soil layer width [cm]
+
+  @return Vector of soil water potential [-bar] or soil water content [cm]
+**/
+SEXP rSW2_SWRC(
+  SEXP x,
+  SEXP direction,
+  SEXP swrc_type,
+  SEXP swrcp,
+  SEXP gravel,
+  SEXP width
+) {
+  int xdirection = asInteger(direction);
+
+  if (xdirection != 1 && xdirection != 2) {
+    error("`direction` must be either SWP->SWC(1) or SWC->SWP(2).");
+  }
+
+  /* Check dimensions */
+  int nlyrs = length(width);
+
+  if (nlyrs != length(gravel)) {
+    error("`width` and `gravel` are not of the same length.");
+  }
+
+  if (nlyrs != length(x)) {
+    error("`length(x)` is not equal to the number of soil layers.");
+  }
+
+  if (nlyrs != length(swrc_type)) {
+    error("`swrc_type` is not equal to the number of soil layers.");
+  }
+
+
+  /* Convert inputs to correct type */
+  x = PROTECT(coerceVector(x, REALSXP));
+  gravel = PROTECT(coerceVector(gravel, REALSXP));
+  width = PROTECT(coerceVector(width, REALSXP));
+  swrcp = PROTECT(coerceVector(swrcp, REALSXP));
+  swrc_type = PROTECT(coerceVector(swrc_type, INTSXP));
+
+
+  /* Check SWRC parameters */
+  int nrp, ncp;
+
+  if (isMatrix(swrcp)) {
+    nrp = nrows(swrcp);
+    ncp = ncols(swrcp);
+  } else if (isVector(swrcp)) {
+    nrp = 1;
+    ncp = length(swrcp);
+  } else {
+    nrp = 0;
+    ncp = 0;
+  }
+
+  if (nlyrs != nrp) {
+    UNPROTECT(5); /* unprotect: swrcp, width, gravel, x, swrc_type */
+    error("`nrows(swrcp)` disagrees with number of soil layers.");
+  }
+
+  if (ncp != SWRC_PARAM_NMAX) {
+    UNPROTECT(5); /* unprotect: swrcp, width, gravel, x, swrc_type */
+    error("`ncols(swrcp)` disagrees with required number of SWRC parameters.");
+  }
+
+
+  /* Allocate memory for result */
+  SEXP res = PROTECT(allocVector(REALSXP, nlyrs));
+
+
+  /* Create convenience pointers */
+  unsigned int
+    *xswrc_type = (unsigned int *) INTEGER(swrc_type);
+
+  double
+    *xres = REAL(res),
+    *xx = REAL(x),
+    *xswrcp = REAL(swrcp),
+    *xgravel = REAL(gravel),
+    *xwidth = REAL(width);
+
+
+  /* Loop over soil layers */
+  /* Ideally, SOILWAT2's `SWRC_SWPtoSWC()` and `SWRC_SWCtoSWP()`
+     would loop over soil layers internally,
+     but SOILWAT2 uses a list of soil layer structures instead of an array
+  */
+  int k1, k2;
+  double swrcpk[SWRC_PARAM_NMAX];
+
+  for (k1 = 0; k1 < nlyrs; k1++) {
+    for (k2 = 0; k2 < SWRC_PARAM_NMAX; k2++) {
+      swrcpk[k2] = xswrcp[k1 + nlyrs * k2];
+    }
+
+    switch (xdirection) {
+      case 1:
+        /* SWP->SWC: [-bar] to [cm] */
+        xres[k1] = SWRC_SWPtoSWC(
+          xx[k1],
+          xswrc_type[k1],
+          swrcpk,
+          xgravel[k1],
+          xwidth[k1]
+        );
+        break;
+
+      case 2:
+        /* SWC->SWP: [cm] to [-bar] */
+        xres[k1] = SWRC_SWCtoSWP(
+          xx[k1],
+          xswrc_type[k1],
+          swrcpk,
+          xgravel[k1],
+          xwidth[k1]
+        );
+        break;
+    }
+  }
+
+  UNPROTECT(6);
+
+  return res;
+}

@@ -31,9 +31,9 @@ pdf_to_swp(
   bar_conversion = 1024
 )
 
-SWPtoVWC(swp, sand, clay)
+SWPtoVWC(swp, sand, clay, ...)
 
-VWCtoSWP(vwc, sand, clay)
+VWCtoSWP(vwc, sand, clay, ...)
 }
 \arguments{
 \item{swp}{A numeric value, vector, or 2-dimensional object
