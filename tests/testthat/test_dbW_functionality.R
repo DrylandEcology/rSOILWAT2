@@ -12,16 +12,21 @@ write(NA, file = fdbWeather2)
 fdbWeather3 <- file.path("/Fantasy", "Volume", "test.sqlite3")
 
 dir_test_data <- file.path("..", "test_data")
-temp <- list.files(dir_test_data, pattern = "Ex")
-temp <- sapply(strsplit(temp, "_"), function(x) x[[1]])
-tests <- unique(temp)
+tmp <- list.files(dir_test_data, pattern = "Ex")
+tmp <- sapply(strsplit(tmp, "_"), function(x) x[[1]])
+tests <- unique(tmp)
 test_that("Test data availability", expect_gt(length(tests), 0))
 
-sw_weather <- lapply(tests, function(it)
-  readRDS(file.path(dir_test_data, paste0(it, "_weather.rds"))))
+sw_weather <- lapply(
+  tests,
+  function(it) readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
+)
 scenarios <- c("Current", paste0("TestScenario", tests))
-scenarios_added <- c(scenarios, paste0(scenarios[1], "_new"),
-  tolower(scenarios[3]))
+scenarios_added <- c(
+  scenarios,
+  paste0(scenarios[1], "_new"),
+  tolower(scenarios[3])
+)
 
 req_cols <- c("Latitude", "Longitude", "Label")
 site_N <- 5
@@ -31,7 +36,8 @@ site_data1 <- data.frame(
   Latitude = 40 + site_ids,
   Longitude = -100 - site_ids,
   Label = paste0("TestSite_id", site_ids),
-  stringsAsFactors = FALSE)
+  stringsAsFactors = FALSE
+)
 
 i_update2 <- 2
 site_data2 <- site_data1
@@ -42,7 +48,8 @@ site_data3 <- data.frame(
   Latitude = 40 + site_N + site_ids,
   Longitude = -100 - site_N + site_ids,
   Label = paste0("TestSite_id", site_N + site_ids),
-  stringsAsFactors = FALSE)
+  stringsAsFactors = FALSE
+)
 
 weatherDF_dataColumns <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
 
@@ -54,15 +61,19 @@ weatherDF_dataColumns <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
 # It doesn't work on Github Actions Windows 64bit
 unlink_forcefully <- function(x, recursive = TRUE, force = TRUE, info = NULL) {
   if (file.exists(x)) {
-    message(paste0(info, ": file ", x, " should not exists, but it does - ",
-      "so we delete it."))
+    message(
+      info, ": file ", x, " should not exists, but it does - ",
+      "so we delete it."
+    )
     unlink(x, recursive = recursive, force = force)
   }
   if (file.exists(x)) {
-    message(paste0(info, ": file ", x, " should not exists because we just ",
-      "attempted to delete it."))
+    message(
+      info, ": file ", x, " should not exists because we just ",
+      "attempted to delete it."
+    )
   } else {
-    message(paste0(info, ": file ", x, " sucessfully deleted."))
+    message(info, ": file ", x, " sucessfully deleted.")
   }
 }
 
@@ -73,14 +84,20 @@ test_that("Disk file write and delete permissions", {
   skip_on_appveyor()
   skip_on_os("windows")
 
-  temp <- try(write(NA, file = fdbWeather), silent = TRUE)
-  expect_true(!inherits(temp, "try-error") && file.exists(fdbWeather),
-    info = paste("Failed to create file", fdbWeather))
+  tmp <- try(write(NA, file = fdbWeather), silent = TRUE)
+  expect_true(
+    !inherits(tmp, "try-error") && file.exists(fdbWeather),
+    info = paste("Failed to create file", fdbWeather)
+  )
 
-  expect_message(temp <- try(unlink_forcefully(fdbWeather, info = "1st"),
-    silent = TRUE), regexp = "sucessfully deleted")
-  expect_true(!inherits(temp, "try-error") && !file.exists(fdbWeather),
-    info = paste("Failed to delete file", fdbWeather))
+  expect_message(
+    tmp <- try(unlink_forcefully(fdbWeather, info = "1st"), silent = TRUE),
+    regexp = "sucessfully deleted"
+  )
+  expect_true(
+    !inherits(tmp, "try-error") && !file.exists(fdbWeather),
+    info = paste("Failed to delete file", fdbWeather)
+  )
 })
 
 test_that("dbW creation", {
@@ -92,50 +109,99 @@ test_that("dbW creation", {
   #--- Attempt to connect to (no) weather database
   unlink(fdbWeather)
   expect_false(dbW_setConnection(fdbWeather, create_if_missing = FALSE))
-  expect_message(dbW_setConnection(fdbWeather, create_if_missing = FALSE,
-    verbose = TRUE), regexp = "does not exist")
-  expect_message(dbW_setConnection(fdbWeather, create_if_missing = TRUE,
-    verbose = TRUE), regexp = "creating a new database")
+  expect_message(
+    dbW_setConnection(fdbWeather, create_if_missing = FALSE, verbose = TRUE),
+    regexp = "does not exist"
+  )
+  expect_message(
+    dbW_setConnection(fdbWeather, create_if_missing = TRUE, verbose = TRUE),
+    regexp = "creating a new database"
+  )
   unlink(fdbWeather)
+
   expect_false(dbW_setConnection(fdbWeather2, create_if_missing = TRUE))
-  expect_message(dbW_setConnection(fdbWeather2, create_if_missing = TRUE,
-    verbose = TRUE), regexp = "exists but is likely not a SQLite-database")
+  expect_message(
+    dbW_setConnection(fdbWeather2, create_if_missing = TRUE, verbose = TRUE),
+    regexp = "exists but is likely not a SQLite-database"
+  )
   expect_false(dbW_setConnection(fdbWeather3, create_if_missing = TRUE))
-  expect_message(dbW_setConnection(fdbWeather3, create_if_missing = TRUE,
-    verbose = TRUE),
-    regexp = "cannot be created likely because the path does not exist")
+  expect_message(
+    dbW_setConnection(fdbWeather3, create_if_missing = TRUE, verbose = TRUE),
+    regexp = "cannot be created likely because the path does not exist"
+  )
   expect_false(dbW_IsValid())
 
   #--- Create weather database and check that connection
-  expect_message(dbW_createDatabase(fdbWeather, site_data = site_data1,
-    Scenarios = scenarios, scen_ambient = scenarios[1],
-    verbose = TRUE, ARG_DOESNT_EXIST = 1:3),
-    regexp = "arguments ignored/deprecated")
+  expect_message(
+    dbW_createDatabase(
+      fdbWeather,
+      site_data = site_data1,
+      Scenarios = scenarios,
+      scen_ambient = scenarios[1],
+      verbose = TRUE,
+      ARG_DOESNT_EXIST = 1:3
+    ),
+    regexp = "arguments ignored/deprecated"
+  )
   unlink(fdbWeather)
   expect_false(dbW_createDatabase(fdbWeather))
-  expect_message(unlink_forcefully(fdbWeather, info = "2nd"),
-    regexp = "sucessfully deleted")
-  expect_message(dbW_createDatabase(fdbWeather, verbose = TRUE),
-    regexp = "errors in the table data")
+  expect_message(
+    unlink_forcefully(fdbWeather, info = "2nd"),
+    regexp = "sucessfully deleted"
+  )
+  expect_message(
+    dbW_createDatabase(fdbWeather, verbose = TRUE),
+    regexp = "errors in the table data"
+  )
+
   # this is a warning coming from 'normalizePath':
   #   - on 'unix': regexp = "No such file or directory"
   #   - on 'windows': regexp = "The system cannot find the path specified" or
   #     similar
-  expect_warning(dbW_createDatabase(fdbWeather3, site_data = site_data1,
-    Scenarios = scenarios, scen_ambient = scenarios[1]))
-  expect_message(unlink_forcefully(fdbWeather, info = "3rd"),
-    regexp = "sucessfully deleted")
-  expect_false(dbW_createDatabase(fdbWeather, site_data = NA,
-    Scenarios = scenarios, scen_ambient = scenarios[1]))
-  expect_message(unlink_forcefully(fdbWeather, info = "4th"),
-    regexp = "sucessfully deleted")
-  expect_message(dbW_createDatabase(fdbWeather, site_data = NA,
-    Scenarios = scenarios, scen_ambient = scenarios[1], verbose = TRUE),
-    regexp = "errors in the table data")
+  expect_warning(
+    dbW_createDatabase(
+      fdbWeather3,
+      site_data = site_data1,
+      Scenarios = scenarios,
+      scen_ambient = scenarios[1]
+    )
+  )
+  expect_message(
+    unlink_forcefully(fdbWeather, info = "3rd"),
+    regexp = "sucessfully deleted"
+  )
+  expect_false(
+    dbW_createDatabase(
+      fdbWeather,
+      site_data = NA,
+      Scenarios = scenarios,
+      scen_ambient = scenarios[1]
+    )
+  )
+  expect_message(
+    unlink_forcefully(fdbWeather, info = "4th"),
+    regexp = "sucessfully deleted"
+  )
+  expect_message(
+    dbW_createDatabase(
+      fdbWeather,
+      site_data = NA,
+      Scenarios = scenarios,
+      scen_ambient = scenarios[1],
+      verbose = TRUE
+    ),
+    regexp = "errors in the table data"
+  )
 
   unlink(fdbWeather)
-  expect_true(dbW_createDatabase(fdbWeather, site_data = site_data1,
-    Scenarios = scenarios, scen_ambient = scenarios[1]))
+  expect_true(
+    dbW_createDatabase(
+      fdbWeather,
+      site_data = site_data1,
+      Scenarios = scenarios,
+      scen_ambient = scenarios[1]
+    )
+  )
   expect_true(dbW_setConnection(fdbWeather))
   expect_true(dbW_IsValid())
   expect_true(dbW_disconnectConnection())
@@ -348,17 +414,37 @@ test_that("dbW weather data manipulation", {
 
   #--- Add weather data
   # Use 'Site_id' as identifier
-  expect_true(dbW_addWeatherData(Site_id = 1, weatherData = sw_weather[[1]],
-    Scenario = scenarios[1]))
-  expect_true(dbW_addWeatherData(Site_id = 1, weatherData = sw_weather[[1]],
-    Scenario = scenarios[2]))
+  expect_true(
+    dbW_addWeatherData(
+      Site_id = 1,
+      weatherData = sw_weather[[1]],
+      Scenario = scenarios[1]
+    )
+  )
+  expect_true(
+    dbW_addWeatherData(
+      Site_id = 1,
+      weatherData = sw_weather[[1]],
+      Scenario = scenarios[2]
+    )
+  )
   # Use 'Label' as identifier
-  expect_true(dbW_addWeatherData(Label = site_data1[2, "Label"],
-    weatherData = sw_weather[[2]], Scenario = scenarios[1]))
+  expect_true(
+    dbW_addWeatherData(
+      Label = site_data1[2, "Label"],
+      weatherData = sw_weather[[2]],
+      Scenario = scenarios[1]
+    )
+  )
   # Use 'lat'/'long' as identifier
-  expect_true(dbW_addWeatherData(lat = site_data1[3, "Latitude"],
-    long = site_data1[3, "Longitude"], weatherData = sw_weather[[2]],
-    Scenario = scenarios[2]))
+  expect_true(
+    dbW_addWeatherData(
+      lat = site_data1[3, "Latitude"],
+      long = site_data1[3, "Longitude"],
+      weatherData = sw_weather[[2]],
+      Scenario = scenarios[2]
+    )
+  )
 
   #--- Check presence of weather data
   # Check one site x one scenario
@@ -405,18 +491,31 @@ test_that("dbW weather data manipulation", {
   )
 
   #--- Retrieve weather data
-  expect_equal(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[1]),
-    sw_weather[[1]])
-  expect_equal(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[2]),
-    sw_weather[[1]])
-  expect_equal(dbW_getWeatherData(Site_id = 2, Scenario = scenarios[1]),
-    sw_weather[[2]])
-  expect_equal(dbW_getWeatherData(Site_id = 3, Scenario = scenarios[2]),
-    sw_weather[[2]])
+  expect_equal(
+    dbW_getWeatherData(Site_id = 1, Scenario = scenarios[1]),
+    sw_weather[[1]]
+  )
+  expect_equal(
+    dbW_getWeatherData(Site_id = 1, Scenario = scenarios[2]),
+    sw_weather[[1]]
+  )
+  expect_equal(
+    dbW_getWeatherData(Site_id = 2, Scenario = scenarios[1]),
+    sw_weather[[2]]
+  )
+  expect_equal(
+    dbW_getWeatherData(Site_id = 3, Scenario = scenarios[2]),
+    sw_weather[[2]]
+  )
 
-  # Adding data to the same Site_id x ScenarioName combination will fail
-  expect_error(dbW_addWeatherData(Site_id = 1, weatherData = sw_weather[[1]],
-    Scenario = scenarios[1]))
+  # Adding data to the same Site_id x Scenario Name combination will fail
+  expect_error(
+    dbW_addWeatherData(
+      Site_id = 1,
+      weatherData = sw_weather[[1]],
+      Scenario = scenarios[1]
+    )
+  )
 
   #--- Remove data
   # Delete one site and all associated weather data
@@ -429,8 +528,10 @@ test_that("dbW weather data manipulation", {
   expect_true(dbW_has_siteIDs(1))
   expect_true(dbW_deleteSiteData(Site_id = 1, Scenario_id = 2))
   expect_true(dbW_has_siteIDs(1))
-  expect_equal(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[1]),
-    sw_weather[[1]])
+  expect_equal(
+    dbW_getWeatherData(Site_id = 1, Scenario = scenarios[1]),
+    sw_weather[[1]]
+  )
   expect_error(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[2]))
 })
 
@@ -444,9 +545,11 @@ unlink(fdbWeather2, force = TRUE)
 #--- Non-dbW functions
 test_that("Manipulate weather data: years", {
 
-  datA <- getWeatherData_folders(LookupWeatherFolder = file.path(path_extdata,
-    paste0("example1"), "Input"), weatherDirName = "data_weather",
-    filebasename = "weath")
+  datA <- getWeatherData_folders(
+    LookupWeatherFolder = file.path(path_extdata, "example1", "Input"),
+    weatherDirName = "data_weather",
+    filebasename = "weath"
+  )
   datA_yrs <- get_years_from_weatherData(datA)
 
   # Unit tests for function 'get_years_from_weatherDF'
@@ -454,31 +557,47 @@ test_that("Manipulate weather data: years", {
   datA_DF_noyrs  <- datA_DF[, -1]
   datA_yrs_ts <- datA_DF[, 1]
 
-  datA_DF_result_con1 <- get_years_from_weatherDF(datA_DF, datA_yrs_ts,
-    weatherDF_dataColumns)
+  datA_DF_result_con1 <- get_years_from_weatherDF(
+    weatherDF = datA_DF,
+    years = datA_yrs_ts,
+    weatherDF_dataColumns = weatherDF_dataColumns
+  )
   expect_equal(datA_DF_result_con1[["years"]], datA_yrs)
   expect_equal(datA_DF_result_con1[["year_ts"]], datA_yrs_ts)
 
-  datA_DF_result_con2 <- get_years_from_weatherDF(datA_DF, datA_yrs,
-    weatherDF_dataColumns)
+  datA_DF_result_con2 <- get_years_from_weatherDF(
+    weatherDF = datA_DF,
+    years = datA_yrs,
+    weatherDF_dataColumns = weatherDF_dataColumns
+  )
   expect_equal(datA_DF_result_con2[["years"]], datA_yrs)
   expect_equal(datA_DF_result_con2[["year_ts"]], datA_yrs_ts)
 
-  expect_error(get_years_from_weatherDF(datA_DF, datA_yrs[2:20],
-    weatherDF_dataColumns)) #con 3
+  expect_error(
+    get_years_from_weatherDF(datA_DF, datA_yrs[2:20], weatherDF_dataColumns)
+  ) #con 3
 
-  datA_DF_result_con4 <- get_years_from_weatherDF(datA_DF, NULL,
-    weatherDF_dataColumns)
+  datA_DF_result_con4 <- get_years_from_weatherDF(
+    weatherDF = datA_DF,
+    years = NULL,
+    weatherDF_dataColumns = weatherDF_dataColumns
+  )
   expect_equal(datA_DF_result_con4[["years"]], datA_yrs)
   expect_equal(datA_DF_result_con4[["year_ts"]], datA_yrs_ts)
 
-  expect_error(get_years_from_weatherDF(datA_DF_noyrs, NULL,
-    weatherDF_dataColumns)) #con 5
+  expect_error(
+    get_years_from_weatherDF(
+      weatherDF = datA_DF_noyrs,
+      years = NULL,
+      weatherDF_dataColumns = weatherDF_dataColumns
+    )
+  ) #con 5
 
   for (k in seq_along(tests)) {
     # skip test if weather generator is turned on due to missing weather data
-    sw_input <- readRDS(file.path(dir_test_data,
-      paste0(tests[k], "_input.rds")))
+    sw_input <- readRDS(
+      file.path(dir_test_data, paste0(tests[k], "_input.rds"))
+    )
 
     if (!swWeather_UseMarkov(sw_input)) {
       datB <- sw_weather[[k]]
@@ -487,7 +606,8 @@ test_that("Manipulate weather data: years", {
       expect_equal(
         datA[select_years(datA_yrs, min(yrs_joint), max(yrs_joint))],
         datB[select_years(datB_yrs, min(yrs_joint), max(yrs_joint))],
-        tol = 1e-3)
+        tol = 1e-3
+      )
     }
   }
 })
@@ -497,16 +617,20 @@ test_that("Convert calendar years", {
   wdata <- rSOILWAT2::weatherData
 
   ## Transfer to different years (partially overlapping)
-  wnew <- dbW_convert_to_GregorianYears(wdata,
-    new_startYear = 2000, new_endYear = 2020
+  wnew <- dbW_convert_to_GregorianYears(
+    wdata,
+    new_startYear = 2000,
+    new_endYear = 2020
   )
   expect_equal(unique(wnew[, "Year"]), 2000:2020)
   expect_false(anyNA(wnew[wnew[, "Year"] %in% names(wdata), ]))
   expect_true(anyNA(wnew))
 
   ## Transfer to a subset of years (i.e., subset)
-  wnew <- dbW_convert_to_GregorianYears(wdata,
-    new_startYear = 2000, new_endYear = 2005
+  wnew <- dbW_convert_to_GregorianYears(
+    wdata,
+    new_startYear = 2000,
+    new_endYear = 2005
   )
   expect_equal(unique(wnew[, "Year"]), 2000:2005)
   expect_false(anyNA(wnew))
@@ -514,16 +638,20 @@ test_that("Convert calendar years", {
   ## Correct/convert from a non-leap to a Gregorian calendar
   wempty <- dbW_weatherData_to_dataframe(list(new("swWeatherData")))[1:365, ]
 
-  wnew <- dbW_convert_to_GregorianYears(wempty,
-    new_startYear = 2016, new_endYear = 2016
+  wnew <- dbW_convert_to_GregorianYears(
+    wempty,
+    new_startYear = 2016,
+    new_endYear = 2016
   )
   expect_equal(unique(wnew[, "Year"]), 2016:2016)
   expect_equal(nrow(wnew), 366) # leap year
   expect_true(anyNA(wnew))
 
 
-  wnew <- dbW_convert_to_GregorianYears(wdata["1981"],
-    new_startYear = 2016, new_endYear = 2016,
+  wnew <- dbW_convert_to_GregorianYears(
+    wdata["1981"],
+    new_startYear = 2016,
+    new_endYear = 2016,
     type = "sequential"
   )
   expect_equal(unique(wnew[, "Year"]), 2016:2016)
