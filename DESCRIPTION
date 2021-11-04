@@ -19,7 +19,7 @@ Depends:
 Imports:
   blob (>= 1.2.0),
   DBI (>= 1.0),
-  RSQLite (>= 2.1),
+  RSQLite (>= 2.2.4),
   rSW2utils (>= 0.1.0),
   rSW2data (>= 0.1.1)
 Suggests:
