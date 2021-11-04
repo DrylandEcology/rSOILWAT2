@@ -97,6 +97,8 @@ NULL
 dbW_has_sites <- function(Labels, ignore.case = FALSE) {
   stopifnot(dbW_IsValid())
 
+  # "EXPLAIN QUERY PLAN":
+  # SEARCH Sites USING COVERING INDEX sqlite_autoindex_Sites_1 (Label=?)
   sql <- paste(
     "SELECT COUNT(*) FROM Sites WHERE Label=:x",
     if (ignore.case) "COLLATE NOCASE"
@@ -113,6 +115,8 @@ dbW_has_sites <- function(Labels, ignore.case = FALSE) {
 dbW_has_siteIDs <- function(Site_ids) {
   stopifnot(dbW_IsValid())
 
+  # "EXPLAIN QUERY PLAN ":
+  # SEARCH Sites USING INTEGER PRIMARY KEY (rowid=?)
   sql <- "SELECT COUNT(*) FROM Sites WHERE Site_id=:x"
 
   DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = Site_ids))[, 1] > 0
@@ -127,6 +131,8 @@ dbW_has_siteIDs <- function(Site_ids) {
 dbW_has_scenarioIDs <- function(Scenario_ids) {
   stopifnot(dbW_IsValid())
 
+  # "EXPLAIN QUERY PLAN ":
+  # SEARCH Scenarios USING INTEGER PRIMARY KEY (rowid=?)
   sql <- "SELECT COUNT(*) FROM Scenarios WHERE id=:x"
 
   DBI::dbGetQuery(
@@ -145,6 +151,9 @@ dbW_has_scenarioIDs <- function(Scenario_ids) {
 dbW_has_scenarios <- function(Scenarios, ignore.case = FALSE) {
   stopifnot(dbW_IsValid())
 
+  # "EXPLAIN QUERY PLAN ":
+  # SEARCH Scenarios USING COVERING INDEX
+  #   sqlite_autoindex_Scenarios_1 (Scenario=?)
   sql <- paste(
     "SELECT COUNT(*) FROM Scenarios WHERE Scenario=:x",
     if (ignore.case) "COLLATE NOCASE"
@@ -164,6 +173,9 @@ dbW_has_weatherData <- function(Site_ids, Scenario_ids) {
 
   sites_N <- length(Site_ids)
   scen_N <- length(Scenario_ids)
+
+  # "EXPLAIN QUERY PLAN":
+  # SEARCH WeatherData USING COVERING INDEX wdindex (Site_id=? AND Scenario=?)
 
   if (sites_N > scen_N) {
     sql <- paste(
@@ -247,6 +259,9 @@ dbW_getSiteId <- function(
 
   if (!is.null(Labels)) {
     Labels <- as.character(Labels)
+
+    # "EXPLAIN QUERY PLAN "
+    # SEARCH Sites USING COVERING INDEX sqlite_autoindex_Sites_1 (Label=?)
     sql <- paste0(
       "SELECT Site_id FROM Sites WHERE Label=:x",
       if (ignore.case) " COLLATE NOCASE"
@@ -629,6 +644,8 @@ dbW_getWeatherData <- function(
     )
   }
 
+  # "EXPLAIN QUERY PLAN ":
+  # SEARCH WeatherData USING INDEX wdindex (Site_id=? AND Scenario=?)
   sql <- "SELECT data FROM WeatherData WHERE Site_id = :x1 AND Scenario = :x2"
   res <- DBI::dbGetQuery(
     rSW2_glovars$con,
