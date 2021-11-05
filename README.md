@@ -311,7 +311,10 @@ project you agree to abide by its terms.
         - Avoid adding new `R CMD check` warnings and/or notes; see, milestone
           [Clean code](https://github.com/DrylandEcology/rSOILWAT2/milestone/2)
 
-
+    1. There are additional tests available in `tools/`
+       (which may have additional dependencies), e.g.,
+         * test concurrent reading and writing to a weather database with
+           `test_dbW_concurrency.R`
 
 
 __Debugging compiled code__
