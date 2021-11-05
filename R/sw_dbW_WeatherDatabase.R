@@ -22,6 +22,64 @@
 # Daily weather data is stored in database as SQL-blob of a list of R objects
 # of class \code{\linkS4class{swWeatherData}}
 
+
+#' Insistently interacting with the weather database
+#'
+#' This is particularly suitable for `DBI::dbGetQuery()` and `DBI::dbExecute()`.
+#'
+#' @param fun A function.
+#'   The function must have arguments `conn`, `statement`, and `params` or
+#'   silently ignore them via `...`.
+#'
+#' @noRd
+#' @md
+dbW_InsistInteract <- function(
+  fun,
+  statement,
+  params = NULL,
+  ...,
+  max_attempts = 10L,
+  wait = 0.1
+) {
+  stopifnot(dbW_IsValid())
+
+  res <- NULL
+  k <- 1
+
+  repeat {
+    # Capture errors in case database is busy
+    res <- try(
+      fun(rSW2_glovars$con, statement = statement, params = params, ...),
+      silent = TRUE
+    )
+
+    if (inherits(res, "try-error")) {
+      if (k <= max_attempts) {
+        # Prepare next attempt
+        k <- k + 1
+
+        # Set busy handler to time out after 10 seconds
+        # (in milliseconds) of retries
+        # It's reported that SQLite may reset the busy handler
+        # https://github.com/r-dbi/RSQLite/issues/280#issuecomment-751441914 # nolint
+        try(DBI::dbExecute(rSW2_glovars$con, "PRAGMA busy_timeout = 10000"))
+
+        # Wait a bit before next attempt
+        Sys.sleep(wait)
+
+      } else {
+        stop("`dbGetQuery` failed after ", k, " attempts: ", shQuote(res))
+      }
+    } else {
+      # success
+      break
+    }
+  }
+
+  res
+}
+
+
 #' Check whether registered weather database connection is valid
 #' @return A logical value.
 #' @export
@@ -33,18 +91,17 @@ dbW_IsValid <- function() {
 #' @return A numeric version number.
 #' @export
 dbW_version <- function() {
-  stopifnot(dbW_IsValid())
-
-  sql <- "SELECT Value FROM Meta WHERE Desc=\'Version\'"
-  numeric_version(as.character(DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1]))
+  res <- dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement = "SELECT Value FROM Meta WHERE Desc=\'Version\'"
+  )
+  numeric_version(as.character(res[1, 1]))
 }
 
 #' Check that version of registered weather database is up-to-date
 #' @return A logical value.
 #' @export
 dbW_check_version <- function(dbW_min_version = NULL) {
-  stopifnot(dbW_IsValid())
-
   v_dbW <- dbW_version()
 
   if (is.null(dbW_min_version)) {
@@ -69,10 +126,12 @@ dbW_check_version <- function(dbW_min_version = NULL) {
 #' @return A character string.
 #' @export
 dbW_compression <- function() {
-  stopifnot(dbW_IsValid())
+  res <- dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement = "SELECT Value FROM Meta WHERE Desc=\'Compression_type\'"
+  )
 
-  sql <- "SELECT Value FROM Meta WHERE Desc=\'Compression_type\'"
-  as.character(DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1])
+  as.character(res[1, 1])
 }
 
 
@@ -95,16 +154,16 @@ NULL
 #'   queried sites.
 #' @export
 dbW_has_sites <- function(Labels, ignore.case = FALSE) {
-  stopifnot(dbW_IsValid())
-
   # "EXPLAIN QUERY PLAN":
   # SEARCH Sites USING COVERING INDEX sqlite_autoindex_Sites_1 (Label=?)
-  sql <- paste(
-    "SELECT COUNT(*) FROM Sites WHERE Label=:x",
-    if (ignore.case) "COLLATE NOCASE"
-  )
-
-  DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = Labels))[, 1] > 0
+  dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement = paste(
+      "SELECT COUNT(*) FROM Sites WHERE Label=:x",
+      if (ignore.case) "COLLATE NOCASE"
+    ),
+    params = list(x = Labels)
+  )[, 1] > 0
 }
 
 #' @rdname check_content
@@ -113,13 +172,13 @@ dbW_has_sites <- function(Labels, ignore.case = FALSE) {
 #'   queried sites.
 #' @export
 dbW_has_siteIDs <- function(Site_ids) {
-  stopifnot(dbW_IsValid())
-
   # "EXPLAIN QUERY PLAN ":
   # SEARCH Sites USING INTEGER PRIMARY KEY (rowid=?)
-  sql <- "SELECT COUNT(*) FROM Sites WHERE Site_id=:x"
-
-  DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = Site_ids))[, 1] > 0
+  dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement = "SELECT COUNT(*) FROM Sites WHERE Site_id=:x",
+    params = list(x = Site_ids)
+  )[, 1] > 0
 }
 
 #' @rdname check_content
@@ -129,15 +188,11 @@ dbW_has_siteIDs <- function(Site_ids) {
 #'   queried Scenarios.
 #' @export
 dbW_has_scenarioIDs <- function(Scenario_ids) {
-  stopifnot(dbW_IsValid())
-
   # "EXPLAIN QUERY PLAN ":
   # SEARCH Scenarios USING INTEGER PRIMARY KEY (rowid=?)
-  sql <- "SELECT COUNT(*) FROM Scenarios WHERE id=:x"
-
-  DBI::dbGetQuery(
-    rSW2_glovars$con,
-    sql,
+  dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement = "SELECT COUNT(*) FROM Scenarios WHERE id=:x",
     params = list(x = Scenario_ids)
   )[, 1] > 0
 }
@@ -149,17 +204,18 @@ dbW_has_scenarioIDs <- function(Scenario_ids) {
 #'   queried Scenarios.
 #' @export
 dbW_has_scenarios <- function(Scenarios, ignore.case = FALSE) {
-  stopifnot(dbW_IsValid())
-
   # "EXPLAIN QUERY PLAN ":
   # SEARCH Scenarios USING COVERING INDEX
   #   sqlite_autoindex_Scenarios_1 (Scenario=?)
-  sql <- paste(
-    "SELECT COUNT(*) FROM Scenarios WHERE Scenario=:x",
-    if (ignore.case) "COLLATE NOCASE"
-  )
 
-  DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = Scenarios))[, 1] > 0
+  dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement = paste(
+      "SELECT COUNT(*) FROM Scenarios WHERE Scenario=:x",
+      if (ignore.case) "COLLATE NOCASE"
+    ),
+    params = list(x = Scenarios)
+  )[, 1] > 0
 }
 
 #' @rdname check_content
@@ -169,8 +225,6 @@ dbW_has_scenarios <- function(Scenarios, ignore.case = FALSE) {
 #'   corresponding to queried sites and columns to queried scenarios.
 #' @export
 dbW_has_weatherData <- function(Site_ids, Scenario_ids) {
-  stopifnot(dbW_IsValid())
-
   sites_N <- length(Site_ids)
   scen_N <- length(Scenario_ids)
 
@@ -186,12 +240,11 @@ dbW_has_weatherData <- function(Site_ids, Scenario_ids) {
     res <- lapply(
       Scenario_ids,
       function(x) {
-        res <- DBI::dbGetQuery(
-          rSW2_glovars$con,
-          sql,
+        dbW_InsistInteract(
+          DBI::dbGetQuery,
+          statement = sql,
           params = list(x1 = Site_ids, x2 = rep(x, sites_N))
-        )
-        res[, 1] == 1L
+        )[, 1] == 1L
       }
     )
 
@@ -205,12 +258,11 @@ dbW_has_weatherData <- function(Site_ids, Scenario_ids) {
 
     res <- lapply(
       Site_ids, function(x) {
-        res <- DBI::dbGetQuery(
-          rSW2_glovars$con,
-          sql,
+        dbW_InsistInteract(
+          DBI::dbGetQuery,
+          statement = sql,
           params = list(x1 = rep(x, scen_N), x2 = Scenario_ids)
-        )
-        res[, 1] == 1L
+        )[, 1] == 1L
       }
     )
 
@@ -253,7 +305,7 @@ dbW_getSiteId <- function(
   verbose = FALSE
 ) {
 
-  stopifnot(dbW_IsValid(), identical(length(lat), length(long)))
+  stopifnot(identical(length(lat), length(long)))
 
   x <- NA
 
@@ -267,8 +319,8 @@ dbW_getSiteId <- function(
       if (ignore.case) " COLLATE NOCASE"
     )
 
-    tmp <- DBI::dbGetQuery(
-      rSW2_glovars$con,
+    tmp <- dbW_InsistInteract(
+      DBI::dbGetQuery,
       statement = sql,
       params = list(x = Labels)
     )[, 1]
@@ -284,6 +336,8 @@ dbW_getSiteId <- function(
     } else {
       # Some Labels are missing, but we don't know which ones
       # Slowly go through Labels one by one
+
+      # TODO: do we need something similar here to `dbW_InsistInteract()`?
       rs <- DBI::dbSendQuery(rSW2_glovars$con, sql)
 
       x <- sapply(
@@ -330,6 +384,7 @@ dbW_getSiteId <- function(
         "dxy2.adlon = dxy2.min_adlon"
     )
 
+    # TODO: do we need something similar here to `dbW_InsistInteract()`?
     rs <- DBI::dbSendQuery(rSW2_glovars$con, sql)
 
     x <- sapply(
@@ -364,8 +419,6 @@ dbW_getSiteId <- function(
 #'   located.
 #' @export
 dbW_getScenarioId <- function(Scenario, ignore.case = FALSE, verbose = FALSE) {
-  stopifnot(dbW_IsValid())
-
   # "EXPLAIN QUERY PLAN "
   # SEARCH Scenarios USING COVERING INDEX
   #   sqlite_autoindex_Scenarios_1 (Scenario=?)
@@ -376,7 +429,11 @@ dbW_getScenarioId <- function(Scenario, ignore.case = FALSE, verbose = FALSE) {
   x <- sapply(
     Scenario,
     function(x) {
-      tmp <- DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = x))[, 1]
+      tmp <- dbW_InsistInteract(
+        DBI::dbGetQuery,
+        statement = sql,
+        params = list(x = x)
+      )[, 1]
       if (is.null(tmp)) NA else tmp
     }
   )
@@ -513,9 +570,7 @@ dbW_getIDs <- function(
 #' @return A data.frame.
 #' @export
 dbW_getSiteTable <- function() {
-  stopifnot(dbW_IsValid())
-
-  DBI::dbReadTable(rSW2_glovars$con, "Sites")
+  dbW_InsistInteract(DBI::dbReadTable, name = "Sites")
 }
 
 #' Read entire table of Scenarios from the registered weather database
@@ -523,9 +578,7 @@ dbW_getSiteTable <- function() {
 #' @return A data.frame.
 #' @export
 dbW_getScenariosTable <- function() {
-  stopifnot(dbW_IsValid())
-
-  DBI::dbReadTable(rSW2_glovars$con, "Scenarios")
+  dbW_InsistInteract(DBI::dbReadTable, name = "Scenarios")
 }
 
 
@@ -622,8 +675,6 @@ dbW_getWeatherData <- function(
   verbose = FALSE
 ) {
 
-  stopifnot(dbW_IsValid())
-
   IDs <- dbW_getIDs(
     site_id = Site_id,
     site_label = Label,
@@ -646,10 +697,10 @@ dbW_getWeatherData <- function(
 
   # "EXPLAIN QUERY PLAN ":
   # SEARCH WeatherData USING INDEX wdindex (Site_id=? AND Scenario=?)
-  sql <- "SELECT data FROM WeatherData WHERE Site_id = :x1 AND Scenario = :x2"
-  res <- DBI::dbGetQuery(
-    rSW2_glovars$con,
-    statement = sql,
+  res <- dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement =
+      "SELECT data FROM WeatherData WHERE Site_id = :x1 AND Scenario = :x2",
     params = list(x1 = IDs[["site_id"]], x2 = IDs[["scenario_id"]])
   )[1, 1]
 
@@ -741,7 +792,10 @@ dbW_setConnection <- function(
   }
 
   # Check if 'dbFilePath' is likely a good SQLite-database
-  tmp2 <- try(DBI::dbExecute(tmp1, "PRAGMA synchronous = off"), silent = TRUE)
+  tmp2 <- try(
+    DBI::dbExecute(tmp1, "PRAGMA synchronous = off"),
+    silent = TRUE
+  )
   if (inherits(tmp2, "try-error")) {
     if (verbose) {
       message(
@@ -753,7 +807,10 @@ dbW_setConnection <- function(
   }
 
   # Check that foreign key constraints are supported or at least accepted
-  tmp3 <- try(DBI::dbExecute(tmp1, "PRAGMA foreign_keys = ON"), silent = TRUE)
+  tmp3 <- try(
+    DBI::dbExecute(tmp1, "PRAGMA foreign_keys = ON"),
+    silent = TRUE
+  )
   if (inherits(tmp3, "try-error")) {
     if (verbose) {
       message("'dbW_setConnection': foreign keys are not supported.")
@@ -761,6 +818,8 @@ dbW_setConnection <- function(
     return(invisible(FALSE))
   }
 
+  # Set busy handler to time out after 10 seconds (in milliseconds) of retries
+  try(DBI::dbExecute(tmp1, "PRAGMA busy_timeout = 10000"))
 
 
   # Set up package-level connection variable
@@ -804,8 +863,6 @@ dbW_disconnectConnection <- function() {
 #'  failure with \code{FALSE}.
 #' @export
 dbW_addSites <- function(site_data, ignore.case = FALSE, verbose = FALSE) {
-  stopifnot(dbW_IsValid())
-
   req_cols <- c("Latitude", "Longitude", "Label")
   if (!all(req_cols %in% colnames(site_data))) {
     stop("'dbW_addSites': argument misses required columns.")
@@ -815,10 +872,10 @@ dbW_addSites <- function(site_data, ignore.case = FALSE, verbose = FALSE) {
   dos_add <- !has_sites
 
   if (any(dos_add)) {
-    sql <- "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)"
-    DBI::dbExecute(
-      rSW2_glovars$con,
-      sql,
+    dbW_InsistInteract(
+      DBI::dbExecute,
+      statement =
+        "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)",
       params = as.list(site_data[dos_add, req_cols])
     )
   }
@@ -840,8 +897,12 @@ dbW_addSites <- function(site_data, ignore.case = FALSE, verbose = FALSE) {
 #' @return An invisible logical value indicating success with \code{TRUE} and
 #'  failure with \code{FALSE}.
 #' @export
-dbW_updateSites <- function(Site_ids, site_data, ignore.case = FALSE,
-  verbose = FALSE) {
+dbW_updateSites <- function(
+  Site_ids,
+  site_data,
+  ignore.case = FALSE,
+  verbose = FALSE
+) {
   stopifnot(dbW_IsValid())
 
   dos_update <- dbW_has_siteIDs(Site_ids)
@@ -861,6 +922,8 @@ dbW_updateSites <- function(Site_ids, site_data, ignore.case = FALSE,
         param = c(
           as.list(site_data[k, c("Latitude", "Longitude", "Label")]),
           list(id = Site_ids[k])
+      # TODO: do we need something similar here to `dbW_InsistInteract()`?
+      rs <- DBI::dbSendStatement(rSW2_glovars$con, sql)
         )
       )
     }
@@ -887,14 +950,12 @@ dbW_updateSites <- function(Site_ids, site_data, ignore.case = FALSE,
 #'  failure with \code{FALSE}.
 #' @export
 dbW_addScenarios <- function(Scenarios, ignore.case = FALSE, verbose = FALSE) {
-  stopifnot(dbW_IsValid())
-
   has_scenarios <- dbW_has_scenarios(Scenarios, ignore.case = ignore.case)
   dos_add <- !has_scenarios
 
   if (any(dos_add)) {
-    DBI::dbExecute(
-      rSW2_glovars$con,
+    dbW_InsistInteract(
+      DBI::dbExecute,
       statement = "INSERT INTO Scenarios VALUES(NULL, :sc)",
       params = list(sc = unlist(Scenarios[dos_add]))
     )
@@ -918,12 +979,23 @@ dbW_addWeatherDataNoCheck <- function(
   weather_blob
 ) {
 
-  sql <- paste("INSERT INTO",
-    "WeatherData (Site_id, Scenario, StartYear, EndYear, data)",
-    "VALUES (:Site_id, :Scenario_id, :StartYear, :EndYear, :weather_blob)")
-  DBI::dbExecute(rSW2_glovars$con, sql, params = list(Site_id = Site_id,
-    Scenario_id = Scenario_id, StartYear = StartYear, EndYear = EndYear,
-    weather_blob = weather_blob))
+  res <- dbW_InsistInteract(
+    DBI::dbExecute,
+    statement = paste(
+      "INSERT INTO",
+      "WeatherData (Site_id, Scenario, StartYear, EndYear, data)",
+      "VALUES (:Site_id, :Scenario_id, :StartYear, :EndYear, :weather_blob)"
+    ),
+    params = list(
+      Site_id = Site_id,
+      Scenario_id = Scenario_id,
+      StartYear = StartYear,
+      EndYear = EndYear,
+      weather_blob = weather_blob
+    )
+  )
+
+  invisible(res)
 }
 
 #' Adds daily weather data to a registered weather database
@@ -1333,15 +1405,16 @@ dbW_addFromFolders <- function(
 #'   failure with \code{FALSE}.
 #' @export
 dbW_deleteSite <- function(Site_ids) {
-  stopifnot(dbW_IsValid())
-
   # First delete all weather data (so that foreign key constraint is not
   # violated)
   stopifnot(dbW_deleteSiteData(Site_ids, Scenario_id = NULL))
 
   # Delete site entry in Sites table
-  sql <- "DELETE FROM \"Sites\" WHERE Site_id=:x"
-  DBI::dbExecute(rSW2_glovars$con, sql, params = list(x = Site_ids))
+  dbW_InsistInteract(
+    DBI::dbExecute,
+    statement = "DELETE FROM \"Sites\" WHERE Site_id=:x",
+    params = list(x = Site_ids)
+  )
 
   invisible(TRUE)
 }
@@ -1357,14 +1430,15 @@ dbW_deleteSiteData <- function(Site_id, Scenario_id = NULL) {
   if (is.null(Scenario_id)) {
     #Remove all data for this site
     sql <- "DELETE FROM \"WeatherData\" WHERE Site_id=:x"
-    DBI::dbExecute(rSW2_glovars$con, sql, params = list(x = Site_id))
+    tmp_params <- list(x = Site_id)
 
   } else {
     # Remove data for specific scenario
     sql <- "DELETE FROM \"WeatherData\" WHERE Site_id=:x1 AND Scenario=:x2"
-    DBI::dbExecute(rSW2_glovars$con, sql,
-      params = list(x1 = Site_id, x2 = Scenario_id))
+    tmp_params <- list(x1 = Site_id, x2 = Scenario_id)
   }
+
+  dbW_InsistInteract(DBI::dbExecute, statement = sql, params = tmp_params)
 
   invisible(TRUE)
 }
