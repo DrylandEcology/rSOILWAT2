@@ -262,6 +262,7 @@ test_that("dbW site/scenario tables manipulation", {
     long = c(NA, site_data1[, "Longitude"], NA)
   )
   expect_equal(site_id5a, c(NA_integer_, site_id1, NA_integer_))
+
   site_id5b <- dbW_getSiteId(
     Labels = c("not there", site_data1[, "Label"], "not there either"),
     ignore.case = FALSE

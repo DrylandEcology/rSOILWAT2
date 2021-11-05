@@ -305,62 +305,35 @@ dbW_getSiteId <- function(
   verbose = FALSE
 ) {
 
-  stopifnot(identical(length(lat), length(long)))
-
-  x <- NA
 
   if (!is.null(Labels)) {
+    #--- Determine which Labels exists
     Labels <- as.character(Labels)
 
     # "EXPLAIN QUERY PLAN "
     # SEARCH Sites USING COVERING INDEX sqlite_autoindex_Sites_1 (Label=?)
-    sql <- paste0(
-      "SELECT Site_id FROM Sites WHERE Label=:x",
-      if (ignore.case) " COLLATE NOCASE"
-    )
-
     tmp <- dbW_InsistInteract(
       DBI::dbGetQuery,
-      statement = sql,
+      statement = paste0(
+        "SELECT COUNT(*) AS n, Site_id FROM Sites WHERE Label=:x",
+        if (ignore.case) " COLLATE NOCASE"
+      ),
       params = list(x = Labels)
-    )[, 1]
+    )
 
-    ntmp <- length(tmp)
-
-    if (ntmp == 0) {
-      x <- rep(NA, length(Labels))
-
-    } else if (ntmp == length(Labels)) {
-      x <- tmp
-
-    } else {
-      # Some Labels are missing, but we don't know which ones
-      # Slowly go through Labels one by one
-
-      # TODO: do we need something similar here to `dbW_InsistInteract()`?
-      rs <- DBI::dbSendQuery(rSW2_glovars$con, sql)
-
-      x <- sapply(
-        Labels,
-        function(x) {
-          DBI::dbBind(rs, list(x = x))
-          tmp <- DBI::dbFetch(rs)[, 1]
-          if (is.null(tmp)) NA else tmp
-        }
-      )
-
-      DBI::dbClearResult(rs)
-    }
-
+    res <- rep(NA, length(Labels))
+    ids_label_exists <- tmp[, "n"] > 0
+    res[ids_label_exists] <- tmp[ids_label_exists, "Site_id"]
 
   } else if (!is.null(lat) && !is.null(long)) {
+    stopifnot(identical(length(lat), length(long)))
     lat <- as.numeric(lat)
     long <- as.numeric(long)
 
-    # Find the latitude and longitude with the minimum difference if less
-    # than deviating by less than tolerance
+    # Find the latitude and longitude with the minimum difference if
+    # deviating by less than tolerance
     sql <- paste(
-      "SELECT dxy2.Site_id",
+      "SELECT COUNT(*) AS n, dxy2.Site_id",
       "FROM (",
         "SELECT",
           "Site_id,",
@@ -384,29 +357,30 @@ dbW_getSiteId <- function(
         "dxy2.adlon = dxy2.min_adlon"
     )
 
-    # TODO: do we need something similar here to `dbW_InsistInteract()`?
-    rs <- DBI::dbSendQuery(rSW2_glovars$con, sql)
-
-    x <- sapply(
-      seq_along(lat),
-      function(k) {
-        DBI::dbBind(rs, list(lat = lat[k], lon = long[k], tol = tol_xy))
-        tmp <- DBI::dbFetch(rs)[, 1]
-        if (is.null(tmp)) NA else tmp
-      }
+    # "EXPLAIN QUERY PLAN "
+    #     id parent notused          detail
+    #  1   2      0       0 CO-ROUTINE dxy2
+    #  2   5      2       0      SCAN Sites
+    #  3  52      0       0       SCAN dxy2
+    tmp <- dbW_InsistInteract(
+      DBI::dbGetQuery,
+      statement = sql,
+      params = list(lat = lat, lon = long, tol = rep_len(tol_xy, length(lat)))
     )
 
-    DBI::dbClearResult(rs)
+    res <- rep(NA, length(lat))
+    ids_label_exists <- tmp[, "n"] > 0
+    res[ids_label_exists] <- tmp[ids_label_exists, "Site_id"]
 
   } else {
     if (verbose) {
       message("'dbW_getSiteId': not enough information to obtain site IDs")
     }
 
-    x <- rep(NA, max(length(Labels), length(long)))
+    res <- rep(NA, max(length(Labels), length(long)))
   }
 
-  as.integer(x)
+  as.integer(res)
 }
 
 
