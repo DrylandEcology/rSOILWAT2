@@ -469,7 +469,12 @@ test_that("dbW weather data manipulation", {
   #--- Check presence of weather data
   # Check one site x one scenario
   expect_true(
-    dbW_has_weatherData(Site_ids = 1, Scenario_ids = 1)
+    dbW_has_weatherData(Site_ids = 1, Scenario_ids = 1)[1, 1]
+  )
+
+  expect_equal(
+    dbW_have_sites_all_weatherData(site_ids = 1, scen_ids = 1),
+    dbW_has_weatherData(Site_ids = 1, Scenario_ids = 1)[1, 1]
   )
 
   # Check one site x multiple scenarios
@@ -479,8 +484,26 @@ test_that("dbW weather data manipulation", {
   )
 
   expect_equal(
+    dbW_have_sites_all_weatherData(site_ids = 1, scen_ids = 1:2),
+    unname(apply(
+      dbW_has_weatherData(Site_ids = 1, Scenario_ids = 1:2),
+      MARGIN = 1,
+      all
+    ))
+  )
+
+  expect_equal(
     as.vector(dbW_has_weatherData(Site_ids = 1, Scenario_ids = 1:3)),
     c(TRUE, TRUE, FALSE)
+  )
+
+  expect_equal(
+    dbW_have_sites_all_weatherData(site_ids = 1, scen_ids = 1:3),
+    unname(apply(
+      dbW_has_weatherData(Site_ids = 1, Scenario_ids = 1:3),
+      MARGIN = 1,
+      all
+    ))
   )
 
   # Check multiple sites x one scenario
@@ -490,8 +513,19 @@ test_that("dbW weather data manipulation", {
   )
 
   expect_equal(
-    as.vector(dbW_has_weatherData(Site_ids = c(1:2, 4), Scenario_ids = 1)),
+    as.vector(
+      dbW_has_weatherData(Site_ids = c(1:2, 4), Scenario_ids = 1)
+    ),
     c(TRUE, TRUE, FALSE)
+  )
+
+  expect_equal(
+    dbW_have_sites_all_weatherData(site_ids = c(1:2, 4), scen_ids = 1),
+    unname(apply(
+      dbW_has_weatherData(Site_ids = c(1:2, 4), Scenario_ids = 1),
+      MARGIN = 1,
+      all
+    ))
   )
 
 
@@ -509,6 +543,19 @@ test_that("dbW weather data manipulation", {
     dbW_has_weatherData(Site_ids = 1:3, Scenario_ids = 1:4),
     res_exp
   )
+
+
+  # Check multiple sites (including non-existing ones) x multiple scenarios
+  expect_equal(
+    dbW_have_sites_all_weatherData(site_ids = c(1:2, 4, 100), scen_ids = 1:2),
+    unname(apply(
+      dbW_has_weatherData(Site_ids = c(1:2, 4, 100), Scenario_ids = 1:2),
+      MARGIN = 1,
+      all
+    ))
+  )
+
+
 
   #--- Retrieve weather data
   expect_equal(

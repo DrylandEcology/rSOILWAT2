@@ -278,6 +278,79 @@ dbW_has_weatherData <- function(Site_ids, Scenario_ids) {
 }
 
 
+#' @rdname check_content
+#' @section Details:
+#'   \code{dbW_have_sites_all_weatherData} checks whether weather data are
+#'   available.
+#'
+#' @return
+#'   \code{dbW_have_sites_all_weatherData} returns a logical vector
+#'   of length of queried sites;
+#'   a \code{TRUE} element indicates that weather data
+#'   for each queried scenarios is available for that queried site.
+#'
+#' @export
+dbW_have_sites_all_weatherData <- function(
+  site_labels = NULL,
+  site_ids = NULL,
+  scen_labels = NULL,
+  scen_ids = NULL,
+  chunk_size = 1500L,
+  verbose = FALSE
+) {
+
+  # Check arguments
+  # Either `site_labels` or `site_ids` or at least the same length
+  si_ltemp <- c(length(site_labels), length(site_ids))
+  si_ntemp <- c(is.null(site_labels), is.null(site_ids))
+  stopifnot(
+    !(si_ntemp[1] && si_ntemp[2]),
+    si_ntemp[1] || si_ntemp[2] || identical(si_ltemp[1], si_ltemp[2])
+  )
+
+  # Either `scen_labels` or `scen_ids` or at least the same length
+  sc_ltemp <- c(length(scen_labels), length(scen_ids))
+  sc_ntemp <- c(is.null(scen_labels), is.null(scen_ids))
+  stopifnot(
+    !(sc_ntemp[1] && sc_ntemp[2]),
+    sc_ntemp[1] || sc_ntemp[2] || identical(sc_ltemp[1], sc_ltemp[2])
+  )
+
+  #--- Collect `site_ids` and `scen_ids` if not provided
+  if (is.null(site_ids)) {
+    site_ids <- rSOILWAT2::dbW_getSiteId(Labels = site_labels)
+  }
+  if (anyNA(site_ids)) {
+    stop("Not all sites available in weather database.")
+  }
+
+  if (is.null(scen_ids)) {
+    scen_ids <- rSOILWAT2::dbW_getScenarioId(Scenario = scen_labels)
+  }
+  if (anyNA(scen_ids)) {
+    stop("Not all scenarios available in weather database.")
+  }
+
+  #--- Query database
+  # "EXPLAIN QUERY PLAN ":
+  # SEARCH WeatherData USING COVERING INDEX wdindex (Site_id=? AND Scenario=?)
+  res <- dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement = paste0(
+      "SELECT COUNT(*) AS scenN, Site_id FROM WeatherData ",
+      "WHERE ",
+        "Site_id IN (?) AND ",
+        "Scenario IN (", paste(scen_ids, collapse = ","), ") "
+    ),
+    params = list(site_ids)
+  )
+
+  # Good: all requested scenarios are available
+  res[, "scenN"] == length(scen_ids)
+}
+
+
+
 #' Extract table keys to connect sites with weather data in the registered
 #' weather database
 #'
