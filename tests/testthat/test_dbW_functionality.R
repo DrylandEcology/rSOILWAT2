@@ -331,6 +331,25 @@ test_that("dbW site/scenario tables manipulation", {
     dbW_getSiteTable()[, req_cols],
     rbind(site_data1, site_data3)[, req_cols]
   )
+  # Update multiple sites at once
+  tmp_sites <- site_data1
+  tmp_sites[, "Label"] <- paste0(tmp_sites[, "Label"], "-mtest")
+  expect_true(
+    dbW_updateSites(Site_ids = site_data1[, "Site_id"], site_data = tmp_sites)
+  )
+  tmp <- dbW_getSiteTable()
+  expect_equal(
+    tmp[tmp[, "Site_id"] %in% site_data1[, "Site_id"], req_cols],
+    tmp_sites[, req_cols]
+  )
+  expect_true(
+    dbW_updateSites(Site_ids = site_data1[, "Site_id"], site_data = site_data1)
+  )
+  tmp <- dbW_getSiteTable()
+  expect_equal(
+    dbW_getSiteTable()[, req_cols],
+    rbind(site_data1, site_data3)[, req_cols]
+  )
 
   #--- Add scenarios
   # Obtain scenario id

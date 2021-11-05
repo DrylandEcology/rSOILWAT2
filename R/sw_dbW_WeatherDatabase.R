@@ -903,30 +903,21 @@ dbW_updateSites <- function(
   ignore.case = FALSE,
   verbose = FALSE
 ) {
-  stopifnot(dbW_IsValid())
-
   dos_update <- dbW_has_siteIDs(Site_ids)
   dos_add <- !dos_update
 
   if (any(dos_update)) {
-    sql <- paste(
-      "UPDATE Sites SET Latitude=:Latitude, Longitude=:Longitude, ",
-      "Label=:Label WHERE Site_id=:id"
-    )
-    rs <- DBI::dbSendStatement(rSW2_glovars$con, sql)
-    on.exit(DBI::dbClearResult(rs), add = TRUE)
-
-    for (k in which(dos_update)) {
-      DBI::dbBind(
-        rs,
-        param = c(
-          as.list(site_data[k, c("Latitude", "Longitude", "Label")]),
-          list(id = Site_ids[k])
-      # TODO: do we need something similar here to `dbW_InsistInteract()`?
-      rs <- DBI::dbSendStatement(rSW2_glovars$con, sql)
-        )
+    dbW_InsistInteract(
+      DBI::dbExecute,
+      statement = paste(
+        "UPDATE Sites SET Latitude=:Latitude, Longitude=:Longitude, ",
+        "Label=:Label WHERE Site_id=:id"
+      ),
+      params = c(
+        as.list(site_data[dos_update, c("Latitude", "Longitude", "Label")]),
+        list(id = Site_ids[dos_update])
       )
-    }
+    )
   }
 
   if (any(dos_add)) {
