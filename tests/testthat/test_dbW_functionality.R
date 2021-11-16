@@ -21,6 +21,10 @@ sw_weather <- lapply(
   tests,
   function(it) readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
 )
+sw_years <- lapply(
+  sw_weather, 
+  function(x) range(get_years_from_weatherData(x))
+)
 scenarios <- c("Current", paste0("TestScenario", tests))
 scenarios_added <- c(
   scenarios,
@@ -465,7 +469,29 @@ test_that("dbW weather data manipulation", {
       Scenario = scenarios[2]
     )
   )
+  
+  #--- Add duplicate weather data entry
+  # `dbW_addWeatherData()` prevents adding duplicate entries
+  expect_error(
+    dbW_addWeatherData(
+      Site_id = 1,
+      weatherData = sw_weather[[1]],
+      Scenario = scenarios[1]
+    )
+  )
+  
+  # `dbW_addWeatherDataNoCheck()` does not prevent adding duplicate entries
+  expect_true(
+    dbW_addWeatherDataNoCheck(
+      Site_id = 1,
+      Scenario_id = 1,
+      StartYear = sw_years[[1]][1],
+      EndYear = sw_years[[1]][2],
+      weather_blob = dbW_weatherData_to_blob(sw_weather[[1]])
+    ) == 1
+  )
 
+  
   #--- Check presence of weather data
   # Check one site x one scenario
   expect_true(
