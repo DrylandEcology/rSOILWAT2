@@ -43,7 +43,7 @@ NeedsCompilation: yes
 License: GPL-3
 URL: https://github.com/DrylandEcology/rSOILWAT2
 BugReports: https://github.com/DrylandEcology/rSOILWAT2/issues
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 LazyData: true
 Language: en-US
 VignetteBuilder: knitr
