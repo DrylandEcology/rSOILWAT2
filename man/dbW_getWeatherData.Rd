@@ -52,10 +52,15 @@ data from a predefined weather database. Using the database was faster then
 reading in multiple weather files from disk.
 }
 \details{
-\pkg{SOILWAT2} does not handle missing weather data. If you have missing
-data, then you have to impute yourself or use the built-in Markov
+If there is missing data, then impute or use the built-in Markov
 weather generator (see examples for \code{\link{sw_exec}}).
 }
+\section{Notes}{
+
+  This function returns the first record of weather data
+  even if duplicate entries match the query.
+}
+
 \seealso{
 \code{\link{getWeatherData_folders}}
 }

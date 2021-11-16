@@ -220,7 +220,8 @@ dbW_has_scenarios <- function(Scenarios, ignore.case = FALSE) {
 
 #' @rdname check_content
 #' @section Details: \code{dbW_has_weatherData} checks whether weather data are
-#'   available.
+#'   available but ignores \code{start_year} and \code{end_year}.
+#'
 #' @return \code{dbW_has_weatherData} returns a logical matrix with rows
 #'   corresponding to queried sites and columns to queried scenarios.
 #' @export
@@ -228,12 +229,15 @@ dbW_has_weatherData <- function(Site_ids, Scenario_ids) {
   sites_N <- length(Site_ids)
   scen_N <- length(Scenario_ids)
 
+  # Count distinct entries because there could be duplicate weather data ...
+
   # "EXPLAIN QUERY PLAN":
   # SEARCH WeatherData USING COVERING INDEX wdindex (Site_id=? AND Scenario=?)
 
   if (sites_N > scen_N) {
+    # Loop over scenarios: count distinct sites for each scenario
     sql <- paste(
-      "SELECT COUNT(*) FROM WeatherData",
+      "SELECT COUNT(DISTINCT Site_id) FROM WeatherData",
       "WHERE Site_id IN (:x1) AND Scenario = :x2"
     )
 
@@ -251,13 +255,15 @@ dbW_has_weatherData <- function(Site_ids, Scenario_ids) {
     res <- do.call(cbind, res)
 
   } else {
+    # Loop over sites: count distinct scenarios for each site
     sql <- paste(
-      "SELECT COUNT(*) FROM WeatherData",
+      "SELECT COUNT(DISTINCT Scenario) FROM WeatherData",
       "WHERE Site_id = :x1 AND Scenario IN (:x2)"
     )
 
     res <- lapply(
-      Site_ids, function(x) {
+      Site_ids,
+      function(x) {
         dbW_InsistInteract(
           DBI::dbGetQuery,
           statement = sql,
@@ -281,7 +287,7 @@ dbW_has_weatherData <- function(Site_ids, Scenario_ids) {
 #' @rdname check_content
 #' @section Details:
 #'   \code{dbW_have_sites_all_weatherData} checks whether weather data are
-#'   available.
+#'   available but ignores \code{start_year} and \code{end_year}.
 #'
 #' @return
 #'   \code{dbW_have_sites_all_weatherData} returns a logical vector
@@ -332,12 +338,15 @@ dbW_have_sites_all_weatherData <- function(
   }
 
   #--- Query database
+  # Count distinct entries because there could be duplicate weather data ...
+
   # "EXPLAIN QUERY PLAN ":
-  # SEARCH WeatherData USING COVERING INDEX wdindex (Site_id=? AND Scenario=?)
+  # 1                                        USE TEMP B-TREE FOR count(DISTINCT)
+  # 2 SEARCH WeatherData USING COVERING INDEX wdindex (Site_id=? AND Scenario=?)
   res <- dbW_InsistInteract(
     DBI::dbGetQuery,
     statement = paste0(
-      "SELECT COUNT(*) AS scenN, Site_id FROM WeatherData ",
+      "SELECT COUNT(DISTINCT Scenario) AS scenN, Site_id FROM WeatherData ",
       "WHERE ",
         "Site_id IN (?) AND ",
         "Scenario IN (", paste(scen_ids, collapse = ","), ") "
@@ -687,8 +696,7 @@ get_years_from_weatherData <- function(wd) {
 #' data from a predefined weather database. Using the database was faster then
 #' reading in multiple weather files from disk.
 #'
-#' \pkg{SOILWAT2} does not handle missing weather data. If you have missing
-#' data, then you have to impute yourself or use the built-in Markov
+#' If there is missing data, then impute or use the built-in Markov
 #' weather generator (see examples for \code{\link{sw_exec}}).
 #'
 #' @param Site_id Numeric. Used to identify site and extract weather data.
@@ -704,6 +712,10 @@ get_years_from_weatherData <- function(wd) {
 #'
 #' @return Returns weather data as list. Each element is an object of class
 #'   \code{\linkS4class{swWeatherData}} and contains data for one year.
+#'
+#' @section Notes:
+#'   This function returns the first record of weather data
+#'   even if duplicate entries match the query.
 #'
 #' @seealso \code{\link{getWeatherData_folders}}
 #'
@@ -1009,6 +1021,10 @@ dbW_addScenarios <- function(Scenarios, ignore.case = FALSE, verbose = FALSE) {
   invisible(TRUE)
 }
 
+#' @section Notes:
+#'   This function does not prevent inserting duplicate entries if asked to do.
+#'
+#' @noRd
 dbW_addWeatherDataNoCheck <- function(
   Site_id,
   Scenario_id,

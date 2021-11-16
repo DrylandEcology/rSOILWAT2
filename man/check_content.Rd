@@ -79,10 +79,10 @@ Check availability of content in registered weather database
   available.
 
  \code{dbW_has_weatherData} checks whether weather data are
-  available.
+  available but ignores \code{start_year} and \code{end_year}.
 
 
   \code{dbW_have_sites_all_weatherData} checks whether weather data are
-  available.
+  available but ignores \code{start_year} and \code{end_year}.
 }
 
