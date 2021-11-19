@@ -33,6 +33,7 @@
 #include "rSW_SoilWater.h"
 
 #include "rSW_Control.h"
+#include "SW_R_lib.h" // externs `InputData`
 
 #include <R.h>
 #include <Rinternals.h>
@@ -40,12 +41,8 @@
 
 
 /* =================================================== */
-/*                  Global Declarations                */
+/*             Global Function Definitions             */
 /* --------------------------------------------------- */
-
-extern Bool useFiles;
-extern SEXP InputData;
-
 
 /** Additional initialization to be performed for rSOILWAT2
     This function is meant to be run immediately after calling SW_CTL_init_model()

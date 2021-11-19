@@ -24,9 +24,20 @@
 #include <Rconfig.h>
 #include <Rinternals.h>
 
-void init_args(int argc, char **argv);
-void usage(void);
 
+
+/* =================================================== */
+/*            Externed Global Variables                */
+/* --------------------------------------------------- */
+extern SEXP InputData;
+extern SEXP WeatherList;
+extern Bool useFiles;
+extern Bool bWeatherList;
+
+
+/* =================================================== */
+/*             Global Function Declarations            */
+/* --------------------------------------------------- */
 SEXP tempError(void);
 SEXP onGetInputDataFromFiles(SEXP input);
 SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet);

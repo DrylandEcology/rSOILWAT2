@@ -22,6 +22,7 @@
 #include "SOILWAT2/myMemory.h"
 #include "SOILWAT2/SW_Defines.h"
 
+// externs `*InFiles`, `_ProjDir`, `weather_prefix`, `output_prefix`
 #include "SOILWAT2/SW_Files.h"
 #include "rSW_Files.h"
 
@@ -31,20 +32,7 @@
 
 
 /* =================================================== */
-/*                  Global Variables                   */
-/* --------------------------------------------------- */
-
-/* =================================================== */
-/*                Module-Level Variables               */
-/* --------------------------------------------------- */
-extern char *InFiles[SW_NFILES];
-extern char _ProjDir[FILENAME_MAX];
-extern char weather_prefix[FILENAME_MAX];
-extern char output_prefix[FILENAME_MAX];
-
-/* =================================================== */
-/* =================================================== */
-/*             Private Function Definitions            */
+/*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
 SEXP onGet_SW_F() {

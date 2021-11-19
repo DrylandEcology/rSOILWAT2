@@ -19,9 +19,9 @@
 #include "SOILWAT2/generic.h"
 #include "SOILWAT2/filefuncs.h"
 #include "SOILWAT2/SW_Defines.h"
-#include "SOILWAT2/SW_Model.h"
+#include "SOILWAT2/SW_Model.h" // externs `SW_Model`
 
-#include "SOILWAT2/SW_Carbon.h"
+#include "SOILWAT2/SW_Carbon.h" // externs `SW_Carbon`
 #include "rSW_Carbon.h"
 
 #include <R.h>
@@ -30,17 +30,8 @@
 
 
 /* =================================================== */
-/*                  Global Variables                   */
+/*             Global Function Definitions             */
 /* --------------------------------------------------- */
-
-
-/* =================================================== */
-/*                Module-Level Variables               */
-/* --------------------------------------------------- */
-
-
-extern SW_MODEL SW_Model;
-extern SW_CARBON SW_Carbon;
 
 
 
