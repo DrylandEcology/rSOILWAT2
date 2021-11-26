@@ -1498,6 +1498,36 @@ dbW_deleteSiteData <- function(Site_id, Scenario_id = NULL) {
 }
 
 
+#' Remove duplicated weather data records
+#'
+#' @param check_values A logical value.
+#'
+#' @section Details:
+#' A weather data record is considered a duplicate if `site_id`, `scenario_id`,
+#' `start_year`, and `end_year` agree; if `check_values` is `TRUE`, then
+#' the daily weather values must also exactly agree (checked as blobs)
+#' to be considered a duplicate entry.
+#'
+#' @return The number of deleted records
+#'
+#' @export
+#' @md
+dbW_delete_duplicated_weatherData <- function(check_values = TRUE) {
+  # Delete duplicates by keeping the lowest rowid per unit
+  dbW_InsistInteract(
+    DBI::dbExecute,
+    statement = paste(
+      "DELETE FROM WeatherData",
+      "WHERE rowid NOT IN (",
+        "SELECT min(rowid) FROM WeatherData ",
+        "GROUP BY Site_id, Scenario, StartYear, EndYear",
+        if (check_values) ", data",
+      ")"
+    )
+  )
+}
+
+
 ## ------ Conversion of weather data formats
 
 #' Conversion: (Compressed) raw vector (e.g., SQL-retrieved blob) to

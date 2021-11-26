@@ -626,6 +626,60 @@ test_that("dbW weather data manipulation", {
     sw_weather[[1]]
   )
   expect_error(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[2]))
+
+
+  #--- Delete duplicate entries
+  # Delete the one duplicate entry
+  expect_equal(dbW_delete_duplicated_weatherData(), 1)
+  expect_equal(dbW_delete_duplicated_weatherData(), 0)
+
+  # Add kmax duplicate entries and delete them all
+  kmax <- 5
+  for (k in seq_len(kmax)) {
+    dbW_addWeatherDataNoCheck(
+      Site_id = 1,
+      Scenario_id = 1,
+      StartYear = sw_years[[1]][1],
+      EndYear = sw_years[[1]][2],
+      weather_blob = dbW_weatherData_to_blob(sw_weather[[1]])
+    )
+  }
+
+  expect_equal(dbW_delete_duplicated_weatherData(), kmax)
+  expect_equal(dbW_delete_duplicated_weatherData(), 0)
+
+
+  # Add multiple entries that differ in EndYear --> no duplicates to delete
+  for (k in seq_len(kmax)) {
+    dbW_addWeatherDataNoCheck(
+      Site_id = 1,
+      Scenario_id = 1,
+      StartYear = sw_years[[1]][1],
+      EndYear = sw_years[[1]][2] + k,
+      weather_blob = dbW_weatherData_to_blob(sw_weather[[1]])
+    )
+  }
+
+  expect_equal(dbW_delete_duplicated_weatherData(), 0)
+
+  # Add multiple entries that differ in weather data
+  # --> considered duplicated only if check_values is FALSE
+  for (k in seq_len(kmax)) {
+    tmp <- sw_weather[[1]]
+    tmp[[1]]@data[1, 2] <- k
+
+    dbW_addWeatherDataNoCheck(
+      Site_id = 1,
+      Scenario_id = 1,
+      StartYear = sw_years[[1]][1],
+      EndYear = sw_years[[1]][2],
+      weather_blob = dbW_weatherData_to_blob(tmp)
+    )
+  }
+
+  expect_equal(dbW_delete_duplicated_weatherData(check_values = TRUE), 0)
+  expect_equal(dbW_delete_duplicated_weatherData(check_values = FALSE), kmax)
+  expect_equal(dbW_delete_duplicated_weatherData(check_values = FALSE), 0)
 })
 
 
