@@ -1,6 +1,6 @@
 context("rSOILWAT2 weather database")
 
-#---INPUTS
+#--- INPUTS ------
 path_extdata <- file.path("..", "..", "inst", "extdata")
 if (!dir.exists(path_extdata)) {
   path_extdata <- system.file("extdata", package = "rSOILWAT2")
@@ -104,13 +104,16 @@ test_that("Disk file write and delete permissions", {
   )
 })
 
+
+
+#--- Unit: dbW creation ------
 test_that("dbW creation", {
   # remove once issue #43 is fixed (unit tests for 'test_dbW_functionality.R'
   # fail on appveyor but not on travis)
   skip_on_appveyor()
   skip_on_os("windows")
 
-  #--- Attempt to connect to (no) weather database
+  #--- * Attempt to connect to (no) weather database ------
   unlink(fdbWeather)
   expect_false(dbW_setConnection(fdbWeather, create_if_missing = FALSE))
   expect_message(
@@ -135,7 +138,7 @@ test_that("dbW creation", {
   )
   expect_false(dbW_IsValid())
 
-  #--- Create weather database and check that connection
+  #--- * Create weather database and check that connection ------
   expect_message(
     dbW_createDatabase(
       fdbWeather,
@@ -233,13 +236,14 @@ test_that("dbW creation", {
 })
 
 
+#--- Unit: dbW site/scenario tables manipulation ------
 test_that("dbW site/scenario tables manipulation", {
   #remove once issue #43 is fixed (unit tests for 'test_dbW_functionality.R'
   # fail on appveyor but not on travis)
   skip_on_appveyor()
   skip_on_os("windows")
 
-  #--- Obtain site_id all at once
+  #--- * Obtain site_id all at once ------
   site_id1 <- dbW_getSiteId(
     lat = site_data1[, "Latitude"],
     long = site_data1[, "Longitude"]
@@ -275,7 +279,7 @@ test_that("dbW site/scenario tables manipulation", {
 
 
   for (k in seq_len(site_N)) {
-    #--- Obtain site_id one by one
+    #--- * Obtain site_id one by one ------
     site_id1 <- dbW_getSiteId(
       lat = site_data1[k, "Latitude"],
       long = site_data1[k, "Longitude"]
@@ -296,7 +300,7 @@ test_that("dbW site/scenario tables manipulation", {
     )
     expect_equal(site_id4, NA_integer_)
 
-    #--- Attempt to add new site
+    #--- * Attempt to add new site ------
     # Site already exists
     expect_true(dbW_addSites(site_data = site_data1[k, ], verbose = FALSE))
     expect_message(
@@ -310,7 +314,7 @@ test_that("dbW site/scenario tables manipulation", {
     expect_true(dbW_addSites(site_data = site_data3[k, ], verbose = FALSE))
   }
 
-  #--- Update site information
+  #--- * Update site information ------
   expect_equal(
     dbW_getSiteTable()[, req_cols],
     rbind(site_data1, site_data3)[, req_cols]
@@ -356,7 +360,8 @@ test_that("dbW site/scenario tables manipulation", {
     rbind(site_data1, site_data3)[, req_cols]
   )
 
-  #--- Add scenarios
+
+  #--- * Add scenarios ------
   # Obtain scenario id
   expect_equal(
     dbW_getScenarioId(scenarios_added),
@@ -385,7 +390,8 @@ test_that("dbW site/scenario tables manipulation", {
   expect_equal(dbW_getScenarioId(scenarios_added), seq_along(scenarios_added))
   expect_equal(dbW_getScenarioId(NULL), integer(0))
 
-  #--- Obtain site and scenario IDs
+
+  #--- * Obtain site and scenario IDs ------
   site_id1 <- dbW_getSiteId(
     lat = site_data1[, "Latitude"],
     long = site_data1[, "Longitude"]
@@ -430,13 +436,14 @@ test_that("dbW site/scenario tables manipulation", {
 })
 
 
+#--- Unit: dbW weather data manipulation ------
 test_that("dbW weather data manipulation", {
   #remove once issue #43 is fixed (unit tests for 'test_dbW_functionality.R'
   # fail on appveyor but not on travis)
   skip_on_appveyor()
   skip_on_os("windows")
 
-  #--- Add weather data
+  #--- * Add weather data ------
   # Use 'Site_id' as identifier
   expect_true(
     dbW_addWeatherData(
@@ -470,7 +477,7 @@ test_that("dbW weather data manipulation", {
     )
   )
 
-  #--- Add duplicate weather data entry
+  #--- * Add duplicate weather data entry ------
   # `dbW_addWeatherData()` prevents adding duplicate entries
   expect_error(
     dbW_addWeatherData(
@@ -492,7 +499,7 @@ test_that("dbW weather data manipulation", {
   )
 
 
-  #--- Check presence of weather data
+  #--- * Check presence of weather data ------
   # Check one site x one scenario
   expect_true(
     dbW_has_weatherData(Site_ids = 1, Scenario_ids = 1)[1, 1]
@@ -583,7 +590,7 @@ test_that("dbW weather data manipulation", {
 
 
 
-  #--- Retrieve weather data
+  #--- * Retrieve weather data ------
   expect_equal(
     dbW_getWeatherData(Site_id = 1, Scenario = scenarios[1]),
     sw_weather[[1]]
@@ -610,7 +617,8 @@ test_that("dbW weather data manipulation", {
     )
   )
 
-  #--- Remove data
+
+  #--- * Remove data ------
   # Delete one site and all associated weather data
   expect_true(dbW_has_siteIDs(3))
   expect_true(dbW_deleteSite(Site_ids = 3))
@@ -683,7 +691,7 @@ test_that("dbW weather data manipulation", {
 })
 
 
-#---CLEAN UP
+#--- CLEAN UP ------
 dbW_disconnectConnection()
 unlink(fdbWeather)
 unlink(fdbWeather2, force = TRUE)
