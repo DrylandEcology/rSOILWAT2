@@ -1,7 +1,9 @@
 ﻿#include "SOILWAT2/Times.h"
 #include <Rinternals.h> // for SEXP
 
-/* Function Declarations */
+/* =================================================== */
+/*             Global Function Declarations            */
+/* --------------------------------------------------- */
 void rSW_SWC_construct(void);
 SEXP onGet_SW_SWC(void);
 void onSet_SW_SWC(SEXP SWC);

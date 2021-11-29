@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "SOILWAT2/generic.h"
+#include "SOILWAT2/generic.h" // externs `EchoInits`
 #include "SOILWAT2/filefuncs.h"
 #include "SOILWAT2/Times.h"
 #include "SOILWAT2/myMemory.h"
@@ -28,6 +28,7 @@
 #include "SOILWAT2/SW_Files.h"
 #include "SOILWAT2/SW_SoilWater.h"
 
+// externs `SW_Site`, `_TranspRgnBounds`, _SWCInitVal, _SWCWetVal, _SWCMinVal
 #include "SOILWAT2/SW_Site.h"
 #include "rSW_Site.h"
 
@@ -36,43 +37,31 @@
 #include <Rdefines.h>
 
 
-/* =================================================== */
-/*                  Global Variables                   */
-/* --------------------------------------------------- */
-
-
-extern SEXP InputData;
-extern SW_SITE SW_Site;
-extern Bool EchoInits;
 
 /* =================================================== */
-/*                Module-Level Variables               */
+/*                  Local Variables                    */
 /* --------------------------------------------------- */
+
 static char *MyFileName;
 
-/* transpiration regions  shallow, moderately shallow,  */
-/* deep and very deep. units are in layer numbers. */
-extern LyrIndex _TranspRgnBounds[MAX_TRANSP_REGIONS];
 
-/* for these three, units are cm/cm if < 1, -bars if >= 1 */
-extern RealD _SWCInitVal, /* initialization value for swc */
-  _SWCWetVal, /* value for a "wet" day,       */
-  _SWCMinVal; /* lower bound on swc.          */
-
-char *cSW_SIT[] = { "SWClimits", "ModelFlags", "ModelCoefficients",
+static char *cSW_SIT[] = {
+  "SWClimits", "ModelFlags", "ModelCoefficients",
   "SnowSimulationParameters", "DrainageCoefficient", "EvaporationCoefficients",
   "TranspirationCoefficients", "IntrinsicSiteParams", "SoilTemperatureFlag",
-  "SoilTemperatureConstants", "TranspirationRegions" };
-char *cLayers[] = { "depth_cm", "bulkDensity_g/cm^3", "gravel_content",
+  "SoilTemperatureConstants", "TranspirationRegions"
+};
+
+static char *cLayers[] = {
+  "depth_cm", "bulkDensity_g/cm^3", "gravel_content",
   "EvapBareSoil_frac", "transpGrass_frac", "transpShrub_frac", "transpTree_frac",
-  "transpForb_frac", "sand_frac", "clay_frac", "impermeability_frac", "soilTemp_c" };
+  "transpForb_frac", "sand_frac", "clay_frac", "impermeability_frac", "soilTemp_c"
+};
 
 
 /* =================================================== */
-/* =================================================== */
-/*             Private Function Definitions            */
+/*             Global Function Definitions             */
 /* --------------------------------------------------- */
-
 
 SEXP onGet_SW_LYR() {
 	int i, dmax = 0;

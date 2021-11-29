@@ -22,8 +22,8 @@
 #include "SOILWAT2/SW_Defines.h"
 #include "SOILWAT2/SW_Files.h"
 
-#include "SOILWAT2/SW_Weather.h"
-#include "SOILWAT2/SW_Sky.h"
+#include "SOILWAT2/SW_Weather.h" // externs `SW_Weather`
+#include "SOILWAT2/SW_Sky.h" // externs `SW_Sky`
 #include "rSW_Sky.h"
 
 #include <R.h>
@@ -32,25 +32,13 @@
 
 
 /* =================================================== */
-/*                  Global Variables                   */
-/* --------------------------------------------------- */
-
-extern SW_SKY SW_Sky;
-extern SW_WEATHER SW_Weather;
-
-/* =================================================== */
-/*                Module-Level Variables               */
+/*                  Local Variables                    */
 /* --------------------------------------------------- */
 static char *MyFileName;
 
-/* =================================================== */
-/* =================================================== */
-/*             Private Function Definitions            */
-/* --------------------------------------------------- */
 
 /* =================================================== */
-/* =================================================== */
-/*             Public Function Definitions             */
+/*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
 SEXP onGet_SW_SKY() {

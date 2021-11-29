@@ -1,6 +1,8 @@
 #include <Rinternals.h> // for SEXP
 
-/* Function Declarations */
+/* =================================================== */
+/*             Global Function Declarations            */
+/* --------------------------------------------------- */
 SEXP onGet_MKV(void);
 void onSet_MKV(SEXP MKV);
 SEXP onGet_MKV_prob(void);
