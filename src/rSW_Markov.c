@@ -26,7 +26,7 @@
 #include "SOILWAT2/SW_Files.h"
 #include "SOILWAT2/SW_Markov.h"
 
-#include "rSW_Markov.h"
+#include "rSW_Markov.h" // externs `SW_Markov`
 
 #include <R.h>
 #include <Rinternals.h>
@@ -34,19 +34,15 @@
 
 
 /* =================================================== */
-/*                  Global Variables                   */
-/* --------------------------------------------------- */
-extern SW_MARKOV SW_Markov; /* declared here, externed elsewhere */
-
-/* =================================================== */
-/*                Module-Level Variables               */
+/*                  Local Variables                    */
 /* --------------------------------------------------- */
 
 static char *cSW_MKV[] = { "Prob", "Conv" };
 
+
+
 /* =================================================== */
-/* =================================================== */
-/*             Public Function Definitions             */
+/*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
 

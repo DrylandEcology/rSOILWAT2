@@ -18,7 +18,7 @@ vegetation production parameter information.
 #include <stdlib.h>
 #include <string.h>
 
-#include "SOILWAT2/generic.h"
+#include "SOILWAT2/generic.h" // externs `EchoInits`
 #include "SOILWAT2/filefuncs.h"
 #include "SOILWAT2/Times.h"
 #include "SOILWAT2/myMemory.h"
@@ -26,7 +26,7 @@ vegetation production parameter information.
 #include "SOILWAT2/SW_Defines.h"
 #include "SOILWAT2/SW_Files.h"
 
-#include "SOILWAT2/SW_VegProd.h"
+#include "SOILWAT2/SW_VegProd.h" // externs `SW_VegProd`
 #include "rSW_VegProd.h"
 
 #include <R.h>
@@ -34,37 +34,30 @@ vegetation production parameter information.
 #include <Rdefines.h>
 
 
-/* =================================================== */
-/*                  Global Variables                   */
-/* --------------------------------------------------- */
-extern Bool EchoInits;
-extern SW_VEGPROD SW_VegProd;
 
 /* =================================================== */
-/*                Module-Level Variables               */
+/*                  Local Variables                    */
 /* --------------------------------------------------- */
 static char *MyFileName;
 
-/* =================================================== */
-/* =================================================== */
-/*             Private Function Definitions            */
-/* --------------------------------------------------- */
 
-
-/* =================================================== */
-/* =================================================== */
-/*             Public Function Definitions             */
-/* --------------------------------------------------- */
-
-char *cVegProd_names[] = { "Composition", "Albedo", "CanopyHeight",
+static char *cVegProd_names[] = {
+	"Composition", "Albedo", "CanopyHeight",
 	"VegetationInterceptionParameters", "LitterInterceptionParameters",
 	"EsTpartitioning_param", "Es_param_limit", "Shade", "HydraulicRedistribution_use",
 	"HydraulicRedistribution", "CriticalSoilWaterPotential", "MonthlyVeg",
-	"CO2Coefficients" };
+	"CO2Coefficients"
+};
 
-char *cMonths[] = { "January", "February", "March", "April", "May", "June", "July",
-	"August", "September", "October", "November", "December" };
+char *cMonths[] = {
+	"January", "February", "March", "April", "May", "June", "July",
+	"August", "September", "October", "November", "December"
+};
 
+
+/* =================================================== */
+/*             Global Function Definitions             */
+/* --------------------------------------------------- */
 
 SEXP onGet_SW_VPD() {
 	int i;

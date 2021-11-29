@@ -5,14 +5,18 @@
  *      Author: Ryan Murphy
  */
 
+// externs `*logfp`, `errstr`, `logged`, `QuietMode`, `EchoInits`
 #include "SOILWAT2/generic.h"
-#include "SOILWAT2/filefuncs.h"
+#include "SOILWAT2/filefuncs.h" // externs `_firstfile`
 #include "SOILWAT2/Times.h"
 #include "SOILWAT2/SW_Defines.h"
 
 #include "SOILWAT2/SW_Files.h"
-#include "SOILWAT2/SW_Carbon.h"
+#include "SOILWAT2/SW_Carbon.h" // externs `SW_Carbon`
+#include "SOILWAT2/SW_SoilWater.h" // externs `SW_Soilwat`
+#include "SOILWAT2/SW_VegEstab.h" // externs `SW_VegEstab`
 #include "SOILWAT2/SW_Output.h"
+#include "SOILWAT2/SW_Main_lib.h"
 
 #include "rSW_Files.h"
 #include "rSW_Model.h"
@@ -33,27 +37,29 @@
 #include <Rinternals.h>
 #include <Rdefines.h>
 
+
+
 /* =================================================== */
-/*                  Global Declarations                */
-/* external by other routines elsewhere in the program */
+/*                  Global Variables                   */
 /* --------------------------------------------------- */
 
-
-SEXP Rlogfile;
 SEXP InputData;
 SEXP WeatherList;
 Bool useFiles;
 Bool bWeatherList;
 
-extern char _firstfile[1024];
-
-extern SW_SOILWAT SW_Soilwat; // used by `tempError()`
 
 
 /* =================================================== */
-/*                Module-Level Declarations            */
+/*                  Local Variables                    */
 /* --------------------------------------------------- */
+static SEXP Rlogfile;
 
+
+
+/* =================================================== */
+/*             Global Function Definitions             */
+/* --------------------------------------------------- */
 
 /**
  * Determines if a constant in the Parton equation 2.21 is invalid and would
@@ -100,7 +106,7 @@ void setupSOILWAT2(SEXP inputOptions) {
 	if (debug) swprintf("Set call arguments\n");
   #endif
 
-	init_args(argc, argv);
+	sw_init_args(argc, argv);
 
   #ifdef RSWDEBUG
   if (debug) swprintf("Initialize SOILWAT ...");
