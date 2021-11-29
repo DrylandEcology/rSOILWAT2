@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "SOILWAT2/generic.h"
+#include "SOILWAT2/generic.h" // externs `EchoInits`
 #include "SOILWAT2/filefuncs.h"
 #include "SOILWAT2/Times.h"
 #include "SOILWAT2/myMemory.h"
@@ -24,7 +24,7 @@
 #include "SOILWAT2/SW_Defines.h"
 #include "SOILWAT2/SW_Files.h"
 
-#include "SOILWAT2/SW_VegEstab.h"
+#include "SOILWAT2/SW_VegEstab.h" // externs `SW_VegEstab`
 #include "rSW_VegEstab.h"
 
 #include <R.h>
@@ -32,30 +32,17 @@
 #include <Rdefines.h>
 
 
-/* =================================================== */
-/*                  Global Variables                   */
-/* --------------------------------------------------- */
-
-extern Bool EchoInits;
-
-extern SW_VEGESTAB SW_VegEstab;
 
 /* =================================================== */
-/*                Module-Level Variables               */
+/*                  Local Variables                    */
 /* --------------------------------------------------- */
 static char *MyFileName;
 
+
+
 /* =================================================== */
-/* =================================================== */
-/*             Private Function Declarations           */
+/*             Global Function Definitions             */
 /* --------------------------------------------------- */
-
-
-/* =================================================== */
-/* =================================================== */
-/*             Public Function Definitions             */
-/* --------------------------------------------------- */
-
 
 SEXP onGet_SW_VES(void) {
 	SEXP swEstab;

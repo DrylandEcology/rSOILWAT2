@@ -1,6 +1,8 @@
 #include <Rinternals.h> // for SEXP
 
-/* Function Declarations */
+/* =================================================== */
+/*             Global Function Declarations            */
+/* --------------------------------------------------- */
 SEXP onGet_SW_SIT();
 void onSet_SW_SIT(SEXP SW_SIT);
 SEXP onGet_SW_LYR();

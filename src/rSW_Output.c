@@ -19,16 +19,16 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "SOILWAT2/generic.h"
+#include "SOILWAT2/generic.h" // externs `EchoInits`
 #include "SOILWAT2/filefuncs.h"
 #include "SOILWAT2/Times.h"
 #include "SOILWAT2/myMemory.h"
 
 #include "SOILWAT2/SW_Defines.h"
 #include "SOILWAT2/SW_Files.h"
-#include "SOILWAT2/SW_Site.h"
+#include "SOILWAT2/SW_Site.h" // externs `SW_Site`
 
-#include "SOILWAT2/SW_Output.h"
+#include "SOILWAT2/SW_Output.h" // externs many variables
 #include "SOILWAT2/SW_Output_outarray.h" // for function `SW_OUT_set_nrow`
 #include "rSW_Output.h"
 
@@ -39,37 +39,13 @@
 
 
 /* =================================================== */
-/*                  Global Variables                   */
-/* --------------------------------------------------- */
-// Following global variables are defined in `SOILWAT2/SW_Output.c`
-extern SW_SITE SW_Site;
-extern SW_OUTPUT SW_Output[];
-extern Bool EchoInits;
-extern char _Sep;
-extern char const *key2str[];
-extern char const *pd2longstr[];
-extern IntUS used_OUTNPERIODS;
-extern Bool use_OutPeriod[];
-extern OutPeriod timeSteps[SW_OUTNKEYS][SW_OUTNPERIODS];
-extern char *colnames_OUT[SW_OUTNKEYS][5 * NVEGTYPES + MAX_LAYERS];
-extern IntUS ncol_OUT[];
-
-// defined in `SW_Output_outarray.c`
-extern size_t nrow_OUT[];
-extern const IntUS ncol_TimeOUT[];
-extern RealD *p_OUT[SW_OUTNKEYS][SW_OUTNPERIODS];
-
-
-
-/* =================================================== */
 /*                Module-Level Variables               */
 /* --------------------------------------------------- */
 static char *MyFileName;
 
 
 /* =================================================== */
-/* =================================================== */
-/*             Public Function Definitions             */
+/*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
 /** Copies values from parameter `OUT` of rSOILWAT2 S4 class `swOUT` to SOILWAT2 variables

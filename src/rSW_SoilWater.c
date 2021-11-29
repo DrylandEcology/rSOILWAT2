@@ -28,42 +28,28 @@
 
 #include "SOILWAT2/SW_Defines.h"
 #include "SOILWAT2/SW_Files.h"
-#include "SOILWAT2/SW_Model.h"
-#include "SOILWAT2/SW_Site.h"
+#include "SOILWAT2/SW_Model.h" // externs `SW_Model`
+#include "SOILWAT2/SW_Site.h" // externs `SW_Site`
 
-#include "SOILWAT2/SW_SoilWater.h"
+#include "SOILWAT2/SW_SoilWater.h" // externs `SW_Soilwat`
 #include "rSW_SoilWater.h"
+#include "SW_R_lib.h" // externs `InputData`
 
 #include <R.h>
 #include <Rinternals.h>
 #include <Rdefines.h>
 
-/* =================================================== */
-/*                  Global Variables                   */
-/* --------------------------------------------------- */
-
-extern SW_MODEL SW_Model;
-extern SW_SITE SW_Site;
-extern SW_SOILWAT SW_Soilwat;
-#ifdef RSOILWAT
-	extern SEXP InputData;
-#endif
 
 /* =================================================== */
-/*                Module-Level Variables               */
+/*                  Local Variables                    */
 /* --------------------------------------------------- */
 static char *MyFileName;
 static int swcdataIndex;
 
-/* =================================================== */
-/* =================================================== */
-/*             Private Function Definitions            */
-/* --------------------------------------------------- */
 
 
 /* =================================================== */
-/* =================================================== */
-/*             Public Function Definitions             */
+/*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
 void rSW_SWC_construct(void) {
