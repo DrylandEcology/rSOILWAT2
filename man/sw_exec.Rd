@@ -146,7 +146,7 @@ swof <- rSOILWAT2::sw_out_flags()
 tmp <- c(
   "sw_temp", "sw_precip", "sw_snow",
   "sw_inf_soil", "sw_deepdrain",
-  "sw_vwcbulk", "sw_swcbulk", "sw_swp", "sw_soiltemp",
+  "sw_swcbulk", "sw_swp", "sw_soiltemp",
   "sw_aet", "sw_pet",
   "sw_veg"
 )
