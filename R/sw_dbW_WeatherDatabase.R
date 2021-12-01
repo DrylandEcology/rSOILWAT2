@@ -22,6 +22,64 @@
 # Daily weather data is stored in database as SQL-blob of a list of R objects
 # of class \code{\linkS4class{swWeatherData}}
 
+
+#' Insistently interacting with the weather database
+#'
+#' This is particularly suitable for `DBI::dbGetQuery()` and `DBI::dbExecute()`.
+#'
+#' @param fun A function.
+#'   The function must have arguments `conn`, `statement`, and `params` or
+#'   silently ignore them via `...`.
+#'
+#' @noRd
+#' @md
+dbW_InsistInteract <- function(
+  fun,
+  statement,
+  params = NULL,
+  ...,
+  max_attempts = 10L,
+  wait = 0.1
+) {
+  stopifnot(dbW_IsValid())
+
+  res <- NULL
+  k <- 1
+
+  repeat {
+    # Capture errors in case database is busy
+    res <- try(
+      fun(rSW2_glovars$con, statement = statement, params = params, ...),
+      silent = TRUE
+    )
+
+    if (inherits(res, "try-error")) {
+      if (k <= max_attempts) {
+        # Prepare next attempt
+        k <- k + 1
+
+        # Set busy handler to time out after 10 seconds
+        # (in milliseconds) of retries
+        # It's reported that SQLite may reset the busy handler
+        # https://github.com/r-dbi/RSQLite/issues/280#issuecomment-751441914 # nolint
+        try(DBI::dbExecute(rSW2_glovars$con, "PRAGMA busy_timeout = 10000"))
+
+        # Wait a bit before next attempt
+        Sys.sleep(wait)
+
+      } else {
+        stop("`dbGetQuery` failed after ", k, " attempts: ", shQuote(res))
+      }
+    } else {
+      # success
+      break
+    }
+  }
+
+  res
+}
+
+
 #' Check whether registered weather database connection is valid
 #' @return A logical value.
 #' @export
@@ -33,18 +91,17 @@ dbW_IsValid <- function() {
 #' @return A numeric version number.
 #' @export
 dbW_version <- function() {
-  stopifnot(dbW_IsValid())
-
-  sql <- "SELECT Value FROM Meta WHERE Desc=\'Version\'"
-  numeric_version(as.character(DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1]))
+  res <- dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement = "SELECT Value FROM Meta WHERE Desc=\'Version\'"
+  )
+  numeric_version(as.character(res[1, 1]))
 }
 
 #' Check that version of registered weather database is up-to-date
 #' @return A logical value.
 #' @export
 dbW_check_version <- function(dbW_min_version = NULL) {
-  stopifnot(dbW_IsValid())
-
   v_dbW <- dbW_version()
 
   if (is.null(dbW_min_version)) {
@@ -53,10 +110,12 @@ dbW_check_version <- function(dbW_min_version = NULL) {
   success <- v_dbW >= dbW_min_version
 
   if (!success) {
-    message(paste("The version", shQuote(v_dbW), "of the weather database",
-      shQuote(basename(slot(rSW2_glovars$con, "dbname"))), "is outdated;",
-      "minimal suggested version is", shQuote(dbW_min_version),
-      "-- please update."))
+    message(
+      "The version ", shQuote(v_dbW), " of the weather database ",
+      shQuote(basename(slot(rSW2_glovars$con, "dbname"))), " is outdated; ",
+      "minimal suggested version is ", shQuote(dbW_min_version),
+      " -- please update."
+    )
   }
 
   success
@@ -67,10 +126,12 @@ dbW_check_version <- function(dbW_min_version = NULL) {
 #' @return A character string.
 #' @export
 dbW_compression <- function() {
-  stopifnot(dbW_IsValid())
+  res <- dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement = "SELECT Value FROM Meta WHERE Desc=\'Compression_type\'"
+  )
 
-  sql <- "SELECT Value FROM Meta WHERE Desc=\'Compression_type\'"
-  as.character(DBI::dbGetQuery(rSW2_glovars$con, sql)[1, 1])
+  as.character(res[1, 1])
 }
 
 
@@ -93,14 +154,16 @@ NULL
 #'   queried sites.
 #' @export
 dbW_has_sites <- function(Labels, ignore.case = FALSE) {
-  stopifnot(dbW_IsValid())
-
-  sql <- paste(
-    "SELECT COUNT(*) FROM Sites WHERE Label=:x",
-    if (ignore.case) "COLLATE NOCASE"
-  )
-
-  DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = Labels))[, 1] > 0
+  # "EXPLAIN QUERY PLAN":
+  # SEARCH Sites USING COVERING INDEX sqlite_autoindex_Sites_1 (Label=?)
+  dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement = paste(
+      "SELECT COUNT(*) FROM Sites WHERE Label=:x",
+      if (ignore.case) "COLLATE NOCASE"
+    ),
+    params = list(x = Labels)
+  )[, 1] > 0
 }
 
 #' @rdname check_content
@@ -109,11 +172,13 @@ dbW_has_sites <- function(Labels, ignore.case = FALSE) {
 #'   queried sites.
 #' @export
 dbW_has_siteIDs <- function(Site_ids) {
-  stopifnot(dbW_IsValid())
-
-  sql <- "SELECT COUNT(*) FROM Sites WHERE Site_id=:x"
-
-  DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = Site_ids))[, 1] > 0
+  # "EXPLAIN QUERY PLAN ":
+  # SEARCH Sites USING INTEGER PRIMARY KEY (rowid=?)
+  dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement = "SELECT COUNT(*) FROM Sites WHERE Site_id=:x",
+    params = list(x = Site_ids)
+  )[, 1] > 0
 }
 
 #' @rdname check_content
@@ -123,13 +188,11 @@ dbW_has_siteIDs <- function(Site_ids) {
 #'   queried Scenarios.
 #' @export
 dbW_has_scenarioIDs <- function(Scenario_ids) {
-  stopifnot(dbW_IsValid())
-
-  sql <- "SELECT COUNT(*) FROM Scenarios WHERE id=:x"
-
-  DBI::dbGetQuery(
-    rSW2_glovars$con,
-    sql,
+  # "EXPLAIN QUERY PLAN ":
+  # SEARCH Scenarios USING INTEGER PRIMARY KEY (rowid=?)
+  dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement = "SELECT COUNT(*) FROM Scenarios WHERE id=:x",
     params = list(x = Scenario_ids)
   )[, 1] > 0
 }
@@ -141,59 +204,73 @@ dbW_has_scenarioIDs <- function(Scenario_ids) {
 #'   queried Scenarios.
 #' @export
 dbW_has_scenarios <- function(Scenarios, ignore.case = FALSE) {
-  stopifnot(dbW_IsValid())
+  # "EXPLAIN QUERY PLAN ":
+  # SEARCH Scenarios USING COVERING INDEX
+  #   sqlite_autoindex_Scenarios_1 (Scenario=?)
 
-  sql <- paste(
-    "SELECT COUNT(*) FROM Scenarios WHERE Scenario=:x",
-    if (ignore.case) "COLLATE NOCASE"
-  )
-
-  DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = Scenarios))[, 1] > 0
+  dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement = paste(
+      "SELECT COUNT(*) FROM Scenarios WHERE Scenario=:x",
+      if (ignore.case) "COLLATE NOCASE"
+    ),
+    params = list(x = Scenarios)
+  )[, 1] > 0
 }
 
 #' @rdname check_content
 #' @section Details: \code{dbW_has_weatherData} checks whether weather data are
-#'   available.
+#'   available but ignores \code{start_year} and \code{end_year}.
+#'
 #' @return \code{dbW_has_weatherData} returns a logical matrix with rows
 #'   corresponding to queried sites and columns to queried scenarios.
 #' @export
 dbW_has_weatherData <- function(Site_ids, Scenario_ids) {
-  stopifnot(dbW_IsValid())
-
   sites_N <- length(Site_ids)
   scen_N <- length(Scenario_ids)
 
+  # Count distinct entries because there could be duplicate weather data ...
+
+  # "EXPLAIN QUERY PLAN":
+  # SEARCH WeatherData USING COVERING INDEX wdindex (Site_id=? AND Scenario=?)
+
   if (sites_N > scen_N) {
+    # Loop over scenarios: count distinct sites for each scenario
     sql <- paste(
-      "SELECT COUNT(*) FROM WeatherData",
+      "SELECT COUNT(DISTINCT Site_id) FROM WeatherData",
       "WHERE Site_id IN (:x1) AND Scenario = :x2"
     )
 
-    res <- lapply(Scenario_ids, function(x) {
-      res <- DBI::dbGetQuery(
-        rSW2_glovars$con,
-        sql,
-        params = list(x1 = Site_ids, x2 = rep(x, sites_N))
-      )
-      res[, 1] == 1L
-    })
+    res <- lapply(
+      Scenario_ids,
+      function(x) {
+        dbW_InsistInteract(
+          DBI::dbGetQuery,
+          statement = sql,
+          params = list(x1 = Site_ids, x2 = rep(x, sites_N))
+        )[, 1] == 1L
+      }
+    )
 
     res <- do.call(cbind, res)
 
   } else {
+    # Loop over sites: count distinct scenarios for each site
     sql <- paste(
-      "SELECT COUNT(*) FROM WeatherData",
+      "SELECT COUNT(DISTINCT Scenario) FROM WeatherData",
       "WHERE Site_id = :x1 AND Scenario IN (:x2)"
     )
 
-    res <- lapply(Site_ids, function(x) {
-      res <- DBI::dbGetQuery(
-        rSW2_glovars$con,
-        sql,
-        params = list(x1 = rep(x, scen_N), x2 = Scenario_ids)
-      )
-      res[, 1] == 1L
-    })
+    res <- lapply(
+      Site_ids,
+      function(x) {
+        dbW_InsistInteract(
+          DBI::dbGetQuery,
+          statement = sql,
+          params = list(x1 = rep(x, scen_N), x2 = Scenario_ids)
+        )[, 1] == 1L
+      }
+    )
 
     res <- do.call(rbind, res)
   }
@@ -205,6 +282,82 @@ dbW_has_weatherData <- function(Site_ids, Scenario_ids) {
 
   res
 }
+
+
+#' @rdname check_content
+#' @section Details:
+#'   \code{dbW_have_sites_all_weatherData} checks whether weather data are
+#'   available but ignores \code{start_year} and \code{end_year}.
+#'
+#' @return
+#'   \code{dbW_have_sites_all_weatherData} returns a logical vector
+#'   of length of queried sites;
+#'   a \code{TRUE} element indicates that weather data
+#'   for each queried scenarios is available for that queried site.
+#'
+#' @export
+dbW_have_sites_all_weatherData <- function(
+  site_labels = NULL,
+  site_ids = NULL,
+  scen_labels = NULL,
+  scen_ids = NULL,
+  chunk_size = 1500L,
+  verbose = FALSE
+) {
+
+  # Check arguments
+  # Either `site_labels` or `site_ids` or at least the same length
+  si_ltemp <- c(length(site_labels), length(site_ids))
+  si_ntemp <- c(is.null(site_labels), is.null(site_ids))
+  stopifnot(
+    !(si_ntemp[1] && si_ntemp[2]),
+    si_ntemp[1] || si_ntemp[2] || identical(si_ltemp[1], si_ltemp[2])
+  )
+
+  # Either `scen_labels` or `scen_ids` or at least the same length
+  sc_ltemp <- c(length(scen_labels), length(scen_ids))
+  sc_ntemp <- c(is.null(scen_labels), is.null(scen_ids))
+  stopifnot(
+    !(sc_ntemp[1] && sc_ntemp[2]),
+    sc_ntemp[1] || sc_ntemp[2] || identical(sc_ltemp[1], sc_ltemp[2])
+  )
+
+  #--- Collect `site_ids` and `scen_ids` if not provided
+  if (is.null(site_ids)) {
+    site_ids <- rSOILWAT2::dbW_getSiteId(Labels = site_labels)
+  }
+  if (anyNA(site_ids)) {
+    stop("Not all sites available in weather database.")
+  }
+
+  if (is.null(scen_ids)) {
+    scen_ids <- rSOILWAT2::dbW_getScenarioId(Scenario = scen_labels)
+  }
+  if (anyNA(scen_ids)) {
+    stop("Not all scenarios available in weather database.")
+  }
+
+  #--- Query database
+  # Count distinct entries because there could be duplicate weather data ...
+
+  # "EXPLAIN QUERY PLAN ":
+  # 1                                        USE TEMP B-TREE FOR count(DISTINCT)
+  # 2 SEARCH WeatherData USING COVERING INDEX wdindex (Site_id=? AND Scenario=?)
+  res <- dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement = paste0(
+      "SELECT COUNT(DISTINCT Scenario) AS scenN, Site_id FROM WeatherData ",
+      "WHERE ",
+        "Site_id IN (?) AND ",
+        "Scenario IN (", paste(scen_ids, collapse = ","), ") "
+    ),
+    params = list(site_ids)
+  )
+
+  # Good: all requested scenarios are available
+  res[, "scenN"] == length(scen_ids)
+}
+
 
 
 #' Extract table keys to connect sites with weather data in the registered
@@ -234,99 +387,82 @@ dbW_getSiteId <- function(
   verbose = FALSE
 ) {
 
-  stopifnot(dbW_IsValid(), identical(length(lat), length(long)))
 
-  x <- if (is.character(Labels)) {
-      sql <- paste0(
-        "SELECT Site_id FROM Sites WHERE Label=:x",
+  if (!is.null(Labels)) {
+    #--- Determine which Labels exists
+    Labels <- as.character(Labels)
+
+    # "EXPLAIN QUERY PLAN "
+    # SEARCH Sites USING COVERING INDEX sqlite_autoindex_Sites_1 (Label=?)
+    tmp <- dbW_InsistInteract(
+      DBI::dbGetQuery,
+      statement = paste0(
+        "SELECT COUNT(*) AS n, Site_id FROM Sites WHERE Label=:x",
         if (ignore.case) " COLLATE NOCASE"
-      )
+      ),
+      params = list(x = Labels)
+    )
 
-      tmp <- DBI::dbGetQuery(
-        rSW2_glovars$con,
-        statement = sql,
-        params = list(x = Labels)
-      )[, 1]
+    res <- rep(NA, length(Labels))
+    ids_label_exists <- tmp[, "n"] > 0
+    res[ids_label_exists] <- tmp[ids_label_exists, "Site_id"]
 
-      ntmp <- length(tmp)
+  } else if (!is.null(lat) && !is.null(long)) {
+    stopifnot(identical(length(lat), length(long)))
+    lat <- as.numeric(lat)
+    long <- as.numeric(long)
 
-      if (ntmp == 0) {
-        rep(NA, length(Labels))
-
-      } else if (ntmp == length(Labels)) {
-        tmp
-
-      } else {
-        # Some Labels are missing, but we don't know which ones
-        # Slowly go through Labels one by one
-        rs <- DBI::dbSendQuery(rSW2_glovars$con, sql)
-
-        tmp <- sapply(
-          Labels,
-          function(x) {
-            DBI::dbBind(rs, list(x = x))
-            tmp <- DBI::dbFetch(rs)[, 1]
-            if (is.null(tmp)) NA else tmp
-          }
-        )
-
-        DBI::dbClearResult(rs)
-        tmp
-      }
-
-
-    } else if (is.numeric(lat) && is.numeric(long)) {
-      # Find the latitude and longitude with the minimum difference if less
-      # than deviating by less than tolerance
-      sql <- paste(
-        "SELECT dxy2.Site_id",
+    # Find the latitude and longitude with the minimum difference if
+    # deviating by less than tolerance
+    sql <- paste(
+      "SELECT COUNT(*) AS n, dxy2.Site_id",
+      "FROM (",
+        "SELECT",
+          "Site_id,",
+          "dxy.adlat AS adlat,",
+          "dxy.adlon AS adlon,",
+          "MIN(dxy.adlat) AS min_adlat,",
+          "MIN(dxy.adlon) AS min_adlon",
         "FROM (",
           "SELECT",
             "Site_id,",
-            "dxy.adlat AS adlat,",
-            "dxy.adlon AS adlon,",
-            "MIN(dxy.adlat) AS min_adlat,",
-            "MIN(dxy.adlon) AS min_adlon",
-          "FROM (",
-            "SELECT",
-              "Site_id,",
-              "ABS(Latitude - :lat) AS adlat,",
-              "ABS(Longitude - :lon) AS adlon",
-            "FROM Sites",
-            "WHERE",
-              "Latitude BETWEEN :lat - :tol AND :lat + :tol AND",
-              "Longitude BETWEEN :lon - :tol AND :lon + :tol",
-          ") AS dxy",
-        ") AS dxy2",
-        "WHERE",
-          "dxy2.adlat = dxy2.min_adlat AND",
-          "dxy2.adlon = dxy2.min_adlon"
-      )
+            "ABS(Latitude - :lat) AS adlat,",
+            "ABS(Longitude - :lon) AS adlon",
+          "FROM Sites",
+          "WHERE",
+            "Latitude BETWEEN :lat - :tol AND :lat + :tol AND",
+            "Longitude BETWEEN :lon - :tol AND :lon + :tol",
+        ") AS dxy",
+      ") AS dxy2",
+      "WHERE",
+        "dxy2.adlat = dxy2.min_adlat AND",
+        "dxy2.adlon = dxy2.min_adlon"
+    )
 
-      rs <- DBI::dbSendQuery(rSW2_glovars$con, sql)
+    # "EXPLAIN QUERY PLAN "
+    #     id parent notused          detail
+    #  1   2      0       0 CO-ROUTINE dxy2
+    #  2   5      2       0      SCAN Sites
+    #  3  52      0       0       SCAN dxy2
+    tmp <- dbW_InsistInteract(
+      DBI::dbGetQuery,
+      statement = sql,
+      params = list(lat = lat, lon = long, tol = rep_len(tol_xy, length(lat)))
+    )
 
-      tmp <- sapply(
-        seq_along(lat),
-        function(k) {
-          DBI::dbBind(rs, list(lat = lat[k], lon = long[k], tol = tol_xy))
-          tmp <- DBI::dbFetch(rs)[, 1]
-          if (is.null(tmp)) NA else tmp
-        }
-      )
+    res <- rep(NA, length(lat))
+    ids_label_exists <- tmp[, "n"] > 0
+    res[ids_label_exists] <- tmp[ids_label_exists, "Site_id"]
 
-      DBI::dbClearResult(rs)
-      tmp
-
-
-    } else {
-      if (verbose) {
-        message("'dbW_getSiteId': not enough information to obtain site IDs")
-      }
-
-      rep(NA, max(length(Labels), length(long)))
+  } else {
+    if (verbose) {
+      message("'dbW_getSiteId': not enough information to obtain site IDs")
     }
 
-  as.integer(x)
+    res <- rep(NA, max(length(Labels), length(long)))
+  }
+
+  as.integer(res)
 }
 
 
@@ -339,14 +475,24 @@ dbW_getSiteId <- function(
 #'   located.
 #' @export
 dbW_getScenarioId <- function(Scenario, ignore.case = FALSE, verbose = FALSE) {
-  stopifnot(dbW_IsValid())
-
-  sql <- paste0("SELECT id FROM Scenarios WHERE Scenario = :x",
-    if (ignore.case) " COLLATE NOCASE")
-  x <- sapply(Scenario, function(x) {
-    temp <- DBI::dbGetQuery(rSW2_glovars$con, sql, params = list(x = x))[, 1]
-    if (is.null(temp)) NA else temp
-  })
+  # "EXPLAIN QUERY PLAN "
+  # SEARCH Scenarios USING COVERING INDEX
+  #   sqlite_autoindex_Scenarios_1 (Scenario=?)
+  sql <- paste0(
+    "SELECT id FROM Scenarios WHERE Scenario = :x",
+    if (ignore.case) " COLLATE NOCASE"
+  )
+  x <- sapply(
+    Scenario,
+    function(x) {
+      tmp <- dbW_InsistInteract(
+        DBI::dbGetQuery,
+        statement = sql,
+        params = list(x = x)
+      )[, 1]
+      if (is.null(tmp)) NA else tmp
+    }
+  )
 
   as.integer(x)
 }
@@ -374,9 +520,13 @@ dbW_getScenarioId <- function(Scenario, ignore.case = FALSE, verbose = FALSE) {
 #'
 #' @export
 dbW_getIDs <- function(
-  site_id = NULL, site_label = NULL,
-  long = NULL, lat = NULL, tol_xy = 1e-4,
-  scenario = NULL, scenario_id = NULL,
+  site_id = NULL,
+  site_label = NULL,
+  long = NULL,
+  lat = NULL,
+  tol_xy = 1e-4,
+  scenario = NULL,
+  scenario_id = NULL,
   add_if_missing = FALSE,
   ignore.case = FALSE,
   verbose = FALSE
@@ -384,55 +534,86 @@ dbW_getIDs <- function(
 
   res <- list(site_id = site_id, scenario_id = scenario_id)
 
-  has_siteID <- is.numeric(res[["site_id"]]) &&
+  has_siteID <-
+    is.numeric(res[["site_id"]]) &&
     all(dbW_has_siteIDs(res[["site_id"]]))
 
   if (!has_siteID) {
     res[["site_id"]] <- dbW_getSiteId(
       Labels = site_label,
-      lat = lat, long = long, tol_xy = tol_xy,
+      lat = lat,
+      long = long,
+      tol_xy = tol_xy,
       ignore.case = ignore.case,
       verbose = verbose
     )
 
     if (anyNA(res[["site_id"]]) && add_if_missing) {
       iadd <- is.na(res[["site_id"]])
-      do_temp <- (is.character(site_label[iadd]) &&
-          all(nchar(site_label[iadd]) > 0)) ||
-        (as.numeric(lat[iadd]) && as.numeric(long[iadd]))
-      temp <- if (do_temp) {
-          df <- data.frame(Latitude = lat[iadd], Longitude = long[iadd],
-            Label = site_label[iadd], stringsAsFactors = FALSE)
-          try(dbW_addSites(site_data = df, ignore.case = ignore.case),
-            silent = TRUE)
+      do_tmp <-
+        (is.character(site_label[iadd]) && all(nchar(site_label[iadd]) > 0)) ||
+        (is.numeric(lat[iadd]) && is.numeric(long[iadd]))
 
-        } else FALSE
+      if (do_tmp) {
+        df <- data.frame(
+          Latitude = lat[iadd],
+          Longitude = long[iadd],
+          Label = site_label[iadd],
+          stringsAsFactors = FALSE
+        )
+        tmp <- try(
+          dbW_addSites(site_data = df, ignore.case = ignore.case),
+          silent = TRUE
+        )
 
-      if (!inherits(temp, "try-error") && isTRUE(temp)) {
-        res[["site_id"]] <- dbW_getSiteId(Labels = site_label,
-          lat = lat, long = long, ignore.case = ignore.case, verbose = verbose)
+      } else {
+        tmp <- FALSE
+      }
+
+      if (!inherits(tmp, "try-error") && isTRUE(tmp)) {
+        res[["site_id"]] <- dbW_getSiteId(
+          Labels = site_label,
+          lat = lat,
+          long = long,
+          ignore.case = ignore.case,
+          verbose = verbose
+        )
       }
     }
   }
 
-  has_scenID <- is.numeric(res[["scenario_id"]]) &&
+  has_scenID <-
+    is.numeric(res[["scenario_id"]]) &&
     all(dbW_has_scenarioIDs(res[["scenario_id"]]))
 
   if (!has_scenID) {
-    res[["scenario_id"]] <- dbW_getScenarioId(Scenario = scenario,
-      ignore.case = ignore.case, verbose = verbose)
+    res[["scenario_id"]] <- dbW_getScenarioId(
+      Scenario = scenario,
+      ignore.case = ignore.case,
+      verbose = verbose
+    )
 
     if (anyNA(res[["scenario_id"]]) && add_if_missing) {
       iadd <- is.na(res[["scenario_id"]])
-      do_temp <- as.character(scenario[iadd]) && all(nchar(scenario[iadd]) > 0)
-      temp <- if (do_temp) {
-          try(dbW_addScenarios(Scenarios = scenario[iadd],
-            ignore.case = ignore.case), silent = TRUE)
-        } else FALSE
+      do_tmp <- as.character(scenario[iadd]) && all(nchar(scenario[iadd]) > 0)
+      if (do_tmp) {
+        tmp <- try(
+          dbW_addScenarios(
+            Scenarios = scenario[iadd],
+            ignore.case = ignore.case
+          ),
+          silent = TRUE
+        )
+      } else {
+        tmp <- FALSE
+      }
 
-      if (!inherits(temp, "try-error") && isTRUE(temp)) {
-        res[["scenario_id"]] <- dbW_getScenarioId(Scenario = scenario,
-          ignore.case = ignore.case, verbose = verbose)
+      if (!inherits(tmp, "try-error") && isTRUE(tmp)) {
+        res[["scenario_id"]] <- dbW_getScenarioId(
+          Scenario = scenario,
+          ignore.case = ignore.case,
+          verbose = verbose
+        )
       }
     }
   }
@@ -445,9 +626,7 @@ dbW_getIDs <- function(
 #' @return A data.frame.
 #' @export
 dbW_getSiteTable <- function() {
-  stopifnot(dbW_IsValid())
-
-  DBI::dbReadTable(rSW2_glovars$con, "Sites")
+  dbW_InsistInteract(DBI::dbReadTable, name = "Sites")
 }
 
 #' Read entire table of Scenarios from the registered weather database
@@ -455,9 +634,7 @@ dbW_getSiteTable <- function() {
 #' @return A data.frame.
 #' @export
 dbW_getScenariosTable <- function() {
-  stopifnot(dbW_IsValid())
-
-  DBI::dbReadTable(rSW2_glovars$con, "Scenarios")
+  dbW_InsistInteract(DBI::dbReadTable, name = "Scenarios")
 }
 
 
@@ -470,10 +647,14 @@ select_years <- function(years, start_year = NULL, end_year = NULL) {
     end_year <- as.integer(end_year)
     use_end <- !is.na(end_year)
 
-    if (use_start && use_end &&
-        (start_year >= end_year || start_year < 0 || end_year < 0)) {
-      warning("'select_years': wrong value for argument 'start_year' ",
-        "and/or 'end_year'")
+    if (
+      use_start && use_end &&
+      (start_year >= end_year || start_year < 0 || end_year < 0)
+    ) {
+      warning(
+        "'select_years': wrong value for argument 'start_year' ",
+        "and/or 'end_year'"
+      )
     }
 
   } else {
@@ -482,17 +663,17 @@ select_years <- function(years, start_year = NULL, end_year = NULL) {
 
   idx_start_year <- 1L
   if (use_start) {
-    temp <- match(start_year, years)
-    if (!is.na(temp)) {
-      idx_start_year <- temp
+    tmp <- match(start_year, years)
+    if (!is.na(tmp)) {
+      idx_start_year <- tmp
     }
   }
 
   idx_end_year <- length(years)
   if (use_end) {
-    temp <- match(end_year, years)
-    if (!is.na(temp)) {
-      idx_end_year <- temp
+    tmp <- match(end_year, years)
+    if (!is.na(tmp)) {
+      idx_end_year <- tmp
     }
   }
 
@@ -515,8 +696,7 @@ get_years_from_weatherData <- function(wd) {
 #' data from a predefined weather database. Using the database was faster then
 #' reading in multiple weather files from disk.
 #'
-#' \pkg{SOILWAT2} does not handle missing weather data. If you have missing
-#' data, then you have to impute yourself or use the built-in Markov
+#' If there is missing data, then impute or use the built-in Markov
 #' weather generator (see examples for \code{\link{sw_exec}}).
 #'
 #' @param Site_id Numeric. Used to identify site and extract weather data.
@@ -533,24 +713,35 @@ get_years_from_weatherData <- function(wd) {
 #' @return Returns weather data as list. Each element is an object of class
 #'   \code{\linkS4class{swWeatherData}} and contains data for one year.
 #'
+#' @section Notes:
+#'   This function returns the first record of weather data
+#'   even if duplicate entries match the query.
+#'
 #' @seealso \code{\link{getWeatherData_folders}}
 #'
 #' @export
 dbW_getWeatherData <- function(
   Site_id = NULL,
-  lat = NULL, long = NULL, tol_xy = 1e-4,
+  lat = NULL,
+  long = NULL,
+  tol_xy = 1e-4,
   Label = NULL,
-  startYear = NULL, endYear = NULL,
-  Scenario = "Current", Scenario_id = NULL,
+  startYear = NULL,
+  endYear = NULL,
+  Scenario = "Current",
+  Scenario_id = NULL,
   ignore.case = FALSE,
   verbose = FALSE
 ) {
 
-  stopifnot(dbW_IsValid())
   IDs <- dbW_getIDs(
-    site_id = Site_id, site_label = Label,
-    long = long, lat = lat, tol_xy = tol_xy,
-    scenario = Scenario, scenario_id = Scenario_id,
+    site_id = Site_id,
+    site_label = Label,
+    long = long,
+    lat = lat,
+    tol_xy = tol_xy,
+    scenario = Scenario,
+    scenario_id = Scenario_id,
     add_if_missing = FALSE,
     ignore.case = ignore.case,
     verbose = verbose
@@ -558,31 +749,44 @@ dbW_getWeatherData <- function(
 
 
   if (any(!sapply(IDs, function(x) length(x) > 0 && is.finite(x)))) {
-    stop("'dbW_getWeatherData': insufficient information to locate weather ",
-      "data.")
+    stop(
+      "'dbW_getWeatherData': insufficient information to locate weather data."
+    )
   }
 
-  sql <- "SELECT data FROM WeatherData WHERE Site_id = :x1 AND Scenario = :x2"
-  res <- DBI::dbGetQuery(rSW2_glovars$con, sql,
-    params = list(x1 = IDs[["site_id"]], x2 = IDs[["scenario_id"]]))[1, 1]
+  # "EXPLAIN QUERY PLAN ":
+  # SEARCH WeatherData USING INDEX wdindex (Site_id=? AND Scenario=?)
+  res <- dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement =
+      "SELECT data FROM WeatherData WHERE Site_id = :x1 AND Scenario = :x2",
+    params = list(x1 = IDs[["site_id"]], x2 = IDs[["scenario_id"]])
+  )[1, 1]
+
   if (is.na(res) || all(lengths(res) == 0)) {
-    stop(paste("Weather data for site", shQuote(IDs[["site_id"]]),
-      "and scenario", shQuote(IDs[["scenario_id"]]),
-      "does not exist in weather database."))
+    stop(
+      "Weather data for site ", shQuote(IDs[["site_id"]]),
+      " and scenario ", shQuote(IDs[["scenario_id"]]),
+      " does not exist in weather database."
+    )
   }
 
   wd <- try(dbW_blob_to_weatherData(res, rSW2_glovars$blob_compression_type))
   if (inherits(wd, "try-error")) {
-    stop(paste("Weather data for site", shQuote(IDs[["site_id"]]),
-      "and scenario", shQuote(IDs[["scenario_id"]]), "is corrupted."))
+    stop(
+      "Weather data for site ", shQuote(IDs[["site_id"]]),
+      " and scenario ", shQuote(IDs[["scenario_id"]]), " is corrupted."
+    )
   }
 
-  temp <- class(wd[[1]])
-  if (!(attr(temp, "package") == "rSOILWAT2")) {
-    message(paste("WARNING: The class of the extracted weather data object is",
-      shQuote(temp), "from package", shQuote(attr(temp, "package")), "which is",
-      "outdated. Please, upgrade weather database with function",
-      "'dbW_upgrade_to_rSOILWAT2'."))
+  tmp <- class(wd[[1]])
+  if (!(attr(tmp, "package") == "rSOILWAT2")) {
+    message(
+      "WARNING: The class of the extracted weather data object is ",
+      shQuote(tmp), " from package ", shQuote(attr(tmp, "package")),
+      " which is outdated. Please, upgrade weather database with function ",
+      "'dbW_upgrade_to_rSOILWAT2'."
+    )
   }
 
   years <- get_years_from_weatherData(wd)
@@ -603,20 +807,26 @@ dbW_getWeatherData <- function(
 #' @return An invisible logical value indicating success/failure.
 #'
 #' @export
-dbW_setConnection <- function(dbFilePath, create_if_missing = FALSE,
-  check_version = FALSE, verbose = FALSE) {
+dbW_setConnection <- function(
+  dbFilePath,
+  create_if_missing = FALSE,
+  check_version = FALSE,
+  verbose = FALSE
+) {
 
   rSW2_glovars$con <- NULL
 
   dbFilePath <- try(normalizePath(dbFilePath, mustWork = FALSE), silent = TRUE)
   if (inherits(dbFilePath, "try-error") || !file.exists(dbFilePath)) {
     if (verbose) {
-      message(paste("'dbW_setConnection':", shQuote(basename(dbFilePath)),
-        "does not exist."))
+      message(
+        "'dbW_setConnection': ", shQuote(basename(dbFilePath)),
+        " does not exist."
+      )
     }
     if (create_if_missing) {
       if (verbose) {
-        message(paste("'dbW_setConnection': creating a new database."))
+        message("'dbW_setConnection': creating a new database.")
       }
     } else {
       return(invisible(FALSE))
@@ -624,42 +834,61 @@ dbW_setConnection <- function(dbFilePath, create_if_missing = FALSE,
   }
 
   # Check if 'dbFilePath' can be created
-  temp1 <- try(suppressWarnings(DBI::dbConnect(RSQLite::SQLite(),
-    dbname = dbFilePath)), silent = TRUE)
-  if (inherits(temp1, "try-error")) {
+  tmp1 <- try(
+    suppressWarnings(
+      DBI::dbConnect(RSQLite::SQLite(), dbname = dbFilePath)
+    ),
+    silent = TRUE
+  )
+  if (inherits(tmp1, "try-error")) {
     if (verbose) {
-      message(paste("'dbW_setConnection':", shQuote(dbFilePath),
-        "cannot be created likely because the path does not exist."))
+      message(
+        "'dbW_setConnection': ", shQuote(dbFilePath),
+        " cannot be created likely because the path does not exist."
+      )
     }
     return(invisible(FALSE))
   }
 
   # Check if 'dbFilePath' is likely a good SQLite-database
-  temp2 <- try(DBI::dbExecute(temp1, "PRAGMA synchronous = off"), silent = TRUE)
-  if (inherits(temp2, "try-error")) {
+  tmp2 <- try(
+    DBI::dbExecute(tmp1, "PRAGMA synchronous = off"),
+    silent = TRUE
+  )
+  if (inherits(tmp2, "try-error")) {
     if (verbose) {
-      message(paste("'dbW_setConnection':", shQuote(basename(dbFilePath)),
-        "exists but is likely not a SQLite-database."))
+      message(
+        "'dbW_setConnection': ", shQuote(basename(dbFilePath)),
+        " exists but is likely not a SQLite-database."
+      )
     }
     return(invisible(FALSE))
   }
 
   # Check that foreign key constraints are supported or at least accepted
-  temp3 <- try(DBI::dbExecute(temp1, "PRAGMA foreign_keys = ON"), silent = TRUE)
-  if (inherits(temp3, "try-error")) {
+  tmp3 <- try(
+    DBI::dbExecute(tmp1, "PRAGMA foreign_keys = ON"),
+    silent = TRUE
+  )
+  if (inherits(tmp3, "try-error")) {
     if (verbose) {
-      message(paste("'dbW_setConnection': foreign keys are not supported."))
+      message("'dbW_setConnection': foreign keys are not supported.")
     }
     return(invisible(FALSE))
   }
 
-  rSW2_glovars$con <- temp1
+  # Set busy handler to time out after 10 seconds (in milliseconds) of retries
+  try(DBI::dbExecute(tmp1, "PRAGMA busy_timeout = 10000"))
+
+
+  # Set up package-level connection variable
+  rSW2_glovars$con <- tmp1
   has_meta <- DBI::dbExistsTable(rSW2_glovars$con, "Meta")
   rSW2_glovars$blob_compression_type <- if (has_meta) {
-      dbW_compression()
-    } else {
-      rSW2_glovars$default_blob_compression_type
-    }
+    dbW_compression()
+  } else {
+    rSW2_glovars$default_blob_compression_type
+  }
 
   if (check_version) {
     dbW_check_version()
@@ -674,8 +903,10 @@ dbW_setConnection <- function(dbFilePath, create_if_missing = FALSE,
 #' @export
 dbW_disconnectConnection <- function() {
   res <- if (dbW_IsValid()) {
-      DBI::dbDisconnect(rSW2_glovars$con)
-    } else TRUE
+    DBI::dbDisconnect(rSW2_glovars$con)
+  } else {
+    TRUE
+  }
 
   rSW2_glovars$con <- NULL
   rSW2_glovars$blob_compression_type <- NULL
@@ -691,8 +922,6 @@ dbW_disconnectConnection <- function() {
 #'  failure with \code{FALSE}.
 #' @export
 dbW_addSites <- function(site_data, ignore.case = FALSE, verbose = FALSE) {
-  stopifnot(dbW_IsValid())
-
   req_cols <- c("Latitude", "Longitude", "Label")
   if (!all(req_cols %in% colnames(site_data))) {
     stop("'dbW_addSites': argument misses required columns.")
@@ -702,14 +931,19 @@ dbW_addSites <- function(site_data, ignore.case = FALSE, verbose = FALSE) {
   dos_add <- !has_sites
 
   if (any(dos_add)) {
-    sql <- "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)"
-    DBI::dbExecute(rSW2_glovars$con, sql,
-      params = as.list(site_data[dos_add, req_cols]))
+    dbW_InsistInteract(
+      DBI::dbExecute,
+      statement =
+        "INSERT INTO Sites VALUES(NULL, :Latitude, :Longitude, :Label)",
+      params = as.list(site_data[dos_add, req_cols])
+    )
   }
 
   if (any(has_sites) && verbose) {
-    message(paste("'dbW_addSites': sites are already in database, labels =",
-      paste(shQuote(site_data[has_sites, "Label"]), collapse = ", ")))
+    message(
+      "'dbW_addSites': sites are already in database, labels = ",
+      paste(shQuote(site_data[has_sites, "Label"]), collapse = ", ")
+    )
   }
 
   invisible(TRUE)
@@ -722,29 +956,37 @@ dbW_addSites <- function(site_data, ignore.case = FALSE, verbose = FALSE) {
 #' @return An invisible logical value indicating success with \code{TRUE} and
 #'  failure with \code{FALSE}.
 #' @export
-dbW_updateSites <- function(Site_ids, site_data, ignore.case = FALSE,
-  verbose = FALSE) {
-  stopifnot(dbW_IsValid())
-
+dbW_updateSites <- function(
+  Site_ids,
+  site_data,
+  ignore.case = FALSE,
+  verbose = FALSE
+) {
   dos_update <- dbW_has_siteIDs(Site_ids)
   dos_add <- !dos_update
 
   if (any(dos_update)) {
-    sql <- paste("UPDATE Sites SET Latitude=:Latitude, Longitude=:Longitude, ",
-      "Label=:Label WHERE Site_id=:id")
-    rs <- DBI::dbSendStatement(rSW2_glovars$con, sql)
-    on.exit(DBI::dbClearResult(rs), add = TRUE)
-
-    for (k in which(dos_update)) {
-      DBI::dbBind(rs,
-        param = c(as.list(site_data[k, c("Latitude", "Longitude", "Label")]),
-        list(id = Site_ids[k])))
-    }
+    dbW_InsistInteract(
+      DBI::dbExecute,
+      statement = paste(
+        "UPDATE Sites SET Latitude=:Latitude, Longitude=:Longitude, ",
+        "Label=:Label WHERE Site_id=:id"
+      ),
+      params = c(
+        as.list(site_data[dos_update, c("Latitude", "Longitude", "Label")]),
+        list(id = Site_ids[dos_update])
+      )
+    )
   }
 
   if (any(dos_add)) {
-    stopifnot(dbW_addSites(site_data[dos_add, ], ignore.case = ignore.case,
-      verbose = verbose))
+    stopifnot(
+      dbW_addSites(
+        site_data[dos_add, ],
+        ignore.case = ignore.case,
+        verbose = verbose
+      )
+    )
   }
 
   invisible(TRUE)
@@ -758,34 +1000,56 @@ dbW_updateSites <- function(Site_ids, site_data, ignore.case = FALSE,
 #'  failure with \code{FALSE}.
 #' @export
 dbW_addScenarios <- function(Scenarios, ignore.case = FALSE, verbose = FALSE) {
-  stopifnot(dbW_IsValid())
-
   has_scenarios <- dbW_has_scenarios(Scenarios, ignore.case = ignore.case)
   dos_add <- !has_scenarios
 
   if (any(dos_add)) {
-    sql <- "INSERT INTO Scenarios VALUES(NULL, :sc)"
-    DBI::dbExecute(rSW2_glovars$con, sql,
-      params = list(sc = unlist(Scenarios[dos_add])))
+    dbW_InsistInteract(
+      DBI::dbExecute,
+      statement = "INSERT INTO Scenarios VALUES(NULL, :sc)",
+      params = list(sc = unlist(Scenarios[dos_add]))
+    )
   }
 
   if (any(has_scenarios) && verbose) {
-    message(paste("'dbW_addScenarios': Scenarios are already in database,",
-      "Scenarios =", paste(shQuote(Scenarios[has_scenarios]), collapse = ", ")))
+    message(
+      "'dbW_addScenarios': Scenarios are already in database,",
+      "Scenarios =", paste(shQuote(Scenarios[has_scenarios]), collapse = ", ")
+    )
   }
 
   invisible(TRUE)
 }
 
-dbW_addWeatherDataNoCheck <- function(Site_id, Scenario_id, StartYear, EndYear,
-  weather_blob) {
+#' @section Notes:
+#'   This function does not prevent inserting duplicate entries if asked to do.
+#'
+#' @noRd
+dbW_addWeatherDataNoCheck <- function(
+  Site_id,
+  Scenario_id,
+  StartYear,
+  EndYear,
+  weather_blob
+) {
 
-  sql <- paste("INSERT INTO",
-    "WeatherData (Site_id, Scenario, StartYear, EndYear, data)",
-    "VALUES (:Site_id, :Scenario_id, :StartYear, :EndYear, :weather_blob)")
-  DBI::dbExecute(rSW2_glovars$con, sql, params = list(Site_id = Site_id,
-    Scenario_id = Scenario_id, StartYear = StartYear, EndYear = EndYear,
-    weather_blob = weather_blob))
+  res <- dbW_InsistInteract(
+    DBI::dbExecute,
+    statement = paste(
+      "INSERT INTO",
+      "WeatherData (Site_id, Scenario, StartYear, EndYear, data)",
+      "VALUES (:Site_id, :Scenario_id, :StartYear, :EndYear, :weather_blob)"
+    ),
+    params = list(
+      Site_id = Site_id,
+      Scenario_id = Scenario_id,
+      StartYear = StartYear,
+      EndYear = EndYear,
+      weather_blob = weather_blob
+    )
+  )
+
+  invisible(res)
 }
 
 #' Adds daily weather data to a registered weather database
@@ -798,10 +1062,14 @@ dbW_addWeatherDataNoCheck <- function(Site_id, Scenario_id, StartYear, EndYear,
 #' @export
 dbW_addWeatherData <- function(
   Site_id = NULL,
-  lat = NULL, long = NULL, tol_xy = 1e-4,
-  weatherFolderPath = NULL, weatherData = NULL,
+  lat = NULL,
+  long = NULL,
+  tol_xy = 1e-4,
+  weatherFolderPath = NULL,
+  weatherData = NULL,
   Label = NULL,
-  Scenario_id = NULL, Scenario = "Current",
+  Scenario_id = NULL,
+  Scenario = "Current",
   weather_tag = "weath",
   ignore.case = FALSE,
   overwrite = FALSE,
@@ -810,104 +1078,159 @@ dbW_addWeatherData <- function(
 
   stopifnot(dbW_IsValid())
 
-  has_weatherFolderPath <- !is.null(weatherFolderPath) &&
+  has_weatherFolderPath <-
+    !is.null(weatherFolderPath) &&
     file.exists(weatherFolderPath)
-  has_weatherData <- !is.null(weatherData) && is.list(weatherData) &&
+
+  has_weatherData <-
+    !is.null(weatherData) &&
+    is.list(weatherData) &&
     inherits(weatherData[[1]], "swWeatherData")
 
   if (!has_weatherFolderPath && !has_weatherData) {
     stop("'dbW_addWeatherData' requires either a folder path or weatherData.")
   }
 
-  Label <- if (!is.null(weatherFolderPath) && is.null(Label)) {
-      basename(weatherFolderPath)
-    } else Label
+  if (!is.null(weatherFolderPath) && is.null(Label)) {
+    Label <- basename(weatherFolderPath)
+  }
 
   IDs <- dbW_getIDs(
-    site_id = Site_id, site_label = Label,
-    long = long, lat = lat, tol_xy = tol_xy,
-    scenario = Scenario, scenario_id = Scenario_id,
+    site_id = Site_id,
+    site_label = Label,
+    long = long,
+    lat = lat,
+    tol_xy = tol_xy,
+    scenario = Scenario,
+    scenario_id = Scenario_id,
     add_if_missing = TRUE,
     ignore.case = ignore.case,
     verbose = verbose
   )
 
   if (any(!sapply(IDs, function(x) length(x) > 0 && is.finite(x)))) {
-    stop("'dbW_addWeatherData': insufficient information to generate ",
-      "site/scenario.")
+    stop(
+      "'dbW_addWeatherData': insufficient information to generate ",
+      "site/scenario."
+    )
   }
 
   if (dbW_has_weatherData(IDs[["site_id"]], IDs[["scenario_id"]])) {
-    temp <- paste("'dbW_addWeatherData': weather data for site",
-      IDs[["site_id"]], "and scenario", IDs[["scenario_id"]], "already exists.")
+    tmp <- paste(
+      "'dbW_addWeatherData': weather data for site",
+      IDs[["site_id"]], "and scenario", IDs[["scenario_id"]], "already exists."
+    )
 
     if (overwrite) {
       if (verbose) {
-        message(paste(temp, "Previous data will be overwritten with new data."))
+        message(tmp, "Previous data will be overwritten with new data.")
       }
-      stopifnot(dbW_deleteSiteData(IDs[["site_id"]], IDs[["scenario_id"]]))
+      tmp2 <- dbW_deleteSiteData(IDs[["site_id"]], IDs[["scenario_id"]])
+
+      if (!tmp2) {
+        stop(tmp, " Overwritting previous data failed.")
+      }
 
     } else {
-      stop(temp)
+      stop(tmp)
     }
   }
 
   if (is.null(weatherData)) {
     weatherData <- getWeatherData_folders(
-      LookupWeatherFolder = weatherFolderPath, filebasename = weather_tag)
+      LookupWeatherFolder = weatherFolderPath,
+      filebasename = weather_tag
+    )
   }
 
   years <- get_years_from_weatherData(weatherData)
-  blob <- dbW_weatherData_to_blob(weatherData,
-    rSW2_glovars$blob_compression_type)
+  blob <- dbW_weatherData_to_blob(
+    weatherData,
+    rSW2_glovars$blob_compression_type
+  )
 
-  dbW_addWeatherDataNoCheck(IDs[["site_id"]], IDs[["scenario_id"]], years[1],
-    years[length(years)], weather_blob = blob)
+  dbW_addWeatherDataNoCheck(
+    Site_id = IDs[["site_id"]],
+    Scenario_id = IDs[["scenario_id"]],
+    StartYear = years[1],
+    EndYear = years[length(years)],
+    weather_blob = blob
+  )
 
   invisible(TRUE)
 }
 
 
 .create_dbW <- function(site_data, Scenarios, scen_ambient) {
+
   sql <- "CREATE TABLE 'Meta' ('Desc' TEXT PRIMARY KEY, 'Value' TEXT)"
   DBI::dbExecute(rSW2_glovars$con, sql)
 
   sql <- "INSERT INTO 'Meta' VALUES(:Desc, :Value)"
-  DBI::dbExecute(rSW2_glovars$con, sql, params = list(
-    Desc = c("Version", "Compression_type"),
-    Value = c(rSW2_glovars$dbW_version, rSW2_glovars$blob_compression_type)))
+  DBI::dbExecute(
+    rSW2_glovars$con,
+    sql,
+    params = list(
+      Desc = c("Version", "Compression_type"),
+      Value = c(rSW2_glovars$dbW_version, rSW2_glovars$blob_compression_type)
+    )
+  )
 
   # Table of sites
-  sql <- paste("CREATE TABLE 'Sites'",
-    "('Site_id' INTEGER PRIMARY KEY AUTOINCREMENT,",
-    "'Latitude' REAL, 'Longitude' REAL, 'Label' TEXT UNIQUE)")
+  sql <- paste0(
+    "CREATE TABLE 'Sites' (",
+      "'Site_id' INTEGER PRIMARY KEY AUTOINCREMENT,",
+      "'Latitude' REAL,",
+      "'Longitude' REAL,",
+      "'Label' TEXT UNIQUE",
+    ")"
+  )
   DBI::dbExecute(rSW2_glovars$con, sql)
+
   # Table of scenario names
-  sql <- paste("CREATE TABLE 'Scenarios'",
-    "('id' INTEGER PRIMARY KEY AUTOINCREMENT,",
-    "'Scenario' TEXT UNIQUE NOT NULL)")
+  sql <- paste0(
+    "CREATE TABLE 'Scenarios' (",
+      "'id' INTEGER PRIMARY KEY AUTOINCREMENT,",
+      "'Scenario' TEXT UNIQUE NOT NULL",
+    ")"
+  )
   DBI::dbExecute(rSW2_glovars$con, sql)
+
+
   # Table for weather data
   DBI::dbExecute(rSW2_glovars$con, "PRAGMA foreign_keys = ON")
-  sql <- paste("CREATE TABLE 'WeatherData'",
-    "('wdid' INTEGER PRIMARY KEY AUTOINCREMENT,",
-    "'Site_id' INTEGER, 'Scenario' INTEGER, 'StartYear' INTEGER NOT NULL,",
-    "'EndYear' INTEGER NOT NULL, 'data' BLOB,",
-    "FOREIGN KEY(Site_id) REFERENCES Sites(Site_id),",
-    "FOREIGN KEY(Scenario) REFERENCES Scenarios(id))")
+
+  sql <- paste0(
+    "CREATE TABLE 'WeatherData' (",
+      "'wdid' INTEGER PRIMARY KEY AUTOINCREMENT,",
+      "'Site_id' INTEGER,",
+      "'Scenario' INTEGER,",
+      "'StartYear' INTEGER NOT NULL,",
+      "'EndYear' INTEGER NOT NULL,",
+      "'data' BLOB,",
+      "FOREIGN KEY(Site_id) REFERENCES Sites(Site_id),",
+      "FOREIGN KEY(Scenario) REFERENCES Scenarios(id)",
+    ")"
+  )
   DBI::dbExecute(rSW2_glovars$con, sql)
   DBI::dbExecute(rSW2_glovars$con,
-    "CREATE INDEX wdindex ON WeatherData(Site_id, Scenario)")
+    "CREATE INDEX wdindex ON WeatherData(Site_id, Scenario)"
+  )
 
   # View all data
-  sql <- paste("CREATE VIEW wd_all AS",
-    "SELECT Sites.Site_id, Sites.Latitude, Sites.Longitude,",
+  sql <- paste(
+    "CREATE VIEW wd_all AS",
+    "SELECT",
+      "Sites.Site_id, Sites.Latitude, Sites.Longitude,",
       "Sites.Label AS Site_Label, Scenarios.id AS Scenario_id,",
       "Scenarios.Scenario, WeatherData.StartYear, WeatherData.EndYear,",
       "WeatherData.data",
-    "FROM Sites, Scenarios, WeatherData",
-    "WHERE WeatherData.Site_id=Sites.Site_id AND",
-      "WeatherData.Scenario=Scenarios.id")
+    "FROM",
+      "Sites, Scenarios, WeatherData",
+    "WHERE",
+      "WeatherData.Site_id=Sites.Site_id AND",
+      "WeatherData.Scenario=Scenarios.id"
+  )
   DBI::dbExecute(rSW2_glovars$con, sql)
 
 
@@ -959,12 +1282,20 @@ dbW_addWeatherData <- function(
 #'   \code{dbFilePath} didn't already exist, but creating it failed, then the
 #'   attempt will be disconnected and removed.
 #' @export
-dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite3", site_data,
-  Scenarios, scen_ambient = "Current", compression_type = "gzip",
-  verbose = FALSE, ...) {
+dbW_createDatabase <- function(
+  dbFilePath = "dbWeatherData.sqlite3",
+  site_data,
+  Scenarios,
+  scen_ambient = "Current",
+  compression_type = "gzip",
+  verbose = FALSE,
+  ...
+) {
 
-  dbFilePath <- file.path(normalizePath(dirname(dbFilePath)),
-    basename(dbFilePath))
+  dbFilePath <- file.path(
+    normalizePath(dirname(dbFilePath)),
+    basename(dbFilePath)
+  )
 
   rm_file <- FALSE
   on.exit({
@@ -973,77 +1304,98 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite3", site_data,
         message("'dbW_createDatabase': deletes db-file due to failure.")
       }
 
-      temp <- dbW_disconnectConnection()
-      if (!temp) {
-        message("'dbW_createDatabase': attempted to disconnect from db-file ",
-          "but failed.")
+      tmp <- dbW_disconnectConnection()
+      if (!tmp) {
+        message(
+          "'dbW_createDatabase': attempted to disconnect from db-file ",
+          "but failed."
+        )
       }
 
       # sqlite3 on Windows OS may not be releasing the file until
       # garbage collection
       gc()
 
-      temp <- unlink(dbFilePath)
-      if (temp != 0) {
-        message("'dbW_createDatabase': attempted to delete db-file but ",
-          "'unlink' suggests a failure.")
+      tmp <- unlink(dbFilePath)
+      if (tmp != 0) {
+        message(
+          "'dbW_createDatabase': attempted to delete db-file but ",
+          "'unlink' suggests a failure."
+        )
       }
 
       if (file.exists(dbFilePath)) {
-        message("'dbW_createDatabase': attempted to delete db-file with ",
-          "'unlink' but db-file is still present.")
+        message(
+          "'dbW_createDatabase': attempted to delete db-file with ",
+          "'unlink' but db-file is still present."
+        )
         file.remove(dbFilePath)
       }
 
-      if (file.exists(dbFilePath))
-        message("'dbW_createDatabase': attempted to delete db-file with ",
-          "'file.remove' but db-file is still present.")
-    }
-  }, add = TRUE)
+      if (file.exists(dbFilePath)) {
+        message(
+          "'dbW_createDatabase': attempted to delete db-file with ",
+          "'file.remove' but db-file is still present."
+        )
+      }
+    }},
+    add = TRUE
+  )
 
   dots <- list(...)
   if (length(dots)) {
-    message(paste("'dbW_createDatabase': arguments ignored/deprecated",
-      paste(shQuote(names(dots)), collapse = ", ")))
+    message(
+      "'dbW_createDatabase': arguments ignored/deprecated ",
+      paste(shQuote(names(dots)), collapse = ", ")
+    )
   }
 
   if (file.exists(dbFilePath)) {
     if (verbose) {
-      message(paste("'dbW_createDatabase': cannot create a new database",
-        "because the file", shQuote(basename(dbFilePath)),
-        "does already exist."))
+      message(
+        "'dbW_createDatabase': cannot create a new database ",
+        "because the file ", shQuote(basename(dbFilePath)),
+        " does already exist."
+      )
     }
     return(FALSE)
   }
 
-  temp <- dbW_setConnection(dbFilePath, create_if_missing = TRUE,
-    verbose = verbose)
+  tmp <- dbW_setConnection(
+    dbFilePath,
+    create_if_missing = TRUE,
+    verbose = verbose
+  )
 
-  if (!temp) {
+  if (!tmp) {
     if (verbose) {
-      message(paste("'dbW_createDatabase': was not able to create a new",
-        "database and connect to the file", shQuote(basename(dbFilePath)), "."))
+      message(
+        "'dbW_createDatabase': was not able to create a new ",
+        "database and connect to the file ", shQuote(basename(dbFilePath)), "."
+      )
     }
     rm_file <- TRUE
     return(FALSE)
   }
 
   # Meta information
-  temp <- eval(formals(memCompress)[[2]])
-  if (missing(compression_type) || !(compression_type %in% temp)) {
+  tmp <- eval(formals(memCompress)[[2]])
+  if (missing(compression_type) || !(compression_type %in% tmp)) {
     compression_type <- rSW2_glovars$default_blob_compression_type
   }
   rSW2_glovars$blob_compression_type <- compression_type
 
   # Create tables
-  temp <- try(.create_dbW(site_data, Scenarios, scen_ambient), silent = TRUE)
-  res <- !inherits(temp, "try-error")
+  tmp <- try(.create_dbW(site_data, Scenarios, scen_ambient), silent = TRUE)
+  res <- !inherits(tmp, "try-error")
 
   if (!res) {
     if (verbose) {
-      message(paste("'dbW_createDatabase': was not able to create a new",
-        "database", shQuote(basename(dbFilePath)), "because of errors in the",
-        "table data."))
+      message(
+        "'dbW_createDatabase': was not able to create a new ",
+        "database ", shQuote(basename(dbFilePath)),
+        " because of errors in the table data."
+      )
     }
     rm_file <- TRUE
   }
@@ -1054,22 +1406,47 @@ dbW_createDatabase <- function(dbFilePath = "dbWeatherData.sqlite3", site_data,
 
 #dataframe of columns folder, lat, long, label where label can equal folderName
 #' @export
-dbW_addFromFolders <- function(MetaData = NULL, FoldersPath,
-  ScenarioName = "Current", weather_tag = "weath") {
+dbW_addFromFolders <- function(
+  MetaData = NULL,
+  FoldersPath,
+  ScenarioName = "Current",
+  weather_tag = "weath"
+) {
 
   if (!is.null(MetaData)) {
-    temp <- apply(MetaData, MARGIN = 1, function(x)
-      dbW_addWeatherData(Site_id = NULL, lat = x[2], long = x[3],
-      weatherFolderPath = file.path(FoldersPath, x[1]),
-      weatherData = NULL, Label = x[4], Scenario = ScenarioName,
-        weather_tag = weather_tag))
+    tmp <- apply(
+      MetaData,
+      MARGIN = 1,
+      function(x) {
+        dbW_addWeatherData(
+          Site_id = NULL,
+          lat = x[2],
+          long = x[3],
+          weatherFolderPath = file.path(FoldersPath, x[1]),
+          weatherData = NULL,
+          Label = x[4],
+          Scenario = ScenarioName,
+          weather_tag = weather_tag
+        )
+      }
+    )
 
   } else {
     files <- list.files(path = FoldersPath, pattern = weather_tag)
-    temp <- lapply(files, function(x)
-      dbW_addWeatherData(Site_id = NULL, lat = NULL, long = NULL,
-      weatherFolderPath = file.path(FoldersPath, x), weatherData = NULL,
-      Scenario = ScenarioName, weather_tag = weather_tag))
+    tmp <- lapply(
+      files,
+      function(x) {
+        dbW_addWeatherData(
+          Site_id = NULL,
+          lat = NULL,
+          long = NULL,
+          weatherFolderPath = file.path(FoldersPath, x),
+          weatherData = NULL,
+          Scenario = ScenarioName,
+          weather_tag = weather_tag
+        )
+      }
+    )
   }
 
   invisible(TRUE)
@@ -1082,15 +1459,16 @@ dbW_addFromFolders <- function(MetaData = NULL, FoldersPath,
 #'   failure with \code{FALSE}.
 #' @export
 dbW_deleteSite <- function(Site_ids) {
-  stopifnot(dbW_IsValid())
-
   # First delete all weather data (so that foreign key constraint is not
   # violated)
   stopifnot(dbW_deleteSiteData(Site_ids, Scenario_id = NULL))
 
   # Delete site entry in Sites table
-  sql <- "DELETE FROM \"Sites\" WHERE Site_id=:x"
-  DBI::dbExecute(rSW2_glovars$con, sql, params = list(x = Site_ids))
+  dbW_InsistInteract(
+    DBI::dbExecute,
+    statement = "DELETE FROM \"Sites\" WHERE Site_id=:x",
+    params = list(x = Site_ids)
+  )
 
   invisible(TRUE)
 }
@@ -1106,16 +1484,47 @@ dbW_deleteSiteData <- function(Site_id, Scenario_id = NULL) {
   if (is.null(Scenario_id)) {
     #Remove all data for this site
     sql <- "DELETE FROM \"WeatherData\" WHERE Site_id=:x"
-    DBI::dbExecute(rSW2_glovars$con, sql, params = list(x = Site_id))
+    tmp_params <- list(x = Site_id)
 
   } else {
     # Remove data for specific scenario
     sql <- "DELETE FROM \"WeatherData\" WHERE Site_id=:x1 AND Scenario=:x2"
-    DBI::dbExecute(rSW2_glovars$con, sql,
-      params = list(x1 = Site_id, x2 = Scenario_id))
+    tmp_params <- list(x1 = Site_id, x2 = Scenario_id)
   }
 
+  dbW_InsistInteract(DBI::dbExecute, statement = sql, params = tmp_params)
+
   invisible(TRUE)
+}
+
+
+#' Remove duplicated weather data records
+#'
+#' @param check_values A logical value.
+#'
+#' @section Details:
+#' A weather data record is considered a duplicate if `site_id`, `scenario_id`,
+#' `start_year`, and `end_year` agree; if `check_values` is `TRUE`, then
+#' the daily weather values must also exactly agree (checked as blobs)
+#' to be considered a duplicate entry.
+#'
+#' @return The number of deleted records
+#'
+#' @export
+#' @md
+dbW_delete_duplicated_weatherData <- function(check_values = TRUE) {
+  # Delete duplicates by keeping the lowest rowid per unit
+  dbW_InsistInteract(
+    DBI::dbExecute,
+    statement = paste(
+      "DELETE FROM WeatherData",
+      "WHERE rowid NOT IN (",
+        "SELECT min(rowid) FROM WeatherData ",
+        "GROUP BY Site_id, Scenario, StartYear, EndYear",
+        if (check_values) ", data",
+      ")"
+    )
+  )
 }
 
 
@@ -1139,8 +1548,10 @@ dbW_blob_to_weatherData <- function(data_blob, type = "gzip") {
   # RSQLite versions < 2.0 return a list of 'raw'; starting with v >= 2.0,
   #  the class changed to 'blob'
 
-  if ((inherits(data_blob, "list") || inherits(data_blob, "blob")) &&
-    inherits(data_blob[[1]], "raw") && length(data_blob) == 1) {
+  if (
+    (inherits(data_blob, "list") || inherits(data_blob, "blob")) &&
+    inherits(data_blob[[1]], "raw") && length(data_blob) == 1
+  ) {
     data_blob <- data_blob[[1]]
   }
 
@@ -1163,8 +1574,10 @@ dbW_blob_to_weatherData <- function(data_blob, type = "gzip") {
 #' @seealso \code{\link[base]{memCompress}}, \code{\link{serialize}}
 #' @export
 dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
-  blob::as_blob(memCompress(serialize(weatherData, connection = NULL),
-    type = type))
+  blob::as_blob(memCompress(
+    serialize(weatherData, connection = NULL),
+    type = type
+  ))
 }
 
 
@@ -1217,17 +1630,23 @@ getWeatherData_folders <- function(LookupWeatherFolder, weatherDirName = NULL,
   filebasename = "weath", startYear = NULL, endYear = NULL) {
 
   if (is.null(LookupWeatherFolder) || is.null(filebasename)) {
-    stop("Need 'LookupWeatherFolder' and 'filebasename' ",
-      "to locate weather data")
+    stop(
+      "Need 'LookupWeatherFolder' and 'filebasename' ",
+      "to locate weather data"
+    )
   }
 
   dir_weather <- if (is.null(weatherDirName)) {
-      LookupWeatherFolder
-    } else {
-      file.path(LookupWeatherFolder, weatherDirName)
+    LookupWeatherFolder
+  } else {
+    file.path(LookupWeatherFolder, weatherDirName)
+  }
+  fweath <- tryCatch(
+    list.files(dir_weather, pattern = filebasename),
+    warning = function(w) {
+      stop("Path to weather data bad or filebasename not correct.")
     }
-  fweath <- tryCatch(list.files(dir_weather, pattern = filebasename), warning =
-      function(w) stop("Path to weather data bad or filebasename not correct."))
+  )
 
   if (!endsWith(filebasename, ".")) {
     filebasename <- paste0(filebasename, ".")
@@ -1238,8 +1657,10 @@ getWeatherData_folders <- function(LookupWeatherFolder, weatherDirName = NULL,
 
   weathDataList <- list()
   for (k in seq_along(index)) {
-    weathDataList[[k]] <- swReadLines(new("swWeatherData",
-      year = years[index[k]]), file.path(dir_weather, fweath[index[k]]))
+    weathDataList[[k]] <- swReadLines(
+      new("swWeatherData", year = years[index[k]]),
+      file.path(dir_weather, fweath[index[k]])
+    )
   }
   names(weathDataList) <- as.character(years[index])
 
@@ -1281,11 +1702,17 @@ set_missing_weather <- function(data, valNA = NULL) {
 #'
 #' @export
 dbW_weatherData_to_dataframe <- function(weatherData, valNA = NULL) {
-  do.call(rbind, lapply(weatherData, FUN = function(x) {
-              temp <- set_missing_weather(x@data, valNA = valNA)
-              Year <- rep(x@year, times = nrow(temp))
-              cbind(Year, temp)
-            }))
+  do.call(
+    rbind,
+    lapply(
+      weatherData,
+      FUN = function(x) {
+        tmp <- set_missing_weather(x@data, valNA = valNA)
+        Year <- rep(x@year, times = nrow(tmp))
+        cbind(Year, tmp)
+      }
+    )
+  )
 }
 
 #' Conversion: object of class \code{\linkS4class{swWeatherData}} to
@@ -1295,20 +1722,31 @@ dbW_weatherData_to_dataframe <- function(weatherData, valNA = NULL) {
 #'
 #' @export
 dbW_weatherData_to_monthly <- function(dailySW, na.rm = FALSE, valNA = NULL) {
-  monthly <- matrix(NA, nrow = length(dailySW) * 12, ncol = 5,
-    dimnames = list(NULL, c("Year", "Month", "Tmax_C", "Tmin_C", "PPT_cm")))
+  monthly <- matrix(
+    nrow = length(dailySW) * 12,
+    ncol = 5,
+    dimnames = list(NULL, c("Year", "Month", "Tmax_C", "Tmin_C", "PPT_cm"))
+  )
 
   for (y in seq_along(dailySW)) {
     weath <- dailySW[[y]]
-    month <- as.POSIXlt(paste(weath@year, weath@data[, "DOY"], sep = "-"),
-                        format = "%Y-%j", tz = "UTC")$mon + 1
-    temp <- set_missing_weather(weath@data, valNA = valNA)
+    month <- as.POSIXlt(
+      paste(weath@year, weath@data[, "DOY"], sep = "-"),
+      format = "%Y-%j", tz = "UTC"
+    )$mon + 1
+    tmp <- set_missing_weather(weath@data, valNA = valNA)
     monthly[1:12 + 12 * (y - 1), ] <- data.matrix(cbind(
-      Year = weath@year, Month = 1:12,
-      aggregate(temp[, c("Tmax_C", "Tmin_C")],
-        by = list(month), FUN = mean, na.rm = na.rm)[, 2:3],
-      PPT_cm = as.vector(tapply(temp[, "PPT_cm"], month, FUN = sum,
-        na.rm = na.rm))
+      Year = weath@year,
+        Month = 1:12,
+      aggregate(
+        tmp[, c("Tmax_C", "Tmin_C")],
+        by = list(month),
+        FUN = mean,
+        na.rm = na.rm
+      )[, 2:3],
+      PPT_cm = as.vector(
+        tapply(tmp[, "PPT_cm"], month, FUN = sum, na.rm = na.rm)
+      )
     ))
   }
 
@@ -1318,8 +1756,11 @@ dbW_weatherData_to_monthly <- function(dailySW, na.rm = FALSE, valNA = NULL) {
 
 #' Aggregate daily weather data.frame to weekly, monthly, or yearly values
 #' @export
-dbW_dataframe_aggregate <- function(dailySW,
-  time_step = c("Year", "Month", "Week", "Day"), na.rm = FALSE) {
+dbW_dataframe_aggregate <- function(
+  dailySW,
+  time_step = c("Year", "Month", "Week", "Day"),
+  na.rm = FALSE
+) {
 
   time_step <- match.arg(time_step)
 
@@ -1327,41 +1768,48 @@ dbW_dataframe_aggregate <- function(dailySW,
     return(dailySW)
   }
 
-  icol_day <- grep("DOY|Day", colnames(dailySW), ignore.case = TRUE,
-    value = TRUE)
+  icol_day <- grep(
+    "DOY|Day",
+    colnames(dailySW),
+    ignore.case = TRUE,
+    value = TRUE
+  )
 
-  temp <- apply(dailySW[, c("Year", icol_day)], 1, paste, collapse = "-")
-  temp <- as.POSIXlt(temp, format = "%Y-%j", tz = "UTC")
-  ytemp <- 1900L + unique(temp$year)
+  tmp <- apply(dailySW[, c("Year", icol_day)], 1, paste, collapse = "-")
+  tmp <- as.POSIXlt(tmp, format = "%Y-%j", tz = "UTC")
+  tmpy <- 1900L + unique(tmp$year)
 
   if (time_step == "Year") {
     idaggs <- list(dailySW[, "Year"])
-    hout <- data.frame(Year = ytemp)
+    hout <- data.frame(Year = tmpy)
 
   } else if (time_step == "Month") {
-    idaggs <- list(1L + temp$mon, dailySW[, "Year"])
+    idaggs <- list(1L + tmp$mon, dailySW[, "Year"])
     hout <- data.frame(
-      Year = rep(ytemp, each = 12),
-      Month = rep(seq_len(12), times = length(ytemp))
+      Year = rep(tmpy, each = 12),
+      Month = rep(seq_len(12), times = length(tmpy))
     )
 
   } else if (time_step == "Week") {
-    idaggs <- list(1L + floor(temp$yday / 7), dailySW[, "Year"])
+    idaggs <- list(1L + floor(tmp$yday / 7), dailySW[, "Year"])
     hout <- data.frame(
-      Year = rep(ytemp, each = 53),
-      Week = rep(seq_len(53), times = length(ytemp))
+      Year = rep(tmpy, each = 53),
+      Week = rep(seq_len(53), times = length(tmpy))
     )
   }
 
-  as.matrix(cbind(hout,
-    Tmax_C = as.vector(tapply(dailySW[, "Tmax_C"], INDEX = idaggs, FUN = mean,
-      na.rm = na.rm)),
-    Tmin_C = as.vector(tapply(dailySW[, "Tmin_C"], INDEX = idaggs, FUN = mean,
-      na.rm = na.rm)),
-    PPT_cm = as.vector(tapply(dailySW[, "PPT_cm"], INDEX = idaggs, FUN = sum,
-      na.rm = na.rm))
+  as.matrix(cbind(
+    hout,
+    Tmax_C = as.vector(
+      tapply(dailySW[, "Tmax_C"], INDEX = idaggs, FUN = mean, na.rm = na.rm)
+    ),
+    Tmin_C = as.vector(
+      tapply(dailySW[, "Tmin_C"], INDEX = idaggs, FUN = mean, na.rm = na.rm)
+    ),
+    PPT_cm = as.vector(
+      tapply(dailySW[, "PPT_cm"], INDEX = idaggs, FUN = sum, na.rm = na.rm)
+    )
   ))
-
 }
 
 #' Conversion: object of daily weather data.frame to matrix of monthly values
@@ -1394,40 +1842,52 @@ get_years_from_weatherDF <- function(weatherDF, years, weatherDF_dataColumns) {
   if (!is.null(years)) {
     if (length(years) == nrow(weatherDF)) {
       year_ts <- years
-    } else if (length(years) ==
-        sum(weatherDF[, weatherDF_dataColumns[1]] == 1)) {
-      year_ts <- rep(years, times = diff(c(
+    } else if (
+      length(years) == sum(weatherDF[, weatherDF_dataColumns[1]] == 1)
+    ) {
+      year_ts <- rep(
+        years,
+        times = diff(c(
         which(weatherDF[, weatherDF_dataColumns[1]] == 1),
-        nrow(weatherDF) + 1)))
+        nrow(weatherDF) + 1)
+      ))
     } else {
-      stop("Not sufficient year information was provided with the ",
-        "'weatherDF' object")
+      stop(
+        "Not sufficient year information was provided with the ",
+        "'weatherDF' object"
+      )
     }
 
   } else if (
-    any(temp <- grepl("year", colnames(weatherDF), ignore.case = TRUE))) {
+    any(tmp <- grepl("year", colnames(weatherDF), ignore.case = TRUE))) {
 
-    year_ts <- weatherDF[, which(temp)[1]]
+    year_ts <- weatherDF[, which(tmp)[1]]
 
   } else {
     stop("No year information was provided with the 'weatherDF' object")
   }
 
-  years <- sort(unique(year_ts))
-
-  return(list(years = years, year_ts = year_ts))
+  return(list(years = sort(unique(year_ts)), year_ts = year_ts))
 }
 
 
 #' Conversion: data.frame to object of class \code{\linkS4class{swWeatherData}}
 #' @export
-dbW_dataframe_to_weatherData <- function(weatherDF, years = NULL,
-  weatherDF_dataColumns = c("DOY", "Tmax_C", "Tmin_C", "PPT_cm"), round = 2) {
+dbW_dataframe_to_weatherData <- function(
+  weatherDF,
+  years = NULL,
+  weatherDF_dataColumns = c("DOY", "Tmax_C", "Tmin_C", "PPT_cm"),
+  round = 2
+) {
 
-  if (!(length(weatherDF_dataColumns) == 4) ||
-      !all(weatherDF_dataColumns %in% colnames(weatherDF))) {
-    stop("Not every required weatherDF_dataColumns is available in the ",
-      "'weatherDF' object")
+  if (
+    !(length(weatherDF_dataColumns) == 4) ||
+    !all(weatherDF_dataColumns %in% colnames(weatherDF))
+  ) {
+    stop(
+      "Not every required weatherDF_dataColumns is available in the ",
+      "'weatherDF' object"
+    )
   }
 
   ylist <- get_years_from_weatherDF(weatherDF, years, weatherDF_dataColumns)
@@ -1438,11 +1898,16 @@ dbW_dataframe_to_weatherData <- function(weatherDF, years = NULL,
 
   weatherData <- list()
   for (i in seq_along(ylist$years)) {
-    ydata <- as.matrix(weatherDF[ylist$year_ts == ylist$years[i],
-      weatherDF_dataColumns])
+    ydata <- as.matrix(
+      weatherDF[ylist$year_ts == ylist$years[i],
+      weatherDF_dataColumns]
+    )
     colnames(ydata) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
-    weatherData[[i]] <- new("swWeatherData", year = ylist$years[i],
-      data = ydata)
+    weatherData[[i]] <- new(
+      "swWeatherData",
+      year = ylist$years[i],
+      data = ydata
+    )
   }
   names(weatherData) <- ylist$years
 
@@ -1453,9 +1918,14 @@ dbW_dataframe_to_weatherData <- function(weatherDF, years = NULL,
 #' Conversion: object of class \code{\linkS4class{swWeatherData}} or
 #' data.frame to \pkg{SOILWAT} input text files
 #' @export
-dbW_weather_to_SOILWATfiles <- function(path, site.label,
-  weatherData = NULL, weatherDF = NULL, years = NULL,
-  weatherDF_dataColumns = c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")) {
+dbW_weather_to_SOILWATfiles <- function(
+  path,
+  site.label,
+  weatherData = NULL,
+  weatherDF = NULL,
+  years = NULL,
+  weatherDF_dataColumns = c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+) {
 
   stopifnot(is.null(weatherData) || is.null(weatherDF))
   dir.create(path, recursive = TRUE, showWarnings = FALSE)
@@ -1464,30 +1934,38 @@ dbW_weather_to_SOILWATfiles <- function(path, site.label,
     years <- sapply(weatherData, FUN = function(x) x@year)
 
   } else if (!is.null(weatherDF)) {
-    if (!(length(weatherDF_dataColumns) == 4) ||
-        !all(weatherDF_dataColumns %in% colnames(weatherDF))) {
-      stop("Not every required weatherDF_dataColumns is available in the ",
-        "'weatherDF' object")
+    if (
+      !(length(weatherDF_dataColumns) == 4) ||
+      !all(weatherDF_dataColumns %in% colnames(weatherDF))
+    ) {
+      stop(
+        "Not every required weatherDF_dataColumns is available in the ",
+        "'weatherDF' object"
+      )
     }
 
-    temp <- get_years_from_weatherDF(weatherDF, years, weatherDF_dataColumns)
-    years <- temp$years
-    year_ts <- temp$year_ts
+    tmp <- get_years_from_weatherDF(weatherDF, years, weatherDF_dataColumns)
+    years <- tmp$years
+    year_ts <- tmp$year_ts
 
   } else {
-    stop("Provide daily weather data either as 'weatherData' or ",
-      "'weatherDF' object")
+    stop(
+      "Provide daily weather data either as 'weatherData' or ",
+      "'weatherDF' object"
+    )
   }
 
   for (y in seq_along(years)) {
     data.sw <- if (!is.null(weatherData)) {
-        weatherData[[y]]@data
-      } else {
-        weatherDF[year_ts == years[y], weatherDF_dataColumns]
-      }
+      weatherData[[y]]@data
+    } else {
+      weatherDF[year_ts == years[y], weatherDF_dataColumns]
+    }
     sw.filename <- file.path(path, paste0("weath.", years[y]))
-    sw.comments <- c(paste("# weather for site", site.label, "year = ",
-      years[y]), "# DOY Tmax(C) Tmin(C) PPT(cm)")
+    sw.comments <- c(
+      paste("# weather for site", site.label, "year = ", years[y]),
+      "# DOY Tmax(C) Tmin(C) PPT(cm)"
+    )
 
     utils::write.table(
       sw.comments,
@@ -1500,7 +1978,8 @@ dbW_weather_to_SOILWATfiles <- function(path, site.label,
     )
 
     utils::write.table(
-      data.frame(data.sw[, 1],
+      data.frame(
+        data.sw[, 1],
         formatC(data.sw[, 2], digits = 2, format = "f"),
         formatC(data.sw[, 3], digits = 2, format = "f"),
         formatC(data.sw[, 4], digits = 2, format = "f")
@@ -1577,16 +2056,25 @@ dbW_weather_to_SOILWATfiles <- function(path, site.label,
 #' all.equal(nrow(wnew), 366) # leap year
 #'
 #' @export
-dbW_convert_to_GregorianYears <- function(weatherData,
-  new_startYear = NULL, new_endYear = NULL, type = c("asis", "sequential"),
-  name_year = "Year", name_DOY = "DOY",
-  name_data = c("Tmax_C", "Tmin_C", "PPT_cm"), valNA = NULL) {
+dbW_convert_to_GregorianYears <- function(
+  weatherData,
+  new_startYear = NULL,
+  new_endYear = NULL,
+  type = c("asis", "sequential"),
+  name_year = "Year",
+  name_DOY = "DOY",
+  name_data = c("Tmax_C", "Tmin_C", "PPT_cm"),
+  valNA = NULL
+) {
 
   # daily weather data
-  if (inherits(weatherData, "list") &&
-      all(sapply(weatherData, inherits, what = "swWeatherData"))) {
-    wdata <- data.frame(dbW_weatherData_to_dataframe(weatherData,
-      valNA = valNA))
+  if (
+    inherits(weatherData, "list") &&
+    all(sapply(weatherData, inherits, what = "swWeatherData"))
+  ) {
+    wdata <- data.frame(
+      dbW_weatherData_to_dataframe(weatherData, valNA = valNA)
+    )
   } else {
     wdata <- data.frame(set_missing_weather(weatherData, valNA = valNA))
   }
@@ -1659,9 +2147,9 @@ dbW_check_weatherData <- function(x) {
   all(sapply(x, inherits, what = "swWeatherData")) &&
   isTRUE(all.equal(
     unname(sapply(x, function(xyr) nrow(slot(xyr, "data")))),
-    365 + as.integer(rSW2utils::isLeapYear(
-      sapply(x, slot, name = "year")
-    ))
+    365 + as.integer(
+      rSW2utils::isLeapYear(sapply(x, slot, name = "year"))
+    )
   ))
 }
 
@@ -1669,75 +2157,74 @@ dbW_check_weatherData <- function(x) {
 # nolint start
 ## ------ Scanning of SOILWAT input text files
 readCharacter <- function(text, showWarnings = FALSE) {
-  temp <- strsplit(x = text, split = "\t")[[1]][1]
-  temp <- unlist(strsplit(x = temp, split = " "))[1]
-  temp
+  tmp <- strsplit(x = text, split = "\t")[[1]][1]
+  unlist(strsplit(x = tmp, split = " "))[1]
 }
 
 readInteger <- function(text,showWarnings=FALSE) {
-  temp <- suppressWarnings(as.integer(strsplit(x=text,split="\t")[[1]][1]))
-  if(is.na(temp)) {
+  tmp <- suppressWarnings(as.integer(strsplit(x=text,split="\t")[[1]][1]))
+  if(is.na(tmp)) {
     if(showWarnings) print(paste("Line: ",text,sep=""))
     if(showWarnings) print("Not formatted with \t. Going to try [space].")
-    temp <- suppressWarnings(as.integer(strsplit(x=text,split=" ")[[1]][1]))
-    if(is.na(temp)) {
+    tmp <- suppressWarnings(as.integer(strsplit(x=text,split=" ")[[1]][1]))
+    if(is.na(tmp)) {
       stop("Bad Line. Or Bad line numbers.")
     }
   }
-  return(temp)
+  return(tmp)
 }
 
 readLogical <- function(text,showWarnings=FALSE) {
-  temp <- suppressWarnings(as.logical(as.integer(strsplit(x=text,split="\t")[[1]][1])))
-  if(is.na(temp)) {
+  tmp <- suppressWarnings(as.logical(as.integer(strsplit(x=text,split="\t")[[1]][1])))
+  if(is.na(tmp)) {
     if(showWarnings) print(paste("Line: ",text,sep=""))
     if(showWarnings) print("Not formatted with \t. Going to try [space].")
-    temp <- suppressWarnings(as.logical(as.integer(strsplit(x=text,split=" ")[[1]][1])))
-    if(is.na(temp)) {
+    tmp <- suppressWarnings(as.logical(as.integer(strsplit(x=text,split=" ")[[1]][1])))
+    if(is.na(tmp)) {
       stop("Bad Line. Or Bad line numbers.")
     }
   }
-  return(temp)
+  return(tmp)
 }
 
 readNumeric <- function(text,showWarnings=FALSE) {
-  temp <- suppressWarnings(as.numeric(strsplit(x=text,split="\t")[[1]][1]))
-  if(is.na(temp)) {
+  tmp <- suppressWarnings(as.numeric(strsplit(x=text,split="\t")[[1]][1]))
+  if(is.na(tmp)) {
     if(showWarnings) print(paste("Line: ",text,sep=""))
     if(showWarnings) print("Not formatted with \t. Going to try [space].")
-    temp <- suppressWarnings(as.numeric(strsplit(x=text,split=" ")[[1]][1]))
-    if(is.na(temp)) {
+    tmp <- suppressWarnings(as.numeric(strsplit(x=text,split=" ")[[1]][1]))
+    if(is.na(tmp)) {
       stop("Bad Line. Or Bad line numbers.")
     }
   }
-  return(temp)
+  return(tmp)
 }
 
 readNumerics <- function(text,expectedArgs,showWarnings=FALSE) {
-  temp <- strsplit(x=text,split="\t")[[1]]
-  temp <- temp[temp != ""] #get rid of extra spaces
-  if(length(temp) > expectedArgs) temp <- temp[1:expectedArgs] #get rid of comment?
-  temp <- suppressWarnings(as.numeric(temp))
-  if(any(is.na(temp))) {
-    if(showWarnings & any(is.na(temp))) print(paste("Line: ",text,sep=""))
-    if(showWarnings & any(is.na(temp))) print("Not formatted with \t. Going to try [space].")
-    temp <- strsplit(x=text,split="\t")[[1]][1] #remove comment
-    temp <- strsplit(x=temp,split=" ")[[1]]
-    temp <- temp[temp!=""] #remove extra spaces
-    temp <- suppressWarnings(as.numeric(temp[1:expectedArgs]))
-    if(any(is.na(temp))) {
+  tmp <- strsplit(x=text,split="\t")[[1]]
+  tmp <- tmp[tmp != ""] #get rid of extra spaces
+  if(length(tmp) > expectedArgs) tmp <- tmp[1:expectedArgs] #get rid of comment?
+  tmp <- suppressWarnings(as.numeric(tmp))
+  if(any(is.na(tmp))) {
+    if(showWarnings & any(is.na(tmp))) print(paste("Line: ",text,sep=""))
+    if(showWarnings & any(is.na(tmp))) print("Not formatted with \t. Going to try [space].")
+    tmp <- strsplit(x=text,split="\t")[[1]][1] #remove comment
+    tmp <- strsplit(x=tmp,split=" ")[[1]]
+    tmp <- tmp[tmp!=""] #remove extra spaces
+    tmp <- suppressWarnings(as.numeric(tmp[1:expectedArgs]))
+    if(any(is.na(tmp))) {
       #last try. tried set by \t then by space. Now try both
-      temp <- strsplit(x=text,split=" ",fixed=T)[[1]]
-      temp <- unlist(strsplit(x=temp,split="\t",fixed=T))
-      temp <- temp[temp!=""] #remove extra spaces
-      temp <- suppressWarnings(as.numeric(temp[1:expectedArgs]))
-      if(any(is.na(temp))) stop("Bad Line. Or Bad line numbers.")
+      tmp <- strsplit(x=text,split=" ",fixed=T)[[1]]
+      tmp <- unlist(strsplit(x=tmp,split="\t",fixed=T))
+      tmp <- tmp[tmp!=""] #remove extra spaces
+      tmp <- suppressWarnings(as.numeric(tmp[1:expectedArgs]))
+      if(any(is.na(tmp))) stop("Bad Line. Or Bad line numbers.")
     }
   }
-  if(length(temp) != expectedArgs) {
+  if(length(tmp) != expectedArgs) {
     if(showWarnings) print(paste("Line: ",text,sep=""))
-      stop(paste("Expected ",expectedArgs," Got ",length(temp),sep=""))
+      stop(paste("Expected ",expectedArgs," Got ",length(tmp),sep=""))
   }
-  return(temp)
+  return(tmp)
 }
 # nolint end

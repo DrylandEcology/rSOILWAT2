@@ -184,7 +184,7 @@ sw_args <- function(dir, files.in, echo, quiet) {
 #' tmp <- c(
 #'   "sw_temp", "sw_precip", "sw_snow",
 #'   "sw_inf_soil", "sw_deepdrain",
-#'   "sw_vwcbulk", "sw_swcbulk", "sw_swp", "sw_soiltemp",
+#'   "sw_swcbulk", "sw_swp", "sw_soiltemp",
 #'   "sw_aet", "sw_pet",
 #'   "sw_veg"
 #' )
