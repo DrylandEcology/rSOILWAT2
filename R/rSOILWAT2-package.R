@@ -10,7 +10,7 @@
 #'
 #' @section Version: The version level of the package is given by the command
 #'   \code{packageDescription("rSOILWAT2")}. The most recent version of the
-#'   package can be obtained from github at
+#'   package can be obtained via \var{github} at
 #'   \url{https://github.com/DrylandEcology/rSOILWAT2}
 #'
 #' @seealso \itemize{
@@ -53,8 +53,6 @@ rSW2_glovars <- new.env()
 #'   inheritedSlotNames getSlots validObject callNextMethod
 #' @importFrom stats aggregate coef complete.cases cor cov fitted median
 #'   na.exclude na.omit predict quantile sd weighted.mean
-#' @importFrom utils data read.csv read.table str write.table
-#' @import rSW2utils
 NULL
 
 ##------ Access SOILWAT2 C code

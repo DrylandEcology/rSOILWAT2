@@ -8,6 +8,7 @@ dbW_getWeatherData(
   Site_id = NULL,
   lat = NULL,
   long = NULL,
+  tol_xy = 1e-04,
   Label = NULL,
   startYear = NULL,
   endYear = NULL,
@@ -26,6 +27,9 @@ dbW_getWeatherData(
 \item{long}{Numeric. Longitude and Latitude are used to identify site if
 \code{Site_id} is missing.}
 
+\item{tol_xy}{A numeric value. The tolerance used to match requested
+longitude and latitude values.}
+
 \item{Label}{A character string. A site label.}
 
 \item{startYear}{Numeric. Extracted weather data will start with this year.}
@@ -33,6 +37,8 @@ dbW_getWeatherData(
 \item{endYear}{Numeric. Extracted weather data will end with this year.}
 
 \item{Scenario}{A character string.}
+
+\item{ignore.case}{A logical value.}
 }
 \value{
 Returns weather data as list. Each element is an object of class
@@ -46,10 +52,15 @@ data from a predefined weather database. Using the database was faster then
 reading in multiple weather files from disk.
 }
 \details{
-\pkg{SOILWAT2} does not handle missing weather data. If you have missing
-data, then you have to impute yourself or use the built-in Markov
+If there is missing data, then impute or use the built-in Markov
 weather generator (see examples for \code{\link{sw_exec}}).
 }
+\section{Notes}{
+
+  This function returns the first record of weather data
+  even if duplicate entries match the query.
+}
+
 \seealso{
 \code{\link{getWeatherData_folders}}
 }

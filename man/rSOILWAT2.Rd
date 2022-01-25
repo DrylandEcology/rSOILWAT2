@@ -20,7 +20,7 @@ input data. Output data is in the form of lists.
 \section{Version}{
  The version level of the package is given by the command
   \code{packageDescription("rSOILWAT2")}. The most recent version of the
-  package can be obtained from github at
+  package can be obtained via \var{github} at
   \url{https://github.com/DrylandEcology/rSOILWAT2}
 }
 
@@ -50,7 +50,7 @@ dynamics in the shortgrass steppe.  \emph{Ecology} \bold{73}:1175--1181.
 }
 }
 \author{
-\strong{Maintainer}: Daniel Schlaepfer \email{daniel.schlaepfer@alumni.ethz.ch} (\href{https://orcid.org/0000-0001-9973-2065}{ORCID})
+\strong{Maintainer}: Daniel Schlaepfer \email{danielrschlaepfer@gmail.com} (\href{https://orcid.org/0000-0001-9973-2065}{ORCID})
 
 Authors:
 \itemize{

@@ -23,6 +23,7 @@
 
 
 # TODO: link this to C code
+# Note: the values must match those of rSW2_glovars[["kSOILWAT2"]][["OutKeys"]]
 #' Slot names of \linkS4class{swOutput}
 #' @return Standardized named vector for easier access to slots of class
 #'  \linkS4class{swOutput}.

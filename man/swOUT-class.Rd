@@ -8,6 +8,8 @@
 \alias{swOUT_TimeStep,swOUT-method}
 \alias{swOUT_OutputSeparator,swOUT-method}
 \alias{set_swOUT<-,swOUT-method}
+\alias{activate_swOUT_OutKey<-,swOUT-method}
+\alias{deactivate_swOUT_OutKey<-,swOUT-method}
 \alias{swOUT_TimeStep<-,swOUT-method}
 \alias{swOUT_TimeStepsForEveryKey<-,swOUT-method}
 \alias{swOUT_OutputSeparator<-,swOUT-method}
@@ -23,6 +25,10 @@
 \S4method{swOUT_OutputSeparator}{swOUT}(object)
 
 \S4method{set_swOUT}{swOUT}(object) <- value
+
+\S4method{activate_swOUT_OutKey}{swOUT}(object) <- value
+
+\S4method{deactivate_swOUT_OutKey}{swOUT}(object) <- value
 
 \S4method{swOUT_TimeStep}{swOUT}(object) <- value
 
@@ -78,6 +84,12 @@ for each possible output time period. See details.}
 \examples{
 showClass("swOUT")
 x <- new("swOUT")
+
+x <- new("swOUT")
+activate_swOUT_OutKey(x) <- c("VWCMATRIC", "HYDRED")
+
+x <- new("swOUT")
+deactivate_swOUT_OutKey(x) <- c("VWCMATRIC", "HYDRED")
 
 x <- new("swOUT")
 swOUT_TimeStepsForEveryKey(x) <- c(2, 3)

@@ -29,7 +29,7 @@
 #include "SOILWAT2/SW_Defines.h"
 #include "SOILWAT2/SW_Times.h"
 #include "SOILWAT2/SW_Files.h"
-#include "SOILWAT2/SW_Model.h"
+#include "SOILWAT2/SW_Model.h" // externs `SW_Model`
 
 #include "rSW_Model.h"
 
@@ -38,23 +38,16 @@
 #include <Rdefines.h>
 
 
-/* =================================================== */
-/*                  Global Variables                   */
-/* --------------------------------------------------- */
-SW_MODEL SW_Model; /* declared here, externed elsewhere */
 
 /* =================================================== */
-/*                Module-Level Variables               */
+/*                  Local Variables                    */
 /* --------------------------------------------------- */
 static char *MyFileName;
 
 
 /* =================================================== */
-/* =================================================== */
-/*             Public Function Definitions             */
+/*             Global Function Definitions             */
 /* --------------------------------------------------- */
-
-
 
 SEXP onGet_SW_MDL() {
 	SW_MODEL *m = &SW_Model;

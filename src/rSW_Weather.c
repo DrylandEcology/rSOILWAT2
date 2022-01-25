@@ -20,12 +20,13 @@
 
 #include "SOILWAT2/SW_Defines.h"
 #include "SOILWAT2/SW_Files.h"
-#include "SOILWAT2/SW_Model.h"
+#include "SOILWAT2/SW_Model.h" // externs `SW_Model`
 #include "SOILWAT2/SW_Markov.h"
 #include "SOILWAT2/SW_Sky.h"
 
-#include "SOILWAT2/SW_Weather.h"
+#include "SOILWAT2/SW_Weather.h" // externs `SW_Weather`
 #include "rSW_Weather.h"
+#include "SW_R_lib.h" // externs `InputData`, `WeatherList`, `bWeatherList`
 
 #include <R.h>
 #include <Rinternals.h>
@@ -33,40 +34,30 @@
 
 
 /* =================================================== */
-/*                  Global Variables                   */
-/* --------------------------------------------------- */
-extern SW_MODEL SW_Model;
-extern SW_WEATHER SW_Weather;
-
-extern SEXP InputData;
-extern SEXP WeatherList;
-extern Bool bWeatherList;
-
-
-/* =================================================== */
-/*                Module-Level Variables               */
+/*                  Local Variables                    */
 /* --------------------------------------------------- */
 static char *MyFileName;
 
-static char *cSW_WTH_names[] = { "UseSnow", "pct_SnowDrift", "pct_SnowRunoff",
+static char *cSW_WTH_names[] = {
+  "UseSnow", "pct_SnowDrift", "pct_SnowRunoff",
   "use_weathergenerator", "use_weathergenerator_only",
   "FirstYear_Historical",
   "MonthlyScalingParams"
 };
 
 
+
 /* =================================================== */
-/* =================================================== */
-/*             Private Function Definitions            */
+/*             Local Function Definitions              */
 /* --------------------------------------------------- */
 
 static SEXP onGet_WTH_DATA_YEAR(TimeInt year);
 static Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year);
 
 
+
 /* =================================================== */
-/* =================================================== */
-/*             Public Function Definitions             */
+/*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
 Bool onSet_WTH_DATA_YEAR(TimeInt year) {
@@ -158,7 +149,7 @@ SEXP onGet_SW_WTH() {
 }
 
 void onSet_SW_WTH(SEXP SW_WTH) {
-	int i;
+	int i, tmp;
 	SW_WEATHER *w = &SW_Weather;
 	SEXP
 		use_snow, pct_snowdrift, pct_snowRunoff,
@@ -184,8 +175,8 @@ void onSet_SW_WTH(SEXP SW_WTH) {
 	}
 
 	PROTECT(yr_first = GET_SLOT(SW_WTH, install(cSW_WTH_names[5])));
-	w->yr.first = *INTEGER(yr_first);
-	w->yr.first = (w->yr.first < 0) ? SW_Model.startyr : w->yr.first;
+	tmp = *INTEGER(yr_first);
+	w->yr.first = (tmp < 0) ? SW_Model.startyr : yearto4digit(tmp);
 
 	PROTECT(MonthlyScalingParams = GET_SLOT(SW_WTH, install(cSW_WTH_names[6])));
 	p_MonthlyValues = REAL(MonthlyScalingParams);

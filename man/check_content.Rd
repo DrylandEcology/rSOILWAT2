@@ -7,6 +7,7 @@
 \alias{dbW_has_scenarioIDs}
 \alias{dbW_has_scenarios}
 \alias{dbW_has_weatherData}
+\alias{dbW_have_sites_all_weatherData}
 \title{Check availability of content in registered weather database}
 \usage{
 dbW_has_sites(Labels, ignore.case = FALSE)
@@ -18,6 +19,15 @@ dbW_has_scenarioIDs(Scenario_ids)
 dbW_has_scenarios(Scenarios, ignore.case = FALSE)
 
 dbW_has_weatherData(Site_ids, Scenario_ids)
+
+dbW_have_sites_all_weatherData(
+  site_labels = NULL,
+  site_ids = NULL,
+  scen_labels = NULL,
+  scen_ids = NULL,
+  chunk_size = 1500L,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{Labels}{A vector of character strings. The names/labels of the queried
@@ -48,6 +58,11 @@ queried scenarios.}
 
 \code{dbW_has_weatherData} returns a logical matrix with rows
   corresponding to queried sites and columns to queried scenarios.
+
+\code{dbW_have_sites_all_weatherData} returns a logical vector
+  of length of queried sites;
+  a \code{TRUE} element indicates that weather data
+  for each queried scenarios is available for that queried site.
 }
 \description{
 Check availability of content in registered weather database
@@ -64,6 +79,10 @@ Check availability of content in registered weather database
   available.
 
  \code{dbW_has_weatherData} checks whether weather data are
-  available.
+  available but ignores \code{start_year} and \code{end_year}.
+
+
+  \code{dbW_have_sites_all_weatherData} checks whether weather data are
+  available but ignores \code{start_year} and \code{end_year}.
 }
 
