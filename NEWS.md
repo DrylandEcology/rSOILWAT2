@@ -1,3 +1,8 @@
+# rSOILWAT2 v5.0.4
+* This version produces identical simulation output as the previous release.
+* Improved version checks (with backwards compatible defaults).
+
+
 # rSOILWAT2 v5.0.3
 * This version produces identical simulation output as the previous release.
 * Improved concurrent reading and writing to a weather database.
