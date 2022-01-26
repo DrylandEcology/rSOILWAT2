@@ -6,10 +6,16 @@ test_that("rSOILWAT2 object versions", {
   # Check version tag of input object
   sw_in <- rSOILWAT2::sw_exampleData
   expect_true(check_version(sw_in, level = "minor"))
+  expect_true(
+    check_version(sw_in, expected_version = "1.0.0", level = "minor")
+  )
 
   # Check version tag of output object
   sw_out <- sw_exec(inputData = sw_in, echo = FALSE, quiet = TRUE)
   expect_true(check_version(sw_out, level = "patch"))
+  expect_true(
+    check_version(sw_out, expected_version = "1.0.0", level = "patch")
+  )
 
 
   #--- Check for other object classes (ANY-method): return `NA`
