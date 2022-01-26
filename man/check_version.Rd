@@ -4,11 +4,19 @@
 \alias{check_version}
 \title{Check that version of an input or output object is up-to-date}
 \usage{
-check_version(object, level = c("minor", "major", "patch"))
+check_version(
+  object,
+  expected_version = rSW2_version(),
+  level = c("minor", "major", "patch")
+)
 }
 \arguments{
 \item{object}{An object of class \code{\linkS4class{swInputData}} or
 \code{\linkS4class{swOutput}}.}
+
+\item{expected_version}{A numeric version. The \code{object} should have
+the same or a newer version number than the expected version;
+defaults to the current \pkg{rSOILWAT2} version number.}
 
 \item{level}{A character string. The level at which to detect changes
 in the version number \var{major.minor.patch}. A value of \var{"minor"}
@@ -23,6 +31,7 @@ Check that version of an input or output object is up-to-date
 \examples{
 # Should pass
 check_version(rSOILWAT2::sw_exampleData, level = "minor")
+check_version(rSOILWAT2::sw_exampleData, "1.0.0", level = "patch")
 
 # May fail due to a recent patch
 try(check_version(rSOILWAT2::sw_exampleData, level = "patch"))
