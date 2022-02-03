@@ -1,3 +1,17 @@
+# rSOILWAT2 v5.1.0
+## Breaking changes
+* This version produces slightly different simulation output from previous
+  versions.
+* `SOILWAT2` is updated to `v6.3.0` with
+   improved percolation and behavior at minimum soil water content
+   (https://github.com/DrylandEcology/SOILWAT2/releases/tag/v6.3.0) including:
+    * Unsaturated percolation rate is now adjusted for `swc_min`,
+      i.e., percolation rate is smaller at very low moisture levels.
+    * Bare-soil evaporation, transpiration, and hydraulic redistribution
+      no longer remove soil moisture held below swc_min.
+    * Lower limit of `swc_min` is now set at -30 MPa.
+
+
 # rSOILWAT2 v5.0.4
 * This version produces identical simulation output as the previous release.
 * Improved version checks (with backwards compatible defaults).
