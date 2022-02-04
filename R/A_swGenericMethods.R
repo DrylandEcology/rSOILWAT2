@@ -61,6 +61,9 @@ setMethod(
 #'
 #' @param object An object of class \code{\linkS4class{swInputData}} or
 #'   \code{\linkS4class{swOutput}}.
+#' @param expected_version A numeric version. The \code{object} should have
+#'   the same or a newer version number than the expected version;
+#'   defaults to the current \pkg{rSOILWAT2} version number.
 #' @param level A character string. The level at which to detect changes
 #'   in the version number \var{major.minor.patch}. A value of \var{"minor"}
 #'   would ignore patch-level changes.
@@ -72,36 +75,41 @@ setMethod(
 #' @examples
 #' # Should pass
 #' check_version(rSOILWAT2::sw_exampleData, level = "minor")
+#' check_version(rSOILWAT2::sw_exampleData, "1.0.0", level = "patch")
 #'
 #' # May fail due to a recent patch
 #' try(check_version(rSOILWAT2::sw_exampleData, level = "patch"))
 #'
 #' @export
-check_version <- function(object, level = c("minor", "major", "patch")) {
+check_version <- function(
+  object,
+  expected_version = rSW2_version(),
+  level = c("minor", "major", "patch")
+) {
   has <- get_version(object)
 
-  if (is.na(has)) {
+  if (is.na(has) || is.na(expected_version)) {
     FALSE
 
   } else {
     has <- as.numeric_version(has)
-    current <- as.numeric_version(rSW2_version())
+    expected <- as.numeric_version(expected_version)
 
     # Adjust for level to compare versions
     level <- match.arg(level)
     if (level %in% c("major", "minor")) {
       # zero the patchlevel
       has[[c(1, 3)]] <- 0
-      current[[c(1, 3)]] <- 0
+      expected[[c(1, 3)]] <- 0
     }
     if (level %in% "major") {
       # zero the minor-level
       has[[c(1, 2)]] <- 0
-      current[[c(1, 2)]] <- 0
+      expected[[c(1, 2)]] <- 0
     }
 
     # Compare
-    has >= current
+    has >= expected
   }
 }
 
