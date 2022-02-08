@@ -81,6 +81,7 @@ unlink_forcefully <- function(x, recursive = TRUE, force = TRUE, info = NULL) {
   }
 }
 
+
 #---TESTS
 test_that("Disk file write and delete permissions", {
   # remove once issue #43 is fixed (unit tests for 'test_dbW_functionality.R'
@@ -421,18 +422,52 @@ test_that("dbW site/scenario tables manipulation", {
   expect_equal(site_id5, c(NA_integer_, site_id1, NA_integer_))
 
   id1 <- dbW_getIDs(
-    long = site_data1[, "Longitude"],
-    lat = site_data1[, "Latitude"],
-    scenario = scenarios_added,
+    long = c(NA, site_data1[, "Longitude"], NA),
+    lat = c(NA, site_data1[, "Latitude"], NA),
+    scenario = c("not here", scenarios_added, "not anywhere"),
     add_if_missing = FALSE
   )
   id2 <- dbW_getIDs(
-    site_label = site_data1[, "Label"],
-    scenario_id = seq_along(scenarios_added),
+    site_label = c("not there", site_data1[, "Label"], "not there either"),
+    scenario = c("not here", scenarios_added, "not anywhere"),
+    add_if_missing = FALSE
+  )
+  id3 <- dbW_getIDs(
+    site_id = c(NA, site_data1[, "Site_id"], NA),
+    scenario_id = c(100, seq_along(scenarios_added), NA),
     add_if_missing = FALSE
   )
 
   expect_equal(id1, id2)
+  expect_equal(id1, id3)
+  expect_equal(id1[["site_id"]], c(NA, site_data1[, "Site_id"], NA))
+  expect_equal(id1[["scenario_id"]], c(NA, seq_along(scenarios_added), NA))
+
+
+  #--- Add sites via `dbW_getIDs()`
+  expect_true(dbW_deleteSite(Site_ids = site_data3[, "Site_id"]))
+
+  id4a <- dbW_getIDs(
+    site_id = site_data3[, "Site_id"],
+    scenario = scenarios_added,
+    add_if_missing = FALSE
+  )
+  expect_equal(id4a[["site_id"]], rep(NA_integer_, nrow(site_data3)))
+  expect_equal(id4a[["scenario_id"]], seq_along(scenarios_added))
+
+  id4b <- dbW_getIDs(
+    site_id = site_data3[, "Site_id"],
+    site_label = site_data3[, "Label"],
+    long = site_data3[, "Longitude"],
+    lat = site_data3[, "Latitude"],
+    scenario = scenarios_added,
+    add_if_missing = TRUE
+  )
+
+  expect_true(!anyNA(id4b[["site_id"]]))
+  expect_length(id4b[["site_id"]], nrow(site_data3))
+  expect_true(!anyNA(id4b[["scenario_id"]]))
+  expect_length(id4b[["scenario_id"]], length(scenarios_added))
 })
 
 
@@ -592,7 +627,7 @@ test_that("dbW weather data manipulation", {
 
   #--- * Retrieve weather data ------
   expect_equal(
-    dbW_getWeatherData(Site_id = 1, Scenario = scenarios[1]),
+    suppressWarnings(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[1])),
     sw_weather[[1]]
   )
   expect_equal(
@@ -608,7 +643,45 @@ test_that("dbW weather data manipulation", {
     sw_weather[[2]]
   )
 
-  # Adding data to the same Site_id x Scenario Name combination will fail
+  #--- Retrieve weather data from multiple sites at once
+  expect_equal(
+    suppressWarnings(
+      dbW_getWeatherData(
+        Site_id = 1:3,
+        Scenario = scenarios[1],
+        stop_if_missing = FALSE
+      )
+    ),
+    list(sw_weather[[1]], sw_weather[[2]], NULL)
+  )
+
+  #--- Retrieve weather data from multiple scenarios at once
+  expect_equal(
+    suppressWarnings(
+      dbW_getWeatherData(
+        Site_id = 1,
+        Scenario = c(scenarios[1], NA, scenarios[2]),
+        stop_if_missing = FALSE
+      )
+    ),
+    list(sw_weather[[1]], NULL, sw_weather[[1]])
+  )
+
+  #--- Retrieve weather data from multiple sites each with a specific scenario
+  expect_equal(
+    suppressWarnings(
+      dbW_getWeatherData(
+        Site_id = c(1:3, 100),
+        Scenario = c(scenarios[1], NA, scenarios[2], scenarios[1]),
+        stop_if_missing = FALSE
+      )
+    ),
+    list(sw_weather[[1]], NULL, sw_weather[[2]], NULL)
+  )
+
+
+
+  #--- Adding data to the same Site_id x Scenario Name combination will fail
   expect_error(
     dbW_addWeatherData(
       Site_id = 1,
@@ -624,13 +697,20 @@ test_that("dbW weather data manipulation", {
   expect_true(dbW_deleteSite(Site_ids = 3))
   expect_false(dbW_has_siteIDs(3))
   expect_error(dbW_getWeatherData(Site_id = 3, Scenario = scenarios[2]))
+  expect_null(suppressWarnings(
+    dbW_getWeatherData(
+      Site_id = 3,
+      Scenario = scenarios[2],
+      stop_if_missing = FALSE
+    )
+  ))
 
   # Delete weather data of one site x scenario combination
   expect_true(dbW_has_siteIDs(1))
   expect_true(dbW_deleteSiteData(Site_id = 1, Scenario_id = 2))
   expect_true(dbW_has_siteIDs(1))
   expect_equal(
-    dbW_getWeatherData(Site_id = 1, Scenario = scenarios[1]),
+    suppressWarnings(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[1])),
     sw_weather[[1]]
   )
   expect_error(dbW_getWeatherData(Site_id = 1, Scenario = scenarios[2]))
@@ -684,6 +764,12 @@ test_that("dbW weather data manipulation", {
       weather_blob = dbW_weatherData_to_blob(tmp)
     )
   }
+
+  # Expect warning that multiple weather data objects are present
+  expect_warning(
+    dbW_getWeatherData(Site_id = 1, Scenario = scenarios[1]),
+    "More than one weather data object exists"
+  )
 
   expect_equal(dbW_delete_duplicated_weatherData(check_values = TRUE), 0)
   expect_equal(dbW_delete_duplicated_weatherData(check_values = FALSE), kmax)
