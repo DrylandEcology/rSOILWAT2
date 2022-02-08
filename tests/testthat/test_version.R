@@ -18,6 +18,69 @@ test_that("rSOILWAT2 object versions", {
   )
 
 
+  #--- Check each level of a version
+  sw_in@version <- as.character(numeric_version("1.1.1-900.1"))
+
+  # devel level
+  expect_true(
+    check_version(sw_in, expected_version = "1.1.1-900.1", level = "devel")
+  )
+  expect_false(
+    check_version(sw_in, expected_version = "1.1.1-900.2", level = "devel")
+  )
+
+  # patch level
+  expect_true(
+    check_version(sw_in, expected_version = "1.1.1-900.1", level = "patch")
+  )
+  expect_true(
+    check_version(sw_in, expected_version = "1.1.1-900.2", level = "patch")
+  )
+  expect_true(
+    check_version(sw_in, expected_version = "1.1.1", level = "patch")
+  )
+  expect_false(
+    check_version(sw_in, expected_version = "1.1.2", level = "patch")
+  )
+
+  # minor level
+  expect_true(
+    check_version(sw_in, expected_version = "1.1.1-900.1", level = "minor")
+  )
+  expect_true(
+    check_version(sw_in, expected_version = "1.1.1-900.2", level = "minor")
+  )
+  expect_true(
+    check_version(sw_in, expected_version = "1.1.1", level = "minor")
+  )
+  expect_true(
+    check_version(sw_in, expected_version = "1.1.2", level = "minor")
+  )
+  expect_false(
+    check_version(sw_in, expected_version = "1.2.0", level = "minor")
+  )
+
+  # major level
+  expect_true(
+    check_version(sw_in, expected_version = "1.1.1-900.1", level = "major")
+  )
+  expect_true(
+    check_version(sw_in, expected_version = "1.1.1-900.2", level = "major")
+  )
+  expect_true(
+    check_version(sw_in, expected_version = "1.1.1", level = "major")
+  )
+  expect_true(
+    check_version(sw_in, expected_version = "1.1.2", level = "major")
+  )
+  expect_true(
+    check_version(sw_in, expected_version = "1.2.0", level = "major")
+  )
+  expect_false(
+    check_version(sw_in, expected_version = "2.0.0", level = "major")
+  )
+
+
   #--- Check for other object classes (ANY-method): return `NA`
   expect_equal(get_version(), NA)
   expect_equal(get_version(NA), NA)
@@ -29,6 +92,7 @@ test_that("rSOILWAT2 object versions", {
 
   expect_false(check_version(NA))
 })
+
 
 test_that("rSOILWAT2 object timestamps", {
   #--- Check for object classes "swInputData" and "swOutput"
