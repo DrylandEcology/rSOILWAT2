@@ -65,8 +65,8 @@ setMethod(
 #'   the same or a newer version number than the expected version;
 #'   defaults to the current \pkg{rSOILWAT2} version number.
 #' @param level A character string. The level at which to detect changes
-#'   in the version number \var{major.minor.patch}. A value of \var{"minor"}
-#'   would ignore patch-level changes.
+#'   in the version number \var{major.minor.patch.devel}.
+#'   For instance, a value of \var{"minor"} would ignore patch-level changes.
 #'
 #' @return A logical value.
 #'
@@ -84,7 +84,7 @@ setMethod(
 check_version <- function(
   object,
   expected_version = rSW2_version(),
-  level = c("minor", "major", "patch")
+  level = c("minor", "major", "patch", "devel")
 ) {
   has <- get_version(object)
 
@@ -97,11 +97,29 @@ check_version <- function(
 
     # Adjust for level to compare versions
     level <- match.arg(level)
+
+    if (level %in% c("major", "minor", "patch")) {
+      # zero all development-levels
+
+      # identify number of levels
+      # rely on `format.numeric_version()` using "." to concatenate levels
+      ns <- lapply(
+        c(has, expected),
+        function(x) {
+          1 + length(gregexpr(".", as.character(x), fixed = TRUE)[[1]])
+        }
+      )
+
+      if (ns[[1]] > 3) for (k in seq(4, ns[[1]])) has[[c(1, k)]] <- 0
+      if (ns[[2]] > 3) for (k in seq(4, ns[[2]])) expected[[c(1, k)]] <- 0
+    }
+
     if (level %in% c("major", "minor")) {
       # zero the patchlevel
       has[[c(1, 3)]] <- 0
       expected[[c(1, 3)]] <- 0
     }
+
     if (level %in% "major") {
       # zero the minor-level
       has[[c(1, 2)]] <- 0
