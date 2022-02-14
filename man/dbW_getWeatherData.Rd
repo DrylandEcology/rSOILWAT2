@@ -15,6 +15,7 @@ dbW_getWeatherData(
   Scenario = "Current",
   Scenario_id = NULL,
   ignore.case = FALSE,
+  stop_if_missing = TRUE,
   verbose = FALSE
 )
 }
@@ -39,10 +40,21 @@ longitude and latitude values.}
 \item{Scenario}{A character string.}
 
 \item{ignore.case}{A logical value.}
+
+\item{stop_if_missing}{A logical value. If \code{TRUE}, then throws an
+error if at least one requested weather data object is not available
+in the current weather database. If \code{FALSE}, then returns \code{NULL}
+for those requested site scenario combinations.}
 }
 \value{
-Returns weather data as list. Each element is an object of class
-  \code{\linkS4class{swWeatherData}} and contains data for one year.
+If one site and one scenario were requested, then returns
+ weather data as list. Each element is an object of class
+ \code{\linkS4class{swWeatherData}} and contains data for one year.
+ If more than one site or more than scenario were requested, then returns
+ a list of such weather data lists.
+ Elements of the returned list may be \code{NULL} if there is no
+ weather data object for the requested site scenario combination and if
+ \code{stop_if_missing} is \code{FALSE}.
 }
 \description{
 Weather data for the soil water simulation run can be stored in the input
@@ -57,8 +69,8 @@ weather generator (see examples for \code{\link{sw_exec}}).
 }
 \section{Notes}{
 
-  This function returns the first record of weather data
-  even if duplicate entries match the query.
+  This function returns the first record of weather data for a
+  site x scenario combination even if duplicate entries match the query.
 }
 
 \seealso{

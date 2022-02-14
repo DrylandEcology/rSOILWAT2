@@ -388,7 +388,7 @@ dbW_getSiteId <- function(
 ) {
 
 
-  if (!is.null(Labels)) {
+  if (!is.null(Labels) && any(!is.na(Labels))) {
     #--- Determine which Labels exists
     Labels <- as.character(Labels)
 
@@ -532,49 +532,86 @@ dbW_getIDs <- function(
   verbose = FALSE
 ) {
 
-  res <- list(site_id = site_id, scenario_id = scenario_id)
+  #--- Prepare output
+  n_sites <- if (!is.null(site_id)) {
+    length(site_id)
+  } else if (!is.null(site_label)) {
+    length(site_label)
+  } else {
+    length(long)
+  }
 
-  has_siteID <-
-    is.numeric(res[["site_id"]]) &&
-    all(dbW_has_siteIDs(res[["site_id"]]))
+  n_scens <- if (!is.null(scenario_id)) {
+    length(scenario_id)
+  } else {
+    length(scenario)
+  }
 
-  if (!has_siteID) {
-    res[["site_id"]] <- dbW_getSiteId(
-      Labels = site_label,
-      lat = lat,
-      long = long,
+  res <- list(
+    site_id = if (!is.null(site_id)) {
+      as.integer(site_id)
+    } else {
+      rep(NA, n_sites)
+    },
+    scenario_id = if (!is.null(scenario_id)) {
+      as.integer(scenario_id)
+    } else {
+      rep(NA, n_scens)
+    }
+  )
+
+
+  #--- Check site IDs ------
+  needs_siteID <- !dbW_has_siteIDs(res[["site_id"]])
+
+  if (any(needs_siteID)) {
+    # Use information of `site_label` or `lat`/`long` to retrieve `site_id`
+    site_label <- as.character(site_label)
+    lat <- as.numeric(lat)
+    long <- as.numeric(long)
+
+    stopifnot(
+      length(site_label) %in% c(0, n_sites),
+      length(long) %in% c(0, n_sites),
+      length(lat) == length(long)
+    )
+
+    res[["site_id"]][needs_siteID] <- dbW_getSiteId(
+      Labels = site_label[needs_siteID],
+      lat = lat[needs_siteID],
+      long = long[needs_siteID],
       tol_xy = tol_xy,
       ignore.case = ignore.case,
       verbose = verbose
     )
 
-    if (anyNA(res[["site_id"]]) && add_if_missing) {
-      iadd <- is.na(res[["site_id"]])
-      do_tmp <-
-        (is.character(site_label[iadd]) && all(nchar(site_label[iadd]) > 0)) ||
-        (is.numeric(lat[iadd]) && is.numeric(long[iadd]))
+    iadd <- which(is.na(res[["site_id"]]))
+    if (length(iadd) > 0 && isTRUE(add_if_missing)) {
+      # Some `site_id` do not exist -> attempt to create new entries
+      iaddok <-
+        (!is.na(site_label[iadd]) & nchar(site_label[iadd]) > 0) |
+        (!is.na(lat[iadd]) & !is.na(long[iadd]))
+      iadd2 <- iadd[which(iaddok)]
 
-      if (do_tmp) {
+      tmp <- if (length(iadd2) > 0) {
         df <- data.frame(
-          Latitude = lat[iadd],
-          Longitude = long[iadd],
-          Label = site_label[iadd],
+          Latitude = lat[iadd2],
+          Longitude = long[iadd2],
+          Label = site_label[iadd2],
           stringsAsFactors = FALSE
         )
-        tmp <- try(
+
+        try(
           dbW_addSites(site_data = df, ignore.case = ignore.case),
           silent = TRUE
         )
-
-      } else {
-        tmp <- FALSE
       }
 
       if (!inherits(tmp, "try-error") && isTRUE(tmp)) {
-        res[["site_id"]] <- dbW_getSiteId(
-          Labels = site_label,
-          lat = lat,
-          long = long,
+        res[["site_id"]][iadd2] <- dbW_getSiteId(
+          Labels = site_label[iadd2],
+          lat = lat[iadd2],
+          long = long[iadd2],
           ignore.case = ignore.case,
           verbose = verbose
         )
@@ -582,35 +619,41 @@ dbW_getIDs <- function(
     }
   }
 
-  has_scenID <-
-    is.numeric(res[["scenario_id"]]) &&
-    all(dbW_has_scenarioIDs(res[["scenario_id"]]))
 
-  if (!has_scenID) {
-    res[["scenario_id"]] <- dbW_getScenarioId(
-      Scenario = scenario,
+  #--- Check scenario IDs ------
+  needs_scenID <- !dbW_has_scenarioIDs(res[["scenario_id"]])
+
+  if (any(needs_scenID)) {
+    # Use information of `scenario` to retrieve `scenario_id`
+    scenario <- as.character(scenario)
+
+    stopifnot(length(scenario) %in% c(0, n_scens))
+
+    res[["scenario_id"]][needs_scenID] <- dbW_getScenarioId(
+      Scenario = scenario[needs_scenID],
       ignore.case = ignore.case,
       verbose = verbose
     )
 
-    if (anyNA(res[["scenario_id"]]) && add_if_missing) {
-      iadd <- is.na(res[["scenario_id"]])
-      do_tmp <- as.character(scenario[iadd]) && all(nchar(scenario[iadd]) > 0)
-      if (do_tmp) {
-        tmp <- try(
+    iadd <- which(is.na(res[["scenario_id"]]))
+    if (length(iadd) > 0 && isTRUE(add_if_missing)) {
+      # Some `scenario_id` do not exist -> attempt to create new entries
+      iaddok <- !is.na(scenario[iadd]) & nchar(site_label[iadd]) > 0
+      iadd2 <- iadd[which(iaddok)]
+
+      tmp <- if (length(iadd2) > 0) {
+        try(
           dbW_addScenarios(
-            Scenarios = scenario[iadd],
+            Scenarios = scenario[iadd2],
             ignore.case = ignore.case
           ),
           silent = TRUE
         )
-      } else {
-        tmp <- FALSE
       }
 
       if (!inherits(tmp, "try-error") && isTRUE(tmp)) {
-        res[["scenario_id"]] <- dbW_getScenarioId(
-          Scenario = scenario,
+        res[["scenario_id"]][iadd2] <- dbW_getScenarioId(
+          Scenario = scenario[iadd2],
           ignore.case = ignore.case,
           verbose = verbose
         )
@@ -708,14 +751,25 @@ get_years_from_weatherData <- function(wd) {
 #' @param startYear Numeric. Extracted weather data will start with this year.
 #' @param endYear Numeric. Extracted weather data will end with this year.
 #' @param Scenario A character string.
+#' @param stop_if_missing A logical value. If \code{TRUE}, then throws an
+#'   error if at least one requested weather data object is not available
+#'   in the current weather database. If \code{FALSE}, then returns \code{NULL}
+#'   for those requested site scenario combinations.
 #' @inheritParams dbW_getSiteId
 #'
-#' @return Returns weather data as list. Each element is an object of class
-#'   \code{\linkS4class{swWeatherData}} and contains data for one year.
+#' @return
+#'  If one site and one scenario were requested, then returns
+#'  weather data as list. Each element is an object of class
+#'  \code{\linkS4class{swWeatherData}} and contains data for one year.
+#'  If more than one site or more than scenario were requested, then returns
+#'  a list of such weather data lists.
+#'  Elements of the returned list may be \code{NULL} if there is no
+#'  weather data object for the requested site scenario combination and if
+#'  \code{stop_if_missing} is \code{FALSE}.
 #'
 #' @section Notes:
-#'   This function returns the first record of weather data
-#'   even if duplicate entries match the query.
+#'   This function returns the first record of weather data for a
+#'   site x scenario combination even if duplicate entries match the query.
 #'
 #' @seealso \code{\link{getWeatherData_folders}}
 #'
@@ -731,6 +785,7 @@ dbW_getWeatherData <- function(
   Scenario = "Current",
   Scenario_id = NULL,
   ignore.case = FALSE,
+  stop_if_missing = TRUE,
   verbose = FALSE
 ) {
 
@@ -747,52 +802,100 @@ dbW_getWeatherData <- function(
     verbose = verbose
   )
 
-
-  if (any(!sapply(IDs, function(x) length(x) > 0 && is.finite(x)))) {
-    stop(
-      "'dbW_getWeatherData': insufficient information to locate weather data."
-    )
+  n_sites <- length(IDs[["site_id"]])
+  n_scens <- length(IDs[["scenario_id"]])
+  if (n_sites == 1 && n_scens > 1) {
+    IDs[["site_id"]] <- rep(IDs[["site_id"]], n_scens)
+  } else if (n_sites > 1 && n_scens == 1) {
+    IDs[["scenario_id"]] <- rep(IDs[["scenario_id"]], n_sites)
   }
 
-  # "EXPLAIN QUERY PLAN ":
-  # SEARCH WeatherData USING INDEX wdindex (Site_id=? AND Scenario=?)
-  res <- dbW_InsistInteract(
-    DBI::dbGetQuery,
-    statement =
-      "SELECT data FROM WeatherData WHERE Site_id = :x1 AND Scenario = :x2",
-    params = list(x1 = IDs[["site_id"]], x2 = IDs[["scenario_id"]])
-  )[1, 1]
+  stopifnot(
+    length(IDs[["site_id"]]) == length(IDs[["scenario_id"]])
+  )
 
-  if (is.na(res) || all(lengths(res) == 0)) {
-    stop(
-      "Weather data for site ", shQuote(IDs[["site_id"]]),
-      " and scenario ", shQuote(IDs[["scenario_id"]]),
+  res <- vector("list", length = length(IDs[["site_id"]]))
+  idsnotna <- which(!is.na(IDs[["site_id"]]) & !is.na(IDs[["scenario_id"]]))
+
+  for (k in idsnotna) {
+    # "EXPLAIN QUERY PLAN ":
+    # SEARCH WeatherData USING INDEX wdindex (Site_id=? AND Scenario=?)
+    x <- dbW_InsistInteract(
+      DBI::dbGetQuery,
+      statement =
+        "SELECT data FROM WeatherData WHERE Site_id = :x1 AND Scenario = :x2",
+      params = list(x1 = IDs[["site_id"]][k], x2 = IDs[["scenario_id"]][k])
+    )
+
+    if (NROW(x) > 1) {
+      warning(
+        "More than one weather data object exists for site ",
+        shQuote(IDs[["site_id"]][k]),
+        " and scenario ", shQuote(IDs[["scenario_id"]][k]),
+        ": processing only the first one."
+      )
+
+      x <- x[1, , drop = FALSE]
+    }
+
+    if (is.na(x) || all(lengths(x) == 0)) {
+      msg <- c(
+        "Weather data for site ", shQuote(IDs[["site_id"]][k]),
+        " and scenario ", shQuote(IDs[["scenario_id"]][k]),
+        " does not exist in weather database."
+      )
+
+      if (stop_if_missing) stop(msg) else warning(msg)
+
+      next
+    }
+
+    wd <- try(
+      dbW_blob_to_weatherData(
+        x[1, 1],
+        rSW2_glovars$blob_compression_type
+      )
+    )
+    if (inherits(wd, "try-error")) {
+      msg <- c(
+        "Weather data for site ", shQuote(IDs[["site_id"]][k]),
+        " and scenario ", shQuote(IDs[["scenario_id"]][k]), " is corrupted."
+      )
+
+      if (stop_if_missing) stop(msg) else warning(msg)
+
+      next
+    }
+
+    tmp <- class(wd[[1]])
+    if (!(attr(tmp, "package") == "rSOILWAT2")) {
+      message(
+        "WARNING: The class of the extracted weather data object is ",
+        shQuote(tmp), " from package ", shQuote(attr(tmp, "package")),
+        " which is outdated. Please, upgrade weather database with function ",
+        "'dbW_upgrade_to_rSOILWAT2'."
+      )
+    }
+
+    years <- get_years_from_weatherData(wd)
+    ids <- select_years(years, startYear, endYear)
+
+    res[[k]] <- wd[ids]
+  }
+
+  if (length(idsnotna) == 0) {
+    msg <- c(
+      "Weather data for all sites ",
+      paste(shQuote(IDs[["site_id"]]), collapse = ", "),
+      " and scenarios ",
+      paste0(shQuote(IDs[["scenario_id"]]), collapse = ", "),
       " does not exist in weather database."
     )
+
+    if (stop_if_missing) stop(msg) else warning(msg)
   }
 
-  wd <- try(dbW_blob_to_weatherData(res, rSW2_glovars$blob_compression_type))
-  if (inherits(wd, "try-error")) {
-    stop(
-      "Weather data for site ", shQuote(IDs[["site_id"]]),
-      " and scenario ", shQuote(IDs[["scenario_id"]]), " is corrupted."
-    )
-  }
-
-  tmp <- class(wd[[1]])
-  if (!(attr(tmp, "package") == "rSOILWAT2")) {
-    message(
-      "WARNING: The class of the extracted weather data object is ",
-      shQuote(tmp), " from package ", shQuote(attr(tmp, "package")),
-      " which is outdated. Please, upgrade weather database with function ",
-      "'dbW_upgrade_to_rSOILWAT2'."
-    )
-  }
-
-  years <- get_years_from_weatherData(wd)
-  ids <- select_years(years, startYear, endYear)
-
-  wd[ids]
+  if (length(IDs[["site_id"]]) == 1) res[[1]] else res
 }
 
 #' Registers/connects a SQLite weather database with the package

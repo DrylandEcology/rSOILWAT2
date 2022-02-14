@@ -7,7 +7,7 @@
 check_version(
   object,
   expected_version = rSW2_version(),
-  level = c("minor", "major", "patch")
+  level = c("minor", "major", "patch", "devel")
 )
 }
 \arguments{
@@ -19,8 +19,8 @@ the same or a newer version number than the expected version;
 defaults to the current \pkg{rSOILWAT2} version number.}
 
 \item{level}{A character string. The level at which to detect changes
-in the version number \var{major.minor.patch}. A value of \var{"minor"}
-would ignore patch-level changes.}
+in the version number \var{major.minor.patch.devel}.
+For instance, a value of \var{"minor"} would ignore patch-level changes.}
 }
 \value{
 A logical value.

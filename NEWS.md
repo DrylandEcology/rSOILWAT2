@@ -1,3 +1,15 @@
+# rSOILWAT2 v5.1.1
+* This version produces identical simulation output as the previous release.
+* `check_version()` now checks for the possible presence of
+  (an arbitrary number of) development version levels and the argument `level`
+  can now also take the value "devel".
+* `dbW_getWeatherData()` is now vectorized over sites and scenarios and
+  gained the argument `stop_if_missing`.
+* `dbW_getSiteId()` is now correctly vectorized over `Labels`.
+* `dbW_getIDs()` is now correctly vectorized for all arguments
+  that identify sites: `site_id`, `site_label`, `long`/`lat`.
+
+
 # rSOILWAT2 v5.1.0
 ## Breaking changes
 * This version produces slightly different simulation output from previous
