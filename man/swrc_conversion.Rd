@@ -38,7 +38,8 @@ swrc_vwc_to_swp(
 \item{direction}{A character string. Indicates the direction of
 soil water conversion.}
 
-\item{x}{A numeric value or vector. The soil water values to be converted,
+\item{x}{A numeric value, vector, or matrix.
+The soil water values to be converted,
 either soil water potential (units \verb{[MPa]}) or
 volumetric water content (units \verb{[cm/cm]}).}
 
@@ -75,6 +76,23 @@ volumetric water content (relative to the whole soil; units `[cm/cm]`).}
 \item{vwcBulk}{A numeric object. The volumetric water content values
 (relative to the whole soil; units `[cm/cm]`)
 to be converted to soil water potential values (units `[MPa]`).}
+}
+\value{
+The dimensions of the output are a function of \code{x} and the
+number of soil values (e.g., rows or length of \code{swrc[["swrcp"]]}).
+The returned object has:
+\itemize{
+\item length \code{l} if both \code{x} and soils are of length \code{l}.
+\item length \code{l} if \code{x} has length \code{l} and there is one soil.
+\item length \code{d} if \code{x} is one value and soils are of length \code{d}.
+\item size \verb{l x d} if \code{x} has length \code{l} and soils are of length \code{d}
+(if \code{l} and \code{d} are not equal);
+the \code{d} sets of soil values are repeated for each value of \code{x}.
+\item size \verb{l x d} if \code{x} has size \verb{l x d} and there is one soil.
+the soil is repeated for each value of \code{x}.
+\item size \verb{l x d} if \code{x} has size \verb{l x d} and soils are of length \code{d}
+the \code{d} sets of soil values are repeated for each row of \code{x}.
+}
 }
 \description{
 Conversion between soil water content and soil water potential

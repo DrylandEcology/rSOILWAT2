@@ -364,9 +364,27 @@ check_swrcp <- function(swrc_type = 1L, swrcp) {
 #' @inheritParams SWRCs
 #' @param direction A character string. Indicates the direction of
 #'   soil water conversion.
-#' @param x A numeric value or vector. The soil water values to be converted,
+#' @param x A numeric value, vector, or matrix.
+#'   The soil water values to be converted,
 #'   either soil water potential (units `[MPa]`) or
 #'   volumetric water content (units `[cm/cm]`).
+#'
+#' @return The dimensions of the output are a function of `x` and the
+#'   number of soil values (e.g., rows or length of `swrc[["swrcp"]]`).
+#'   The returned object has:
+#'   \itemize{
+#'     \item length `l` if both `x` and soils are of length `l`.
+#'     \item length `l` if `x` has length `l` and there is one soil.
+#'     \item length `d` if `x` is one value and soils are of length `d`.
+#'     \item size `l x d` if `x` has length `l` and soils are of length `d`
+#'           (if `l` and `d` are not equal);
+#'           the `d` sets of soil values are repeated for each value of `x`.
+#'     \item size `l x d` if `x` has size `l x d` and there is one soil.
+#'           the soil is repeated for each value of `x`.
+#'     \item size `l x d` if `x` has size `l x d` and soils are of length `d`
+#'           the `d` sets of soil values are repeated for each row of `x`.
+#'   }
+#'
 #'
 #' @section Details:
 #' See [SWRCs] for suitable values of `swrc_type`.
@@ -510,8 +528,9 @@ swrc_conversion <- function(
   res <- array(dim = c(nrx, ncx))
 
 
-  if (nx1d && (nx == 1 || nsoils == 1)) {
-    # 1. x [len = 1] + soils [len = 1] --> res [len = 1, dim = 1 x 1]
+  if (nx1d && (nx == 1 || nsoils == 1 || nx == nsoils)) {
+
+    # 1a. x [len = 1] + soils [len = 1] --> res [len = 1, dim = 1 x 1]
     # nothing to prepare
 
     if (nx == 1 && nsoils > 1) {
@@ -521,6 +540,10 @@ swrc_conversion <- function(
     } else if (nx > 1 && nx1d && nsoils == 1) {
       # 3. x [len = l] + soils [len = 1] --> res [len = l, dim = l x 1]
       soils <- lapply(soils, rep_len, length.out = nx)
+
+    } else if (nx == nsoils) {
+      # 1b. x [len = l] + soils [len = l] --> res [len = l, dim = l x 1]
+      x <- as.vector(unlist(x))
     }
 
     if (is.null(swrc[["swrcp"]])) {
@@ -580,8 +603,8 @@ swrc_conversion <- function(
 
 
   } else if (nx > 1 && !nx1d && nsoils == ncx) {
-    # 6. x [dim = l x d] + soils [len = d] --> SWP [dim = l x d]
-    # (soils repeated for each x value)
+    # 6. x [dim = l x d] + soils [len = d] --> res [dim = l x d]
+    # (soils repeated for row of x value)
 
     if (is.null(swrc[["swrcp"]])) {
       swrc[["swrcp"]] <- pdf_estimate(
