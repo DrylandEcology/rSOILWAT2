@@ -56,7 +56,7 @@ soil water content of a soil layer and volumetric water content.}
 
 \item{swrc}{A named list.
 Contains all necessary elements of a \code{SWRC},
-i.e., \code{swrc_type} and \code{swrcp},
+i.e., \code{type} (short for \code{swrc_type}) and \code{swrcp},
 or all necessary elements to estimate parameters of a \code{SWRC} given
 soil parameters, i.e., \code{swrc_type} and \code{pdf_type}.}
 
@@ -112,23 +112,27 @@ fcrs1 <- c(0, 0)
 fcrs2 <- c(0.4, 0.1)
 
 p1 <- pdf_estimate(sand = fsand, clay = fclay, fcoarse = fcrs1)
-swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, swrc = list(swrc_type = 1, swrcp = p1))
+swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, swrc = list(type = 1, swrcp = p1))
 swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, sand = fsand, clay = fclay)
 swrc_vwc_to_swp(
   c(0.10, 0.15, 0.20),
   fcoarse = fcrs1,
-  swrc = list(swrc_type = 1, swrcp = p1)
+  swrc = list(type = 1, swrcp = p1)
 )
 
 p2 <- pdf_estimate(sand = fsand, clay = fclay, fcoarse = fcrs2)
-swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, swrc = list(swrc_type = 1, swrcp = p2))
+swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, swrc = list(type = 1, swrcp = p2))
 (1 - fcrs2) * swrc_swp_to_vwc(-1.5, swrc = list(type = 1, swrcp = p2))
 swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, sand = fsand, clay = fclay)
 swrc_vwc_to_swp(
   c(0.10, 0.15, 0.20),
   fcoarse = fcrs2,
-  swrc = list(swrc_type = 1, swrcp = p2)
+  swrc = list(type = 1, swrcp = p2)
 )
+
+
+# Shape of SWRC
+
 
 }
 \seealso{

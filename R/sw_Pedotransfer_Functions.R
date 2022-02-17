@@ -232,7 +232,7 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #'   each row represents one `SWRC`, e.g., one per soil layer.
 #' @param swrc A named list.
 #'   Contains all necessary elements of a `SWRC`,
-#'   i.e., `swrc_type` and `swrcp`,
+#'   i.e., `type` (short for `swrc_type`) and `swrcp`,
 #'   or all necessary elements to estimate parameters of a `SWRC` given
 #'   soil parameters, i.e., `swrc_type` and `pdf_type`.
 #'
@@ -394,22 +394,22 @@ check_swrcp <- function(swrc_type = 1L, swrcp) {
 #' fcrs2 <- c(0.4, 0.1)
 #'
 #' p1 <- pdf_estimate(sand = fsand, clay = fclay, fcoarse = fcrs1)
-#' swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, swrc = list(swrc_type = 1, swrcp = p1))
+#' swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, swrc = list(type = 1, swrcp = p1))
 #' swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, sand = fsand, clay = fclay)
 #' swrc_vwc_to_swp(
 #'   c(0.10, 0.15, 0.20),
 #'   fcoarse = fcrs1,
-#'   swrc = list(swrc_type = 1, swrcp = p1)
+#'   swrc = list(type = 1, swrcp = p1)
 #' )
 #'
 #' p2 <- pdf_estimate(sand = fsand, clay = fclay, fcoarse = fcrs2)
-#' swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, swrc = list(swrc_type = 1, swrcp = p2))
+#' swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, swrc = list(type = 1, swrcp = p2))
 #' (1 - fcrs2) * swrc_swp_to_vwc(-1.5, swrc = list(type = 1, swrcp = p2))
 #' swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, sand = fsand, clay = fclay)
 #' swrc_vwc_to_swp(
 #'   c(0.10, 0.15, 0.20),
 #'   fcoarse = fcrs2,
-#'   swrc = list(swrc_type = 1, swrcp = p2)
+#'   swrc = list(type = 1, swrcp = p2)
 #' )
 #'
 #'
@@ -426,6 +426,11 @@ swrc_conversion <- function(
 ) {
   #--- Check inputs
   direction <- match.arg(direction)
+
+  # `type` can be used as short form of `swrc_type`
+  if (!("swrc_type" %in% names(swrc)) && "type" %in% names(swrc)) {
+    swrc[["swrc_type"]] <- swrc[["type"]]
+  }
 
   stopifnot("swrc_type" %in% names(swrc))
 

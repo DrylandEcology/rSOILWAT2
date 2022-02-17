@@ -36,7 +36,7 @@ each row represents one \code{SWRC}, e.g., one per soil layer.}
 
 \item{swrc}{A named list.
 Contains all necessary elements of a \code{SWRC},
-i.e., \code{swrc_type} and \code{swrcp},
+i.e., \code{type} (short for \code{swrc_type}) and \code{swrcp},
 or all necessary elements to estimate parameters of a \code{SWRC} given
 soil parameters, i.e., \code{swrc_type} and \code{pdf_type}.}
 }
