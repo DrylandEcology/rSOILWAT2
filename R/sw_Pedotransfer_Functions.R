@@ -213,10 +213,10 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #' @param clay A numeric value or vector.
 #'   Clay content of the matric soil component
 #'   (< 2 mm fraction; units of `[g/g]`) of each soil layer.
-#' @param gravel A numeric value or vector.
+#' @param fcoarse A numeric value or vector.
 #'   Coarse fragments, e.g., gravel, (> 2 mm; units of `[m3/m3]`)
 #'   relative to the whole soil of each soil layer.
-#'   `gravel` is required, for instance, to translate between
+#'   `fcoarse` is required, for instance, to translate between
 #'   values relative to the matric soil component (< 2 mm fraction) and
 #'   relative to the whole soil (matric soil plus coarse fragments).
 #' @param layer_width A numeric value or vector.
@@ -268,7 +268,7 @@ NULL
 #' See [SWRCs] for suitable values of `swrc_type`.
 #'
 #' @section Notes:
-#' The soil parameters `sand`, `clay`, and `gravel` must be of
+#' The soil parameters `sand`, `clay`, and `fcoarse` must be of
 #' the same length, i.e., represent one soil (length 1) or
 #' multiple soil (layers) (length > 1).
 #' The arguments selecting `SWRC` (`swrc_type`) and `PDF` (`pdf_type`)
@@ -287,11 +287,18 @@ NULL
 #' The interpretation is dependent on the selected `SWRC`.
 #'
 #' @examples
-#' pdf_estimate(sand = c(0.5, 0.3), clay = c(0.2, 0.1), gravel = c(0, 0))
+#' pdf_estimate(sand = c(0.5, 0.3), clay = c(0.2, 0.1), fcoarse = c(0, 0))
+#'
+#' soils <- swSoils_Layers(rSOILWAT2::sw_exampleData)
+#' pdf_estimate(
+#'   sand = soils[, "sand_frac"],
+#'   clay = soils[, "clay_frac"],
+#'   fcoarse = soils[, "gravel_content"]
+#' )
 #'
 #' @md
 #' @export
-pdf_estimate <- function(sand, clay, gravel, swrc_type = 1L, pdf_type = 1L) {
+pdf_estimate <- function(sand, clay, fcoarse, swrc_type = 1L, pdf_type = 1L) {
 
   # lengths of arguments are checked by `C_rSW2_SWRC_PDF_estimate_parameters()`
   nlyrs <- length(sand)
@@ -302,7 +309,7 @@ pdf_estimate <- function(sand, clay, gravel, swrc_type = 1L, pdf_type = 1L) {
     pdf_type = rep_len(pdf_type, nlyrs),
     sand = sand,
     clay = clay,
-    gravel = gravel
+    fcoarse = fcoarse
   )
 }
 
@@ -325,7 +332,7 @@ pdf_estimate <- function(sand, clay, gravel, swrc_type = 1L, pdf_type = 1L) {
 #' swrcp <- pdf_estimate(
 #'   sand = c(0.5, 0.3),
 #'   clay = c(0.2, 0.1),
-#'   gravel = c(0, 0),
+#'   fcoarse = c(0, 0),
 #'   swrc_type = swrc_type
 #' )
 #'
@@ -365,9 +372,9 @@ check_swrcp <- function(swrc_type = 1L, swrcp) {
 #' See [SWRCs] for suitable values of `swrc_type`.
 #'
 #' @section Details:
-#' For backward compatibility, `gravel` and `layer_width` may be missing.
-#' If they are missing, then the soils are assumed to contain `0%` gravel and
-#' be represented by `1 cm` wide soil layers.
+#' For backward compatibility, `fcoarse` and `layer_width` may be missing.
+#' If they are missing, then the soils are assumed to contain
+#' `0%` coarse fragments and be represented by `1 cm` wide soil layers.
 #'
 #' @section Details:
 #' Arguments `sand` and `clay` are only required if `SWRC` parameter values
@@ -381,17 +388,37 @@ check_swrcp <- function(swrc_type = 1L, swrcp) {
 #'   [check_swrcp()]
 #'
 #' @examples
-#' p <- pdf_estimate(sand = c(0.5, 0.3), clay = c(0.2, 0.1), gravel = c(0, 0))
-#' swrc_swp_to_vwc(-1.5, swrc = list(swrc_type = 1, swrcp = p))
-#' swrc_swp_to_vwc(-1.5, sand = c(0.5, 0.3), clay = c(0.2, 0.1))
-#' swrc_vwc_to_swp(c(0.20, 0.25, 0.30), swrc = list(swrc_type = 1, swrcp = p))
+#' fsand <- c(0.5, 0.3)
+#' fclay <- c(0.2, 0.1)
+#' fcrs1 <- c(0, 0)
+#' fcrs2 <- c(0.4, 0.1)
+#'
+#' p1 <- pdf_estimate(sand = fsand, clay = fclay, fcoarse = fcrs1)
+#' swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, swrc = list(swrc_type = 1, swrcp = p1))
+#' swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, sand = fsand, clay = fclay)
+#' swrc_vwc_to_swp(
+#'   c(0.10, 0.15, 0.20),
+#'   fcoarse = fcrs1,
+#'   swrc = list(swrc_type = 1, swrcp = p1)
+#' )
+#'
+#' p2 <- pdf_estimate(sand = fsand, clay = fclay, fcoarse = fcrs2)
+#' swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, swrc = list(swrc_type = 1, swrcp = p2))
+#' (1 - fcrs2) * swrc_swp_to_vwc(-1.5, swrc = list(type = 1, swrcp = p2))
+#' swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, sand = fsand, clay = fclay)
+#' swrc_vwc_to_swp(
+#'   c(0.10, 0.15, 0.20),
+#'   fcoarse = fcrs2,
+#'   swrc = list(swrc_type = 1, swrcp = p2)
+#' )
+#'
 #'
 #' @export
 #' @md
 swrc_conversion <- function(
   direction = c("swp_to_vwc", "vwc_to_swp"),
   x,
-  gravel,
+  fcoarse,
   layer_width,
   swrc,
   sand = NULL,
@@ -424,7 +451,7 @@ swrc_conversion <- function(
   }
 
   # Do we have sufficient soil parameters?
-  if (missing(gravel) && missing(layer_width)) {
+  if (missing(fcoarse) && missing(layer_width)) {
     ntmp <- if (!is.null(swrc[["swrcp"]])) {
       nrow(swrc[["swrcp"]])
     } else {
@@ -436,21 +463,21 @@ swrc_conversion <- function(
     }
 
     if (!is.null(ntmp)) {
-      gravel <- rep(0, ntmp)
+      fcoarse <- rep(0, ntmp)
       layer_width <- rep(1, ntmp)
     } else {
       stop("Insufficient soil parameters to use SWRC.")
     }
 
-  } else if (missing(gravel)) {
-    gravel <- rep(0, length(layer_width))
+  } else if (missing(fcoarse)) {
+    fcoarse <- rep(0, length(layer_width))
   } else if (missing(layer_width)) {
-    layer_width <- rep(1, length(gravel))
+    layer_width <- rep(1, length(fcoarse))
   }
 
   # Put together available soil parameters and check for consistency
   soils <- list(
-    gravel = gravel,
+    fcoarse = fcoarse,
     layer_width = layer_width
   )
 
@@ -495,7 +522,7 @@ swrc_conversion <- function(
       swrc[["swrcp"]] <- pdf_estimate(
         sand = soils[["sand"]],
         clay = soils[["clay"]],
-        gravel = soils[["gravel"]],
+        fcoarse = soils[["fcoarse"]],
         swrc_type = swrc[["swrc_type"]],
         pdf_type = swrc[["pdf_type"]]
       )
@@ -511,7 +538,7 @@ swrc_conversion <- function(
       swrc[["swrcp"]] <- pdf_estimate(
         sand = soils[["sand"]],
         clay = soils[["clay"]],
-        gravel = soils[["gravel"]],
+        fcoarse = soils[["fcoarse"]],
         swrc_type = swrc[["swrc_type"]],
         pdf_type = swrc[["pdf_type"]]
       )
@@ -533,7 +560,7 @@ swrc_conversion <- function(
       swrc[["swrcp"]] <- pdf_estimate(
         sand = soils[["sand"]],
         clay = soils[["clay"]],
-        gravel = soils[["gravel"]],
+        fcoarse = soils[["fcoarse"]],
         swrc_type = swrc[["swrc_type"]],
         pdf_type = swrc[["pdf_type"]]
       )
@@ -555,7 +582,7 @@ swrc_conversion <- function(
       swrc[["swrcp"]] <- pdf_estimate(
         sand = soils[["sand"]],
         clay = soils[["clay"]],
-        gravel = soils[["gravel"]],
+        fcoarse = soils[["fcoarse"]],
         swrc_type = swrc[["swrc_type"]],
         pdf_type = swrc[["pdf_type"]]
       )
@@ -605,7 +632,7 @@ swrc_conversion_1d <- function(direction, x, soils, swrc) {
       direction = 1L,
       swrc_type = rep_len(swrc[["swrc_type"]], nx),
       swrcp = swrc[["swrcp"]],
-      gravel = soils[["gravel"]],
+      fcoarse = soils[["fcoarse"]],
       width = soils[["layer_width"]]
     ),
     # C_rSW2_SWRC(direction = 2) returns [-bar] convert to [MPa]
@@ -616,7 +643,7 @@ swrc_conversion_1d <- function(direction, x, soils, swrc) {
       direction = 2L,
       swrc_type = rep_len(swrc[["swrc_type"]], nx),
       swrcp = swrc[["swrcp"]],
-      gravel = soils[["gravel"]],
+      fcoarse = soils[["fcoarse"]],
       width = soils[["layer_width"]]
     )
   )
@@ -634,7 +661,7 @@ swrc_conversion_1d <- function(direction, x, soils, swrc) {
 #' @export
 swrc_swp_to_vwc <- function(
   swp_MPa,
-  gravel,
+  fcoarse,
   layer_width,
   swrc = list(swrc_type = 1L, pdf_type = 1L, swrcp = NULL),
   sand = NULL,
@@ -645,7 +672,7 @@ swrc_swp_to_vwc <- function(
     x = swp_MPa,
     sand = sand,
     clay = clay,
-    gravel = gravel,
+    fcoarse = fcoarse,
     layer_width = layer_width,
     swrc = swrc
   )
@@ -663,7 +690,7 @@ swrc_swp_to_vwc <- function(
 #' @export
 swrc_vwc_to_swp <- function(
   vwcBulk,
-  gravel,
+  fcoarse,
   layer_width,
   swrc = list(swrc_type = 1L, pdf_type = 1L, swrcp = NULL),
   sand = NULL,
@@ -674,7 +701,7 @@ swrc_vwc_to_swp <- function(
     x = vwcBulk,
     sand = sand,
     clay = clay,
-    gravel = gravel,
+    fcoarse = fcoarse,
     layer_width = layer_width,
     swrc = swrc
   )

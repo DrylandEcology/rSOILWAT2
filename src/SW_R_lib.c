@@ -519,7 +519,7 @@ SEXP sw_consts(void) {
   @param[in] pdf_type Identification number of selected PDF
   @param[in] sand Sand content of the matric soil (< 2 mm fraction) [g/g]
   @param[in] clay Clay content of the matric soil (< 2 mm fraction) [g/g]
-  @param[in] gravel Coarse fragments (> 2 mm; e.g., gravel)
+  @param[in] fcoarse Coarse fragments (> 2 mm; e.g., gravel)
     of the whole soil [m3/m3]
 
   @return Matrix of estimated SWRC parameters
@@ -529,14 +529,14 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
   SEXP pdf_type,
   SEXP sand,
   SEXP clay,
-  SEXP gravel
+  SEXP fcoarse
 ) {
   int nlyrs = length(sand);
 
   /* Check inputs */
   if (
     nlyrs != length(clay) ||
-    nlyrs != length(gravel) ||
+    nlyrs != length(fcoarse) ||
     nlyrs != length(swrc_type) ||
     nlyrs != length(pdf_type)
   ) {
@@ -548,7 +548,7 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
   pdf_type = PROTECT(coerceVector(pdf_type, INTSXP));
   sand = PROTECT(coerceVector(sand, REALSXP));
   clay = PROTECT(coerceVector(clay, REALSXP));
-  gravel = PROTECT(coerceVector(gravel, REALSXP));
+  fcoarse = PROTECT(coerceVector(fcoarse, REALSXP));
 
   /* Allocate memory for SWRC parameters */
   SEXP
@@ -563,7 +563,7 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
   double
     *xsand = REAL(sand),
     *xclay = REAL(clay),
-    *xgravel = REAL(gravel),
+    *xcoarse = REAL(fcoarse),
     *xres = REAL(res_swrcp);
 
 
@@ -581,7 +581,7 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
       REAL(swrcpk),
       xsand[k1],
       xclay[k1],
-      xgravel[k1]
+      xcoarse[k1]
     );
 
     for (k2 = 0; k2 < SWRC_PARAM_NMAX; k2++) {
@@ -690,7 +690,7 @@ SEXP rSW2_SWRC_check_parameters(SEXP swrc_type, SEXP swrcp) {
   @param[in] direction Direction of conversion, 1: SWP->SWC; 2: SWC->SWP
   @param[in] swrc_type Identification number of selected SWRC
   @param[in] *swrcp Vector or matrix of SWRC parameters
-  @param[in] gravel Coarse fragments (> 2 mm; e.g., gravel)
+  @param[in] fcoarse Coarse fragments (> 2 mm; e.g., gravel)
     of the whole soil [m3/m3]
   @param[in] width Soil layer width [cm]
 
@@ -701,7 +701,7 @@ SEXP rSW2_SWRC(
   SEXP direction,
   SEXP swrc_type,
   SEXP swrcp,
-  SEXP gravel,
+  SEXP fcoarse,
   SEXP width
 ) {
   int xdirection = asInteger(direction);
@@ -713,8 +713,8 @@ SEXP rSW2_SWRC(
   /* Check dimensions */
   int nlyrs = length(width);
 
-  if (nlyrs != length(gravel)) {
-    error("`width` and `gravel` are not of the same length.");
+  if (nlyrs != length(fcoarse)) {
+    error("`width` and `fcoarse` are not of the same length.");
   }
 
   if (nlyrs != length(x)) {
@@ -728,7 +728,7 @@ SEXP rSW2_SWRC(
 
   /* Convert inputs to correct type */
   x = PROTECT(coerceVector(x, REALSXP));
-  gravel = PROTECT(coerceVector(gravel, REALSXP));
+  fcoarse = PROTECT(coerceVector(fcoarse, REALSXP));
   width = PROTECT(coerceVector(width, REALSXP));
   swrcp = PROTECT(coerceVector(swrcp, REALSXP));
   swrc_type = PROTECT(coerceVector(swrc_type, INTSXP));
@@ -749,12 +749,12 @@ SEXP rSW2_SWRC(
   }
 
   if (nlyrs != nrp) {
-    UNPROTECT(5); /* unprotect: swrcp, width, gravel, x, swrc_type */
+    UNPROTECT(5); /* unprotect: swrcp, width, fcoarse, x, swrc_type */
     error("`nrows(swrcp)` disagrees with number of soil layers.");
   }
 
   if (ncp != SWRC_PARAM_NMAX) {
-    UNPROTECT(5); /* unprotect: swrcp, width, gravel, x, swrc_type */
+    UNPROTECT(5); /* unprotect: swrcp, width, fcoarse, x, swrc_type */
     error("`ncols(swrcp)` disagrees with required number of SWRC parameters.");
   }
 
@@ -771,7 +771,7 @@ SEXP rSW2_SWRC(
     *xres = REAL(res),
     *xx = REAL(x),
     *xswrcp = REAL(swrcp),
-    *xgravel = REAL(gravel),
+    *xcoarse = REAL(fcoarse),
     *xwidth = REAL(width);
 
 
@@ -795,7 +795,7 @@ SEXP rSW2_SWRC(
           xx[k1],
           xswrc_type[k1],
           swrcpk,
-          xgravel[k1],
+          xcoarse[k1],
           xwidth[k1]
         );
         break;
@@ -806,7 +806,7 @@ SEXP rSW2_SWRC(
           xx[k1],
           xswrc_type[k1],
           swrcpk,
-          xgravel[k1],
+          xcoarse[k1],
           xwidth[k1]
         );
         break;

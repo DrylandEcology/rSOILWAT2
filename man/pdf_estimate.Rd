@@ -4,7 +4,7 @@
 \alias{pdf_estimate}
 \title{Estimate \code{SWRC} parameters from soil texture with a pedotransfer function}
 \usage{
-pdf_estimate(sand, clay, gravel, swrc_type = 1L, pdf_type = 1L)
+pdf_estimate(sand, clay, fcoarse, swrc_type = 1L, pdf_type = 1L)
 }
 \arguments{
 \item{sand}{A numeric value or vector.
@@ -15,10 +15,10 @@ Sand content of the matric soil component
 Clay content of the matric soil component
 (< 2 mm fraction; units of \verb{[g/g]}) of each soil layer.}
 
-\item{gravel}{A numeric value or vector.
+\item{fcoarse}{A numeric value or vector.
 Coarse fragments, e.g., gravel, (> 2 mm; units of \verb{[m3/m3]})
 relative to the whole soil of each soil layer.
-\code{gravel} is required, for instance, to translate between
+\code{fcoarse} is required, for instance, to translate between
 values relative to the matric soil component (< 2 mm fraction) and
 relative to the whole soil (matric soil plus coarse fragments).}
 
@@ -50,7 +50,7 @@ See \link{SWRCs} for suitable values of \code{swrc_type}.
 
 \section{Notes}{
 
-The soil parameters \code{sand}, \code{clay}, and \code{gravel} must be of
+The soil parameters \code{sand}, \code{clay}, and \code{fcoarse} must be of
 the same length, i.e., represent one soil (length 1) or
 multiple soil (layers) (length > 1).
 The arguments selecting \code{SWRC} (\code{swrc_type}) and \code{PDF} (\code{pdf_type})
@@ -58,7 +58,14 @@ are recycled for multiple soil layers.
 }
 
 \examples{
-pdf_estimate(sand = c(0.5, 0.3), clay = c(0.2, 0.1), gravel = c(0, 0))
+pdf_estimate(sand = c(0.5, 0.3), clay = c(0.2, 0.1), fcoarse = c(0, 0))
+
+soils <- swSoils_Layers(rSOILWAT2::sw_exampleData)
+pdf_estimate(
+  sand = soils[, "sand_frac"],
+  clay = soils[, "clay_frac"],
+  fcoarse = soils[, "gravel_content"]
+)
 
 }
 \references{

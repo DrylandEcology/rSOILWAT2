@@ -33,7 +33,7 @@ swrc_type <- 1
 swrcp <- pdf_estimate(
   sand = c(0.5, 0.3),
   clay = c(0.2, 0.1),
-  gravel = c(0, 0),
+  fcoarse = c(0, 0),
   swrc_type = swrc_type
 )
 

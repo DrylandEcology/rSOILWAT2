@@ -9,7 +9,7 @@
 swrc_conversion(
   direction = c("swp_to_vwc", "vwc_to_swp"),
   x,
-  gravel,
+  fcoarse,
   layer_width,
   swrc,
   sand = NULL,
@@ -18,7 +18,7 @@ swrc_conversion(
 
 swrc_swp_to_vwc(
   swp_MPa,
-  gravel,
+  fcoarse,
   layer_width,
   swrc = list(swrc_type = 1L, pdf_type = 1L, swrcp = NULL),
   sand = NULL,
@@ -27,7 +27,7 @@ swrc_swp_to_vwc(
 
 swrc_vwc_to_swp(
   vwcBulk,
-  gravel,
+  fcoarse,
   layer_width,
   swrc = list(swrc_type = 1L, pdf_type = 1L, swrcp = NULL),
   sand = NULL,
@@ -42,10 +42,10 @@ soil water conversion.}
 either soil water potential (units \verb{[MPa]}) or
 volumetric water content (units \verb{[cm/cm]}).}
 
-\item{gravel}{A numeric value or vector.
+\item{fcoarse}{A numeric value or vector.
 Coarse fragments, e.g., gravel, (> 2 mm; units of \verb{[m3/m3]})
 relative to the whole soil of each soil layer.
-\code{gravel} is required, for instance, to translate between
+\code{fcoarse} is required, for instance, to translate between
 values relative to the matric soil component (< 2 mm fraction) and
 relative to the whole soil (matric soil plus coarse fragments).}
 
@@ -93,9 +93,9 @@ to convert from `VWC` to `SWP` with selected `SWRC`
 See \link{SWRCs} for suitable values of \code{swrc_type}.
 
 
-For backward compatibility, \code{gravel} and \code{layer_width} may be missing.
-If they are missing, then the soils are assumed to contain \verb{0\%} gravel and
-be represented by \verb{1 cm} wide soil layers.
+For backward compatibility, \code{fcoarse} and \code{layer_width} may be missing.
+If they are missing, then the soils are assumed to contain
+\verb{0\%} coarse fragments and be represented by \verb{1 cm} wide soil layers.
 
 
 Arguments \code{sand} and \code{clay} are only required if \code{SWRC} parameter values
@@ -106,10 +106,29 @@ the element \code{pdf_type} for argument \code{swrc}.
 }
 
 \examples{
-p <- pdf_estimate(sand = c(0.5, 0.3), clay = c(0.2, 0.1), gravel = c(0, 0))
-swrc_swp_to_vwc(-1.5, swrc = list(swrc_type = 1, swrcp = p))
-swrc_swp_to_vwc(-1.5, sand = c(0.5, 0.3), clay = c(0.2, 0.1))
-swrc_vwc_to_swp(c(0.20, 0.25, 0.30), swrc = list(swrc_type = 1, swrcp = p))
+fsand <- c(0.5, 0.3)
+fclay <- c(0.2, 0.1)
+fcrs1 <- c(0, 0)
+fcrs2 <- c(0.4, 0.1)
+
+p1 <- pdf_estimate(sand = fsand, clay = fclay, fcoarse = fcrs1)
+swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, swrc = list(swrc_type = 1, swrcp = p1))
+swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, sand = fsand, clay = fclay)
+swrc_vwc_to_swp(
+  c(0.10, 0.15, 0.20),
+  fcoarse = fcrs1,
+  swrc = list(swrc_type = 1, swrcp = p1)
+)
+
+p2 <- pdf_estimate(sand = fsand, clay = fclay, fcoarse = fcrs2)
+swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, swrc = list(swrc_type = 1, swrcp = p2))
+(1 - fcrs2) * swrc_swp_to_vwc(-1.5, swrc = list(type = 1, swrcp = p2))
+swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, sand = fsand, clay = fclay)
+swrc_vwc_to_swp(
+  c(0.10, 0.15, 0.20),
+  fcoarse = fcrs2,
+  swrc = list(swrc_type = 1, swrcp = p2)
+)
 
 }
 \seealso{

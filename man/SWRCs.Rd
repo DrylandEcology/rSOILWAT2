@@ -12,10 +12,10 @@ Sand content of the matric soil component
 Clay content of the matric soil component
 (< 2 mm fraction; units of \verb{[g/g]}) of each soil layer.}
 
-\item{gravel}{A numeric value or vector.
+\item{fcoarse}{A numeric value or vector.
 Coarse fragments, e.g., gravel, (> 2 mm; units of \verb{[m3/m3]})
 relative to the whole soil of each soil layer.
-\code{gravel} is required, for instance, to translate between
+\code{fcoarse} is required, for instance, to translate between
 values relative to the matric soil component (< 2 mm fraction) and
 relative to the whole soil (matric soil plus coarse fragments).}
 
