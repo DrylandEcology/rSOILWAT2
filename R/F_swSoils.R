@@ -157,25 +157,34 @@ setMethod("swSoils_Layers", "swSoils", function(object) object@Layers)
 
 #' @rdname swSoils-class
 #' @export
-setReplaceMethod("set_swSoils",
+
+#' @rdname swSoils-class
+#' @export
+setReplaceMethod(
+  "set_swSoils",
   signature = c(object = "swSoils", value = "swSoils"),
   function(object, value) {
     colnames(value@Layers) <- colnames(object@Layers)
     object <- value
     validObject(object)
     object
-})
+  }
+)
+
 
 #' @rdname swSoils-class
 #' @export
-setReplaceMethod("swSoils_Layers",
-  signature = c(object = "swSoils", value = "matrix"),
+setReplaceMethod(
+  "swSoils_Layers",
+  signature = "swSoils",
   function(object, value) {
     colnames(value) <- colnames(object@Layers)
-    object@Layers <- value
+    object@Layers <- data.matrix(value)
     validObject(object)
     object
-})
+  }
+)
+
 
 
 #' @rdname swSoils-class

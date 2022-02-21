@@ -157,7 +157,7 @@
 \alias{get_swSoils,swInputData-method}
 \alias{swSoils_Layers,swInputData-method}
 \alias{set_swSoils<-,swInputData,swSoils-method}
-\alias{swSoils_Layers<-,swInputData,matrix-method}
+\alias{swSoils_Layers<-,swInputData-method}
 \alias{get_swSWC,swInputData-method}
 \alias{swSWC_use,swInputData-method}
 \alias{swSWC_prefix,swInputData-method}
@@ -509,7 +509,8 @@
 
 \S4method{set_swSoils}{swInputData,swSoils}(object) <- value
 
-\S4method{swSoils_Layers}{swInputData,matrix}(object) <- value
+
+\S4method{swSoils_Layers}{swInputData}(object) <- value
 
 \S4method{get_swSWC}{swInputData}(object)
 

@@ -308,7 +308,7 @@ You may organize weather data in a variety of ways:
 
   # Assign CO2 values to rSOILWAT2 input object
   rSOILWAT2::swCarbon_Scenario(sw_in) <- co2_nametag
-  rSOILWAT2::swCarbon_CO2ppm(sw_in) <- data.matrix(co2_data)
+  rSOILWAT2::swCarbon_CO2ppm(sw_in) <- co2_data
 ```
 
 
@@ -454,7 +454,7 @@ You may organize weather data in a variety of ways:
 ## Assign new soil data to rSOILWAT2 input object
 ```{r, soils_final1}
   # This fails because rooting profile values are still missing
-  try(rSOILWAT2::swSoils_Layers(sw_in) <- data.matrix(soil_new))
+  try(rSOILWAT2::swSoils_Layers(sw_in) <- soil_new)
 ```
 
 
@@ -566,7 +566,7 @@ You may organize weather data in a variety of ways:
 
 ## Assign new soil data to rSOILWAT2 input object
 ```{r, soils_final2, results = "hide"}
-  rSOILWAT2::swSoils_Layers(sw_in) <- data.matrix(soil_new)
+  rSOILWAT2::swSoils_Layers(sw_in) <- soil_new
 ```
 
 
@@ -581,7 +581,7 @@ You may organize weather data in a variety of ways:
   tr_lyrs_10cm <- c(1, 1, 1, 2, 2, 2, 2, 3, 3, 3)
 
   tr <- rSOILWAT2::prepare_TranspirationRegions(tr_lyrs = tr_lyrs_10cm)
-  rSOILWAT2::swSite_TranspirationRegions(sw_in) <- data.matrix(tr)
+  rSOILWAT2::swSite_TranspirationRegions(sw_in) <- tr
 
   # Make necessary adjustments based on soil depth and rooting profiles
   rSOILWAT2::swSite_TranspirationRegions(sw_in) <-

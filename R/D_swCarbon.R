@@ -194,7 +194,7 @@ setReplaceMethod("swCarbon_DeltaYear", signature = "swCarbon",
 setReplaceMethod("swCarbon_CO2ppm", signature = "swCarbon",
   function(object, value) {
     colnames(value) <- colnames(object@CO2ppm)
-    object@CO2ppm <- value
+    object@CO2ppm <- data.matrix(value)
     validObject(object)
     object
 })

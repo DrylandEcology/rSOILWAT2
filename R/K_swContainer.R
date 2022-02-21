@@ -1226,7 +1226,11 @@ setMethod("swSoils_Layers", "swInputData",
 
 #' @rdname swInputData-class
 #' @export
-setReplaceMethod("set_swSoils",
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "set_swSoils",
   signature = c(object = "swInputData", value = "swSoils"),
   function(object, value) {
     set_swSoils(object@soils) <- value
@@ -1234,8 +1238,9 @@ setReplaceMethod("set_swSoils",
 })
 #' @rdname swInputData-class
 #' @export
-setReplaceMethod("swSoils_Layers",
-  signature = c(object = "swInputData", value = "matrix"),
+setReplaceMethod(
+  "swSoils_Layers",
+  signature = "swInputData",
   function(object, value) {
     swSoils_Layers(object@soils) <- value
     object

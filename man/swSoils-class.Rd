@@ -7,7 +7,7 @@
 \alias{get_swSoils,swSoils-method}
 \alias{swSoils_Layers,swSoils-method}
 \alias{set_swSoils<-,swSoils,swSoils-method}
-\alias{swSoils_Layers<-,swSoils,matrix-method}
+\alias{swSoils_Layers<-,swSoils-method}
 \alias{swReadLines,swSoils,character-method}
 \title{Class \code{"swSoils"}}
 \usage{
@@ -19,7 +19,8 @@
 
 \S4method{set_swSoils}{swSoils,swSoils}(object) <- value
 
-\S4method{swSoils_Layers}{swSoils,matrix}(object) <- value
+
+\S4method{swSoils_Layers}{swSoils}(object) <- value
 
 \S4method{swReadLines}{swSoils,character}(object, file)
 }

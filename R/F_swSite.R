@@ -358,9 +358,11 @@ setReplaceMethod("swSite_TranspirationRegions", signature = "swSite",
       }
       # otherwise, we copy non-integer values which will trigger `validObject`
     }
-    colnames(value) <- colnames(object@TranspirationRegions)
-    object@TranspirationRegions <- array(as.integer(value), dim = dim(value),
-      dimnames = dimnames(value))
+    object@TranspirationRegions <- array(
+      as.integer(value),
+      dim = dim(value),
+      dimnames = list(NULL, colnames(object@TranspirationRegions))
+    )
     validObject(object)
     object
 })
