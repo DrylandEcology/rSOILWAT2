@@ -116,8 +116,8 @@ setMethod("initialize", signature = "swCloud", function(.Object, ...) {
     ids <- 4:5
     def@Cloud[- ids, ] <- NA_real_
   } else {
-    # Guarantee dimnames
-    dimnames(dots[["Cloud"]]) <- dimnames(def@Cloud)
+    # Guarantee names
+    dimnames(dots[["Cloud"]]) <- list(NULL, colnames(def@Cloud))
   }
 
   for (sn in sns) {

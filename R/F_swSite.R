@@ -165,9 +165,10 @@ setMethod(
     if (!("TranspirationRegions" %in% dns)) {
       def@TranspirationRegions[, "layer"] <- NA_integer_
     } else {
-      # Guarantee dimnames
+      # Guarantee names
       dimnames(dots[["TranspirationRegions"]]) <-
-        dimnames(def@TranspirationRegions)
+        list(NULL, colnames(def@TranspirationRegions))
+    }
     }
 
     for (sn in sns) {

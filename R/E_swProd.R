@@ -161,13 +161,15 @@ setMethod("initialize", signature = "swProd", function(.Object, ...) {
     def@Composition[] <- NA_real_
   }
 
-  # Guarantee dimnames of dots arguments
-  gdns <- c("CanopyHeight", "VegetationInterceptionParameters",
+  # Guarantee names
+  gdns <- c(
+    "CanopyHeight", "VegetationInterceptionParameters",
     "LitterInterceptionParameters", "HydraulicRedistribution",
-    "CO2Coefficients", "MonthlyVeg")
+    "CO2Coefficients", "MonthlyVeg"
+  )
 
   for (g in gdns) if (g %in% dns) {
-    dimnames(dots[[g]]) <- dimnames(slot(def, g))
+    dimnames(dots[[g]]) <- list(NULL, colnames(slot(def, g)))
   }
 
   # Initialize values

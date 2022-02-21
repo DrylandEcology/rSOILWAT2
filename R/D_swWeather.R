@@ -75,9 +75,9 @@ setMethod("initialize", signature = "swMonthlyScalingParams",
     dns <- names(dots)
 
     if ("MonthlyScalingParams" %in% dns) {
-      # Guarantee dimnames
+      # Guarantee names
       dimnames(dots[["MonthlyScalingParams"]]) <-
-        dimnames(def@MonthlyScalingParams)
+        list(NULL, colnames(def@MonthlyScalingParams))
     }
 
     for (sn in sns) {

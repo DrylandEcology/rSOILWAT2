@@ -50,14 +50,15 @@ setClass("swSoils", slots = c(Layers = "matrix"))
 
 swSoilLayers_validity <- function(object) {
   val <- TRUE
-  temp <- dim(object@Layers)
-  dtol1 <- 1 + temp[1] * rSW2_glovars[["tol"]]
+  tmpL <- dim(object@Layers)
+  dtol1 <- 1 + tmpL[1] * rSW2_glovars[["tol"]]
 
-  if (temp[1] == 0) {
+  #--- Check "Layers"
+  if (tmpL[1] == 0) {
     msg <- "@Layers must have at least one row/soil layer."
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
-  if (temp[2] != 12) {
+  if (tmpL[2] != 12) {
     msg <- paste(
       "@Layers must have exactly 12 columns corresponding to",
       "depth_cm, bulkDensity_g/cm^3, gravel_content, EvapBareSoil_frac,",
@@ -66,15 +67,37 @@ swSoilLayers_validity <- function(object) {
     )
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
-  if (!all(is.na(object@Layers[, 1])) && (any(object@Layers[, 1] <= 0) ||
-    any(diff(object@Layers[, 1]) < rSW2_glovars[["tol"]]))) {
-    msg <- "@Layers['depth_cm', ] must be positive increasing depths."
+
+  if (
+    !all(is.na(object@Layers[, 1])) && (
+      any(object@Layers[, 1] <= 0) ||
+      any(diff(object@Layers[, 1]) < rSW2_glovars[["tol"]])
+    )
+  ) {
+    msg <- "@Layers[, 'depth_cm'] must be positive increasing depths."
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
-  if (!all(is.na(object@Layers[, 3:11])) && (any(object@Layers[, 3:11] < 0) ||
-    any(object@Layers[, 3:11] > dtol1))) {
-    msg <- paste("@Layers values of gravel, evco, trcos, sand, clay, and",
-      "impermeability must be between 0 and 1.")
+
+  if (
+    !all(is.na(object@Layers[, 3:11])) &&
+    (any(object@Layers[, 3:11] < 0) || any(object@Layers[, 3:11] > dtol1))
+  ) {
+    msg <- paste(
+      "@Layers values of gravel, evco, trcos, sand, clay, and",
+      "impermeability must be between 0 and 1."
+    )
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
+  tmp <- colSums(object@Layers[, 4:8, drop = FALSE])
+  if (any(tmp > dtol1, na.rm = TRUE)) {
+    msg <- paste(
+      "@Layers values of profile sums of evco and trcos must be",
+      "between 0 and 1."
+    )
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
   temp <- colSums(object@Layers[, 4:8, drop = FALSE])
@@ -101,9 +124,13 @@ setMethod("initialize", signature = "swSoils", function(.Object, ...) {
   if (!("Layers" %in% dns)) {
     def@Layers <- def@Layers[1, , drop = FALSE]
     def@Layers[] <- NA_real_
+    ntmp <- 1
   } else {
-    # Guarantee dimnames
-    dimnames(dots[["Layers"]]) <- dimnames(def@Layers)
+    # Guarantee names
+    dimnames(dots[["Layers"]]) <- list(NULL, colnames(def@Layers))
+    ntmp <- nrow(dots[["Layers"]])
+  }
+
   }
 
   for (sn in sns) {

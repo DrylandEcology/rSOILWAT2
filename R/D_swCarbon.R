@@ -75,8 +75,8 @@ setMethod(
     dns <- names(dots)
 
     if ("CO2ppm" %in% dns) {
-      # Guarantee dimnames
-      dimnames(dots[["CO2ppm"]]) <- dimnames(def@CO2ppm)
+      # Guarantee names
+      dimnames(dots[["CO2ppm"]]) <- list(NULL, colnames(def@CO2ppm))
     }
 
     for (sn in sns) {

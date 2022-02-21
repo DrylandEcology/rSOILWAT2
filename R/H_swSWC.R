@@ -140,8 +140,8 @@ setMethod("initialize", signature = "swSWC", function(.Object, ...) {
   if (!("History" %in% dns)) {
     def@History <- list()
   } else {
-    # Guarantee dimnames
-    dimnames(dots[["History"]]) <- dimnames(def@History)
+    # Guarantee names
+    dimnames(dots[["History"]]) <- list(NULL, colnames(def@History))
   }
 
   for (sn in sns) {
