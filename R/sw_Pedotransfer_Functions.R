@@ -368,6 +368,13 @@ check_swrcp <- function(swrc_type = 1L, swrcp) {
 #'   The soil water values to be converted,
 #'   either soil water potential (units `[MPa]`) or
 #'   volumetric water content (units `[cm/cm]`).
+#' @param outer_if_equalsize A logical value.
+#'   Relevant only if `x` of length `l` and soils of length `d` are equal.
+#'   If `TRUE`, then the returned object has a size of `l x d` = `l x l`
+#'   where the `d` sets of soil values are repeated for each value of `x`.
+#'   If `FALSE` (default), then the returned object has a size of `l` = `d`
+#'   where the the `SWRC` conversion is applied to the
+#'   first element of `x` and soils, the second elements, and so on.
 #'
 #' @return The dimensions of the output are a function of `x` and the
 #'   number of soil values (e.g., rows or length of `swrc[["swrcp"]]`).
@@ -377,7 +384,8 @@ check_swrcp <- function(swrc_type = 1L, swrcp) {
 #'     \item length `l` if `x` has length `l` and there is one soil.
 #'     \item length `d` if `x` is one value and soils are of length `d`.
 #'     \item size `l x d` if `x` has length `l` and soils are of length `d`
-#'           (if `l` and `d` are not equal);
+#'           (if `l` and `d` are not equal or `outer_if_equalsize` is `TRUE`;
+#'           cf. the first case);
 #'           the `d` sets of soil values are repeated for each value of `x`.
 #'     \item size `l x d` if `x` has size `l x d` and there is one soil.
 #'           the soil is repeated for each value of `x`.
@@ -440,7 +448,8 @@ swrc_conversion <- function(
   layer_width,
   swrc,
   sand = NULL,
-  clay = NULL
+  clay = NULL,
+  outer_if_equalsize = FALSE
 ) {
   #--- Check inputs
   direction <- match.arg(direction)
@@ -528,7 +537,9 @@ swrc_conversion <- function(
   res <- array(dim = c(nrx, ncx))
 
 
-  if (nx1d && (nx == 1 || nsoils == 1 || nx == nsoils)) {
+  if (
+    nx1d && (nx == 1 || nsoils == 1 || (nx == nsoils && !outer_if_equalsize))
+  ) {
 
     # 1a. x [len = 1] + soils [len = 1] --> res [len = 1, dim = 1 x 1]
     # nothing to prepare
@@ -541,7 +552,7 @@ swrc_conversion <- function(
       # 3. x [len = l] + soils [len = 1] --> res [len = l, dim = l x 1]
       soils <- lapply(soils, rep_len, length.out = nx)
 
-    } else if (nx == nsoils) {
+    } else if (nx == nsoils && !outer_if_equalsize) {
       # 1b. x [len = l] + soils [len = l] --> res [len = l, dim = l x 1]
       x <- as.vector(unlist(x))
     }
@@ -693,7 +704,8 @@ swrc_swp_to_vwc <- function(
   layer_width,
   swrc = list(swrc_type = 1L, pdf_type = 1L, swrcp = NULL),
   sand = NULL,
-  clay = NULL
+  clay = NULL,
+  outer_if_equalsize = FALSE
 ) {
   swrc_conversion(
     direction = "swp_to_vwc",
@@ -702,7 +714,8 @@ swrc_swp_to_vwc <- function(
     clay = clay,
     fcoarse = fcoarse,
     layer_width = layer_width,
-    swrc = swrc
+    swrc = swrc,
+    outer_if_equalsize = outer_if_equalsize
   )
 }
 
@@ -722,7 +735,8 @@ swrc_vwc_to_swp <- function(
   layer_width,
   swrc = list(swrc_type = 1L, pdf_type = 1L, swrcp = NULL),
   sand = NULL,
-  clay = NULL
+  clay = NULL,
+  outer_if_equalsize = FALSE
 ) {
   swrc_conversion(
     direction = "vwc_to_swp",
@@ -731,6 +745,7 @@ swrc_vwc_to_swp <- function(
     clay = clay,
     fcoarse = fcoarse,
     layer_width = layer_width,
-    swrc = swrc
+    swrc = swrc,
+    outer_if_equalsize = outer_if_equalsize
   )
 }

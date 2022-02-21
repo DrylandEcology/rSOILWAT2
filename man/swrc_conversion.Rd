@@ -13,7 +13,8 @@ swrc_conversion(
   layer_width,
   swrc,
   sand = NULL,
-  clay = NULL
+  clay = NULL,
+  outer_if_equalsize = FALSE
 )
 
 swrc_swp_to_vwc(
@@ -22,7 +23,8 @@ swrc_swp_to_vwc(
   layer_width,
   swrc = list(swrc_type = 1L, pdf_type = 1L, swrcp = NULL),
   sand = NULL,
-  clay = NULL
+  clay = NULL,
+  outer_if_equalsize = FALSE
 )
 
 swrc_vwc_to_swp(
@@ -31,7 +33,8 @@ swrc_vwc_to_swp(
   layer_width,
   swrc = list(swrc_type = 1L, pdf_type = 1L, swrcp = NULL),
   sand = NULL,
-  clay = NULL
+  clay = NULL,
+  outer_if_equalsize = FALSE
 )
 }
 \arguments{
@@ -69,6 +72,14 @@ Sand content of the matric soil component
 Clay content of the matric soil component
 (< 2 mm fraction; units of \verb{[g/g]}) of each soil layer.}
 
+\item{outer_if_equalsize}{A logical value.
+Relevant only if \code{x} of length \code{l} and soils of length \code{d} are equal.
+If \code{TRUE}, then the returned object has a size of \verb{l x d} = \verb{l x l}
+where the \code{d} sets of soil values are repeated for each value of \code{x}.
+If \code{FALSE} (default), then the returned object has a size of \code{l} = \code{d}
+where the the \code{SWRC} conversion is applied to the
+first element of \code{x} and soils, the second elements, and so on.}
+
 \item{swp_MPa}{A numeric object. The soil water potential values
 (units `[MPa]`) to be converted to
 volumetric water content (relative to the whole soil; units `[cm/cm]`).}
@@ -86,7 +97,8 @@ The returned object has:
 \item length \code{l} if \code{x} has length \code{l} and there is one soil.
 \item length \code{d} if \code{x} is one value and soils are of length \code{d}.
 \item size \verb{l x d} if \code{x} has length \code{l} and soils are of length \code{d}
-(if \code{l} and \code{d} are not equal);
+(if \code{l} and \code{d} are not equal or \code{outer_if_equalsize} is \code{TRUE};
+cf. the first case);
 the \code{d} sets of soil values are repeated for each value of \code{x}.
 \item size \verb{l x d} if \code{x} has size \verb{l x d} and there is one soil.
 the soil is repeated for each value of \code{x}.

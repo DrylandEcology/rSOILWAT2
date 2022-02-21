@@ -77,7 +77,7 @@ if (FALSE) {
 
 #--- Tests
 test_that("Use SWRC to convert between VWC/SWP", {
-  # 1. x [len = 1] + soils [len = 1] --> res [len = 1]
+  # 1a. x [len = 1] + soils [len = 1] --> res [len = 1]
   for (ifix in names(swp_fix)) {
     for (itext in row.names(texture)) {
       expect_equivalent(
@@ -98,6 +98,18 @@ test_that("Use SWRC to convert between VWC/SWP", {
         vwc_fix[itext, ifix]
       )
     }
+  }
+
+  # 1b. x [len = l] + soils [len = d] -> res [dim = l = d] where l = d
+  for (ifix in names(swp_fix)) {
+    expect_equivalent(
+      swrc_vwc_to_swp(
+        vwcBulk = vwc_fix[, ifix],
+        sand = texture[, "sand"],
+        clay = texture[, "clay"]
+      ),
+      diag(swp_vals[, ifix, ])
+    )
   }
 
 
@@ -148,14 +160,28 @@ test_that("Use SWRC to convert between VWC/SWP", {
     }
   }
 
-  # 4. x [len = l] + soils [len = d] -> res [dim = l x d]
+  # 4a. x [len = l] + soils [len = d] -> res [dim = l x d] where l != d
+  # (x vector repeated for each soil): probably not used
+  for (ifix in names(swp_fix)) {
+    expect_equivalent(
+      swrc_vwc_to_swp(
+        vwcBulk = vwc_fix[, ifix],
+        sand = texture[-1, "sand"],
+        clay = texture[-1, "clay"]
+      ),
+      swp_vals[, ifix, -1]
+    )
+  }
+
+  # 4b. x [len = l] + soils [len = d] -> res [dim = l x d] where l = d
   # (x vector repeated for each soil): probably not used
   for (ifix in names(swp_fix)) {
     expect_equivalent(
       swrc_vwc_to_swp(
         vwcBulk = vwc_fix[, ifix],
         sand = texture[, "sand"],
-        clay = texture[, "clay"]
+        clay = texture[, "clay"],
+        outer_if_equalsize = TRUE
       ),
       swp_vals[, ifix, ]
     )
