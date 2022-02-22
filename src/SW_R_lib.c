@@ -327,10 +327,13 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 
 
 /** Expose SOILWAT2 constants and defines to internal R code of rSOILWAT2
-  @return A list with six elements: one element `kINT` for integer constants;
-    other elements contain vegetation keys, `VegTypes`; output keys, `OutKeys`;
-    output periods, `OutPeriods`; output aggregation types, `OutAggs`; and names of
-    input files, `InFiles`.
+  @return A list with six elements:
+    one element `kINT` for integer constants;
+    other elements contain vegetation keys, `VegTypes`;
+    output keys, `OutKeys`;
+    output periods, `OutPeriods`;
+    output aggregation types, `OutAggs`;
+    and indices of input files, `InFiles`.
  */
 SEXP sw_consts(void) {
   #ifdef RSWDEBUG
@@ -345,45 +348,69 @@ SEXP sw_consts(void) {
   if (debug) swprintf("sw_consts: define variables ... ");
   #endif
 
-  SEXP ret, cnames, ret_num, ret_int, ret_int2, ret_str1, ret_str2, ret_str3,
+  SEXP
+    ret, cnames, ret_num, ret_int, ret_int2, ret_str1, ret_str2, ret_str3,
     ret_infiles;
   int i;
   int *pvINT;
   double *pvNUM;
-  char *cret[] = {"kNUM", "kINT", "VegTypes", "OutKeys", "OutPeriods",
-    "OutAggs", "InFiles"};
+  char *cret[] = {
+    "kNUM", "kINT", "VegTypes", "OutKeys", "OutPeriods", "OutAggs", "InFiles"
+  };
 
+  // Miscellaneous numerical constants
   double vNUM[] = {SW_MISSING};
   char *cNUM[] = {"SW_MISSING"};
 
-  int vINT[] = {SW_NFILES, MAX_LAYERS, MAX_TRANSP_REGIONS, MAX_NYEAR, eSW_NoTime,
-    SW_OUTNPERIODS, SW_OUTNKEYS, SW_NSUMTYPES, NVEGTYPES, OUT_DIGITS};
-  char *cINT[] = {"SW_NFILES", "MAX_LAYERS", "MAX_TRANSP_REGIONS", "MAX_NYEAR",
+  // Miscellaneous integer constants
+  int vINT[] = {
+    SW_NFILES, MAX_LAYERS, MAX_TRANSP_REGIONS, MAX_NYEAR,
+    eSW_NoTime, SW_OUTNPERIODS, SW_OUTNKEYS, SW_NSUMTYPES, NVEGTYPES,
+    OUT_DIGITS
+  };
+  char *cINT[] = {
+    "SW_NFILES", "MAX_LAYERS", "MAX_TRANSP_REGIONS", "MAX_NYEAR",
     "eSW_NoTime", "SW_OUTNPERIODS", "SW_OUTNKEYS", "SW_NSUMTYPES", "NVEGTYPES",
-    "OUT_DIGITS"};
+    "OUT_DIGITS"
+  };
+
+  // Vegetation types
+  // NOTE: order must match their numeric values, i.e., how SOILWAT2 uses them
   int vINT2[] = {SW_TREES, SW_SHRUB, SW_FORBS, SW_GRASS};
   char *cINT2[] = {"SW_TREES", "SW_SHRUB", "SW_FORBS", "SW_GRASS"};
 
-  char *vSTR1[] = { SW_WETHR, SW_TEMP, SW_PRECIP, SW_SOILINF, SW_RUNOFF, SW_ALLH2O, SW_VWCBULK,
-			SW_VWCMATRIC, SW_SWCBULK, SW_SWABULK, SW_SWAMATRIC, SW_SWA, SW_SWPMATRIC,
-			SW_SURFACEW, SW_TRANSP, SW_EVAPSOIL, SW_EVAPSURFACE, SW_INTERCEPTION,
-			SW_LYRDRAIN, SW_HYDRED, SW_ET, SW_AET, SW_PET, SW_WETDAY, SW_SNOWPACK,
-			SW_DEEPSWC, SW_SOILTEMP,
-			SW_ALLVEG, SW_ESTAB, SW_CO2EFFECTS, SW_BIOMASS };  // TODO: this is identical to SW_Output.c/key2str
-  char *cSTR1[] = {"SW_WETHR", "SW_TEMP", "SW_PRECIP", "SW_SOILINF", "SW_RUNOFF",
+  // Output categories
+  // NOTE: `cSTR1` must agree with SW_Output.c/key2str[]
+  char *cSTR1[] = {
+    "SW_WETHR", "SW_TEMP", "SW_PRECIP", "SW_SOILINF", "SW_RUNOFF",
     "SW_ALLH2O", "SW_VWCBULK", "SW_VWCMATRIC", "SW_SWCBULK", "SW_SWABULK",
     "SW_SWAMATRIC", "SW_SWA", "SW_SWPMATRIC", "SW_SURFACEW", "SW_TRANSP", "SW_EVAPSOIL",
     "SW_EVAPSURFACE", "SW_INTERCEPTION", "SW_LYRDRAIN", "SW_HYDRED", "SW_ET", "SW_AET",
     "SW_PET", "SW_WETDAY", "SW_SNOWPACK", "SW_DEEPSWC", "SW_SOILTEMP", "SW_ALLVEG",
-    "SW_ESTAB", "SW_CO2EFFECTS", "SW_BIOMASS"};
-  char *vSTR2[] = {SW_DAY, SW_WEEK, SW_MONTH, SW_YEAR}; // TODO: this is identical to SW_Output.c/pd2str
+    "SW_ESTAB", "SW_CO2EFFECTS", "SW_BIOMASS"
+  };
+
+  // Output time steps
+  // Note: `cSTR2` must agree with SW_Output.c/pd2longstr[]
   char *cSTR2[] = {"SW_DAY", "SW_WEEK", "SW_MONTH", "SW_YEAR"};
-  char *vSTR3[] = {SW_SUM_OFF, SW_SUM_SUM, SW_SUM_AVG, SW_SUM_FNL}; // TODO: this is identical to SW_Output.c/styp2str
+
+  // Output aggregation types
+  // Note: `cSTR3` must agree with SW_Output.c/styp2str
   char *cSTR3[] = {"SW_SUM_OFF", "SW_SUM_SUM", "SW_SUM_AVG", "SW_SUM_FNL"};
-  char *cInF[] = {"eFirst", "eModel", "eLog", "eSite", "eLayers", "eWeather",
-    "eMarkovProb",  "eMarkovCov", "eSky", "eVegProd", "eVegEstab", "eCarbon", "eSoilwat",
-    "eOutput", "eOutputDaily","eOutputWeekly","eOutputMonthly","eOutputYearly",
-    "eOutputDaily_soil","eOutputWeekly_soil","eOutputMonthly_soil","eOutputYearly_soil"}; // TODO: this must match SW_Files.h/SW_FileIndex
+
+  // SOILWAT2 input files
+  // Note: `cInF` must agree with SW_Files.h/SW_FileIndex
+  char *cInF[] = {
+    "eFirst",
+    "eModel", "eLog",
+    "eSite", "eLayers", "eSWRCp",
+    "eWeather", "eMarkovProb", "eMarkovCov", "eSky",
+    "eVegProd", "eVegEstab",
+    "eCarbon",
+    "eSoilwat",
+    "eOutput", "eOutputDaily", "eOutputWeekly", "eOutputMonthly", "eOutputYearly",
+    "eOutputDaily_soil", "eOutputWeekly_soil", "eOutputMonthly_soil", "eOutputYearly_soil"
+  };
 
   // create vector of numeric/real/double constants
   #ifdef RSWDEBUG
@@ -431,7 +458,7 @@ SEXP sw_consts(void) {
   PROTECT(ret_str1 = allocVector(STRSXP, SW_OUTNKEYS));
   PROTECT(cnames = allocVector(STRSXP, SW_OUTNKEYS));
   for (i = 0; i < SW_OUTNKEYS; i++) {
-    SET_STRING_ELT(ret_str1, i, mkChar(vSTR1[i]));
+    SET_STRING_ELT(ret_str1, i, mkChar(key2str[i]));
     SET_STRING_ELT(cnames, i, mkChar(cSTR1[i]));
   }
   namesgets(ret_str1, cnames);
@@ -443,7 +470,7 @@ SEXP sw_consts(void) {
   PROTECT(ret_str2 = allocVector(STRSXP, SW_OUTNPERIODS));
   PROTECT(cnames = allocVector(STRSXP, SW_OUTNPERIODS));
   for (i = 0; i < SW_OUTNPERIODS; i++) {
-    SET_STRING_ELT(ret_str2, i, mkChar(vSTR2[i]));
+    SET_STRING_ELT(ret_str2, i, mkChar(pd2longstr[i]));
     SET_STRING_ELT(cnames, i, mkChar(cSTR2[i]));
   }
   namesgets(ret_str2, cnames);
@@ -455,7 +482,7 @@ SEXP sw_consts(void) {
   PROTECT(ret_str3 = allocVector(STRSXP, SW_NSUMTYPES));
   PROTECT(cnames = allocVector(STRSXP, SW_NSUMTYPES));
   for (i = 0; i < SW_NSUMTYPES; i++) {
-    SET_STRING_ELT(ret_str3, i, mkChar(vSTR3[i]));
+    SET_STRING_ELT(ret_str3, i, mkChar(styp2str[i]));
     SET_STRING_ELT(cnames, i, mkChar(cSTR3[i]));
   }
   namesgets(ret_str3, cnames);

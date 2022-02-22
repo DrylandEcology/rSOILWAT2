@@ -7,7 +7,7 @@ context("rSOILWAT2 water balance")
 #---CONSTANTS
 tol <- 10 ^ (-rSW2_glovars[["kSOILWAT2"]][["kINT"]][["OUT_DIGITS"]])
 SW_OUTNPERIODS <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
-OutPeriods <- rSW2_glovars[["sw_TimeSteps"]]
+OutPeriods <- rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]]
 veg_types <- c("tree", "shrub", "forbs", "grass")
 dir_test_data <- file.path("..", "test_data")
 temp <- list.files(dir_test_data, pattern = "Ex")

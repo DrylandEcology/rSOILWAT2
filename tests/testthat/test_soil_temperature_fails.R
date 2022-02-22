@@ -33,13 +33,19 @@ for (it in tests) {
 
   test_that("Check soil temperature", {
     # Run SOILWAT
-    rd <- sw_exec(inputData = sw_input, weatherList = sw_weather,
-      echo = FALSE, quiet = TRUE)
+    rd <- sw_exec(
+      inputData = sw_input,
+      weatherList = sw_weather,
+      echo = FALSE,
+      quiet = TRUE
+    )
     expect_s4_class(rd, "swOutput")
     expect_false(has_soilTemp_failed())
 
     Tsoil_data <- slot(rd, st_name)
-    time_steps <- rSW2_glovars[["sw_TimeSteps"]][1 + Tsoil_data@TimeStep]
+    time_steps <- rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]][
+      1 + Tsoil_data@TimeStep
+    ]
 
     for (k in seq_along(time_steps)) {
       info <- paste("test-data", it, "- slot", time_steps[k])

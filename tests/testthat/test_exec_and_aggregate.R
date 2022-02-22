@@ -164,6 +164,7 @@ for (it in tests) {
     expect_true(check_version(rd, level = "minor"))
     expect_s4_class(rd, "swOutput")
     expect_false(has_soilTemp_failed())
+    expect_true(all(sw_out_flags() %in% slotNames(rd)))
 
     # Run silently/verbosely
     expect_silent(sw_exec(

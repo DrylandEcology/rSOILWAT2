@@ -232,7 +232,7 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
     st_name <- rSW2_glovars[["kSOILWAT2"]][["OutKeys"]][["SW_SOILTEMP"]]
     tempd <- slot(res, st_name)
 
-    for (k in rSW2_glovars[["sw_TimeSteps"]]) {
+    for (k in rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]]) {
       temp <- slot(tempd, k)
       np <- dim(temp)
       if (np[1] > 0) {
