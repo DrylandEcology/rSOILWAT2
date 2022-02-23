@@ -54,12 +54,41 @@ Bool bWeatherList;
 /*                  Local Variables                    */
 /* --------------------------------------------------- */
 static SEXP Rlogfile;
+static Bool current_sw_quiet = swFALSE;
 
 
 
 /* =================================================== */
 /*             Global Function Definitions             */
 /* --------------------------------------------------- */
+
+
+/**
+ * Turn on/off `SOILWAT2` messages including errors, notes, and warnings
+ *
+ * @param verbose A logical value.
+ * @return The previous logical value.
+ */
+SEXP sw_quiet(SEXP quiet) {
+	SEXP prev_quiet;
+
+	PROTECT(prev_quiet = NEW_LOGICAL(1));
+	LOGICAL_POINTER(prev_quiet)[0] = current_sw_quiet;
+
+	if (LOGICAL(coerceVector(quiet, LGLSXP))[0]) {
+		// tell `LogError()` that R should NOT print messages to the console
+		logfp = NULL;
+		current_sw_quiet = swTRUE;
+	} else {
+		// tell `LogError()` that R should print messages to the console
+		logfp = (FILE *) swTRUE; // any non-NULL file pointer
+		current_sw_quiet = swFALSE;
+	}
+
+	UNPROTECT(1);
+	return prev_quiet;
+}
+
 
 /**
  * Determines if a constant in the Parton equation 2.21 is invalid and would
@@ -117,14 +146,14 @@ void setupSOILWAT2(SEXP inputOptions) {
 }
 
 
-SEXP onGetInputDataFromFiles(SEXP inputOptions) {
+SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   SEXP swInputData, SW_DataList, swLog, oRlogfile;
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
 
   logged = FALSE;
-  logfp = NULL;
+  sw_quiet(quiet);
 
   #ifdef RSWDEBUG
   if (debug) swprintf("Set log\n");
@@ -149,8 +178,12 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   SW_CTL_init_run();
 
   #ifdef RSWDEBUG
-  if (debug) swprintf("onGetInputDataFromFiles: copy data from SOILWAT2 "
-    "variables to rSOILWAT2 S4 classes: ");
+  if (debug) {
+    swprintf(
+      "onGetInputDataFromFiles: copy data from SOILWAT2 variables "
+      "to rSOILWAT2 S4 classes: "
+    );
+  }
   #endif
 
   PROTECT(swInputData = MAKE_CLASS("swInputData"));
@@ -240,6 +273,8 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   return SW_DataList;
 }
 
+
+
 SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 	SEXP outputData, swLog, oRlogfile;
   #ifdef RSWDEBUG
@@ -247,13 +282,7 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
   #endif
 
 	logged = FALSE;
-	if (LOGICAL(coerceVector(quiet, LGLSXP))[0]) {
-		// tell 'LogError' that R should NOT print messages to the console
-		logfp = NULL;
-	} else {
-		// tell 'LogError' that R should print messages to the console
-		logfp = (FILE *) swTRUE; // any non-NULL file pointer
-	}
+	sw_quiet(quiet);
 
 	if (isNull(inputData)) {
 		useFiles = TRUE;

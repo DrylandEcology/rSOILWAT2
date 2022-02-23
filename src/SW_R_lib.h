@@ -38,8 +38,9 @@ extern Bool bWeatherList;
 /* =================================================== */
 /*             Global Function Declarations            */
 /* --------------------------------------------------- */
+SEXP sw_quiet(SEXP quiet);
 SEXP tempError(void);
-SEXP onGetInputDataFromFiles(SEXP input);
+SEXP onGetInputDataFromFiles(SEXP input, SEXP quiet);
 SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet);
 SEXP sw_consts(void);
 

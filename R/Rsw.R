@@ -35,6 +35,17 @@ sw_args <- function(dir, files.in, echo, quiet) {
 
 
 
+#' Turn on/off `SOILWAT2` notes and warnings
+#'
+#' @param quiet A logical value.
+#' @return The previous logical value.
+#'
+#' @export
+sw_verbosity <- function(verbose = TRUE) {
+  invisible(!.Call(C_sw_quiet, !as.logical(verbose)))
+}
+
+
 #' Execute a \pkg{rSOILWAT2} simulation run
 #'
 #' Run the simulation and get the output data.  Executes the \pkg{SOILWAT2}
@@ -209,10 +220,16 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
   dir_prev <- getwd()
   on.exit(setwd(dir_prev), add = TRUE)
 
+  quiet <- as.logical(quiet)
+
   input <- sw_args(dir, files.in, echo, quiet)
 
   if (is.null(inputData)) {
-    inputData <- sw_inputDataFromFiles(dir = dir, files.in = files.in)
+    inputData <- sw_inputDataFromFiles(
+      dir = dir,
+      files.in = files.in,
+      quiet = quiet
+    )
   }
 
   if (!check_version(inputData, level = "minor")) {
@@ -222,7 +239,7 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
     )
   }
 
-  res <- .Call(C_start, input, inputData, weatherList, as.logical(quiet))
+  res <- .Call(C_start, input, inputData, weatherList, quiet)
   slot(res, "version") <- rSW2_version()
   slot(res, "timestamp") <- rSW2_timestamp()
 
@@ -284,14 +301,20 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
 #'
 #'
 #' @export
-sw_inputDataFromFiles <- function(dir = "", files.in = "files.in") {
+sw_inputDataFromFiles <- function(
+  dir = "",
+  files.in = "files.in",
+  quiet = FALSE
+) {
 
   dir_prev <- getwd()
   on.exit(setwd(dir_prev), add = TRUE)
 
-  input <- sw_args(dir, files.in, echo = FALSE, quiet = FALSE)
+  quiet <- as.logical(quiet)
 
-  res <- .Call(C_onGetInputDataFromFiles, input)
+  input <- sw_args(dir, files.in, echo = FALSE, quiet = quiet)
+
+  res <- .Call(C_onGetInputDataFromFiles, input, quiet)
   slot(res, "version") <- rSW2_version()
   slot(res, "timestamp") <- rSW2_timestamp()
 

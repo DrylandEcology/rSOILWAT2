@@ -4,7 +4,7 @@
 \alias{sw_inputDataFromFiles}
 \title{Read simulation input data from files on disk}
 \usage{
-sw_inputDataFromFiles(dir = "", files.in = "files.in")
+sw_inputDataFromFiles(dir = "", files.in = "files.in", quiet = FALSE)
 }
 \arguments{
 \item{dir}{A character string. The path to the simulation project directory.}
