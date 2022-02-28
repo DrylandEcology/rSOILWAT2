@@ -154,8 +154,11 @@ sw_verbosity <- function(verbose = TRUE) {
 #' ##   to set up a SQLite database for the weather data)
 #' sw_weath3 <- getWeatherData_folders(
 #'    LookupWeatherFolder = file.path(path_demo, "Input"),
-#'    weatherDirName = "data_weather", filebasename = "weath",
-#'    startYear = 1979, endYear = 2010)
+#'    weatherDirName = "data_weather",
+#'    filebasename = "weath",
+#'    startYear = 1979,
+#'    endYear = 2010
+#' )
 #'
 #' ## List of the slots of the input objects of class 'swWeatherData'
 #' utils::str(sw_weath3, max.level = 1)
@@ -214,8 +217,14 @@ sw_verbosity <- function(verbose = TRUE) {
 #' ## See help(package = "rSOILWAT2") for a full list of functions
 #'
 #' @export
-sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
-  files.in = "files.in", echo = FALSE, quiet = FALSE) {
+sw_exec <- function(
+  inputData = NULL,
+  weatherList = NULL,
+  dir = ".",
+  files.in = "files.in",
+  echo = FALSE,
+  quiet = FALSE
+) {
 
   dir_prev <- getwd()
   on.exit(setwd(dir_prev), add = TRUE)
@@ -239,6 +248,34 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
     )
   }
 
+
+  # Estimate SWRC parameters if requested PDF only implemented in R
+  pdf_name <- std_pdf(swSite_SWRCflags(inputData)["pdf_name"])
+  if (pdf_name %in% pdfs_implemented_in_rSW2()) {
+    soils <- swSoils_Layers(inputData)
+
+    swrcp <- rSW2_SWRC_PDF_estimate_parameters(
+      sand = soils[, "sand_frac"],
+      clay = soils[, "clay_frac"],
+      fcoarse = soils[, "gravel_content"],
+      pdf_name = pdf_name,
+      fail = FALSE
+    )
+
+    if (!is.null(swrcp)) {
+      rSOILWAT2::swSoils_SWRCp(inputData) <- swrcp
+      swSite_SWRCflags(inputData)["pdf_name"] <- "NoPDF"
+    } else {
+      tmp <- rSOILWAT2::swSoils_SWRCp(inputData)
+      rSOILWAT2::swSoils_SWRCp(inputData) <- array(
+        data = NA_real_,
+        dim = dim(tmp)
+      )
+    }
+  }
+
+
+  # Run SOILWAT2
   res <- .Call(C_start, input, inputData, weatherList, quiet)
   slot(res, "version") <- rSW2_version()
   slot(res, "timestamp") <- rSW2_timestamp()
