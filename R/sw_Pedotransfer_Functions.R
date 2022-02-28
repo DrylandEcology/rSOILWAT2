@@ -387,7 +387,16 @@ pdf_estimate <- function(sand, clay, fcoarse, swrc_name, pdf_name) {
   }
 
 
+  #--- Determine whether we use a C- or R-implemented PDF
+  swrcp <- if (pdf_name %in% pdfs_implemented_in_rSW2()) {
+    rSW2_SWRC_PDF_estimate_parameters(
+      pdf_name = pdf_name,
+      sand = sand,
+      clay = clay,
+      fcoarse = fcoarse
+    )
 
+  } else {
     .Call(
       C_rSW2_SWRC_PDF_estimate_parameters,
       pdf_type = rep_len(encode_name2pdf(pdf_name), length(sand)),
@@ -395,6 +404,7 @@ pdf_estimate <- function(sand, clay, fcoarse, swrc_name, pdf_name) {
       clay = clay,
       fcoarse = fcoarse
     )
+  }
 
 
   #--- Check validity of estimated SWRCp
@@ -404,6 +414,59 @@ pdf_estimate <- function(sand, clay, fcoarse, swrc_name, pdf_name) {
 
   swrcp
 }
+
+
+#' List PDFs implemented only in `rSOILWAT2` instead of `SOILWAT2`
+#' @md
+pdfs_implemented_in_rSW2 <- function() {
+}
+
+
+#' Estimate parameters of selected soil water retention curve (`SWRC`)
+#' using selected pedotransfer function (`PDF`) that are implemented in `R`
+#'
+#' @inheritParams SWRCs
+#' @param fail A logical value. If `TRUE` (default) and
+#'   requested `PDF` is not implemented in `R`, then throw an error;
+#'   otherwise, return silently.
+#'
+#' @return `swrcp`, i.e,.
+#' a numeric matrix where rows represent soil (layers) and
+#' columns represent a fixed number of `SWRC` parameters.
+#' The interpretation is dependent on the selected `SWRC`.
+#' However, return value is `NULL`
+#' only if `fail` is `FALSE` and requested `PDF` is not implemented in `R`.
+#'
+#' @inherit SWRCs references
+#'
+#' @section Details:
+#' [pdf_estimate()] is the function that should be directly called; this here
+#' is an internal helper function.
+#'
+#' @section Notes:
+#' See `SWRC_PDF_estimate_parameters()` in `SOILWAT2` for `PDFs`
+#' implemented in C.
+#'
+#' @md
+rSW2_SWRC_PDF_estimate_parameters <- function(
+  pdf_name,
+  sand,
+  clay,
+  fcoarse,
+  fail = TRUE
+) {
+  pdf_name <- std_pdf(pdf_name)[1]
+  has_pdf <- pdf_name %in% pdfs_implemented_in_rSW2()
+
+  if (has_pdf) {
+
+  } else {
+    if (isTRUE(fail)) {
+      stop("PDF ", shQuote(pdf_name), " is not implemented in rSOILWAT2.")
+    }
+  }
+}
+
   )
 }
 
