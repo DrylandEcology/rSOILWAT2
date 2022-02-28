@@ -1,0 +1,22 @@
+#------ Input for Soil Water Retention Curves (by soil layer) ------
+
+# A table with up to `MAX_LAYERS` rows (soil layers) and 6 columns:
+#   - the soil layers must match `soils.in`
+#   - the interpretation of columns (SWRC parameters) depends on the
+#     selected SWRC (see `siteparam.in`)
+#   - unused columns are ignored (if selected SWRC uses fewer than 6 parameters)
+
+# swrc = "Campbell1974"
+#   * param1 = "saturation" soil water matric potential [-bar]
+#   * param2 = saturated volumetric water content for the matric component [cm/cm]
+#   * param3 = b, slope of the linear log-log retention curve [-]
+
+# param1  param2   param3   param4   param5   param6
+18.6080  0.42703   5.3020   0.0000   0.0000   0.0000
+20.4644  0.43290   7.0500   0.0000   0.0000   0.0000
+22.8402  0.44013   9.4320   0.0000   0.0000   0.0000
+24.0381  0.44291  10.0690   0.0000   0.0000   0.0000
+24.2159  0.44359  10.3860   0.0000   0.0000   0.0000
+23.3507  0.44217  10.3830   0.0000   0.0000   0.0000
+12.3880  0.41370   7.3250   0.0000   0.0000   0.0000
+12.3880  0.41370   7.3250   0.0000   0.0000   0.0000

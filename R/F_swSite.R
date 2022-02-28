@@ -60,7 +60,9 @@ setClass(
     IntrinsicSiteParams = "numeric",
     SoilTemperatureFlag = "logical",
     SoilTemperatureConstants = "numeric",
-    TranspirationRegions = "matrix"
+    TranspirationRegions = "matrix",
+    # swrc_flags: swrc_name, pdf_name
+    swrc_flags = "character"
   )
 )
 
@@ -141,6 +143,11 @@ setValidity("swSite", function(object) {
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
+  if (length(object@swrc_flags) != 2) {
+    msg <- "@swrc_flags length != 2."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+
   val
 })
 
@@ -169,6 +176,10 @@ setMethod(
       dimnames(dots[["TranspirationRegions"]]) <-
         list(NULL, colnames(def@TranspirationRegions))
     }
+
+    if ("swrc_flags" %in% dns) {
+      # Guarantee names
+      names(dots[["swrc_flags"]]) <- names(def@swrc_flags)
     }
 
     for (sn in sns) {
@@ -189,6 +200,14 @@ setMethod(
 #' @rdname swSite-class
 #' @export
 setMethod("get_swSite", "swSite", function(object) object)
+
+#' @rdname swSite-class
+#' @export
+setMethod(
+  "swSite_SWRCflags",
+  signature = "swSite",
+  function(object) slot(object, "swrc_flags")
+)
 
 #' @rdname swSite-class
 #' @export
@@ -250,6 +269,17 @@ setMethod("swSite_TranspirationRegions", "swSite",
 setReplaceMethod("set_swSite", signature = "swSite",
   definition = function(object, value) {
     object <- value
+    validObject(object)
+    object
+})
+
+#' @rdname swSite-class
+#' @export
+setReplaceMethod(
+  "swSite_SWRCflags",
+  signature = "swSite",
+  definition = function(object, value) {
+    object@swrc_flags[] <- as.character(value)
     validObject(object)
     object
 })

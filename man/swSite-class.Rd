@@ -5,6 +5,7 @@
 \alias{swSite-class}
 \alias{initialize,swSite-method}
 \alias{get_swSite,swSite-method}
+\alias{swSite_SWRCflags,swSite-method}
 \alias{swSite_SWClimits,swSite-method}
 \alias{swSite_ModelFlags,swSite-method}
 \alias{swSite_ModelCoefficients,swSite-method}
@@ -17,6 +18,7 @@
 \alias{swSite_SoilTemperatureConsts,swSite-method}
 \alias{swSite_TranspirationRegions,swSite-method}
 \alias{set_swSite<-,swSite-method}
+\alias{swSite_SWRCflags<-,swSite-method}
 \alias{swSite_SWClimits<-,swSite-method}
 \alias{swSite_ModelFlags<-,swSite-method}
 \alias{swSite_ModelCoefficients<-,swSite-method}
@@ -34,6 +36,8 @@
 \S4method{initialize}{swSite}(.Object, ...)
 
 \S4method{get_swSite}{swSite}(object)
+
+\S4method{swSite_SWRCflags}{swSite}(object)
 
 \S4method{swSite_SWClimits}{swSite}(object)
 
@@ -58,6 +62,8 @@
 \S4method{swSite_TranspirationRegions}{swSite}(object)
 
 \S4method{set_swSite}{swSite}(object) <- value
+
+\S4method{swSite_SWRCflags}{swSite}(object) <- value
 
 \S4method{swSite_SWClimits}{swSite}(object) <- value
 

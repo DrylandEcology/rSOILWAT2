@@ -232,9 +232,9 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   if (debug) swprintf(" > 'site'");
   #endif
 
-  SET_SLOT(SW_DataList, install("soils"), onGet_SW_LYR());
+  SET_SLOT(SW_DataList, install("soils"), onGet_SW_SOILS());
   #ifdef RSWDEBUG
-  if (debug) swprintf(" > 'soils'");
+  if (debug) swprintf(" > 'soils' + 'swrc parameters'");
   #endif
 
   SET_SLOT(SW_DataList, install("estab"), onGet_SW_VES());
@@ -369,8 +369,8 @@ SEXP sw_consts(void) {
   int debug = 0;
   #endif
 
-  const int nret = 7; // length of cret
-  const int nINT = 10; // length of vINT and cINT
+  const int nret = 9; // length of cret
+  const int nINT = 13; // length of vINT and cINT
   const int nNUM = 1; // length of vNUM and cNUM
 
   #ifdef RSWDEBUG
@@ -378,13 +378,26 @@ SEXP sw_consts(void) {
   #endif
 
   SEXP
-    ret, cnames, ret_num, ret_int, ret_int2, ret_str1, ret_str2, ret_str3,
-    ret_infiles;
+    ret,
+    cnames,
+    ret_num,
+    ret_int,
+    ret_int2,
+    ret_str1, ret_str2, ret_str3,
+    ret_infiles,
+    ret_swrc,
+    ret_pdf;
   int i;
   int *pvINT;
   double *pvNUM;
   char *cret[] = {
-    "kNUM", "kINT", "VegTypes", "OutKeys", "OutPeriods", "OutAggs", "InFiles"
+    "kNUM",
+    "kINT",
+    "VegTypes",
+    "OutKeys", "OutPeriods", "OutAggs",
+    "InFiles",
+    "SWRC_types",
+    "PDF_types"
   };
 
   // Miscellaneous numerical constants
@@ -394,13 +407,17 @@ SEXP sw_consts(void) {
   // Miscellaneous integer constants
   int vINT[] = {
     SW_NFILES, MAX_LAYERS, MAX_TRANSP_REGIONS, MAX_NYEAR,
+    SWRC_PARAM_NMAX,
     eSW_NoTime, SW_OUTNPERIODS, SW_OUTNKEYS, SW_NSUMTYPES, NVEGTYPES,
-    OUT_DIGITS
+    OUT_DIGITS,
+    N_SWRCs, N_PDFs
   };
   char *cINT[] = {
     "SW_NFILES", "MAX_LAYERS", "MAX_TRANSP_REGIONS", "MAX_NYEAR",
+    "SWRC_PARAM_NMAX",
     "eSW_NoTime", "SW_OUTNPERIODS", "SW_OUTNKEYS", "SW_NSUMTYPES", "NVEGTYPES",
-    "OUT_DIGITS"
+    "OUT_DIGITS",
+    "N_SWRCs", "N_PDFs"
   };
 
   // Vegetation types
@@ -440,6 +457,7 @@ SEXP sw_consts(void) {
     "eOutput", "eOutputDaily", "eOutputWeekly", "eOutputMonthly", "eOutputYearly",
     "eOutputDaily_soil", "eOutputWeekly_soil", "eOutputMonthly_soil", "eOutputYearly_soil"
   };
+
 
   // create vector of numeric/real/double constants
   #ifdef RSWDEBUG
@@ -529,6 +547,32 @@ SEXP sw_consts(void) {
   }
   namesgets(ret_infiles, cnames);
 
+  // create vector of SWRC types
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" create ret_swrc ...");
+  #endif
+  PROTECT(ret_swrc = allocVector(INTSXP, N_SWRCs));
+  pvINT = INTEGER(ret_swrc);
+  PROTECT(cnames = allocVector(STRSXP, N_SWRCs));
+  for (i = 0; i < N_SWRCs; i++) {
+    pvINT[i] = i;
+    SET_STRING_ELT(cnames, i, mkChar(swrc2str[i]));
+  }
+  namesgets(ret_swrc, cnames);
+
+  // create vector of PDF types
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" create ret_pdf ...");
+  #endif
+  PROTECT(ret_pdf = allocVector(INTSXP, N_PDFs));
+  pvINT = INTEGER(ret_pdf);
+  PROTECT(cnames = allocVector(STRSXP, N_PDFs));
+  for (i = 0; i < N_PDFs; i++) {
+    pvINT[i] = i;
+    SET_STRING_ELT(cnames, i, mkChar(pdf2str[i]));
+  }
+  namesgets(ret_pdf, cnames);
+
 
   // combine vectors into a list and return
   #ifdef RSWDEBUG
@@ -546,7 +590,10 @@ SEXP sw_consts(void) {
   SET_VECTOR_ELT(ret, 4, ret_str2);
   SET_VECTOR_ELT(ret, 5, ret_str3);
   SET_VECTOR_ELT(ret, 6, ret_infiles);
+  SET_VECTOR_ELT(ret, 7, ret_swrc);
+  SET_VECTOR_ELT(ret, 8, ret_pdf);
 
+  // clean up
   UNPROTECT(nret * 2 + 2);
   #ifdef RSWDEBUG
   if (debug) swprintf(" ... done.\n");
@@ -561,17 +608,8 @@ SEXP sw_consts(void) {
   @brief Estimate parameters of selected soil water retention curve (SWRC)
     using selected pedotransfer function (PDF)
 
-  See SOILWAT2 function `SWRC_PDF_estimate_parameters()`.
+  See SOILWAT2's `SWRC_PDF_estimate_parameters()`, `swrc2str[]` and `pdf2str[]`.
 
-  Implemented SWRCs (`swrc_type`):
-    1. Campbell 1974 \cite Campbell1974
-
-  Implemented PDFs (`pdf_type`):
-    1. Cosby et al. 1984 \cite Cosby1984 PDF estimates parameters of
-       Campbell 1974 \cite Campbell1974 SWRC
-       see `SWRC_PDF_Cosby1984_for_Campbell1974()`
-
-  @param[in] swrc_type Identification number of selected SWRC
   @param[in] pdf_type Identification number of selected PDF
   @param[in] sand Sand content of the matric soil (< 2 mm fraction) [g/g]
   @param[in] clay Clay content of the matric soil (< 2 mm fraction) [g/g]
@@ -581,7 +619,6 @@ SEXP sw_consts(void) {
   @return Matrix of estimated SWRC parameters
 */
 SEXP rSW2_SWRC_PDF_estimate_parameters(
-  SEXP swrc_type,
   SEXP pdf_type,
   SEXP sand,
   SEXP clay,
@@ -593,14 +630,12 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
   if (
     nlyrs != length(clay) ||
     nlyrs != length(fcoarse) ||
-    nlyrs != length(swrc_type) ||
     nlyrs != length(pdf_type)
   ) {
     error("inputs are not of the same length.");
   }
 
   /* Convert inputs to correct type */
-  swrc_type = PROTECT(coerceVector(swrc_type, INTSXP));
   pdf_type = PROTECT(coerceVector(pdf_type, INTSXP));
   sand = PROTECT(coerceVector(sand, REALSXP));
   clay = PROTECT(coerceVector(clay, REALSXP));
@@ -613,7 +648,6 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
 
   /* Create convenience pointers */
   unsigned int
-    *xswrc_type = (unsigned int *) INTEGER(swrc_type),
     *xpdf_type = (unsigned int *) INTEGER(pdf_type);
 
   double
@@ -621,7 +655,6 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
     *xclay = REAL(clay),
     *xcoarse = REAL(fcoarse),
     *xres = REAL(res_swrcp);
-
 
   /* Loop over soil layers */
   /* Ideally, SOILWAT2's `SWRC_PDF_estimate_parameters()`
@@ -632,7 +665,6 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
 
   for (k1 = 0; k1 < nlyrs; k1++) {
     SWRC_PDF_estimate_parameters(
-      xswrc_type[k1],
       xpdf_type[k1],
       REAL(swrcpk),
       xsand[k1],
@@ -645,7 +677,7 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
     }
   }
 
-  UNPROTECT(7);
+  UNPROTECT(6);
 
   return res_swrcp;
 }
@@ -656,9 +688,6 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
   @brief Check Soil Water Retention Curve (SWRC) parameters
 
   See SOILWAT2 function `SWRC_check_parameters()`.
-
-  Implemented SWRCs:
-    1. Campbell 1974 \cite Campbell1974
 
   @param[in] swrc_type Identification number of selected SWRC
   @param[in] *swrcp SWRC parameters;
@@ -737,9 +766,6 @@ SEXP rSW2_SWRC_check_parameters(SEXP swrc_type, SEXP swrcp) {
       specified soil water retention curve (SWRC)
 
   See SOILWAT2 function `SWRC_SWCtoSWP()` and `SWRC_SWPtoSWC()`.
-
-  Implemented SWRCs (`swrc_type`):
-      1. Campbell 1974 \cite Campbell1974, see `SWRC_SWCtoSWP_Campbell1974()`
 
   @param[in] x
     Soil water content in the layer [cm] or soil water potential [-bar]\

@@ -48,7 +48,7 @@
   assign("st_mo", seq_len(12L), envir = rSW2_glovars)
 
   # Print SOILWAT2 messages to the console (by default); may turn off later
-  sw_verbosity(TRUE);
+  sw_verbosity(TRUE)
 
   invisible()
 }

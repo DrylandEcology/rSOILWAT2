@@ -223,29 +223,35 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #'   Depth interval, width, of each soil layer (units of `cm`).
 #'   `layer_width` is required to translate between
 #'   soil water content of a soil layer and volumetric water content.
-#' @param swrc_type An integer value or vector.
-#'   The identification number of selected `SWRC`.
-#' @param pdf_type An integer value or vector.
-#'   The identification number of selected `PDF`.
+#' @param swrc_name An character string or vector.
+#'   The selected `SWRC` name
+#'   (one of [swrc_names()], with default `"Campbell1974"`).
+#' @param pdf_name An character string or vector.
+#'   The selected `PDF` name
+#'   (one of [pdf_names()], with default `"Cosby1984AndOthers"`).
 #' @param swrcp A numeric vector or matrix.
 #'   The parameters of a selected `SWRC`;
 #'   each row represents one `SWRC`, e.g., one per soil layer.
 #' @param swrc A named list.
 #'   Contains all necessary elements of a `SWRC`,
-#'   i.e., `type` (short for `swrc_type`) and `swrcp`,
+#'   i.e., `name` (short for `swrc_name`) and `swrcp`,
 #'   or all necessary elements to estimate parameters of a `SWRC` given
-#'   soil parameters, i.e., `swrc_type` and `pdf_type`.
+#'   soil parameters, i.e., `swrc_name` and `pdf_name`.
 #'
 #' @section Details:
-#' Implemented SWRCs (`swrc_type`):
-#'   1. Campbell 1974
+#' [swrc_names()] lists implemented `SWRCs`;
+#' [pdf_names()] lists implemented `PDFs`.
 #'
-#' @references Campbell, G. S. 1974.
-#' A simple method for determining unsaturated conductivity
-#' from moisture retention data.
-#' Soil Science, 117(6):311-314. \doi{10.1097/00010694-197406000-00001}
+#' @inherit pdf_Rosetta3_for_vanGenuchten1980 references
+#' @references
+#'   Cosby, B. J., G. M. Hornberger, R. B. Clapp, & T. R. Ginn. 1984.
+#'   A statistical exploration of the relationships of soil moisture
+#'   characteristics to the physical properties of soils.
+#'   Water Resources Research, 20:682-690, \doi{10.1029/WR020i006p00682}
 #'
 #' @seealso
+#'   [swrc_names()],
+#'   [pdf_names()],
 #'   [pdf_estimate()],
 #'   [check_swrcp()],
 #'   [swrc_swp_to_vwc()],
@@ -256,35 +262,99 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 NULL
 
 
+#' List Soil Water Retention Curves `SWRCs`
+#'
+#' @return An integer vector with names of implemented `SWRCs`
+#'
+#' @details Notes:
+#' The integer values may change with new versions of `SOILWAT2.`
+#'
+#' @seealso [`SWRCs`], [pdf_names()]
+#'
+#' @md
+#' @export
+swrc_names <- function() {
+  rSW2_glovars[["kSOILWAT2"]][["SWRC_types"]]
+}
+
+#' List Pedotransfer Functions `PDFs`
+#'
+#' @return An integer vector with names of implemented `PDFs`
+#'
+#' @details Notes:
+#' The integer values may change with new versions of `SOILWAT2.`
+#'
+#' @seealso [`SWRCs`], [swrc_names()]
+#'
+#' @md
+#' @export
+pdf_names <- function() {
+  rSW2_glovars[["kSOILWAT2"]][["PDF_types"]]
+}
+
+
+#' Standardize a `SWRC` name
+#' @noRd
+std_swrc <- function(swrc_name) {
+  if (missing(swrc_name) || is.null(swrc_name) || all(is.na(swrc_name))) {
+    "Campbell1974"
+  } else {
+    as.character(swrc_name)
+  }
+}
+
+#' Standardize a `PDF` name
+#' @noRd
+std_pdf <- function(pdf_name) {
+  if (missing(pdf_name) || is.null(pdf_name) || all(is.na(pdf_name))) {
+    "Cosby1984AndOthers"
+  } else {
+    as.character(pdf_name)
+  }
+}
+
+
+#' Translate a `SWRC` name to its internal integer code
+#' @noRd
+encode_name2swrc <- function(swrc_name) {
+  as.integer(unname(swrc_names()[std_swrc(swrc_name)]))
+}
+
+#' Translate a `PDF` name to its internal integer code
+#' @noRd
+encode_name2pdf <- function(pdf_name) {
+  as.integer(unname(pdf_names()[std_pdf(pdf_name)]))
+}
+
+
+
 #' Estimate `SWRC` parameters from soil texture with a pedotransfer function
 #'
 #' @inheritParams SWRCs
 #'
-#' @section Details:
-#' Implemented PDFs (`pdf_type`):
-#'   1. Cosby et al. 1984 PDF estimates parameters of Campbell 1974 SWRC
-#'
-#' @section Details:
-#' See [SWRCs] for suitable values of `swrc_type`.
+#' @section Notes:
+#' [swrc_names()] lists implemented `SWRCs`;
+#' [pdf_names()] lists implemented `PDFs`.
 #'
 #' @section Notes:
 #' The soil parameters `sand`, `clay`, and `fcoarse` must be of
 #' the same length, i.e., represent one soil (length 1) or
 #' multiple soil (layers) (length > 1).
-#' The arguments selecting `SWRC` (`swrc_type`) and `PDF` (`pdf_type`)
+#' The arguments selecting `SWRC` (`swrc_name`) and `PDF` (`pdf_name`)
 #' are recycled for multiple soil layers.
 #'
 #' @inherit SWRCs references
 #'
-#' @references Cosby, B. J., G. M. Hornberger, R. B. Clapp, and T. R. Ginn.
-#' 1984. A statistical exploration of the relationships of soil moisture
-#' characteristics to the physical properties of soils.
-#' Water Resources Research, 20:682-690, \doi{10.1029/WR020i006p00682}
-#'
 #' @return `swrcp`, i.e,.
 #' a numeric matrix where rows represent soil (layers) and
 #' columns represent a fixed number of `SWRC` parameters.
-#' The interpretation is dependent on the selected `SWRC`.
+#' The interpretation is dependent on the selected `SWRC`, see
+#' `SOILWAT2` input file `swrc_param.in`
+#' (
+# nolint start
+#' `system.file("extdata", "example1", "Input", "swrc_params.in", package = "rSOILWAT2")`
+#' ).
+# nolint end
 #'
 #' @examples
 #' pdf_estimate(sand = c(0.5, 0.3), clay = c(0.2, 0.1), fcoarse = c(0, 0))
@@ -293,23 +363,29 @@ NULL
 #' pdf_estimate(
 #'   sand = soils[, "sand_frac"],
 #'   clay = soils[, "clay_frac"],
-#'   fcoarse = soils[, "gravel_content"]
+#'   fcoarse = soils[, "gravel_content"],
+#'   swrc_name = "Campbell1974",
+#'   pdf_name = "Cosby1984"
+#' )
 #' )
 #'
 #' @md
 #' @export
-pdf_estimate <- function(sand, clay, fcoarse, swrc_type = 1L, pdf_type = 1L) {
+pdf_estimate <- function(sand, clay, fcoarse, swrc_name, pdf_name) {
 
-  # lengths of arguments are checked by `C_rSW2_SWRC_PDF_estimate_parameters()`
-  nlyrs <- length(sand)
+  #--- Check for consistency between SWRC and PDF
+  swrc_name <- std_swrc(swrc_name)[1]
+  pdf_name <- std_pdf(pdf_name)[1]
 
-  .Call(
-    C_rSW2_SWRC_PDF_estimate_parameters,
-    swrc_type = rep_len(swrc_type, nlyrs),
-    pdf_type = rep_len(pdf_type, nlyrs),
-    sand = sand,
-    clay = clay,
-    fcoarse = fcoarse
+
+
+    .Call(
+      C_rSW2_SWRC_PDF_estimate_parameters,
+      pdf_type = rep_len(encode_name2pdf(pdf_name), length(sand)),
+      sand = sand,
+      clay = clay,
+      fcoarse = fcoarse
+    )
   )
 }
 
@@ -319,38 +395,42 @@ pdf_estimate <- function(sand, clay, fcoarse, swrc_type = 1L, pdf_type = 1L) {
 #' @inheritParams SWRCs
 #'
 #' @section Notes:
-#' The argument selecting `SWRC` (`swrc_type`) is recycled
+#' The argument selecting `SWRC` (`swrc_name`) is recycled
 #' for multiple parameter sets, i.e., rows of `swrcp`.
 #'
 #' @section Details:
-#' See [SWRCs] for suitable values of `swrc_type`.
+#' [swrc_names()] lists implemented `SWRCs`.
 #'
 #' @seealso [pdf_estimate()]
 #'
 #' @examples
-#' swrc_type <- 1
+#' swrc_name <- "Campbell1974"
+#' pdf_name <- "Cosby1984AndOthers"
 #' swrcp <- pdf_estimate(
 #'   sand = c(0.5, 0.3),
 #'   clay = c(0.2, 0.1),
 #'   fcoarse = c(0, 0),
-#'   swrc_type = swrc_type
+#'   swrc_name = swrc_name,
+#'   pdf_name = pdf_name
 #' )
 #'
-#' check_swrcp(swrc_type, swrcp)
-#' check_swrcp(rep(swrc_type, 2), swrcp)
-#' check_swrcp(swrc_type, swrcp[1, ])
+#' check_swrcp(swrc_name, swrcp)
+#' check_swrcp(swrc_name, swrcp[1, ])
 #'
 #' swrcp2 <- swrcp
 #' swrcp2[1, 1] <- -10
-#' check_swrcp(rep(swrc_type, 2), swrcp2)
+#' check_swrcp(swrc_name, swrcp2)
 #'
 #' @export
 #' @md
-check_swrcp <- function(swrc_type = 1L, swrcp) {
+check_swrcp <- function(swrc_name, swrcp) {
   # lengths of arguments are checked by `C_rSW2_SWRC_check_parameters()`
   .Call(
     C_rSW2_SWRC_check_parameters,
-    swrc_type = rep_len(swrc_type, if (is.matrix(swrcp)) nrow(swrcp) else 1),
+    swrc_type = rep_len(
+      encode_name2swrc(swrc_name)[1],
+      if (is.matrix(swrcp)) nrow(swrcp) else 1
+    ),
     swrcp = swrcp
   )
 }
@@ -394,8 +474,11 @@ check_swrcp <- function(swrc_type = 1L, swrcp) {
 #'   }
 #'
 #'
+#' @inherit SWRCs references
+#'
 #' @section Details:
-#' See [SWRCs] for suitable values of `swrc_type`.
+#' [swrc_names()] lists implemented `SWRCs`;
+#' [pdf_names()] lists implemented `PDFs`.
 #'
 #' @section Details:
 #' For backward compatibility, `fcoarse` and `layer_width` may be missing.
@@ -407,7 +490,7 @@ check_swrcp <- function(swrc_type = 1L, swrcp) {
 #' need to be estimated on the fly, i.e., if `swrc` does not contain
 #' the element `swrcp` (with suitable `SWRC` parameter values).
 #' This is handled by [pdf_estimate()] and additionally requires
-#' the element `pdf_type` for argument `swrc`.
+#' the element `pdf_name` for argument `swrc`.
 #'
 #' @seealso
 #'   [pdf_estimate()],
@@ -419,24 +502,50 @@ check_swrcp <- function(swrc_type = 1L, swrcp) {
 #' fcrs1 <- c(0, 0)
 #' fcrs2 <- c(0.4, 0.1)
 #'
-#' p1 <- pdf_estimate(sand = fsand, clay = fclay, fcoarse = fcrs1)
-#' swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, swrc = list(type = 1, swrcp = p1))
+#' swrc1 <- list(
+#'   name = "Campbell1974",
+#'   swrcp = pdf_estimate(
+#'     sand = fsand,
+#'     clay = fclay,
+#'     fcoarse = fcrs1,
+#'     swrc_name = "Campbell1974",
+#'     pdf_name = "Cosby1984"
+#'   )
+#' )
+#' swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, swrc = swrc1)
 #' swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, sand = fsand, clay = fclay)
-#' swrc_vwc_to_swp(
-#'   c(0.10, 0.15, 0.20),
-#'   fcoarse = fcrs1,
-#'   swrc = list(type = 1, swrcp = p1)
-#' )
+#' swrc_vwc_to_swp(c(0.10, 0.15, 0.20), fcoarse = fcrs1, swrc = swrc1)
 #'
-#' p2 <- pdf_estimate(sand = fsand, clay = fclay, fcoarse = fcrs2)
-#' swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, swrc = list(type = 1, swrcp = p2))
-#' (1 - fcrs2) * swrc_swp_to_vwc(-1.5, swrc = list(type = 1, swrcp = p2))
-#' swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, sand = fsand, clay = fclay)
-#' swrc_vwc_to_swp(
-#'   c(0.10, 0.15, 0.20),
-#'   fcoarse = fcrs2,
-#'   swrc = list(type = 1, swrcp = p2)
+#' swrc2 <- list(
+#'   name = "Campbell1974",
+#'   swrcp = pdf_estimate(
+#'     sand = fsand,
+#'     clay = fclay,
+#'     fcoarse = fcrs2,
+#'     swrc_name = "Campbell1974",
+#'     pdf_name = "Cosby1984"
+#'   )
 #' )
+#' swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, swrc = swrc2)
+#' (1 - fcrs2) * swrc_swp_to_vwc(-1.5, swrc = swrc2)
+#' swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, sand = fsand, clay = fclay)
+#' swrc_vwc_to_swp(c(0.10, 0.15, 0.20), fcoarse = fcrs2, swrc = swrc2)
+#'
+#'
+#' # Available water holding capacity "AWC"
+#' soils <- swSoils_Layers(rSOILWAT2::sw_exampleData)
+#' p <- pdf_estimate(
+#'   sand = soils[, "sand_frac"],
+#'   clay = soils[, "clay_frac"],
+#'   fcoarse = soils[, "gravel_content"]
+#' )
+#' tmp <- swrc_swp_to_vwc(
+#'   c(-1.5, -0.033),
+#'   fcoarse = soils[, "gravel_content"],
+#'   swrc = list(name = "Campbell1974", swrcp = p)
+#' )
+#' awc <- diff(c(0, soils[, "depth_cm"])) * as.vector(diff(tmp))
+#'
 #'
 #'
 #' @export
@@ -454,12 +563,15 @@ swrc_conversion <- function(
   #--- Check inputs
   direction <- match.arg(direction)
 
-  # `type` can be used as short form of `swrc_type`
-  if (!("swrc_type" %in% names(swrc)) && "type" %in% names(swrc)) {
-    swrc[["swrc_type"]] <- swrc[["type"]]
+  # `name` can be used as short form of `swrc_name`
+  if (!("swrc_name" %in% names(swrc)) && "name" %in% names(swrc)) {
+    swrc[["swrc_name"]] <- swrc[["name"]]
   }
 
-  stopifnot("swrc_type" %in% names(swrc))
+  stopifnot("swrc_name" %in% names(swrc))
+  swrc[["swrc_name"]] <- std_swrc(swrc[["swrc_name"]])[1]
+  swrc[["swrc_type"]] <- encode_name2swrc(swrc[["swrc_name"]])
+
 
   # Do we need to estimate swrcp?
   swrc[["swrcp"]] <- if (
@@ -475,10 +587,12 @@ swrc_conversion <- function(
   # Do we have sufficient information to estimate swrcp?
   if (is.null(swrc[["swrcp"]])) {
     if (
-      !all(c("swrc_type", "pdf_type") %in% names(swrc)) ||
+      !all(c("swrc_name", "pdf_name") %in% names(swrc)) ||
         is.null(sand) || is.null(clay)
     ) {
       stop("Insufficient information to estimate SWRC parameters.")
+    } else {
+      swrc[["pdf_type"]] <- encode_name2swrc(swrc[["pdf_name"]])[1]
     }
   }
 
@@ -562,8 +676,8 @@ swrc_conversion <- function(
         sand = soils[["sand"]],
         clay = soils[["clay"]],
         fcoarse = soils[["fcoarse"]],
-        swrc_type = swrc[["swrc_type"]],
-        pdf_type = swrc[["pdf_type"]]
+        swrc_name = swrc[["swrc_name"]],
+        pdf_name = swrc[["pdf_name"]]
       )
     }
 
@@ -578,8 +692,8 @@ swrc_conversion <- function(
         sand = soils[["sand"]],
         clay = soils[["clay"]],
         fcoarse = soils[["fcoarse"]],
-        swrc_type = swrc[["swrc_type"]],
-        pdf_type = swrc[["pdf_type"]]
+        swrc_name = swrc[["swrc_name"]],
+        pdf_name = swrc[["pdf_name"]]
       )
     }
 
@@ -600,8 +714,8 @@ swrc_conversion <- function(
         sand = soils[["sand"]],
         clay = soils[["clay"]],
         fcoarse = soils[["fcoarse"]],
-        swrc_type = swrc[["swrc_type"]],
-        pdf_type = swrc[["pdf_type"]]
+        swrc_name = swrc[["swrc_name"]],
+        pdf_name = swrc[["pdf_name"]]
       )
     }
 
@@ -622,8 +736,8 @@ swrc_conversion <- function(
         sand = soils[["sand"]],
         clay = soils[["clay"]],
         fcoarse = soils[["fcoarse"]],
-        swrc_type = swrc[["swrc_type"]],
-        pdf_type = swrc[["pdf_type"]]
+        swrc_name = swrc[["swrc_name"]],
+        pdf_name = swrc[["pdf_name"]]
       )
     }
 
@@ -632,13 +746,14 @@ swrc_conversion <- function(
     res <- vapply(
       seq_len(ncx),
       function(k) {
+        ids <- rep.int(k, nrx)
         swrc_conversion_1d(
           direction,
           x = x[, k],
-          soils = lapply(soils, function(sp) rep_len(sp[k], length.out = nrx)),
+          soils = lapply(soils, function(sp) sp[ids]),
           swrc = list(
-            swrc_type = rep_len(swrc[["swrc_type"]][k], nrx),
-            swrcp = swrc[["swrcp"]][rep(k, nrx), ]
+            swrc_type = swrc[["swrc_type"]][ids],
+            swrcp = swrc[["swrcp"]][ids, , drop = FALSE]
           )
         )
       },
@@ -702,7 +817,7 @@ swrc_swp_to_vwc <- function(
   swp_MPa,
   fcoarse,
   layer_width,
-  swrc = list(swrc_type = 1L, pdf_type = 1L, swrcp = NULL),
+  swrc = list(swrc_name = NULL, pdf_name = NULL, swrcp = NULL),
   sand = NULL,
   clay = NULL,
   outer_if_equalsize = FALSE
@@ -733,7 +848,7 @@ swrc_vwc_to_swp <- function(
   vwcBulk,
   fcoarse,
   layer_width,
-  swrc = list(swrc_type = 1L, pdf_type = 1L, swrcp = NULL),
+  swrc = list(swrc_name = NULL, pdf_name = NULL, swrcp = NULL),
   sand = NULL,
   clay = NULL,
   outer_if_equalsize = FALSE

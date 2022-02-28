@@ -11,6 +11,7 @@
 \alias{swFiles_LogFile,swInputData-method}
 \alias{swFiles_SiteParams,swInputData-method}
 \alias{swFiles_Soils,swInputData-method}
+\alias{swFiles_SWRCp,swInputData-method}
 \alias{swFiles_WeatherSetup,swInputData-method}
 \alias{swFiles_MarkovProbs,swInputData-method}
 \alias{swFiles_MarkovCov,swInputData-method}
@@ -29,6 +30,7 @@
 \alias{swFiles_LogFile<-,swInputData-method}
 \alias{swFiles_SiteParams<-,swInputData-method}
 \alias{swFiles_Soils<-,swInputData-method}
+\alias{swFiles_SWRCp<-,swInputData-method}
 \alias{swFiles_WeatherSetup<-,swInputData-method}
 \alias{swFiles_MarkovProbs<-,swInputData-method}
 \alias{swFiles_MarkovCov<-,swInputData-method}
@@ -131,6 +133,7 @@
 \alias{swProd_MonProd_tree<-,swInputData-method}
 \alias{swProd_MonProd_forb<-,swInputData-method}
 \alias{get_swSite,swInputData-method}
+\alias{swSite_SWRCflags,swInputData-method}
 \alias{swSite_SWClimits,swInputData-method}
 \alias{swSite_ModelFlags,swInputData-method}
 \alias{swSite_ModelCoefficients,swInputData-method}
@@ -143,6 +146,7 @@
 \alias{swSite_SoilTemperatureConsts,swInputData-method}
 \alias{swSite_TranspirationRegions,swInputData-method}
 \alias{set_swSite<-,swInputData-method}
+\alias{swSite_SWRCflags<-,swInputData-method}
 \alias{swSite_SWClimits<-,swInputData-method}
 \alias{swSite_ModelFlags<-,swInputData-method}
 \alias{swSite_ModelCoefficients<-,swInputData-method}
@@ -156,8 +160,11 @@
 \alias{swSite_TranspirationRegions<-,swInputData-method}
 \alias{get_swSoils,swInputData-method}
 \alias{swSoils_Layers,swInputData-method}
+\alias{swSoils_SWRCp,swInputData-method}
 \alias{set_swSoils<-,swInputData,swSoils-method}
+\alias{set_swSoils<-,swInputData,list-method}
 \alias{swSoils_Layers<-,swInputData-method}
+\alias{swSoils_SWRCp<-,swInputData-method}
 \alias{get_swSWC,swInputData-method}
 \alias{swSWC_use,swInputData-method}
 \alias{swSWC_prefix,swInputData-method}
@@ -213,6 +220,8 @@
 
 \S4method{swFiles_Soils}{swInputData}(object)
 
+\S4method{swFiles_SWRCp}{swInputData}(object)
+
 \S4method{swFiles_WeatherSetup}{swInputData}(object)
 
 \S4method{swFiles_MarkovProbs}{swInputData}(object)
@@ -248,6 +257,8 @@
 \S4method{swFiles_SiteParams}{swInputData}(object) <- value
 
 \S4method{swFiles_Soils}{swInputData}(object) <- value
+
+\S4method{swFiles_SWRCp}{swInputData}(object) <- value
 
 \S4method{swFiles_WeatherSetup}{swInputData}(object) <- value
 
@@ -457,6 +468,8 @@
 
 \S4method{get_swSite}{swInputData}(object)
 
+\S4method{swSite_SWRCflags}{swInputData}(object)
+
 \S4method{swSite_SWClimits}{swInputData}(object)
 
 \S4method{swSite_ModelFlags}{swInputData}(object)
@@ -480,6 +493,8 @@
 \S4method{swSite_TranspirationRegions}{swInputData}(object)
 
 \S4method{set_swSite}{swInputData}(object) <- value
+
+\S4method{swSite_SWRCflags}{swInputData}(object) <- value
 
 \S4method{swSite_SWClimits}{swInputData}(object) <- value
 
@@ -507,10 +522,15 @@
 
 \S4method{swSoils_Layers}{swInputData}(object)
 
+\S4method{swSoils_SWRCp}{swInputData}(object)
+
 \S4method{set_swSoils}{swInputData,swSoils}(object) <- value
 
+\S4method{set_swSoils}{swInputData,list}(object) <- value
 
 \S4method{swSoils_Layers}{swInputData}(object) <- value
+
+\S4method{swSoils_SWRCp}{swInputData}(object) <- value
 
 \S4method{get_swSWC}{swInputData}(object)
 

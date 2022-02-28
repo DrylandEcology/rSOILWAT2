@@ -21,7 +21,7 @@ swrc_swp_to_vwc(
   swp_MPa,
   fcoarse,
   layer_width,
-  swrc = list(swrc_type = 1L, pdf_type = 1L, swrcp = NULL),
+  swrc = list(swrc_name = NULL, pdf_name = NULL, swrcp = NULL),
   sand = NULL,
   clay = NULL,
   outer_if_equalsize = FALSE
@@ -31,7 +31,7 @@ swrc_vwc_to_swp(
   vwcBulk,
   fcoarse,
   layer_width,
-  swrc = list(swrc_type = 1L, pdf_type = 1L, swrcp = NULL),
+  swrc = list(swrc_name = NULL, pdf_name = NULL, swrcp = NULL),
   sand = NULL,
   clay = NULL,
   outer_if_equalsize = FALSE
@@ -60,9 +60,9 @@ soil water content of a soil layer and volumetric water content.}
 
 \item{swrc}{A named list.
 Contains all necessary elements of a \code{SWRC},
-i.e., \code{type} (short for \code{swrc_type}) and \code{swrcp},
+i.e., \code{name} (short for \code{swrc_name}) and \code{swrcp},
 or all necessary elements to estimate parameters of a \code{SWRC} given
-soil parameters, i.e., \code{swrc_type} and \code{pdf_type}.}
+soil parameters, i.e., \code{swrc_name} and \code{pdf_name}.}
 
 \item{sand}{A numeric value or vector.
 Sand content of the matric soil component
@@ -120,7 +120,8 @@ to convert from `VWC` to `SWP` with selected `SWRC`
 
 \section{Details}{
 
-See \link{SWRCs} for suitable values of \code{swrc_type}.
+\code{\link[=swrc_names]{swrc_names()}} lists implemented \code{SWRCs};
+\code{\link[=pdf_names]{pdf_names()}} lists implemented \code{PDFs}.
 
 
 For backward compatibility, \code{fcoarse} and \code{layer_width} may be missing.
@@ -132,7 +133,7 @@ Arguments \code{sand} and \code{clay} are only required if \code{SWRC} parameter
 need to be estimated on the fly, i.e., if \code{swrc} does not contain
 the element \code{swrcp} (with suitable \code{SWRC} parameter values).
 This is handled by \code{\link[=pdf_estimate]{pdf_estimate()}} and additionally requires
-the element \code{pdf_type} for argument \code{swrc}.
+the element \code{pdf_name} for argument \code{swrc}.
 }
 
 \examples{
@@ -141,24 +142,49 @@ fclay <- c(0.2, 0.1)
 fcrs1 <- c(0, 0)
 fcrs2 <- c(0.4, 0.1)
 
-p1 <- pdf_estimate(sand = fsand, clay = fclay, fcoarse = fcrs1)
-swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, swrc = list(type = 1, swrcp = p1))
+swrc1 <- list(
+  name = "Campbell1974",
+  swrcp = pdf_estimate(
+    sand = fsand,
+    clay = fclay,
+    fcoarse = fcrs1,
+    swrc_name = "Campbell1974",
+    pdf_name = "Cosby1984"
+  )
+)
+swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, swrc = swrc1)
 swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, sand = fsand, clay = fclay)
-swrc_vwc_to_swp(
-  c(0.10, 0.15, 0.20),
-  fcoarse = fcrs1,
-  swrc = list(type = 1, swrcp = p1)
-)
+swrc_vwc_to_swp(c(0.10, 0.15, 0.20), fcoarse = fcrs1, swrc = swrc1)
 
-p2 <- pdf_estimate(sand = fsand, clay = fclay, fcoarse = fcrs2)
-swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, swrc = list(type = 1, swrcp = p2))
-(1 - fcrs2) * swrc_swp_to_vwc(-1.5, swrc = list(type = 1, swrcp = p2))
-swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, sand = fsand, clay = fclay)
-swrc_vwc_to_swp(
-  c(0.10, 0.15, 0.20),
-  fcoarse = fcrs2,
-  swrc = list(type = 1, swrcp = p2)
+swrc2 <- list(
+  name = "Campbell1974",
+  swrcp = pdf_estimate(
+    sand = fsand,
+    clay = fclay,
+    fcoarse = fcrs2,
+    swrc_name = "Campbell1974",
+    pdf_name = "Cosby1984"
+  )
 )
+swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, swrc = swrc2)
+(1 - fcrs2) * swrc_swp_to_vwc(-1.5, swrc = swrc2)
+swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, sand = fsand, clay = fclay)
+swrc_vwc_to_swp(c(0.10, 0.15, 0.20), fcoarse = fcrs2, swrc = swrc2)
+
+
+# Available water holding capacity "AWC"
+soils <- swSoils_Layers(rSOILWAT2::sw_exampleData)
+p <- pdf_estimate(
+  sand = soils[, "sand_frac"],
+  clay = soils[, "clay_frac"],
+  fcoarse = soils[, "gravel_content"]
+)
+tmp <- swrc_swp_to_vwc(
+  c(-1.5, -0.033),
+  fcoarse = soils[, "gravel_content"],
+  swrc = list(name = "Campbell1974", swrcp = p)
+)
+awc <- diff(c(0, soils[, "depth_cm"])) * as.vector(diff(tmp))
 
 
 # Shape of SWRC

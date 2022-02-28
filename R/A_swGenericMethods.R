@@ -222,6 +222,12 @@ setGeneric("swFiles_SiteParams",
 #' @seealso \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}
 setGeneric("swFiles_Soils", function(object) standardGeneric("swFiles_Soils"))
 
+#' \code{swFiles_SWRCp}
+#' @param object An object of class \code{\linkS4class{swFiles}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}
+setGeneric("swFiles_SWRCp", function(object) standardGeneric("swFiles_SWRCp"))
+
 #' \code{swFiles_WeatherSetup}
 #' @param object An object of class \code{\linkS4class{swFiles}} or
 #'   \code{\linkS4class{swInputData}}.
@@ -356,6 +362,14 @@ setGeneric("swFiles_SiteParams<-",
 #' @seealso \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}
 setGeneric("swFiles_Soils<-",
   function(object, value) standardGeneric("swFiles_Soils<-"))
+
+#' \code{swFiles_SWRCp<-}
+#' @param object An object of class \code{\linkS4class{swFiles}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}
+setGeneric("swFiles_SWRCp<-",
+  function(object, value) standardGeneric("swFiles_SWRCp<-"))
 
 #' \code{swFiles_WeatherSetup<-}
 #' @param object An object of class \code{\linkS4class{swFiles}} or
@@ -1166,6 +1180,15 @@ setGeneric("swProd_MonProd_forb<-",
 #' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
 setGeneric("get_swSite", function(object) standardGeneric("get_swSite"))
 
+#' \code{swSite_SWRCflags}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_SWRCflags",
+  function(object) standardGeneric("swSite_SWRCflags")
+)
+
 #' \code{swSite_SWClimits}
 #' @param object An object of class \code{\linkS4class{swSite}} or
 #'   \code{\linkS4class{swInputData}}.
@@ -1256,6 +1279,15 @@ setGeneric("set_swSite", function(object, value) standardGeneric("set_swSite"))
 #' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
 setGeneric("set_swSite<-",
   function(object, value) standardGeneric("set_swSite<-"))
+
+#' \code{swSite_SWRCflags<-}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_SWRCflags<-",
+  function(object, value) standardGeneric("swSite_SWRCflags<-")
+)
 
 #' \code{swSite_SWClimits<-}
 #' @param object An object of class \code{\linkS4class{swSite}} or
@@ -1359,6 +1391,12 @@ setGeneric("get_swSoils", function(object) standardGeneric("get_swSoils"))
 #' @seealso \code{\linkS4class{swSoils}} and \code{\linkS4class{swInputData}}
 setGeneric("swSoils_Layers", function(object) standardGeneric("swSoils_Layers"))
 
+#' \code{swSoils_SWRCp}
+#' @param object An object of class \code{\linkS4class{swSoils}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSoils}} and \code{\linkS4class{swInputData}}
+setGeneric("swSoils_SWRCp", function(object) standardGeneric("swSoils_SWRCp"))
+
 #' \code{set_swSoils}
 #' Need to define and export this generic method -- otherwise,
 #' \code{\link{set_swSoils<-}} doesn't work.
@@ -1381,6 +1419,16 @@ setGeneric("set_swSoils<-",
 #' @seealso \code{\linkS4class{swSoils}} and \code{\linkS4class{swInputData}}
 setGeneric("swSoils_Layers<-",
   function(object, value) standardGeneric("swSoils_Layers<-"))
+
+#' \code{swSoils_SWRCp<-}
+#' @param object An object of class \code{\linkS4class{swSoils}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSoils}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSoils_SWRCp<-",
+  function(object, value) standardGeneric("swSoils_SWRCp<-")
+)
 ########################
 
 #########ESTAB##########

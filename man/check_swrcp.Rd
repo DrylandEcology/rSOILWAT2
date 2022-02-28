@@ -4,11 +4,12 @@
 \alias{check_swrcp}
 \title{Check Soil Water Retention Curve parameters}
 \usage{
-check_swrcp(swrc_type = 1L, swrcp)
+check_swrcp(swrc_name, swrcp)
 }
 \arguments{
-\item{swrc_type}{An integer value or vector.
-The identification number of selected \code{SWRC}.}
+\item{swrc_name}{An character string or vector.
+The selected \code{SWRC} name
+(one of \code{\link[=swrc_names]{swrc_names()}}, with default \code{"Campbell1974"}).}
 
 \item{swrcp}{A numeric vector or matrix.
 The parameters of a selected \code{SWRC};
@@ -19,31 +20,32 @@ Check Soil Water Retention Curve parameters
 }
 \section{Notes}{
 
-The argument selecting \code{SWRC} (\code{swrc_type}) is recycled
+The argument selecting \code{SWRC} (\code{swrc_name}) is recycled
 for multiple parameter sets, i.e., rows of \code{swrcp}.
 }
 
 \section{Details}{
 
-See \link{SWRCs} for suitable values of \code{swrc_type}.
+\code{\link[=swrc_names]{swrc_names()}} lists implemented \code{SWRCs}.
 }
 
 \examples{
-swrc_type <- 1
+swrc_name <- "Campbell1974"
+pdf_name <- "Cosby1984AndOthers"
 swrcp <- pdf_estimate(
   sand = c(0.5, 0.3),
   clay = c(0.2, 0.1),
   fcoarse = c(0, 0),
-  swrc_type = swrc_type
+  swrc_name = swrc_name,
+  pdf_name = pdf_name
 )
 
-check_swrcp(swrc_type, swrcp)
-check_swrcp(rep(swrc_type, 2), swrcp)
-check_swrcp(swrc_type, swrcp[1, ])
+check_swrcp(swrc_name, swrcp)
+check_swrcp(swrc_name, swrcp[1, ])
 
 swrcp2 <- swrcp
 swrcp2[1, 1] <- -10
-check_swrcp(rep(swrc_type, 2), swrcp2)
+check_swrcp(swrc_name, swrcp2)
 
 }
 \seealso{

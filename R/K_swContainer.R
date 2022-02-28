@@ -186,6 +186,14 @@ setMethod("swFiles_Soils", "swInputData",
 
 #' @rdname swInputData-class
 #' @export
+setMethod(
+  "swFiles_SWRCp",
+  signature = "swInputData",
+  function(object) swFiles_SWRCp(object@files)
+)
+
+#' @rdname swInputData-class
+#' @export
 setMethod("swFiles_WeatherSetup", "swInputData",
   function(object) swFiles_WeatherSetup(object@files))
 
@@ -294,6 +302,16 @@ setReplaceMethod("swFiles_SiteParams", signature = "swInputData",
 setReplaceMethod("swFiles_Soils", signature = "swInputData",
   function(object, value) {
     swFiles_Soils(object@files) <- value
+    object
+})
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "swFiles_SWRCp",
+  signature = "swInputData",
+  function(object, value) {
+    swFiles_SWRCp(object@files) <- value
     object
 })
 
@@ -1063,6 +1081,14 @@ setMethod("get_swSite", "swInputData", function(object) slot(object, "site"))
 
 #' @rdname swInputData-class
 #' @export
+setMethod(
+  "swSite_SWRCflags",
+  "swInputData",
+  function(object) swSite_SWRCflags(object@site)
+)
+
+#' @rdname swInputData-class
+#' @export
 setMethod("swSite_SWClimits", "swInputData",
   function(object) swSite_SWClimits(object@site))
 
@@ -1124,6 +1150,17 @@ setReplaceMethod("set_swSite", signature = "swInputData",
     set_swSite(object@site) <- value
     object
 })
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "swSite_SWRCflags",
+  signature = "swInputData",
+  function(object, value) {
+    swSite_SWRCflags(object@site) <- value
+    object
+  }
+)
 
 #' @rdname swInputData-class
 #' @export
@@ -1221,11 +1258,19 @@ setMethod("get_swSoils", "swInputData", function(object) object@soils)
 
 #' @rdname swInputData-class
 #' @export
-setMethod("swSoils_Layers", "swInputData",
-  function(object) swSoils_Layers(object@soils))
+setMethod(
+  "swSoils_Layers",
+  signature = "swInputData",
+  function(object) swSoils_Layers(object@soils)
+)
 
 #' @rdname swInputData-class
 #' @export
+setMethod(
+ "swSoils_SWRCp",
+ signature = "swInputData",
+ function(object) swSoils_SWRCp(object@soils)
+)
 
 #' @rdname swInputData-class
 #' @export
@@ -1236,13 +1281,50 @@ setReplaceMethod(
     set_swSoils(object@soils) <- value
     object
 })
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "set_swSoils",
+  signature = c(object = "swInputData", value = "list"),
+  function(object, value) {
+    set_swSoils(object@soils) <- value
+    object
+})
+
 #' @rdname swInputData-class
 #' @export
 setReplaceMethod(
   "swSoils_Layers",
   signature = "swInputData",
   function(object, value) {
+
+    if (as.vector(object@site@swrc_flags["pdf_name"]) != "NoPDF") {
+      # Note: If `pdf_type` == 0, then SWRC parameters are not estimated
+      # but they are either read in from disk or passed as object.
+      # --> however, assigning new soil layers fails `swSoils` validity checks
+      # if number of soil layers disagrees with the SWRC parameter object.
+      # If `pdf_type` != 0, then SWRC parameters will be estimated later;
+      # thus current values will be discarded and
+      # we can resize empty SWRC parameter object to avoid validity failure.
+      object@soils@SWRCp <- array(
+        data = NA_real_,
+        dim = c(nrow(value), ncol(object@soils@SWRCp)),
+        dimnames = list(NULL, colnames(object@soils@SWRCp))
+      )
+    }
+
     swSoils_Layers(object@soils) <- value
+    object
+})
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "swSoils_SWRCp",
+  signature = "swInputData",
+  function(object, value) {
+    swSoils_SWRCp(object@soils) <- value
     object
 })
 

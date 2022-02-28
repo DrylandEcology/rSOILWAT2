@@ -206,7 +206,7 @@ test_that("Use SWRC to convert between VWC/SWP", {
       swrc_vwc_to_swp(
         vwcBulk = matrix(
           vwc_fix[, ifix],
-          nrow = nrow(vwc_fix),
+          nrow = nrow(vwc_fix) - 1,
           ncol = nrow(texture),
           byrow = TRUE
         ),
@@ -215,7 +215,7 @@ test_that("Use SWRC to convert between VWC/SWP", {
       ),
       matrix(
         swp_fix[ifix],
-        nrow = nrow(vwc_fix),
+        nrow = nrow(vwc_fix) - 1,
         ncol = nrow(texture)
       )
     )

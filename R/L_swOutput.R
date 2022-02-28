@@ -118,7 +118,7 @@ setMethod(
   "swOutput_KEY_Period",
   signature = "swOutput_KEY",
   function(object, index) {
-    slot(object, rSW2_glovars[["sw_TimeSteps"]][index])
+    slot(object, rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]][index])
   }
 )
 
@@ -141,7 +141,7 @@ setReplaceMethod(
   "swOutput_KEY_Period",
   signature = "swOutput_KEY",
   function(object, index, value) {
-    slot(object, rSW2_glovars[["sw_TimeSteps"]][index]) <- value
+    slot(object, rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]][index]) <- value
     validObject(object)
     object
   }

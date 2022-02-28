@@ -49,7 +49,8 @@ static char *cSW_SIT[] = {
   "SWClimits", "ModelFlags", "ModelCoefficients",
   "SnowSimulationParameters", "DrainageCoefficient", "EvaporationCoefficients",
   "TranspirationCoefficients", "IntrinsicSiteParams", "SoilTemperatureFlag",
-  "SoilTemperatureConstants", "TranspirationRegions"
+  "SoilTemperatureConstants", "TranspirationRegions",
+  "swrc_flags"
 };
 
 static char *cLayers[] = {
@@ -58,21 +59,23 @@ static char *cLayers[] = {
   "transpForb_frac", "sand_frac", "clay_frac", "impermeability_frac", "soilTemp_c"
 };
 
+static char *cSWRCp[] = {
+  "Param1", "Param2", "Param3", "Param4", "Param5", "Param6"
+};
+
 
 /* =================================================== */
-/*             Global Function Definitions             */
+/*             Local Function Definitions              */
 /* --------------------------------------------------- */
 
-SEXP onGet_SW_LYR() {
+/* Copy soil properties into "Layers" matrix */
+static SEXP onGet_SW_LYR() {
 	int i, dmax = 0;
 	SW_SITE *v = &SW_Site;
-	SEXP swSoils, SW_SOILS;
-	SEXP Layers,Layers_names,Layers_names_y;
+	SEXP Layers, Layers_names, Layers_names_y;
 	RealD *p_Layers;
 
-	PROTECT(swSoils = MAKE_CLASS("swSoils"));
-	PROTECT(SW_SOILS = NEW_OBJECT(swSoils));
-	PROTECT(Layers = allocMatrix(REALSXP,v->n_layers,12));
+	PROTECT(Layers = allocMatrix(REALSXP, v->n_layers, 12));
 	p_Layers = REAL(Layers);
 	for (i = 0; i < (v->n_layers); i++) {
 		p_Layers[i + (v->n_layers) * 0] = dmax = v->lyr[i]->width + dmax;
@@ -88,33 +91,32 @@ SEXP onGet_SW_LYR() {
 		p_Layers[i + (v->n_layers) * 10] = v->lyr[i]->impermeability;
 		p_Layers[i + (v->n_layers) * 11] = v->lyr[i]->sTemp;
 	}
-	PROTECT(Layers_names = allocVector(VECSXP,2));
-	PROTECT(Layers_names_y = allocVector(STRSXP,12));
-	for(i=0;i<12;i++)
-		SET_STRING_ELT(Layers_names_y,i,mkChar(cLayers[i]));
-	SET_VECTOR_ELT(Layers_names,1,Layers_names_y);
+
+	PROTECT(Layers_names = allocVector(VECSXP, 2));
+	PROTECT(Layers_names_y = allocVector(STRSXP, 12));
+	for (i = 0; i < 12; i++) {
+		SET_STRING_ELT(Layers_names_y, i, mkChar(cLayers[i]));
+	}
+	SET_VECTOR_ELT(Layers_names, 1, Layers_names_y);
 	setAttrib(Layers, R_DimNamesSymbol, Layers_names);
 
-	SET_SLOT(SW_SOILS,install("Layers"),Layers);
-
-	UNPROTECT(5);
-	return SW_SOILS;
+	UNPROTECT(3);
+	return Layers;
 }
 
-/* Function `onSet_SW_LYR()` corresponds to SOILWAT2's `_read_layers()` */
-void onSet_SW_LYR(SEXP SW_SOILS) {
+/* Function `onSet_SW_LYR()` corresponds to SOILWAT2's `SW_LYR_read()`,
+   previously named `_read_layers()`
+*/
+static void onSet_SW_LYR(SEXP SW_LYR) {
 
 	SW_SITE *v = &SW_Site;
 	LyrIndex lyrno;
 	int i, j, k, columns;
 	RealF dmin = 0.0, dmax, evco, trco_veg[NVEGTYPES], psand, pclay, matricd, imperm, soiltemp, f_gravel;
 	RealD *p_Layers;
-	SEXP SW_LYR;
 
 	/* note that Files.read() must be called prior to this. */
-	PROTECT(SW_LYR = GET_SLOT(SW_SOILS,install("Layers")));
 	MyFileName = SW_F_name(eLayers);
-
 
 	j = nrows(SW_LYR);
 	p_Layers = REAL(SW_LYR);
@@ -169,11 +171,110 @@ void onSet_SW_LYR(SEXP SW_SOILS) {
 				MyFileName, lyrno + 1, MAX_LAYERS
 			);
 		}
+	}
+}
 
+
+/* Copy SWRC parameters into "SWRCp" matrix */
+static SEXP onGet_SW_SWRCp() {
+	int i, k;
+	SW_SITE *v = &SW_Site;
+	SEXP SWRCp, SWRCp_names, SWRCp_names_y;
+	RealD *p_SWRCp;
+
+	PROTECT(SWRCp = allocMatrix(REALSXP, v->n_layers, SWRC_PARAM_NMAX));
+	p_SWRCp = REAL(SWRCp);
+	for (i = 0; i < (v->n_layers); i++) {
+		for (k = 0; k < SWRC_PARAM_NMAX; k++) {
+			p_SWRCp[i + (v->n_layers) * k] = v->lyr[i]->swrcp[k];
+		}
 	}
 
-	UNPROTECT(1);
+	PROTECT(SWRCp_names = allocVector(VECSXP, 2));
+	PROTECT(SWRCp_names_y = allocVector(STRSXP, SWRC_PARAM_NMAX));
+	for (i = 0; i < SWRC_PARAM_NMAX; i++) {
+		SET_STRING_ELT(SWRCp_names_y, i, mkChar(cSWRCp[i]));
+	}
+	SET_VECTOR_ELT(SWRCp_names, 1, SWRCp_names_y);
+	setAttrib(SWRCp, R_DimNamesSymbol, SWRCp_names);
+
+	UNPROTECT(3);
+	return SWRCp;
 }
+
+/* Function `onSet_SW_SWRCp()` corresponds to SOILWAT2's `SW_SWRC_read()` */
+static void onSet_SW_SWRCp(SEXP SW_SWRCp) {
+
+	SW_SITE *v = &SW_Site;
+	int i, k;
+	RealD *p_SWRCp;
+
+	/* note that Files.read() must be called prior to this. */
+	MyFileName = SW_F_name(eSWRCp);
+
+	/* Check that we have n = `SWRC_PARAM_NMAX` values per layer */
+	if (ncols(SW_SWRCp) != SWRC_PARAM_NMAX) {
+		LogError(
+			logfp,
+			LOGFATAL,
+			"%s : Bad number of SWRC parameters %d -- must be %d.\n",
+			MyFileName, ncols(SW_SWRCp), SWRC_PARAM_NMAX
+		);
+	}
+
+	/* Check that we have `SW_Site.n_layers` */
+	if (nrows(SW_SWRCp) != SW_Site.n_layers) {
+		LogError(
+			logfp,
+			LOGFATAL,
+			"%s : Number of layers with SWRC parameters (%d) "
+			"must match number of soil layers (%d)\n",
+			MyFileName, nrows(SW_SWRCp), SW_Site.n_layers
+		);
+	}
+
+	/* Copy values */
+	p_SWRCp = REAL(SW_SWRCp);
+
+	for (i = 0; i < (v->n_layers); i++) {
+		for (k = 0; k < SWRC_PARAM_NMAX; k++) {
+			v->lyr[i]->swrcp[k] = p_SWRCp[i + (v->n_layers) * k];
+		}
+	}
+}
+
+
+/* =================================================== */
+/*             Global Function Definitions             */
+/* --------------------------------------------------- */
+
+/* Copy SOILWAT2 soil properties and SWRC parameters into S4 class "swSoils" */
+SEXP onGet_SW_SOILS() {
+	SEXP swSoils, SW_SOILS;
+
+	PROTECT(swSoils = MAKE_CLASS("swSoils"));
+	PROTECT(SW_SOILS = NEW_OBJECT(swSoils));
+
+	SET_SLOT(SW_SOILS, install("Layers"), onGet_SW_LYR());
+	SET_SLOT(SW_SOILS, install("SWRCp"), onGet_SW_SWRCp());
+
+	UNPROTECT(2);
+	return SW_SOILS;
+}
+
+/* Copy S4 class "swSoils" into SOILWAT2 soil properties and SWRC parameters */
+void onSet_SW_SOILS(SEXP SW_SOILS) {
+	SEXP SW_LYR, SW_SWRCp;
+
+	PROTECT(SW_LYR = GET_SLOT(SW_SOILS, install("Layers")));
+	onSet_SW_LYR(SW_LYR);
+
+	PROTECT(SW_SWRCp = GET_SLOT(SW_SOILS, install("SWRCp")));
+	onSet_SW_SWRCp(SW_SWRCp);
+
+	UNPROTECT(2);
+}
+
 
 SEXP onGet_SW_SIT() {
 	int i;
@@ -204,8 +305,17 @@ SEXP onGet_SW_SIT() {
 	char *cIntrinsicSiteParams[] = { "Longitude", "Latitude", "Altitude", "Slope", "Aspect" };
 
 	SEXP SoilTemperatureConstants_use, SoilTemperatureConstants, SoilTemperatureConstants_names;
-	char *cSoilTempValues[] = { "BiomassLimiter_g/m^2", "T1constant_a", "T1constant_b", "T1constant_c", "cs_constant_SoilThermCondct", "cs_constant", "sh_constant_SpecificHeatCapacity",
-			"ConstMeanAirTemp", "deltaX_Param", "MaxDepth" };
+	char *cSoilTempValues[] = {
+		"BiomassLimiter_g/m^2",
+		"T1constant_a", "T1constant_b", "T1constant_c",
+		"cs_constant_SoilThermCondct", "cs_constant",
+		"sh_constant_SpecificHeatCapacity",
+		"ConstMeanAirTemp",
+		"deltaX_Param", "MaxDepth"
+	};
+
+	SEXP swrc_flags, swrc_names;
+	char *cSWRCflags[] = {"swrc_name", "pdf_name"};
 
 	SEXP TranspirationRegions, TranspirationRegions_names, TranspirationRegions_names_y;
 	char *cTranspirationRegions[] = { "ndx", "layer" };
@@ -323,6 +433,19 @@ SEXP onGet_SW_SIT() {
 	SET_VECTOR_ELT(TranspirationRegions_names, 1, TranspirationRegions_names_y);
 	setAttrib(TranspirationRegions, R_DimNamesSymbol, TranspirationRegions_names);
 
+
+	PROTECT(swrc_flags = NEW_CHARACTER(2));
+	SET_STRING_ELT(swrc_flags, 0, mkChar(v->site_swrc_name));
+	SET_STRING_ELT(swrc_flags, 1, mkChar(v->site_pdf_name));
+
+	PROTECT(swrc_names = NEW_CHARACTER(2));
+	for (i = 0; i < 2; i++) {
+		SET_STRING_ELT(swrc_names, i, mkChar(cSWRCflags[i]));
+	}
+	setAttrib(swrc_flags, R_NamesSymbol, swrc_names);
+
+
+	// Fill all slots of `SW_SIT`
 	SET_SLOT(SW_SIT, install(cSW_SIT[0]), SWClimits);
 	SET_SLOT(SW_SIT, install(cSW_SIT[1]), ModelFlags);
 	SET_SLOT(SW_SIT, install(cSW_SIT[2]), ModelCoefficients);
@@ -334,8 +457,9 @@ SEXP onGet_SW_SIT() {
 	SET_SLOT(SW_SIT, install(cSW_SIT[8]), SoilTemperatureConstants_use);
 	SET_SLOT(SW_SIT, install(cSW_SIT[9]), SoilTemperatureConstants);
 	SET_SLOT(SW_SIT, install(cSW_SIT[10]), TranspirationRegions);
+	SET_SLOT(SW_SIT, install(cSW_SIT[11]), swrc_flags);
 
-	UNPROTECT(24);
+	UNPROTECT(26);
 	return SW_SIT;
 }
 
@@ -353,6 +477,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	SEXP IntrinsicSiteParams;
 	SEXP SoilTemperatureConstants_use;
 	SEXP SoilTemperatureConstants;
+	SEXP swrc_flags;
 	SEXP TranspirationRegions;
 	int *p_transp; // ideally `LyrIndex` so that same type as `_TranspRgnBounds`, but R API INTEGER() is signed
 
@@ -459,6 +584,17 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	if (debug) swprintf(" > 'soiltemp-constants'");
 	#endif
 
+
+	PROTECT(swrc_flags = GET_SLOT(SW_SIT, install("swrc_flags")));
+	strcpy(v->site_swrc_name, CHAR(STRING_ELT(swrc_flags, 0)));
+	v->site_swrc_type = encode_str2swrc(v->site_swrc_name);
+	strcpy(v->site_pdf_name, CHAR(STRING_ELT(swrc_flags, 1)));
+	v->site_pdf_type = encode_str2pdf(v->site_pdf_name);
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" > 'swrc/pdf-type'");
+	#endif
+
+
 	PROTECT(TranspirationRegions = GET_SLOT(SW_SIT, install("TranspirationRegions")));
 	p_transp = INTEGER(TranspirationRegions);
 	v->n_transp_rgn = nrows(TranspirationRegions);
@@ -488,5 +624,5 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	if (debug) swprintf(" ... done. \n");
 	#endif
 
-	UNPROTECT(11);
+	UNPROTECT(12);
 }

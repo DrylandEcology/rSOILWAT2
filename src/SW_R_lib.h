@@ -45,7 +45,6 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet);
 SEXP sw_consts(void);
 
 SEXP rSW2_SWRC_PDF_estimate_parameters(
-  SEXP swrc_type,
   SEXP pdf_type,
   SEXP sand,
   SEXP clay,

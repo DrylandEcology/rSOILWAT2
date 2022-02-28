@@ -4,7 +4,7 @@
 \alias{pdf_estimate}
 \title{Estimate \code{SWRC} parameters from soil texture with a pedotransfer function}
 \usage{
-pdf_estimate(sand, clay, fcoarse, swrc_type = 1L, pdf_type = 1L)
+pdf_estimate(sand, clay, fcoarse, swrc_name, pdf_name)
 }
 \arguments{
 \item{sand}{A numeric value or vector.
@@ -22,38 +22,37 @@ relative to the whole soil of each soil layer.
 values relative to the matric soil component (< 2 mm fraction) and
 relative to the whole soil (matric soil plus coarse fragments).}
 
-\item{swrc_type}{An integer value or vector.
-The identification number of selected \code{SWRC}.}
+\item{swrc_name}{An character string or vector.
+The selected \code{SWRC} name
+(one of \code{\link[=swrc_names]{swrc_names()}}, with default \code{"Campbell1974"}).}
 
-\item{pdf_type}{An integer value or vector.
-The identification number of selected \code{PDF}.}
+\item{pdf_name}{An character string or vector.
+The selected \code{PDF} name
+(one of \code{\link[=pdf_names]{pdf_names()}}, with default \code{"Cosby1984AndOthers"}).}
 }
 \value{
 \code{swrcp}, i.e,.
 a numeric matrix where rows represent soil (layers) and
 columns represent a fixed number of \code{SWRC} parameters.
-The interpretation is dependent on the selected \code{SWRC}.
+The interpretation is dependent on the selected \code{SWRC}, see
+\code{SOILWAT2} input file \code{swrc_param.in}
+(
+\code{system.file("extdata", "example1", "Input", "swrc_params.in", package = "rSOILWAT2")}
+).
 }
 \description{
 Estimate \code{SWRC} parameters from soil texture with a pedotransfer function
 }
-\section{Details}{
-
-Implemented PDFs (\code{pdf_type}):
-\enumerate{
-\item Cosby et al. 1984 PDF estimates parameters of Campbell 1974 SWRC
-}
-
-
-See \link{SWRCs} for suitable values of \code{swrc_type}.
-}
-
 \section{Notes}{
+
+\code{\link[=swrc_names]{swrc_names()}} lists implemented \code{SWRCs};
+\code{\link[=pdf_names]{pdf_names()}} lists implemented \code{PDFs}.
+
 
 The soil parameters \code{sand}, \code{clay}, and \code{fcoarse} must be of
 the same length, i.e., represent one soil (length 1) or
 multiple soil (layers) (length > 1).
-The arguments selecting \code{SWRC} (\code{swrc_type}) and \code{PDF} (\code{pdf_type})
+The arguments selecting \code{SWRC} (\code{swrc_name}) and \code{PDF} (\code{pdf_name})
 are recycled for multiple soil layers.
 }
 
@@ -64,13 +63,22 @@ soils <- swSoils_Layers(rSOILWAT2::sw_exampleData)
 pdf_estimate(
   sand = soils[, "sand_frac"],
   clay = soils[, "clay_frac"],
-  fcoarse = soils[, "gravel_content"]
+  fcoarse = soils[, "gravel_content"],
+  swrc_name = "Campbell1974",
+  pdf_name = "Cosby1984"
+)
+pdf_estimate(
+  sand = soils[, "sand_frac"],
+  clay = soils[, "clay_frac"],
+  fcoarse = soils[, "gravel_content"],
+  swrc_name = "vanGenuchten1980",
+  pdf_name = "Rosetta3"
 )
 
 }
 \references{
-Cosby, B. J., G. M. Hornberger, R. B. Clapp, and T. R. Ginn.
-1984. A statistical exploration of the relationships of soil moisture
+Cosby, B. J., G. M. Hornberger, R. B. Clapp, & T. R. Ginn. 1984.
+A statistical exploration of the relationships of soil moisture
 characteristics to the physical properties of soils.
 Water Resources Research, 20:682-690, \doi{10.1029/WR020i006p00682}
 }

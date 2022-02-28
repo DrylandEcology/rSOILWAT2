@@ -24,11 +24,13 @@ Depth interval, width, of each soil layer (units of \code{cm}).
 \code{layer_width} is required to translate between
 soil water content of a soil layer and volumetric water content.}
 
-\item{swrc_type}{An integer value or vector.
-The identification number of selected \code{SWRC}.}
+\item{swrc_name}{An character string or vector.
+The selected \code{SWRC} name
+(one of \code{\link[=swrc_names]{swrc_names()}}, with default \code{"Campbell1974"}).}
 
-\item{pdf_type}{An integer value or vector.
-The identification number of selected \code{PDF}.}
+\item{pdf_name}{An character string or vector.
+The selected \code{PDF} name
+(one of \code{\link[=pdf_names]{pdf_names()}}, with default \code{"Cosby1984AndOthers"}).}
 
 \item{swrcp}{A numeric vector or matrix.
 The parameters of a selected \code{SWRC};
@@ -36,9 +38,9 @@ each row represents one \code{SWRC}, e.g., one per soil layer.}
 
 \item{swrc}{A named list.
 Contains all necessary elements of a \code{SWRC},
-i.e., \code{type} (short for \code{swrc_type}) and \code{swrcp},
+i.e., \code{name} (short for \code{swrc_name}) and \code{swrcp},
 or all necessary elements to estimate parameters of a \code{SWRC} given
-soil parameters, i.e., \code{swrc_type} and \code{pdf_type}.}
+soil parameters, i.e., \code{swrc_name} and \code{pdf_name}.}
 }
 \description{
 \code{SWRCs} convert between soil water content and soil water potential
@@ -51,19 +53,19 @@ The \code{SWRC} parameters can be checked for consistency with \code{\link[=chec
 }
 \section{Details}{
 
-Implemented SWRCs (\code{swrc_type}):
-\enumerate{
-\item Campbell 1974
-}
+\code{\link[=swrc_names]{swrc_names()}} lists implemented \code{SWRCs};
+\code{\link[=pdf_names]{pdf_names()}} lists implemented \code{PDFs}.
 }
 
 \references{
-Campbell, G. S. 1974.
-A simple method for determining unsaturated conductivity
-from moisture retention data.
-Soil Science, 117(6):311-314. \doi{10.1097/00010694-197406000-00001}
+Cosby, B. J., G. M. Hornberger, R. B. Clapp, & T. R. Ginn. 1984.
+A statistical exploration of the relationships of soil moisture
+characteristics to the physical properties of soils.
+Water Resources Research, 20:682-690, \doi{10.1029/WR020i006p00682}
 }
 \seealso{
+\code{\link[=swrc_names]{swrc_names()}},
+\code{\link[=pdf_names]{pdf_names()}},
 \code{\link[=pdf_estimate]{pdf_estimate()}},
 \code{\link[=check_swrcp]{check_swrcp()}},
 \code{\link[=swrc_swp_to_vwc]{swrc_swp_to_vwc()}},

@@ -12,6 +12,7 @@
 \alias{swFiles_LogFile,swFiles-method}
 \alias{swFiles_SiteParams,swFiles-method}
 \alias{swFiles_Soils,swFiles-method}
+\alias{swFiles_SWRCp,swFiles-method}
 \alias{swFiles_WeatherSetup,swFiles-method}
 \alias{swFiles_MarkovProbs,swFiles-method}
 \alias{swFiles_MarkovCov,swFiles-method}
@@ -29,6 +30,7 @@
 \alias{swFiles_LogFile<-,swFiles-method}
 \alias{swFiles_SiteParams<-,swFiles-method}
 \alias{swFiles_Soils<-,swFiles-method}
+\alias{swFiles_SWRCp<-,swFiles-method}
 \alias{swFiles_WeatherSetup<-,swFiles-method}
 \alias{swFiles_MarkovProbs<-,swFiles-method}
 \alias{swFiles_MarkovCov<-,swFiles-method}
@@ -58,6 +60,8 @@
 \S4method{swFiles_SiteParams}{swFiles}(object)
 
 \S4method{swFiles_Soils}{swFiles}(object)
+
+\S4method{swFiles_SWRCp}{swFiles}(object)
 
 \S4method{swFiles_WeatherSetup}{swFiles}(object)
 
@@ -92,6 +96,8 @@
 \S4method{swFiles_SiteParams}{swFiles}(object) <- value
 
 \S4method{swFiles_Soils}{swFiles}(object) <- value
+
+\S4method{swFiles_SWRCp}{swFiles}(object) <- value
 
 \S4method{swFiles_WeatherSetup}{swFiles}(object) <- value
 

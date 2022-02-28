@@ -46,11 +46,18 @@
 #'
 #' @name swSoils-class
 #' @export
-setClass("swSoils", slots = c(Layers = "matrix"))
+setClass(
+  "swSoils",
+  slots = c(
+    Layers = "matrix",
+    SWRCp = "matrix"
+  )
+)
 
 swSoilLayers_validity <- function(object) {
   val <- TRUE
   tmpL <- dim(object@Layers)
+  tmpp <- dim(object@SWRCp)
   dtol1 <- 1 + tmpL[1] * rSW2_glovars[["tol"]]
 
   #--- Check "Layers"
@@ -98,12 +105,21 @@ swSoilLayers_validity <- function(object) {
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
+  #--- Check "SWRCp"
+  # `SW_SIT_init_run()` will call function to check validity of SWRCp values
+  if (tmpp[1] != tmpL[1]) {
+    msg <- paste(
+      "@SWRCp must have exactly the same number of soil layers (rows)",
+      "as @Layers."
+    )
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
-  temp <- colSums(object@Layers[, 4:8, drop = FALSE])
-  if (any(temp > dtol1, na.rm = TRUE)) {
-    msg <- paste("@Layers values of profile sums of evco and trcos must be",
-      "between 0 and 1.")
+  if (tmpp[2] != rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SWRC_PARAM_NMAX"]]) {
+    msg <- paste(
+      "@SWRCp must have exactly",
+      rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SWRC_PARAM_NMAX"]],
+      "columns."
+    )
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
 
@@ -131,6 +147,14 @@ setMethod("initialize", signature = "swSoils", function(.Object, ...) {
     ntmp <- nrow(dots[["Layers"]])
   }
 
+  # We don't set values for slot `SWRCp` if not passed via ...; this
+  # is to prevent simulation runs with accidentally incorrect values
+  if (!("SWRCp" %in% dns)) {
+    def@SWRCp <- def@SWRCp[rep.int(1, ntmp), , drop = FALSE]
+    def@SWRCp[] <- NA_real_
+  } else {
+    # Guarantee names
+    dimnames(dots[["SWRCp"]]) <- list(NULL, colnames(def@SWRCp))
   }
 
   for (sn in sns) {
@@ -157,6 +181,7 @@ setMethod("swSoils_Layers", "swSoils", function(object) object@Layers)
 
 #' @rdname swSoils-class
 #' @export
+setMethod("swSoils_SWRCp", "swSoils", function(object) object@SWRCp)
 
 #' @rdname swSoils-class
 #' @export
@@ -165,12 +190,29 @@ setReplaceMethod(
   signature = c(object = "swSoils", value = "swSoils"),
   function(object, value) {
     colnames(value@Layers) <- colnames(object@Layers)
+    colnames(value@SWRCp) <- colnames(object@SWRCp)
     object <- value
     validObject(object)
     object
   }
 )
 
+#' @rdname swSoils-class
+#' @export
+setReplaceMethod(
+  "set_swSoils",
+  signature = c(object = "swSoils", value = "list"),
+  function(object, value) {
+    idl <- if (utils::hasName(value, "Layers")) "Layers" else 1
+    idp <- if (utils::hasName(value, "SWRCp")) "SWRCp" else 2
+    colnames(value[[idl]]) <- colnames(object@Layers)
+    colnames(value[[idp]]) <- colnames(object@SWRCp)
+    object@Layers <- data.matrix(value[[idl]])
+    object@SWRCp <- data.matrix(value[[idp]])
+    validObject(object)
+    object
+  }
+)
 
 #' @rdname swSoils-class
 #' @export
@@ -180,10 +222,28 @@ setReplaceMethod(
   function(object, value) {
     colnames(value) <- colnames(object@Layers)
     object@Layers <- data.matrix(value)
+    # Note: validity check fails if number of soil layers disagrees with
+    # number of of soil layers of SWRC parameters
+    # --> see method for "swInputData" that can automatically resizes SWRCp
     validObject(object)
     object
   }
 )
+
+
+#' @rdname swSoils-class
+#' @export
+setReplaceMethod(
+  "swSoils_SWRCp",
+  signature = "swSoils",
+  function(object, value) {
+    colnames(value) <- colnames(object@SWRCp)
+    object@SWRCp <- data.matrix(value)
+    validObject(object)
+    object
+  }
+)
+
 
 
 
@@ -192,6 +252,7 @@ setReplaceMethod(
 setMethod("swReadLines",
   signature = c(object = "swSoils", file = "character"),
   function(object, file) {
+    stop("This function no longer works correctly; and SWRCp are not read.")
     infiletext <- readLines(con = file)
     infiletext <- infiletext[infiletext != ""] #get rid of extra spaces
     infiletext <- infiletext[17:length(infiletext)] #get rid of comments

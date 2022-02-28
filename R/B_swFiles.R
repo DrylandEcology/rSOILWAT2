@@ -143,6 +143,11 @@ setMethod("swFiles_Soils", "swFiles", function(object) {
 })
 #' @rdname swFiles-class
 #' @export
+setMethod("swFiles_SWRCp", "swFiles", function(object) {
+  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eSWRCp"]]]
+})
+#' @rdname swFiles-class
+#' @export
 setMethod("swFiles_WeatherSetup", "swFiles", function(object) {
   object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eWeather"]]]
 })
@@ -248,6 +253,14 @@ setReplaceMethod("swFiles_SiteParams", signature = "swFiles",
 #' @export
 setReplaceMethod("swFiles_Soils", signature = "swFiles",
   function(object, value) set_InFiles(object, "eLayers", value))
+
+#' @rdname swFiles-class
+#' @export
+setReplaceMethod(
+  "swFiles_SWRCp",
+  signature = "swFiles",
+  function(object, value) set_InFiles(object, "eSWRCp", value)
+)
 
 #' @rdname swFiles-class
 #' @export
