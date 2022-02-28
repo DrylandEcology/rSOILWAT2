@@ -4,30 +4,6 @@
 #include <R_ext/Rdynload.h>
 
 
-/* .C calls */
-//extern void SWRC_PDF_estimate_parameters(
-//  int swrc_type, int pdf_type,
-//  double *swrcp,
-//  double sand, double clay, double gravel
-//);
-//
-//static R_NativePrimitiveArgType SWRC_PDF_estimate_parameters_t[6] = {
-//  INTSXP, INTSXP,
-//  REALSXP,
-//  REALSXP, REALSXP, REALSXP
-//};
-//
-//static const R_CMethodDef CEntries[] = {
-//  {
-//    "SWRC_PDF_estimate_parameters",
-//    (DL_FUNC) &SWRC_PDF_estimate_parameters,
-//    6,
-//    SWRC_PDF_estimate_parameters_t
-//  },
-//  {NULL, NULL, 0, NULL}
-//};
-//
-
 /* .Call calls */
 extern SEXP start(SEXP, SEXP, SEXP, SEXP);
 extern SEXP tempError();
