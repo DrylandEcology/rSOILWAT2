@@ -187,7 +187,7 @@ editor_options:
 ## Create base rSOILWAT2 input object
 ```{r, input_object}
   # Preferred option:
-  # All relevant site-specific paramaters and variables are set to NA
+  # All relevant site-specific parameters and variables are set to NA
   sw_in <- new("swInputData")
 
   # Quick option:
@@ -567,6 +567,34 @@ You may organize weather data in a variety of ways:
 ## Assign new soil data to rSOILWAT2 input object
 ```{r, soils_final2, results = "hide"}
   rSOILWAT2::swSoils_Layers(sw_in) <- soil_new
+```
+
+
+## Estimate parameters of Soil Water Retention Curve before simulation
+Note: This step is usually not necessarily;
+instead, the default is to use the selected pedotransfer function to have the
+parameters estimated automatically.
+If we pass parameter values, then we need to set the `PDF` name to `"NoPDF"`,
+see `pdf_names()`.
+```{r, soils_swrc}
+  tmp <- rSOILWAT2::swSite_SWRCflags(sw_in)
+  swrcp <- rSOILWAT2::pdf_estimate(
+    sand = soil_new[, "sand_frac"],
+    clay = soil_new[, "clay_frac"],
+    fcoarse = soil_new[, "gravel_content"],
+    swrc_name = tmp["swrc_name"],
+    pdf_name = tmp["pdf_name"]
+  )
+
+  rSOILWAT2::swSoils_SWRCp(sw_in) <- swrcp
+
+  if (FALSE) {
+    # Alternatively, set soil properties and SWRC parameters at once
+    rSOILWAT2::set_swSoils(sw_in) <- list(Layers = soil_new, SWRCp = swrcp)
+  }
+
+  # Update `pdf_name` to indicate that parameter values are already estimated
+  rSOILWAT2::swSite_SWRCflags(sw_in)["pdf_name"] <- "NoPDF"
 ```
 
 
