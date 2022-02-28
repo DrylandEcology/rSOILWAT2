@@ -395,6 +395,15 @@ pdf_estimate <- function(sand, clay, fcoarse, swrc_name, pdf_name) {
       clay = clay,
       fcoarse = fcoarse
     )
+
+
+  #--- Check validity of estimated SWRCp
+  if (any(!check_swrcp(swrc_name, swrcp))) {
+    warning("Some estimated parameters failed checks.")
+  }
+
+  swrcp
+}
   )
 }
 
