@@ -377,6 +377,15 @@ pdf_estimate <- function(sand, clay, fcoarse, swrc_name, pdf_name) {
   swrc_name <- std_swrc(swrc_name)[1]
   pdf_name <- std_pdf(pdf_name)[1]
 
+  if (!.Call(C_rSW2_check_SWRC_vs_PDF, swrc_name, pdf_name)) {
+    stop(
+      "Selected PDF ",
+      shQuote(pdf_name),
+      " is incompatible with selected SWRC ",
+      shQuote(swrc_name)
+    )
+  }
+
 
 
     .Call(

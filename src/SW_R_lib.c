@@ -683,6 +683,42 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
 }
 
 
+/**
+  @brief Check whether selected PDF and SWRC are compatible
+
+  @param[in] swrc_name Name selected SWRC
+  @param[in] pdf_name Name selected PDF
+
+  @return A logical value indicating if SWRC and PDF are compatible.
+*/
+SEXP rSW2_check_SWRC_vs_PDF(SEXP swrc_name, SEXP pdf_name) {
+	SEXP res;
+	PROTECT(res = NEW_LOGICAL(1));
+	LOGICAL(res)[0] = swFALSE;
+
+	PROTECT(swrc_name = AS_CHARACTER(swrc_name));
+	PROTECT(pdf_name = AS_CHARACTER(pdf_name));
+
+	if (
+		!isNull(swrc_name) &&
+		!isNull(pdf_name) &&
+		strlen(CHAR(STRING_ELT(swrc_name, 0))) < 64 &&
+		strlen(CHAR(STRING_ELT(pdf_name, 0))) < 64
+	) {
+		char
+			sw_swrc_name[64],
+			sw_pdf_name[64];
+
+		strcpy(sw_swrc_name, CHAR(STRING_ELT(swrc_name, 0)));
+		strcpy(sw_pdf_name, CHAR(STRING_ELT(pdf_name, 0)));
+
+		LOGICAL(res)[0] = check_SWRC_vs_PDF(sw_swrc_name, sw_pdf_name);
+	}
+
+	UNPROTECT(3);
+	return res;
+}
+
 
 /**
   @brief Check Soil Water Retention Curve (SWRC) parameters
