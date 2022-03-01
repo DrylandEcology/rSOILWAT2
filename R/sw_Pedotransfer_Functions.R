@@ -195,6 +195,23 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 
 #------ SWRC parameters & pedotransfer functions ------
 
+# MAINTENANCE:
+# Notes for implementing a new SWRC "XXX" and corresponding PDF "YYY"
+#   1) SOILWAT2: see notes in SOILWAT2/SW_Site.h, i.e.,
+#      --> updated `N_SWRCs`, `N_PDFs`, `swrc2str[]`, `pdf2str[]`
+#      --> updated `check_SWRC_vs_PDF()`, `SWRC_PDF_estimate_parameters()`,
+#          `SWRC_check_parameters()`, `SWRC_SWCtoSWP()`, `SWRC_SWPtoSWC()`
+#      --> new `SWRC_check_parameters_for_XXX()`, `SWRC_PDF_YYY_for_XXX()`,
+#          `SWRC_SWCtoSWP_XXX()`, `SWRC_SWPtoSWC_XXX()`
+#
+#   2) rSOILWAT2:
+#     * if "YYY" is implemented in R, then:
+#       * new `pdf_YYY_for_XXX()`
+#       * update `pdfs_implemented_in_rSW2()`
+#       * update `rSW2_SWRC_PDF_estimate_parameters()`
+#     * update examples and unit tests to utilize new XXX/YYY functions
+
+
 #' Functionality for Soil Water Retention Curves (`SWRC`)
 #'
 #' @description
