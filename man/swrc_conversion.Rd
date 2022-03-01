@@ -14,7 +14,8 @@ swrc_conversion(
   swrc,
   sand = NULL,
   clay = NULL,
-  outer_if_equalsize = FALSE
+  outer_if_equalsize = FALSE,
+  verbose = FALSE
 )
 
 swrc_swp_to_vwc(
@@ -24,7 +25,8 @@ swrc_swp_to_vwc(
   swrc = list(swrc_name = NULL, pdf_name = NULL, swrcp = NULL),
   sand = NULL,
   clay = NULL,
-  outer_if_equalsize = FALSE
+  outer_if_equalsize = FALSE,
+  verbose = FALSE
 )
 
 swrc_vwc_to_swp(
@@ -34,7 +36,8 @@ swrc_vwc_to_swp(
   swrc = list(swrc_name = NULL, pdf_name = NULL, swrcp = NULL),
   sand = NULL,
   clay = NULL,
-  outer_if_equalsize = FALSE
+  outer_if_equalsize = FALSE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -79,6 +82,9 @@ where the \code{d} sets of soil values are repeated for each value of \code{x}.
 If \code{FALSE} (default), then the returned object has a size of \code{l} = \code{d}
 where the the \code{SWRC} conversion is applied to the
 first element of \code{x} and soils, the second elements, and so on.}
+
+\item{verbose}{A logical value. If \code{TRUE}, then display
+\code{SOILWAT2} internal warnings.}
 
 \item{swp_MPa}{A numeric object. The soil water potential values
 (units `[MPa]`) to be converted to
@@ -153,8 +159,10 @@ swrc1 <- list(
   )
 )
 swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, swrc = swrc1)
+swrc_swp_to_vwc(c(-1.5, NA), fcoarse = fcrs1, swrc = swrc1)
 swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, sand = fsand, clay = fclay)
 swrc_vwc_to_swp(c(0.10, 0.15, 0.20), fcoarse = fcrs1, swrc = swrc1)
+swrc_vwc_to_swp(c(0.10, NA, 0.20), fcoarse = fcrs1, swrc = swrc1)
 
 swrc2 <- list(
   name = "Campbell1974",

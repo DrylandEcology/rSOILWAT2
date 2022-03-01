@@ -906,28 +906,41 @@ SEXP rSW2_SWRC(
       swrcpk[k2] = xswrcp[k1 + nlyrs * k2];
     }
 
-    switch (xdirection) {
-      case 1:
-        /* SWP->SWC: [-bar] to [cm] */
-        xres[k1] = SWRC_SWPtoSWC(
-          xx[k1],
-          xswrc_type[k1],
-          swrcpk,
-          xcoarse[k1],
-          xwidth[k1]
-        );
-        break;
+    if (R_FINITE(xx[k1]) && R_FINITE(xcoarse[k1]) && R_FINITE(xwidth[k1])) {
+      switch (xdirection) {
+        case 1:
+          /* SWP->SWC: [-bar] to [cm] */
+          xres[k1] = SWRC_SWPtoSWC(
+            xx[k1],
+            xswrc_type[k1],
+            swrcpk,
+            xcoarse[k1],
+            xwidth[k1],
+            LOGWARN
+          );
+          break;
 
-      case 2:
-        /* SWC->SWP: [cm] to [-bar] */
-        xres[k1] = SWRC_SWCtoSWP(
-          xx[k1],
-          xswrc_type[k1],
-          swrcpk,
-          xcoarse[k1],
-          xwidth[k1]
-        );
-        break;
+        case 2:
+          /* SWC->SWP: [cm] to [-bar] */
+          xres[k1] = SWRC_SWCtoSWP(
+            xx[k1],
+            xswrc_type[k1],
+            swrcpk,
+            xcoarse[k1],
+            xwidth[k1],
+            LOGWARN
+          );
+          break;
+      }
+
+      // Translate SOILWAT2 missing to R missing value
+      if (EQ(xres[k1], SW_MISSING)) {
+        xres[k1] = NA_REAL;
+      }
+
+    } else {
+      // Input values are not finite
+      xres[k1] = NA_REAL;
     }
   }
 

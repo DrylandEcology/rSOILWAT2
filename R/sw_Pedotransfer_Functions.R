@@ -614,6 +614,8 @@ check_swrcp <- function(swrc_name, swrcp) {
 #'   If `FALSE` (default), then the returned object has a size of `l` = `d`
 #'   where the the `SWRC` conversion is applied to the
 #'   first element of `x` and soils, the second elements, and so on.
+#' @param verbose A logical value. If `TRUE`, then display
+#'   `SOILWAT2` internal warnings.
 #'
 #' @return The dimensions of the output are a function of `x` and the
 #'   number of soil values (e.g., rows or length of `swrc[["swrcp"]]`).
@@ -672,8 +674,10 @@ check_swrcp <- function(swrc_name, swrcp) {
 #'   )
 #' )
 #' swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, swrc = swrc1)
+#' swrc_swp_to_vwc(c(-1.5, NA), fcoarse = fcrs1, swrc = swrc1)
 #' swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, sand = fsand, clay = fclay)
 #' swrc_vwc_to_swp(c(0.10, 0.15, 0.20), fcoarse = fcrs1, swrc = swrc1)
+#' swrc_vwc_to_swp(c(0.10, NA, 0.20), fcoarse = fcrs1, swrc = swrc1)
 #'
 #' swrc2 <- list(
 #'   name = "Campbell1974",
@@ -757,7 +761,8 @@ swrc_conversion <- function(
   swrc,
   sand = NULL,
   clay = NULL,
-  outer_if_equalsize = FALSE
+  outer_if_equalsize = FALSE,
+  verbose = FALSE
 ) {
   #--- Check inputs
   direction <- match.arg(direction)
@@ -850,6 +855,7 @@ swrc_conversion <- function(
   res <- array(dim = c(nrx, ncx))
 
 
+  #--- Prepare inputs and make SWRC conversion
   if (
     nx1d && (nx == 1 || nsoils == 1 || (nx == nsoils && !outer_if_equalsize))
   ) {
@@ -880,7 +886,7 @@ swrc_conversion <- function(
       )
     }
 
-    res <- swrc_conversion_1d(direction, x, soils, swrc = swrc)
+    res <- swrc_conversion_1d(direction, x, soils, swrc, verbose)
 
   } else if (nx1d && nx > 1 && nsoils > 1) {
     # 4. x [len = l] + soils [len = d] -> res [dim = l x d]
@@ -899,7 +905,7 @@ swrc_conversion <- function(
     tmp <- lapply(
       x,
       function(v) {
-        swrc_conversion_1d(direction, x = rep_len(v, nsoils), soils, swrc)
+        swrc_conversion_1d(direction, rep_len(v, nsoils), soils, swrc, verbose)
       }
     )
     res <- matrix(unlist(tmp), nrow = nx, ncol = nsoils, byrow = TRUE)
@@ -920,7 +926,7 @@ swrc_conversion <- function(
 
     res <- vapply(
       seq_len(ncx),
-      function(k) swrc_conversion_1d(direction, x = x[, k], soils, swrc),
+      function(k) swrc_conversion_1d(direction, x[, k], soils, swrc, verbose),
       FUN.VALUE = rep(1, nrx),
       USE.NAMES = FALSE
     )
@@ -953,7 +959,8 @@ swrc_conversion <- function(
           swrc = list(
             swrc_type = swrc[["swrc_type"]][ids],
             swrcp = swrc[["swrcp"]][ids, , drop = FALSE]
-          )
+          ),
+          verbose = verbose
         )
       },
       FUN.VALUE = rep(1, nrx),
@@ -970,7 +977,10 @@ swrc_conversion <- function(
 
 #' Helper function of \code{swrc_conversion} to access underlying C code
 #' @noRd
-swrc_conversion_1d <- function(direction, x, soils, swrc) {
+swrc_conversion_1d <- function(direction, x, soils, swrc, verbose) {
+
+  prev_verbosity <- sw_verbosity(verbose = as.logical(verbose))
+  on.exit(sw_verbosity(prev_verbosity))
 
   # lengths of arguments are checked by `C_rSW2_SWRC()`
   nx <- length(x)
@@ -1019,7 +1029,8 @@ swrc_swp_to_vwc <- function(
   swrc = list(swrc_name = NULL, pdf_name = NULL, swrcp = NULL),
   sand = NULL,
   clay = NULL,
-  outer_if_equalsize = FALSE
+  outer_if_equalsize = FALSE,
+  verbose = FALSE
 ) {
   swrc_conversion(
     direction = "swp_to_vwc",
@@ -1029,7 +1040,8 @@ swrc_swp_to_vwc <- function(
     fcoarse = fcoarse,
     layer_width = layer_width,
     swrc = swrc,
-    outer_if_equalsize = outer_if_equalsize
+    outer_if_equalsize = outer_if_equalsize,
+    verbose = verbose
   )
 }
 
@@ -1050,7 +1062,8 @@ swrc_vwc_to_swp <- function(
   swrc = list(swrc_name = NULL, pdf_name = NULL, swrcp = NULL),
   sand = NULL,
   clay = NULL,
-  outer_if_equalsize = FALSE
+  outer_if_equalsize = FALSE,
+  verbose = FALSE
 ) {
   swrc_conversion(
     direction = "vwc_to_swp",
@@ -1060,6 +1073,7 @@ swrc_vwc_to_swp <- function(
     fcoarse = fcoarse,
     layer_width = layer_width,
     swrc = swrc,
-    outer_if_equalsize = outer_if_equalsize
+    outer_if_equalsize = outer_if_equalsize,
+    verbose = verbose
   )
 }
