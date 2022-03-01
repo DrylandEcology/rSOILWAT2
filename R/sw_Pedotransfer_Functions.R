@@ -367,6 +367,12 @@ encode_name2pdf <- function(pdf_name) {
 #'   swrc_name = "Campbell1974",
 #'   pdf_name = "Cosby1984"
 #' )
+#' pdf_estimate(
+#'   sand = soils[, "sand_frac"],
+#'   clay = soils[, "clay_frac"],
+#'   fcoarse = soils[, "gravel_content"],
+#'   swrc_name = "vanGenuchten1980",
+#'   pdf_name = "Rosetta3"
 #' )
 #'
 #' @md
@@ -419,6 +425,7 @@ pdf_estimate <- function(sand, clay, fcoarse, swrc_name, pdf_name) {
 #' List PDFs implemented only in `rSOILWAT2` instead of `SOILWAT2`
 #' @md
 pdfs_implemented_in_rSW2 <- function() {
+  "Rosetta3"
 }
 
 
@@ -458,7 +465,8 @@ rSW2_SWRC_PDF_estimate_parameters <- function(
   pdf_name <- std_pdf(pdf_name)[1]
   has_pdf <- pdf_name %in% pdfs_implemented_in_rSW2()
 
-  if (has_pdf) {
+  if (has_pdf && pdf_name %in% "Rosetta3") {
+    pdf_Rosetta3_for_vanGenuchten1980(sand = sand, clay = clay)
 
   } else {
     if (isTRUE(fail)) {
@@ -467,7 +475,60 @@ rSW2_SWRC_PDF_estimate_parameters <- function(
   }
 }
 
+
+#' Estimate van Genuchten 1980 `SWRC` parameters using `Rosetta` v3 `PDF` by
+#' Zhang et al. 2017
+#'
+#' @inheritParams SWRCs
+#'
+#' @return `swrcp`, i.e,.
+#' a numeric matrix where rows represent soil (layers) and
+#' columns represent a fixed number of `SWRC` parameters: \itemize{
+#'   \item `swrcp[0]` (`theta_r`): residual volumetric water content
+#'         of the matric component (units of `[cm / cm]`)
+#'   \item `swrcp[1]` (`theta_s`): saturated volumetric water content
+#'         of the matric component (units of `[cm / cm]`)
+#'   \item `swrcp[2]` (`alpha`): related to the inverse of
+#'         air entry suction (units of `[cm-1]`)
+#'   \item `swrcp[3]` (`n`): measure of the pore-size distribution `[-]`
+#' }
+#'
+#' @references
+#'   Mualem, Y. 1976. A new model for predicting the hydraulic conductivity of
+#'   unsaturated porous media.
+#'   Water Resources Research, 12:513-522, \doi{10.1029/WR012i003p00513}
+#' @references
+#'   van Genuchten, M. T. 1980. A Closed-form Equation for Predicting the
+#'   Hydraulic Conductivity of Unsaturated Soils.
+#'   Soil Science Society of America Journal, 44:892-898,
+#'   \doi{10.2136/sssaj1980.03615995004400050002x}
+#' @references
+#'   Zhang, Y., & Schaap, M. G. 2017. Weighted recalibration of the
+#'   Rosetta pedotransfer model with improved estimates of
+#'   hydraulic parameter distributions and summary statistics (Rosetta3).
+#'   Journal of Hydrology, 547:39-53, \doi{10.1016/j.jhydrol.2017.01.004}
+#'
+#' @section Details:
+#' [pdf_estimate()] is the function that should be directly called; this here
+#' is an internal helper function.
+#'
+#' @md
+pdf_Rosetta3_for_vanGenuchten1980 <- function(sand, clay) {
+  stopifnot(requireNamespace("soilDB"))
+
+  tmp <- soilDB::ROSETTA(
+    100 * data.frame(sand = sand, silt = 1 - (sand + clay), clay = clay),
+    vars = c("sand", "silt", "clay"),
+    v = "3"
   )
+
+  unname(data.matrix(data.frame(
+    tmp[, c("theta_r", "theta_s")],
+    10 ^ tmp[, "alpha"],
+    10 ^ tmp[, "npar"],
+    0,
+    0
+  )))
 }
 
 
@@ -627,6 +688,46 @@ check_swrcp <- function(swrc_name, swrcp) {
 #' )
 #' awc <- diff(c(0, soils[, "depth_cm"])) * as.vector(diff(tmp))
 #'
+#'
+#' # Shape of SWRCs
+#' theta <- seq(0.05, 0.5, by = 0.001)
+#' soils <- data.frame(
+#'   sand_frac = c(sand = 0.92, silty_loam = 0.17, silty_clay = 0.06),
+#'   clay_frac = c(0.03, 0.13, 0.58)
+#' )
+#' phi <- list(
+#'   Campbell1974 = swrc_vwc_to_swp(
+#'     theta,
+#'     sand = soils[, "sand_frac"],
+#'     clay = soils[, "clay_frac"],
+#'     swrc = list(swrc_name = "Campbell1974", pdf_name = "Cosby1984")
+#'   ),
+#'   vanGenuchten1980 = swrc_vwc_to_swp(
+#'     theta,
+#'     sand = soils[, "sand_frac"],
+#'     clay = soils[, "clay_frac"],
+#'     swrc = list(swrc_name = "vanGenuchten1980", pdf_name = "Rosetta3")
+#'   )
+#' )
+#' if (requireNamespace("graphics")) {
+#'   par_prev <- graphics::par(mfcol = c(2, 1))
+#'
+#'   for (k in seq_along(phi)) {
+#'     graphics::matplot(
+#'       theta, -phi[[k]],
+#'       type = "l", log = "y",
+#'       xlim = c(0, max(theta)),
+#'       xlab = "theta [m/m]",
+#'       ylim = c(1e-4, 1e6),
+#'       ylab = "-phi [MPa]",
+#'       main = paste0("Soil Water Retention Curve (", names(phi)[k], ")")
+#'     )
+#'     graphics::abline(h = -c(-1.5, -0.033), col = "gray", lty = 3)
+#'     graphics::legend("topright", rownames(soils), col = 1:3, lty = 1:3)
+#'   }
+#'
+#'   graphics::par(par_prev)
+#' }
 #'
 #'
 #' @export

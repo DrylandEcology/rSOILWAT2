@@ -187,9 +187,53 @@ tmp <- swrc_swp_to_vwc(
 awc <- diff(c(0, soils[, "depth_cm"])) * as.vector(diff(tmp))
 
 
-# Shape of SWRC
+# Shape of SWRCs
+theta <- seq(0.05, 0.5, by = 0.001)
+soils <- data.frame(
+  sand_frac = c(sand = 0.92, silty_loam = 0.17, silty_clay = 0.06),
+  clay_frac = c(0.03, 0.13, 0.58)
+)
+phi <- list(
+  Campbell1974 = swrc_vwc_to_swp(
+    theta,
+    sand = soils[, "sand_frac"],
+    clay = soils[, "clay_frac"],
+    swrc = list(swrc_name = "Campbell1974", pdf_name = "Cosby1984")
+  ),
+  vanGenuchten1980 = swrc_vwc_to_swp(
+    theta,
+    sand = soils[, "sand_frac"],
+    clay = soils[, "clay_frac"],
+    swrc = list(swrc_name = "vanGenuchten1980", pdf_name = "Rosetta3")
+  )
+)
+if (requireNamespace("graphics")) {
+  par_prev <- graphics::par(mfcol = c(2, 1))
+
+  for (k in seq_along(phi)) {
+    graphics::matplot(
+      theta, -phi[[k]],
+      type = "l", log = "y",
+      xlim = c(0, max(theta)),
+      xlab = "theta [m/m]",
+      ylim = c(1e-4, 1e6),
+      ylab = "-phi [MPa]",
+      main = paste0("Soil Water Retention Curve (", names(phi)[k], ")")
+    )
+    graphics::abline(h = -c(-1.5, -0.033), col = "gray", lty = 3)
+    graphics::legend("topright", rownames(soils), col = 1:3, lty = 1:3)
+  }
+
+  graphics::par(par_prev)
+}
 
 
+}
+\references{
+Cosby, B. J., G. M. Hornberger, R. B. Clapp, & T. R. Ginn. 1984.
+A statistical exploration of the relationships of soil moisture
+characteristics to the physical properties of soils.
+Water Resources Research, 20:682-690, \doi{10.1029/WR020i006p00682}
 }
 \seealso{
 \code{\link[=pdf_estimate]{pdf_estimate()}},

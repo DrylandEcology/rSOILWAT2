@@ -39,6 +39,7 @@ pedotransfer
 phenological
 phenology
 rangeland
+recalibration
 sensu
 shortgrass
 shrubland
@@ -90,6 +91,7 @@ Clapp
 codecov
 Espinosa
 Freund
+Genuchten
 Gessner
 Gidden
 Ginn
@@ -109,6 +111,7 @@ Matsumoto
 Meinshausen
 Milchunas
 Montzka
+Mualem
 Nauels
 Nicholls
 Oecologia
@@ -129,6 +132,7 @@ rSFSTEP
 rSFSW
 rSW
 Sala
+Schaap
 Schlaepfer
 SOILWAT
 Springer
@@ -144,3 +148,4 @@ Vuuren
 Wickham
 Wuenschel
 Zach
+Zhang

@@ -712,7 +712,7 @@ SEXP rSW2_check_SWRC_vs_PDF(SEXP swrc_name, SEXP pdf_name) {
 		strcpy(sw_swrc_name, CHAR(STRING_ELT(swrc_name, 0)));
 		strcpy(sw_pdf_name, CHAR(STRING_ELT(pdf_name, 0)));
 
-		LOGICAL(res)[0] = check_SWRC_vs_PDF(sw_swrc_name, sw_pdf_name);
+		LOGICAL(res)[0] = check_SWRC_vs_PDF(sw_swrc_name, sw_pdf_name, swFALSE);
 	}
 
 	UNPROTECT(3);
