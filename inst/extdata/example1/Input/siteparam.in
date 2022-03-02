@@ -91,9 +91,11 @@ RCP85
 #     input file ("swrc_params.in") instead of estimated from PDF
 #   - swrc_name = "Campbell1974": (Campbell 1974)
 #     * pdf_name = "Cosby1984AndOthers": PDFs by Cosby et al. 1984
-#       (but Saxton et al. 2006 for `swc_sat` and Rawls et al. 1985 for `swc_min`)
+#       (but `swc_sat` by Saxton et al. 2006,
+#       `swc_min` by user input, realistic SWP limit, or Rawls et al. 1985)
 #     * pdf_name = "Cosby1984": PDFs by Cosby et al. 1984
-#       (including `swc_sat` and `swc_min` = 0)
+#       (including `swc_sat`; `swc_min` = 0 is not realistic, thus,
+#       `swc_min` by user input, realistic SWP limit, or Rawls et al. 1985)
 #   - swrc_name = "vanGenuchten1980": van Genuchten-Mualem (van Genuchten 1980)
 #     * pdf_name = "Rosetta3": not implemented in C (but see rSOILWAT2)
 #   - swrc_name = "BrooksCorey1964": (Brooks and Corey 1964)
