@@ -171,45 +171,6 @@ swSite_SWRCflags(sw_in7) <- c("vanGenuchten1980", "Rosetta3")
 
 sw_out7 <- sw_exec(inputData = sw_in7, weatherList = sw_weath3, quiet = TRUE)
 
-if (requireNamespace("graphics")) {
-  par_prev <- graphics::par(mfrow = c(2, 1))
-
-  graphics::plot(
-    -0.1 * slot(slot(sw_out7, "SWPMATRIC"), "Day")[1:365, "Lyr_2"],
-    type = "l",
-    ylim = c(-10, 0),
-    xlab = "Time [Day of year]",
-    ylab = "Soil water potential [MPa]"
-  )
-  graphics::lines(
-    -0.1 * slot(slot(sw_out, "SWPMATRIC"), "Day")[1:365, "Lyr_2"],
-    col = "orange"
-  )
-
-  graphics::plot(
-    10 * slot(slot(sw_out7, "SWCBULK"), "Day")[1:365, "Lyr_2"],
-    type = "l",
-    ylim = c(0, 20),
-    xlab = "Time [Day of year]",
-    ylab = "Soil water content [mm]"
-  )
-  graphics::lines(
-    10 * slot(slot(sw_out, "SWCBULK"), "Day")[1:365, "Lyr_2"],
-    col = "orange"
-  )
-  graphics::legend(
-    "bottomleft",
-    legend = c(
-      paste(swSite_SWRCflags(sw_in7), collapse = "/"),
-      paste(swSite_SWRCflags(sw_in), collapse = "/")
-    ),
-    col = c("black", "orange"),
-    lwd = 2
-  )
-
-  graphics::par(par_prev)
-}
-
 ## See help(package = "rSOILWAT2") for a full list of functions
 
 }
