@@ -344,6 +344,46 @@ encode_name2pdf <- function(pdf_name) {
 }
 
 
+#' Matching pairs of implemented `SWRCs` and `PDFs`
+#'
+#' @inheritParams SWRCs
+#'
+#' @return A `data.frame` with two columns `SWRC` and `PDF` where each
+#'   row contains a matching pair of `SWRC` and `PDF` that are implemented.
+#'
+#' @section Details:
+#'   The argument `swrc_name` is optional. If missing, then all implemented
+#'   `SWRCs` are listed.
+#'   `"NoPDF` is not included in the list.
+#'
+#' @export
+list_matched_swrcs_pdfs <- function(swrc_name) {
+  swrc_name <- if (
+    missing(swrc_name) || is.null(swrc_name) || all(is.na(swrc_name))
+  ) {
+    names(swrc_names())
+  } else {
+    as.character(swrc_name)
+  }
+
+  res <- expand.grid(
+    SWRC = swrc_name,
+    PDF = names(pdf_names()[-1]),
+    stringsAsFactors = FALSE,
+    KEEP.OUT.ATTRS = FALSE
+  )
+
+  ids <- mapply(
+    function(s, p) .Call(C_rSW2_check_SWRC_vs_PDF, s, p),
+    res[, "SWRC"],
+    res[, "PDF"]
+  )
+
+  res <- res[ids, , drop = FALSE]
+  rownames(res) <- NULL
+  res
+}
+
 
 #' Estimate `SWRC` parameters from soil texture with a pedotransfer function
 #'
