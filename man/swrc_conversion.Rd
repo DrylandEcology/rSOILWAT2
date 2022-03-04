@@ -196,7 +196,7 @@ awc <- diff(c(0, soils[, "depth_cm"])) * as.vector(diff(tmp))
 
 
 # Shape of SWRCs
-theta <- seq(0.05, 0.5, by = 0.001)
+theta <- seq(0.05, 0.55, by = 0.001)
 soils <- data.frame(
   sand_frac = c(sand = 0.92, silty_loam = 0.17, silty_clay = 0.06),
   clay_frac = c(0.03, 0.13, 0.58)
@@ -221,7 +221,8 @@ if (requireNamespace("graphics")) {
   for (k in seq_along(phi)) {
     graphics::matplot(
       theta, -phi[[k]],
-      type = "l", log = "y",
+      type = "l",
+      log = "y",
       xlim = c(0, max(theta)),
       xlab = "theta [m/m]",
       ylim = c(1e-4, 1e6),
