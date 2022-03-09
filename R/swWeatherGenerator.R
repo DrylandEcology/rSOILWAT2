@@ -117,16 +117,23 @@
 #' swMarkov_Conv(sw_in) <- res2[["mkv_woy"]]
 #'
 #' @export
-dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
-  propagate_NAs = FALSE, valNA = NULL,
+dbW_estimate_WGen_coefs <- function(
+  weatherData,
+  WET_limit_cm = 0,
+  propagate_NAs = FALSE,
+  valNA = NULL,
   imputation_type = c("none", "mean", "locf"),
-  imputation_span = 5L) {
+  imputation_span = 5L
+) {
 
   # daily weather data
-  if (inherits(weatherData, "list") &&
-      all(sapply(weatherData, inherits, what = "swWeatherData"))) {
-    wdata <- data.frame(dbW_weatherData_to_dataframe(weatherData,
-      valNA = valNA))
+  if (
+    inherits(weatherData, "list") &&
+    all(sapply(weatherData, inherits, what = "swWeatherData"))
+  ) {
+    wdata <- data.frame(
+      dbW_weatherData_to_dataframe(weatherData, valNA = valNA)
+    )
   } else {
     wdata <- data.frame(set_missing_weather(weatherData, valNA = valNA))
   }
@@ -139,8 +146,12 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
 
   #-----------------------------------------------------------------------------
   #------ calculate mkv_prob.in
-  icol_day <- grep("DOY|Day", colnames(wdata), ignore.case = TRUE,
-    value = TRUE)
+  icol_day <- grep(
+    "DOY|Day",
+    colnames(wdata),
+    ignore.case = TRUE,
+    value = TRUE
+  )
 
   #--- calculate WET days
   wdata[["WET"]] <- wdata[["PPT_cm"]] > WET_limit_cm
@@ -156,25 +167,31 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   #--- output container: dataframe for storing mkv_prob.in data
   doys <- 366  # see SOILWAT2 constant `MAX_DAYS`
   outs <- c("DOY", "p_W_W", "p_W_D", "PPT_avg", "PPT_sd")
-  mkv_prob <- data.frame(matrix(NA, nrow = doys, ncol = length(outs),
-    dimnames = list(NULL, outs)))
+  mkv_prob <- data.frame(
+    matrix(nrow = doys, ncol = length(outs), dimnames = list(NULL, outs))
+  )
   mkv_prob[, "DOY"] <- seq_len(doys)
 
   #--- mean/sd of precipitation across years for doy i if it is a wet day
-  temp <- by(wdata[, c("WET", "PPT_cm")], INDICES = wdata[, icol_day],
+  temp <- by(
+    wdata[, c("WET", "PPT_cm")],
+    INDICES = wdata[, icol_day],
     function(x) {
       # if `na.rm` is TRUE, then remove NAs in `WET`; if only NAs -> PPT_avg = 0
       # if `na.rm` is FALSE, then any NA propagates to PPT_avg = NA
       iswet <- if (na.rm) which(x[, "WET"]) else x[, "WET"]
       ppt <- x[iswet, "PPT_cm"]
       if (length(ppt) > 0) {
-        c(PPT_avg = mean(ppt, na.rm = na.rm),
-          PPT_sd = sd(ppt, na.rm = na.rm))
+        c(
+          PPT_avg = mean(ppt, na.rm = na.rm),
+          PPT_sd = sd(ppt, na.rm = na.rm)
+        )
       } else {
         # there are no wet days for this DOY; thus PPT = 0
         c(PPT_avg = 0, PPT_sd = 0)
       }
-    })
+    }
+  )
   mkv_prob[, c("PPT_avg", "PPT_sd")] <- do.call(rbind, temp)
 
 
@@ -184,8 +201,10 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   #    dryprob = p(wet|dry) = "p_W_D" #nolint
   #    = probability that it precipitates today if it was dry
   #      (did not precipitate) yesterday
-  temp <- by(wdata[, c("WET", "WET_yesterday", "WW", "WD")],
-    INDICES = wdata[, icol_day], function(x) {
+  temp <- by(
+    wdata[, c("WET", "WET_yesterday", "WW", "WD")],
+    INDICES = wdata[, icol_day],
+    function(x) {
       # p(wet): probability that today is wet
       p_W <- mean(x[, "WET"], na.rm = na.rm)
       # number of DOY = i that follow a wet day
@@ -195,30 +214,32 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
 
       c(
         p_W_W = if (isTRUE(n_Wy > 0)) {
-            # `p(wet|wet)` estimated as the number of years with doy being wet
-            # given previous day is wet divided by the number of years with
-            # the previous day being wet
-            sum(x[, "WW"], na.rm = na.rm) / n_Wy
-          } else {
-            # `p(wet|wet)` approximated with frequency that today is wet for
-            # data where yesterday is never wet (avoid division by zero);
-            # this value is likely near 0 because p(wet yesterday) = 0
-            # and p(wet today) ~ p(wet yesterday)
-            p_W
-          },
+          # `p(wet|wet)` estimated as the number of years with doy being wet
+          # given previous day is wet divided by the number of years with
+          # the previous day being wet
+          sum(x[, "WW"], na.rm = na.rm) / n_Wy
+        } else {
+          # `p(wet|wet)` approximated with frequency that today is wet for
+          # data where yesterday is never wet (avoid division by zero);
+          # this value is likely near 0 because p(wet yesterday) = 0
+          # and p(wet today) ~ p(wet yesterday)
+          p_W
+        },
         p_W_D = if (isTRUE(n_Dy > 0)) {
-            # `p(wet|dry)` estimated as the number of years with doy being wet
-            # given previous day is dry divided by the number of years with
-            # the previous day being dry
-            sum(x[, "WD"], na.rm = na.rm) / n_Dy
-          } else {
-            # `p(wet|dry)` approximated with frequency that today is wet for
-            # data where yesterday is never dry (avoid division by zero);
-            # this value is likely near 1 because p(wet yesterday) = 1
-            # and p(wet today) ~ p(wet yesterday)
-            p_W
-          })
-    })
+          # `p(wet|dry)` estimated as the number of years with doy being wet
+          # given previous day is dry divided by the number of years with
+          # the previous day being dry
+          sum(x[, "WD"], na.rm = na.rm) / n_Dy
+        } else {
+          # `p(wet|dry)` approximated with frequency that today is wet for
+          # data where yesterday is never dry (avoid division by zero);
+          # this value is likely near 1 because p(wet yesterday) = 1
+          # and p(wet today) ~ p(wet yesterday)
+          p_W
+        }
+      )
+    }
+  )
   mkv_prob[, c("p_W_W", "p_W_D")] <- do.call(rbind, temp)
 
   #--- Make sure probability values are well formed: 0 <= p <= 1
@@ -233,14 +254,17 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   if (anyNA(mkv_prob)) {
     ids_baddoy <- mkv_prob[apply(mkv_prob, 1, anyNA), "DOY"]
 
-    msg <- paste0("values for n = ", length(ids_baddoy), " DOYs: ",
-      paste(ids_baddoy, collapse = ", "))
+    msg <- paste0(
+      "values for n = ", length(ids_baddoy), " DOYs: ",
+      paste(ids_baddoy, collapse = ", ")
+    )
 
     if (imputation_type == "none") {
       warning("Insufficient weather data to estimate ", msg)
     } else {
       message("Impute missing `mkv_prob` ", msg)
-      mkv_prob <- rSW2utils::impute_df(mkv_prob,
+      mkv_prob <- rSW2utils::impute_df(
+        mkv_prob,
         imputation_type = imputation_type,
         imputation_span = imputation_span,
         cyclic = TRUE
@@ -258,25 +282,40 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
 
   #--- output container: dataframe for storing mkv_cov.in data
   weeks <- 53 # see SOILWAT2 constant `MAX_WEEKS`
-  outs <- c("WEEK", "wTmax_C", "wTmin_C",
+  outs <- c(
+    "WEEK", "wTmax_C", "wTmin_C",
     "var_MAX", "cov_MAXMIN", "cov_MINMAX", "var_MIN",
-    "CF_Tmax_wet", "CF_Tmax_dry", "CF_Tmin_wet", "CF_Tmin_dry")
-  mkv_cov <- data.frame(matrix(NA, nrow = weeks, ncol = length(outs),
-    dimnames = list(NULL, outs)))
+    "CF_Tmax_wet", "CF_Tmax_dry", "CF_Tmin_wet", "CF_Tmin_dry"
+  )
+  mkv_cov <- data.frame(
+    matrix(nrow = weeks, ncol = length(outs), dimnames = list(NULL, outs))
+  )
 
 
   #--- Aggregate for each week
   mkv_cov[, "WEEK"] <- seq_len(weeks)
 
   # Average weekly temperature values
-  mkv_cov[, "wTmax_C"] <- tapply(wdata[["Tmax_C"]], wdata[["WEEK"]], mean,
-    na.rm = na.rm)
-  mkv_cov[, "wTmin_C"] <- tapply(wdata[["Tmin_C"]], wdata[["WEEK"]], mean,
-    na.rm = na.rm)
+  mkv_cov[, "wTmax_C"] <- tapply(
+    wdata[["Tmax_C"]],
+    wdata[["WEEK"]],
+    mean,
+    na.rm = na.rm
+  )
+  mkv_cov[, "wTmin_C"] <- tapply(
+    wdata[["Tmin_C"]],
+    wdata[["WEEK"]],
+    mean,
+    na.rm = na.rm
+  )
 
   # Variance-covariance values among maximum and minimum temperature
-  temp <- by(wdata[, c("Tmax_C", "Tmin_C")], wdata[["WEEK"]], cov,
-    use = if (na.rm) "na.or.complete" else "everything")
+  temp <- by(
+    wdata[, c("Tmax_C", "Tmin_C")],
+    wdata[["WEEK"]],
+    cov,
+    use = if (na.rm) "na.or.complete" else "everything"
+  )
   temp <- sapply(temp, function(x) c(x[1, 1], x[1, 2], x[2, 1], x[2, 2]))
   mkv_cov[, "var_MAX"] <- temp[1, ]
   mkv_cov[, "cov_MAXMIN"] <- temp[2, ]
@@ -288,7 +327,9 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   # Used to correct random temperature values based on average conditions
   # if that target day is wet or dry (e.g., overcast weather tends to
   # increase minimum daily temperature and decrease maximum daily tempature)
-  temp <- by(wdata[, c("WET", "Tmax_C", "Tmin_C")], INDICES = wdata[, "WEEK"],
+  temp <- by(
+    wdata[, c("WET", "Tmax_C", "Tmin_C")],
+    INDICES = wdata[, "WEEK"],
     function(x) {
       # if `na.rm` is TRUE, then consider `WET` = NA as FALSE
       # if `na.rm` is FALSE, then propagate NAs in `WET` -> neither wet nor dry
@@ -309,26 +350,27 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
 
       # if no wet/dry days in week of year, then use overall mean instead
       # of conditional mean (i.e., given wet/dry)
-      c(Tmax_mean_wet = if (isanywet) {
-            mean(x[iswet, "Tmax_C"], na.rm = na.rm)
-          } else {
-            mean(x[, "Tmax_C"], na.rm = na.rm)
-          },
+      c(
+        Tmax_mean_wet = if (isanywet) {
+          mean(x[iswet, "Tmax_C"], na.rm = na.rm)
+        } else {
+          mean(x[, "Tmax_C"], na.rm = na.rm)
+        },
         Tmax_mean_dry = if (isanydry) {
-            mean(x[isdry, "Tmax_C"], na.rm = na.rm)
-          } else {
-            mean(x[, "Tmax_C"], na.rm = na.rm)
-          },
+          mean(x[isdry, "Tmax_C"], na.rm = na.rm)
+        } else {
+          mean(x[, "Tmax_C"], na.rm = na.rm)
+        },
         Tmin_mean_wet = if (isanywet) {
-            mean(x[iswet, "Tmin_C"], na.rm = na.rm)
-          } else {
-            mean(x[, "Tmin_C"], na.rm = na.rm)
-          },
+          mean(x[iswet, "Tmin_C"], na.rm = na.rm)
+        } else {
+          mean(x[, "Tmin_C"], na.rm = na.rm)
+        },
         Tmin_mean_dry = if (isanydry) {
-            mean(x[isdry, "Tmin_C"], na.rm = na.rm)
-          } else {
-            mean(x[, "Tmin_C"], na.rm = na.rm)
-          }
+          mean(x[isdry, "Tmin_C"], na.rm = na.rm)
+        } else {
+          mean(x[, "Tmin_C"], na.rm = na.rm)
+        }
       )
     }
   )
@@ -420,14 +462,19 @@ print_mkv_files <- function(mkv_doy, mkv_woy, path, digits = 5) {
 check_weather <- function(weather, required_variables) {
   stopifnot(
     length(dim(weather)) == 2,
-    sapply(required_variables, function(p)
-      length(grep(p, x = colnames(weather))) == 1)
+    sapply(
+      required_variables,
+      function(p) length(grep(p, x = colnames(weather))) == 1
+    )
   )
 }
 
 # Aggregate daily weather for each time step
-prepare_weather <- function(data_daily,
-  time_steps = c("Year", "Month", "Week", "Day"), na.rm = FALSE) {
+prepare_weather <- function(
+  data_daily,
+  time_steps = c("Year", "Month", "Week", "Day"),
+  na.rm = FALSE
+) {
 
   weather_list <- list()
   id_daily <- "Day" == time_steps
@@ -441,8 +488,11 @@ prepare_weather <- function(data_daily,
 }
 
 # Prepare weather data object for \code{\link{compare_dailyweather}}
-prepare_weather_for_comparison <- function(weather,
-  time_steps = c("Year", "Month", "Week", "Day"), na.rm = FALSE) {
+prepare_weather_for_comparison <- function(
+  weather,
+  time_steps = c("Year", "Month", "Week", "Day"),
+  na.rm = FALSE
+) {
   req_vars <- c("Year", "Tmax_C", "Tmin_C", "PPT_cm")
 
   if (length(weather) == length(time_steps) &&
@@ -550,8 +600,14 @@ prepare_weather_for_comparison <- function(weather,
 #' unlink(list.files(path), force = TRUE)
 #'
 #' @export
-compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
-  path, tag) {
+compare_weather <- function(
+  ref_weather,
+  weather,
+  N,
+  WET_limit_cm = 0,
+  path,
+  tag
+) {
 
   dir.create(path, recursive = TRUE, showWarnings = FALSE)
   time_steps <- c("Year", "Month", "Week", "Day")
@@ -578,17 +634,29 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
   #------- OUTPUTS
   #--- Compare means and SDs: boxplots
   calculate_MeansSDs <- function(data) {
-    temp <- lapply(weather_vars, function(var)
-      sapply(time_steps, function(ts)
-        sapply(data, function(x) {
-          temp <- x[[ts]][, var]
-          c(mean(temp, na.rm = TRUE), sd(temp, na.rm = TRUE))
-        })
-      ))
+    temp <- lapply(
+      weather_vars,
+      function(var) {
+        sapply(
+          time_steps,
+          function(ts) {
+            sapply(
+              data,
+              function(x) {
+                temp <- x[[ts]][, var]
+                c(mean(temp, na.rm = TRUE), sd(temp, na.rm = TRUE))
+              }
+            )
+          }
+        )
+      }
+    )
 
-    array(unlist(temp),
+    array(
+      unlist(temp),
       dim = c(2, length(data), length(time_steps), length(weather_vars)),
-      dimnames = list(c("mean", "sd"), names(data), time_steps, weather_vars))
+      dimnames = list(c("mean", "sd"), names(data), time_steps, weather_vars)
+    )
   }
 
   foo_bxp <- function(data, ref_data, ylab, legend = FALSE) {
@@ -600,12 +668,22 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 
     if (all(is.finite(ylim))) {
       graphics::boxplot(data, ylim = ylim, ylab = ylab)
-      graphics::points(seq_along(ref_data), ref_data, col = "red", pch = 4,
-        lwd = 2)
+      graphics::points(
+        seq_along(ref_data),
+        ref_data,
+        col = "red",
+        pch = 4,
+        lwd = 2
+      )
 
       if (legend) {
-        graphics::legend("topright", legend = c("Reference", "Weather"),
-          col = c("red", "black"), pch = c(4, 16), pt.lwd = 2)
+        graphics::legend(
+          "topright",
+          legend = c("Reference", "Weather"),
+          col = c("red", "black"),
+          pch = c(4, 16),
+          pt.lwd = 2
+        )
       }
 
     } else {
@@ -620,32 +698,54 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 
   # Make figure
   panels <- c(3, 2)
-  grDevices::png(units = "in", res = 150,
-    height = 3 * panels[1], width = 6 * panels[2],
-    file = file.path(path, paste0(tag, "_CompareWeather_Boxplots_MeanSD.png")))
-  par_prev <- graphics::par(mfrow = panels, mar = c(2, 2.5, 0.5, 0.5),
-    mgp = c(1, 0, 0), tcl = 0.3, cex = 1)
+  grDevices::png(
+    units = "in",
+    res = 150,
+    height = 3 * panels[1],
+    width = 6 * panels[2],
+    file = file.path(path, paste0(tag, "_CompareWeather_Boxplots_MeanSD.png"))
+  )
+  par_prev <- graphics::par(
+    mfrow = panels,
+    mar = c(2, 2.5, 0.5, 0.5),
+    mgp = c(1, 0, 0),
+    tcl = 0.3,
+    cex = 1
+  )
 
-  foo_bxp(data = comp_MeanSD["mean", , , "PPT_cm"],
+  foo_bxp(
+    data = comp_MeanSD["mean", , , "PPT_cm"],
     ref_data = ref_MeanSD["mean", , , "PPT_cm"],
-    ylab = "Mean Precipitation (cm)", legend = TRUE)
-  foo_bxp(data = comp_MeanSD["sd", , , "PPT_cm"],
+    ylab = "Mean Precipitation (cm)",
+    legend = TRUE
+  )
+  foo_bxp(
+    data = comp_MeanSD["sd", , , "PPT_cm"],
     ref_data = ref_MeanSD["sd", , , "PPT_cm"],
-    ylab = "SD Precipitation (cm)")
+    ylab = "SD Precipitation (cm)"
+  )
 
-  foo_bxp(data = comp_MeanSD["mean", , , "Tmax_C"],
+  foo_bxp(
+    data = comp_MeanSD["mean", , , "Tmax_C"],
     ref_data = ref_MeanSD["mean", , , "Tmax_C"],
-    ylab = "Mean Daily Max Temperature (C)")
-  foo_bxp(data = comp_MeanSD["sd", , , "Tmax_C"],
+    ylab = "Mean Daily Max Temperature (C)"
+  )
+  foo_bxp(
+    data = comp_MeanSD["sd", , , "Tmax_C"],
     ref_data = ref_MeanSD["sd", , , "Tmax_C"],
-    ylab = "SD Daily Max Temperature (C)")
+    ylab = "SD Daily Max Temperature (C)"
+  )
 
-  foo_bxp(data = comp_MeanSD["mean", , , "Tmin_C"],
+  foo_bxp(
+    data = comp_MeanSD["mean", , , "Tmin_C"],
     ref_data = ref_MeanSD["mean", , , "Tmin_C"],
-    ylab = "Mean Daily Min Temperature (C)")
-  foo_bxp(data = comp_MeanSD["sd", , , "Tmin_C"],
+    ylab = "Mean Daily Min Temperature (C)"
+  )
+  foo_bxp(
+    data = comp_MeanSD["sd", , , "Tmin_C"],
     ref_data = ref_MeanSD["sd", , , "Tmin_C"],
-    ylab = "SD Daily Min Temperature (C)")
+    ylab = "SD Daily Min Temperature (C)"
+  )
 
   graphics::par(par_prev)
   grDevices::dev.off()
@@ -654,33 +754,62 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
   #--- Quantile-quantile comparisons: scatterplots
   foo_qq <- function(data, ref_data, var, time, lab, legend = FALSE) {
 
-    vlim <- range(sapply(c(ref_data, data),
-      function(x) range(x[[time]][, var], na.rm = TRUE)))
+    vlim <- range(
+      sapply(
+        c(ref_data, data),
+        function(x) range(x[[time]][, var], na.rm = TRUE)
+      )
+    )
 
     if (all(is.finite(vlim))) {
       probs <- seq(0, 1, length.out = 1000)
 
-      x <- quantile(ref_data[[1]][[time]][, var], probs = probs,
-        na.rm = TRUE)
-      graphics::plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
+      x <- quantile(
+        ref_data[[1]][[time]][, var], probs = probs,
+        na.rm = TRUE
+      )
+      graphics::plot(
+        x,
+        x,
+        type = "n",
+        xlim = vlim,
+        ylim = vlim,
+        asp = 1,
         xlab = paste0(time, "ly : reference ", lab),
-        ylab = paste0(time, "ly : weather ", lab))
+        ylab = paste0(time, "ly : weather ", lab)
+      )
+
       for (k in seq_along(data)) {
-        qy <- quantile(data[[k]][[time]][, var], probs = probs,
-          na.rm = TRUE)
+        qy <- quantile(
+          data[[k]][[time]][, var], probs = probs,
+          na.rm = TRUE
+        )
         graphics::points(x, qy, pch = 46)
       }
 
       graphics::abline(h = 0, lty = 2)
       graphics::abline(v = 0, lty = 2)
-      graphics::segments(x0 = vlim[1], y0 = vlim[1],
-        x1 = vlim[2], y1 = vlim[2], col = "red", lwd = 2)
+      graphics::segments(
+        x0 = vlim[1],
+        y0 = vlim[1],
+        x1 = vlim[2],
+        y1 = vlim[2],
+        col = "red",
+        lwd = 2
+      )
 
 
       if (legend) {
-        graphics::legend("topleft", legend = c("Reference", "Weather"),
-          col = c("red", "black"), pch = c(NA, 16), pt.lwd = 2,
-          lty = c(1, NA), lwd = 2, merge = TRUE)
+        graphics::legend(
+          "topleft",
+          legend = c("Reference", "Weather"),
+          col = c("red", "black"),
+          pch = c(NA, 16),
+          pt.lwd = 2,
+          lty = c(1, NA),
+          lwd = 2,
+          merge = TRUE
+        )
       }
 
     } else {
@@ -690,19 +819,44 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 
   # Make figure
   panels <- c(length(time_steps), 3)
-  grDevices::png(units = "in", res = 150,
-    height = 3 * panels[1], width = 3 * panels[2],
-    file = file.path(path, paste0(tag, "_CompareWeather_QQplots.png")))
-  par_prev <- graphics::par(mfrow = panels, mar = c(2, 2.5, 0.5, 0.5),
-    mgp = c(1, 0, 0), tcl = 0.3, cex = 1)
+  grDevices::png(
+    units = "in",
+    res = 150,
+    height = 3 * panels[1],
+    width = 3 * panels[2],
+    file = file.path(path, paste0(tag, "_CompareWeather_QQplots.png"))
+  )
+  par_prev <- graphics::par(
+    mfrow = panels,
+    mar = c(2, 2.5, 0.5, 0.5),
+    mgp = c(1, 0, 0),
+    tcl = 0.3,
+    cex = 1
+  )
 
   for (ts in time_steps) {
-    foo_qq(comp_df, ref_df, var = "PPT_cm", time = ts,
-      lab = "precipitation (cm)", legend = ts == time_steps[1])
-    foo_qq(comp_df, ref_df, var = "Tmax_C", time = ts,
-      lab = "max temp (C)")
-    foo_qq(comp_df, ref_df, var = "Tmin_C", time = ts,
-      lab = "min temp (C)")
+    foo_qq(
+      comp_df,
+      ref_df,
+      var = "PPT_cm",
+      time = ts,
+      lab = "precipitation (cm)",
+      legend = ts == time_steps[1]
+    )
+    foo_qq(
+      comp_df,
+      ref_df,
+      var = "Tmax_C",
+      time = ts,
+      lab = "max temp (C)"
+    )
+    foo_qq(
+      comp_df,
+      ref_df,
+      var = "Tmin_C",
+      time = ts,
+      lab = "min temp (C)"
+    )
   }
 
   graphics::par(par_prev)
@@ -710,12 +864,22 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 
 
   #--- Does output weather recreate weather generator inputs?
-  ref_wgin <- dbW_estimate_WGen_coefs(ref_df[[1]][["Day"]],
-    WET_limit_cm = WET_limit_cm, imputation_type = "mean")
-  comp_wgin <- lapply(comp_df, function(x)
-      dbW_estimate_WGen_coefs(x[["Day"]],
-        WET_limit_cm = WET_limit_cm, imputation_type = "mean")
-    )
+  ref_wgin <- dbW_estimate_WGen_coefs(
+    ref_df[[1]][["Day"]],
+    WET_limit_cm = WET_limit_cm,
+    imputation_type = "mean"
+  )
+
+  comp_wgin <- lapply(
+    comp_df,
+    function(x) {
+      dbW_estimate_WGen_coefs(
+        x[["Day"]],
+        WET_limit_cm = WET_limit_cm,
+        imputation_type = "mean"
+      )
+    }
+  )
 
 
   foo_scatter_wgin <- function(data, ref_data, obj, fname) {
@@ -728,36 +892,70 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
       rep(ceiling(sqrt(length(vars))), 2)
     }
 
-    grDevices::png(units = "in", res = 150,
-      height = 3 * panels[1], width = 3 * panels[2],
-      file = fname)
-    par_prev <- graphics::par(mfrow = panels, mar = c(2, 2.5, 0.5, 0.5),
-      mgp = c(1, 0, 0), tcl = 0.3, cex = 1)
+    grDevices::png(
+      units = "in",
+      res = 150,
+      height = 3 * panels[1],
+      width = 3 * panels[2],
+      file = fname
+    )
+
+    par_prev <- graphics::par(
+      mfrow = panels,
+      mar = c(2, 2.5, 0.5, 0.5),
+      mgp = c(1, 0, 0),
+      tcl = 0.3,
+      cex = 1
+    )
 
     for (v in vars) {
       x <- ref_data[[obj]][, v]
 
       vlim_obs <- range(x, na.rm = TRUE)
-      vlim <- range(sapply(data, function(x)
-        range(x[[obj]][, v], na.rm = TRUE)))
+      vlim <- range(
+        sapply(
+          data, function(x) range(x[[obj]][, v], na.rm = TRUE)
+        )
+      )
 
       if (all(is.finite(vlim_obs)) && all(is.finite(vlim))) {
-        graphics::plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
-          xlab = paste0("Reference ", v), ylab = paste0("Weather ", v))
+        graphics::plot(
+          x,
+          x,
+          type = "n",
+          xlim = vlim,
+          ylim = vlim,
+          asp = 1,
+          xlab = paste0("Reference ", v),
+          ylab = paste0("Weather ", v)
+        )
+
         for (k in seq_along(data)) {
           isgood <- complete.cases(cbind(x, data[[k]][[obj]][, v]))
-          graphics::lines(stats::lowess(x[isgood], data[[k]][[obj]][isgood, v]),
-            col = "gray")
+          graphics::lines(
+            stats::lowess(x[isgood], data[[k]][[obj]][isgood, v]),
+            col = "gray"
+          )
         }
 
         graphics::abline(h = 0, lty = 2)
         graphics::abline(v = 0, lty = 2)
-        graphics::segments(x0 = vlim_obs[1], y0 = vlim_obs[1],
-          x1 = vlim_obs[2], y1 = vlim_obs[2], col = "red", lwd = 2)
+        graphics::segments(
+          x0 = vlim_obs[1],
+          y0 = vlim_obs[1],
+          x1 = vlim_obs[2],
+          y1 = vlim_obs[2],
+          col = "red",
+          lwd = 2
+        )
 
         if (v == vars[1]) {
-          graphics::legend("topleft", legend = c("Reference", "Weather"),
-            col = c("red", "black"), lwd = 2)
+          graphics::legend(
+            "topleft",
+            legend = c("Reference", "Weather"),
+            col = c("red", "black"),
+            lwd = 2
+          )
         }
 
       } else {
@@ -770,12 +968,25 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
   }
 
 
-  foo_scatter_wgin(data = comp_wgin, ref_data = ref_wgin, obj = "mkv_doy",
-    fname = file.path(path,
-      paste0(tag, "_CompareWeather_WGenInputs_DayOfYear.png")))
-  foo_scatter_wgin(data = comp_wgin, ref_data = ref_wgin, obj = "mkv_woy",
-    fname = file.path(path,
-      paste0(tag, "_CompareWeather_WGenInputs_WeekOfYear.png")))
+  foo_scatter_wgin(
+    data = comp_wgin,
+    ref_data = ref_wgin,
+    obj = "mkv_doy",
+    fname = file.path(
+      path,
+      paste0(tag, "_CompareWeather_WGenInputs_DayOfYear.png")
+    )
+  )
+
+  foo_scatter_wgin(
+    data = comp_wgin,
+    ref_data = ref_wgin,
+    obj = "mkv_woy",
+    fname = file.path(
+      path,
+      paste0(tag, "_CompareWeather_WGenInputs_WeekOfYear.png")
+    )
+  )
 
 }
 
@@ -851,8 +1062,14 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 #' unlink(list.files(path), force = TRUE)
 #'
 #' @export
-dbW_generateWeather <- function(weatherData, years = NULL, wgen_coeffs = NULL,
-  imputation_type = "mean", imputation_span = 5L, seed = NULL) {
+dbW_generateWeather <- function(
+  weatherData,
+  years = NULL,
+  wgen_coeffs = NULL,
+  imputation_type = "mean",
+  imputation_span = 5L,
+  seed = NULL
+) {
 
   #--- Obtain missing/null arguments
   if (is.null(wgen_coeffs)) {

@@ -142,54 +142,72 @@ setMethod("swYears_isNorth", "swYears", function(object) object@isNorth)
 
 #' @rdname swYears-class
 #' @export
-setReplaceMethod("swYears_StartYear", signature = "swYears",
+setReplaceMethod(
+  "swYears_StartYear",
+  signature = "swYears",
   function(object, value) {
     object@StartYear <- as.integer(value)
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swYears-class
 #' @export
-setReplaceMethod("swYears_EndYear", signature = "swYears",
+setReplaceMethod(
+  "swYears_EndYear",
+  signature = "swYears",
   function(object, value) {
     object@EndYear <- as.integer(value)
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swYears-class
 #' @export
-setReplaceMethod("swYears_FDOFY", signature = "swYears",
+setReplaceMethod(
+  "swYears_FDOFY",
+  signature = "swYears",
   function(object, value) {
     object@FDOFY <- as.integer(value)
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swYears-class
 #' @export
-setReplaceMethod("swYears_EDOEY", signature = "swYears",
+setReplaceMethod(
+  "swYears_EDOEY",
+  signature = "swYears",
   function(object, value) {
-   object@EDOEY <- as.integer(value)
-   validObject(object)
-   object
-})
+    object@EDOEY <- as.integer(value)
+    validObject(object)
+    object
+  }
+)
 
 #' @rdname swYears-class
 #' @export
-setReplaceMethod("swYears_isNorth", signature = "swYears",
+setReplaceMethod(
+  "swYears_isNorth",
+  signature = "swYears",
   function(object, value) {
-   object@isNorth <- as.logical(value)
-   validObject(object)
-   object
-})
+    object@isNorth <- as.logical(value)
+    validObject(object)
+    object
+  }
+)
 
 
 #' @rdname swYears-class
 #' @export
-setMethod("swReadLines", signature = c(object = "swYears", file = "character"),
+setMethod(
+  "swReadLines",
+  signature = c(object = "swYears", file = "character"),
   function(object, file) {
+    stop("swReadLines is defunct")
     infiletext <- readLines(con = file)
     object@StartYear <- readInteger(infiletext[4])
     object@EndYear <- readInteger(infiletext[5])

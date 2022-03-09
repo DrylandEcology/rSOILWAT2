@@ -146,55 +146,73 @@ setMethod("swCarbon_CO2ppm", "swCarbon", function(object) object@CO2ppm)
 
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("set_swCarbon", signature = "swCarbon",
+setReplaceMethod(
+  "set_swCarbon",
+  signature = "swCarbon",
   function(object, value) {
     object <- value
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_Use_Bio", signature = "swCarbon",
+setReplaceMethod(
+  "swCarbon_Use_Bio",
+  signature = "swCarbon",
   function(object, value) {
     object@CarbonUseBio <- as.integer(as.logical(value))
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_Use_WUE", signature = "swCarbon",
+setReplaceMethod(
+  "swCarbon_Use_WUE",
+  signature = "swCarbon",
   function(object, value) {
     object@CarbonUseWUE <- as.integer(as.logical(value))
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_Scenario", signature = "swCarbon",
+setReplaceMethod(
+  "swCarbon_Scenario",
+  signature = "swCarbon",
   function(object, value) {
     object@Scenario <- value
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_DeltaYear", signature = "swCarbon",
+setReplaceMethod(
+  "swCarbon_DeltaYear",
+  signature = "swCarbon",
   function(object, value) {
     object@DeltaYear <- as.integer(value)
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_CO2ppm", signature = "swCarbon",
+setReplaceMethod(
+  "swCarbon_CO2ppm",
+  signature = "swCarbon",
   function(object, value) {
     colnames(value) <- colnames(object@CO2ppm)
     object@CO2ppm <- data.matrix(value)
     validObject(object)
     object
-})
+  }
+)

@@ -605,23 +605,31 @@ dbW_upgrade_v1to2 <- function(dbWeatherDataFile, fbackup = NULL,
 }
 
 
+#' Check an updated weather database
+#'
+#' @param con A connection to an updated weather database.
+#'
 #' @export
 check_updatedDB <- function(con) {
-  print(paste0(Sys.time(),
-    ": 'check_updatedDB' started with database integrity"))
+  print(paste0(
+    Sys.time(),
+    ": 'check_updatedDB' started with database integrity"
+  ))
 
   print(paste0(Sys.time(), ": 'check_updatedDB' started 'quick check'"))
-  res <- DBI::dbExecute(con, "PRAGMA quick_check;")
+  res <- DBI::dbExecute(con, "PRAGMA quick_check")
   print(res)
   print(paste0(Sys.time(), ": 'check_updatedDB' started 'integrity check'"))
-  print(DBI::dbExecute(con, "PRAGMA integrity_check;"))
+  print(DBI::dbExecute(con, "PRAGMA integrity_check"))
   print(paste0(Sys.time(), ": 'check_updatedDB' started 'foreign key check'"))
-  print(DBI::dbExecute(con, "PRAGMA foreign_key_check;"))
+  print(DBI::dbExecute(con, "PRAGMA foreign_key_check"))
 
   print(paste0(Sys.time(), ": 'check_updatedDB' checks indices"))
-  print(DBI::dbExecute(con, "PRAGMA index_list(WeatherData);"))
-  print(DBI::dbExecute(con,
-    "PRAGMA index_info(sqlite_autoindex_WeatherData_1);"))
+  print(DBI::dbExecute(con, "PRAGMA index_list(WeatherData)"))
+  print(DBI::dbExecute(
+    con,
+    "PRAGMA index_info(sqlite_autoindex_WeatherData_1)"
+  ))
 }
 
 

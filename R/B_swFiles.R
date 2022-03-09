@@ -102,126 +102,214 @@ setValidity("swFiles", swFiles_validity)
 
 #' @rdname swFiles-class
 #' @export
-setMethod("swFiles_ProjDir", "swFiles", function(object) {
-  object@ProjDir
-})
-#' @rdname swFiles-class
-#' @export
-setMethod("swFiles_WeatherPrefix", "swFiles", function(object) {
-  object@WeatherPrefix
-})
-#' @rdname swFiles-class
-#' @export
-setMethod("swFiles_OutputPrefix", "swFiles", function(object) {
-  object@OutputPrefix
-})
+setMethod(
+  "swFiles_ProjDir",
+  "swFiles",
+  function(object) object@ProjDir
+)
 
 #' @rdname swFiles-class
 #' @export
-setMethod("swFiles_filesIn", "swFiles", function(object) {
-  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eFirst"]]]
-})
+setMethod(
+  "swFiles_WeatherPrefix",
+  "swFiles",
+  function(object) object@WeatherPrefix
+)
+
 #' @rdname swFiles-class
 #' @export
-setMethod("swFiles_Years", "swFiles", function(object) {
-  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eModel"]]]
-})
+setMethod(
+  "swFiles_OutputPrefix",
+  "swFiles",
+  function(object) object@OutputPrefix
+)
+
 #' @rdname swFiles-class
 #' @export
-setMethod("swFiles_LogFile", "swFiles", function(object) {
-  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eLog"]]]
-})
+setMethod(
+  "swFiles_filesIn",
+  "swFiles",
+  function(object) {
+    object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eFirst"]]]
+  }
+)
+
 #' @rdname swFiles-class
 #' @export
-setMethod("swFiles_SiteParams", "swFiles", function(object) {
-  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eSite"]]]
-})
+setMethod(
+  "swFiles_Years",
+  "swFiles",
+  function(object) {
+    object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eModel"]]]
+  }
+)
+
 #' @rdname swFiles-class
 #' @export
-setMethod("swFiles_Soils", "swFiles", function(object) {
-  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eLayers"]]]
-})
+setMethod(
+  "swFiles_LogFile",
+  "swFiles",
+  function(object) {
+    object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eLog"]]]
+  }
+)
+
 #' @rdname swFiles-class
 #' @export
-setMethod("swFiles_SWRCp", "swFiles", function(object) {
-  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eSWRCp"]]]
-})
+setMethod(
+  "swFiles_SiteParams",
+  "swFiles",
+  function(object) {
+    object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eSite"]]]
+  }
+)
+
 #' @rdname swFiles-class
 #' @export
-setMethod("swFiles_WeatherSetup", "swFiles", function(object) {
-  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eWeather"]]]
-})
+setMethod(
+  "swFiles_Soils",
+  "swFiles",
+  function(object) {
+    object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eLayers"]]]
+  }
+)
+
 #' @rdname swFiles-class
 #' @export
-setMethod("swFiles_MarkovProbs", "swFiles", function(object) {
-  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eMarkovProb"]]]
-})
+setMethod(
+  "swFiles_SWRCp",
+  "swFiles",
+  function(object) {
+    object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eSWRCp"]]]
+  }
+)
+
 #' @rdname swFiles-class
 #' @export
-setMethod("swFiles_MarkovCov", "swFiles", function(object) {
-  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eMarkovCov"]]]
-})
+setMethod(
+  "swFiles_WeatherSetup",
+  "swFiles",
+  function(object) {
+    object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eWeather"]]]
+  }
+)
+
 #' @rdname swFiles-class
 #' @export
-setMethod("swFiles_Cloud", "swFiles", function(object) {
-  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eSky"]]]
-})
+setMethod(
+  "swFiles_MarkovProbs",
+  "swFiles",
+  function(object) {
+    object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eMarkovProb"]]]
+  }
+)
+
 #' @rdname swFiles-class
 #' @export
-setMethod("swFiles_Prod", "swFiles", function(object) {
-  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eVegProd"]]]
-})
+setMethod(
+  "swFiles_MarkovCov",
+  "swFiles",
+  function(object) {
+    object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eMarkovCov"]]]
+  }
+)
+
 #' @rdname swFiles-class
 #' @export
-setMethod("swFiles_Estab", "swFiles", function(object) {
-  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eVegEstab"]]]
-})
+setMethod(
+  "swFiles_Cloud",
+  "swFiles",
+  function(object) {
+    object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eSky"]]]
+  }
+)
+
 #' @rdname swFiles-class
 #' @export
-setMethod("swFiles_SWCsetup", "swFiles", function(object) {
-  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eSoilwat"]]]
-})
+setMethod(
+  "swFiles_Prod",
+  "swFiles",
+  function(object) {
+    object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eVegProd"]]]
+  }
+)
+
 #' @rdname swFiles-class
 #' @export
-setMethod("swFiles_Carbon", "swFiles", function(object) {
-  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eCarbon"]]]
-})
+setMethod(
+  "swFiles_Estab",
+  "swFiles",
+  function(object) {
+    object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eVegEstab"]]]
+  }
+)
+
 #' @rdname swFiles-class
 #' @export
-setMethod("swFiles_Output", "swFiles", function(object) {
-  object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eOutput"]]]
-})
+setMethod(
+  "swFiles_SWCsetup",
+  "swFiles",
+  function(object) {
+    object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eSoilwat"]]]
+  }
+)
+
+#' @rdname swFiles-class
+#' @export
+setMethod(
+  "swFiles_Carbon",
+  "swFiles",
+  function(object) {
+    object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eCarbon"]]]
+  }
+)
+
+#' @rdname swFiles-class
+#' @export
+setMethod(
+  "swFiles_Output",
+  "swFiles",
+  function(object) {
+    object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eOutput"]]]
+  }
+)
 
 
 #' @rdname swFiles-class
 #' @export
-setReplaceMethod("swFiles_ProjDir", signature = "swFiles",
+setReplaceMethod(
+  "swFiles_ProjDir",
+  signature = "swFiles",
   function(object, value) {
-
-  object@ProjDir <- value
-  validObject(object)
-  object
-})
-
-#' @rdname swFiles-class
-#' @export
-setReplaceMethod("swFiles_WeatherPrefix", signature = "swFiles",
-  function(object, value) {
-
-  object@WeatherPrefix <- value
-  validObject(object)
-  object
-})
+    object@ProjDir <- value
+    validObject(object)
+    object
+  }
+)
 
 #' @rdname swFiles-class
 #' @export
-setReplaceMethod("swFiles_OutputPrefix", signature = "swFiles",
+setReplaceMethod(
+  "swFiles_WeatherPrefix",
+  signature = "swFiles",
   function(object, value) {
+    object@WeatherPrefix <- value
+    validObject(object)
+    object
+  }
+)
 
-  object@OutputPrefix <- value
-  validObject(object)
-  object
-})
+#' @rdname swFiles-class
+#' @export
+setReplaceMethod(
+  "swFiles_OutputPrefix",
+  signature = "swFiles",
+  function(object, value) {
+    object@OutputPrefix <- value
+    validObject(object)
+    object
+  }
+)
 
 set_InFiles <- function(object, eID, value) {
   id <- 1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][[eID]]
@@ -231,28 +319,43 @@ set_InFiles <- function(object, eID, value) {
 
 #' @rdname swFiles-class
 #' @export
-setReplaceMethod("swFiles_filesIn", signature = "swFiles",
-  function(object, value) set_InFiles(object, "eFirst", value))
+setReplaceMethod(
+  "swFiles_filesIn",
+  signature = "swFiles",
+  function(object, value) set_InFiles(object, "eFirst", value)
+)
 
 #' @rdname swFiles-class
 #' @export
-setReplaceMethod("swFiles_Years", signature = "swFiles",
-  function(object, value) set_InFiles(object, "eModel", value))
+setReplaceMethod(
+  "swFiles_Years",
+  signature = "swFiles",
+  function(object, value) set_InFiles(object, "eModel", value)
+)
 
 #' @rdname swFiles-class
 #' @export
-setReplaceMethod("swFiles_LogFile", signature = "swFiles",
-  function(object, value) set_InFiles(object, "eLog", value))
+setReplaceMethod(
+  "swFiles_LogFile",
+  signature = "swFiles",
+  function(object, value) set_InFiles(object, "eLog", value)
+)
 
 #' @rdname swFiles-class
 #' @export
-setReplaceMethod("swFiles_SiteParams", signature = "swFiles",
-  function(object, value) set_InFiles(object, "eSite", value))
+setReplaceMethod(
+  "swFiles_SiteParams",
+  signature = "swFiles",
+  function(object, value) set_InFiles(object, "eSite", value)
+)
 
 #' @rdname swFiles-class
 #' @export
-setReplaceMethod("swFiles_Soils", signature = "swFiles",
-  function(object, value) set_InFiles(object, "eLayers", value))
+setReplaceMethod(
+  "swFiles_Soils",
+  signature = "swFiles",
+  function(object, value) set_InFiles(object, "eLayers", value)
+)
 
 #' @rdname swFiles-class
 #' @export
@@ -264,53 +367,82 @@ setReplaceMethod(
 
 #' @rdname swFiles-class
 #' @export
-setReplaceMethod("swFiles_WeatherSetup", signature = "swFiles",
-  function(object, value) set_InFiles(object, "eWeather", value))
+setReplaceMethod(
+  "swFiles_WeatherSetup",
+  signature = "swFiles",
+  function(object, value) set_InFiles(object, "eWeather", value)
+)
 
 #' @rdname swFiles-class
 #' @export
-setReplaceMethod("swFiles_MarkovProbs", signature = "swFiles",
-  function(object, value) set_InFiles(object, "eMarkovProb", value))
+setReplaceMethod(
+  "swFiles_MarkovProbs",
+  signature = "swFiles",
+  function(object, value) set_InFiles(object, "eMarkovProb", value)
+)
 
 #' @rdname swFiles-class
 #' @export
-setReplaceMethod("swFiles_MarkovCov", signature = "swFiles",
-  function(object, value) set_InFiles(object, "eMarkovCov", value))
+setReplaceMethod(
+  "swFiles_MarkovCov",
+  signature = "swFiles",
+  function(object, value) set_InFiles(object, "eMarkovCov", value)
+)
 
 #' @rdname swFiles-class
 #' @export
-setReplaceMethod("swFiles_Cloud", signature = "swFiles",
-  function(object, value) set_InFiles(object, "eSky", value))
+setReplaceMethod(
+  "swFiles_Cloud",
+  signature = "swFiles",
+  function(object, value) set_InFiles(object, "eSky", value)
+)
 
 #' @rdname swFiles-class
 #' @export
-setReplaceMethod("swFiles_Prod", signature = "swFiles",
-  function(object, value) set_InFiles(object, "eVegProd", value))
+setReplaceMethod(
+  "swFiles_Prod",
+  signature = "swFiles",
+  function(object, value) set_InFiles(object, "eVegProd", value)
+)
 
 #' @rdname swFiles-class
 #' @export
-setReplaceMethod("swFiles_Estab", signature = "swFiles",
-  function(object, value) set_InFiles(object, "eVegEstab", value))
+setReplaceMethod(
+  "swFiles_Estab",
+  signature = "swFiles",
+  function(object, value) set_InFiles(object, "eVegEstab", value)
+)
 
 #' @rdname swFiles-class
 #' @export
-setReplaceMethod("swFiles_SWCsetup", signature = "swFiles",
-  function(object, value) set_InFiles(object, "eSoilwat", value))
+setReplaceMethod(
+  "swFiles_SWCsetup",
+  signature = "swFiles",
+  function(object, value) set_InFiles(object, "eSoilwat", value)
+)
 
 #' @rdname swFiles-class
 #' @export
-setReplaceMethod("swFiles_Carbon", signature = "swFiles",
-  function(object, value) set_InFiles(object, "eCarbon", value))
+setReplaceMethod(
+  "swFiles_Carbon",
+  signature = "swFiles",
+  function(object, value) set_InFiles(object, "eCarbon", value)
+)
 
 #' @rdname swFiles-class
 #' @export
-setReplaceMethod("swFiles_Output", signature = "swFiles",
-  function(object, value) set_InFiles(object, "eOutput", value))
+setReplaceMethod(
+  "swFiles_Output",
+  signature = "swFiles",
+  function(object, value) set_InFiles(object, "eOutput", value)
+)
 
 
 #' @rdname swFiles-class
 #' @export
-setMethod("swReadLines", signature = c(object = "swFiles", file = "character"),
+setMethod(
+  "swReadLines",
+  signature = c(object = "swFiles", file = "character"),
   function(object, file) {
   print(paste("TODO: method 'swReadLines' is not up-to-date;",
     "hard-coded indices are incorrect"))

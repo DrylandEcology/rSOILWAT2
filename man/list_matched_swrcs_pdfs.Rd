@@ -22,6 +22,6 @@ Matching pairs of implemented `SWRCs` and `PDFs`
 
   The argument `swrc_name` is optional. If missing, then all implemented
   `SWRCs` are listed.
-  `"NoPDF` is not included in the list.
+  \var{"NoPDF"} is not included in the list.
 }
 

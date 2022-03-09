@@ -108,13 +108,24 @@ setMethod("initialize", signature = "swWeatherData", function(.Object, ...,
 
 #' @rdname swWeatherData-class
 #' @export
-setMethod("swReadLines",
+setMethod(
+  "swReadLines",
   signature = c(object = "swWeatherData", file = "character"),
   function(object, file) {
-    object@year <- as.integer(strsplit(x = basename(file), split = ".",
-      fixed = TRUE)[[1]][2])
-    data <- utils::read.table(file, header = FALSE, comment.char = "#",
-      blank.lines.skip = TRUE, sep = "\t")
+    object@year <- as.integer(
+      strsplit(
+        x = basename(file),
+        split = ".",
+      fixed = TRUE
+      )[[1]][2]
+    )
+    data <- utils::read.table(
+      file,
+      header = FALSE,
+      comment.char = "#",
+      blank.lines.skip = TRUE,
+      sep = "\t"
+    )
     colnames(data) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
     object@data <- as.matrix(data)
 

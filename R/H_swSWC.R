@@ -70,15 +70,18 @@ setMethod("initialize", signature = "swSWC_hist",
 
     validObject(.Object)
     .Object
-})
+  }
+)
 
 
 
 #' @rdname swSWC_hist-class
 #' @export
-setMethod("swReadLines",
+setMethod(
+  "swReadLines",
   signature = c(object = "swSWC_hist", file = "character"),
   function(object, file) {
+    stop("swReadLines is defunct.")
     object@year <- as.integer(strsplit(x = file, split = ".",
       fixed = TRUE)[[1]][2])
     infiletext <- readLines(con = file)
@@ -179,71 +182,87 @@ setMethod("swSWC_HistoricList", "swSWC", function(object) object@History)
 
 #' @rdname swSWC-class
 #' @export
-setMethod("swSWC_HistoricData", "swSWC", function(object, year) {
-  index <- which(names(object@History) == as.character(year))
-  if (length(index) != 1) {
-    print("swc historic data Index has wrong length.")
-    return(NULL)
-  }
-  if (object@History[[index]]@year != as.integer(year))
-    print("Somethings wrong with the historical soil moisture data.")
+setMethod(
+  "swSWC_HistoricData",
+  "swSWC",
+  function(object, year) {
+    index <- which(names(object@History) == as.character(year))
+    if (length(index) != 1) {
+      print("swc historic data Index has wrong length.")
+      return(NULL)
+    }
+    if (object@History[[index]]@year != as.integer(year)) {
+      print("Somethings wrong with the historical soil moisture data.")
+    }
 
-  object@History[[index]]
-})
+    object@History[[index]]
+  }
+)
 
 #' @rdname swSWC-class
 #' @export
-setReplaceMethod("swSWC_use",
+setReplaceMethod(
+  "swSWC_use",
   signature = c(object = "swSWC", value = "logical"),
   function(object, value) {
     object@UseSWCHistoricData[] <- value
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swSWC-class
 #' @export
-setReplaceMethod("swSWC_prefix",
+setReplaceMethod(
+  "swSWC_prefix",
   signature = c(object = "swSWC", value = "character"),
   function(object, value) {
     object@DataFilePrefix <- as.character(value)
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swSWC-class
 #' @export
-setReplaceMethod("swSWC_FirstYear",
+setReplaceMethod(
+  "swSWC_FirstYear",
   signature = c(object = "swSWC", value = "integer"),
   function(object, value) {
     object@FirstYear <- as.integer(value)
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swSWC-class
 #' @export
-setReplaceMethod("swSWC_Method",
+setReplaceMethod(
+  "swSWC_Method",
   signature = c(object = "swSWC", value = "integer"),
   function(object, value) {
     object@Method <- as.integer(value)
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swSWC-class
 #' @export
-setReplaceMethod("swSWC_HistoricList",
+setReplaceMethod(
+  "swSWC_HistoricList",
   signature = c(object = "swSWC", value = "list"),
   function(object, value) {
     object@History <- value
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swSWC-class
 #' @export
-setReplaceMethod("swSWC_HistoricData",
+setReplaceMethod(
+  "swSWC_HistoricData",
   signature = c(object = "swSWC", value = "swSWC_hist"),
   function(object, value) {
     index <- which(names(object@History) == as.character(value@year))
@@ -264,13 +283,17 @@ setReplaceMethod("swSWC_HistoricData",
     }
 
     object
-})
+  }
+)
 
 
 #' @rdname swSWC-class
 #' @export
-setMethod("swReadLines", signature = c(object = "swSWC", file = "character"),
+setMethod(
+  "swReadLines",
+  signature = c(object = "swSWC", file = "character"),
   function(object, file) {
+    stop("swReadLines is defunct")
     infiletext <- readLines(con = file)
     #should be no empty lines
     infiletext <- infiletext[infiletext != ""]
@@ -279,4 +302,5 @@ setMethod("swReadLines", signature = c(object = "swSWC", file = "character"),
     object@FirstYear <- readInteger(infiletext[6])
     object@Method <- readInteger(infiletext[7])
     return(object)
-})
+  }
+)

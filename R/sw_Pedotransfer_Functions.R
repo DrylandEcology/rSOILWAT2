@@ -354,7 +354,7 @@ encode_name2pdf <- function(pdf_name) {
 #' @section Details:
 #'   The argument `swrc_name` is optional. If missing, then all implemented
 #'   `SWRCs` are listed.
-#'   `"NoPDF` is not included in the list.
+#'   \var{"NoPDF"} is not included in the list.
 #'
 #' @export
 list_matched_swrcs_pdfs <- function(swrc_name) {

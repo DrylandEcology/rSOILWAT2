@@ -36,6 +36,7 @@ row.names(texture) <- c(
 )
 
 # Field capacity and agricultural permanent wilting point
+# for Campbell1974 and Cosby1984
 swp_fix <- c(fc = -0.0333, pwp = -1.5) # MPa
 vwc_fix <- data.frame(
   fc = c(
@@ -80,35 +81,35 @@ test_that("Use SWRC to convert between VWC/SWP", {
   # 1a. x [len = 1] + soils [len = 1] --> res [len = 1]
   for (ifix in names(swp_fix)) {
     for (itext in row.names(texture)) {
-      expect_equivalent(
+      expect_equal(
         swrc_vwc_to_swp(
           vwcBulk = vwc_fix[itext, ifix],
           sand = texture[itext, "sand"],
           clay = texture[itext, "clay"]
         ),
-        swp_fix[ifix]
+        unname(swp_fix[ifix])
       )
 
-      expect_equivalent(
+      expect_equal(
         swrc_swp_to_vwc(
           swp_MPa = swp_fix[ifix],
           sand = texture[itext, "sand"],
           clay = texture[itext, "clay"]
         ),
-        vwc_fix[itext, ifix]
+        unname(vwc_fix[itext, ifix])
       )
     }
   }
 
   # 1b. x [len = l] + soils [len = d] -> res [dim = l = d] where l = d
   for (ifix in names(swp_fix)) {
-    expect_equivalent(
+    expect_equal(
       swrc_vwc_to_swp(
         vwcBulk = vwc_fix[, ifix],
         sand = texture[, "sand"],
         clay = texture[, "clay"]
       ),
-      diag(swp_vals[, ifix, ])
+      unname(diag(swp_vals[, ifix, ]))
     )
   }
 
@@ -116,22 +117,22 @@ test_that("Use SWRC to convert between VWC/SWP", {
   # 2. x [len = 1] + soils [len = d] --> res [len = d]
   for (ifix in names(swp_fix)) {
     for (itext in row.names(texture)) {
-      expect_equivalent(
+      expect_equal(
         swrc_vwc_to_swp(
           vwcBulk = vwc_fix[itext, ifix],
           sand = texture[, "sand"],
           clay = texture[, "clay"]
         ),
-        swp_vals[itext, ifix, ]
+        unname(swp_vals[itext, ifix, ])
       )
 
-      expect_equivalent(
+      expect_equal(
         swrc_swp_to_vwc(
           swp_MPa = swp_fix[ifix],
           sand = texture[, "sand"],
           clay = texture[, "clay"]
         ),
-        vwc_fix[, ifix]
+        unname(vwc_fix[, ifix])
       )
     }
   }
@@ -140,22 +141,22 @@ test_that("Use SWRC to convert between VWC/SWP", {
   # 3. x [len = l] + soils [len = 1] --> res [len = l]
   for (ifix in names(swp_fix)) {
     for (itext in row.names(texture)) {
-      expect_equivalent(
+      expect_equal(
         swrc_vwc_to_swp(
           vwcBulk = vwc_fix[, ifix],
           sand = texture[itext, "sand"],
           clay = texture[itext, "clay"]
         ),
-        swp_vals[, ifix, itext]
+        unname(swp_vals[, ifix, itext])
       )
 
-      expect_equivalent(
+      expect_equal(
         swrc_swp_to_vwc(
           swp_MPa = rep(swp_fix[ifix], nrow(texture)),
           sand = texture[itext, "sand"],
           clay = texture[itext, "clay"]
         ),
-        rep(vwc_fix[itext, ifix], nrow(texture))
+        rep(unname(vwc_fix[itext, ifix]), nrow(texture))
       )
     }
   }
@@ -163,46 +164,46 @@ test_that("Use SWRC to convert between VWC/SWP", {
   # 4a. x [len = l] + soils [len = d] -> res [dim = l x d] where l != d
   # (x vector repeated for each soil): probably not used
   for (ifix in names(swp_fix)) {
-    expect_equivalent(
+    expect_equal(
       swrc_vwc_to_swp(
         vwcBulk = vwc_fix[, ifix],
         sand = texture[-1, "sand"],
         clay = texture[-1, "clay"]
       ),
-      swp_vals[, ifix, -1]
+      unname(swp_vals[, ifix, -1])
     )
   }
 
   # 4b. x [len = l] + soils [len = d] -> res [dim = l x d] where l = d
   # (x vector repeated for each soil): probably not used
   for (ifix in names(swp_fix)) {
-    expect_equivalent(
+    expect_equal(
       swrc_vwc_to_swp(
         vwcBulk = vwc_fix[, ifix],
         sand = texture[, "sand"],
         clay = texture[, "clay"],
         outer_if_equalsize = TRUE
       ),
-      swp_vals[, ifix, ]
+      unname(swp_vals[, ifix, ])
     )
   }
 
   # 5. x [dim = l x d] + soils [len = 1] --> res [dim = l x d]
   for (itext in row.names(texture)) {
-    expect_equivalent(
+    expect_equal(
       swrc_vwc_to_swp(
         vwcBulk = vwc_fix,
         sand = texture[itext, "sand"],
         clay = texture[itext, "clay"]
       ),
-      swp_vals[, , itext]
+      unname(swp_vals[, , itext])
     )
   }
 
   # 6. x [dim = l x d] + soils [len = d] --> res [dim = l x d]
   # (soils vectors repeated for each row of x)
   for (ifix in names(swp_fix)) {
-    expect_equivalent(
+    expect_equal(
       swrc_vwc_to_swp(
         vwcBulk = matrix(
           vwc_fix[, ifix],

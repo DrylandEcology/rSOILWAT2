@@ -156,58 +156,84 @@ setMethod("swCloud_RainEvents", "swCloud", function(object) object@Cloud[5, ])
 
 #' @rdname swCloud-class
 #' @export
-setReplaceMethod("set_swCloud", signature = "swCloud", function(object, value) {
-  dimnames(value@Cloud) <- dimnames(object@Cloud)
-  object <- value
-  validObject(object)
-  object
-})
+setReplaceMethod(
+  "set_swCloud",
+  signature = "swCloud",
+  function(object, value) {
+    dimnames(value@Cloud) <- dimnames(object@Cloud)
+    object <- value
+    validObject(object)
+    object
+  }
+)
+
 #' @rdname swCloud-class
 #' @export
-setReplaceMethod("swCloud_SkyCover", signature = "swCloud",
+setReplaceMethod(
+  "swCloud_SkyCover",
+  signature = "swCloud",
   function(object, value) {
     object@Cloud[1, ] <- value
     validObject(object)
     object
-})
+  }
+)
+
 #' @rdname swCloud-class
 #' @export
-setReplaceMethod("swCloud_WindSpeed", signature = "swCloud",
+setReplaceMethod(
+  "swCloud_WindSpeed",
+  signature = "swCloud",
   function(object, value) {
     object@Cloud[2, ] <- value
     validObject(object)
     object
-})
+  }
+)
+
 #' @rdname swCloud-class
 #' @export
-setReplaceMethod("swCloud_Humidity", signature = "swCloud",
+setReplaceMethod(
+  "swCloud_Humidity",
+  signature = "swCloud",
   function(object, value) {
     object@Cloud[3, ] <- value
     validObject(object)
     object
-})
+  }
+)
+
 #' @rdname swCloud-class
 #' @export
-setReplaceMethod("swCloud_SnowDensity", signature = "swCloud",
+setReplaceMethod(
+  "swCloud_SnowDensity",
+  signature = "swCloud",
   function(object, value) {
     object@Cloud[4, ] <- value
     validObject(object)
     object
-})
+  }
+)
+
 #' @rdname swCloud-class
 #' @export
-setReplaceMethod("swCloud_RainEvents", signature = "swCloud",
+setReplaceMethod(
+  "swCloud_RainEvents",
+  signature = "swCloud",
   function(object, value) {
     object@Cloud[5, ] <- value
     validObject(object)
     object
-})
-
+  }
+)
 
 #' @rdname swCloud-class
 #' @export
-setMethod("swReadLines", signature = c(object = "swCloud", file = "character"),
+setMethod(
+  "swReadLines",
+  signature = c(object = "swCloud", file = "character"),
   function(object, file) {
+    stop("swReadLines is defunct")
     infiletext <- readLines(con = file)
     #should be no empty lines
     infiletext <- infiletext[infiletext != ""]

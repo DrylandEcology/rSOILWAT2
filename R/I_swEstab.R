@@ -54,9 +54,11 @@ setClass("swEstabSpecies", slot = c(fileName = "character", Name = "character",
   max_temp_germ = "numeric", min_temp_estab = "numeric",
   max_temp_estab = "numeric"))
 
-setValidity("swEstabSpecies", function(object) {
-  TRUE
-})
+
+setValidity(
+  "swEstabSpecies",
+  function(object) TRUE
+)
 
 #' @rdname swEstabSpecies-class
 #' @export
@@ -83,27 +85,33 @@ setMethod("initialize", signature = "swEstabSpecies", function(.Object, ...) {
 #' @rdname swEstabSpecies-class
 #' @export
 # nolint start
-setMethod("swReadLines", signature = c(object="swEstabSpecies",file="character"), function(object,file) {
-			infiletext <- readLines(con = file)
+setMethod(
+  "swReadLines",
+  signature = c(object="swEstabSpecies",file="character"),
+  function(object,file) {
+    stop("swReadLines is defunct")
+    infiletext <- readLines(con = file)
 
-			object@Name = c(object@Name, gsub("[[:space:]]", "",strsplit(x=infiletext[1],split = c("#", " ", "\t"),fixed=F)[[1]][1]))
-			object@estab_lyrs = c(object@estab_lyrs,readInteger(infiletext[3]))
-			object@barsGERM = c(object@barsGERM,readNumeric(infiletext[4]))
-			object@barsESTAB = c(object@barsESTAB,readNumeric(infiletext[5]))
-			object@min_pregerm_days = c(object@min_pregerm_days,readInteger(infiletext[7]))
-			object@max_pregerm_days = c(object@max_pregerm_days,readInteger(infiletext[8]))
-			object@min_wetdays_for_germ = c(object@min_wetdays_for_germ,readInteger(infiletext[9]))
-			object@max_drydays_postgerm = c(object@max_drydays_postgerm,readInteger(infiletext[10]))
-			object@min_wetdays_for_estab = c(object@min_wetdays_for_estab,readInteger(infiletext[11]))
-			object@min_days_germ2estab = c(object@min_days_germ2estab,readInteger(infiletext[12]))
-			object@max_days_germ2estab = c(object@max_days_germ2estab,readInteger(infiletext[13]))
-			object@min_temp_germ = c(object@min_temp_germ,readInteger(infiletext[15]))
-			object@max_temp_germ = c(object@max_temp_germ,readNumeric(infiletext[16]))
-			object@min_temp_estab = c(object@min_temp_estab,readNumeric(infiletext[17]))
-			object@max_temp_estab = c(object@max_temp_estab,readNumeric(infiletext[18]))
-			return(object)
-		})
+    object@Name = c(object@Name, gsub("[[:space:]]", "",strsplit(x=infiletext[1],split = c("#", " ", "\t"),fixed=F)[[1]][1]))
+    object@estab_lyrs = c(object@estab_lyrs,readInteger(infiletext[3]))
+    object@barsGERM = c(object@barsGERM,readNumeric(infiletext[4]))
+    object@barsESTAB = c(object@barsESTAB,readNumeric(infiletext[5]))
+    object@min_pregerm_days = c(object@min_pregerm_days,readInteger(infiletext[7]))
+    object@max_pregerm_days = c(object@max_pregerm_days,readInteger(infiletext[8]))
+    object@min_wetdays_for_germ = c(object@min_wetdays_for_germ,readInteger(infiletext[9]))
+    object@max_drydays_postgerm = c(object@max_drydays_postgerm,readInteger(infiletext[10]))
+    object@min_wetdays_for_estab = c(object@min_wetdays_for_estab,readInteger(infiletext[11]))
+    object@min_days_germ2estab = c(object@min_days_germ2estab,readInteger(infiletext[12]))
+    object@max_days_germ2estab = c(object@max_days_germ2estab,readInteger(infiletext[13]))
+    object@min_temp_germ = c(object@min_temp_germ,readInteger(infiletext[15]))
+    object@max_temp_germ = c(object@max_temp_germ,readNumeric(infiletext[16]))
+    object@min_temp_estab = c(object@min_temp_estab,readNumeric(infiletext[17]))
+    object@max_temp_estab = c(object@max_temp_estab,readNumeric(infiletext[18]))
+    return(object)
+  }
+)
 # nolint end
+
 
 #############################ESTAB.IN#########################################
 #' Class \code{"swEstab"}
@@ -133,9 +141,11 @@ setMethod("swReadLines", signature = c(object="swEstabSpecies",file="character")
 setClass("swEstab", slot = c(useEstab = "logical", count = "integer"),
   contains = "swEstabSpecies")
 
-setValidity("swEstab", function(object) {
-  TRUE
-})
+setValidity(
+  "swEstab",
+  function(object) TRUE
+)
+
 
 #' @rdname swEstab-class
 #' @export
@@ -158,37 +168,45 @@ setMethod("initialize", signature = "swEstab", function(.Object, ...) {
 #' @rdname swEstab-class
 #' @export
 setMethod("swEstab_useEstab", "swEstab", function(object) object@useEstab)
+
 #' @rdname swEstab-class
 #' @export
-setReplaceMethod("swEstab_useEstab", signature = "swEstab",
+setReplaceMethod(
+  "swEstab_useEstab",
+  signature = "swEstab",
   function(object, value) {
     object@useEstab <- as.logical(value)
     validObject(object)
     object
-})
+  }
+)
 
 
 #' @rdname swEstab-class
 #' @export
 # nolint start
-setMethod("swReadLines", signature = c(object="swEstab",file="character"), function(object,file) {
-			infiletext <- readLines(con = file[1])
-			index<-length(object@fileName)+1
-			object@useEstab = readLogical(infiletext[9])
-			object@count = 0L
-			if(object@useEstab) {
-				infiletext <- infiletext[-c(1:9)]
-				infiletext <- infiletext[infiletext != ""]
-				for(i in 1:length(infiletext)) {
-					#see if the line is commented out
-					line<-gsub("[[:space:]]", "",strsplit(x=infiletext[i],split=c("#"))[[1]][1])
-					if(line != "") {
-						object@fileName <- c(object@fileName, line)
-						object@count <- object@count + 1L
-						as(object,"swEstabSpecies") <- swReadLines(as(object,"swEstabSpecies"),file.path(file[2],line))
-					}
-				}
-			}
-			return(object)
-		})
+setMethod(
+  "swReadLines",
+  signature = c(object="swEstab",file="character"),
+  function(object,file) {
+    stop("swReadLines is defunct")
+    infiletext <- readLines(con = file[1])
+    index<-length(object@fileName)+1
+    object@useEstab = readLogical(infiletext[9])
+    object@count = 0L
+    if(object@useEstab) {
+      infiletext <- infiletext[-c(1:9)]
+      infiletext <- infiletext[infiletext != ""]
+      for(i in 1:length(infiletext)) {
+        #see if the line is commented out
+        line<-gsub("[[:space:]]", "",strsplit(x=infiletext[i],split=c("#"))[[1]][1])
+        if(line != "") {
+          object@fileName <- c(object@fileName, line)
+          object@count <- object@count + 1L
+          as(object,"swEstabSpecies") <- swReadLines(as(object,"swEstabSpecies"),file.path(file[2],line))
+        }
+      }
+    }
+    return(object)
+  })
 # nolint end

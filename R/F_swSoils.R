@@ -249,7 +249,8 @@ setReplaceMethod(
 
 #' @rdname swSoils-class
 #' @export
-setMethod("swReadLines",
+setMethod(
+  "swReadLines",
   signature = c(object = "swSoils", file = "character"),
   function(object, file) {
     stop("This function no longer works correctly; and SWRCp are not read.")
@@ -266,4 +267,5 @@ setMethod("swReadLines",
     }
 
     object
-})
+  }
+)

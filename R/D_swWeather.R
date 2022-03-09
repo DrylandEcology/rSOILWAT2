@@ -131,7 +131,9 @@ setClass(
     use_weathergenerator_only = "logical",
     FirstYear_Historical = "integer"
   ),
-  contains = "swMonthlyScalingParams"
+  # TODO: this class should not contain `swMonthlyScalingParams` but
+  # instead be a composition, i.e., have a slot of that class
+  contains = "swMonthlyScalingParams",
 )
 
 setValidity("swWeather", function(object) {
@@ -179,92 +181,138 @@ setMethod("initialize", signature = "swWeather", function(.Object, ...) {
 
 #' @rdname swWeather-class
 #' @export
-setMethod("swWeather_DaysRunningAverage", "swWeather",
-  function(object) object@DaysRunningAverage)
+setMethod(
+  "swWeather_DaysRunningAverage",
+  "swWeather",
+  function(object) object@DaysRunningAverage
+)
 
 #' @rdname swWeather-class
 #' @export
-setMethod("swWeather_FirstYearHistorical", "swWeather",
-  function(object) object@FirstYear_Historical)
+setMethod(
+  "swWeather_FirstYearHistorical",
+  "swWeather",
+  function(object) object@FirstYear_Historical
+)
 
 #' @rdname swWeather-class
 #' @export
-setMethod("swWeather_pct_SnowDrift", "swWeather",
-  function(object) object@pct_SnowDrift)
+setMethod(
+  "swWeather_pct_SnowDrift",
+  "swWeather",
+  function(object) object@pct_SnowDrift
+)
 
 #' @rdname swWeather-class
 #' @export
-setMethod("swWeather_pct_SnowRunoff", "swWeather",
-  function(object) object@pct_SnowRunoff)
+setMethod(
+  "swWeather_pct_SnowRunoff",
+  "swWeather",
+  function(object) object@pct_SnowRunoff
+)
 
 #' @rdname swWeather-class
 #' @export
-setMethod("swWeather_UseMarkov", "swWeather",
-  function(object) object@use_weathergenerator)
+setMethod(
+  "swWeather_UseMarkov",
+  "swWeather",
+  function(object) object@use_weathergenerator
+)
 
 #' @rdname swWeather-class
 #' @export
-setMethod("swWeather_UseMarkovOnly", "swWeather",
-  function(object) object@use_weathergenerator_only)
+setMethod(
+  "swWeather_UseMarkovOnly",
+  "swWeather",
+  function(object) object@use_weathergenerator_only
+)
 
 #' @rdname swWeather-class
 #' @export
-setMethod("swWeather_UseSnow", "swWeather",
-  function(object) object@UseSnow)
+setMethod(
+  "swWeather_UseSnow",
+  "swWeather",
+  function(object) object@UseSnow
+)
 
 #' @rdname swWeather-class
 #' @export
-setMethod("swWeather_MonScalingParams", "swWeather",
-  function(object) object@MonthlyScalingParams)
+setMethod(
+  "swWeather_MonScalingParams",
+  "swWeather",
+  function(object) object@MonthlyScalingParams
+)
 
 #' @rdname swWeather-class
 #' @export
-setReplaceMethod("swWeather_DaysRunningAverage", signature = "swWeather",
+setReplaceMethod(
+  "swWeather_DaysRunningAverage",
+  signature = "swWeather",
   function(object, value) {
     object@DaysRunningAverage <- as.integer(value)
     validObject(object)
     object
-})
+  }
+)
+
 
 #' @rdname swWeather-class
 #' @export
-setReplaceMethod("swWeather_FirstYearHistorical", signature = "swWeather",
+setReplaceMethod(
+  "swWeather_FirstYearHistorical",
+  signature = "swWeather",
   function(object, value) {
     object@FirstYear_Historical <- as.integer(value)
     validObject(object)
     object
-})
+  }
+)
+
 
 #' @rdname swWeather-class
 #' @export
-setReplaceMethod("swWeather_pct_SnowDrift", signature = "swWeather",
+setReplaceMethod(
+  "swWeather_pct_SnowDrift",
+  signature = "swWeather",
   function(object, value) {
     object@pct_SnowDrift <- as.numeric(value)
     validObject(object)
     object
-})
+  }
+)
+
 
 #' @rdname swWeather-class
 #' @export
-setReplaceMethod("swWeather_pct_SnowRunoff", signature = "swWeather",
+setReplaceMethod(
+  "swWeather_pct_SnowRunoff",
+  signature = "swWeather",
   function(object, value) {
     object@pct_SnowRunoff <- as.numeric(value)
     validObject(object)
     object
-})
+  }
+)
+
 
 #' @rdname swWeather-class
 #' @export
-setReplaceMethod("swWeather_UseMarkov", signature = "swWeather",
+setReplaceMethod(
+  "swWeather_UseMarkov",
+  signature = "swWeather",
   function(object, value) {
     object@use_weathergenerator <- as.logical(value)
     validObject(object)
     object
-})
+  }
+)
+
 
 #' @rdname swWeather-class
 #' @export
-setReplaceMethod("swWeather_UseMarkovOnly", signature = "swWeather",
+setReplaceMethod(
+  "swWeather_UseMarkovOnly",
+  signature = "swWeather",
   function(object, value) {
     object@use_weathergenerator_only <- as.logical(value)
     if (object@use_weathergenerator_only) {
@@ -272,31 +320,41 @@ setReplaceMethod("swWeather_UseMarkovOnly", signature = "swWeather",
     }
     validObject(object)
     object
-})
+  }
+)
+
 
 #' @rdname swWeather-class
 #' @export
-setReplaceMethod("swWeather_UseSnow", signature = "swWeather",
+setReplaceMethod(
+  "swWeather_UseSnow",
+  signature = "swWeather",
   function(object, value) {
     object@UseSnow <- as.logical(value)
     validObject(object)
     object
-})
+  }
+)
+
 
 #' @rdname swWeather-class
 #' @export
-setReplaceMethod("swWeather_MonScalingParams", signature = "swWeather",
+setReplaceMethod(
+  "swWeather_MonScalingParams",
+  signature = "swWeather",
   function(object, value) {
     object@MonthlyScalingParams[] <- value
     validObject(object)
     object
-})
+  }
+)
 
 
 
 #' @rdname swWeather-class
 #' @export
-setMethod("swReadLines",
+setMethod(
+  "swReadLines",
   signature = c(object = "swWeather", file = "character"),
   function(object, file) {
     print(paste(
@@ -322,4 +380,5 @@ setMethod("swReadLines",
     object@MonthlyScalingParams <- data
 
     object
-})
+  }
+)

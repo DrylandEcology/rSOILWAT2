@@ -62,25 +62,32 @@ can convert from a non-leap to a Gregorian calendar.
 wdata <- rSOILWAT2::weatherData
 
 ## Transfer to different years (partially overlapping)
-wnew <- dbW_convert_to_GregorianYears(wdata,
-  new_startYear = 2000, new_endYear = 2020
+wnew <- dbW_convert_to_GregorianYears(
+  wdata,
+  new_startYear = 2000,
+  new_endYear = 2020
 )
 all.equal(unique(wnew[, "Year"]), 2000:2020)
 anyNA(wnew) # --> use `dbW_generateWeather`
 
 ## Transfer to a subset of years (i.e., subset)
-wnew <- dbW_convert_to_GregorianYears(wdata,
-  new_startYear = 2000, new_endYear = 2005
+wnew <- dbW_convert_to_GregorianYears(
+  wdata,
+  new_startYear = 2000,
+  new_endYear = 2005
 )
 all.equal(unique(wnew[, "Year"]), 2000:2005)
 anyNA(wnew)
 
 ## Correct/convert from a non-leap to a Gregorian calendar
-wempty <- data.frame(dbW_weatherData_to_dataframe(
-  list(new("swWeatherData"))))[1:365, ]
+wempty <- data.frame(
+  dbW_weatherData_to_dataframe(weatherHistory())
+)[1:365, ]
 
-wnew <- dbW_convert_to_GregorianYears(wempty,
-  new_startYear = 2016, new_endYear = 2016
+wnew <- dbW_convert_to_GregorianYears(
+  wempty,
+  new_startYear = 2016,
+  new_endYear = 2016
 )
 all.equal(unique(wnew[, "Year"]), 2016:2016)
 all.equal(nrow(wnew), 366) # leap year

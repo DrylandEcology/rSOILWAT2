@@ -134,21 +134,26 @@ setMethod("swMarkov_Conv", "swMarkov", function(object) object@Conv)
 
 #' @rdname swMarkov-class
 #' @export
-setReplaceMethod("set_Markov", signature = "swMarkov", function(object, value) {
-  if (ncol(value@Prod) == ncol(object@Prob)) {
-    dimnames(value@Prob) <- dimnames(object@Prob)
+setReplaceMethod(
+  "set_Markov",
+  signature = "swMarkov", function(object, value) {
+    if (ncol(value@Prod) == ncol(object@Prob)) {
+      dimnames(value@Prob) <- dimnames(object@Prob)
+    }
+    if (ncol(value@Conv) == ncol(object@Conv)) {
+      dimnames(value@Conv) <- dimnames(object@Conv)
+    }
+    object <- value
+    validObject(object)
+    object
   }
-  if (ncol(value@Conv) == ncol(object@Conv)) {
-    dimnames(value@Conv) <- dimnames(object@Conv)
-  }
-  object <- value
-  validObject(object)
-  object
-})
+)
 
 #' @rdname swMarkov-class
 #' @export
-setReplaceMethod("swMarkov_Prob", signature = "swMarkov",
+setReplaceMethod(
+  "swMarkov_Prob",
+  signature = "swMarkov",
   function(object, value) {
     if (ncol(value) == ncol(object@Prob)) {
       colnames(value) <- dimnames(object@Prob)[[2]]
@@ -156,11 +161,14 @@ setReplaceMethod("swMarkov_Prob", signature = "swMarkov",
     object@Prob <- as.matrix(value)
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swMarkov-class
 #' @export
-setReplaceMethod("swMarkov_Conv", signature = "swMarkov",
+setReplaceMethod(
+  "swMarkov_Conv",
+  signature = "swMarkov",
   function(object, value) {
     if (ncol(value) == ncol(object@Conv)) {
       colnames(value) <- dimnames(object@Conv)[[2]]
@@ -168,13 +176,17 @@ setReplaceMethod("swMarkov_Conv", signature = "swMarkov",
     object@Conv <- as.matrix(value)
     validObject(object)
     object
-})
+  }
+)
 
 
 #' @rdname swMarkov-class
 #' @export
-setMethod("swReadLines", signature = c(object = "swMarkov", file = "character"),
+setMethod(
+  "swReadLines",
+  signature = c(object = "swMarkov", file = "character"),
   function(object, file) {
+    stop("swReadLines is defunct")
     id_skip <- 1:2
 
     infiletext <- readLines(con = file[1])
@@ -198,4 +210,5 @@ setMethod("swReadLines", signature = c(object = "swMarkov", file = "character"),
     }
 
     object
-})
+  }
+)

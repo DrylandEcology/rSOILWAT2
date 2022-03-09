@@ -195,16 +195,23 @@ setMethod("swOUT_TimeStep", "swOUT", function(object) object@timeSteps)
 
 #' @rdname swOUT-class
 #' @export
-setMethod("swOUT_OutputSeparator", "swOUT",
-  function(object) object@outputSeparator)
+setMethod(
+  "swOUT_OutputSeparator",
+  "swOUT",
+  function(object) object@outputSeparator
+)
 
 #' @rdname swOUT-class
 #' @export
-setReplaceMethod("set_swOUT", signature = "swOUT", function(object, value) {
-  object <- value
-  validObject(object)
-  object
-})
+setReplaceMethod(
+  "set_swOUT",
+  signature = "swOUT",
+  function(object, value) {
+    object <- value
+    validObject(object)
+    object
+  }
+)
 
 
 #' @rdname swOUT-class
@@ -305,12 +312,15 @@ setReplaceMethod(
 
 #' @rdname swOUT-class
 #' @export
-setReplaceMethod("swOUT_TimeStep", signature = "swOUT",
+setReplaceMethod(
+  "swOUT_TimeStep",
+  signature = "swOUT",
   function(object, value) {
     object@timeSteps <- value
     validObject(object)
     object
-})
+  }
+)
 
 #' Set time steps to the same set of values for each output key.
 #' @examples
@@ -319,15 +329,20 @@ setReplaceMethod("swOUT_TimeStep", signature = "swOUT",
 #' identical(as.vector(unique(swOUT_TimeStep(x))), as.integer(c(2, 3)))
 #' @rdname swOUT-class
 #' @export
-setReplaceMethod("swOUT_TimeStepsForEveryKey", signature = "swOUT",
+setReplaceMethod(
+  "swOUT_TimeStepsForEveryKey",
+  signature = "swOUT",
   function(object, value) {
-    stopifnot(length(value) <=
-        rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]])
+    stopifnot(
+      length(value) <= rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
+    )
 
     # Create empty matrix
-    temp <- matrix(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]],
+    temp <- matrix(
+      data = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]],
       nrow = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]],
-      ncol = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]])
+      ncol = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
+    )
 
     # Fill matrix with requested values
     temp[, seq_along(value)] <- rep(value,
@@ -341,16 +356,20 @@ setReplaceMethod("swOUT_TimeStepsForEveryKey", signature = "swOUT",
     validObject(object)
 
     object
-})
+  }
+)
 
 #' @rdname swOUT-class
 #' @export
-setReplaceMethod("swOUT_OutputSeparator", signature = "swOUT",
+setReplaceMethod(
+  "swOUT_OutputSeparator",
+  signature = "swOUT",
   function(object, value) {
     object@outputSeparator <- as.character(value)
     validObject(object)
     object
-})
+  }
+)
 
 
 # used by swReadLines
@@ -367,54 +386,63 @@ timePeriods <- c("dy", "wk", "mo", "yr")
 #' @rdname swOUT-class
 #' @export
 # nolint start
-setMethod("swReadLines", signature = c(object="swOUT",file="character"), function(object,file) {
-  print("TODO: method 'swReadLines' for class 'swOUT' is not up-to-date; hard-coded indices are incorrect")
+setMethod(
+  "swReadLines",
+  signature = c(object="swOUT",file="character"),
+  function(object,file) {
+    print("TODO: method 'swReadLines' for class 'swOUT' is not up-to-date; hard-coded indices are incorrect")
 
-			infiletext <- readLines(con = file)
-			if(temp<-strsplit(infiletext[41],split=" ")[[1]][2] == "t") {
-				object@outputSeparator="\t"
-			} else if(temp == "s") {
-				object@outputSeparator=" "
-			} else if(temp == "c"){
-			  object@outputSeparator=","
-			} else {
-				object@outputSeparator="\t"
-			}
+    infiletext <- readLines(con = file)
+    if(temp<-strsplit(infiletext[41],split=" ")[[1]][2] == "t") {
+      object@outputSeparator="\t"
+    } else if(temp == "s") {
+      object@outputSeparator=" "
+    } else if(temp == "c"){
+      object@outputSeparator=","
+    } else {
+      object@outputSeparator="\t"
+    }
 
-			if(infiletext[42]==""){
-				useTimeStep = FALSE
-			} else {
-				useTimeStep = TRUE
-				temp<-strsplit(x=infiletext[42],split=" ")[[1]][-1]
-				object@timeSteps = as.integer(sapply(1:length(temp), FUN=function(i) which(temp[i] == timePeriods))-1)
-			}
+    if (infiletext[42] == "") {
+      useTimeStep = FALSE
+    } else {
+      useTimeStep = TRUE
+      temp<-strsplit(x=infiletext[42], split=" ")[[1]][-1]
+      object@timeSteps = as.integer(
+        sapply(
+          1:length(temp),
+          FUN=function(i) which(temp[i] == timePeriods)
+        )-1
+      )
+    }
 
-			for(i in 45:length(infiletext)) {
-				if(infiletext[i] != "") {
-					temp<-strsplit(x=infiletext[i],split="\t")[[1]]
-					temp<-unlist(strsplit(x=temp,split=" "))
-					temp <- temp[temp != ""][1:6]
-					mykey<- as.integer(grep(pattern=temp[1],x=KEY)[1])
-					sumtype <- as.integer(grep(pattern=temp[2],x=OutSum))-1
-					period <- which(tolower(temp[3]) == timePeriods)-1
-					start <- as.integer(temp[4])
-					if(grepl(pattern="end",x=temp[5])) {
-						end <- as.integer(366)
-					} else {
-						end <- as.integer(temp[5])
-					}
-					object@mykey[mykey] = as.integer(mykey-1)
-					object@sumtype[mykey] = as.integer(sumtype)
-					object@first_orig[mykey] = start
-					object@last_orig[mykey] = end
-					object@outfile[mykey] = temp[6]
-					if(object@sumtype[mykey] != 0) {
-						object@use[mykey] = TRUE
-					} else {
-						object@use[mykey] = FALSE
-					}
-				}
-			}
-			return(object)
-		})
+    for(i in 45:length(infiletext)) {
+      if(infiletext[i] != "") {
+        temp<-strsplit(x=infiletext[i],split="\t")[[1]]
+        temp<-unlist(strsplit(x=temp,split=" "))
+        temp <- temp[temp != ""][1:6]
+        mykey<- as.integer(grep(pattern=temp[1],x=KEY)[1])
+        sumtype <- as.integer(grep(pattern=temp[2],x=OutSum))-1
+        period <- which(tolower(temp[3]) == timePeriods)-1
+        start <- as.integer(temp[4])
+        if(grepl(pattern="end",x=temp[5])) {
+          end <- as.integer(366)
+        } else {
+          end <- as.integer(temp[5])
+        }
+        object@mykey[mykey] = as.integer(mykey-1)
+        object@sumtype[mykey] = as.integer(sumtype)
+        object@first_orig[mykey] = start
+        object@last_orig[mykey] = end
+        object@outfile[mykey] = temp[6]
+        if(object@sumtype[mykey] != 0) {
+          object@use[mykey] = TRUE
+        } else {
+          object@use[mykey] = FALSE
+        }
+      }
+    }
+    return(object)
+  }
+)
 # nolint end
