@@ -31,12 +31,16 @@ setGeneric("swReadLines", function(object, file) standardGeneric("swReadLines"))
 
 
 #' Create \pkg{rSOILWAT2} version representation
-rSW2_version <- function() as.character(getNamespaceVersion("rSOILWAT2"))
+rSW2_version <- function() {
+  as.character(as.numeric_version(getNamespaceVersion("rSOILWAT2")))
+}
 
 #' Retrieve version of \pkg{rSOILWAT2} that was used to create object
 #'
 #' @param object An object of class \code{\linkS4class{swInputData}} or
 #'   \code{\linkS4class{swOutput}}.
+#'
+#' @return A character string representing the version number (or \code{NA}).
 #'
 #' @seealso \code{\link{check_version}}
 #'
@@ -49,10 +53,15 @@ setGeneric("get_version", function(object) standardGeneric("get_version"))
 
 #' @rdname get_version
 setMethod(
-  f = "get_version",
+  "get_version",
   signature = "ANY",
   definition = function(object) {
-    NA
+    tmp <- try(object@version, silent = TRUE)
+    if (inherits(tmp, "try-error")) {
+      NA_character_
+    } else {
+      as.character(as.numeric_version(tmp))
+    }
   }
 )
 
@@ -151,10 +160,11 @@ setGeneric("get_timestamp", function(object) standardGeneric("get_timestamp"))
 
 #' @rdname get_timestamp
 setMethod(
-  f = "get_timestamp",
+  "get_timestamp",
   signature = "ANY",
   definition = function(object) {
-    NA
+    tmp <- try(object@timestamp, silent = TRUE)
+    if (inherits(tmp, "try-error")) NA_real_ else tmp
   }
 )
 

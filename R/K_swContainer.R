@@ -229,26 +229,6 @@ setValidity(
 
 
 
-#' @rdname get_version
-setMethod(
-  "get_version",
-  signature = "swInputData",
-  definition = function(object) {
-    tmp <- try(object@version, silent = TRUE)
-    if (inherits(tmp, "try-error")) NA else tmp
-  }
-)
-
-#' @rdname get_timestamp
-setMethod(
-  "get_timestamp",
-  signature = "swInputData",
-  definition = function(object) {
-    tmp <- try(object@timestamp, silent = TRUE)
-    if (inherits(tmp, "try-error")) NA else tmp
-  }
-)
-
 
 # Methods for slot \code{files}
 #' @rdname swInputData-class
