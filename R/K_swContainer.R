@@ -228,6 +228,65 @@ setValidity(
 
 
 
+#' Attempt to upgrade essential slots if input object is from an older version
+#'
+#' Missing slots are added and take the new default values from `SOILWAT2`.
+#'
+#' @param x An object of class \code{\linkS4class{swInputData}}.
+#' @return An object of class \code{\linkS4class{swInputData}},
+#'   potentially upgraded.
+#'
+#' @export
+upgrade_swInputData <- function(x) {
+
+  # Suppress warnings in case `x` is indeed invalid (outdated)
+  if (!suppressWarnings(check_version(x))) {
+    # Only consider upgrades if version is less than current
+    msg_upgrades <- NULL
+
+    #--- Make sure we have SWRC/PDF flags
+    tmp <- try(x@site@swrc_flags, silent = TRUE)
+    if (inherits(tmp, "try-error")) {
+      x@site <- suppressWarnings(swSite(x@site))
+      msg_upgrades <- c(msg_upgrades, "swrc_flags")
+    }
+
+    #--- Make sure we have SWRC parameters
+    tmp <- try(x@soils@SWRCp, silent = TRUE)
+    if (inherits(tmp, "try-error")) {
+      x@soils <- suppressWarnings(swSoils(x@soils))
+      msg_upgrades <- c(msg_upgrades, "SWRCp")
+    }
+
+    #--- Make sure we have the name to the SWRC parameter input file
+    # Note: non-essential to run `sw_exec()` but it helps pass `validObject()`
+    tmp <- try(validObject(x@files), silent = TRUE)
+    if (inherits(tmp, "try-error")) {
+      x@files@InFiles <- swFiles()@InFiles
+      msg_upgrades <- c(msg_upgrades, "InFiles")
+    }
+
+
+    if (length(msg_upgrades) > 1) {
+      message(
+        "Outdated object was upgraded; ",
+        "default values were used to add previously missing slots: ",
+        paste0(shQuote(msg_upgrades), collapse = ", ")
+      )
+
+      #--- Update version/timestamp
+      x@version <- rSW2_version()
+      x@timestamp <- rSW2_timestamp()
+
+      #--- Check validity and return
+      validObject(x)
+    }
+  }
+
+  x
+}
+
+
 
 
 # Methods for slot \code{files}
