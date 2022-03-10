@@ -23,11 +23,11 @@ test_that("Manipulate 'swProd' class", {
   expect_s4_class(x, "swProd")
 
   # Tests for the 'swProd' slot of signature 'swInputData'
-  xinput <- xinput2 <- new("swInputData")
+  xinput <- xinput2 <- swInputData()
   expect_s4_class(get_swProd(xinput), "swProd")
 
   x1 <- get_swProd(xinput)
-  x2 <- new("swProd")
+  x2 <- swProd()
   expect_equal(x1, x2)
   set_swProd(xinput2) <- x1
   expect_equal(xinput, xinput2)

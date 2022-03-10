@@ -1042,7 +1042,7 @@ compare_weather <- function(
 #'
 #' ## Example 3: generate weather based only on estimated weather generator
 #' ## coefficients from a different dataset
-#' x_empty <- list(new("swWeatherData"))
+#' x_empty <- weatherHistory()
 #' wout3 <- dbW_generateWeather(
 #'   x_empty,
 #'   years = 2050:2055,

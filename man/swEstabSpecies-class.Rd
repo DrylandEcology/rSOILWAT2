@@ -3,18 +3,23 @@
 \docType{class}
 \name{swEstabSpecies-class}
 \alias{swEstabSpecies-class}
-\alias{initialize,swEstabSpecies-method}
+\alias{swEstabSpecies}
 \alias{swReadLines,swEstabSpecies,character-method}
 \title{Class \code{"swEstabSpecies"}}
 \usage{
-\S4method{initialize}{swEstabSpecies}(.Object, ...)
+swEstabSpecies(...)
 
 \S4method{swReadLines}{swEstabSpecies,character}(object, file)
 }
 \arguments{
-\item{.Object}{An object of class \code{\linkS4class{swEstabSpecies}}.}
-
-\item{...}{Further arguments to methods.}
+\item{...}{Arguments to the helper constructor function.
+Dots can either contain objects to copy into slots of that class
+(must be named identical to the corresponding slot) or
+be one object of that class (in which case it will be copied and
+any missing slots will take their default values).
+If dots are missing, then corresponding values of
+\code{rSOILWAT2::sw_exampleData}
+(i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
 
 \item{object}{An object of class \code{\linkS4class{swEstabSpecies}}.}
 
@@ -27,6 +32,7 @@ The methods listed below work on this class and the proper slot of the class
 \examples{
 showClass("swEstabSpecies")
 x <- new("swEstabSpecies")
+x <- swEstabSpecies()
 
 }
 \seealso{

@@ -29,50 +29,61 @@
 #'
 #'
 #' @param object An object of class \code{\linkS4class{swSWC_hist}}.
-#' @param .Object An object of class \code{\linkS4class{swSWC_hist}}.
 #' @param file A character string. The file name from which to read.
-#' @param ... Further arguments to methods.
-#' @param year An integer value. The calendar year of the \var{SWC}
+#' @param ... Arguments to the helper constructor function.
+#'  Dots can either contain objects to copy into slots of that class
+#'  (must be named identical to the corresponding slot) or
+#'  be one object of that class (in which case it will be copied and
+#'  any missing slots will take their default values).
+#'  If dots are missing, then corresponding values of
+#'  \code{rSOILWAT2::sw_exampleData}
+#'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
+#' @slot year An integer value. The calendar year of the \var{SWC}
 #'   \code{data} object.
-#' @param data A 365 x 4 or 366 x 4 matrix representing daily \var{SWC}
+#' @slot data A 365 x 4 or 366 x 4 matrix representing daily \var{SWC}
 #'   data for one calendar \code{year} with columns \var{doy}, \var{lyr},
 #'   \var{swc}, \var{st_err}.
 #'
 #' @name swSWC_hist-class
 #' @export
-setClass("swSWC_hist", slot = c(data = "matrix", year = "integer"))
+setClass(
+  "swSWC_hist",
+  slot = c(data = "matrix", year = "integer"),
+  prototype = list(
+    data = array(
+      NA_real_,
+      dim = c(366, 4),
+      dimnames = list(NULL, c("doy", "lyr", "swc", "st_err"))
+    ),
+    year = NA_integer_
+  )
+)
 
 
 #' @rdname swSWC_hist-class
 #' @export
-setMethod("initialize", signature = "swSWC_hist",
-  function(.Object, ..., year = 0L, data = NULL) {
-    # We don't set values; this is to prevent simulation runs with
-    # accidentally incorrect values
-
-    # We have to explicitly give column names (as defined in
-    # `onGet_SW_SWC_hist`) because they are not read in by C code if the
-    # historical soil moisture data are not provided as input
-    ctemp <- c("doy", "lyr", "swc", "st_err")
-    if (is.null(data)) {
-      data <- matrix(NA_real_, nrow = 366, ncol = length(ctemp))
-      data[, "doy"] <- 1:366
-    }
-    colnames(data) <- ctemp
-    .Object@data <- data
-
-    .Object@year <- as.integer(year)
-
-    if (FALSE) {
-      # not needed because no relevant inheritance
-      .Object <- callNextMethod(.Object, ...)
-    }
-
-    validObject(.Object)
-    .Object
+swSWC_hist <- function(...) {
+  def <- new("swSWC_hist")
+  sns <- slotNames("swSWC_hist")
+  dots <- list(...)
+  if (length(dots) == 1 && inherits(dots[[1]], "swSWC_hist")) {
+    # If dots are one object of this class, then convert to list of its slots
+    dots <- attributes(unclass(dots[[1]]))
   }
-)
+  dns <- names(dots)
 
+  # We don't set values; this is to prevent simulation runs with
+  # accidentally incorrect values
+
+  # Use prototype "def", but dot arguments take precedence
+  tmp <- lapply(
+    sns,
+    function(sn) if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  )
+  names(tmp) <- sns
+
+  do.call("new", args = c("swSWC_hist", tmp))
+}
 
 
 #' @rdname swSWC_hist-class
@@ -106,10 +117,16 @@ setMethod(
 #'   \code{\linkS4class{swInputData}}.
 #'
 #' @param object An object of class \code{\linkS4class{swSWC}}.
-#' @param .Object An object of class \code{\linkS4class{swSWC}}.
 #' @param file A character string. The file name from which to read.
 #' @param value A value to assign to a specific slot of the object.
-#' @param ... Further arguments to methods.
+#' @param ... Arguments to the helper constructor function.
+#'  Dots can either contain objects to copy into slots of that class
+#'  (must be named identical to the corresponding slot) or
+#'  be one object of that class (in which case it will be copied and
+#'  any missing slots will take their default values).
+#'  If dots are missing, then corresponding values of
+#'  \code{rSOILWAT2::sw_exampleData}
+#'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #' @param year An integer value. The calendar year of the \var{SWC}
 #'   \code{data} object.
 #'
@@ -123,42 +140,57 @@ setMethod(
 #' @examples
 #' showClass("swSWC")
 #' x <- new("swSWC")
+#' x <- swSWC()
 #'
 #' @name swSWC-class
 #' @export
-setClass("swSWC", slot = c(UseSWCHistoricData = "logical",
-  DataFilePrefix = "character", FirstYear = "integer", Method = "integer",
-  History = "list"))
+setClass(
+  "swSWC",
+  slot = c(
+    UseSWCHistoricData = "logical",
+    DataFilePrefix = "character",
+    FirstYear = "integer",
+    Method = "integer",
+    History = "list"
+  ),
+  prototype = list(
+    UseSWCHistoricData = NA,
+    DataFilePrefix = NA_character_,
+    FirstYear = NA_integer_,
+    Method = NA_integer_,
+    History = list()
+  )
+)
 
 #' @rdname swSWC-class
 #' @export
-setMethod("initialize", signature = "swSWC", function(.Object, ...) {
+swSWC <- function(...) {
   def <- slot(rSOILWAT2::sw_exampleData, "swc")
-  sns <- slotNames(def)
+  sns <- slotNames("swSWC")
   dots <- list(...)
+  if (length(dots) == 1 && inherits(dots[[1]], "swSWC")) {
+    # If dots are one object of this class, then convert to list of its slots
+    dots <- attributes(unclass(dots[[1]]))
+  }
   dns <- names(dots)
+
 
   # We don't set values for slot `History` if not passed via ...; this
   # is to prevent simulation runs with accidentally incorrect values
   if (!("History" %in% dns)) {
     def@History <- list()
-  } else {
-    # Guarantee names
-    dimnames(dots[["History"]]) <- list(NULL, colnames(def@History))
   }
 
-  for (sn in sns) {
-    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
-  }
+  # Copy from SOILWAT2 "testing" (defaults), but dot arguments take precedence
+  tmp <- lapply(
+    sns,
+    function(sn) if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  )
+  names(tmp) <- sns
 
-  if (FALSE) {
-    # not needed because no relevant inheritance
-    .Object <- callNextMethod(.Object, ...)
-  }
+  do.call("new", args = c("swSWC", tmp))
+}
 
-  validObject(.Object)
-  .Object
-})
 
 #' @rdname swSWC-class
 #' @export

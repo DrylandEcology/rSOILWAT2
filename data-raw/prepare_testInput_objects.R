@@ -127,7 +127,8 @@ for (it in seq_along(tests)) {
   )
 
   sw_weather <- slot(sw_input, "weatherHistory")
-  slot(sw_input, "weatherHistory") <- list(new("swWeatherData"))
+  set_WeatherHistory(sw_input) <- weatherHistory()
+
 
   #---Files for unit testing
   saveRDS(

@@ -188,7 +188,7 @@ editor_options:
 ```{r, input_object}
   # Preferred option:
   # All relevant site-specific parameters and variables are set to NA
-  sw_in <- new("swInputData")
+  sw_in <- rSOILWAT2::swInputData()
 
   # Quick option:
   # This approach is discouraged because it is very easy to miss to

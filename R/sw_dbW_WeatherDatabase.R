@@ -1773,7 +1773,7 @@ getWeatherData_folders <- function(
   weathDataList <- list()
   for (k in seq_along(index)) {
     weathDataList[[k]] <- swReadLines(
-      new("swWeatherData", year = years[index[k]]),
+      swWeatherData(year = years[index[k]]),
       file.path(dir_weather, fweath[index[k]])
     )
   }
@@ -2018,8 +2018,7 @@ dbW_dataframe_to_weatherData <- function(
       weatherDF_dataColumns]
     )
     colnames(ydata) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
-    weatherData[[i]] <- new(
-      "swWeatherData",
+    weatherData[[i]] <- swWeatherData(
       year = ylist$years[i],
       data = ydata
     )

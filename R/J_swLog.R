@@ -29,8 +29,14 @@
 #' The methods listed below work on this class and the proper slot of the class
 #'   \code{\linkS4class{swInputData}}.
 #'
-#' @param .Object An object of class \code{\linkS4class{swLog}}.
-#' @param ... Further arguments to methods.
+#' @param ... Arguments to the helper constructor function.
+#'  Dots can either contain objects to copy into slots of that class
+#'  (must be named identical to the corresponding slot) or
+#'  be one object of that class (in which case it will be copied and
+#'  any missing slots will take their default values).
+#'  If dots are missing, then corresponding values of
+#'  \code{rSOILWAT2::sw_exampleData}
+#'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
 #' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
 #' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
@@ -42,29 +48,51 @@
 #' @examples
 #' showClass("swLog")
 #' x <- new("swLog")
+#' x <- swLog()
 #'
 #' @name swLog-class
 #' @export
-setClass("swLog", slot = c(LogData = "character", MaxLines = "integer",
-  UsedLines = "integer"))
+setClass(
+  "swLog",
+  slot = c(LogData = "character", MaxLines = "integer", UsedLines = "integer"),
+  prototype = c(
+    LogData = NA_character_,
+    MaxLines = NA_integer_,
+    UsedLines = NA_integer_
+  )
+)
 
 
 #' @rdname swLog-class
 #' @export
-setMethod("initialize", signature = "swLog", function(.Object, ...) {
+swLog <- function(...) {
   def <- slot(rSOILWAT2::sw_exampleData, "log")
+  sns <- slotNames("swLog")
+  dots <- list(...)
+  if (length(dots) == 1 && inherits(dots[[1]], "swLog")) {
+    # If dots are one object of this class, then convert to list of its slots
+    dots <- attributes(unclass(dots[[1]]))
+  }
+  dns <- names(dots)
 
   # We don't set values for any slots; this is to prevent simulation runs with
   # accidentally incorrect values
-  .Object@MaxLines <- 150L
-  .Object@LogData <- character(.Object@MaxLines)
-  .Object@UsedLines <- 1L
-
-  if (FALSE) {
-    # not needed because no relevant inheritance
-    .Object <- callNextMethod(.Object, ...)
+  if (!("MaxLines" %in% dns)) {
+    dots[["MaxLines"]] <- 150L
+  }
+  if (!("LogData" %in% dns)) {
+    dots[["LogData"]] <- character(dots[["MaxLines"]])
+  }
+  if (!("UsedLines" %in% dns)) {
+    dots[["UsedLines"]] <- 1L
   }
 
-  validObject(.Object)
-  .Object
-})
+  # Copy from SOILWAT2 "testing" (defaults), but dot arguments take precedence
+  tmp <- lapply(
+    sns,
+    function(sn) if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  )
+  names(tmp) <- sns
+
+  do.call("new", args = c("swLog", tmp))
+}

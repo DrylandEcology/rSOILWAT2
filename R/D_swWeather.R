@@ -28,9 +28,14 @@
 #' The methods listed below work on this class and the proper slot of the class
 #'   \code{\linkS4class{swInputData}}.
 #'
-#' @param .Object An object of class
-#'   \code{\linkS4class{swMonthlyScalingParams}}.
-#' @param ... Further arguments to methods.
+#' @param ... Arguments to the helper constructor function.
+#'  Dots can either contain objects to copy into slots of that class
+#'  (must be named identical to the corresponding slot) or
+#'  be one object of that class (in which case it will be copied and
+#'  any missing slots will take their default values).
+#'  If dots are missing, then corresponding values of
+#'  \code{rSOILWAT2::sw_exampleData}
+#'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
 #' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
 #' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
@@ -42,56 +47,78 @@
 #' @examples
 #' showClass("swMonthlyScalingParams")
 #' x <- new("swMonthlyScalingParams")
+#' x <- swMonthlyScalingParams()
 #'
 #' @name swMonthlyScalingParams-class
 #' @export
-setClass("swMonthlyScalingParams", slots = c(MonthlyScalingParams = "matrix"))
+setClass(
+  "swMonthlyScalingParams",
+  slots = c(MonthlyScalingParams = "matrix"),
+  prototype = list(
+    MonthlyScalingParams = array(
+      NA_real_,
+      dim = c(12, 6),
+      dimnames = list(
+        NULL,
+        c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH")
+      )
+    )
+  )
+)
 
-setValidity("swMonthlyScalingParams", function(object) {
-  val <- TRUE
-  temp <- dim(object@MonthlyScalingParams)
+setValidity(
+  "swMonthlyScalingParams",
+  function(object) {
+    val <- TRUE
+    temp <- dim(object@MonthlyScalingParams)
 
-  if (temp[2] != 6) {
-    msg <- paste("@MonthlyScalingParams must have exactly 6 columns ",
-      "corresponding to PPT, MaxT, MinT, SkyCover, Wind, rH")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-  if (temp[1] != 12) {
-    msg <- paste("@MonthlyScalingParams must have exactly 12 rows",
-      "corresponding months.")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
+    if (temp[2] != 6) {
+      msg <- paste(
+        "@MonthlyScalingParams must have exactly 6 columns ",
+        "corresponding to PPT, MaxT, MinT, SkyCover, Wind, rH"
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    if (temp[1] != 12) {
+      msg <- paste(
+        "@MonthlyScalingParams must have exactly 12 rows",
+        "corresponding months."
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
 
-  val
-})
+    val
+   }
+)
 
 #' @rdname swMonthlyScalingParams-class
 #' @export
-setMethod("initialize", signature = "swMonthlyScalingParams",
-  function(.Object, ...) {
-    def <- slot(rSOILWAT2::sw_exampleData, "weather")
-    sns <- slotNames("swMonthlyScalingParams")
-    dots <- list(...)
-    dns <- names(dots)
+swMonthlyScalingParams <- function(...) {
+  def <- slot(rSOILWAT2::sw_exampleData, "weather")
+  sns <- slotNames("swMonthlyScalingParams")
+  dots <- list(...)
+  if (length(dots) == 1 && inherits(dots[[1]], "swMonthlyScalingParams")) {
+    # If dots are one object of this class, then convert to list of its slots
+    dots <- attributes(unclass(dots[[1]]))
+  }
+  dns <- names(dots)
 
-    if ("MonthlyScalingParams" %in% dns) {
-      # Guarantee names
-      dimnames(dots[["MonthlyScalingParams"]]) <-
-        list(NULL, colnames(def@MonthlyScalingParams))
-    }
+  if ("MonthlyScalingParams" %in% dns) {
+    # Guarantee names
+    dimnames(dots[["MonthlyScalingParams"]]) <- dimnames(
+      def@MonthlyScalingParams
+    )
+  }
 
-    for (sn in sns) {
-      slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
-    }
+  # Copy from SOILWAT2 "testing" (defaults), but dot arguments take precedence
+  tmp <- lapply(
+    sns,
+    function(sn) if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  )
+  names(tmp) <- sns
 
-    if (FALSE) {
-      # not needed because no relevant inheritance
-      .Object <- callNextMethod(.Object, ...)
-    }
-
-    validObject(.Object)
-    .Object
-})
+  do.call("new", args = c("swMonthlyScalingParams", tmp))
+}
 
 
 
@@ -103,10 +130,16 @@ setMethod("initialize", signature = "swMonthlyScalingParams",
 #'   \code{\linkS4class{swInputData}}.
 #'
 #' @param object An object of class \code{\linkS4class{swWeather}}.
-#' @param .Object An object of class \code{\linkS4class{swWeather}}.
 #' @param value A value to assign to a specific slot of the object.
 #' @param file A character string. The file name from which to read.
-#' @param ... Further arguments to methods.
+#' @param ... Arguments to the helper constructor function.
+#'  Dots can either contain objects to copy into slots of that class
+#'  (must be named identical to the corresponding slot) or
+#'  be one object of that class (in which case it will be copied and
+#'  any missing slots will take their default values).
+#'  If dots are missing, then corresponding values of
+#'  \code{rSOILWAT2::sw_exampleData}
+#'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
 #' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
 #' \code{\linkS4class{swInputData}} \code{\linkS4class{swCloud}}
@@ -118,6 +151,7 @@ setMethod("initialize", signature = "swMonthlyScalingParams",
 #' @examples
 #' showClass("swWeather")
 #' x <- new("swWeather")
+#' x <- swWeather()
 #'
 #' @name swWeather-class
 #' @export
@@ -134,49 +168,69 @@ setClass(
   # TODO: this class should not contain `swMonthlyScalingParams` but
   # instead be a composition, i.e., have a slot of that class
   contains = "swMonthlyScalingParams",
+  prototype = list(
+    UseSnow = NA,
+    pct_SnowDrift = NA_real_,
+    pct_SnowRunoff = NA_real_,
+    use_weathergenerator = NA,
+    use_weathergenerator_only = NA,
+    FirstYear_Historical = NA_integer_
+  )
 )
 
-setValidity("swWeather", function(object) {
-  val <- TRUE
-  sns <- setdiff(slotNames("swWeather"), inheritedSlotNames("swWeather"))
+setValidity(
+  "swWeather",
+  function(object) {
+    val <- TRUE
+    sns <- setdiff(slotNames("swWeather"), inheritedSlotNames("swWeather"))
 
-  for (sn in sns) {
-    if (length(slot(object, sn)) != 1) {
-      msg <- paste0("@", sn, " must have exactly one value.")
-      val <- if (isTRUE(val)) msg else c(val, msg)
+    for (sn in sns) {
+      if (length(slot(object, sn)) != 1) {
+        msg <- paste0("@", sn, " must have exactly one value.")
+        val <- if (isTRUE(val)) msg else c(val, msg)
+      }
     }
-  }
 
-  val
-})
+    val
+  }
+)
 
 
 #' @rdname swWeather-class
 #' @export
-setMethod("initialize", signature = "swWeather", function(.Object, ...) {
+swWeather <- function(...) {
   def <- slot(rSOILWAT2::sw_exampleData, "weather")
   sns <- setdiff(slotNames("swWeather"), inheritedSlotNames("swWeather"))
   dots <- list(...)
-  dns <- names(dots)
-
-  for (sn in sns) {
-    slot(.Object, sn) <- if (sn %in% dns) {
-      dots[[sn]]
-    } else {
-      if (sn == "FirstYear_Historical") {
-        -1L
-      } else {
-        slot(def, sn)
-      }
-    }
+  if (length(dots) == 1 && inherits(dots[[1]], "swWeather")) {
+    # If dots are one object of this class, then convert to list of its slots
+    dots <- attributes(unclass(dots[[1]]))
   }
+  dns <- setdiff(names(dots), inheritedSlotNames("swWeather"))
 
-  .Object <- callNextMethod(.Object, ...)
-  validObject(.Object)
+  # Fix "FirstYear_Historical"
+  def@FirstYear_Historical <- -1L
 
-  .Object
-})
+  # Copy from SOILWAT2 "testing" (defaults), but dot arguments take precedence
+  tmp <- lapply(
+    sns,
+    function(sn) if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  )
+  names(tmp) <- sns
 
+  do.call(
+    "new",
+    args = c(
+      "swWeather",
+      if ("MonthlyScalingParams" %in% dns) {
+        swMonthlyScalingParams(dots[["MonthlyScalingParams"]])
+      } else {
+        do.call(swMonthlyScalingParams, dots)
+      },
+      tmp
+    )
+  )
+}
 
 
 #' @rdname swWeather-class

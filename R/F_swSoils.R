@@ -28,10 +28,16 @@
 #'   \code{\linkS4class{swInputData}}.
 #'
 #' @param object An object of class \code{\linkS4class{swSoils}}.
-#' @param .Object An object of class \code{\linkS4class{swSoils}}.
 #' @param value A value to assign to a specific slot of the object.
 #' @param file A character string. The file name from which to read.
-#' @param ... Further arguments to methods.
+#' @param ... Arguments to the helper constructor function.
+#'  Dots can either contain objects to copy into slots of that class
+#'  (must be named identical to the corresponding slot) or
+#'  be one object of that class (in which case it will be copied and
+#'  any missing slots will take their default values).
+#'  If dots are missing, then corresponding values of
+#'  \code{rSOILWAT2::sw_exampleData}
+#'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
 #' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
 #' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
@@ -43,6 +49,7 @@
 #' @examples
 #' showClass("swSoils")
 #' x <- new("swSoils")
+#' x <- swSoils()
 #'
 #' @name swSoils-class
 #' @export
@@ -51,88 +58,118 @@ setClass(
   slots = c(
     Layers = "matrix",
     SWRCp = "matrix"
+  ),
+  prototype = list(
+    Layers = array(
+      NA_real_,
+      dim = c(0, 12),
+      dimnames = list(
+        NULL,
+        c(
+          "depth_cm", "bulkDensity_g/cm^3", "gravel_content",
+          "EvapBareSoil_frac", "transpGrass_frac", "transpShrub_frac",
+          "transpTree_frac", "transpForb_frac", "sand_frac", "clay_frac",
+          "impermeability_frac", "soilTemp_c"
+        )
+      )
+    ),
+    SWRCp = array(
+      NA_real_,
+      dim = c(0, 6),
+      dimnames = list(
+        NULL,
+        paste0("Param", seq_len(6))
+      )
+    )
   )
 )
 
-swSoilLayers_validity <- function(object) {
-  val <- TRUE
-  tmpL <- dim(object@Layers)
-  tmpp <- dim(object@SWRCp)
-  dtol1 <- 1 + tmpL[1] * rSW2_glovars[["tol"]]
 
-  #--- Check "Layers"
-  if (tmpL[1] == 0) {
-    msg <- "@Layers must have at least one row/soil layer."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-  if (tmpL[2] != 12) {
-    msg <- paste(
-      "@Layers must have exactly 12 columns corresponding to",
-      "depth_cm, bulkDensity_g/cm^3, gravel_content, EvapBareSoil_frac,",
-      "transpGrass_frac,transpShrub_frac, transpTree_frac, transpForb_frac,",
-      "sand_frac, clay_frac, impermeability_frac, soilTemp_c"
-    )
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
+setValidity(
+  "swSoils",
+  function(object) {
+    val <- TRUE
+    tmpL <- dim(object@Layers)
+    tmpp <- dim(object@SWRCp)
+    dtol1 <- 1 + tmpL[1] * rSW2_glovars[["tol"]]
 
-  if (
-    !all(is.na(object@Layers[, 1])) && (
-      any(object@Layers[, 1] <= 0) ||
-      any(diff(object@Layers[, 1]) < rSW2_glovars[["tol"]])
-    )
-  ) {
-    msg <- "@Layers[, 'depth_cm'] must be positive increasing depths."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
+    #--- Check "Layers"
+    if (tmpL[1] == 0) {
+      msg <- "@Layers must have at least one row/soil layer."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    if (tmpL[2] != 12) {
+      msg <- paste(
+        "@Layers must have exactly 12 columns corresponding to",
+        "depth_cm, bulkDensity_g/cm^3, gravel_content, EvapBareSoil_frac,",
+        "transpGrass_frac,transpShrub_frac, transpTree_frac, transpForb_frac,",
+        "sand_frac, clay_frac, impermeability_frac, soilTemp_c"
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
 
-  if (
-    !all(is.na(object@Layers[, 3:11])) &&
-    (any(object@Layers[, 3:11] < 0) || any(object@Layers[, 3:11] > dtol1))
-  ) {
-    msg <- paste(
-      "@Layers values of gravel, evco, trcos, sand, clay, and",
-      "impermeability must be between 0 and 1."
-    )
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
+    if (
+      !all(is.na(object@Layers[, 1])) && (
+        any(object@Layers[, 1] <= 0) ||
+          any(diff(object@Layers[, 1]) < rSW2_glovars[["tol"]])
+      )
+    ) {
+      msg <- "@Layers[, 'depth_cm'] must be positive increasing depths."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
 
-  tmp <- colSums(object@Layers[, 4:8, drop = FALSE])
-  if (any(tmp > dtol1, na.rm = TRUE)) {
-    msg <- paste(
-      "@Layers values of profile sums of evco and trcos must be",
-      "between 0 and 1."
-    )
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
+    if (
+      !all(is.na(object@Layers[, 3:11])) &&
+        (any(object@Layers[, 3:11] < 0) || any(object@Layers[, 3:11] > dtol1))
+    ) {
+      msg <- paste(
+        "@Layers values of gravel, evco, trcos, sand, clay, and",
+        "impermeability must be between 0 and 1."
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
 
-  #--- Check "SWRCp"
-  # `SW_SIT_init_run()` will call function to check validity of SWRCp values
-  if (tmpp[1] != tmpL[1]) {
-    msg <- paste(
-      "@SWRCp must have exactly the same number of soil layers (rows)",
-      "as @Layers."
-    )
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-  if (tmpp[2] != rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SWRC_PARAM_NMAX"]]) {
-    msg <- paste(
-      "@SWRCp must have exactly",
-      rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SWRC_PARAM_NMAX"]],
-      "columns."
-    )
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
+    tmp <- colSums(object@Layers[, 4:8, drop = FALSE])
+    if (any(tmp > dtol1, na.rm = TRUE)) {
+      msg <- paste(
+        "@Layers values of profile sums of evco and trcos must be",
+        "between 0 and 1."
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
 
-  val
-}
-setValidity("swSoils", swSoilLayers_validity)
+    #--- Check "SWRCp"
+    # `SW_SIT_init_run()` will call function to check validity of SWRCp values
+    if (tmpp[1] != tmpL[1]) {
+      msg <- paste(
+        "@SWRCp must have exactly the same number of soil layers (rows)",
+        "as @Layers."
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    if (tmpp[2] != rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SWRC_PARAM_NMAX"]]) {
+      msg <- paste(
+        "@SWRCp must have exactly",
+        rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SWRC_PARAM_NMAX"]],
+        "columns."
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    val
+  }
+)
 
 #' @rdname swSoils-class
 #' @export
-setMethod("initialize", signature = "swSoils", function(.Object, ...) {
+swSoils <- function(...) {
   def <- slot(rSOILWAT2::sw_exampleData, "soils")
-  sns <- slotNames(def)
+  sns <- slotNames("swSoils")
   dots <- list(...)
+  if (length(dots) == 1 && inherits(dots[[1]], "swSoils")) {
+    # If dots are one object of this class, then convert to list of its slots
+    dots <- attributes(unclass(dots[[1]]))
+  }
   dns <- names(dots)
 
   # We don't set values for slot `Layers` if not passed via ...; this
@@ -157,18 +194,15 @@ setMethod("initialize", signature = "swSoils", function(.Object, ...) {
     dimnames(dots[["SWRCp"]]) <- list(NULL, colnames(def@SWRCp))
   }
 
-  for (sn in sns) {
-    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
-  }
+  # Copy from SOILWAT2 "testing" (defaults), but dot arguments take precedence
+  tmp <- lapply(
+    sns,
+    function(sn) if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  )
+  names(tmp) <- sns
 
-  if (FALSE) {
-    # not needed because no relevant inheritance
-    .Object <- callNextMethod(.Object, ...)
-  }
-
-  validObject(.Object)
-  .Object
-})
+  do.call("new", args = c("swSoils", tmp))
+}
 
 
 #' @rdname swSoils-class

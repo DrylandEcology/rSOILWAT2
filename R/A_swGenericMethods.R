@@ -862,6 +862,14 @@ setGeneric(
   function(object) standardGeneric("get_Markov")
 )
 
+#' \code{get_swMarkov}
+#' @param object An object of class \code{\linkS4class{swMarkov}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swMarkov}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "get_swMarkov",
+  function(object) standardGeneric("get_swMarkov")
+)
 
 #' \code{swMarkov_Prob}
 #' @param object An object of class \code{\linkS4class{swMarkov}} or
@@ -899,6 +907,26 @@ setGeneric(
 setGeneric(
   "set_Markov<-",
   function(object, value) standardGeneric("set_Markov<-")
+)
+
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swMarkov<-}} doesn't work.
+#' \code{set_swMarkov}
+#' @inheritParams set_swMarkov<-
+#' @export
+setGeneric(
+  "set_swMarkov",
+  function(object, value) standardGeneric("set_swMarkov")
+)
+
+#' \code{set_swMarkov<-}
+#' @param object An object of class \code{\linkS4class{swMarkov}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swMarkov}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "set_swMarkov<-",
+  function(object, value) standardGeneric("set_swMarkov<-")
 )
 
 #' \code{swMarkov_Prob<-}

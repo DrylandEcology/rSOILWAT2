@@ -413,11 +413,11 @@ sw_inputData <- function() {
   dir_prev <- getwd()
   on.exit(setwd(dir_prev), add = TRUE)
 
-  temp <- new("swInputData") # data are from calls to `initialize`-methods
+  tmp <- swInputData() # default values (minus some deleted slots)
   utils::data(package = "rSOILWAT2", "weatherData", envir = environment())
-  slot(temp, "weatherHistory") <- get("weatherData", envir = environment())
+  slot(tmp, "weatherHistory") <- get("weatherData", envir = environment())
 
-  temp
+  tmp
 }
 
 

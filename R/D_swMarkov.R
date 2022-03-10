@@ -29,10 +29,16 @@
 #'   \code{\linkS4class{swInputData}}.
 #'
 #' @param object An object of class \code{\linkS4class{swMarkov}}.
-#' @param .Object An object of class \code{\linkS4class{swMarkov}}.
 #' @param value A value to assign to a specific slot of the object.
 #' @param file A character string. The file name from which to read.
-#' @param ... Further arguments to methods.
+#' @param ... Arguments to the helper constructor function.
+#'  Dots can either contain objects to copy into slots of that class
+#'  (must be named identical to the corresponding slot) or
+#'  be one object of that class (in which case it will be copied and
+#'  any missing slots will take their default values).
+#'  If dots are missing, then corresponding values of
+#'  \code{rSOILWAT2::sw_exampleData}
+#'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
 #' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
 #' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
@@ -44,16 +50,48 @@
 #' @examples
 #' showClass("swMarkov")
 #' x <- new("swMarkov")
+#' x <- swMarkov()
 #'
 #' @name swMarkov-class
 #' @export
-setClass("swMarkov", slots = c(Prob = "matrix", Conv = "matrix"))
+setClass(
+  "swMarkov",
+  slots = c(Prob = "matrix", Conv = "matrix"),
+  prototype = list(
+    Prob = array(
+      NA_real_,
+      dim = c(366, 5),
+      dimnames = list(
+        NULL,
+        c("DOY", "p_wet_wet", "p_wet_dry", "avg_ppt", "std_ppt")
+      )
+    ),
+    Conv = array(
+      NA_real_,
+      dim = c(53, 11),
+      dimnames = list(
+        NULL,
+        c(
+          "WEEK", "wTmax_C", "wTmin_C", "var_wTmax", "cov_wTmaxmin",
+          "cov_wTminmax", "var_wTmin", "cfmax_wet", "cfmax_dry", "cfmin_wet",
+          "cfmin_dry"
+        )
+      )
+    )
+  )
+)
 
 #' @rdname swMarkov-class
 #' @export
-setMethod("initialize", signature = "swMarkov", function(.Object, ...) {
+swMarkov <- function(...) {
+  # Copy from SOILWAT2 "testing", but dot arguments take precedence
   def <- slot(rSOILWAT2::sw_exampleData, "markov")
+  sns <- slotNames("swMarkov")
   dots <- list(...)
+  if (length(dots) == 1 && inherits(dots[[1]], "swMarkov")) {
+    # If dots are one object of this class, then convert to list of its slots
+    dots <- attributes(unclass(dots[[1]]))
+  }
   dns <- names(dots)
 
   # We don't set values for slots `Prob` and `Conv`; this is to prevent
@@ -62,64 +100,78 @@ setMethod("initialize", signature = "swMarkov", function(.Object, ...) {
   # We have to explicitly give column names (as defined in `onGet_MKV_prob` and
   # `onGet_MKV_conv`) because they are not read in by C code if the weather
   # generator is turned off
-  ctemp_Prob <- c("DOY", "p_wet_wet", "p_wet_dry", "avg_ppt", "std_ppt")
-  ctemp_Conv <- c("WEEK", "wTmax_C", "wTmin_C", "var_wTmax",
-    "cov_wTmaxmin", "cov_wTminmax", "var_wTmin",
-    "cfmax_wet", "cfmax_dry", "cfmin_wet", "cfmin_dry")
+  tmp <- new("swMarkov")
+  ctemp_Prob <- colnames(slot(tmp, "Prob"))
+  ctemp_Conv <- colnames(slot(tmp, "Conv"))
 
   if ("Prob" %in% dns) {
-    temp <- dots[["Prob"]]
-    if (sum(dim(temp)) > 0) {
-      colnames(temp) <- ctemp_Prob
+    tmp <- dots[["Prob"]]
+    if (sum(dim(tmp)) > 0) {
+      colnames(tmp) <- ctemp_Prob
     }
   } else {
-    temp <- matrix(NA_real_, nrow = 366, ncol = length(ctemp_Prob),
-      dimnames = list(NULL, ctemp_Prob))
-    temp[, "DOY"] <- 1:366
+    tmp <- array(
+      NA_real_,
+      dim = c(366, length(ctemp_Prob)),
+      dimnames = list(NULL, ctemp_Prob)
+    )
+    tmp[, "DOY"] <- 1:366
   }
-  .Object@Prob <- temp
+  dots[["Prob"]] <- tmp
 
   if ("Conv" %in% dns) {
-    temp <- dots[["Conv"]]
-    if (sum(dim(temp)) > 0) {
-      colnames(temp) <- ctemp_Conv
+    tmp <- dots[["Conv"]]
+    if (sum(dim(tmp)) > 0) {
+      colnames(tmp) <- ctemp_Conv
     }
   } else {
-    temp <- matrix(NA_real_, nrow = 53, ncol = length(ctemp_Conv),
-      dimnames = list(NULL, ctemp_Conv))
-    temp[, "WEEK"] <- 1:53
+    tmp <- array(
+      NA_real_,
+      dim = c(53, length(ctemp_Conv)),
+      dimnames = list(NULL, ctemp_Conv)
+    )
+    tmp[, "WEEK"] <- 1:53
   }
-  .Object@Conv <- temp
+  dots[["Conv"]] <- tmp
 
-  if (FALSE) {
-    # not needed because no relevant inheritance
-    .Object <- callNextMethod(.Object, ...)
-  }
+  # Copy from SOILWAT2 "testing" (defaults), but dot arguments take precedence
+  tmp <- lapply(
+    sns,
+    function(sn) if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  )
+  names(tmp) <- sns
 
-  validObject(.Object)
-  .Object
-})
-
-swMarkov_validity <- function(object) {
-  val <- TRUE
-
-  temp <- dim(object@Prob)
-  if (!isTRUE(all.equal(temp, c(0, 0))) &&
-      !isTRUE(all.equal(temp, c(366, 5)))) {
-    msg <- paste("@Prob must be a 0x0 or a 366x5 matrix.")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  temp <- dim(object@Conv)
-  if (!isTRUE(all.equal(temp, c(0, 0))) &&
-      !isTRUE(all.equal(temp, c(53, 11)))) {
-      msg <- paste("@Conv must be a 0x0 or a 53x11 matrix.")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  val
+  do.call("new", args = c("swMarkov", tmp))
 }
-setValidity("swMarkov", swMarkov_validity)
+
+
+
+setValidity(
+  "swMarkov",
+  function(object) {
+    val <- TRUE
+
+    temp <- dim(object@Prob)
+    if (
+      !isTRUE(all.equal(temp, c(0, 0))) &&
+      !isTRUE(all.equal(temp, c(366, 5)))
+    ) {
+      msg <- "@Prob must be a 0x0 or a 366x5 matrix."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    temp <- dim(object@Conv)
+    if (
+      !isTRUE(all.equal(temp, c(0, 0))) &&
+      !isTRUE(all.equal(temp, c(53, 11)))
+    ) {
+      msg <- "@Conv must be a 0x0 or a 53x11 matrix."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    val
+  }
+)
 
 
 #' @rdname swMarkov-class
@@ -136,6 +188,16 @@ setMethod("swMarkov_Conv", "swMarkov", function(object) object@Conv)
 #' @export
 setReplaceMethod(
   "set_Markov",
+  signature = "swMarkov", function(object, value) {
+    set_swMarkov(object) <- value
+    object
+  }
+)
+
+#' @rdname swMarkov-class
+#' @export
+setReplaceMethod(
+  "set_swMarkov",
   signature = "swMarkov", function(object, value) {
     if (ncol(value@Prod) == ncol(object@Prob)) {
       dimnames(value@Prob) <- dimnames(object@Prob)

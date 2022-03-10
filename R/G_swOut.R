@@ -29,56 +29,88 @@
 #' The methods listed below work on this class and the proper slot of the class
 #'   \code{\linkS4class{swInputData}}.
 #'
-#' @param .Object An object of class \code{\linkS4class{swOUT_key}}.
-#' @param ... Further arguments to methods.
+#' @param ... Arguments to the helper constructor function.
+#'  Dots can either contain objects to copy into slots of that class
+#'  (must be named identical to the corresponding slot) or
+#'  be one object of that class (in which case it will be copied and
+#'  any missing slots will take their default values).
+#'  If dots are missing, then corresponding values of
+#'  \code{rSOILWAT2::sw_exampleData}
+#'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
 #' @examples
 #' showClass("swOUT_key")
 #' x <- new("swOUT_key")
+#' x <- swOUT_key()
 #'
 #' @name swOUT_key-class
 #' @export
-setClass("swOUT_key", slots = c(mykey = "integer", myobj = "integer",
-  sumtype = "integer", use = "logical", first_orig = "integer",
-  last_orig = "integer", outfile = "character"))
+setClass(
+  "swOUT_key",
+  slots = c(
+    mykey = "integer",
+    myobj = "integer",
+    sumtype = "integer",
+    use = "logical",
+    first_orig = "integer",
+    last_orig = "integer",
+    outfile = "character"
+  ),
+  # TODO: 31 should be rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]
+  prototype = list(
+    mykey = rep(NA_integer_, 31),
+    myobj = rep(NA_integer_, 31),
+    sumtype = rep(NA_integer_, 31),
+    use = rep(NA, 31),
+    first_orig = rep(NA_integer_, 31),
+    last_orig = rep(NA_integer_, 31),
+    outfile = rep(NA_character_, 31)
+  )
+)
 
-swOUT_key_validity <- function(object) {
-  val <- TRUE
+setValidity(
+  "swOUT_key",
+  function(object) {
+    val <- TRUE
 
-  temp <- lengths(lapply(slotNames(object), function(x) slot(object, x)))
+    temp <- lengths(lapply(slotNames(object), function(x) slot(object, x)))
 
-  id <- temp != rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]
+    id <- temp != rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]
 
-  if (any(id)) {
-    msg <- paste0(names(temp)[id], " must be a vector of length 'SW_OUTNKEYS'")
-    val <- if (isTRUE(val)) msg else c(val, msg)
+    if (any(id)) {
+      msg <- paste0(
+        names(temp)[id],
+        " must be a vector of length 'SW_OUTNKEYS'"
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    val
   }
-
-  val
-}
-setValidity("swOUT_key", swOUT_key_validity)
+)
 
 
 #' @rdname swOUT_key-class
 #' @export
-setMethod("initialize", signature = "swOUT_key", function(.Object, ...) {
+swOUT_key <- function(...) {
   def <- slot(rSOILWAT2::sw_exampleData, "output")
   sns <- slotNames("swOUT_key")
   dots <- list(...)
+  if (length(dots) == 1 && inherits(dots[[1]], "swOUT_key")) {
+    # If dots are one object of this class, then convert to list of its slots
+    dots <- attributes(unclass(dots[[1]]))
+  }
   dns <- names(dots)
 
-  for (sn in sns) {
-    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
-  }
+  # Copy from SOILWAT2 "testing" (defaults), but dot arguments take precedence
+  tmp <- lapply(
+    sns,
+    function(sn) if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  )
+  names(tmp) <- sns
 
-  if (FALSE) {
-    # not needed because no relevant inheritance
-    .Object <- callNextMethod(.Object, ...)
-  }
-
-  validObject(.Object)
-  .Object
-})
+  do.call("new", args = c("swOUT_key", tmp))
+}
 
 
 ###########################OUTSETUP.IN########################################
@@ -89,10 +121,16 @@ setMethod("initialize", signature = "swOUT_key", function(.Object, ...) {
 #'   \code{\linkS4class{swInputData}}.
 #'
 #' @param object An object of class \code{\linkS4class{swOUT}}.
-#' @param .Object An object of class \code{\linkS4class{swOUT}}.
 #' @param value A value to assign to a specific slot of the object.
 #' @param file A character string. The file name from which to read.
-#' @param ... Further arguments to methods.
+#' @param ... Arguments to the helper constructor function.
+#'  Dots can either contain objects to copy into slots of that class
+#'  (must be named identical to the corresponding slot) or
+#'  be one object of that class (in which case it will be copied and
+#'  any missing slots will take their default values).
+#'  If dots are missing, then corresponding values of
+#'  \code{rSOILWAT2::sw_exampleData}
+#'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
 #' @slot outputSeparator A character string. Currently, only \var{"\\t"} is
 #'   functional.
@@ -121,68 +159,107 @@ setMethod("initialize", signature = "swOUT_key", function(.Object, ...) {
 #' @examples
 #' showClass("swOUT")
 #' x <- new("swOUT")
+#' x <- swOUT()
 #'
 #' @name swOUT-class
 #' @export
-setClass("swOUT", slot = c(outputSeparator = "character", timeSteps = "matrix"),
-  contains = "swOUT_key")
+setClass(
+  "swOUT",
+  slot = c(
+    outputSeparator = "character",
+    timeSteps = "matrix"
+  ),
+  contains = "swOUT_key",
+  prototype = list(
+    outputSeparator = NA_character_,
+    # 999 must be rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]]
+    timeSteps = array(999, dim = c(31, 4))
+  )
+)
 
-swOUT_validity <- function(object) {
-  val <- TRUE
 
-  if (length(object@outputSeparator) != 1) {
-    msg <- "@outputSeparator needs to be of length 1."
-    val <- if (isTRUE(val)) msg else c(val, msg)
+setValidity(
+  "swOUT",
+  function(object) {
+    val <- TRUE
+
+    if (length(object@outputSeparator) != 1) {
+      msg <- "@outputSeparator needs to be of length 1."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (length(dim(object@timeSteps)) != 2) {
+      msg <- "@timeSteps must be a 2-dimensional matrix"
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (
+      nrow(object@timeSteps) !=
+        rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]
+    ) {
+      msg <- "@timeSteps must be a matrix with 'SW_OUTNKEYS' rows"
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (
+      ncol(object@timeSteps) !=
+        rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
+    ) {
+      msg <- "@timeSteps must be a matrix with 'SW_OUTNPERIODS' columns"
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    # timeSteps is base0
+    ok <- c(
+      rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]],
+      seq_len(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]) - 1L
+    )
+
+    if (!all(object@timeSteps %in% ok)) {
+      msg <- paste(
+        "@timeSteps values must be within SW_OUTNPERIODS or be",
+        "equal to eSW_NoTime"
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    val
   }
-
-  if (length(dim(object@timeSteps)) != 2) {
-    msg <- "@timeSteps must be a 2-dimensional matrix"
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  if (nrow(object@timeSteps) !=
-      rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]) {
-    msg <- "@timeSteps must be a matrix with 'SW_OUTNKEYS' rows"
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  if (ncol(object@timeSteps) !=
-      rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]) {
-    msg <- "@timeSteps must be a matrix with 'SW_OUTNPERIODS' columns"
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  # timeSteps is base0
-  ok <- c(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]],
-    seq_len(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]) - 1L)
-
-  if (!all(object@timeSteps %in% ok)) {
-    msg <- paste("@timeSteps values must be within SW_OUTNPERIODS or be",
-      "equal to eSW_NoTime")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  val
-}
-setValidity("swOUT", swOUT_validity)
+)
 
 
 #' @rdname swOUT-class
 #' @export
-setMethod("initialize", signature = "swOUT", function(.Object, ...) {
+swOUT <- function(...) {
   def <- slot(rSOILWAT2::sw_exampleData, "output")
   sns <- setdiff(slotNames("swOUT"), inheritedSlotNames("swOUT"))
   dots <- list(...)
-  dns <- names(dots)
-
-  for (sn in sns) {
-    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  if (length(dots) == 1 && inherits(dots[[1]], "swOUT")) {
+    # If dots are one object of this class, then convert to list of its slots
+    dots <- attributes(unclass(dots[[1]]))
   }
+  dns <- setdiff(names(dots), inheritedSlotNames("swOUT"))
 
-  .Object <- callNextMethod(.Object, ...)
-  validObject(.Object)
-  .Object
-})
+  # Copy from SOILWAT2 "testing" (defaults), but dot arguments take precedence
+  tmp <- lapply(
+    sns,
+    function(sn) if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  )
+  names(tmp) <- sns
+
+  do.call(
+    "new",
+    args = c(
+      "swOUT",
+      if ("swOUT_key" %in% dns) {
+        swOUT_key(dots[["swOUT_key"]])
+      } else {
+        do.call(swOUT_key, dots)
+      },
+      tmp
+    )
+  )
+}
 
 
 #' @rdname swOUT-class
@@ -216,7 +293,7 @@ setReplaceMethod(
 
 #' @rdname swOUT-class
 #' @examples
-#' x <- new("swOUT")
+#' x <- swOUT()
 #' activate_swOUT_OutKey(x) <- c("VWCMATRIC", "HYDRED")
 #'
 #' @export
@@ -273,7 +350,7 @@ setReplaceMethod(
 
 #' @rdname swOUT-class
 #' @examples
-#' x <- new("swOUT")
+#' x <- swOUT()
 #' deactivate_swOUT_OutKey(x) <- c("VWCMATRIC", "HYDRED")
 #'
 #' @export
@@ -324,9 +401,13 @@ setReplaceMethod(
 
 #' Set time steps to the same set of values for each output key.
 #' @examples
-#' x <- new("swOUT")
+#' x <- swOUT()
 #' swOUT_TimeStepsForEveryKey(x) <- c(2, 3)
-#' identical(as.vector(unique(swOUT_TimeStep(x))), as.integer(c(2, 3)))
+#' identical(
+#'   unique(sort(as.vector(swOUT_TimeStep(x)))),
+#'   as.integer(c(2, 3, 999)) # 999 represents 'eSW_NoTime'
+#' )
+#'
 #' @rdname swOUT-class
 #' @export
 setReplaceMethod(
@@ -345,8 +426,10 @@ setReplaceMethod(
     )
 
     # Fill matrix with requested values
-    temp[, seq_along(value)] <- rep(value,
-      each = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]])
+    temp[, seq_along(value)] <- rep(
+      as.integer(value),
+      each = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]
+    )
 
     # Set unused output keys to no-time
     temp[!slot(object, "use"), ] <-

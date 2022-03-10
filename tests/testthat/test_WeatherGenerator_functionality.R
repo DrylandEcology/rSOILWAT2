@@ -91,7 +91,7 @@ test_that("Weather generator: generate weather", {
 
     # Case 3: generate weather based only on estimated weather generator
     #   coefficients from full dataset
-    x_empty <- list(new("swWeatherData"))
+    x_empty <- weatherHistory()
     wout[[3]] <- dbW_generateWeather(
       x_empty,
       years = years[length(years)] + 30:40,
@@ -154,7 +154,7 @@ test_that("Weather generator (integration tests): compare input/output", {
   res <- dbW_estimate_WGen_coefs(obs_df, imputation_type = "mean")
   swMarkov_Prob(sw_in) <- res[["mkv_doy"]]
   swMarkov_Conv(sw_in) <- res[["mkv_woy"]]
-  set_swWeatherData(sw_in) <- new("swWeatherData")
+  set_WeatherHistory(sw_in) <- weatherHistory()
 
   wgen_df <- replicate(
     N, {

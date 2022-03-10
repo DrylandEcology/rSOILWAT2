@@ -51,10 +51,16 @@
 #' }
 #'
 #' @param object An object of class \code{\linkS4class{swInputData}}.
-#' @param .Object An object of class \code{\linkS4class{swInputData}}.
 #' @param value A value to assign to a specific slot of the object.
 #' @param file A character string. The file name from which to read.
-#' @param ... Further arguments to methods.
+#' @param ... Arguments to the helper constructor function.
+#'  Dots can either contain objects to copy into slots of that class
+#'  (must be named identical to the corresponding slot) or
+#'  be one object of that class (in which case it will be copied and
+#'  any missing slots will take their default values).
+#'  If dots are missing, then corresponding values of
+#'  \code{rSOILWAT2::sw_exampleData}
+#'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #' @param year An integer value. The calendar year of the weather or
 #'   \var{SWC} \code{data} object.
 #' @param vegtype The name or index of the vegetation type.
@@ -69,7 +75,8 @@
 #'
 #' @examples
 #' showClass("swInputData")
-#' x <- new("swInputData")
+#' x <- new("swInputData") # prototype
+#' x <- swInputData() # constructor helper
 #'
 #' @name swInputData-class
 #' @export
@@ -93,35 +100,129 @@ setClass(
     swc = "swSWC",
     log = "swLog"
   )
+  # Note: we cannot set prototypes for `swInputData` because
+  # that calls each slot's class constructor; the constructors call eventually
+  # `new()` which in turn calls setValidity()` which use `rSW2_glovars`.
+  # However, this all occurs before `rSW2_glovars` is defined, i.e.,
+  # validity functions are erroring out if they utilize `rSW2_glovars`.
+  # Calling `validObject()` at run time is not a problem because
+  # `rSW2_glovars` will be defined by then (see `.onLoad()`).
 )
 
 
 #' @rdname swInputData-class
 #' @export
-setMethod(
-  "initialize",
-  signature = "swInputData",
-  function(.Object) {
-    sns <- slotNames("swInputData")
-    scl <- getSlots("swInputData")
+swInputData <- function(...) {
+  # Call helper constructor for each slot class
+  dots <- list(...)
 
-    for (i in seq_along(sns)) {
-      slot(.Object, sns[i]) <- new(scl[i])
-    }
-
-    slot(.Object, "version") <- rSW2_version()
-    slot(.Object, "timestamp") <- rSW2_timestamp()
-
-    validObject(.Object)
-
-    .Object
+  if (length(dots) == 1 && inherits(dots[[1]], "swInputData")) {
+    # If dots are one object of this class, then convert to list of its slots
+    dots <- attributes(unclass(dots[[1]]))
   }
-)
+
+  dns <- names(dots)
+
+  object <- new("swInputData")
+  object@version <- rSW2_version()
+  object@timestamp <- rSW2_timestamp()
+
+
+  object@files <- if ("files" %in% dns) {
+    swFiles(dots[["files"]])
+  } else {
+    do.call(swFiles, dots)
+  }
+
+  object@years <- if ("years" %in% dns) {
+    swYears(dots[["years"]])
+  } else {
+    do.call(swYears, dots)
+  }
+
+  object@weather <- if ("weather" %in% dns) {
+    swWeather(dots[["weather"]])
+  } else {
+    do.call(swWeather, dots)
+  }
+
+  object@cloud <- if ("cloud" %in% dns) {
+    swCloud(dots[["cloud"]])
+  } else {
+    do.call(swCloud, dots)
+  }
+
+  object@weatherHistory <- weatherHistory(dots[["weatherHistory"]])
+
+  object@markov <- if ("markov" %in% dns) {
+    swMarkov(dots[["markov"]])
+  } else {
+    do.call(swMarkov, dots)
+  }
+
+  object@prod <- if ("prod" %in% dns) {
+    swProd(dots[["prod"]])
+  } else {
+    do.call(swProd, dots)
+  }
+
+  object@site <- if ("site" %in% dns) {
+    swSite(dots[["site"]])
+  } else {
+    do.call(swSite, dots)
+  }
+
+  object@soils <- if ("soils" %in% dns) {
+    swSoils(dots[["soils"]])
+  } else {
+    do.call(swSoils, dots)
+  }
+
+  object@estab <- if ("estab" %in% dns) {
+    swEstab(dots[["estab"]])
+  } else {
+    do.call(swEstab, dots)
+  }
+
+  object@carbon <- if ("carbon" %in% dns) {
+    swCarbon(dots[["carbon"]])
+  } else {
+    do.call(swCarbon, dots)
+  }
+
+  object@output <- if ("output" %in% dns) {
+    swOUT(dots[["output"]])
+  } else {
+    do.call(swOUT, dots)
+  }
+
+  object@swc <- if ("swc" %in% dns) {
+    swSWC(dots[["swc"]])
+  } else {
+    do.call(swSWC, dots)
+  }
+
+  object@log <- if ("log" %in% dns) {
+    swLog(dots[["log"]])
+  } else {
+    do.call(swLog, dots)
+  }
+
+  object
+}
+
+
 
 setValidity(
   "swInputData",
   function(object) {
-    TRUE
+    res <- lapply(slotNames(object), function(sn) validObject(slot(object, sn)))
+    has_msg <- sapply(res, is.character)
+    if (any(has_msg)) {
+      unlist(res[has_msg])
+    } else {
+      TRUE
+    }
   }
 )
 
@@ -926,6 +1027,7 @@ setMethod("get_Markov", "swInputData", function(object) object@markov)
 
 #' @rdname swInputData-class
 #' @export
+setMethod("get_swMarkov", "swInputData", function(object) object@markov)
 
 #' @rdname swInputData-class
 #' @export
@@ -1434,6 +1536,12 @@ setReplaceMethod(
     object
   }
 )
+
+
+# Methods for slot \code{estab}
+#' @rdname swInputData-class
+#' @export
+setMethod("get_swEstab", "swInputData", function(object) object@estab)
 
 
 # Methods for slot \code{site}

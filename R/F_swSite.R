@@ -29,10 +29,16 @@
 #'   \code{\linkS4class{swInputData}}.
 #'
 #' @param object An object of class \code{\linkS4class{swSite}}.
-#' @param .Object An object of class \code{\linkS4class{swSite}}.
 #' @param value A value to assign to a specific slot of the object.
 #' @param file A character string. The file name from which to read.
-#' @param ... Further arguments to methods.
+#' @param ... Arguments to the helper constructor function.
+#'  Dots can either contain objects to copy into slots of that class
+#'  (must be named identical to the corresponding slot) or
+#'  be one object of that class (in which case it will be copied and
+#'  any missing slots will take their default values).
+#'  If dots are missing, then corresponding values of
+#'  \code{rSOILWAT2::sw_exampleData}
+#'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
 #' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
 #' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
@@ -44,6 +50,7 @@
 #' @examples
 #' showClass("swSite")
 #' x <- new("swSite")
+#' x <- swSite()
 #'
 #' @name swSite-class
 #' @export
@@ -61,140 +68,185 @@ setClass(
     SoilTemperatureFlag = "logical",
     SoilTemperatureConstants = "numeric",
     TranspirationRegions = "matrix",
-    # swrc_flags: swrc_name, pdf_name
     swrc_flags = "character"
+  )
+  ,
+  prototype = list(
+    SWClimits = c(swc_min = NA_real_, swc_init = NA_real_, swc_wet = NA_real_),
+    ModelFlags = c(Reset = NA, DeepDrain = NA),
+    ModelCoefficients = c(
+      PETmultiplier = NA_real_,
+      DailyRunoff = NA_real_,
+      DailyRunon = NA_real_
+    ),
+    SnowSimulationParameters = stats::setNames(
+      rep(NA_real_, 5),
+      c("TminAccu2", "TmaxCrit", "lambdaSnow", "RmeltMin", "RmeltMax")
+    ),
+    DrainageCoefficient = c("SlowDrainCoefficientPerYear_cm/dy" = NA_real_),
+    EvaporationCoefficients = stats::setNames(
+      rep(NA_real_, 4),
+      c("RateShift", "RateSlope", "InflectionPoint", "Range")
+    ),
+    TranspirationCoefficients = stats::setNames(
+      rep(NA_real_, 4),
+      c("RateShift", "RateShape", "InflectionPoint", "Range")
+    ),
+    IntrinsicSiteParams = stats::setNames(
+      rep(NA_real_, 5),
+      c("Longitude", "Latitude", "Altitude", "Slope", "Aspect")
+    ),
+    SoilTemperatureFlag = NA,
+    SoilTemperatureConstants = stats::setNames(
+      rep(NA_real_, 10),
+      c(
+        "BiomassLimiter_g/m^2", "T1constant_a", "T1constant_b", "T1constant_c",
+        "cs_constant_SoilThermCondct", "cs_constant",
+        "sh_constant_SpecificHeatCapacity",
+        "ConstMeanAirTemp", "deltaX_Param", "MaxDepth"
+      )
+    ),
+    TranspirationRegions = array(
+      NA_real_,
+      dim = c(3, 2),
+      dimnames = list(NULL, c("ndx", "layer"))
+    ),
+    swrc_flags = c(swrc_name = NA_character_, pdf_name = NA_character_)
   )
 )
 
-setValidity("swSite", function(object) {
-  val <- TRUE
+setValidity(
+  "swSite",
+  function(object) {
+    val <- TRUE
 
-  if (length(object@SWClimits) != 3) {
-    msg <- "@SWClimits length != 3."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-  if (length(object@ModelFlags) != 2) {
-    msg <- "@ModelFlags length != 2."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
+    if (length(object@SWClimits) != 3) {
+      msg <- "@SWClimits length != 3."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    if (length(object@ModelFlags) != 2) {
+      msg <- "@ModelFlags length != 2."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
 
-  if (length(object@ModelCoefficients) != 3) {
-    msg <- "@ModelCoefficients length != 3."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-  x <- slot(object, "ModelCoefficients")[1]
-  if (!is.na(x) && x < 0) {
-    msg <- paste("@ModelCoefficients:PETmultiplier =", x,
-      "must be a non-negative number")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-  x <- slot(object, "ModelCoefficients")[2]
-  if (!is.na(x) && !(x >= 0 && x <= 1)) {
-    msg <- paste("@ModelCoefficients:DailyRunoff =", x,
-      "must be a number between 0 and 1",
-      "(inclusive)")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-  x <- slot(object, "ModelCoefficients")[3]
-  if (!is.na(x) && x < 0) {
-    msg <- paste("@ModelCoefficients:DailyRunon =", x,
-      "must be a non-negative number")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
+    if (length(object@ModelCoefficients) != 3) {
+      msg <- "@ModelCoefficients length != 3."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    x <- slot(object, "ModelCoefficients")[1]
+    if (!is.na(x) && x < 0) {
+      msg <- paste("@ModelCoefficients:PETmultiplier =", x,
+        "must be a non-negative number")
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    x <- slot(object, "ModelCoefficients")[2]
+    if (!is.na(x) && !(x >= 0 && x <= 1)) {
+      msg <- paste("@ModelCoefficients:DailyRunoff =", x,
+        "must be a number between 0 and 1",
+        "(inclusive)")
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    x <- slot(object, "ModelCoefficients")[3]
+    if (!is.na(x) && x < 0) {
+      msg <- paste("@ModelCoefficients:DailyRunon =", x,
+        "must be a non-negative number")
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
 
-  if (length(object@SnowSimulationParameters) != 5) {
-    msg <- "@SnowSimulationParameters length != 5."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-  if (length(object@DrainageCoefficient) != 1) {
-    msg <- "@DrainageCoefficient length != 1."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-  if (length(object@EvaporationCoefficients) != 4) {
-    msg <- "@EvaporationCoefficients length != 4."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-  if (length(object@TranspirationCoefficients) != 4) {
-    msg <- "@TranspirationCoefficients length != 4."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-  if (length(object@IntrinsicSiteParams) != 5) {
-    msg <- "@IntrinsicSiteParams length != 5."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-  if (length(object@SoilTemperatureFlag) != 1) {
-    msg <- "@SoilTemperatureFlag length != 1."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-  if (length(object@SoilTemperatureConstants) != 10) {
-    msg <- "@SoilTemperatureConstants length != 10."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-  if (typeof(object@TranspirationRegions) != "integer") {
-    msg <- "@TranspirationRegions is of integer type."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-  if (NCOL(object@TranspirationRegions) != 2) {
-    msg <- "@TranspirationRegions columns != 2."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-  if (typeof(object@TranspirationRegions) != "integer") {
-    msg <- "@TranspirationRegions must be integers."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
+    if (length(object@SnowSimulationParameters) != 5) {
+      msg <- "@SnowSimulationParameters length != 5."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    if (length(object@DrainageCoefficient) != 1) {
+      msg <- "@DrainageCoefficient length != 1."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    if (length(object@EvaporationCoefficients) != 4) {
+      msg <- "@EvaporationCoefficients length != 4."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    if (length(object@TranspirationCoefficients) != 4) {
+      msg <- "@TranspirationCoefficients length != 4."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    if (length(object@IntrinsicSiteParams) != 5) {
+      msg <- "@IntrinsicSiteParams length != 5."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    if (length(object@SoilTemperatureFlag) != 1) {
+      msg <- "@SoilTemperatureFlag length != 1."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    if (length(object@SoilTemperatureConstants) != 10) {
+      msg <- "@SoilTemperatureConstants length != 10."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    if (typeof(object@TranspirationRegions) != "integer") {
+      msg <- "@TranspirationRegions is of integer type."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    if (NCOL(object@TranspirationRegions) != 2) {
+      msg <- "@TranspirationRegions columns != 2."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    if (typeof(object@TranspirationRegions) != "integer") {
+      msg <- "@TranspirationRegions must be integers."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
 
-  if (length(object@swrc_flags) != 2) {
-    msg <- "@swrc_flags length != 2."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
+    if (length(object@swrc_flags) != 2) {
+      msg <- "@swrc_flags length != 2."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
 
-  val
-})
+    val
+  }
+)
 
 #' @rdname swSite-class
 #' @export
-setMethod(
-  f = "initialize",
-  signature = "swSite",
-  function(.Object, ...) {
-    def <- slot(rSOILWAT2::sw_exampleData, "site")
-    sns <- slotNames(def)
-    dots <- list(...)
-    dns <- names(dots)
-
-    # We don't set values for slots `IntrinsicSiteParams` and
-    # `TranspirationRegions`; this is to prevent simulation runs with
-    # accidentally incorrect values
-    if (!("IntrinsicSiteParams" %in% dns)) {
-      tmp <- c("Longitude", "Latitude", "Altitude", "Slope", "Aspect")
-      def@IntrinsicSiteParams[tmp] <- NA_real_
-    }
-    if (!("TranspirationRegions" %in% dns)) {
-      def@TranspirationRegions[, "layer"] <- NA_integer_
-    } else {
-      # Guarantee names
-      dimnames(dots[["TranspirationRegions"]]) <-
-        list(NULL, colnames(def@TranspirationRegions))
-    }
-
-    if ("swrc_flags" %in% dns) {
-      # Guarantee names
-      names(dots[["swrc_flags"]]) <- names(def@swrc_flags)
-    }
-
-    for (sn in sns) {
-      slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
-    }
-
-    if (FALSE) {
-      # not needed because no relevant inheritance
-      .Object <- callNextMethod(.Object, ...)
-    }
-
-    validObject(.Object)
-    .Object
+swSite <- function(...) {
+  def <- slot(rSOILWAT2::sw_exampleData, "site")
+  sns <- slotNames("swSite")
+  dots <- list(...)
+  if (length(dots) == 1 && inherits(dots[[1]], "swSite")) {
+    # If dots are one object of this class, then convert to list of its slots
+    dots <- attributes(unclass(dots[[1]]))
   }
-)
+  dns <- names(dots)
+
+  # We don't set values for slots `IntrinsicSiteParams` and
+  # `TranspirationRegions`; this is to prevent simulation runs with
+  # accidentally incorrect values
+  if (!("IntrinsicSiteParams" %in% dns)) {
+    tmp <- c("Longitude", "Latitude", "Altitude", "Slope", "Aspect")
+    def@IntrinsicSiteParams[tmp] <- NA_real_
+  }
+  if (!("TranspirationRegions" %in% dns)) {
+    def@TranspirationRegions[, "layer"] <- NA_integer_
+  } else {
+    # Guarantee names
+    dimnames(dots[["TranspirationRegions"]]) <- list(
+      NULL,
+      colnames(def@TranspirationRegions)
+    )
+  }
+
+  if ("swrc_flags" %in% dns) {
+    # Guarantee names
+    names(dots[["swrc_flags"]]) <- names(def@swrc_flags)
+  }
+
+  # Copy from SOILWAT2 "testing" (defaults), but dot arguments take precedence
+  tmp <- lapply(
+    sns,
+    function(sn) if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  )
+  names(tmp) <- sns
+
+  do.call("new", args = c("swSite", tmp))
+}
+
 
 
 #' @rdname swSite-class

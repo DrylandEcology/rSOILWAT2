@@ -30,10 +30,16 @@
 #'   \code{\linkS4class{swInputData}}.
 #'
 #' @param object An object of class \code{\linkS4class{swYears}}.
-#' @param .Object An object of class \code{\linkS4class{swYears}}.
 #' @param value A value to assign to a specific slot of the object.
 #' @param file A character string. The file name from which to read.
-#' @param ... Further arguments to methods.
+#' @param ... Arguments to the helper constructor function.
+#'  Dots can either contain objects to copy into slots of that class
+#'  (must be named identical to the corresponding slot) or
+#'  be one object of that class (in which case it will be copied and
+#'  any missing slots will take their default values).
+#'  If dots are missing, then corresponding values of
+#'  \code{rSOILWAT2::sw_exampleData}
+#'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
 #' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
 #' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
@@ -45,18 +51,38 @@
 #' @examples
 #' showClass("swYears")
 #' x <- new("swYears")
+#' x <- swYears()
 #'
 #' @name swYears-class
 #' @export
-setClass("swYears", slots = c(StartYear = "integer", EndYear = "integer",
-  FDOFY = "integer", EDOEY = "integer", isNorth = "logical"))
+setClass(
+  "swYears",
+  slots = c(
+    StartYear = "integer",
+    EndYear = "integer",
+    FDOFY = "integer",
+    EDOEY = "integer",
+    isNorth = "logical"
+  ),
+  prototype = list(
+    StartYear = NA_integer_,
+    EndYear = NA_integer_,
+    FDOFY = NA_integer_,
+    EDOEY = NA_integer_,
+    isNorth = NA
+  )
+)
 
 #' @rdname swYears-class
 #' @export
-setMethod("initialize", signature = "swYears", function(.Object, ...) {
+swYears <- function(...) {
   def <- slot(rSOILWAT2::sw_exampleData, "years")
-  sns <- slotNames(def)
+  sns <- slotNames("swYears")
   dots <- list(...)
+  if (length(dots) == 1 && inherits(dots[[1]], "swYears")) {
+    # If dots are one object of this class, then convert to list of its slots
+    dots <- attributes(unclass(dots[[1]]))
+  }
   dns <- names(dots)
 
   # We don't set values for slots `StartYear` and `EndYear` if not passed
@@ -65,60 +91,78 @@ setMethod("initialize", signature = "swYears", function(.Object, ...) {
   if (!("StartYear" %in% dns)) def@StartYear <- NA_integer_
   if (!("EndYear" %in% dns)) def@EndYear <- NA_integer_
 
-  for (sn in sns) {
-    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
-  }
+  # Copy from SOILWAT2 "testing" (defaults), but dot arguments take precedence
+  tmp <- lapply(
+    sns,
+    function(sn) if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  )
+  names(tmp) <- sns
 
-  if (FALSE) {
-    # not needed because no relevant inheritance
-    .Object <- callNextMethod(.Object, ...)
-  }
-
-  validObject(.Object)
-  .Object
-})
-
-swYears_validity <- function(object) {
-  val <- TRUE
-
-  if (length(object@StartYear) != 1 ||
-      (!anyNA(object@StartYear) && isTRUE(object@StartYear < 0))) {
-    msg <- "There must be exactly one NA or non-negative @StartYear value."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  if (length(object@EndYear) != 1 ||
-      (!anyNA(object@EndYear) && isTRUE(object@EndYear < 0)) ||
-      (!anyNA(object@EndYear) && !anyNA(object@StartYear) &&
-          isTRUE(object@EndYear < object@StartYear))) {
-    msg <- paste("There must be exactly NA or one non-negative @EndYear value ",
-      "that is not smaller than @StartYear.")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  if (length(object@FDOFY) != 1 || !is.finite(object@FDOFY) ||
-      object@FDOFY < 0 ||
-    object@FDOFY > 365) {
-    msg <- paste("There must be exactly one non-negative finite @FDOFY value",
-      "that is smaller than day 366.")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  if (length(object@EDOEY) != 1 || !is.finite(object@EDOEY) ||
-      object@EDOEY < 0 || object@EDOEY > 366 || object@EDOEY < object@FDOFY) {
-    msg <- paste("There must be exactly one non-negative finite @EDOEY value",
-      "that is not larger than day 366 and larger than @FDOFY.")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  if (length(object@isNorth) != 1 || is.na(object@isNorth)) {
-    msg <- paste("There must be exactly one non-NA logical @isNorth value.")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  val
+  do.call("new", args = c("swYears", tmp))
 }
-setValidity("swYears", swYears_validity)
+
+
+setValidity(
+  "swYears",
+  function(object) {
+    val <- TRUE
+
+    if (
+      length(object@StartYear) != 1 ||
+      (!anyNA(object@StartYear) && isTRUE(object@StartYear < 0))
+    ) {
+      msg <- "There must be exactly one NA or non-negative @StartYear value."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (
+      length(object@EndYear) != 1 ||
+        (!anyNA(object@EndYear) && isTRUE(object@EndYear < 0)) ||
+        (!anyNA(object@EndYear) && !anyNA(object@StartYear) &&
+            isTRUE(object@EndYear < object@StartYear))
+    ) {
+      msg <- paste(
+        "There must be exactly NA or one non-negative @EndYear value ",
+        "that is not smaller than @StartYear."
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (
+      length(object@FDOFY) != 1 ||
+      !is.finite(object@FDOFY) ||
+      object@FDOFY < 0 ||
+      object@FDOFY > 365
+    ) {
+      msg <- paste(
+        "There must be exactly one non-negative finite @FDOFY value",
+        "that is smaller than day 366."
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (
+      length(object@EDOEY) != 1 ||
+      !is.finite(object@EDOEY) ||
+      object@EDOEY < 0 ||
+      object@EDOEY > 366 ||
+      object@EDOEY < object@FDOFY
+    ) {
+      msg <- paste(
+        "There must be exactly one non-negative finite @EDOEY value",
+        "that is not larger than day 366 and larger than @FDOFY."
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (length(object@isNorth) != 1 || is.na(object@isNorth)) {
+      msg <- "There must be exactly one non-NA logical @isNorth value."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    val
+  }
+)
 
 
 

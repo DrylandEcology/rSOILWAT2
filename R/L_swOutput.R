@@ -81,7 +81,7 @@ sw_out_flags <- function() {
 #'
 #' @name swOutput_KEY-class
 #' @export
-setClass(
+swOutput_KEY <- setClass(
   "swOutput_KEY",
   slot = c(
     Title = "character",
@@ -91,6 +91,15 @@ setClass(
     Week = "matrix",
     Month = "matrix",
     Year = "matrix"
+  ),
+  prototype = list(
+    Title = character(),
+    TimeStep = integer(),
+    Columns = integer(),
+    Day = matrix(NA_real_)[0, 0],
+    Week = matrix(NA_real_)[0, 0],
+    Month = matrix(NA_real_)[0, 0],
+    Year = matrix(NA_real_)[0, 0]
   )
 )
 
@@ -173,7 +182,7 @@ setReplaceMethod(
 #'
 #' @name swOutput-class
 #' @export
-setClass(
+swOutput <- setClass(
   "swOutput",
   slot = c(
     version = "character",
@@ -213,25 +222,48 @@ setClass(
     ESTABL = "swOutput_KEY",
     CO2EFFECTS = "swOutput_KEY",
     BIOMASS = "swOutput_KEY"
+  ),
+  prototype = list(
+    version = rSW2_version(),
+    timestamp = rSW2_timestamp(),
+    yr_nrow = integer(),
+    mo_nrow = integer(),
+    wk_nrow = integer(),
+    dy_nrow = integer(),
+    WTHR = swOutput_KEY(),
+    TEMP = swOutput_KEY(),
+    PRECIP = swOutput_KEY(),
+    SOILINFILT = swOutput_KEY(),
+    RUNOFF = swOutput_KEY(),
+    ALLH2O = swOutput_KEY(),
+    VWCBULK = swOutput_KEY(),
+    VWCMATRIC = swOutput_KEY(),
+    SWCBULK = swOutput_KEY(),
+    SWA = swOutput_KEY(),
+    SWABULK = swOutput_KEY(),
+    SWAMATRIC = swOutput_KEY(),
+    SWPMATRIC = swOutput_KEY(),
+    SURFACEWATER = swOutput_KEY(),
+    TRANSP = swOutput_KEY(),
+    EVAPSOIL = swOutput_KEY(),
+    EVAPSURFACE = swOutput_KEY(),
+    INTERCEPTION = swOutput_KEY(),
+    LYRDRAIN = swOutput_KEY(),
+    HYDRED = swOutput_KEY(),
+    ET = swOutput_KEY(),
+    AET = swOutput_KEY(),
+    PET = swOutput_KEY(),
+    WETDAY = swOutput_KEY(),
+    SNOWPACK = swOutput_KEY(),
+    DEEPSWC = swOutput_KEY(),
+    SOILTEMP = swOutput_KEY(),
+    ALLVEG = swOutput_KEY(),
+    ESTABL = swOutput_KEY(),
+    CO2EFFECTS = swOutput_KEY(),
+    BIOMASS = swOutput_KEY()
   )
 )
 
-
-#' @rdname swOutput-class
-#' @export
-setMethod(
-  "initialize",
-  signature = "swOutput",
-  function(.Object) {
-
-    slot(.Object, "version") <- rSW2_version()
-    slot(.Object, "timestamp") <- rSW2_timestamp()
-
-    validObject(.Object)
-
-    .Object
-  }
-)
 
 setValidity(
   "swOutput",

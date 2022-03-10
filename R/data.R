@@ -31,7 +31,8 @@
 #'   site-specific simulation run is discouraged (even though there are many
 #'   such examples throughout the documentation of this package).
 #'   The recommended approach is to create a clean new object with
-#'   \code{new("swInputData")} and then set all site-specific inputs and
+#'   the helper constructor \code{swInputData()} (or based on the prototype
+#'   \code{new("swInputData")}) and then set all site-specific inputs and
 #'   parameters. See \var{\dQuote{rSOILWAT2_demo}} vignette.
 #'
 #' @examples

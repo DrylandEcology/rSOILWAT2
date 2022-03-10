@@ -28,10 +28,16 @@
 #'   \code{\linkS4class{swInputData}}.
 #'
 #' @param object An object of class \code{\linkS4class{swFiles}}.
-#' @param .Object An object of class \code{\linkS4class{swFiles}}.
 #' @param value A value to assign to a specific slot of the object.
 #' @param file A character string. The file name from which to read.
-#' @param ... Further arguments to methods.
+#' @param ... Arguments to the helper constructor function.
+#'  Dots can either contain objects to copy into slots of that class
+#'  (must be named identical to the corresponding slot) or
+#'  be one object of that class (in which case it will be copied and
+#'  any missing slots will take their default values).
+#'  If dots are missing, then corresponding values of
+#'  \code{rSOILWAT2::sw_exampleData}
+#'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
 #' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swYears}}
 #' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
@@ -44,60 +50,82 @@
 #' @examples
 #' showClass("swFiles")
 #' x <- new("swFiles")
+#' x <- swFiles()
 #'
 #' @name swFiles-class
 #' @export
-setClass("swFiles", slots = c(ProjDir = "character", InFiles = "character",
-  WeatherPrefix = "character", OutputPrefix = "character"))
+setClass(
+  "swFiles",
+  slots = c(
+    ProjDir = "character",
+    InFiles = "character",
+    WeatherPrefix = "character",
+    OutputPrefix = "character"
+  ),
+  prototype = list(
+    ProjDir = NA_character_,
+    # 23 must be equal to rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_NFILES"]]
+    InFiles = rep(NA_character_, 23),
+    WeatherPrefix = NA_character_,
+    OutputPrefix = NA_character_
+  )
+)
 
 #' @rdname swFiles-class
 #' @export
-setMethod("initialize", signature = "swFiles", function(.Object, ...) {
+swFiles <- function(...) {
   def <- slot(rSOILWAT2::sw_exampleData, "files")
-  sns <- slotNames(def)
+  sns <- slotNames("swFiles")
   dots <- list(...)
+  if (length(dots) == 1 && inherits(dots[[1]], "swFiles")) {
+    # If dots are one object of this class, then convert to list of its slots
+    dots <- attributes(unclass(dots[[1]]))
+  }
   dns <- names(dots)
 
-  for (sn in sns) {
-    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
-  }
+  # Copy from SOILWAT2 "testing" (defaults), but dot arguments take precedence
+  tmp <- lapply(
+    sns,
+    function(sn) if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  )
+  names(tmp) <- sns
 
-  if (FALSE) {
-    # currently not needed because no relevant inheritance
-    .Object <- callNextMethod(.Object, ...)
-  }
-
-  validObject(.Object)
-  .Object
-})
-
-swFiles_validity <- function(object) {
-  val <- TRUE
-
-  if (length(object@ProjDir) != 1) {
-    msg <- "There must be exactly one @ProjDir value."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  if (length(object@InFiles) !=
-      rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_NFILES"]]) {
-    msg <- "The number of (non-empty) @InFiles must be SW_NFILES."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  if (length(object@WeatherPrefix) != 1 || nchar(object@WeatherPrefix) == 0) {
-    msg <- "There must be exactly one non-empty @WeatherPrefix value."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  if (length(object@OutputPrefix) != 1) {
-    msg <- "There must be exactly one @OutputPrefix value."
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  val
+  do.call("new", args = c("swFiles", tmp))
 }
-setValidity("swFiles", swFiles_validity)
+
+
+setValidity(
+  "swFiles",
+  function(object) {
+    val <- TRUE
+
+    if (length(object@ProjDir) != 1) {
+      msg <- "There must be exactly one @ProjDir value."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (
+      length(object@InFiles) !=
+        rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_NFILES"]]
+    ) {
+      msg <- "The number of (non-empty) @InFiles must be SW_NFILES."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (length(object@WeatherPrefix) != 1 || nchar(object@WeatherPrefix) == 0) {
+      msg <- "There must be exactly one non-empty @WeatherPrefix value."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (length(object@OutputPrefix) != 1) {
+      msg <- "There must be exactly one @OutputPrefix value."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    val
+  }
+)
+
 
 
 #' @rdname swFiles-class
@@ -200,7 +228,9 @@ setMethod(
   "swFiles_MarkovProbs",
   "swFiles",
   function(object) {
-    object@InFiles[1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eMarkovProb"]]]
+    object@InFiles[
+      1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][["eMarkovProb"]]
+    ]
   }
 )
 

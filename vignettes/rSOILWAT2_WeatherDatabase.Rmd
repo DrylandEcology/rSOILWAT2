@@ -97,7 +97,7 @@ Here, we create three replicates of our example data with the weather generator
     imputation_span = 5
   )
 
-  x_empty <- list(new("swWeatherData"))
+  x_empty <- weatherHistory()
 
   # Loop over our three sites, generate weather, and add it to the database
   for (k in seq_len(nrow(sites1))) {

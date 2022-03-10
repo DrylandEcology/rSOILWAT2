@@ -3,7 +3,7 @@
 \docType{class}
 \name{swOUT-class}
 \alias{swOUT-class}
-\alias{initialize,swOUT-method}
+\alias{swOUT}
 \alias{get_swOUT,swOUT-method}
 \alias{swOUT_TimeStep,swOUT-method}
 \alias{swOUT_OutputSeparator,swOUT-method}
@@ -16,7 +16,7 @@
 \alias{swReadLines,swOUT,character-method}
 \title{Class \code{swOUT}}
 \usage{
-\S4method{initialize}{swOUT}(.Object, ...)
+swOUT(...)
 
 \S4method{get_swOUT}{swOUT}(object)
 
@@ -39,9 +39,14 @@
 \S4method{swReadLines}{swOUT,character}(object, file)
 }
 \arguments{
-\item{.Object}{An object of class \code{\linkS4class{swOUT}}.}
-
-\item{...}{Further arguments to methods.}
+\item{...}{Arguments to the helper constructor function.
+Dots can either contain objects to copy into slots of that class
+(must be named identical to the corresponding slot) or
+be one object of that class (in which case it will be copied and
+any missing slots will take their default values).
+If dots are missing, then corresponding values of
+\code{rSOILWAT2::sw_exampleData}
+(i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
 
 \item{object}{An object of class \code{\linkS4class{swOUT}}.}
 
@@ -84,16 +89,21 @@ for each possible output time period. See details.}
 \examples{
 showClass("swOUT")
 x <- new("swOUT")
+x <- swOUT()
 
-x <- new("swOUT")
+x <- swOUT()
 activate_swOUT_OutKey(x) <- c("VWCMATRIC", "HYDRED")
 
-x <- new("swOUT")
+x <- swOUT()
 deactivate_swOUT_OutKey(x) <- c("VWCMATRIC", "HYDRED")
 
-x <- new("swOUT")
+x <- swOUT()
 swOUT_TimeStepsForEveryKey(x) <- c(2, 3)
-identical(as.vector(unique(swOUT_TimeStep(x))), as.integer(c(2, 3)))
+identical(
+  unique(sort(as.vector(swOUT_TimeStep(x)))),
+  as.integer(c(2, 3, 999)) # 999 represents 'eSW_NoTime'
+)
+
 }
 \seealso{
 \code{\linkS4class{swInputData}}
