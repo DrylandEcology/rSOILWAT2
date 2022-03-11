@@ -222,3 +222,82 @@ test_that("Use SWRC to convert between VWC/SWP", {
     )
   }
 })
+
+
+test_that("Simulate with all SWRC/PDF combinations", {
+  list_swrcs_pdfs <- unname(as.list(as.data.frame(t(
+    rSOILWAT2::list_matched_swrcs_pdfs()
+  ))))
+
+  dir_test_data <- file.path("..", "test_data")
+  tmp <- list.files(dir_test_data, pattern = "Ex")
+  tmp <- sapply(strsplit(tmp, "_"), function(x) x[[1]])
+  tests <- unique(tmp)
+  expect_gt(length(tests), 0)
+
+
+  #--- Loop over test cases ------
+  for (it in tests) {
+    #---INPUTS
+    sw_weather <- readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
+    sw_input <- readRDS(file.path(dir_test_data, paste0(it, "_input.rds")))
+
+    # Just simulate for a few years to speed things up
+    rSOILWAT2::swYears_EndYear(sw_input) <-
+      rSOILWAT2::swYears_StartYear(sw_input) + 5
+
+
+    #--- Loop over SWRC-PDF combinations ------
+    for (isp in seq_along(list_swrcs_pdfs)) {
+
+      # Set SWRC/PDF
+      rSOILWAT2::swSite_SWRCflags(sw_input) <- list_swrcs_pdfs[[isp]]
+
+      # Run SOILWAT
+      x <- try(
+        rSOILWAT2::sw_exec(
+          inputData = sw_input,
+          weatherList = sw_weather,
+          echo = FALSE,
+          quiet = TRUE
+        ),
+        silent = TRUE
+      )
+
+
+      if (inherits(x, "try-error")) {
+        succeed(
+          paste(
+            paste0(list_swrcs_pdfs[[isp]], collapse = "/"),
+            "requires live internet, skipping for now!"
+          )
+        )
+
+      } else {
+        expect_s4_class(x, "swOutput")
+
+        # Estimate SWRCp and set "NoPDF"
+        soils <- rSOILWAT2::swSoils_Layers(sw_input)
+
+        rSOILWAT2::swSoils_SWRCp(sw_input) <- rSOILWAT2::pdf_estimate(
+          sand = soils[, "sand_frac"],
+          clay = soils[, "clay_frac"],
+          fcoarse = soils[, "gravel_content"],
+          swrc_name = list_swrcs_pdfs[[isp]][1],
+          pdf_name = list_swrcs_pdfs[[isp]][2]
+        )
+
+        rSOILWAT2::swSite_SWRCflags(sw_input)["pdf_name"] <- "NoPDF"
+
+        # Run SOILWAT
+        x <- rSOILWAT2::sw_exec(
+          inputData = sw_input,
+          weatherList = sw_weather,
+          echo = FALSE,
+          quiet = TRUE
+        )
+        expect_s4_class(x, "swOutput")
+      }
+    }
+  }
+})
