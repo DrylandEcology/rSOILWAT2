@@ -36,7 +36,6 @@
   # 'rSW2_glovars' is defined in rSOILWAT2-package.R
 
   # Variables for interaction with SOILWAT2
-  assign("swof", sw_out_flags(), envir = rSW2_glovars)
   assign("kSOILWAT2", .Call(C_sw_consts), envir = rSW2_glovars)
 
   # Variables for weather database functionality

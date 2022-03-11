@@ -28,7 +28,7 @@
 #' @export
 sw_out_flags <- function() {
   tmp <- rSW2_glovars[["kSOILWAT2"]][["OutKeys"]]
-  c(
+  res <- c(
     sw_aet = tmp["SW_AET"],
     sw_deepdrain = tmp["SW_DEEPSWC"],
     sw_estabs = tmp["SW_ESTAB"],
@@ -56,7 +56,14 @@ sw_out_flags <- function() {
     sw_veg = tmp["SW_BIOMASS"],
     sw_wetdays = tmp["SW_WETDAY"]
   )
+
+  # Fix names
+  tmp <- sapply(strsplit(names(res), split = ".", fixed = TRUE), `[`, j = 1)
+  names(res) <- tmp
+
+  res
 }
+
 
 ###################Generic Class to Hold One Output KEY########################
 #' Class \code{"swOutput_KEY"}
