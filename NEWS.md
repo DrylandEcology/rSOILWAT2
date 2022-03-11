@@ -1,3 +1,22 @@
+# rSOILWAT2 v6.0.0-9000
+
+## Breaking changes
+* `SOILWAT2` updated to v7.0.0
+* This version now handles a variety of soil water retention curves `SWRC`
+  and pedotransfer functions `PDF`.
+* New inputs are required to select a `SWRC` and `PDF` as well as to provide
+  parameter values of the selected `SWRC` for each soil layer.
+  Default values are backwards compatible, i.e.,
+  default `SWRC` is "Campbell1974" and default `PDF` is "Cosby1984AndOthers".
+  If these new inputs are missing in an `rSOILWAT2` "swInputData" object,
+  then they are automatically set to their default values.
+* This version produces nearly identical simulation output
+  as the previous release under default values.
+  Small deviations arise due to a fix in the handling of soil moisture values
+  between field capacity and saturation.
+
+
+
 # rSOILWAT2 v5.1.1
 * This version produces identical simulation output as the previous release.
 * `check_version()` now checks for the possible presence of
