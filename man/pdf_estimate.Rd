@@ -54,6 +54,10 @@ the same length, i.e., represent one soil (length 1) or
 multiple soil (layers) (length > 1).
 The arguments selecting \code{SWRC} (\code{swrc_name}) and \code{PDF} (\code{pdf_name})
 are recycled for multiple soil layers.
+
+
+Some \code{PDFs} require a live internet connection to be able to obtain
+\code{SWRC} parameter estimates.
 }
 
 \examples{

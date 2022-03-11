@@ -39,6 +39,12 @@ Zhang et al. 2017
 is an internal helper function.
 }
 
+\section{Notes}{
+
+This function requires a live internet connection to be able
+to obtain parameter estimates from \code{Rosetta3}.
+}
+
 \references{
 Mualem, Y. 1976. A new model for predicting the hydraulic conductivity of
 unsaturated porous media.

@@ -400,6 +400,10 @@ list_matched_swrcs_pdfs <- function(swrc_name) {
 #' The arguments selecting `SWRC` (`swrc_name`) and `PDF` (`pdf_name`)
 #' are recycled for multiple soil layers.
 #'
+#' @section Notes:
+#' Some `PDFs` require a live internet connection to be able to obtain
+#' `SWRC` parameter estimates.
+#'
 #' @inherit SWRCs references
 #'
 #' @return `swrcp`, i.e,.
@@ -569,9 +573,16 @@ rSW2_SWRC_PDF_estimate_parameters <- function(
 #' [pdf_estimate()] is the function that should be directly called; this here
 #' is an internal helper function.
 #'
+#' @section Notes:
+#'  This function requires a live internet connection to be able
+#'  to obtain parameter estimates from `Rosetta3`.
+#'
 #' @md
 pdf_Rosetta3_for_vanGenuchten1980 <- function(sand, clay) {
-  stopifnot(requireNamespace("soilDB"))
+  stopifnot(
+    requireNamespace("soilDB"),
+    requireNamespace("curl") && curl::has_internet()
+  )
 
   tmp <- soilDB::ROSETTA(
     100 * data.frame(sand = sand, silt = 1 - (sand + clay), clay = clay),
