@@ -47,3 +47,4 @@ RoxygenNote: 7.1.2
 LazyData: true
 Language: en-US
 VignetteBuilder: knitr
+Encoding: UTF-8

@@ -2,14 +2,15 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_WeatherHistory}
 \alias{set_WeatherHistory}
-\title{\code{set_WeatherHistory}
-Need to define and export this generic method -- otherwise,
-\code{\link{set_WeatherHistory<-}} doesn't work.}
+\title{\code{set_WeatherHistory}}
 \usage{
 set_WeatherHistory(object, value)
 }
+\arguments{
+\item{object}{An object of class \code{\linkS4class{swInputData}}.}
+
+\item{value}{A value to assign to a specific slot of the \code{object}.}
+}
 \description{
 \code{set_WeatherHistory}
-Need to define and export this generic method -- otherwise,
-\code{\link{set_WeatherHistory<-}} doesn't work.
 }

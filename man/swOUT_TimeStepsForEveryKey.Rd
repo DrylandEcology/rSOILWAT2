@@ -2,14 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{swOUT_TimeStepsForEveryKey}
 \alias{swOUT_TimeStepsForEveryKey}
-\title{\code{swOUT_TimeStepsForEveryKey}
-Need to define and export this generic method -- otherwise,
-\code{\link{swOUT_TimeStepsForEveryKey<-}} doesn't work.}
+\title{\code{swOUT_TimeStepsForEveryKey}}
 \usage{
 swOUT_TimeStepsForEveryKey(object, value)
 }
+\arguments{
+\item{object}{An object of class \code{\linkS4class{swOUT}} or
+\code{\linkS4class{swInputData}}.}
+
+\item{value}{A value to assign to a specific slot of the \code{object}.}
+}
 \description{
 \code{swOUT_TimeStepsForEveryKey}
-Need to define and export this generic method -- otherwise,
-\code{\link{swOUT_TimeStepsForEveryKey<-}} doesn't work.
 }

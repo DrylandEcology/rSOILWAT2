@@ -2,14 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swYears}
 \alias{set_swYears}
-\title{\code{set_swYears}
-Need to define and export this generic method -- otherwise,
-\code{\link{set_swYears<-}} doesn't work.}
+\title{\code{set_swYears}}
 \usage{
 set_swYears(object, value)
 }
+\arguments{
+\item{object}{An object of class \code{\linkS4class{swYears}} or
+\code{\linkS4class{swInputData}}.}
+
+\item{value}{A value to assign to a specific slot of the \code{object}.}
+}
 \description{
 \code{set_swYears}
-Need to define and export this generic method -- otherwise,
-\code{\link{set_swYears<-}} doesn't work.
 }

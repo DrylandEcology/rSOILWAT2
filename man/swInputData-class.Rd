@@ -89,6 +89,7 @@
 \alias{swMarkov_Prob,swInputData-method}
 \alias{swMarkov_Conv,swInputData-method}
 \alias{set_Markov<-,swInputData-method}
+\alias{set_swMarkov<-,swInputData-method}
 \alias{swMarkov_Prob<-,swInputData-method}
 \alias{swMarkov_Conv<-,swInputData-method}
 \alias{get_WeatherHistory,swInputData-method}
@@ -381,6 +382,8 @@ swInputData(...)
 \S4method{swMarkov_Conv}{swInputData}(object)
 
 \S4method{set_Markov}{swInputData}(object) <- value
+
+\S4method{set_swMarkov}{swInputData}(object) <- value
 
 \S4method{swMarkov_Prob}{swInputData}(object) <- value
 

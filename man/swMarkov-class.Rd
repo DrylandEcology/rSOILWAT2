@@ -8,6 +8,7 @@
 \alias{swMarkov_Prob,swMarkov-method}
 \alias{swMarkov_Conv,swMarkov-method}
 \alias{set_Markov<-,swMarkov-method}
+\alias{set_swMarkov<-,swMarkov-method}
 \alias{swMarkov_Prob<-,swMarkov-method}
 \alias{swMarkov_Conv<-,swMarkov-method}
 \alias{swReadLines,swMarkov,character-method}
@@ -22,6 +23,8 @@ swMarkov(...)
 \S4method{swMarkov_Conv}{swMarkov}(object)
 
 \S4method{set_Markov}{swMarkov}(object) <- value
+
+\S4method{set_swMarkov}{swMarkov}(object) <- value
 
 \S4method{swMarkov_Prob}{swMarkov}(object) <- value
 

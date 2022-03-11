@@ -7,7 +7,8 @@
 sw_verbosity(verbose = TRUE)
 }
 \arguments{
-\item{quiet}{A logical value.}
+\item{verbose}{A logical value.
+Verbose mode prints any \pkg{SOILWAT2} messages.}
 }
 \value{
 The previous logical value.

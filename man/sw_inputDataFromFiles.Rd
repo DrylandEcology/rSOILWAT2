@@ -7,11 +7,15 @@
 sw_inputDataFromFiles(dir = "", files.in = "files.in", quiet = FALSE)
 }
 \arguments{
-\item{dir}{A character string. The path to the simulation project directory.}
+\item{dir}{a character vector that represents the path to the input data. Use
+with \code{files.in}}
 
 \item{files.in}{A character string. The file name (and path relative to
 \code{dir}) of the \var{files} input file that contains information
 about the remaining input files.}
+
+\item{quiet}{logical. Quiet mode hides any \pkg{SOILWAT2} messages,
+see \code{\link{sw_verbosity}}.}
 }
 \value{
 An object of class \code{\linkS4class{swInputData}}.

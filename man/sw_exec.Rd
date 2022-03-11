@@ -24,13 +24,15 @@ sw_exec(
 \item{dir}{a character vector that represents the path to the input data. Use
 with \code{files.in}}
 
-\item{files.in}{a character vector that represents the partial path of the
-\var{files.in} file}
+\item{files.in}{A character string. The file name (and path relative to
+\code{dir}) of the \var{files} input file that contains information
+about the remaining input files.}
 
 \item{echo}{logical. This option will echo the inputs to the \var{logfile}.
 Helpful for debugging.}
 
-\item{quiet}{logical. Quiet mode doesn't print messages to the \var{logfile}.}
+\item{quiet}{logical. Quiet mode hides any \pkg{SOILWAT2} messages,
+see \code{\link{sw_verbosity}}.}
 }
 \value{
 An object of class \code{\linkS4class{swOutput}}.

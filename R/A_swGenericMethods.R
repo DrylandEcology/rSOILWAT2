@@ -354,9 +354,10 @@ setGeneric(
   function(object) standardGeneric("swFiles_OutputPrefix")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swFiles<-}} doesn't work.
 #' \code{set_swFiles}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swFiles<-}} doesn't work.
+#' @inheritParams set_swFiles<-
 #' @export
 setGeneric(
   "set_swFiles",
@@ -609,9 +610,10 @@ setGeneric(
   function(object) standardGeneric("swYears_isNorth")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swYears<-}} doesn't work.
 #' \code{set_swYears}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swYears<-}} doesn't work.
+#' @inheritParams set_swYears<-
 #' @export
 setGeneric(
   "set_swYears",
@@ -761,9 +763,10 @@ setGeneric(
   function(object) standardGeneric("swWeather_MonScalingParams")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swWeather<-}} doesn't work.
 #' \code{set_swWeather}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swWeather<-}} doesn't work.
+#' @inheritParams set_swWeather<-
 #' @export
 setGeneric(
   "set_swWeather",
@@ -900,9 +903,10 @@ setGeneric(
 )
 
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_Markov<-}} doesn't work.
 #' \code{set_Markov}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_Markov<-}} doesn't work.
+#' @inheritParams set_Markov<-
 #' @export
 setGeneric(
   "set_Markov",
@@ -980,9 +984,10 @@ setGeneric(
   function(object, year) standardGeneric("get_swWeatherData")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_WeatherHistory<-}} doesn't work.
 #' \code{set_WeatherHistory}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_WeatherHistory<-}} doesn't work.
+#' @inheritParams set_WeatherHistory<-
 #' @export
 setGeneric(
   "set_WeatherHistory",
@@ -998,9 +1003,10 @@ setGeneric(
   function(object, value) standardGeneric("set_WeatherHistory<-")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swWeatherData<-}} doesn't work.
 #' \code{set_swWeatherData}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swWeatherData<-}} doesn't work.
+#' @inheritParams set_swWeatherData<-
 #' @export
 setGeneric(
   "set_swWeatherData",
@@ -1074,9 +1080,10 @@ setGeneric(
   function(object) standardGeneric("swCloud_RainEvents")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swCloud<-}} doesn't work.
 #' \code{set_swCloud}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swCloud<-}} doesn't work.
+#' @inheritParams set_swCloud<-
 #' @export
 setGeneric(
   "set_swCloud",
@@ -1308,9 +1315,10 @@ setGeneric(
   function(object) standardGeneric("swProd_MonProd_forb")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swProd<-}} doesn't work.
 #' \code{set_swProd}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swProd<-}} doesn't work.
+#' @inheritParams set_swProd<-
 #' @export
 setGeneric(
   "set_swProd",
@@ -1617,9 +1625,10 @@ setGeneric(
   function(object) standardGeneric("swSite_TranspirationRegions")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swSite<-}} doesn't work.
 #' \code{set_swSite}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swSite<-}} doesn't work.
+#' @inheritParams set_swSite<-
 #' @export
 setGeneric(
   "set_swSite",
@@ -1784,9 +1793,10 @@ setGeneric(
   function(object) standardGeneric("swSoils_SWRCp")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swSoils<-}} doesn't work.
 #' \code{set_swSoils}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swSoils<-}} doesn't work.
+#' @inheritParams set_swSoils<-
 #' @export
 setGeneric(
   "set_swSoils",
@@ -1921,9 +1931,10 @@ setGeneric(
   function(object) standardGeneric("swCarbon_CO2ppm")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swCarbon<-}} doesn't work.
 #' \code{set_swCarbon}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swCarbon<-}} doesn't work.
+#' @inheritParams set_swCarbon<-
 #' @export
 setGeneric(
   "set_swCarbon",
@@ -2055,9 +2066,10 @@ setGeneric(
   function(object, year) standardGeneric("swSWC_HistoricData")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swSWC<-}} doesn't work.
 #' \code{set_swSWC}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swSWC<-}} doesn't work.
+#' @inheritParams set_swSWC<-
 #' @export
 setGeneric(
   "set_swSWC",
@@ -2163,9 +2175,10 @@ setGeneric(
   function(object) standardGeneric("swOUT_OutputSeparator")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swOUT<-}} doesn't work.
 #' \code{set_swOUT}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swOUT<-}} doesn't work.
+#' @inheritParams set_swOUT<-
 #' @export
 setGeneric(
   "set_swOUT",
@@ -2192,9 +2205,10 @@ setGeneric(
   function(object, value) standardGeneric("swOUT_TimeStep<-")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{swOUT_TimeStepsForEveryKey<-}} doesn't work.
 #' \code{swOUT_TimeStepsForEveryKey}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{swOUT_TimeStepsForEveryKey<-}} doesn't work.
+#' @inheritParams swOUT_TimeStepsForEveryKey<-
 #' @export
 setGeneric(
   "swOUT_TimeStepsForEveryKey",

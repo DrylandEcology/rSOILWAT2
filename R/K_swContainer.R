@@ -1091,7 +1091,18 @@ setReplaceMethod(
   "set_Markov",
   signature = "swInputData",
   function(object, value) {
-    set_Markov(object@markov) <- value
+    set_swMarkov(object@markov) <- value
+    object
+  }
+)
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "set_swMarkov",
+  signature = "swInputData",
+  function(object, value) {
+    set_swMarkov(object@markov) <- value
     object
   }
 )

@@ -37,7 +37,9 @@ sw_args <- function(dir, files.in, echo, quiet) {
 
 #' Turn on/off `SOILWAT2` notes and warnings
 #'
-#' @param quiet A logical value.
+#' @param verbose A logical value.
+#'   Verbose mode prints any \pkg{SOILWAT2} messages.
+#'
 #' @return The previous logical value.
 #'
 #' @export
@@ -80,11 +82,13 @@ sw_verbosity <- function(verbose = TRUE) {
 #'   \code{\link{dbW_getWeatherData}} or \code{\link{getWeatherData_folders}}.
 #' @param dir a character vector that represents the path to the input data. Use
 #'   with \code{files.in}
-#' @param files.in a character vector that represents the partial path of the
-#'   \var{files.in} file
+#' @param files.in A character string. The file name (and path relative to
+#'   \code{dir}) of the \var{files} input file that contains information
+#'   about the remaining input files.
 #' @param echo logical. This option will echo the inputs to the \var{logfile}.
 #'   Helpful for debugging.
-#' @param quiet logical. Quiet mode doesn't print messages to the \var{logfile}.
+#' @param quiet logical. Quiet mode hides any \pkg{SOILWAT2} messages,
+#'   see \code{\link{sw_verbosity}}.
 #'
 #' @return An object of class \code{\linkS4class{swOutput}}.
 #'
@@ -317,10 +321,7 @@ sw_exec <- function(
 
 #' Read simulation input data from files on disk
 #'
-#' @param dir A character string. The path to the simulation project directory.
-#' @param files.in A character string. The file name (and path relative to
-#'   \code{dir}) of the \var{files} input file that contains information
-#'   about the remaining input files.
+#' @inheritParams sw_exec
 #'
 #' @return An object of class \code{\linkS4class{swInputData}}.
 #'
@@ -372,7 +373,8 @@ sw_inputDataFromFiles <- function(
 
 #' Return output data
 #'
-#' @param inputData An object of class \code{\linkS4class{swInputData}}.
+#' @inheritParams sw_exec
+#'
 #' @return An object of class \code{\linkS4class{swOutput}}.
 #' @export
 sw_outputData <- function(inputData) {

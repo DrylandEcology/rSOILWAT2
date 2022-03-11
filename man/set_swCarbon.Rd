@@ -2,14 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swCarbon}
 \alias{set_swCarbon}
-\title{\code{set_swCarbon}
-Need to define and export this generic method -- otherwise,
-\code{\link{set_swCarbon<-}} doesn't work.}
+\title{\code{set_swCarbon}}
 \usage{
 set_swCarbon(object, value)
 }
+\arguments{
+\item{object}{An object of class \code{\linkS4class{swCarbon}} or
+\code{\linkS4class{swInputData}}.}
+
+\item{value}{A value to assign to a specific slot of the \code{object}.}
+}
 \description{
 \code{set_swCarbon}
-Need to define and export this generic method -- otherwise,
-\code{\link{set_swCarbon<-}} doesn't work.
 }
