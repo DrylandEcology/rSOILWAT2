@@ -40,9 +40,7 @@ is an internal helper function.
 }
 
 \section{Notes}{
-
-This function requires a live internet connection to be able
-to obtain parameter estimates from \code{Rosetta3}.
+ A live internet connection is required to access \code{Rosetta3}.
 }
 
 \references{

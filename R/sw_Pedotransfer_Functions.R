@@ -428,13 +428,16 @@ list_matched_swrcs_pdfs <- function(swrc_name) {
 #'   swrc_name = "Campbell1974",
 #'   pdf_name = "Cosby1984"
 #' )
-#' pdf_estimate(
-#'   sand = soils[, "sand_frac"],
-#'   clay = soils[, "clay_frac"],
-#'   fcoarse = soils[, "gravel_content"],
-#'   swrc_name = "vanGenuchten1980",
-#'   pdf_name = "Rosetta3"
-#' )
+#'
+#' if (requireNamespace("curl") && curl::has_internet()) {
+#'   pdf_estimate(
+#'     sand = soils[, "sand_frac"],
+#'     clay = soils[, "clay_frac"],
+#'     fcoarse = soils[, "gravel_content"],
+#'     swrc_name = "vanGenuchten1980",
+#'     pdf_name = "Rosetta3"
+#'   )
+#' }
 #'
 #' @md
 #' @export
@@ -573,16 +576,15 @@ rSW2_SWRC_PDF_estimate_parameters <- function(
 #' [pdf_estimate()] is the function that should be directly called; this here
 #' is an internal helper function.
 #'
-#' @section Notes:
-#'  This function requires a live internet connection to be able
-#'  to obtain parameter estimates from `Rosetta3`.
+#' @section Notes: A live internet connection is required to access `Rosetta3`.
 #'
 #' @md
 pdf_Rosetta3_for_vanGenuchten1980 <- function(sand, clay) {
-  stopifnot(
-    requireNamespace("soilDB"),
-    requireNamespace("curl") && curl::has_internet()
-  )
+  stopifnot(requireNamespace("soilDB"), requireNamespace("curl"))
+
+  if (!curl::has_internet()) {
+    stop("`pdf_Rosetta3_for_vanGenuchten1980()` requires live internet.")
+  }
 
   tmp <- soilDB::ROSETTA(
     100 * data.frame(sand = sand, silt = 1 - (sand + clay), clay = clay),
@@ -773,14 +775,18 @@ check_swrcp <- function(swrc_name, swrcp) {
 #'     sand = soils[, "sand_frac"],
 #'     clay = soils[, "clay_frac"],
 #'     swrc = list(swrc_name = "Campbell1974", pdf_name = "Cosby1984")
-#'   ),
-#'   vanGenuchten1980 = swrc_vwc_to_swp(
+#'   )
+#' )
+#'
+#' if (requireNamespace("curl") && curl::has_internet()) {
+#'   phi[["vanGenuchten1980"]] <- swrc_vwc_to_swp(
 #'     theta,
 #'     sand = soils[, "sand_frac"],
 #'     clay = soils[, "clay_frac"],
 #'     swrc = list(swrc_name = "vanGenuchten1980", pdf_name = "Rosetta3")
 #'   )
-#' )
+#' }
+#'
 #' if (requireNamespace("graphics")) {
 #'   par_prev <- graphics::par(mfcol = c(2, 1))
 #'

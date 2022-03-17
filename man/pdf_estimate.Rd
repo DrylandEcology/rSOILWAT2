@@ -71,13 +71,16 @@ pdf_estimate(
   swrc_name = "Campbell1974",
   pdf_name = "Cosby1984"
 )
-pdf_estimate(
-  sand = soils[, "sand_frac"],
-  clay = soils[, "clay_frac"],
-  fcoarse = soils[, "gravel_content"],
-  swrc_name = "vanGenuchten1980",
-  pdf_name = "Rosetta3"
-)
+
+if (requireNamespace("curl") && curl::has_internet()) {
+  pdf_estimate(
+    sand = soils[, "sand_frac"],
+    clay = soils[, "clay_frac"],
+    fcoarse = soils[, "gravel_content"],
+    swrc_name = "vanGenuchten1980",
+    pdf_name = "Rosetta3"
+  )
+}
 
 }
 \references{

@@ -207,14 +207,18 @@ phi <- list(
     sand = soils[, "sand_frac"],
     clay = soils[, "clay_frac"],
     swrc = list(swrc_name = "Campbell1974", pdf_name = "Cosby1984")
-  ),
-  vanGenuchten1980 = swrc_vwc_to_swp(
+  )
+)
+
+if (requireNamespace("curl") && curl::has_internet()) {
+  phi[["vanGenuchten1980"]] <- swrc_vwc_to_swp(
     theta,
     sand = soils[, "sand_frac"],
     clay = soils[, "clay_frac"],
     swrc = list(swrc_name = "vanGenuchten1980", pdf_name = "Rosetta3")
   )
-)
+}
+
 if (requireNamespace("graphics")) {
   par_prev <- graphics::par(mfcol = c(2, 1))
 

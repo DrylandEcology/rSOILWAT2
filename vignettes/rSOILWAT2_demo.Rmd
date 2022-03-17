@@ -273,6 +273,15 @@ You may organize weather data in a variety of ways:
       # Check that weather data is well-formed
       stopifnot(rSOILWAT2::dbW_check_weatherData(wdata))
     }
+
+  } else {
+    # We don't have live internet and
+    # were not able to obtain weather data for requested years
+    # --> instead, use data we have locally and adjust years
+    years <- sapply(wdata, function(x) slot(x, "year"))
+    rSOILWAT2::swYears_StartYear(sw_in) <- 0
+    rSOILWAT2::swYears_EndYear(sw_in) <- max(years)
+    rSOILWAT2::swYears_StartYear(sw_in) <- min(years)
   }
 ```
 

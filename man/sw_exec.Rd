@@ -168,10 +168,12 @@ print(round(as.numeric(object.size(sw_out6) / object.size(sw_out5)), 2))
 
 
 ## ------ Simulation with different SWRC ------------
-sw_in7 <- sw_in3
-swSite_SWRCflags(sw_in7) <- c("vanGenuchten1980", "Rosetta3")
+if (requireNamespace("curl") && curl::has_internet()) {
+  sw_in7 <- sw_in3
+  swSite_SWRCflags(sw_in7) <- c("vanGenuchten1980", "Rosetta3")
 
-sw_out7 <- sw_exec(inputData = sw_in7, weatherList = sw_weath3, quiet = TRUE)
+  sw_out7 <- sw_exec(inputData = sw_in7, weatherList = sw_weath3)
+}
 
 ## See help(package = "rSOILWAT2") for a full list of functions
 

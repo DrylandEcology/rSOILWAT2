@@ -9,7 +9,10 @@
 
 
 # Required packages not part of `rSOILWAT2`
-stopifnot(requireNamespace("ggplot2"))
+stopifnot(
+  requireNamespace("ggplot2"),
+  requireNamespace("curl") && curl::has_internet()
+)
 
 
 #--- List of SWRC-PDF combinations ------

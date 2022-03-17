@@ -85,7 +85,12 @@ for (it in tests) {
       )
 
       if (inherits(x, "try-error")) {
-        succeed(paste(info1, "requires live internet, skipping for now!"))
+        # Skip if it failed because PDF requires internet but we are offline
+        if (isTRUE(grepl("requires live internet", x))) {
+          succeed(paste(info1, "requires live internet, skipping for now!"))
+        } else {
+          fail(paste(info1, x))
+        }
 
       } else {
 
