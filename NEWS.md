@@ -1,3 +1,5 @@
+# rSOILWAT2 v5.1.2-9000
+* This version produces identical simulation output as the previous release.
 # rSOILWAT2 v5.1.1
 * This version produces identical simulation output as the previous release.
 * `check_version()` now checks for the possible presence of
