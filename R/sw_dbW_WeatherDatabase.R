@@ -1350,6 +1350,35 @@ dbW_addWeatherData <- function(
 }
 
 
+#' Add an index on four data columns of table "WeatherData" if not present
+#'
+#' @noRd
+.wdindex4 <- function(verbose = FALSE) {
+  res <- dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement = paste(
+      "SELECT name FROM sqlite_master",
+      "WHERE type = 'index' AND tbl_name = 'WeatherData'"
+    )
+  )
+
+  if (!("wdindex4" %in% res[, "name"])) {
+    if (verbose) {
+      message("Building dbW index on site, scenario, start year, end year.")
+    }
+
+    dbW_InsistInteract(
+      DBI::dbExecute,
+      statement = paste(
+        "CREATE INDEX wdindex4 ON ",
+        "WeatherData(Site_id, Scenario, StartYear, EndYear)"
+      )
+    )
+  }
+}
+
+
+
 #' Create a weather database
 #'
 #' @section Details: A \pkg{rSOILWAT2} weather database has the following
