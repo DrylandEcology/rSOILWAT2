@@ -774,16 +774,41 @@ test_that("dbW weather data manipulation", {
   expect_equal(dbW_delete_duplicated_weatherData(check_values = TRUE), 0)
   expect_equal(dbW_delete_duplicated_weatherData(check_values = FALSE), kmax)
   expect_equal(dbW_delete_duplicated_weatherData(check_values = FALSE), 0)
+
+
+  # Add kmax duplicate entries for site 1 and for site 2 and delete site by site
+  for (k in seq_len(kmax)) {
+    for (k2 in 1:2) {
+      dbW_addWeatherDataNoCheck(
+        Site_id = k2,
+        Scenario_id = 1,
+        StartYear = sw_years[[1]][1],
+        EndYear = sw_years[[1]][2],
+        weather_blob = dbW_weatherData_to_blob(sw_weather[[1]])
+      )
+    }
+  }
+
+  expect_equal(dbW_delete_duplicated_weatherData(site_id = 1), kmax)
+  expect_equal(
+    dbW_delete_duplicated_weatherData(site_id = 1, carefully = TRUE),
+    0
+  )
+  expect_equal(
+    dbW_delete_duplicated_weatherData(site_id = 2, check_values = FALSE),
+    kmax
+  )
+  expect_equal(dbW_delete_duplicated_weatherData(), 0)
 })
 
 
-#--- CLEAN UP ------
+#--- CLEAN UP dbW ------
 dbW_disconnectConnection()
 unlink(fdbWeather)
 unlink(fdbWeather2, force = TRUE)
 
 
-#--- Non-dbW functions
+#--- Non-dbW functions ------
 test_that("Manipulate weather data: years", {
 
   datA <- getWeatherData_folders(
