@@ -4,10 +4,27 @@
 \alias{dbW_delete_duplicated_weatherData}
 \title{Remove duplicated weather data records}
 \usage{
-dbW_delete_duplicated_weatherData(check_values = TRUE)
+dbW_delete_duplicated_weatherData(
+  site_id = NULL,
+  check_values = TRUE,
+  carefully = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
-\item{check_values}{A logical value.}
+\item{site_id}{A numeric value.
+If \code{NULL}, then duplicates of any sites are deleted.
+Otherwise, duplicates for the requested site only are deleted.}
+
+\item{check_values}{A logical value. See details.}
+
+\item{carefully}{A logical value. If \code{TRUE} and \code{site_id} is specified,
+then first count all and unique weather data records to determine
+if there could be duplicate records before attempting to delete them.
+Counting instead of identifying duplicates can be faster in certain
+situations.}
+
+\item{verbose}{A logical value.}
 }
 \value{
 The number of deleted records
