@@ -16,6 +16,15 @@
   between field capacity and saturation.
 
 
+# rSOILWAT2 v5.1.2
+* This version produces identical simulation output as the previous release.
+* `dbW_delete_duplicated_weatherData()` gains arguments
+  with backwards-compatible defaults:
+    * `site_id`: delete duplicates only for one selected site
+    * `carefully`: in combination with `site_id`, thoroughly identify and
+      delete duplicated entries only if quick counts suggests that there
+      might be duplicates, i.e, this safes time if there are no duplicates.
+
 
 # rSOILWAT2 v5.1.1
 * This version produces identical simulation output as the previous release.

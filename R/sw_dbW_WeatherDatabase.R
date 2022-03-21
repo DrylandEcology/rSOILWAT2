@@ -1350,6 +1350,35 @@ dbW_addWeatherData <- function(
 }
 
 
+#' Add an index on four data columns of table "WeatherData" if not present
+#'
+#' @noRd
+.wdindex4 <- function(verbose = FALSE) {
+  res <- dbW_InsistInteract(
+    DBI::dbGetQuery,
+    statement = paste(
+      "SELECT name FROM sqlite_master",
+      "WHERE type = 'index' AND tbl_name = 'WeatherData'"
+    )
+  )
+
+  if (!("wdindex4" %in% res[, "name"])) {
+    if (verbose) {
+      message("Building dbW index on site, scenario, start year, end year.")
+    }
+
+    dbW_InsistInteract(
+      DBI::dbExecute,
+      statement = paste(
+        "CREATE INDEX wdindex4 ON ",
+        "WeatherData(Site_id, Scenario, StartYear, EndYear)"
+      )
+    )
+  }
+}
+
+
+
 #' Create a weather database
 #'
 #' @section Details: A \pkg{rSOILWAT2} weather database has the following
@@ -1610,7 +1639,16 @@ dbW_deleteSiteData <- function(Site_id, Scenario_id = NULL) {
 
 #' Remove duplicated weather data records
 #'
-#' @param check_values A logical value.
+#' @param site_id A numeric value.
+#'   If `NULL`, then duplicates of any sites are deleted.
+#'   Otherwise, duplicates for the requested site only are deleted.
+#' @param check_values A logical value. See details.
+#' @param carefully A logical value. If `TRUE` and `site_id` is specified,
+#'   then first count all and unique weather data records to determine
+#'   if there could be duplicate records before attempting to delete them.
+#'   Counting instead of identifying duplicates can be faster in certain
+#'   situations.
+#' @param verbose A logical value.
 #'
 #' @section Details:
 #' A weather data record is considered a duplicate if `site_id`, `scenario_id`,
@@ -1622,19 +1660,96 @@ dbW_deleteSiteData <- function(Site_id, Scenario_id = NULL) {
 #'
 #' @export
 #' @md
-dbW_delete_duplicated_weatherData <- function(check_values = TRUE) {
-  # Delete duplicates by keeping the lowest rowid per unit
-  dbW_InsistInteract(
-    DBI::dbExecute,
-    statement = paste(
-      "DELETE FROM WeatherData",
-      "WHERE rowid NOT IN (",
+dbW_delete_duplicated_weatherData <- function(
+  site_id = NULL,
+  check_values = TRUE,
+  carefully = FALSE,
+  verbose = FALSE
+) {
+  do_duplicates <- TRUE
+
+  if (!is.null(site_id)) {
+    if (length(site_id) != 1) {
+      message("`site_id` has multiple values; only the first is considered.")
+      site_id <- site_id[1]
+    }
+
+    if (carefully) {
+      # If there are duplicates for `site_id`, then
+      # there are more total than unique weather data objects for `site_id`
+
+      # Count all weather data objects
+      n_all <- as.integer(dbW_InsistInteract(
+        DBI::dbGetQuery,
+        statement = "SELECT COUNT(*) FROM WeatherData WHERE Site_id = :x",
+        params = list(x = site_id)
+      ))
+
+      # Count unique weather data objects
+      n_unique <- sum(as.integer(dbW_InsistInteract(
+        DBI::dbGetQuery,
+        statement = paste(
+          "SELECT Scenario, COUNT(DISTINCT Site_id) FROM WeatherData ",
+          "WHERE Site_id = :x",
+          "GROUP BY Scenario"
+        ),
+        params = list(x = site_id)
+      )[, 2]))
+
+      do_duplicates <- n_all > n_unique
+
+      if (verbose) {
+        message(
+          "Site ", site_id,
+          ": n(total) = ", n_all,
+          " and estimated n(unique) = ", n_unique,
+          " weather data entries."
+        )
+      }
+    }
+  }
+
+  if (do_duplicates) {
+    # Delete duplicates by keeping the lowest rowid per unit
+    # Note: this can be expensive, particularly without an appropriate index
+
+    if (!check_values) {
+      # Add index to avoid using a temporary b-tree for the 'group by'
+      .wdindex4(verbose = verbose)
+    }
+
+    # "EXPLAIN QUERY PLAN":
+    #   * if `check_values = FALSE`
+    #       SCAN WeatherData
+    #       LIST SUBQUERY 1
+    #       SCAN WeatherData USING COVERING INDEX wdindex4
+    #
+    #   * if `check_values = TRUE`
+    #       SCAN WeatherData
+    #       LIST SUBQUERY 1
+    #       SCAN WeatherData USING COVERING INDEX wdindex4
+    #       USE TEMP B-TREE FOR GROUP BY
+    #     --> this still uses a temporary b-tree because `data` is not indexed
+    #     --> todo: should we include `data` in an index?
+
+    dbW_InsistInteract(
+      DBI::dbExecute,
+      statement = paste(
+        "DELETE FROM WeatherData",
+        "WHERE",
+        if (!is.null(site_id)) "Site_id = :x AND",
+        "rowid NOT IN (",
         "SELECT min(rowid) FROM WeatherData ",
-        "GROUP BY Site_id, Scenario, StartYear, EndYear",
+        if (!is.null(site_id)) "WHERE Site_id = :x",
+        "GROUP BY",
+        if (is.null(site_id)) "Site_id, ",
+        "Scenario, StartYear, EndYear",
         if (check_values) ", data",
-      ")"
+        ")"
+      ),
+      params = if (!is.null(site_id)) list(x = site_id)
     )
-  )
+  }
 }
 
 
