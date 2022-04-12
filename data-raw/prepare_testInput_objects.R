@@ -117,6 +117,17 @@ for (it in seq_along(tests)) {
 
 
 
+
+#-----------------------
+#--- USE DEFAULT EXTDATA EXAMPLE AS PACKAGE DATA
+sw_exampleData <- sw_inputDataFromFiles(
+  file.path(dir_in, examples[1]),
+  files.in = "files.in"
+)
+usethis::use_data(sw_exampleData, internal = FALSE, overwrite = TRUE)
+
+
+
 #-----------------------
 #--- USE EXTDATA EXAMPLES AS BASIS FOR UNIT-TESTS
 for (it in seq_along(tests)) {
@@ -157,15 +168,6 @@ for (it in seq_along(tests)) {
     )
   }
 }
-
-
-#-----------------------
-#--- USE DEFAULT EXTDATA EXAMPLE AS PACKAGE DATA
-sw_exampleData <- sw_inputDataFromFiles(
-  file.path(dir_in, examples[1]),
-  files.in = "files.in"
-)
-usethis::use_data(sw_exampleData, internal = FALSE, overwrite = TRUE)
 
 
 #-----------------------
