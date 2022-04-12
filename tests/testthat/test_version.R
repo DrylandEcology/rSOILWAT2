@@ -18,6 +18,17 @@ test_that("rSOILWAT2 object versions", {
   )
 
 
+  #--- devel: dash and dot are equivalent
+  sw_in@version <- as.character(numeric_version("1.1.1-9000"))
+
+  # devel level
+  expect_true(
+    check_version(sw_in, expected_version = "1.1.1.9000", level = "devel")
+  )
+  expect_true(
+    check_version(sw_in, expected_version = "1.1.1-9000", level = "devel")
+  )
+
   #--- Check each level of a version
   sw_in@version <- as.character(numeric_version("1.1.1-900.1"))
 
