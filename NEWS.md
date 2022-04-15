@@ -1,3 +1,4 @@
+# rSOILWAT2 v5.1.3-9000
 # rSOILWAT2 v5.1.2
 * This version produces identical simulation output as the previous release.
 * `dbW_delete_duplicated_weatherData()` gains arguments
