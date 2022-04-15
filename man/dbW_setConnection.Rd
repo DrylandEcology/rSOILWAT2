@@ -2,6 +2,7 @@
 % Please edit documentation in R/sw_dbW_WeatherDatabase.R
 \name{dbW_setConnection}
 \alias{dbW_setConnection}
+\alias{.dbW_setConnection}
 \title{Registers/connects a SQLite weather database with the package}
 \usage{
 dbW_setConnection(
@@ -10,6 +11,8 @@ dbW_setConnection(
   check_version = FALSE,
   verbose = FALSE
 )
+
+.dbW_setConnection(dbFilePath)
 }
 \arguments{
 \item{dbFilePath}{A character string. The weather database file path.}
@@ -28,3 +31,10 @@ An invisible logical value indicating success/failure.
 \description{
 Registers/connects a SQLite weather database with the package
 }
+\section{Details}{
+
+\code{.dbW_setConnection()} is a bare-bones version of \code{dbW_setConnection()}.
+It doesn't carry out any checks that make sure the database works
+correctly.
+}
+
