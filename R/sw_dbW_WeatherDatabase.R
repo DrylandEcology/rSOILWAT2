@@ -1000,21 +1000,34 @@ dbW_setConnection <- function(
   invisible(dbW_IsValid())
 }
 
+#' @rdname dbW_setConnection
+#'
+#' @section Details:
+#' `.dbW_setConnection()` is a bare-bones version of `dbW_setConnection()`.
+#'  It doesn't carry out any checks that make sure the database works
+#'  correctly.
+#'
+#' @md
+#' @export
+.dbW_setConnection <- function(dbFilePath) {
+  rSW2_glovars$con <- suppressWarnings(
+    DBI::dbConnect(RSQLite::SQLite(), dbname = dbFilePath)
+  )
+  rSW2_glovars$blob_compression_type <- dbW_compression()
+  invisible(dbW_IsValid())
+}
+
 #' Disconnects a SQLite weather database from the package
 #' @return An invisible logical value indicating success with \code{TRUE} and
 #'  failure with \code{FALSE}.
 #' @export
 dbW_disconnectConnection <- function() {
-  res <- if (dbW_IsValid()) {
-    DBI::dbDisconnect(rSW2_glovars$con)
-  } else {
-    TRUE
-  }
+  res <- try(DBI::dbDisconnect(rSW2_glovars$con), silent = TRUE)
 
   rSW2_glovars$con <- NULL
   rSW2_glovars$blob_compression_type <- NULL
 
-  invisible(res)
+  invisible(!inherits(res, "try-error"))
 }
 
 #' Adds new sites to a registered weather database
