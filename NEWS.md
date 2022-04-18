@@ -1,4 +1,4 @@
-# rSOILWAT2 v5.1.3-9000
+# rSOILWAT2 v5.1.3
 * This version produces identical simulation output as the previous release.
 * `.dbW_setConnection()` is a bare-bones version of `dbW_setConnection()` that
   quickly and without any error checking connects to a weather database.
