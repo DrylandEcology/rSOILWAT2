@@ -31,7 +31,9 @@ setGeneric("swReadLines", function(object, file) standardGeneric("swReadLines"))
 
 
 #' Create \pkg{rSOILWAT2} version representation
-rSW2_version <- function() as.character(getNamespaceVersion("rSOILWAT2"))
+rSW2_version <- function() {
+  as.character(as.numeric_version(getNamespaceVersion("rSOILWAT2")))
+}
 
 #' Retrieve version of \pkg{rSOILWAT2} that was used to create object
 #'

@@ -159,8 +159,13 @@ then you may consider using one of the cloud services (no endorsements), e.g.,
 
 <a name="get_documentation"></a>
 ### Documentation
-View package documentation in an interactive R session with
-`help(package = "rSOILWAT2")`
+
+`rSOILWAT2` offers documentation and code examples of exported functions
+    `help(package = "rSOILWAT2")`, in particular `?sw_exec`,
+and several vignettes
+    `vignette(package = "rSOILWAT2")`, in particular
+    `vignette("rSOILWAT2_demo", package = "rSOILWAT2")`.
+
 
 
 
@@ -214,6 +219,24 @@ project you agree to abide by its terms.
 
 
 ### Tests, documentation, and code
+
+We develop code on development branches and,
+after they are reviewed and pass our checks,
+merge them into the main branch for release:
+  * Create a development branch
+      * Set the package version number (`DESCRIPTION`) to a
+        development version (ending in `-9000`)
+      * Start a new section in `NEWS`
+  * Develop, document and test code and create a pull request
+  * Finalize code development
+  * Once code is reviewed, sufficiently tested, and ready for merging into main
+      * Decide on a package version number for the new release
+      * Set the package version number in `DESCRIPTION`
+      * Finalize `NEWS`
+  * Merge pull request into main and
+    create new `rSOILWAT2` [release](#code_versioning)
+
+
 
 <a name="code_documentation"></a>
 #### Code documentation
@@ -360,11 +383,21 @@ if the `SOILWAT2` updated included changes to the input files.
 <a name="code_versioning"></a>
 #### Version numbers
 
-We attempt to follow guidelines of [semantic versioning][] with version
-numbers of `MAJOR.MINOR.PATCH`.
+We base our versions on the guidelines of [semantic versioning][]
+with version numbers of `MAJOR.MINOR.PATCH`.
+
+We create a new release for each update to the main branch;
+a new release is identified by the package version (`DESCRIPTION`) and
+by a [github release](https://github.com/DrylandEcology/rSOILWAT2/releases)
+that also creates a git tag of the same name.
+The main branch is updated via pull requests from development branches
+after they are reviewed and pass required checks.
 
 If the version numbers changes, then the following files must be updated
 * `DESCRIPTION`: adjust lines 'Version'
+* `NEWS`: add a new section describing pertinent changes to a package user
+  (see [`r-pkgs` news](https://r-pkgs.org/release.html#news) and
+  [`tidyverse` news style](https://style.tidyverse.org/news.html?q=news#news))
 
 
 <br>

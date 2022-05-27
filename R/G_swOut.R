@@ -358,7 +358,7 @@ KEY <- c("WTHR", "TEMP", "PRECIP", "SOILINFILT", "RUNOFF", "ALLH2O", "VWCBULK",
   "VWCMATRIC", "SWCBULK", "SWA", "SWABULK", "SWAMATRIC", "SWPMATRIC",
   "SURFACEWATER", "TRANSP", "EVAPSOIL", "EVAPSURFACE", "INTERCEPTION",
   "LYRDRAIN", "HYDRED", "ET", "AET", "PET", "WETDAY", "SNOWPACK", "DEEPSWC",
-  "SOILTEMP", "ALLVEG", "ESTABL")
+  "SOILTEMP", "FROZEN", "ALLVEG", "ESTABL")
 OutSum <- c("off", "sum", "avg", "fnl") # only used for 'swReadLines'
 #Remember this models the C code so index starts at 0 not 1
 timePeriods <- c("dy", "wk", "mo", "yr")

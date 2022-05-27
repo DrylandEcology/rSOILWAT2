@@ -1,3 +1,11 @@
+# rSOILWAT2 v5.2.0
+## Breaking changes
+* This version adds new output to otherwise identical simulation output.
+* `SOILWAT2` is updated to `v6.4.0` which provides
+  the phase of soil moisture (frozen or not) in each soil layer.
+* The new output is provided in slot "FROZEN" of class `swOutput` (#101).
+
+
 # rSOILWAT2 v5.1.3
 * This version produces identical simulation output as the previous release.
 * `.dbW_setConnection()` is a bare-bones version of `dbW_setConnection()` that
