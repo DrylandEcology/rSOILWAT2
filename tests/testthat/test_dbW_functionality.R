@@ -212,6 +212,8 @@ test_that("dbW creation", {
   )
   expect_true(dbW_setConnection(fdbWeather))
   expect_true(dbW_IsValid())
+  expect_true(.dbW_setConnection(fdbWeather))
+  expect_true(dbW_IsValid())
   expect_true(dbW_disconnectConnection())
   expect_false(dbW_IsValid())
   expect_true(dbW_setConnection(fdbWeather))

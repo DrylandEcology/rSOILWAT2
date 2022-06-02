@@ -352,8 +352,11 @@ test_that("Compare to previous runs", {
 
       # Expect version number and timestamp to be >= than stored copy
       expect_true(
-        !!get_version(rdy) >= !!get_version(sw_output),
-        info = info1
+        check_version(
+          !!rdy,
+          expected_version = !!get_version(sw_output),
+          level = "patch"
+        )
       )
       expect_gte(!!get_timestamp(rdy), !!get_timestamp(sw_output))
     }
