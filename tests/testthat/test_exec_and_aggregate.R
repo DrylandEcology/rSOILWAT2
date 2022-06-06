@@ -90,6 +90,8 @@ for (it in tests) {
     max(-Tmax, weather_extremes[1, "Tmin_C"]),
     min(Tmax, weather_extremes[2, "Tmax_C"])
   )
+  # Surface temperature goes beyond air temperature
+  var_limits2["TEMP", ] <- c(-Tmax, Tmax)
   var_limits2["SOILTEMP", ] <- c(-Tmax, Tmax)
   var_limits2["PRECIP", ] <- c(0, min(H2Omax, weather_extremes[2, "PPT_cm"]))
   var_limits2["SOILINFT", ] <- c(0, H2Omax)
