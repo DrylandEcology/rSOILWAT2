@@ -84,7 +84,7 @@ where the the \code{SWRC} conversion is applied to the
 first element of \code{x} and soils, the second elements, and so on.}
 
 \item{verbose}{A logical value. If \code{TRUE}, then display
-\code{SOILWAT2} internal warnings.}
+\code{SOILWAT2} internal warnings and other messages.}
 
 \item{swp_MPa}{A numeric object. The soil water potential values
 (units `[MPa]`) to be converted to

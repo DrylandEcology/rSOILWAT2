@@ -254,6 +254,8 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #'   i.e., `name` (short for `swrc_name`) and `swrcp`,
 #'   or all necessary elements to estimate parameters of a `SWRC` given
 #'   soil parameters, i.e., `swrc_name` and `pdf_name`.
+#' @param verbose A logical value. If `TRUE`, then display
+#'   `SOILWAT2` internal warnings and other messages.
 #'
 #' @section Details:
 #' [swrc_names()] lists implemented `SWRCs`;
@@ -579,11 +581,19 @@ rSW2_SWRC_PDF_estimate_parameters <- function(
 #' @section Notes: A live internet connection is required to access `Rosetta3`.
 #'
 #' @md
-pdf_Rosetta3_for_vanGenuchten1980 <- function(sand, clay) {
+pdf_Rosetta3_for_vanGenuchten1980 <- function(
+  sand,
+  clay,
+  verbose = interactive()
+) {
   stopifnot(requireNamespace("soilDB"), requireNamespace("curl"))
 
   if (!curl::has_internet()) {
     stop("`pdf_Rosetta3_for_vanGenuchten1980()` requires live internet.")
+  }
+
+  if (verbose) {
+    message("Connecting live to ROSETTA API...")
   }
 
   tmp <- soilDB::ROSETTA(
@@ -667,8 +677,6 @@ check_swrcp <- function(swrc_name, swrcp) {
 #'   If `FALSE` (default), then the returned object has a size of `l` = `d`
 #'   where the the `SWRC` conversion is applied to the
 #'   first element of `x` and soils, the second elements, and so on.
-#' @param verbose A logical value. If `TRUE`, then display
-#'   `SOILWAT2` internal warnings.
 #'
 #' @return The dimensions of the output are a function of `x` and the
 #'   number of soil values (e.g., rows or length of `swrc[["swrcp"]]`).

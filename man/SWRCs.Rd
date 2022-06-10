@@ -41,6 +41,9 @@ Contains all necessary elements of a \code{SWRC},
 i.e., \code{name} (short for \code{swrc_name}) and \code{swrcp},
 or all necessary elements to estimate parameters of a \code{SWRC} given
 soil parameters, i.e., \code{swrc_name} and \code{pdf_name}.}
+
+\item{verbose}{A logical value. If \code{TRUE}, then display
+\code{SOILWAT2} internal warnings and other messages.}
 }
 \description{
 \code{SWRCs} convert between soil water content and soil water potential

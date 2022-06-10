@@ -5,7 +5,7 @@
 \title{Estimate van Genuchten 1980 \code{SWRC} parameters using \code{Rosetta} v3 \code{PDF} by
 Zhang et al. 2017}
 \usage{
-pdf_Rosetta3_for_vanGenuchten1980(sand, clay)
+pdf_Rosetta3_for_vanGenuchten1980(sand, clay, verbose = interactive())
 }
 \arguments{
 \item{sand}{A numeric value or vector.
@@ -15,6 +15,9 @@ Sand content of the matric soil component
 \item{clay}{A numeric value or vector.
 Clay content of the matric soil component
 (< 2 mm fraction; units of \verb{[g/g]}) of each soil layer.}
+
+\item{verbose}{A logical value. If \code{TRUE}, then display
+\code{SOILWAT2} internal warnings and other messages.}
 }
 \value{
 \code{swrcp}, i.e,.
