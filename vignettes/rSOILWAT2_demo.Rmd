@@ -591,6 +591,7 @@ see `pdf_names()`.
     sand = soil_new[, "sand_frac"],
     clay = soil_new[, "clay_frac"],
     fcoarse = soil_new[, "gravel_content"],
+    bdensity = soil_new[, "bulkDensity_g.cm.3"],
     swrc_name = tmp["swrc_name"],
     pdf_name = tmp["pdf_name"]
   )

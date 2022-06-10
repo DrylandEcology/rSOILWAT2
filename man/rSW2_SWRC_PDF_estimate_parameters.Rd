@@ -5,7 +5,14 @@
 \title{Estimate parameters of selected soil water retention curve (\code{SWRC})
 using selected pedotransfer function (\code{PDF}) that are implemented in \code{R}}
 \usage{
-rSW2_SWRC_PDF_estimate_parameters(pdf_name, sand, clay, fcoarse, fail = TRUE)
+rSW2_SWRC_PDF_estimate_parameters(
+  pdf_name,
+  sand,
+  clay,
+  fcoarse,
+  bdensity = NULL,
+  fail = TRUE
+)
 }
 \arguments{
 \item{pdf_name}{An character string or vector.
@@ -26,6 +33,10 @@ relative to the whole soil of each soil layer.
 \code{fcoarse} is required, for instance, to translate between
 values relative to the matric soil component (< 2 mm fraction) and
 relative to the whole soil (matric soil plus coarse fragments).}
+
+\item{bdensity}{A numeric value or vector.
+Density of the whole soil
+(matric soil plus coarse fragments; units \verb{[g/cm3]}).}
 
 \item{fail}{A logical value. If \code{TRUE} (default) and
 requested \code{PDF} is not implemented in \code{R}, then throw an error;

@@ -4,7 +4,7 @@
 \alias{pdf_estimate}
 \title{Estimate \code{SWRC} parameters from soil texture with a pedotransfer function}
 \usage{
-pdf_estimate(sand, clay, fcoarse, swrc_name, pdf_name)
+pdf_estimate(sand, clay, fcoarse, bdensity = NULL, swrc_name, pdf_name)
 }
 \arguments{
 \item{sand}{A numeric value or vector.
@@ -21,6 +21,10 @@ relative to the whole soil of each soil layer.
 \code{fcoarse} is required, for instance, to translate between
 values relative to the matric soil component (< 2 mm fraction) and
 relative to the whole soil (matric soil plus coarse fragments).}
+
+\item{bdensity}{A numeric value or vector.
+Density of the whole soil
+(matric soil plus coarse fragments; units \verb{[g/cm3]}).}
 
 \item{swrc_name}{An character string or vector.
 The selected \code{SWRC} name
@@ -49,9 +53,9 @@ Estimate \code{SWRC} parameters from soil texture with a pedotransfer function
 \code{\link[=pdf_names]{pdf_names()}} lists implemented \code{PDFs}.
 
 
-The soil parameters \code{sand}, \code{clay}, and \code{fcoarse} must be of
+The soil parameters \code{sand}, \code{clay}, \code{fcoarse}, and \code{bdensity} must be of
 the same length, i.e., represent one soil (length 1) or
-multiple soil (layers) (length > 1).
+multiple soil (layers) (length > 1); however, \code{bdensity} may be \code{NULL}.
 The arguments selecting \code{SWRC} (\code{swrc_name}) and \code{PDF} (\code{pdf_name})
 are recycled for multiple soil layers.
 
@@ -77,6 +81,7 @@ if (requireNamespace("curl") && curl::has_internet()) {
     sand = soils[, "sand_frac"],
     clay = soils[, "clay_frac"],
     fcoarse = soils[, "gravel_content"],
+    bdensity = soils[, "bulkDensity_g/cm^3"],
     swrc_name = "vanGenuchten1980",
     pdf_name = "Rosetta3"
   )

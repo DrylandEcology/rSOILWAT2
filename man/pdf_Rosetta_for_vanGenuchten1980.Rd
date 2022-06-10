@@ -7,6 +7,7 @@
 pdf_Rosetta_for_vanGenuchten1980(
   sand,
   clay,
+  bdensity = NULL,
   version = c("3", "1", "2"),
   verbose = interactive()
 )
@@ -19,6 +20,10 @@ Sand content of the matric soil component
 \item{clay}{A numeric value or vector.
 Clay content of the matric soil component
 (< 2 mm fraction; units of \verb{[g/g]}) of each soil layer.}
+
+\item{bdensity}{A numeric value or vector.
+Density of the whole soil
+(matric soil plus coarse fragments; units \verb{[g/cm3]}).}
 
 \item{version}{A character string that selects a \code{Rosetta} version.}
 

@@ -275,6 +275,7 @@ sw_exec <- function(
       sand = soils[, "sand_frac"],
       clay = soils[, "clay_frac"],
       fcoarse = soils[, "gravel_content"],
+      bdensity = soils[, "bulkDensity_g/cm^3"],
       pdf_name = pdf_name,
       fail = FALSE
     )

@@ -19,6 +19,10 @@ relative to the whole soil of each soil layer.
 values relative to the matric soil component (< 2 mm fraction) and
 relative to the whole soil (matric soil plus coarse fragments).}
 
+\item{bdensity}{A numeric value or vector.
+Density of the whole soil
+(matric soil plus coarse fragments; units \verb{[g/cm3]}).}
+
 \item{layer_width}{A numeric value or vector.
 Depth interval, width, of each soil layer (units of \code{cm}).
 \code{layer_width} is required to translate between

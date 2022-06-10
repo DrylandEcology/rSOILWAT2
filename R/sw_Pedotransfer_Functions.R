@@ -236,6 +236,9 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #'   `fcoarse` is required, for instance, to translate between
 #'   values relative to the matric soil component (< 2 mm fraction) and
 #'   relative to the whole soil (matric soil plus coarse fragments).
+#' @param bdensity A numeric value or vector.
+#'   Density of the whole soil
+#'   (matric soil plus coarse fragments; units `[g/cm3]`).
 #' @param layer_width A numeric value or vector.
 #'   Depth interval, width, of each soil layer (units of `cm`).
 #'   `layer_width` is required to translate between
@@ -396,9 +399,9 @@ list_matched_swrcs_pdfs <- function(swrc_name) {
 #' [pdf_names()] lists implemented `PDFs`.
 #'
 #' @section Notes:
-#' The soil parameters `sand`, `clay`, and `fcoarse` must be of
+#' The soil parameters `sand`, `clay`, `fcoarse`, and `bdensity` must be of
 #' the same length, i.e., represent one soil (length 1) or
-#' multiple soil (layers) (length > 1).
+#' multiple soil (layers) (length > 1); however, `bdensity` may be `NULL`.
 #' The arguments selecting `SWRC` (`swrc_name`) and `PDF` (`pdf_name`)
 #' are recycled for multiple soil layers.
 #'
@@ -436,6 +439,7 @@ list_matched_swrcs_pdfs <- function(swrc_name) {
 #'     sand = soils[, "sand_frac"],
 #'     clay = soils[, "clay_frac"],
 #'     fcoarse = soils[, "gravel_content"],
+#'     bdensity = soils[, "bulkDensity_g/cm^3"],
 #'     swrc_name = "vanGenuchten1980",
 #'     pdf_name = "Rosetta3"
 #'   )
@@ -443,7 +447,14 @@ list_matched_swrcs_pdfs <- function(swrc_name) {
 #'
 #' @md
 #' @export
-pdf_estimate <- function(sand, clay, fcoarse, swrc_name, pdf_name) {
+pdf_estimate <- function(
+  sand,
+  clay,
+  fcoarse,
+  bdensity = NULL,
+  swrc_name,
+  pdf_name
+) {
 
   #--- Check for consistency between SWRC and PDF
   swrc_name <- std_swrc(swrc_name)[1]
@@ -465,7 +476,8 @@ pdf_estimate <- function(sand, clay, fcoarse, swrc_name, pdf_name) {
       pdf_name = pdf_name,
       sand = sand,
       clay = clay,
-      fcoarse = fcoarse
+      fcoarse = fcoarse,
+      bdensity = bdensity
     )
 
   } else {
@@ -474,7 +486,8 @@ pdf_estimate <- function(sand, clay, fcoarse, swrc_name, pdf_name) {
       pdf_type = rep_len(encode_name2pdf(pdf_name), length(sand)),
       sand = sand,
       clay = clay,
-      fcoarse = fcoarse
+      fcoarse = fcoarse,
+      bdensity = bdensity
     )
   }
 
@@ -526,6 +539,7 @@ rSW2_SWRC_PDF_estimate_parameters <- function(
   sand,
   clay,
   fcoarse,
+  bdensity = NULL,
   fail = TRUE
 ) {
   pdf_name <- std_pdf(pdf_name)[1]
@@ -535,6 +549,7 @@ rSW2_SWRC_PDF_estimate_parameters <- function(
     pdf_Rosetta_for_vanGenuchten1980(
       sand = sand,
       clay = clay,
+      bdensity = bdensity,
       version = "3"
     )
 
@@ -592,6 +607,7 @@ rSW2_SWRC_PDF_estimate_parameters <- function(
 pdf_Rosetta_for_vanGenuchten1980 <- function(
   sand,
   clay,
+  bdensity = NULL,
   version = c("3", "1", "2"),
   verbose = interactive()
 ) {
@@ -607,11 +623,22 @@ pdf_Rosetta_for_vanGenuchten1980 <- function(
     message("Connecting live to ROSETTA API...")
   }
 
-  tmp <- soilDB::ROSETTA(
-    100 * data.frame(sand = sand, silt = 1 - (sand + clay), clay = clay),
-    vars = c("sand", "silt", "clay"),
-    v = version
+  tmp_txt <- 100 * data.frame(
+    sand = sand,
+    silt = 1 - (sand + clay),
+    clay = clay
   )
+  var_txt <- c("sand", "silt", "clay")
+
+  tmp <- if (is.null(bdensity)) {
+    soilDB::ROSETTA(tmp_txt, vars = var_txt, v = version)
+  } else {
+    soilDB::ROSETTA(
+      cbind(tmp_txt, bdensity = bdensity),
+      vars = c(var_txt, "bdensity"),
+      v = version
+    )
+  }
 
   unname(data.matrix(data.frame(
     tmp[, c("theta_r", "theta_s")],
@@ -719,9 +746,10 @@ check_swrcp <- function(swrc_name, swrcp) {
 #' `0%` coarse fragments and be represented by `1 cm` wide soil layers.
 #'
 #' @section Details:
-#' Arguments `sand` and `clay` are only required if `SWRC` parameter values
-#' need to be estimated on the fly, i.e., if `swrc` does not contain
-#' the element `swrcp` (with suitable `SWRC` parameter values).
+#' Arguments `sand`, `clay`, and `bdensity` are only required
+#' if `SWRC` parameter values need to be estimated on the fly,
+#' i.e., if `swrc` does not contain the element `swrcp`
+#' (with suitable `SWRC` parameter values).
 #' This is handled by [pdf_estimate()] and additionally requires
 #' the element `pdf_name` for argument `swrc`.
 #'
@@ -838,6 +866,7 @@ swrc_conversion <- function(
   swrc,
   sand = NULL,
   clay = NULL,
+  bdensity = NULL,
   outer_if_equalsize = FALSE,
   verbose = FALSE
 ) {
@@ -909,7 +938,11 @@ swrc_conversion <- function(
   )
 
   if (is.null(swrc[["swrcp"]])) {
-    soils <- c(soils, list(sand = sand, clay = clay))
+    soils <- c(
+      soils,
+      list(sand = sand, clay = clay),
+      if (!is.null(bdensity)) list(bdensity = bdensity)
+    )
   }
 
   nsoils <- unique(lengths(soils))
@@ -958,6 +991,7 @@ swrc_conversion <- function(
         sand = soils[["sand"]],
         clay = soils[["clay"]],
         fcoarse = soils[["fcoarse"]],
+        bdensity = soils[["bdensity"]],
         swrc_name = swrc[["swrc_name"]],
         pdf_name = swrc[["pdf_name"]]
       )
@@ -974,6 +1008,7 @@ swrc_conversion <- function(
         sand = soils[["sand"]],
         clay = soils[["clay"]],
         fcoarse = soils[["fcoarse"]],
+        bdensity = soils[["bdensity"]],
         swrc_name = swrc[["swrc_name"]],
         pdf_name = swrc[["pdf_name"]]
       )
@@ -996,6 +1031,7 @@ swrc_conversion <- function(
         sand = soils[["sand"]],
         clay = soils[["clay"]],
         fcoarse = soils[["fcoarse"]],
+        bdensity = soils[["bdensity"]],
         swrc_name = swrc[["swrc_name"]],
         pdf_name = swrc[["pdf_name"]]
       )
@@ -1018,6 +1054,7 @@ swrc_conversion <- function(
         sand = soils[["sand"]],
         clay = soils[["clay"]],
         fcoarse = soils[["fcoarse"]],
+        bdensity = soils[["bdensity"]],
         swrc_name = swrc[["swrc_name"]],
         pdf_name = swrc[["pdf_name"]]
       )
@@ -1106,6 +1143,7 @@ swrc_swp_to_vwc <- function(
   swrc = list(swrc_name = NULL, pdf_name = NULL, swrcp = NULL),
   sand = NULL,
   clay = NULL,
+  bdensity = NULL,
   outer_if_equalsize = FALSE,
   verbose = FALSE
 ) {
@@ -1115,6 +1153,7 @@ swrc_swp_to_vwc <- function(
     sand = sand,
     clay = clay,
     fcoarse = fcoarse,
+    bdensity = bdensity,
     layer_width = layer_width,
     swrc = swrc,
     outer_if_equalsize = outer_if_equalsize,
@@ -1139,6 +1178,7 @@ swrc_vwc_to_swp <- function(
   swrc = list(swrc_name = NULL, pdf_name = NULL, swrcp = NULL),
   sand = NULL,
   clay = NULL,
+  bdensity = NULL,
   outer_if_equalsize = FALSE,
   verbose = FALSE
 ) {
@@ -1148,6 +1188,7 @@ swrc_vwc_to_swp <- function(
     sand = sand,
     clay = clay,
     fcoarse = fcoarse,
+    bdensity = bdensity,
     layer_width = layer_width,
     swrc = swrc,
     outer_if_equalsize = outer_if_equalsize,

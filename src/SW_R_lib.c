@@ -615,6 +615,9 @@ SEXP sw_consts(void) {
   @param[in] clay Clay content of the matric soil (< 2 mm fraction) [g/g]
   @param[in] fcoarse Coarse fragments (> 2 mm; e.g., gravel)
     of the whole soil [m3/m3]
+  @param[in] bdensity Density of the whole soil
+    (matric soil plus coarse fragments) [g/cm3];
+    accepts `NULL` if not used by `PDF`
 
   @return Matrix of estimated SWRC parameters
 */
@@ -622,15 +625,18 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
   SEXP pdf_type,
   SEXP sand,
   SEXP clay,
-  SEXP fcoarse
+  SEXP fcoarse,
+  SEXP bdensity
 ) {
   int nlyrs = length(sand);
+  Rboolean has_bd = !isNull(bdensity);
 
   /* Check inputs */
   if (
     nlyrs != length(clay) ||
     nlyrs != length(fcoarse) ||
-    nlyrs != length(pdf_type)
+    nlyrs != length(pdf_type) ||
+    (has_bd && nlyrs != length(bdensity))
   ) {
     error("inputs are not of the same length.");
   }
@@ -640,6 +646,16 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
   sand = PROTECT(coerceVector(sand, REALSXP));
   clay = PROTECT(coerceVector(clay, REALSXP));
   fcoarse = PROTECT(coerceVector(fcoarse, REALSXP));
+  if (has_bd) {
+    bdensity = PROTECT(coerceVector(bdensity, REALSXP));
+  } else {
+    // Set `bdensity` from `NULL` to array of `SW_MISSING` of appropriate length
+    // `SW_MISSING` is the expected value by SOILWAT2
+    bdensity = PROTECT(allocVector(REALSXP, nlyrs));
+    for (int i = 0; i < nlyrs; i++) {
+      REAL(bdensity)[i] = SW_MISSING;
+    }
+  }
 
   /* Allocate memory for SWRC parameters */
   SEXP
@@ -654,7 +670,9 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
     *xsand = REAL(sand),
     *xclay = REAL(clay),
     *xcoarse = REAL(fcoarse),
+    *xbd = REAL(bdensity),
     *xres = REAL(res_swrcp);
+
 
   /* Loop over soil layers */
   /* Ideally, SOILWAT2's `SWRC_PDF_estimate_parameters()`
@@ -669,7 +687,8 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
       REAL(swrcpk),
       xsand[k1],
       xclay[k1],
-      xcoarse[k1]
+      xcoarse[k1],
+      xbd[k1]
     );
 
     for (k2 = 0; k2 < SWRC_PARAM_NMAX; k2++) {
@@ -677,7 +696,7 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
     }
   }
 
-  UNPROTECT(6);
+  UNPROTECT(7);
 
   return res_swrcp;
 }

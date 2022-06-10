@@ -48,7 +48,8 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
   SEXP pdf_type,
   SEXP sand,
   SEXP clay,
-  SEXP gravel
+  SEXP gravel,
+  SEXP bdensity
 );
 
 SEXP rSW2_SWRC_check_parameters(SEXP swrc_type, SEXP swrcp);

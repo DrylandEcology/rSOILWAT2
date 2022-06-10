@@ -14,6 +14,7 @@ swrc_conversion(
   swrc,
   sand = NULL,
   clay = NULL,
+  bdensity = NULL,
   outer_if_equalsize = FALSE,
   verbose = FALSE
 )
@@ -25,6 +26,7 @@ swrc_swp_to_vwc(
   swrc = list(swrc_name = NULL, pdf_name = NULL, swrcp = NULL),
   sand = NULL,
   clay = NULL,
+  bdensity = NULL,
   outer_if_equalsize = FALSE,
   verbose = FALSE
 )
@@ -36,6 +38,7 @@ swrc_vwc_to_swp(
   swrc = list(swrc_name = NULL, pdf_name = NULL, swrcp = NULL),
   sand = NULL,
   clay = NULL,
+  bdensity = NULL,
   outer_if_equalsize = FALSE,
   verbose = FALSE
 )
@@ -74,6 +77,10 @@ Sand content of the matric soil component
 \item{clay}{A numeric value or vector.
 Clay content of the matric soil component
 (< 2 mm fraction; units of \verb{[g/g]}) of each soil layer.}
+
+\item{bdensity}{A numeric value or vector.
+Density of the whole soil
+(matric soil plus coarse fragments; units \verb{[g/cm3]}).}
 
 \item{outer_if_equalsize}{A logical value.
 Relevant only if \code{x} of length \code{l} and soils of length \code{d} are equal.
@@ -135,9 +142,10 @@ If they are missing, then the soils are assumed to contain
 \verb{0\%} coarse fragments and be represented by \verb{1 cm} wide soil layers.
 
 
-Arguments \code{sand} and \code{clay} are only required if \code{SWRC} parameter values
-need to be estimated on the fly, i.e., if \code{swrc} does not contain
-the element \code{swrcp} (with suitable \code{SWRC} parameter values).
+Arguments \code{sand}, \code{clay}, and \code{bdensity} are only required
+if \code{SWRC} parameter values need to be estimated on the fly,
+i.e., if \code{swrc} does not contain the element \code{swrcp}
+(with suitable \code{SWRC} parameter values).
 This is handled by \code{\link[=pdf_estimate]{pdf_estimate()}} and additionally requires
 the element \code{pdf_name} for argument \code{swrc}.
 }
