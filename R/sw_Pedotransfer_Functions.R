@@ -261,7 +261,7 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #' [swrc_names()] lists implemented `SWRCs`;
 #' [pdf_names()] lists implemented `PDFs`.
 #'
-#' @inherit pdf_Rosetta3_for_vanGenuchten1980 references
+#' @inherit pdf_Rosetta_for_vanGenuchten1980 references
 #' @references
 #'   Cosby, B. J., G. M. Hornberger, R. B. Clapp, & T. R. Ginn. 1984.
 #'   A statistical exploration of the relationships of soil moisture
@@ -532,7 +532,11 @@ rSW2_SWRC_PDF_estimate_parameters <- function(
   has_pdf <- pdf_name %in% pdfs_implemented_in_rSW2()
 
   if (has_pdf && pdf_name %in% "Rosetta3") {
-    pdf_Rosetta3_for_vanGenuchten1980(sand = sand, clay = clay)
+    pdf_Rosetta_for_vanGenuchten1980(
+      sand = sand,
+      clay = clay,
+      version = "3"
+    )
 
   } else {
     if (isTRUE(fail)) {
@@ -542,10 +546,10 @@ rSW2_SWRC_PDF_estimate_parameters <- function(
 }
 
 
-#' Estimate van Genuchten 1980 `SWRC` parameters using `Rosetta` v3 `PDF` by
-#' Zhang et al. 2017
+#' Estimate van Genuchten 1980 `SWRC` parameters using `Rosetta` live `API`
 #'
 #' @inheritParams SWRCs
+#' @param version A character string that selects a `Rosetta` version.
 #'
 #' @return `swrcp`, i.e,.
 #' a numeric matrix where rows represent soil (layers) and
@@ -578,19 +582,26 @@ rSW2_SWRC_PDF_estimate_parameters <- function(
 #' [pdf_estimate()] is the function that should be directly called; this here
 #' is an internal helper function.
 #'
-#' @section Notes: A live internet connection is required to access `Rosetta3`.
+#' @section Notes:
+#' This function calls `soilDB::ROSETTA()` and
+#' a live internet connection is required to access `Rosetta`.
+#'
+#' @seealso `soilDB::ROSETTA()`
 #'
 #' @md
-pdf_Rosetta3_for_vanGenuchten1980 <- function(
+pdf_Rosetta_for_vanGenuchten1980 <- function(
   sand,
   clay,
+  version = c("3", "1", "2"),
   verbose = interactive()
 ) {
   stopifnot(requireNamespace("soilDB"), requireNamespace("curl"))
 
   if (!curl::has_internet()) {
-    stop("`pdf_Rosetta3_for_vanGenuchten1980()` requires live internet.")
+    stop("`pdf_Rosetta_for_vanGenuchten1980()` requires live internet.")
   }
+
+  version <- match.arg(version)
 
   if (verbose) {
     message("Connecting live to ROSETTA API...")
@@ -599,7 +610,7 @@ pdf_Rosetta3_for_vanGenuchten1980 <- function(
   tmp <- soilDB::ROSETTA(
     100 * data.frame(sand = sand, silt = 1 - (sand + clay), clay = clay),
     vars = c("sand", "silt", "clay"),
-    v = "3"
+    v = version
   )
 
   unname(data.matrix(data.frame(
