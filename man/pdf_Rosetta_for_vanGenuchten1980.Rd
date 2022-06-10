@@ -41,6 +41,7 @@ of the matric component (units of \verb{[cm / cm]})
 \item \code{swrcp[2]} (\code{alpha}): related to the inverse of
 air entry suction (units of \verb{[cm-1]})
 \item \code{swrcp[3]} (\code{n}): measure of the pore-size distribution \verb{[-]}
+\item \code{swrcp[4]} (\code{K_sat}): saturated hydraulic conductivity \verb{[cm / day]}
 }
 }
 \description{

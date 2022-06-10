@@ -576,6 +576,7 @@ rSW2_SWRC_PDF_estimate_parameters <- function(
 #'   \item `swrcp[2]` (`alpha`): related to the inverse of
 #'         air entry suction (units of `[cm-1]`)
 #'   \item `swrcp[3]` (`n`): measure of the pore-size distribution `[-]`
+#'   \item `swrcp[4]` (`K_sat`): saturated hydraulic conductivity `[cm / day]`
 #' }
 #'
 #' @references
@@ -644,7 +645,7 @@ pdf_Rosetta_for_vanGenuchten1980 <- function(
     tmp[, c("theta_r", "theta_s")],
     10 ^ tmp[, "alpha"],
     10 ^ tmp[, "npar"],
-    0,
+    10 ^ tmp[, "ksat"],
     0
   )))
 }
