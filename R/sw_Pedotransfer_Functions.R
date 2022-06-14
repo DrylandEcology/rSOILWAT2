@@ -754,6 +754,11 @@ check_swrcp <- function(swrc_name, swrcp) {
 #' This is handled by [pdf_estimate()] and additionally requires
 #' the element `pdf_name` for argument `swrc`.
 #'
+#' @section Details:
+#' If `swrc` contains element `swrcp` with one set of `SWRC` parameters,
+#' i.e., one row, then the parameter set is repeated for each value of `x`.
+#'
+#'
 #' @seealso
 #'   [pdf_estimate()],
 #'   [check_swrcp()]
@@ -905,6 +910,15 @@ swrc_conversion <- function(
     } else {
       swrc[["pdf_type"]] <- encode_name2swrc(swrc[["pdf_name"]])[1]
     }
+  }
+
+  # If we have one set of `swrcp` but many `x` -> repeat `swrcp` for each `x`
+  if (
+    !is.null(swrc[["swrcp"]]) &&
+    nrow(swrc[["swrcp"]]) == 1 &&
+    length(x) > 0
+  ) {
+    swrc[["swrcp"]] <- swrc[["swrcp"]][rep(1, length(x)), , drop = FALSE]
   }
 
   # Do we have sufficient soil parameters?

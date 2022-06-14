@@ -148,6 +148,10 @@ i.e., if \code{swrc} does not contain the element \code{swrcp}
 (with suitable \code{SWRC} parameter values).
 This is handled by \code{\link[=pdf_estimate]{pdf_estimate()}} and additionally requires
 the element \code{pdf_name} for argument \code{swrc}.
+
+
+If \code{swrc} contains element \code{swrcp} with one set of \code{SWRC} parameters,
+i.e., one row, then the parameter set is repeated for each value of \code{x}.
 }
 
 \examples{
