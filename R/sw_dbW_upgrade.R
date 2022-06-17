@@ -262,7 +262,7 @@ dbW_upgrade_v31to32 <- function(dbWeatherDataFile, fbackup = NULL) {
 
   req_tables <- c("Meta", "Sites", "Scenarios", "WeatherData")
   temp <- req_tables %in% DBI::dbListTables(con)
-  if (any(!temp)) {
+  if (!all(temp)) {
     warning("Missing tables:", paste(shQuote(req_tables[!temp]),
       collapse = "-"))
     return(FALSE)

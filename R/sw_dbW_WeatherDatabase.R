@@ -388,7 +388,7 @@ dbW_getSiteId <- function(
 ) {
 
 
-  if (!is.null(Labels) && any(!is.na(Labels))) {
+  if (!is.null(Labels) && !all(is.na(Labels))) {
     #--- Determine which Labels exists
     Labels <- as.character(Labels)
 
@@ -1224,7 +1224,7 @@ dbW_addWeatherData <- function(
     verbose = verbose
   )
 
-  if (any(!sapply(IDs, function(x) length(x) > 0 && is.finite(x)))) {
+  if (!all(sapply(IDs, function(x) length(x) > 0 && is.finite(x)))) {
     stop(
       "'dbW_addWeatherData': insufficient information to generate ",
       "site/scenario."

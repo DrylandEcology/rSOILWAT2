@@ -51,7 +51,7 @@ for (it in tests) {
       icol <- seq.int(ncol1 + 1, ncol(Tsoil_data2))
       Tsoil <- Tsoil_data2[, icol]
 
-      ids_bad <- apply(Tsoil, 1, function(x) any(!is.finite(x)))
+      ids_bad <- apply(Tsoil, 1, function(x) !all(is.finite(x)))
       expect_true(!any(ids_bad), info = paste(info, "check: is.finite",
         format_badData(Tsoil_data2, ids_bad)))
 
