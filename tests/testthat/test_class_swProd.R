@@ -1,8 +1,14 @@
 context("Vegetation parameters class")
 
 ids_VegType <- rSW2_glovars[["kSOILWAT2"]][["VegTypes"]]
-names_VegTypes <- tolower(gsub("SW_", "",
-  names(rSW2_glovars[["kSOILWAT2"]][["VegTypes"]])))
+names_VegTypes <- tolower(
+  gsub(
+    "SW_",
+    "",
+    names(rSW2_glovars[["kSOILWAT2"]][["VegTypes"]]),
+    fixed = TRUE
+  )
+)
 
 names_VegTypes2 <- sapply(names_VegTypes, function(x) {
   if (endsWith(x, "s")) {

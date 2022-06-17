@@ -1499,8 +1499,8 @@ estimate_PotNatVeg_biomass <- function(
 
   # Scale monthly values of litter and biomass amount by column-max
   tmp <- apply(
-    tr_VegBiom[, grepl("Biomass", ns_VegBiom)] *
-      tr_VegBiom[, grepl("Perc.Live", ns_VegBiom)],
+    tr_VegBiom[, grepl("Biomass", ns_VegBiom, fixed = TRUE)] *
+      tr_VegBiom[, grepl("Perc.Live", ns_VegBiom, fixed = TRUE)],
     MARGIN = 2,
     FUN = max
   )
@@ -1560,8 +1560,8 @@ estimate_PotNatVeg_biomass <- function(
 
     # Calculate 'live biomass amount'
     x[[ns]][, paste0(vt, ".Amount.Live")] <-
-      x[[ns]][, grepl("Biomass", ntmp)] *
-      x[[ns]][, grepl("Perc.Live", ntmp)]
+      x[[ns]][, grepl("Biomass", ntmp, fixed = TRUE)] *
+      x[[ns]][, grepl("Perc.Live", ntmp, fixed = TRUE)]
 
     # Scale so that 1 = previous peak (as required by `adjBiom_by_ppt`)
     for (bt in btypes2[-3]) {

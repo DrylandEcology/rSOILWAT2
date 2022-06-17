@@ -84,6 +84,7 @@ setMethod("initialize", signature = "swEstabSpecies", function(.Object, ...) {
 #' @export
 # nolint start
 setMethod("swReadLines", signature = c(object="swEstabSpecies",file="character"), function(object,file) {
+  print("TODO: method 'swReadLines' for class 'swInputData' is not up-to-date; hard-coded indices are incorrect")
 			infiletext <- readLines(con = file)
 
 			object@Name = c(object@Name, gsub("[[:space:]]", "",strsplit(x=infiletext[1],split = c("#", " ", "\t"),fixed=F)[[1]][1]))
@@ -172,6 +173,7 @@ setReplaceMethod("swEstab_useEstab", signature = "swEstab",
 #' @export
 # nolint start
 setMethod("swReadLines", signature = c(object="swEstab",file="character"), function(object,file) {
+  print("TODO: method 'swReadLines' for class 'swInputData' is not up-to-date; hard-coded indices are incorrect")
 			infiletext <- readLines(con = file[1])
 			index<-length(object@fileName)+1
 			object@useEstab = readLogical(infiletext[9])

@@ -188,8 +188,10 @@ setReplaceMethod("swYears_isNorth", signature = "swYears",
 
 #' @rdname swYears-class
 #' @export
+# nolint start
 setMethod("swReadLines", signature = c(object = "swYears", file = "character"),
   function(object, file) {
+  print("TODO: method 'swReadLines' for class 'swInputData' is not up-to-date; hard-coded indices are incorrect")
     infiletext <- readLines(con = file)
     object@StartYear <- readInteger(infiletext[4])
     object@EndYear <- readInteger(infiletext[5])
@@ -202,3 +204,4 @@ setMethod("swReadLines", signature = c(object = "swYears", file = "character"),
 
     object
 })
+# nolint end

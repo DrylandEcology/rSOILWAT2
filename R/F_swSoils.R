@@ -153,9 +153,11 @@ setReplaceMethod("swSoils_Layers",
 
 #' @rdname swSoils-class
 #' @export
+# nolint start
 setMethod("swReadLines",
   signature = c(object = "swSoils", file = "character"),
   function(object, file) {
+    print("TODO: method 'swReadLines' is not up-to-date; hard-coded indices are incorrect")
     infiletext <- readLines(con = file)
     infiletext <- infiletext[infiletext != ""] #get rid of extra spaces
     infiletext <- infiletext[17:length(infiletext)] #get rid of comments
@@ -170,3 +172,4 @@ setMethod("swReadLines",
 
     object
 })
+# nolint end

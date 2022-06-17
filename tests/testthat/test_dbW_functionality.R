@@ -13,7 +13,7 @@ fdbWeather3 <- file.path("/Fantasy", "Volume", "test.sqlite3")
 
 dir_test_data <- file.path("..", "test_data")
 tmp <- list.files(dir_test_data, pattern = "Ex")
-tmp <- sapply(strsplit(tmp, "_"), function(x) x[[1]])
+tmp <- sapply(strsplit(tmp, "_", fixed = TRUE), function(x) x[[1]])
 tests <- unique(tmp)
 test_that("Test data availability", expect_gt(length(tests), 0))
 

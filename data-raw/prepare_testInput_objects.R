@@ -16,7 +16,7 @@ pkgload::load_all()
 dSOILWAT2_inputs <- "testing"
 dir_orig <- file.path("src", "SOILWAT2", dSOILWAT2_inputs)
 dir_in <- file.path("inst", "extdata")
-dir_backup <- sub("extdata", "extdata_copy", dir_in)
+dir_backup <- sub("extdata", "extdata_copy", dir_in, fixed = TRUE)
 dir_out <- file.path("tests", "test_data")
 
 tests <- 1:5
@@ -90,7 +90,7 @@ for (it in seq_along(tests)) {
 # example3: use soil temperature
   ftemp <- file.path(dir_in, examples[3], "Input", "siteparam.in")
   fin <- readLines(ftemp)
-  line <- grep("flag, 1 to calculate soil_temperature", fin)
+  line <- grep("flag, 1 to calculate soil_temperature", fin, fixed = TRUE)
   stopifnot(length(line) == 1, line > 0, line < length(fin))
   substr(fin[line], 1, 1) <- "1"
   writeLines(fin, con = ftemp)
@@ -98,10 +98,10 @@ for (it in seq_along(tests)) {
 # example4: turn on CO2-effects
   ftemp <- file.path(dir_in, examples[4], "Input", "siteparam.in")
   fin <- readLines(ftemp)
-  line <- grep("biomass multiplier", fin)
+  line <- grep("biomass multiplier", fin, fixed = TRUE)
   stopifnot(length(line) == 1, line > 0, line < length(fin))
   substr(fin[line + 1], 1, 1) <- "1"
-  line <- grep("water-usage efficiency multiplier", fin)
+  line <- grep("water-usage efficiency multiplier", fin, fixed = TRUE)
   stopifnot(length(line) == 1, line > 0, line < length(fin))
   substr(fin[line + 1], 1, 1) <- "1"
   writeLines(fin, con = ftemp)
@@ -109,10 +109,10 @@ for (it in seq_along(tests)) {
 # example5: tilted surface
   ftemp <- file.path(dir_in, examples[5], "Input", "siteparam.in")
   fin <- readLines(ftemp)
-  line <- grep("slope \\(degrees\\)", fin)
+  line <- grep("slope (degrees)", fin, fixed = TRUE)
   stopifnot(length(line) == 1, line > 0, line < length(fin))
   fin[line] <- paste0("30", substr(fin[line], 2, nchar(fin[line])))
-  line <- grep("aspect = surface azimuth angle \\(degrees\\)", fin)
+  line <- grep("aspect = surface azimuth angle (degrees)", fin, fixed = TRUE)
   stopifnot(length(line) == 1, line > 0, line < length(fin))
   substr(fin[line], 1, 3) <- "-45"
   writeLines(fin, con = ftemp)

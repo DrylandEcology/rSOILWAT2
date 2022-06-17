@@ -381,7 +381,7 @@ dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL,
     }
 
     temp <- memDecompress(data_blob, type = type, asChar = TRUE)
-    data <- strsplit(temp, ";")[[1]]
+    data <- strsplit(temp, split = ";", fixed = TRUE)[[1]]
     years <- StartYear:EndYear
 
     weatherData <- list()

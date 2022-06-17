@@ -76,9 +76,11 @@ setMethod("initialize", signature = "swSWC_hist",
 
 #' @rdname swSWC_hist-class
 #' @export
+# nolint start
 setMethod("swReadLines",
   signature = c(object = "swSWC_hist", file = "character"),
   function(object, file) {
+  print("TODO: method 'swReadLines' for class 'swInputData' is not up-to-date; hard-coded indices are incorrect")
     object@year <- as.integer(strsplit(x = file, split = ".",
       fixed = TRUE)[[1]][2])
     infiletext <- readLines(con = file)
@@ -93,7 +95,7 @@ setMethod("swReadLines",
     object@data <- data
     object
 })
-
+# nolint end
 
 ##########################swcsetup.in#########################################
 
@@ -269,8 +271,10 @@ setReplaceMethod("swSWC_HistoricData",
 
 #' @rdname swSWC-class
 #' @export
+# nolint start
 setMethod("swReadLines", signature = c(object = "swSWC", file = "character"),
   function(object, file) {
+  print("TODO: method 'swReadLines' for class 'swInputData' is not up-to-date; hard-coded indices are incorrect")
     infiletext <- readLines(con = file)
     #should be no empty lines
     infiletext <- infiletext[infiletext != ""]
@@ -280,3 +284,4 @@ setMethod("swReadLines", signature = c(object = "swSWC", file = "character"),
     object@Method <- readInteger(infiletext[7])
     return(object)
 })
+# nolint end

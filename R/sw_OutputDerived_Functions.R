@@ -32,11 +32,8 @@ get_transpiration <- function(x, timestep = c("Day", "Week", "Month", "Year")) {
     tmp <- slot(slot(x, "TRANSP"), timestep)
 
     if (all(dim(tmp) > 0)) {
-      res <- apply(
-        X = tmp[, grep("transp_total_Lyr", colnames(tmp)), drop = FALSE],
-        MARGIN = 1,
-        FUN = sum
-      )
+      ids <- grep("transp_total_Lyr", colnames(tmp), fixed = TRUE)
+      res <- apply(tmp[, ids, drop = FALSE], MARGIN = 1, FUN = sum)
 
     } else {
       stop(
@@ -77,11 +74,12 @@ get_evaporation <- function(x, timestep = c("Day", "Week", "Month", "Year")) {
     tmp3 <- slot(slot(x, "PRECIP"), timestep)
 
     if (all(dim(tmp1) > 0, dim(tmp2) > 0, dim(tmp3) > 0)) {
+      ids <- grep("Lyr", colnames(tmp2), fixed = TRUE)
       res <-
         # evaporation from surface water (canopy, litter, ponded)
         tmp1[, "evap_total"] +
         # evaporation from bare soil
-        apply(tmp2[, grep("Lyr", colnames(tmp2)), drop = FALSE], 1, sum) +
+        apply(tmp2[, ids, drop = FALSE], 1, sum) +
         # evaporation from snow (sublimation)
         tmp3[, "snowloss"]
 
