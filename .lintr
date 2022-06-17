@@ -1,0 +1,6 @@
+linters: lintr::linters_with_defaults()
+exclusions: list(
+  "R/RcppExports.R",
+  "R/rSOILWAT2_deprecated.R")
+error_on_lint: TRUE
+encoding: "UTF-8"
