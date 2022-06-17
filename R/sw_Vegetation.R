@@ -500,7 +500,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
           estim_cover[igc3] <- 1 + estim_cover[igc3]
         }
 
-        if (MAT_C >= 10  & MAP_mm >= 600) {
+        if (MAT_C >= 10 && MAP_mm >= 600) {
           estim_cover[igc4] <- 1 + estim_cover[igc4]
         }
       }
@@ -1649,7 +1649,7 @@ TranspCoeffByVegType <- function(tr_input_code, tr_input_coeff,
     lup <- 1
     for (l in 1:soillayer_no) {
       llow <- as.numeric(layers_depth[l])
-      if (is.na(llow) | lup > length(trco.raw)) {
+      if (is.na(llow) || lup > length(trco.raw)) {
         l <- l - 1
         break
       }
