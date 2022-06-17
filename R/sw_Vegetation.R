@@ -342,9 +342,9 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
       # Estimate climate variables
       if (isNorth) {
         Months_WinterTF <- c(12, 1:2)
-        Months_SummerTF <- c(6:8)
+        Months_SummerTF <- 6:8
       } else {
-        Months_WinterTF <- c(6:8)
+        Months_WinterTF <- 6:8
         Months_SummerTF <- c(12, 1:2)
       }
 
