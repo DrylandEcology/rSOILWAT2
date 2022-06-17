@@ -2,9 +2,11 @@
 
 #--- rSOILWAT2: use development version
 library("methods")  # in case this code is run via 'Rscript'
-stopifnot(requireNamespace("pkgbuild"))
-stopifnot(requireNamespace("pkgload"))
-stopifnot(requireNamespace("usethis"))
+stopifnot(
+  requireNamespace("pkgbuild"),
+  requireNamespace("pkgload"),
+  requireNamespace("usethis")
+)
 
 pkgbuild::clean_dll()
 pkgload::load_all()
