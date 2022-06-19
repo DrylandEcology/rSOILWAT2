@@ -90,8 +90,9 @@ test_that("Disk file write and delete permissions", {
   skip_on_os("windows")
 
   tmp <- try(write(NA, file = fdbWeather), silent = TRUE)
+  has_fdbW <- !inherits(tmp, "try-error") && file.exists(fdbWeather)
   expect_true(
-    !inherits(tmp, "try-error") && file.exists(fdbWeather),
+    has_fdbW,
     info = paste("Failed to create file", fdbWeather)
   )
 
@@ -99,11 +100,11 @@ test_that("Disk file write and delete permissions", {
     tmp <- try(unlink_forcefully(fdbWeather, info = "1st"), silent = TRUE),
     regexp = "sucessfully deleted"
   )
+  hasnot_fdbW <- !inherits(tmp, "try-error") && !file.exists(fdbWeather)
   expect_true(
-    !inherits(tmp, "try-error") && !file.exists(fdbWeather),
-    info = paste("Failed to delete file", fdbWeather)
+    hasnot_fdbW,
+    info = paste("Failed to create file", fdbWeather)
   )
-})
 
 
 
