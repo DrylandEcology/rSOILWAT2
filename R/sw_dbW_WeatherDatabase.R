@@ -61,7 +61,7 @@ dbW_InsistInteract <- function(
         # Set busy handler to time out after 10 seconds
         # (in milliseconds) of retries
         # It's reported that SQLite may reset the busy handler
-        # https://github.com/r-dbi/RSQLite/issues/280#issuecomment-751441914 # nolint
+        # https://github.com/r-dbi/RSQLite/issues/280#issuecomment-751441914
         try(DBI::dbExecute(rSW2_glovars$con, "PRAGMA busy_timeout = 10000"))
 
         # Wait a bit before next attempt

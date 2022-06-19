@@ -901,16 +901,16 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp, x_asif = NULL) {
   temp_2max <- max(tmp1, tmp2) / vals_std[2]
 
   ref_temp_norm <- tmp1 / temp_2max
-  ref_temp_norm_mean <- mean(ref_temp_norm)  # nolint
-  target_temp_norm <- tmp2 / temp_2max  # nolint
+  ref_temp_norm_mean <- mean(ref_temp_norm)
+  target_temp_norm <- tmp2 / temp_2max
 
   # Normalize vegetation values (on y-axis) into [0, 0.5] so that mean = 0.25
   veg_min <- c(0, 0)
   veg_2max <- (c(max(x), max(x_asif)) - veg_min) / vals_std[2]
   veg_4mean <- (c(mean(x), mean(x_asif)) - veg_min) / (vals_std[2] / 2)
   veg_scale <- pmax(veg_2max, veg_4mean)
-  veg_norm <- (x - veg_min[1]) / veg_scale[1] # nolint
-  veg_asif_norm <- (x_asif - veg_min[2]) / veg_scale[2]  # nolint
+  veg_norm <- (x - veg_min[1]) / veg_scale[1]
+  veg_asif_norm <- (x_asif - veg_min[2]) / veg_scale[2]
 
   # Calculate factor to correct for different spreads between
   # vegetation data and `x_asif`
@@ -950,7 +950,7 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp, x_asif = NULL) {
   ) / nmon
 
   sx <- yr_std_r - tpeak_norm
-  mon_norm_center <- mon_norm + sx  # nolint
+  mon_norm_center <- mon_norm + sx
 
 
 
@@ -1265,7 +1265,7 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp, x_asif = NULL) {
   veg_new <- veg_min[1] + veg_scale[1] * vadj4[, 4]
 
   # Revert temporal shifts due to centering of refs, target temps and veg
-  toy_new <- (vadj4[, 1] - sx) %% yr_std_d # nolint
+  toy_new <- (vadj4[, 1] - sx) %% yr_std_d
 
   if (nrow(vadj4) >= 2) {
     # Use linear (instead of cubic) spline to smooth across potential steps
