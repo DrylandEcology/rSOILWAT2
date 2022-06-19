@@ -233,8 +233,10 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   if (anyNA(mkv_prob)) {
     ids_baddoy <- mkv_prob[apply(mkv_prob, 1, anyNA), "DOY"]
 
-    msg <- paste0("values for n = ", length(ids_baddoy), " DOYs: ",
-      paste(ids_baddoy, collapse = ", "))
+    msg <- paste0(
+      "values for n = ", length(ids_baddoy),
+      " DOYs: ", toString(ids_baddoy)
+    )
 
     if (imputation_type == "none") {
       warning("Insufficient weather data to estimate ", msg)
@@ -344,8 +346,10 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   if (anyNA(mkv_cov)) {
     ids_badweek <- mkv_cov[apply(mkv_cov, 1, anyNA), "WEEK"]
 
-    msg <- paste0("values for n = ", length(ids_badweek), " weeks: ",
-      paste(ids_badweek, collapse = ", "))
+    msg <- paste0(
+      "values for n = ", length(ids_badweek),
+      " weeks: ", toString(ids_badweek)
+    )
 
     if (imputation_type == "none") {
       warning("Insufficient weather data to estimate ", msg)

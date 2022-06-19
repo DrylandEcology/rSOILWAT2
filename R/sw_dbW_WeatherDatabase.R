@@ -886,9 +886,9 @@ dbW_getWeatherData <- function(
   if (length(idsnotna) == 0) {
     msg <- c(
       "Weather data for all sites ",
-      paste(shQuote(IDs[["site_id"]]), collapse = ", "),
+      toString(shQuote(IDs[["site_id"]])),
       " and scenarios ",
-      paste0(shQuote(IDs[["scenario_id"]]), collapse = ", "),
+      toString(shQuote(IDs[["scenario_id"]])),
       " does not exist in weather database."
     )
 
@@ -1058,7 +1058,7 @@ dbW_addSites <- function(site_data, ignore.case = FALSE, verbose = FALSE) {
   if (any(has_sites) && verbose) {
     message(
       "'dbW_addSites': sites are already in database, labels = ",
-      paste(shQuote(site_data[has_sites, "Label"]), collapse = ", ")
+      toString(shQuote(site_data[has_sites, "Label"]))
     )
   }
 
@@ -1130,7 +1130,7 @@ dbW_addScenarios <- function(Scenarios, ignore.case = FALSE, verbose = FALSE) {
   if (any(has_scenarios) && verbose) {
     message(
       "'dbW_addScenarios': Scenarios are already in database,",
-      "Scenarios =", paste(shQuote(Scenarios[has_scenarios]), collapse = ", ")
+      "Scenarios =", toString(shQuote(Scenarios[has_scenarios]))
     )
   }
 
@@ -1491,7 +1491,7 @@ dbW_createDatabase <- function(
   if (length(dots)) {
     message(
       "'dbW_createDatabase': arguments ignored/deprecated ",
-      paste(shQuote(names(dots)), collapse = ", ")
+      toString(shQuote(names(dots)))
     )
   }
 

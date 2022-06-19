@@ -429,7 +429,7 @@ set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE,
       if (!(ndim_gt1_vals == 1 && ndim_gt1_def == 1)) {
         stop(
           "ERROR: ",
-          paste(shQuote(val_names), collapse = ", "),
+          toString(shQuote(val_names)),
           " are not represented as 1-dimensional objects in",
           " class 'swInputData'."
         )
