@@ -525,14 +525,15 @@ test_that("dbW weather data manipulation", {
   )
 
   # `dbW_addWeatherDataNoCheck()` does not prevent adding duplicate entries
-  expect_true(
+  expect_identical(
     dbW_addWeatherDataNoCheck(
       Site_id = 1,
       Scenario_id = 1,
       StartYear = sw_years[[1]][1],
       EndYear = sw_years[[1]][2],
       weather_blob = dbW_weatherData_to_blob(sw_weather[[1]])
-    ) == 1
+    ),
+    1L
   )
 
 
