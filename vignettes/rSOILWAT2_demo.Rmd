@@ -121,7 +121,7 @@ editor_options:
 ```{r, plot1}
   x <- slot(slot(sw_out0, "VWCBULK"), "Day")
 
-  ids <- grep("Lyr", colnames(x))
+  ids <- grep("Lyr", colnames(x), fixed = TRUE)
   vwc <- x[, ids]
   matplot(
     vwc,
@@ -139,7 +139,7 @@ editor_options:
 
 
   x <- slot(slot(sw_out0, "TRANSP"), "Month")
-  ids <- grep("transp_total", colnames(x))
+  ids <- grep("transp_total", colnames(x), fixed = TRUE)
   matplot(
     x[1:24, ids],
     type = "l",
@@ -149,7 +149,7 @@ editor_options:
 
 
   x <- slot(slot(sw_out0, "EVAPSOIL"), "Year")
-  ids <- grep("Lyr", colnames(x))
+  ids <- grep("Lyr", colnames(x), fixed = TRUE)
   es <- apply(x[, ids], 1, sum)
   plot(
     x = x[, "Year"], y = es,
@@ -379,7 +379,11 @@ You may organize weather data in a variety of ways:
 
     } else {
       # Add homogenized soil layers
-      tmp <- grep("depth_L", colnames(soils_sda[["table_depths"]]))
+      tmp <- grep(
+        "depth_L",
+        colnames(soils_sda[["table_depths"]]),
+        fixed = TRUE
+      )
       soils_sda2 <- rSW2data::update_soil_profile(
         soil_layers = soils_sda[["table_depths"]][1, tmp, drop = FALSE],
         requested_soil_layers = c(
@@ -399,19 +403,25 @@ You may organize weather data in a variety of ways:
       ids <- seq_len(ncol(soils_sda2[["soil_layers"]]))
 
       # Soil layer depths
-      tmp <- grep("depth_L", colnames(soils_sda2[["soil_layers"]]))
+      tmp <- grep(
+        "depth_L",
+        colnames(soils_sda2[["soil_layers"]]),
+        fixed = TRUE
+      )
       soil_new[ids, "depth_cm"] <- soils_sda2[["soil_layers"]][1, tmp]
 
       # Soil density, texture, and gravel
-      tmp <- grep("dbovendry_L", colnames(soils_sda2[["soil_data"]]))
+      cns_sd <- colnames(soils_sda2[["soil_data"]])
+
+      tmp <- grep("dbovendry_L", cns_sd, fixed = TRUE)
       soil_new[ids, "bulkDensity_g.cm.3"] <- soils_sda2[["soil_data"]][1, tmp]
 
-      tmp <- grep("sandtotal_L", colnames(soils_sda2[["soil_data"]]))
+      tmp <- grep("sandtotal_L", cns_sd, fixed = TRUE)
       soil_new[ids, "sand_frac"] <- soils_sda2[["soil_data"]][1, tmp]
-      tmp <- grep("claytotal_L", colnames(soils_sda2[["soil_data"]]))
+      tmp <- grep("claytotal_L", cns_sd, fixed = TRUE)
       soil_new[ids, "clay_frac"] <- soils_sda2[["soil_data"]][1, tmp]
 
-      tmp <- grep("fragvol_L", colnames(soils_sda2[["soil_data"]]))
+      tmp <- grep("fragvol_L", cns_sd, fixed = TRUE)
       soil_new[ids, "gravel_content"] <- soils_sda2[["soil_data"]][1, tmp]
     }
   }
