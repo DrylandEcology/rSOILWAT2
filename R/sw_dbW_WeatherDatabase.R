@@ -2213,7 +2213,8 @@ dbW_weather_to_SOILWATfiles <- function(
         data.sw[, 1],
         formatC(data.sw[, 2], digits = 2, format = "f"),
         formatC(data.sw[, 3], digits = 2, format = "f"),
-        formatC(data.sw[, 4], digits = 2, format = "f")
+        formatC(data.sw[, 4], digits = 2, format = "f"),
+        stringsAsFactors = FALSE
       ),
       file = sw.filename,
       append = TRUE,
