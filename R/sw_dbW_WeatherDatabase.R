@@ -1666,7 +1666,7 @@ dbW_deleteSiteData <- function(Site_id, Scenario_id = NULL) {
 #'
 #' @export
 #' @md
-dbW_delete_duplicated_weatherData <- function(
+dbW_delete_duplicated_weatherData <- function( # nolint: object_length_linter.
   site_id = NULL,
   check_values = TRUE,
   carefully = FALSE,
