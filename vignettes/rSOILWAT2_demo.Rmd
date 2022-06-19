@@ -647,7 +647,7 @@ You may organize weather data in a variety of ways:
   # missing values from folder `data_weather_missing`
   wdata_gaps <- rSOILWAT2::getWeatherData_folders(
     LookupWeatherFolder = file.path(path_demo, "Input"),
-    weatherDirName = "data_weather_missing",
+    weatherDirName = "data_weather_missing"
   )
 
   # This will fail: missing data
