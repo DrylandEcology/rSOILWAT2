@@ -1,7 +1,8 @@
 #!/usr/bin/env Rscript
 
 #--- rSOILWAT2: use development version
-library("methods")  # in case this code is run via 'Rscript'
+# load package "methods" in case this script is run via 'Rscript'
+library("methods") # nolint: unused_import_linter.
 stopifnot(
   requireNamespace("pkgbuild"),
   requireNamespace("pkgload"),
