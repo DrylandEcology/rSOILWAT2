@@ -15,6 +15,8 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: recursive
 
       - uses: r-lib/actions/setup-r@v1
         with:
