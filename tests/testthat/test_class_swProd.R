@@ -10,11 +10,16 @@ names_VegTypes <- tolower(
   )
 )
 
-names_VegTypes2 <- sapply(names_VegTypes, function(x) {
-  if (endsWith(x, "s")) {
-    if (endsWith(x, "ss")) x else substr(x, 1, nchar(x) - 1)
-  } else x
-})
+names_VegTypes2 <- sapply(
+  names_VegTypes,
+  function(x) {
+    if (endsWith(x, "s")) {
+      if (endsWith(x, "ss")) x else substr(x, 1, nchar(x) - 1)
+    } else {
+      x
+    }
+  }
+)
 
 
 #---TESTS

@@ -105,6 +105,7 @@ test_that("Disk file write and delete permissions", {
     hasnot_fdbW,
     info = paste("Failed to create file", fdbWeather)
   )
+})
 
 
 

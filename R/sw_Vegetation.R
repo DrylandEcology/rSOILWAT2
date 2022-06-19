@@ -1660,8 +1660,10 @@ TranspCoeffByVegType <- function(tr_input_code, tr_input_coeff,
 
   } else if (trco.code == "Layer") {
     usel <- if (length(trco.raw) < soillayer_no) {
-        length(trco.raw)
-      } else soillayer_no
+      length(trco.raw)
+    } else {
+      soillayer_no
+    }
 
     ltemp <- seq_len(usel)
     stemp <- sum(trco.raw[ltemp], na.rm = TRUE)
@@ -1893,8 +1895,10 @@ update_biomass <- function(fg = c("Grass", "Shrub", "Tree", "Forb"), use,
   fg <- match.arg(fg)
 
   comps <- c("_Litter", "_Biomass", "_FractionLive", "_LAIconv")
-  veg_ids <- lapply(comps, function(x)
-    grep(paste0(fg, x), names(use)))
+  veg_ids <- lapply(
+    comps,
+    function(x) grep(paste0(fg, x), names(use))
+  )
   veg_incl <- lapply(veg_ids, function(x) use[x])
 
   temp <- swProd_MonProd_veg(prod_default, fg)

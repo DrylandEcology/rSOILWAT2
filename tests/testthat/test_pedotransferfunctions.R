@@ -47,11 +47,20 @@ row.names(vwc_fix) <- row.names(texture)
 
 ftemp <- file.path("..", "test_data", "swp_values.rds")
 if (FALSE) {
-  swp_vals <- unlist(lapply(row.names(texture), function(itext)
-    VWCtoSWP(vwc_fix, texture[itext, "sand"], texture[itext, "clay"])))
+  swp_vals <- unlist(
+    lapply(
+      row.names(texture),
+      function(itext) {
+        VWCtoSWP(vwc_fix, texture[itext, "sand"], texture[itext, "clay"])
+      }
+    )
+  )
   dim(swp_vals) <- c(nrow(vwc_fix), ncol(vwc_fix), nrow(texture))
-  dimnames(swp_vals) <- list(row.names(texture), names(swp_fix),
-    row.names(texture))
+  dimnames(swp_vals) <- list(
+    row.names(texture),
+    names(swp_fix),
+    row.names(texture)
+  )
   saveRDS(swp_vals, file = ftemp)
 
 } else {

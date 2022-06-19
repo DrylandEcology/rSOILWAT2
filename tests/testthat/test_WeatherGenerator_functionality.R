@@ -13,8 +13,10 @@ temp <- sapply(strsplit(temp, "_", fixed = TRUE), function(x) x[[1]])
 tests <- unique(temp)
 test_that("Test data availability", expect_gt(length(tests), 0))
 
-sw_weather <- lapply(tests, function(it)
-  readRDS(file.path(dir_test_data, paste0(it, "_weather.rds"))))
+sw_weather <- lapply(
+  tests,
+  function(it) readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
+)
 
 
 #---TESTS
