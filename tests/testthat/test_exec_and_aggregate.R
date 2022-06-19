@@ -214,7 +214,9 @@ for (it in tests) {
     )
 
     fun_agg <- OutSum[1 + slot(get_swOUT(sw_input), "sumtype")]
+    # nolint start: expect_length_linter.
     expect_identical(length(vars), length(fun_agg))
+    # nolint end
 
     for (k in seq_along(vars)) {
       x1 <- slot(rd, vars[k])
