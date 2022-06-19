@@ -57,7 +57,7 @@ test_that("Climate variables: calc_SiteClimate", {
   expect_named(x, names_calc_SiteClimate)
   itemp <- !is.na(lengths_calc_SiteClimate)
   expect_equal(unname(lengths(x))[itemp], lengths_calc_SiteClimate[itemp])
-  expect_true(!anyNA(x))
+  expect_false(anyNA(x))
   expect_named(x[["dailyC4vars"]], names_sw_dailyC4_TempVar)
   expect_named(x[["Cheatgrass_ClimVars"]], names_sw_Cheatgrass_ClimVar)
 

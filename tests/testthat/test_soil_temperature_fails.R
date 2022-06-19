@@ -52,16 +52,34 @@ for (it in tests) {
       Tsoil <- Tsoil_data2[, icol]
 
       ids_bad <- apply(Tsoil, 1, function(x) !all(is.finite(x)))
-      expect_true(!any(ids_bad), info = paste(info, "check: is.finite",
-        format_badData(Tsoil_data2, ids_bad)))
+      expect_false(
+        any(ids_bad),
+        info = paste(
+          info,
+          "check: is.finite",
+          format_badData(Tsoil_data2, ids_bad)
+        )
+      )
 
       ids_bad <- apply(Tsoil, 1, function(x) any(x < -100))
-      expect_true(!any(ids_bad), info = paste(info, "check: Tsoil > -100",
-        format_badData(Tsoil_data2, ids_bad)))
+      expect_false(
+        any(ids_bad),
+        info = paste(
+          info,
+          "check: Tsoil > -100",
+          format_badData(Tsoil_data2, ids_bad)
+        )
+      )
 
       ids_bad <- apply(Tsoil, 1, function(x) any(x > +100))
-      expect_true(!any(ids_bad), info = paste(info, "check: Tsoil < +100",
-        format_badData(Tsoil_data2, ids_bad)))
+      expect_false(
+        any(ids_bad),
+        info = paste(
+          info,
+          "check: Tsoil < +100",
+          format_badData(Tsoil_data2, ids_bad)
+        )
+      )
     }
   })
 }

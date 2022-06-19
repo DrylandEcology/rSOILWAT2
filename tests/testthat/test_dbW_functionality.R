@@ -466,9 +466,9 @@ test_that("dbW site/scenario tables manipulation", {
     add_if_missing = TRUE
   )
 
-  expect_true(!anyNA(id4b[["site_id"]]))
+  expect_false(anyNA(id4b[["site_id"]]))
   expect_length(id4b[["site_id"]], nrow(site_data3))
-  expect_true(!anyNA(id4b[["scenario_id"]]))
+  expect_false(anyNA(id4b[["scenario_id"]]))
   expect_length(id4b[["scenario_id"]], length(scenarios_added))
 })
 
