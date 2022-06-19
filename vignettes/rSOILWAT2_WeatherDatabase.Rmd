@@ -38,21 +38,21 @@ vignette: >
     Latitude = rep(tmp[["Latitude"]], 3),
     Label = paste0("ExampleSite_", seq_len(3))
   )
-  
+
   scenario1 <- "Reference"
 ```
 
 ## Create a new weather database
 ```{r, new_dbW}
   my_dbW <- "dbWeatherData.sqlite3"
-  
+
   is_dbW_success <- dbW_createDatabase(
     dbFilePath = my_dbW,
     site_data = sites1,
     Scenarios = scenario1,
     scen_ambient = scenario1
   )
-  
+
   # Check that database was successfully created
   stopifnot(is_dbW_success)
 ```
@@ -62,7 +62,7 @@ We will see later how to add more sites and scenarios
 ## Connect to the newly created weather database and check if it is valid
 ```{r, connect}
   dbW_setConnection(dbFilePath = my_dbW)
-  
+
   # Check that connection to weather database was successfully established
   stopifnot(dbW_IsValid())
 ```
@@ -74,7 +74,7 @@ We will see later how to add more sites and scenarios
   # Read entire site table and compare to our inputs
   dbW_sites <- dbW_getSiteTable()
   stopifnot(all.equal(dbW_sites[, colnames(sites1)], sites1))
-    
+
   # Read entire scenario table and compare to our inputs
   dbW_scenarios <- dbW_getScenariosTable()
   stopifnot(all.equal(dbW_scenarios[, "Scenario"], scenario1))
