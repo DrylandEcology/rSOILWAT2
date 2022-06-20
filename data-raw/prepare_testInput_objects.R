@@ -3,14 +3,15 @@
 #--- rSOILWAT2: use development version
 # load package "methods" in case this script is run via 'Rscript'
 library("methods") # nolint: unused_import_linter.
+# these packages are not listed by `rSOILWAT2`:
 stopifnot(
-  requireNamespace("pkgbuild"),
-  requireNamespace("pkgload"),
-  requireNamespace("usethis")
+  requireNamespace("pkgbuild"), # nolint: missing_package_linter.
+  requireNamespace("pkgload"),  # nolint: missing_package_linter.
+  requireNamespace("usethis") # nolint: missing_package_linter.
 )
 
-pkgbuild::clean_dll()
-pkgload::load_all()
+pkgbuild::clean_dll() # nolint: namespace_linter.
+pkgload::load_all() # nolint: namespace_linter.
 
 
 #--- INPUTS
@@ -123,19 +124,20 @@ for (it in seq_along(tests)) {
 
 #-----------------------
 #--- USE DEFAULT EXTDATA EXAMPLE AS PACKAGE DATA
-sw_exampleData <- sw_inputDataFromFiles(
+sw_exampleData <- rSOILWAT2::sw_inputDataFromFiles(
   file.path(dir_in, examples[1]),
   files.in = "files.in"
 )
+# nolint start: namespace_linter.
 usethis::use_data(sw_exampleData, internal = FALSE, overwrite = TRUE)
-
+# nolint end
 
 
 #-----------------------
 #--- USE EXTDATA EXAMPLES AS BASIS FOR UNIT-TESTS
 for (it in seq_along(tests)) {
   #---rSOILWAT2 inputs using development version
-  sw_input <- sw_inputDataFromFiles(
+  sw_input <- rSOILWAT2::sw_inputDataFromFiles(
     dir = file.path(dir_in, examples[it]),
     files.in = "files.in"
   )
@@ -155,10 +157,10 @@ for (it in seq_along(tests)) {
 
 
   #--- Run with yearly output and save it
-  if (!swWeather_UseMarkov(sw_input)) {
-    swOUT_TimeStepsForEveryKey(sw_input) <- 3
+  if (!rSOILWAT2::swWeather_UseMarkov(sw_input)) {
+    rSOILWAT2::swOUT_TimeStepsForEveryKey(sw_input) <- 3
 
-    rdy <- sw_exec(
+    rdy <- rSOILWAT2::sw_exec(
       inputData = sw_input,
       weatherList = sw_weather,
       echo = FALSE,
