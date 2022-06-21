@@ -1,8 +1,11 @@
 # rSOILWAT2 v5.3.0
 * This version adds new output to otherwise identical simulation output.
 * `SOILWAT2` is updated to `v6.5.0` which provides
-  the estimated minimum/maximum soil temperature for every layer and at the surface.
+  the estimated minimum/maximum soil temperature for every layer and
+  at the surface.
 * The new output is provided as an extention to slot "TEMP" and "SOILTEMP".
+* Package linting updated to `lintr` >= 3 and
+  lint workflow switched from package tests to Github Action.
 
 
 # rSOILWAT2 v5.2.0
