@@ -257,6 +257,7 @@ setReplaceMethod(
 
 #' @rdname swCloud-class
 #' @export
+# nolint start
 setMethod(
   "swReadLines",
   signature = c(object = "swCloud", file = "character"),
@@ -279,3 +280,4 @@ setMethod(
 
     object
 })
+# nolint end

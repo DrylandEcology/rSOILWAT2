@@ -29,7 +29,7 @@ Suggests:
   daymetr,
   digest (>= 0.6.12),
   knitr,
-  lintr (>= 2.0.0),
+  lintr (>= 3.0.0),
   rmarkdown,
   rSW2exter (>= 0.1.0),
   soilDB,

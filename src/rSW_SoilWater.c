@@ -103,10 +103,9 @@ void onSet_SW_SWC(SEXP SWC) {
 	SEXP swcMethod;
 
 	MyFileName = SW_F_name(eSoilwat);
-	v->surfaceTemp = 0;
 	LyrIndex i;
 	ForEachSoilLayer(i)
-		v->sTemp[i] = SW_Site.lyr[i]->sTemp;
+		v->avgLyrTemp[i] = SW_Site.lyr[i]->avgLyrTemp;
 
 	PROTECT(swcUseData = GET_SLOT(SWC, install("UseSWCHistoricData")));
 	PROTECT(swcFilePrefix = GET_SLOT(SWC, install("DataFilePrefix")));

@@ -33,7 +33,10 @@ pdf_to_swp <- function(vwc, sand, clay, thetas, psis, b, bar_toMPa = -0.1,
 }
 
 pedotransfer <- function(x, sand, clay, pdf) {
-  stopifnot(length(sand) && length(sand) == length(clay))
+  stopifnot(
+    length(sand) > 0,
+    length(sand) == length(clay)
+  )
   sand <- rSW2utils::finite01(sand, NA, NA)
   clay <- rSW2utils::finite01(clay, NA, NA)
 
@@ -493,7 +496,7 @@ pdf_estimate <- function(
 
 
   #--- Check validity of estimated SWRCp
-  if (any(!check_swrcp(swrc_name, swrcp))) {
+  if (!all(check_swrcp(swrc_name, swrcp))) {
     warning("Some estimated parameters failed checks.")
   }
 
@@ -534,7 +537,7 @@ pdfs_implemented_in_rSW2 <- function() {
 #' implemented in C.
 #'
 #' @md
-rSW2_SWRC_PDF_estimate_parameters <- function(
+rSW2_SWRC_PDF_estimate_parameters <- function( # nolint: object_length_linter.
   pdf_name,
   sand,
   clay,
@@ -605,7 +608,7 @@ rSW2_SWRC_PDF_estimate_parameters <- function(
 #' @seealso `soilDB::ROSETTA()`
 #'
 #' @md
-pdf_Rosetta_for_vanGenuchten1980 <- function(
+pdf_Rosetta_for_vanGenuchten1980 <- function( # nolint: object_length_linter.
   sand,
   clay,
   bdensity = NULL,

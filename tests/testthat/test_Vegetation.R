@@ -22,7 +22,7 @@ test_that("Vegetation: estimate land cover composition", {
   expect_pnv <- function(pnv) {
     for (k in seq_along(pnv)) {
       sumval <- if (
-        grepl("Rel_Abundance", names(pnv)[k]) ||
+        grepl("Rel_Abundance", names(pnv)[k], fixed = TRUE) ||
         pnv[["Rel_Abundance_L1"]][["SW_GRASS"]] > 0
       ) {
         1

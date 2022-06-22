@@ -10,19 +10,21 @@
 #   * param1 = air-entry suction [cm]
 #   * param2 = saturated volumetric water content for the matric component [cm/cm]
 #   * param3 = b, slope of the linear log-log retention curve [-]
+#   * param4 = saturated hydraulic conductivity [cm/day]
 
 # swrc = "vanGenuchten1980"
 #   * param1 = residual volumetric water content for the matric component [cm/cm]
 #   * param2 = saturated volumetric water content for the matric component [cm/cm]
 #   * param3 = alpha, related to the inverse of air entry suction [cm-1]
 #   * param4 = n, measure of the pore-size distribution [-]
+#   * param5 = saturated hydraulic conductivity [cm/day]
 
-# param1  param2   param3   param4   param5   param6
-18.6080  0.42703   5.3020   0.0000   0.0000   0.0000
-20.4644  0.43290   7.0500   0.0000   0.0000   0.0000
-22.8402  0.44013   9.4320   0.0000   0.0000   0.0000
-24.0381  0.44291  10.0690   0.0000   0.0000   0.0000
-24.2159  0.44359  10.3860   0.0000   0.0000   0.0000
-23.3507  0.44217  10.3830   0.0000   0.0000   0.0000
-12.3880  0.41370   7.3250   0.0000   0.0000   0.0000
-12.3880  0.41370   7.3250   0.0000   0.0000   0.0000
+# param1  param2   param3   param4     param5   param6
+18.6080  0.42703   5.3020   24.03047   0.0000   0.0000
+20.4644  0.43290   7.0500   14.94351   0.0000   0.0000
+22.8402  0.44013   9.4320   13.71177   0.0000   0.0000
+24.0381  0.44291  10.0690   13.43171   0.0000   0.0000
+24.2159  0.44359  10.3860   14.14351   0.0000   0.0000
+23.3507  0.44217  10.3830   40.63764   0.0000   0.0000
+12.3880  0.41370   7.3250   37.22899   0.0000   0.0000
+12.3880  0.41370   7.3250   37.22899   0.0000   0.0000

@@ -283,6 +283,7 @@ setReplaceMethod(
 
 #' @rdname swSoils-class
 #' @export
+# nolint start
 setMethod(
   "swReadLines",
   signature = c(object = "swSoils", file = "character"),
@@ -303,3 +304,4 @@ setMethod(
     object
   }
 )
+# nolint end

@@ -247,6 +247,7 @@ setReplaceMethod(
 
 #' @rdname swYears-class
 #' @export
+# nolint start
 setMethod(
   "swReadLines",
   signature = c(object = "swYears", file = "character"),
@@ -264,3 +265,4 @@ setMethod(
 
     object
 })
+# nolint end

@@ -87,15 +87,12 @@ RCP85
 #--- Soil water retention curve (SWRC) ------
 #
 # Implemented options (`swrc_name`/`pdf_name`, see `swrc2str[]`/`pdf2str[]`):
-#   - pdf_name = "NoPDF": parameters for any SWRC obtained from
-#     input file ("swrc_params.in") instead of estimated from PDF
+#   - pdf_name = "NoPDF": SWRC parameters from input file "swrc_params.in"
 #   - swrc_name = "Campbell1974": (Campbell 1974)
 #     * pdf_name = "Cosby1984AndOthers": PDFs by Cosby et al. 1984
 #       (but `swc_sat` by Saxton et al. 2006,
 #       `swc_min` by user input, realistic SWP limit, or Rawls et al. 1985)
 #     * pdf_name = "Cosby1984": PDFs by Cosby et al. 1984
-#       (including `swc_sat`; `swc_min` = 0 is not realistic, thus,
-#       `swc_min` by user input, realistic SWP limit, or Rawls et al. 1985)
 #   - swrc_name = "vanGenuchten1980": van Genuchten-Mualem (van Genuchten 1980)
 #     * pdf_name = "Rosetta3": not implemented in C (but see rSOILWAT2)
 #   - swrc_name = "BrooksCorey1964": (Brooks and Corey 1964)

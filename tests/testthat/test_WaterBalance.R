@@ -11,7 +11,7 @@ OutPeriods <- rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]]
 veg_types <- c("tree", "shrub", "forbs", "grass")
 dir_test_data <- file.path("..", "test_data")
 temp <- list.files(dir_test_data, pattern = "Ex")
-temp <- sapply(strsplit(temp, "_"), function(x) x[[1]])
+temp <- sapply(strsplit(temp, "_", fixed = TRUE), function(x) x[[1]])
 tests <- unique(temp)
 test_that("Test data availability", expect_gt(length(tests), 0))
 
@@ -86,7 +86,7 @@ for (it in tests) {
 
       if (inherits(x, "try-error")) {
         # Skip if it failed because PDF requires internet but we are offline
-        if (isTRUE(grepl("requires live internet", x))) {
+        if (isTRUE(grepl("requires live internet", x, fixed = TRUE))) {
           succeed(paste(info1, "requires live internet, skipping for now!"))
         } else {
           fail(paste(info1, x))
@@ -140,7 +140,7 @@ for (it in tests) {
 
         # change in soil moisture
         temp <- slot(slot(x, "SWCBULK"), "Day")
-        swcj <- temp[, grep("Lyr", colnames(temp)), drop = FALSE]
+        swcj <- temp[, grep("Lyr", colnames(temp), fixed = TRUE), drop = FALSE]
         n_soillayers <- ncol(swcj)
 
         # today - yesterday:
@@ -175,7 +175,8 @@ for (it in tests) {
           Etotalint <- Eveg + Elitter
 
           temp <- slot(slot(x, "EVAPSOIL"), OutPeriods[pd])
-          Esoilj <- temp[, grep("Lyr", colnames(temp)), drop = FALSE]
+          ids <- grep("Lyr", colnames(temp), fixed = TRUE)
+          Esoilj <- temp[, ids, drop = FALSE]
           Esoil <- apply(Esoilj, 1, sum)
 
           temp <- matrix(0, nrow = nrow(Esoilj), ncol = n_soillayers)
@@ -187,13 +188,17 @@ for (it in tests) {
 
           # Get transpiration values
           temp <- slot(slot(x, "TRANSP"), OutPeriods[pd])
-          ids <- grep("transp_total_Lyr", colnames(temp))
+          ids <- grep("transp_total_Lyr", colnames(temp), fixed = TRUE)
           Ttotalj <- temp[, ids, drop = FALSE]
           Ttotal <- apply(Ttotalj, 1, sum)
           Tvegij <- lapply(
             veg_types,
             function(v) {
-              ids <- grep(paste0("transp_", v, "_Lyr"), colnames(temp))
+              ids <- grep(
+                paste0("transp_", v, "_Lyr"),
+                colnames(temp),
+                fixed = TRUE
+              )
               temp[, ids, drop = FALSE]
             }
           )
@@ -225,21 +230,22 @@ for (it in tests) {
           )[, "lowLayerDrain_cm"]
 
           temp <- slot(slot(x, "LYRDRAIN"), OutPeriods[pd])
-          temp <- temp[, grep("Lyr", colnames(temp)), drop = FALSE]
+          ids <- grep("Lyr", colnames(temp), fixed = TRUE)
+          temp <- temp[, ids, drop = FALSE]
           percolationIn <- cbind(infiltration, temp)
           percolationOut <- cbind(temp, deepDrainage)
 
           temp <- slot(slot(x, "HYDRED"), OutPeriods[pd])
-          ctemp <- grep("total_Lyr", colnames(temp))
+          ctemp <- grep("total_Lyr", colnames(temp), fixed = TRUE)
           hydraulicRedistribution <- temp[, ctemp, drop = FALSE]
 
           temp <- slot(slot(x, "INTERCEPTION"), OutPeriods[pd])
           intercepted <- temp[, "int_total"]
 
           temp <- slot(slot(x, "RUNOFF"), OutPeriods[pd])
-          ctemp <- grep("runoff", colnames(temp))
+          ctemp <- grep("runoff", colnames(temp), fixed = TRUE)
           runoff <- apply(temp[, ctemp, drop = FALSE], 1, sum)
-          ctemp <- grep("runon", colnames(temp))
+          ctemp <- grep("runon", colnames(temp), fixed = TRUE)
           runon <- apply(temp[, ctemp, drop = FALSE], 1, sum)
 
           temp <- slot(slot(x, "PRECIP"), OutPeriods[pd])

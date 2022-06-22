@@ -29,7 +29,7 @@
 #'
 #' \code{\linkS4class{swInputData}} consists of slots for each file that is
 #' read in. These slots can be accessed via the following functions: \itemize{
-#'   \item \code{\link{get_Markov}}
+#'   \item \code{\link{get_swMarkov}}
 #'   \item \code{\link{get_swCloud}}
 #'   \item \code{\link{get_swFiles}}
 #'   \item \code{\link{get_swOUT}}
@@ -271,7 +271,7 @@ upgrade_swInputData <- function(x) {
       message(
         "Outdated object was upgraded; ",
         "default values were used to add previously missing slots: ",
-        paste0(shQuote(msg_upgrades), collapse = ", ")
+        toString(shQuote(msg_upgrades))
       )
 
       #--- Update version/timestamp
@@ -298,7 +298,7 @@ setMethod("get_swFiles", "swInputData", function(object) object@files)
 #' @export
 setMethod(
   "swFiles_ProjDir",
-  "swInputData",
+  signature = "swInputData",
   function(object) swFiles_ProjDir(object@files)
 )
 
@@ -306,7 +306,7 @@ setMethod(
 #' @export
 setMethod(
   "swFiles_filesIn",
-  "swInputData",
+  signature = "swInputData",
   function(object) swFiles_filesIn(object@files)
 )
 
@@ -314,7 +314,7 @@ setMethod(
 #' @export
 setMethod(
   "swFiles_Years",
-  "swInputData",
+  signature = "swInputData",
   function(object) swFiles_Years(object@files)
 )
 
@@ -322,7 +322,7 @@ setMethod(
 #' @export
 setMethod(
   "swFiles_LogFile",
-  "swInputData",
+  signature = "swInputData",
   function(object) swFiles_LogFile(object@files)
 )
 
@@ -330,7 +330,7 @@ setMethod(
 #' @export
 setMethod(
   "swFiles_SiteParams",
-  "swInputData",
+  signature = "swInputData",
   function(object) swFiles_SiteParams(object@files)
 )
 
@@ -338,7 +338,7 @@ setMethod(
 #' @export
 setMethod(
   "swFiles_Soils",
-  "swInputData",
+  signature = "swInputData",
   function(object) swFiles_Soils(object@files)
 )
 
@@ -354,7 +354,7 @@ setMethod(
 #' @export
 setMethod(
   "swFiles_WeatherSetup",
-  "swInputData",
+  signature = "swInputData",
   function(object) swFiles_WeatherSetup(object@files)
 )
 
@@ -362,7 +362,7 @@ setMethod(
 #' @export
 setMethod(
   "swFiles_MarkovProbs",
-  "swInputData",
+  signature = "swInputData",
   function(object) swFiles_MarkovProbs(object@files)
 )
 
@@ -370,7 +370,7 @@ setMethod(
 #' @export
 setMethod(
   "swFiles_MarkovCov",
-  "swInputData",
+  signature = "swInputData",
   function(object) swFiles_MarkovCov(object@files)
 )
 
@@ -378,7 +378,7 @@ setMethod(
 #' @export
 setMethod(
   "swFiles_Cloud",
-  "swInputData",
+  signature = "swInputData",
   function(object) swFiles_Cloud(object@files)
 )
 
@@ -386,7 +386,7 @@ setMethod(
 #' @export
 setMethod(
   "swFiles_Prod",
-  "swInputData",
+  signature = "swInputData",
   function(object) swFiles_Prod(object@files)
 )
 
@@ -394,7 +394,7 @@ setMethod(
 #' @export
 setMethod(
   "swFiles_Estab",
-  "swInputData",
+  signature = "swInputData",
   function(object) swFiles_Estab(object@files)
 )
 
@@ -402,7 +402,7 @@ setMethod(
 #' @export
 setMethod(
   "swFiles_Carbon",
-  "swInputData",
+  signature = "swInputData",
   function(object) swFiles_Carbon(object@files)
 )
 
@@ -410,7 +410,7 @@ setMethod(
 #' @export
 setMethod(
   "swFiles_SWCsetup",
-  "swInputData",
+  signature = "swInputData",
   function(object) swFiles_SWCsetup(object@files)
 )
 
@@ -418,7 +418,7 @@ setMethod(
 #' @export
 setMethod(
   "swFiles_Output",
-  "swInputData",
+  signature = "swInputData",
   function(object) swFiles_Output(object@files)
 )
 
@@ -426,7 +426,7 @@ setMethod(
 #' @export
 setMethod(
   "swFiles_WeatherPrefix",
-  "swInputData",
+  signature = "swInputData",
   function(object) swFiles_WeatherPrefix(object@files)
 )
 
@@ -434,7 +434,7 @@ setMethod(
 #' @export
 setMethod(
   "swFiles_OutputPrefix",
-  "swInputData",
+  signature = "swInputData",
   function(object) swFiles_OutputPrefix(object@files)
 )
 
@@ -658,15 +658,16 @@ setMethod("get_swYears", "swInputData", function(object) object@years)
 #' @rdname swInputData-class
 #' @export
 setMethod(
-  "swYears_StartYear", "swInputData", function(object)
-  swYears_StartYear(object@years)
+  "swYears_StartYear",
+  signature = "swInputData",
+  function(object) swYears_StartYear(object@years)
 )
 
 #' @rdname swInputData-class
 #' @export
 setMethod(
   "swYears_EndYear",
-  "swInputData",
+  signature = "swInputData",
   function(object) swYears_EndYear(object@years)
 )
 
@@ -674,7 +675,7 @@ setMethod(
 #' @export
 setMethod(
   "swYears_FDOFY",
-  "swInputData",
+  signature = "swInputData",
   function(object) swYears_FDOFY(object@years)
 )
 
@@ -682,7 +683,7 @@ setMethod(
 #' @export
 setMethod(
   "swYears_EDOEY",
-  "swInputData",
+  signature = "swInputData",
   function(object) swYears_EDOEY(object@years)
 )
 
@@ -690,7 +691,7 @@ setMethod(
 #' @export
 setMethod(
   "swYears_isNorth",
-  "swInputData",
+  signature = "swInputData",
   function(object) swYears_isNorth(object@years)
 )
 
@@ -788,7 +789,7 @@ setMethod("get_swWeather", "swInputData", function(object) object@weather)
 #' @export
 setMethod(
   "swWeather_DaysRunningAverage",
-  "swInputData",
+  signature = "swInputData",
   function(object) swWeather_DaysRunningAverage(object@weather)
 )
 
@@ -796,7 +797,7 @@ setMethod(
 #' @export
 setMethod(
   "swWeather_FirstYearHistorical",
-  "swInputData",
+  signature = "swInputData",
   function(object) swWeather_FirstYearHistorical(object@weather)
 )
 
@@ -804,7 +805,7 @@ setMethod(
 #' @export
 setMethod(
   "swWeather_pct_SnowDrift",
-  "swInputData",
+  signature = "swInputData",
   function(object) swWeather_DaysRunningAverage(object@weather)
 )
 
@@ -812,7 +813,7 @@ setMethod(
 #' @export
 setMethod(
   "swWeather_pct_SnowRunoff",
-  "swInputData",
+  signature = "swInputData",
   function(object) swWeather_pct_SnowDrift(object@weather)
 )
 
@@ -820,7 +821,7 @@ setMethod(
 #' @export
 setMethod(
   "swWeather_UseMarkov",
-  "swInputData",
+  signature = "swInputData",
   function(object) swWeather_UseMarkov(object@weather)
 )
 
@@ -828,7 +829,7 @@ setMethod(
 #' @export
 setMethod(
   "swWeather_UseMarkovOnly",
-  "swInputData",
+  signature = "swInputData",
   function(object) swWeather_UseMarkovOnly(object@weather)
 )
 
@@ -836,7 +837,7 @@ setMethod(
 #' @export
 setMethod(
   "swWeather_UseSnow",
-  "swInputData",
+  signature = "swInputData",
   function(object) swWeather_UseSnow(object@weather)
 )
 
@@ -844,7 +845,7 @@ setMethod(
 #' @export
 setMethod(
   "swWeather_MonScalingParams",
-  "swInputData",
+  signature = "swInputData",
   function(object) swWeather_MonScalingParams(object@weather)
 )
 
@@ -958,29 +959,32 @@ setMethod("get_swCloud", "swInputData", function(object) object@cloud)
 #' @rdname swInputData-class
 #' @export
 setMethod(
-  "swCloud_SkyCover", "swInputData", function(object)
-  swCloud_SkyCover(object@cloud)
+  "swCloud_SkyCover",
+  signature = "swInputData",
+  function(object) swCloud_SkyCover(object@cloud)
 )
 
 #' @rdname swInputData-class
 #' @export
 setMethod(
-  "swCloud_WindSpeed", "swInputData", function(object)
-  swCloud_WindSpeed(object@cloud)
+  "swCloud_WindSpeed",
+  signature = "swInputData",
+  function(object) swCloud_WindSpeed(object@cloud)
 )
 
 #' @rdname swInputData-class
 #' @export
 setMethod(
-  "swCloud_Humidity", "swInputData", function(object)
-  swCloud_Humidity(object@cloud)
+  "swCloud_Humidity",
+  signature = "swInputData",
+  function(object) swCloud_Humidity(object@cloud)
 )
 
 #' @rdname swInputData-class
 #' @export
 setMethod(
   "swCloud_SnowDensity",
-  "swInputData",
+  signature = "swInputData",
   function(object) swCloud_SnowDensity(object@cloud)
 )
 
@@ -988,7 +992,7 @@ setMethod(
 #' @export
 setMethod(
   "swCloud_RainEvents",
-  "swInputData",
+  signature = "swInputData",
   function(object) swCloud_RainEvents(object@cloud)
 )
 
@@ -1060,6 +1064,7 @@ setReplaceMethod(
 
 
 # Methods for slot \code{markov}
+# use `get_swMarkov()`, `get_Markov()` is a legacy name
 #' @rdname swInputData-class
 #' @export
 setMethod("get_Markov", "swInputData", function(object) object@markov)
@@ -1072,7 +1077,7 @@ setMethod("get_swMarkov", "swInputData", function(object) object@markov)
 #' @export
 setMethod(
   "swMarkov_Prob",
-  "swInputData",
+  signature = "swInputData",
   function(object) swMarkov_Prob(object@markov)
 )
 
@@ -1080,11 +1085,12 @@ setMethod(
 #' @export
 setMethod(
   "swMarkov_Conv",
-  "swInputData",
+  signature = "swInputData",
   function(object) swMarkov_Conv(object@markov)
 )
 
 
+# use `set_swMarkov()`; `set_Markov()` is a legacy name
 #' @rdname swInputData-class
 #' @export
 setReplaceMethod(
@@ -1135,7 +1141,7 @@ setReplaceMethod(
 #' @export
 setMethod(
   "get_WeatherHistory",
-  "swInputData",
+  signature = "swInputData",
   function(object) object@weatherHistory
 )
 
@@ -1155,7 +1161,7 @@ setReplaceMethod(
 setMethod(
   "get_swWeatherData",
   signature = "swInputData",
-    function(object, year) {
+  function(object, year) {
     index <- which(names(object@weatherHistory) == as.character(year))
     if (length(index) != 1) {
       stop("Index has wrong length.")
@@ -1256,7 +1262,7 @@ setMethod("get_swProd", "swInputData", function(object) object@prod)
 #' @export
 setMethod(
   "swProd_Composition",
-  "swInputData",
+  signature = "swInputData",
   function(object) swProd_Composition(object@prod)
 )
 
@@ -1264,7 +1270,7 @@ setMethod(
 #' @export
 setMethod(
   "swProd_Albedo",
-  "swInputData",
+  signature = "swInputData",
   function(object) swProd_Albedo(object@prod)
 )
 
@@ -1272,7 +1278,7 @@ setMethod(
 #' @export
 setMethod(
   "swProd_CanopyHeight",
-  "swInputData",
+  signature = "swInputData",
   function(object) swProd_CanopyHeight(object@prod)
 )
 
@@ -1280,7 +1286,7 @@ setMethod(
 #' @export
 setMethod(
   "swProd_VegInterParam",
-  "swInputData",
+  signature = "swInputData",
   function(object) swProd_VegInterParam(object@prod)
 )
 
@@ -1288,7 +1294,7 @@ setMethod(
 #' @export
 setMethod(
   "swProd_LitterInterParam",
-  "swInputData",
+  signature = "swInputData",
   function(object) swProd_LitterInterParam(object@prod)
 )
 
@@ -1296,7 +1302,7 @@ setMethod(
 #' @export
 setMethod(
   "swProd_EsTpartitioning_param",
-  "swInputData",
+  signature = "swInputData",
   function(object) swProd_EsTpartitioning_param(object@prod)
 )
 
@@ -1304,7 +1310,7 @@ setMethod(
 #' @export
 setMethod(
   "swProd_Es_param_limit",
-  "swInputData",
+  signature = "swInputData",
   function(object) swProd_Es_param_limit(object@prod)
 )
 
@@ -1312,7 +1318,7 @@ setMethod(
 #' @export
 setMethod(
   "swProd_Shade",
-  "swInputData",
+  signature = "swInputData",
   function(object) swProd_Shade(object@prod)
 )
 
@@ -1320,7 +1326,7 @@ setMethod(
 #' @export
 setMethod(
   "swProd_HydrRedstro_use",
-  "swInputData",
+  signature = "swInputData",
   function(object) swProd_HydrRedstro_use(object@prod)
 )
 
@@ -1328,7 +1334,7 @@ setMethod(
 #' @export
 setMethod(
   "swProd_HydrRedstro",
-  "swInputData",
+  signature = "swInputData",
   function(object) swProd_HydrRedstro(object@prod)
 )
 
@@ -1336,7 +1342,7 @@ setMethod(
 #' @export
 setMethod(
   "swProd_CritSoilWaterPotential",
-  "swInputData",
+  signature = "swInputData",
   function(object) swProd_CritSoilWaterPotential(object@prod)
 )
 
@@ -1344,7 +1350,7 @@ setMethod(
 #' @export
 setMethod(
   "swProd_CO2Coefficients",
-  "swInputData",
+  signature = "swInputData",
   function(object) swProd_CO2Coefficients(object@prod)
 )
 
@@ -1352,7 +1358,7 @@ setMethod(
 #' @export
 setMethod(
   "swProd_MonProd_veg",
-  "swInputData",
+  signature = "swInputData",
   function(object, vegtype) swProd_MonProd_veg(object@prod, vegtype)
 )
 
@@ -1360,7 +1366,7 @@ setMethod(
 #' @export
 setMethod(
   "swProd_MonProd_grass",
-  "swInputData",
+  signature = "swInputData",
   function(object) swProd_MonProd_grass(object@prod)
 )
 
@@ -1368,7 +1374,7 @@ setMethod(
 #' @export
 setMethod(
   "swProd_MonProd_shrub",
-  "swInputData",
+  signature = "swInputData",
   function(object) swProd_MonProd_shrub(object@prod)
 )
 
@@ -1376,7 +1382,7 @@ setMethod(
 #' @export
 setMethod(
   "swProd_MonProd_tree",
-  "swInputData",
+  signature = "swInputData",
   function(object) swProd_MonProd_tree(object@prod)
 )
 
@@ -1384,7 +1390,7 @@ setMethod(
 #' @export
 setMethod(
   "swProd_MonProd_forb",
-  "swInputData",
+  signature = "swInputData",
   function(object) swProd_MonProd_forb(object@prod)
 )
 
@@ -1603,7 +1609,7 @@ setMethod("get_swSite", "swInputData", function(object) slot(object, "site"))
 #' @export
 setMethod(
   "swSite_SWRCflags",
-  "swInputData",
+  signature = "swInputData",
   function(object) swSite_SWRCflags(object@site)
 )
 
@@ -1611,7 +1617,7 @@ setMethod(
 #' @export
 setMethod(
   "swSite_SWClimits",
-  "swInputData",
+  signature = "swInputData",
   function(object) swSite_SWClimits(object@site)
 )
 
@@ -1619,7 +1625,7 @@ setMethod(
 #' @export
 setMethod(
   "swSite_ModelFlags",
-  "swInputData",
+  signature = "swInputData",
   function(object) swSite_ModelFlags(object@site)
 )
 
@@ -1627,7 +1633,7 @@ setMethod(
 #' @export
 setMethod(
   "swSite_ModelCoefficients",
-  "swInputData",
+  signature = "swInputData",
   function(object) swSite_ModelCoefficients(object@site)
 )
 
@@ -1635,7 +1641,7 @@ setMethod(
 #' @export
 setMethod(
   "swSite_SnowSimulationParams",
-  "swInputData",
+  signature = "swInputData",
   function(object) swSite_SnowSimulationParams(object@site)
 )
 
@@ -1643,7 +1649,7 @@ setMethod(
 #' @export
 setMethod(
   "swSite_DrainageCoefficient",
-  "swInputData",
+  signature = "swInputData",
   function(object) swSite_DrainageCoefficient(object@site)
 )
 
@@ -1651,7 +1657,7 @@ setMethod(
 #' @export
 setMethod(
   "swSite_EvapCoefficients",
-  "swInputData",
+  signature = "swInputData",
   function(object) swSite_EvapCoefficients(object@site)
 )
 
@@ -1659,7 +1665,7 @@ setMethod(
 #' @export
 setMethod(
   "swSite_TranspCoefficients",
-  "swInputData",
+  signature = "swInputData",
   function(object) swSite_TranspCoefficients(object@site)
 )
 
@@ -1667,7 +1673,7 @@ setMethod(
 #' @export
 setMethod(
   "swSite_IntrinsicSiteParams",
-  "swInputData",
+  signature = "swInputData",
   function(object) swSite_IntrinsicSiteParams(object@site)
 )
 
@@ -1675,7 +1681,7 @@ setMethod(
 #' @export
 setMethod(
   "swSite_SoilTemperatureFlag",
-  "swInputData",
+  signature = "swInputData",
   function(object) swSite_SoilTemperatureFlag(object@site)
 )
 
@@ -1683,7 +1689,7 @@ setMethod(
 #' @export
 setMethod(
   "swSite_SoilTemperatureConsts",
-  "swInputData",
+  signature = "swInputData",
   function(object) swSite_SoilTemperatureConsts(object@site)
 )
 
@@ -1691,7 +1697,7 @@ setMethod(
 #' @export
 setMethod(
   "swSite_TranspirationRegions",
-  "swInputData",
+  signature = "swInputData",
   function(object) swSite_TranspirationRegions(object@site)
 )
 
@@ -1935,7 +1941,7 @@ setMethod("swSWC_use", "swInputData", function(object) swSWC_use(object@swc))
 #' @export
 setMethod(
   "swSWC_prefix",
-  "swInputData",
+  signature = "swInputData",
   function(object) swSWC_prefix(object@swc)
 )
 
@@ -1943,7 +1949,7 @@ setMethod(
 #' @export
 setMethod(
   "swSWC_FirstYear",
-  "swInputData",
+  signature = "swInputData",
   function(object) swSWC_FirstYear(object@swc)
 )
 
@@ -1951,7 +1957,7 @@ setMethod(
 #' @export
 setMethod(
   "swSWC_Method",
-  "swInputData",
+  signature = "swInputData",
   function(object) swSWC_Method(object@swc)
 )
 
@@ -1959,7 +1965,7 @@ setMethod(
 #' @export
 setMethod(
   "swSWC_HistoricList",
-  "swInputData",
+  signature = "swInputData",
   function(object) swSWC_HistoricList(object@swc)
 )
 
@@ -1967,7 +1973,7 @@ setMethod(
 #' @export
 setMethod(
   "swSWC_HistoricData",
-  "swInputData",
+  signature = "swInputData",
   function(object, year) swSWC_HistoricData(object@swc, year)
 )
 
@@ -2078,7 +2084,7 @@ setMethod("get_swCarbon", "swInputData", function(object) object@carbon)
 #' @export
 setMethod(
   "swCarbon_Use_Bio",
-  "swInputData",
+  signature = "swInputData",
   function(object) swCarbon_Use_Bio(object@carbon)
 )
 
@@ -2086,7 +2092,7 @@ setMethod(
 #' @export
 setMethod(
   "swCarbon_Use_WUE",
-  "swInputData",
+  signature = "swInputData",
   function(object) swCarbon_Use_WUE(object@carbon)
 )
 
@@ -2094,7 +2100,7 @@ setMethod(
 #' @export
 setMethod(
   "swCarbon_Scenario",
-  "swInputData",
+  signature = "swInputData",
   function(object) swCarbon_Scenario(object@carbon)
 )
 
@@ -2102,7 +2108,7 @@ setMethod(
 #' @export
 setMethod(
   "swCarbon_DeltaYear",
-  "swInputData",
+  signature = "swInputData",
   function(object) swCarbon_DeltaYear(object@carbon)
 )
 
@@ -2110,7 +2116,7 @@ setMethod(
 #' @export
 setMethod(
   "swCarbon_CO2ppm",
-  "swInputData",
+  signature = "swInputData",
   function(object) swCarbon_CO2ppm(object@carbon)
 )
 
@@ -2191,7 +2197,7 @@ setMethod("get_swOUT", "swInputData", function(object) object@output)
 #' @export
 setMethod(
   "swOUT_TimeStep",
-  "swInputData",
+  signature = "swInputData",
   function(object) swOUT_TimeStep(object@output)
 )
 
@@ -2199,7 +2205,7 @@ setMethod(
 #' @export
 setMethod(
   "swOUT_OutputSeparator",
-  "swInputData",
+  signature = "swInputData",
   function(object) swOUT_OutputSeparator(object@output)
 )
 
@@ -2276,7 +2282,7 @@ setReplaceMethod(
 #' @export
 setReplaceMethod(
   "swLog_setLine",
-  "swInputData",
+  signature = "swInputData",
   function(object, value) {
     if (object@log@UsedLines <= object@log@MaxLines) {
       object@log@LogData[object@log@UsedLines] <- value

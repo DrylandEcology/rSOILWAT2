@@ -714,12 +714,12 @@ setReplaceMethod(
 
 #' @rdname swProd-class
 #' @export
+# nolint start
 setMethod(
   "swReadLines",
   signature = c(object = "swProd", file = "character"),
   function(object, file) {
     stop("swReadLines is defunct")
-    # nolint start
     infiletext <- readLines(con = file)
     object@Composition = readNumerics(infiletext[6],5)
     object@Albedo = readNumerics(infiletext[11],5)
@@ -750,6 +750,6 @@ setMethod(
     for(i in 1:12) object@MonthlyVeg[[1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]]][i, ] = readNumerics(infiletext[124+i],4)
     for(i in 1:12) object@MonthlyVeg[[1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]]][i, ] = readNumerics(infiletext[139+i],4)
     return(object)
-    # nolint end
   }
 )
+# nolint end

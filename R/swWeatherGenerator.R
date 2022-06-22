@@ -255,8 +255,8 @@ dbW_estimate_WGen_coefs <- function(
     ids_baddoy <- mkv_prob[apply(mkv_prob, 1, anyNA), "DOY"]
 
     msg <- paste0(
-      "values for n = ", length(ids_baddoy), " DOYs: ",
-      paste(ids_baddoy, collapse = ", ")
+      "values for n = ", length(ids_baddoy),
+      " DOYs: ", toString(ids_baddoy)
     )
 
     if (imputation_type == "none") {
@@ -386,8 +386,10 @@ dbW_estimate_WGen_coefs <- function(
   if (anyNA(mkv_cov)) {
     ids_badweek <- mkv_cov[apply(mkv_cov, 1, anyNA), "WEEK"]
 
-    msg <- paste0("values for n = ", length(ids_badweek), " weeks: ",
-      paste(ids_badweek, collapse = ", "))
+    msg <- paste0(
+      "values for n = ", length(ids_badweek),
+      " weeks: ", toString(ids_badweek)
+    )
 
     if (imputation_type == "none") {
       warning("Insufficient weather data to estimate ", msg)
@@ -913,9 +915,7 @@ compare_weather <- function(
 
       vlim_obs <- range(x, na.rm = TRUE)
       vlim <- range(
-        sapply(
-          data, function(x) range(x[[obj]][, v], na.rm = TRUE)
-        )
+        sapply(data, function(x) range(x[[obj]][, v], na.rm = TRUE))
       )
 
       if (all(is.finite(vlim_obs)) && all(is.finite(vlim))) {

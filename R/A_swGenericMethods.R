@@ -659,7 +659,6 @@ setGeneric(
   "swYears_FDOFY<-",
   function(object, value) standardGeneric("swYears_FDOFY<-")
 )
-
 #' \code{swYears_EDOEY<-}
 #' @param object An object of class \code{\linkS4class{swYears}} or
 #'   \code{\linkS4class{swInputData}}.

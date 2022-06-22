@@ -44,7 +44,7 @@ OUTSEP c
 TIMESTEP dy wk mo yr # must be lowercase
 
 #         KEY     SUMTYPE   PERIOD   START END FILENAME_PREFIX      DESCRIPTION
-         TEMP     AVG       WK       1     end        temp_air      /* max., min, average air temperature (C) */
+         TEMP     AVG       WK       1     end        temp_air      /* max., min., average air temperature (C) max., min., average surface temperature (C)*/
        PRECIP     SUM       MO       1     end          precip      /* precipitation, rainfall, snowfall, snowmelt, and snowloss (sublimation) (cm) */
    SOILINFILT     SUM       YR       1     end    infiltration      /* water to infiltrate in top soil layer (cm) */
        RUNOFF     SUM       WK       1     end          runoff      /* runoff/runon (cm): net runoff, runoff from ponded water, runoff from snowmelt, runon of surface water from hypothetical upslope neighbor */

@@ -466,7 +466,7 @@ set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE,
   default = NA) {
 
   if (!inherits(swIn, "swInputData")) {
-    stop(paste("ERROR: argument 'swIn' is not a class 'swInputData' object."))
+    stop("ERROR: argument 'swIn' is not a class 'swInputData' object.")
   }
 
   val_names <- names(use)
@@ -480,10 +480,16 @@ set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE,
     temp_bad <- !is.finite(as.numeric(vals))
 
     if (any(temp_bad)) {
-      stop(paste("ERROR: column(s) of", tag,
-        paste(shQuote(val_names[temp_bad]), "=", vals[temp_bad],
-          collapse = " / "),
-        "contain(s) unsuitable values"))
+      stop(
+        "ERROR: column(s) of ", tag,
+        paste(
+          shQuote(val_names[temp_bad]),
+          "=",
+          vals[temp_bad],
+          collapse = " / "
+        ),
+        "contain(s) unsuitable values."
+      )
 
     } else {
       def <- get(fun)(swIn)
@@ -497,9 +503,12 @@ set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE,
       ndim_gt1_vals <- sum(dim(data.frame(vals)) > 1)
       ndim_gt1_def <- sum(dim(data.frame(def)) > 1)
       if (!(ndim_gt1_vals == 1 && ndim_gt1_def == 1)) {
-        stop(paste("ERROR:", paste(shQuote(val_names), collapse = ", "),
-          "are not represented as 1-dimensional objects in ",
-          "class 'swInputData'."))
+        stop(
+          "ERROR: ",
+          toString(shQuote(val_names)),
+          " are not represented as 1-dimensional objects in",
+          " class 'swInputData'."
+        )
 
       } else {
         # Transfer values

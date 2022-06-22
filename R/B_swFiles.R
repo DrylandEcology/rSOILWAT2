@@ -470,6 +470,7 @@ setReplaceMethod(
 
 #' @rdname swFiles-class
 #' @export
+# nolint start
 setMethod(
   "swReadLines",
   signature = c(object = "swFiles", file = "character"),
@@ -501,3 +502,4 @@ setMethod(
 
     object
 })
+# nolint end

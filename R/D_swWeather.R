@@ -407,6 +407,7 @@ setReplaceMethod(
 
 #' @rdname swWeather-class
 #' @export
+# nolint start
 setMethod(
   "swReadLines",
   signature = c(object = "swWeather", file = "character"),
@@ -436,3 +437,4 @@ setMethod(
     object
   }
 )
+# nolint end

@@ -174,9 +174,15 @@ setValidity(
 )
 
 
+# use `get_swMarkov()`; `get_Markov()` is a legacy name
 #' @rdname swMarkov-class
 #' @export
 setMethod("get_Markov", "swMarkov", function(object) object)
+
+#' @rdname swMarkov-class
+#' @export
+setMethod("get_swMarkov", "swMarkov", function(object) object)
+
 #' @rdname swMarkov-class
 #' @export
 setMethod("swMarkov_Prob", "swMarkov", function(object) object@Prob)
@@ -184,6 +190,7 @@ setMethod("swMarkov_Prob", "swMarkov", function(object) object@Prob)
 #' @export
 setMethod("swMarkov_Conv", "swMarkov", function(object) object@Conv)
 
+# use `set_swMarkov()`; `set_Markov()` is a legacy name
 #' @rdname swMarkov-class
 #' @export
 setReplaceMethod(
@@ -244,6 +251,7 @@ setReplaceMethod(
 
 #' @rdname swMarkov-class
 #' @export
+# nolint start
 setMethod(
   "swReadLines",
   signature = c(object = "swMarkov", file = "character"),
@@ -274,3 +282,4 @@ setMethod(
     object
   }
 )
+# nolint end

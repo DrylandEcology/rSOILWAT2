@@ -93,7 +93,7 @@
 #'   from Meinshausen et al. 2011 for \var{CMIP5} and Meinshausen et
 #'   al. 2020 for \var{CMIP6}:
 #'
-# nolint start
+# nolint start: line_length_linter.
 #'   | Name             | Years     | Published source data file |
 #'   | ---------------- | --------- | ------------------- |
 #'   | CMIP5_historical | 1765-2005 | \var{20THCENTURY_MIDYEAR_CONCENTRATIONS.xls} |

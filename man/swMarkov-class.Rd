@@ -5,6 +5,7 @@
 \alias{swMarkov-class}
 \alias{swMarkov}
 \alias{get_Markov,swMarkov-method}
+\alias{get_swMarkov,swMarkov-method}
 \alias{swMarkov_Prob,swMarkov-method}
 \alias{swMarkov_Conv,swMarkov-method}
 \alias{set_Markov<-,swMarkov-method}
@@ -17,6 +18,8 @@
 swMarkov(...)
 
 \S4method{get_Markov}{swMarkov}(object)
+
+\S4method{get_swMarkov}{swMarkov}(object)
 
 \S4method{swMarkov_Prob}{swMarkov}(object)
 

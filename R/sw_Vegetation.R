@@ -342,9 +342,9 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
       # Estimate climate variables
       if (isNorth) {
         Months_WinterTF <- c(12, 1:2)
-        Months_SummerTF <- c(6:8)
+        Months_SummerTF <- 6:8
       } else {
-        Months_WinterTF <- c(6:8)
+        Months_WinterTF <- 6:8
         Months_SummerTF <- c(12, 1:2)
       }
 
@@ -500,7 +500,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
           estim_cover[igc3] <- 1 + estim_cover[igc3]
         }
 
-        if (MAT_C >= 10  & MAP_mm >= 600) {
+        if (MAT_C >= 10 && MAP_mm >= 600) {
           estim_cover[igc4] <- 1 + estim_cover[igc4]
         }
       }
@@ -901,16 +901,16 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp, x_asif = NULL) {
   temp_2max <- max(tmp1, tmp2) / vals_std[2]
 
   ref_temp_norm <- tmp1 / temp_2max
-  ref_temp_norm_mean <- mean(ref_temp_norm)  # nolint
-  target_temp_norm <- tmp2 / temp_2max  # nolint
+  ref_temp_norm_mean <- mean(ref_temp_norm)
+  target_temp_norm <- tmp2 / temp_2max
 
   # Normalize vegetation values (on y-axis) into [0, 0.5] so that mean = 0.25
   veg_min <- c(0, 0)
   veg_2max <- (c(max(x), max(x_asif)) - veg_min) / vals_std[2]
   veg_4mean <- (c(mean(x), mean(x_asif)) - veg_min) / (vals_std[2] / 2)
   veg_scale <- pmax(veg_2max, veg_4mean)
-  veg_norm <- (x - veg_min[1]) / veg_scale[1] # nolint
-  veg_asif_norm <- (x_asif - veg_min[2]) / veg_scale[2]  # nolint
+  veg_norm <- (x - veg_min[1]) / veg_scale[1]
+  veg_asif_norm <- (x_asif - veg_min[2]) / veg_scale[2]
 
   # Calculate factor to correct for different spreads between
   # vegetation data and `x_asif`
@@ -950,7 +950,7 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp, x_asif = NULL) {
   ) / nmon
 
   sx <- yr_std_r - tpeak_norm
-  mon_norm_center <- mon_norm + sx  # nolint
+  mon_norm_center <- mon_norm + sx
 
 
 
@@ -1265,7 +1265,7 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp, x_asif = NULL) {
   veg_new <- veg_min[1] + veg_scale[1] * vadj4[, 4]
 
   # Revert temporal shifts due to centering of refs, target temps and veg
-  toy_new <- (vadj4[, 1] - sx) %% yr_std_d # nolint
+  toy_new <- (vadj4[, 1] - sx) %% yr_std_d
 
   if (nrow(vadj4) >= 2) {
     # Use linear (instead of cubic) spline to smooth across potential steps
@@ -1499,8 +1499,8 @@ estimate_PotNatVeg_biomass <- function(
 
   # Scale monthly values of litter and biomass amount by column-max
   tmp <- apply(
-    tr_VegBiom[, grepl("Biomass", ns_VegBiom)] *
-      tr_VegBiom[, grepl("Perc.Live", ns_VegBiom)],
+    tr_VegBiom[, grepl("Biomass", ns_VegBiom, fixed = TRUE)] *
+      tr_VegBiom[, grepl("Perc.Live", ns_VegBiom, fixed = TRUE)],
     MARGIN = 2,
     FUN = max
   )
@@ -1560,8 +1560,8 @@ estimate_PotNatVeg_biomass <- function(
 
     # Calculate 'live biomass amount'
     x[[ns]][, paste0(vt, ".Amount.Live")] <-
-      x[[ns]][, grepl("Biomass", ntmp)] *
-      x[[ns]][, grepl("Perc.Live", ntmp)]
+      x[[ns]][, grepl("Biomass", ntmp, fixed = TRUE)] *
+      x[[ns]][, grepl("Perc.Live", ntmp, fixed = TRUE)]
 
     # Scale so that 1 = previous peak (as required by `adjBiom_by_ppt`)
     for (bt in btypes2[-3]) {
@@ -1649,7 +1649,7 @@ TranspCoeffByVegType <- function(tr_input_code, tr_input_coeff,
     lup <- 1
     for (l in 1:soillayer_no) {
       llow <- as.numeric(layers_depth[l])
-      if (is.na(llow) | lup > length(trco.raw)) {
+      if (is.na(llow) || lup > length(trco.raw)) {
         l <- l - 1
         break
       }
@@ -1660,8 +1660,10 @@ TranspCoeffByVegType <- function(tr_input_code, tr_input_coeff,
 
   } else if (trco.code == "Layer") {
     usel <- if (length(trco.raw) < soillayer_no) {
-        length(trco.raw)
-      } else soillayer_no
+      length(trco.raw)
+    } else {
+      soillayer_no
+    }
 
     ltemp <- seq_len(usel)
     stemp <- sum(trco.raw[ltemp], na.rm = TRUE)
@@ -1893,8 +1895,10 @@ update_biomass <- function(fg = c("Grass", "Shrub", "Tree", "Forb"), use,
   fg <- match.arg(fg)
 
   comps <- c("_Litter", "_Biomass", "_FractionLive", "_LAIconv")
-  veg_ids <- lapply(comps, function(x)
-    grep(paste0(fg, x), names(use)))
+  veg_ids <- lapply(
+    comps,
+    function(x) grep(paste0(fg, x), names(use))
+  )
   veg_incl <- lapply(veg_ids, function(x) use[x])
 
   temp <- swProd_MonProd_veg(prod_default, fg)

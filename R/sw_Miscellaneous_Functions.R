@@ -208,8 +208,12 @@ calc_SiteClimate <- function(weatherList, year.start = NA, year.end = NA,
       if (is_simTime2_good) {
         !is.null(simTime2[["month_ForEachUsedDay_NSadj"]]) &&
         !is.null(simTime2[["year_ForEachUsedDay_NSadj"]])
-      } else FALSE
-    } else TRUE
+      } else {
+        FALSE
+      }
+    } else {
+      TRUE
+    }
 
   if (is_simTime2_good && is_simTime2_good_for_C4vars) {
     st2 <- simTime2
@@ -252,9 +256,14 @@ calc_SiteClimate <- function(weatherList, year.start = NA, year.end = NA,
     dailyTempMin = if (do_C4vars) x[, "Tmin_C"] else NA,
     dailyTempMean = if (do_C4vars) Tmean_C else NA,
     dailyC4vars = if (do_C4vars) {
-      sw_dailyC4_TempVar(dailyTempMin = x[, "Tmin_C"], dailyTempMean = Tmean_C,
-        simTime2 = st2)
-      } else NA,
+      sw_dailyC4_TempVar(
+        dailyTempMin = x[, "Tmin_C"],
+        dailyTempMean = Tmean_C,
+        simTime2 = st2
+      )
+    } else {
+      NA
+    },
 
     # If cheatgrass-variables are requested
     Cheatgrass_ClimVars = if (do_Cheatgrass_ClimVars) {
@@ -263,7 +272,9 @@ calc_SiteClimate <- function(weatherList, year.start = NA, year.end = NA,
         monthlyTempMean_C = mon_Temp[, , 1, drop = FALSE],
         monthlyTempMin_C = mon_Temp[, , 2, drop = FALSE]
       )
-    } else NA
+    } else {
+      NA
+    }
   )
 }
 

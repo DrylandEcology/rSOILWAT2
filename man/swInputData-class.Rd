@@ -644,7 +644,7 @@ classes in the container's slots.
 \details{
 \code{\linkS4class{swInputData}} consists of slots for each file that is
 read in. These slots can be accessed via the following functions: \itemize{
-  \item \code{\link{get_Markov}}
+  \item \code{\link{get_swMarkov}}
   \item \code{\link{get_swCloud}}
   \item \code{\link{get_swFiles}}
   \item \code{\link{get_swOUT}}

@@ -88,6 +88,7 @@ swSWC_hist <- function(...) {
 
 #' @rdname swSWC_hist-class
 #' @export
+# nolint start
 setMethod(
   "swReadLines",
   signature = c(object = "swSWC_hist", file = "character"),
@@ -107,7 +108,7 @@ setMethod(
     object@data <- data
     object
 })
-
+# nolint end
 
 ##########################swcsetup.in#########################################
 
@@ -321,6 +322,7 @@ setReplaceMethod(
 
 #' @rdname swSWC-class
 #' @export
+# nolint start
 setMethod(
   "swReadLines",
   signature = c(object = "swSWC", file = "character"),
@@ -336,3 +338,4 @@ setMethod(
     return(object)
   }
 )
+# nolint end
