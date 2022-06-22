@@ -61,7 +61,7 @@ dbW_InsistInteract <- function(
         # Set busy handler to time out after 10 seconds
         # (in milliseconds) of retries
         # It's reported that SQLite may reset the busy handler
-        # https://github.com/r-dbi/RSQLite/issues/280#issuecomment-751441914 # nolint
+        # https://github.com/r-dbi/RSQLite/issues/280#issuecomment-751441914
         try(DBI::dbExecute(rSW2_glovars$con, "PRAGMA busy_timeout = 10000"))
 
         # Wait a bit before next attempt
@@ -388,7 +388,7 @@ dbW_getSiteId <- function(
 ) {
 
 
-  if (!is.null(Labels) && any(!is.na(Labels))) {
+  if (!is.null(Labels) && !all(is.na(Labels))) {
     #--- Determine which Labels exists
     Labels <- as.character(Labels)
 
@@ -886,9 +886,9 @@ dbW_getWeatherData <- function(
   if (length(idsnotna) == 0) {
     msg <- c(
       "Weather data for all sites ",
-      paste(shQuote(IDs[["site_id"]]), collapse = ", "),
+      toString(shQuote(IDs[["site_id"]])),
       " and scenarios ",
-      paste0(shQuote(IDs[["scenario_id"]]), collapse = ", "),
+      toString(shQuote(IDs[["scenario_id"]])),
       " does not exist in weather database."
     )
 
@@ -1058,7 +1058,7 @@ dbW_addSites <- function(site_data, ignore.case = FALSE, verbose = FALSE) {
   if (any(has_sites) && verbose) {
     message(
       "'dbW_addSites': sites are already in database, labels = ",
-      paste(shQuote(site_data[has_sites, "Label"]), collapse = ", ")
+      toString(shQuote(site_data[has_sites, "Label"]))
     )
   }
 
@@ -1130,7 +1130,7 @@ dbW_addScenarios <- function(Scenarios, ignore.case = FALSE, verbose = FALSE) {
   if (any(has_scenarios) && verbose) {
     message(
       "'dbW_addScenarios': Scenarios are already in database,",
-      "Scenarios =", paste(shQuote(Scenarios[has_scenarios]), collapse = ", ")
+      "Scenarios =", toString(shQuote(Scenarios[has_scenarios]))
     )
   }
 
@@ -1224,7 +1224,7 @@ dbW_addWeatherData <- function(
     verbose = verbose
   )
 
-  if (any(!sapply(IDs, function(x) length(x) > 0 && is.finite(x)))) {
+  if (!all(sapply(IDs, function(x) length(x) > 0 && is.finite(x)))) {
     stop(
       "'dbW_addWeatherData': insufficient information to generate ",
       "site/scenario."
@@ -1491,7 +1491,7 @@ dbW_createDatabase <- function(
   if (length(dots)) {
     message(
       "'dbW_createDatabase': arguments ignored/deprecated ",
-      paste(shQuote(names(dots)), collapse = ", ")
+      toString(shQuote(names(dots)))
     )
   }
 
@@ -1666,7 +1666,7 @@ dbW_deleteSiteData <- function(Site_id, Scenario_id = NULL) {
 #'
 #' @export
 #' @md
-dbW_delete_duplicated_weatherData <- function(
+dbW_delete_duplicated_weatherData <- function( # nolint: object_length_linter.
   site_id = NULL,
   check_values = TRUE,
   carefully = FALSE,
@@ -2213,7 +2213,8 @@ dbW_weather_to_SOILWATfiles <- function(
         data.sw[, 1],
         formatC(data.sw[, 2], digits = 2, format = "f"),
         formatC(data.sw[, 3], digits = 2, format = "f"),
-        formatC(data.sw[, 4], digits = 2, format = "f")
+        formatC(data.sw[, 4], digits = 2, format = "f"),
+        stringsAsFactors = FALSE
       ),
       file = sw.filename,
       append = TRUE,

@@ -86,7 +86,10 @@ temp <- c("RSOILWAT_ALLTESTS", "RSOILWAT_INTEGRATIONTESTS",
   "NOT_CRAN", "TRAVIS", "APPVEYOR", "TESTTHAT")
 temp <- Sys.getenv(temp, names = TRUE)
 
-message(paste("Testing environment is run with:",
+message(
+  "Testing environment is run with:",
   paste(
-  paste("\n\t*", names(temp), "=", shQuote(temp)),
-  collapse = "")))
+    paste("\n\t*", names(temp), "=", shQuote(temp)),
+    collapse = ""
+  )
+)

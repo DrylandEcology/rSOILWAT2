@@ -1,13 +1,17 @@
 #!/usr/bin/env Rscript
 
 #--- rSOILWAT2: use development version
-library("methods")  # in case this code is run via 'Rscript'
-stopifnot(requireNamespace("pkgbuild"))
-stopifnot(requireNamespace("pkgload"))
-stopifnot(requireNamespace("usethis"))
+# load package "methods" in case this script is run via 'Rscript'
+library("methods") # nolint: unused_import_linter.
+# these packages are not listed by `rSOILWAT2`:
+stopifnot(
+  requireNamespace("pkgbuild"), # nolint: missing_package_linter.
+  requireNamespace("pkgload"),  # nolint: missing_package_linter.
+  requireNamespace("usethis") # nolint: missing_package_linter.
+)
 
-pkgbuild::clean_dll()
-pkgload::load_all()
+pkgbuild::clean_dll() # nolint: namespace_linter.
+pkgload::load_all() # nolint: namespace_linter.
 
 
 dir_definf <- file.path("data-raw", "data")
@@ -21,8 +25,9 @@ sw2_tr_VegBiom <- utils::read.csv(
   stringsAsFactors = FALSE
 )
 
+# nolint start: namespace_linter.
 usethis::use_data(sw2_tr_VegBiom, internal = FALSE, overwrite = TRUE)
-
+# nolint end
 
 #--- Vegetation rooting profile
 tmp_trco_desc <- utils::read.csv(
@@ -43,8 +48,9 @@ sw2_trco_table <- list(
   data = tmp_trco_data
 )
 
+# nolint start: namespace_linter.
 usethis::use_data(sw2_trco_table, internal = FALSE, overwrite = TRUE)
-
+# nolint end
 
 
 
@@ -54,4 +60,6 @@ sw2_tr_CO2a <- utils::read.csv(
   stringsAsFactors = FALSE
 )
 
+# nolint start: namespace_linter.
 usethis::use_data(sw2_tr_CO2a, internal = FALSE, overwrite = TRUE)
+# nolint end

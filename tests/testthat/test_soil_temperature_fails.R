@@ -3,7 +3,7 @@ context("rSOILWAT2 soil temperature instability")
 #---CONSTANTS
 dir_test_data <- file.path("..", "test_data")
 temp <- list.files(dir_test_data, pattern = "Ex")
-temp <- sapply(strsplit(temp, "_"), function(x) x[[1]])
+temp <- sapply(strsplit(temp, "_", fixed = TRUE), function(x) x[[1]])
 tests <- unique(temp)
 test_that("Test data availability", expect_gt(length(tests), 0))
 
@@ -11,9 +11,13 @@ st_name <- rSW2_glovars[["kSOILWAT2"]][["OutKeys"]][["SW_SOILTEMP"]]
 
 format_badData <- function(data, ids_bad) {
   if (any(ids_bad)) {
-    paste(apply(round(data[ids_bad, ], 2), 1, paste, collapse = "/"),
-      collapse = "; ")
-  } else "all good"
+    paste(
+      apply(round(data[ids_bad, ], 2), 1, paste, collapse = "/"),
+      collapse = "; "
+    )
+  } else {
+    "all good"
+  }
 }
 
 for (it in tests) {
@@ -51,17 +55,35 @@ for (it in tests) {
       icol <- seq.int(ncol1 + 1, ncol(Tsoil_data2))
       Tsoil <- Tsoil_data2[, icol]
 
-      ids_bad <- apply(Tsoil, 1, function(x) any(!is.finite(x)))
-      expect_true(!any(ids_bad), info = paste(info, "check: is.finite",
-        format_badData(Tsoil_data2, ids_bad)))
+      ids_bad <- apply(Tsoil, 1, function(x) !all(is.finite(x)))
+      expect_false(
+        any(ids_bad),
+        info = paste(
+          info,
+          "check: is.finite",
+          format_badData(Tsoil_data2, ids_bad)
+        )
+      )
 
       ids_bad <- apply(Tsoil, 1, function(x) any(x < -100))
-      expect_true(!any(ids_bad), info = paste(info, "check: Tsoil > -100",
-        format_badData(Tsoil_data2, ids_bad)))
+      expect_false(
+        any(ids_bad),
+        info = paste(
+          info,
+          "check: Tsoil > -100",
+          format_badData(Tsoil_data2, ids_bad)
+        )
+      )
 
       ids_bad <- apply(Tsoil, 1, function(x) any(x > +100))
-      expect_true(!any(ids_bad), info = paste(info, "check: Tsoil < +100",
-        format_badData(Tsoil_data2, ids_bad)))
+      expect_false(
+        any(ids_bad),
+        info = paste(
+          info,
+          "check: Tsoil < +100",
+          format_badData(Tsoil_data2, ids_bad)
+        )
+      )
     }
   })
 }

@@ -233,8 +233,10 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   if (anyNA(mkv_prob)) {
     ids_baddoy <- mkv_prob[apply(mkv_prob, 1, anyNA), "DOY"]
 
-    msg <- paste0("values for n = ", length(ids_baddoy), " DOYs: ",
-      paste(ids_baddoy, collapse = ", "))
+    msg <- paste0(
+      "values for n = ", length(ids_baddoy),
+      " DOYs: ", toString(ids_baddoy)
+    )
 
     if (imputation_type == "none") {
       warning("Insufficient weather data to estimate ", msg)
@@ -344,8 +346,10 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   if (anyNA(mkv_cov)) {
     ids_badweek <- mkv_cov[apply(mkv_cov, 1, anyNA), "WEEK"]
 
-    msg <- paste0("values for n = ", length(ids_badweek), " weeks: ",
-      paste(ids_badweek, collapse = ", "))
+    msg <- paste0(
+      "values for n = ", length(ids_badweek),
+      " weeks: ", toString(ids_badweek)
+    )
 
     if (imputation_type == "none") {
       warning("Insufficient weather data to estimate ", msg)
@@ -420,8 +424,10 @@ print_mkv_files <- function(mkv_doy, mkv_woy, path, digits = 5) {
 check_weather <- function(weather, required_variables) {
   stopifnot(
     length(dim(weather)) == 2,
-    sapply(required_variables, function(p)
-      length(grep(p, x = colnames(weather))) == 1)
+    sapply(
+      required_variables,
+      function(p) length(grep(p, x = colnames(weather))) == 1
+    )
   )
 }
 
@@ -578,13 +584,23 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
   #------- OUTPUTS
   #--- Compare means and SDs: boxplots
   calculate_MeansSDs <- function(data) {
-    temp <- lapply(weather_vars, function(var)
-      sapply(time_steps, function(ts)
-        sapply(data, function(x) {
-          temp <- x[[ts]][, var]
-          c(mean(temp, na.rm = TRUE), sd(temp, na.rm = TRUE))
-        })
-      ))
+    temp <- lapply(
+      weather_vars,
+      function(var) {
+        sapply(
+          time_steps,
+          function(ts) {
+            sapply(
+              data,
+              function(x) {
+                temp <- x[[ts]][, var]
+                c(mean(temp, na.rm = TRUE), sd(temp, na.rm = TRUE))
+              }
+            )
+          }
+        )
+      }
+    )
 
     array(unlist(temp),
       dim = c(2, length(data), length(time_steps), length(weather_vars)),
@@ -710,12 +726,22 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 
 
   #--- Does output weather recreate weather generator inputs?
-  ref_wgin <- dbW_estimate_WGen_coefs(ref_df[[1]][["Day"]],
-    WET_limit_cm = WET_limit_cm, imputation_type = "mean")
-  comp_wgin <- lapply(comp_df, function(x)
-      dbW_estimate_WGen_coefs(x[["Day"]],
-        WET_limit_cm = WET_limit_cm, imputation_type = "mean")
-    )
+  ref_wgin <- dbW_estimate_WGen_coefs(
+    ref_df[[1]][["Day"]],
+    WET_limit_cm = WET_limit_cm,
+    imputation_type = "mean"
+  )
+
+  comp_wgin <- lapply(
+    comp_df,
+    function(x) {
+      dbW_estimate_WGen_coefs(
+        x[["Day"]],
+        WET_limit_cm = WET_limit_cm,
+        imputation_type = "mean"
+      )
+    }
+  )
 
 
   foo_scatter_wgin <- function(data, ref_data, obj, fname) {
@@ -738,8 +764,9 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
       x <- ref_data[[obj]][, v]
 
       vlim_obs <- range(x, na.rm = TRUE)
-      vlim <- range(sapply(data, function(x)
-        range(x[[obj]][, v], na.rm = TRUE)))
+      vlim <- range(
+        sapply(data, function(x) range(x[[obj]][, v], na.rm = TRUE))
+      )
 
       if (all(is.finite(vlim_obs)) && all(is.finite(vlim))) {
         graphics::plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,

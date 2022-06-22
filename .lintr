@@ -1,0 +1,20 @@
+linters: lintr::linters_with_tags(
+  tags = NULL,
+  #--- Change arguments of linters:
+  line_length_linter = lintr::line_length_linter(length = 80L),
+  #--- Turn off linters:
+  undesirable_function_linter = NULL,
+  implicit_integer_linter = NULL,
+  extraction_operator_linter = NULL,
+  object_name_linter = NULL,
+  object_usage_linter = NULL,
+  cyclocomp_linter = NULL,
+  todo_comment_linter = NULL,
+  nonportable_path_linter = NULL,
+  expect_identical_linter = NULL,
+  yoda_test_linter = NULL)
+exclusions: list(
+  "R/RcppExports.R",
+  "R/rSOILWAT2_deprecated.R")
+error_on_lint: TRUE
+encoding: "UTF-8"

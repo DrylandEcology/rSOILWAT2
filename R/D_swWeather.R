@@ -296,6 +296,7 @@ setReplaceMethod("swWeather_MonScalingParams", signature = "swWeather",
 
 #' @rdname swWeather-class
 #' @export
+# nolint start
 setMethod("swReadLines",
   signature = c(object = "swWeather", file = "character"),
   function(object, file) {
@@ -323,3 +324,4 @@ setMethod("swReadLines",
 
     object
 })
+# nolint end

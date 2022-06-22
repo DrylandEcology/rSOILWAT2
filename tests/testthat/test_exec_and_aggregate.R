@@ -10,7 +10,7 @@ tols <- list(
 OutSum <- c("off", "sum", "mean", "fnl")
 dir_test_data <- file.path("..", "test_data")
 temp <- list.files(dir_test_data, pattern = "Ex")
-temp <- sapply(strsplit(temp, "_"), function(x) x[[1]])
+temp <- sapply(strsplit(temp, "_", fixed = TRUE), function(x) x[[1]])
 tests <- unique(temp)
 
 test_that("Test data availability", expect_gt(length(tests), 0))
@@ -90,6 +90,8 @@ for (it in tests) {
     max(-Tmax, weather_extremes[1, "Tmin_C"]),
     min(Tmax, weather_extremes[2, "Tmax_C"])
   )
+  # Surface temperature goes beyond air temperature
+  var_limits2["TEMP", ] <- c(-Tmax, Tmax)
   var_limits2["SOILTEMP", ] <- c(-Tmax, Tmax)
   var_limits2["PRECIP", ] <- c(0, min(H2Omax, weather_extremes[2, "PPT_cm"]))
   var_limits2["SOILINFT", ] <- c(0, H2Omax)
@@ -212,7 +214,9 @@ for (it in tests) {
     )
 
     fun_agg <- OutSum[1 + slot(get_swOUT(sw_input), "sumtype")]
-    expect_true(length(vars) == length(fun_agg))
+    # nolint start: expect_length_linter.
+    expect_identical(length(vars), length(fun_agg))
+    # nolint end
 
     for (k in seq_along(vars)) {
       x1 <- slot(rd, vars[k])

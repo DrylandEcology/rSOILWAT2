@@ -13,7 +13,7 @@ fdbWeather3 <- file.path("/Fantasy", "Volume", "test.sqlite3")
 
 dir_test_data <- file.path("..", "test_data")
 tmp <- list.files(dir_test_data, pattern = "Ex")
-tmp <- sapply(strsplit(tmp, "_"), function(x) x[[1]])
+tmp <- sapply(strsplit(tmp, "_", fixed = TRUE), function(x) x[[1]])
 tests <- unique(tmp)
 test_that("Test data availability", expect_gt(length(tests), 0))
 
@@ -90,8 +90,9 @@ test_that("Disk file write and delete permissions", {
   skip_on_os("windows")
 
   tmp <- try(write(NA, file = fdbWeather), silent = TRUE)
+  has_fdbW <- !inherits(tmp, "try-error") && file.exists(fdbWeather)
   expect_true(
-    !inherits(tmp, "try-error") && file.exists(fdbWeather),
+    has_fdbW,
     info = paste("Failed to create file", fdbWeather)
   )
 
@@ -99,9 +100,10 @@ test_that("Disk file write and delete permissions", {
     tmp <- try(unlink_forcefully(fdbWeather, info = "1st"), silent = TRUE),
     regexp = "sucessfully deleted"
   )
+  hasnot_fdbW <- !inherits(tmp, "try-error") && !file.exists(fdbWeather)
   expect_true(
-    !inherits(tmp, "try-error") && !file.exists(fdbWeather),
-    info = paste("Failed to delete file", fdbWeather)
+    hasnot_fdbW,
+    info = paste("Failed to create file", fdbWeather)
   )
 })
 
@@ -466,9 +468,9 @@ test_that("dbW site/scenario tables manipulation", {
     add_if_missing = TRUE
   )
 
-  expect_true(!anyNA(id4b[["site_id"]]))
+  expect_false(anyNA(id4b[["site_id"]]))
   expect_length(id4b[["site_id"]], nrow(site_data3))
-  expect_true(!anyNA(id4b[["scenario_id"]]))
+  expect_false(anyNA(id4b[["scenario_id"]]))
   expect_length(id4b[["scenario_id"]], length(scenarios_added))
 })
 
@@ -525,14 +527,15 @@ test_that("dbW weather data manipulation", {
   )
 
   # `dbW_addWeatherDataNoCheck()` does not prevent adding duplicate entries
-  expect_true(
+  expect_identical(
     dbW_addWeatherDataNoCheck(
       Site_id = 1,
       Scenario_id = 1,
       StartYear = sw_years[[1]][1],
       EndYear = sw_years[[1]][2],
       weather_blob = dbW_weatherData_to_blob(sw_weather[[1]])
-    ) == 1
+    ),
+    1L
   )
 
 

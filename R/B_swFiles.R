@@ -297,6 +297,7 @@ setReplaceMethod("swFiles_Output", signature = "swFiles",
 
 #' @rdname swFiles-class
 #' @export
+# nolint start
 setMethod("swReadLines", signature = c(object = "swFiles", file = "character"),
   function(object, file) {
   print(paste("TODO: method 'swReadLines' is not up-to-date;",
@@ -326,3 +327,4 @@ setMethod("swReadLines", signature = c(object = "swFiles", file = "character"),
 
     object
 })
+# nolint end

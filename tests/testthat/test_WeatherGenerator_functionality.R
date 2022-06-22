@@ -9,12 +9,14 @@ if (!dir.exists(path_extdata)) {
 
 dir_test_data <- file.path("..", "test_data")
 temp <- list.files(dir_test_data, pattern = "Ex")
-temp <- sapply(strsplit(temp, "_"), function(x) x[[1]])
+temp <- sapply(strsplit(temp, "_", fixed = TRUE), function(x) x[[1]])
 tests <- unique(temp)
 test_that("Test data availability", expect_gt(length(tests), 0))
 
-sw_weather <- lapply(tests, function(it)
-  readRDS(file.path(dir_test_data, paste0(it, "_weather.rds"))))
+sw_weather <- lapply(
+  tests,
+  function(it) readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
+)
 
 
 #---TESTS

@@ -13,11 +13,9 @@
 
 on:
   push:
-    branches:
-      - main
+    branches: [main, release/**]
   pull_request:
-    branches:
-      - main
+    branches: [main, release/**]
 
 name: R-CMD-check-covr
 
@@ -50,7 +48,7 @@ jobs:
       - uses: r-lib/actions/setup-r@v1
         with:
           r-version: ${{ matrix.config.r }}
-          
+
       - uses: r-lib/actions/setup-tinytex@v1
 
       - uses: r-lib/actions/setup-pandoc@v1

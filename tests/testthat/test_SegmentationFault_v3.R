@@ -1,6 +1,6 @@
 context("rSOILWAT2 segfault")
 
-# nolint start
+# nolint start: line_length_linter, commented_code_linter.
 # Running from command line --> segfaults
 #	r --slave -f Test_Rsoilwat31_SegmentationFault_v3.R
 #	r -d "valgrind --dsymutil=yes --leak-check=full --track-origins=yes --expensive-definedness-checks=yes" --slave -f Test_Rsoilwat31_SegmentationFault_v3.R

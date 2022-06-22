@@ -262,7 +262,7 @@ dbW_upgrade_v31to32 <- function(dbWeatherDataFile, fbackup = NULL) {
 
   req_tables <- c("Meta", "Sites", "Scenarios", "WeatherData")
   temp <- req_tables %in% DBI::dbListTables(con)
-  if (any(!temp)) {
+  if (!all(temp)) {
     warning("Missing tables:", paste(shQuote(req_tables[!temp]),
       collapse = "-"))
     return(FALSE)
@@ -381,7 +381,7 @@ dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL,
     }
 
     temp <- memDecompress(data_blob, type = type, asChar = TRUE)
-    data <- strsplit(temp, ";")[[1]]
+    data <- strsplit(temp, split = ";", fixed = TRUE)[[1]]
     years <- StartYear:EndYear
 
     weatherData <- list()
