@@ -11,7 +11,8 @@ rSW2_SWRC_PDF_estimate_parameters(
   clay,
   fcoarse,
   bdensity = NULL,
-  fail = TRUE
+  fail = TRUE,
+  ...
 )
 }
 \arguments{
@@ -41,6 +42,8 @@ Density of the whole soil
 \item{fail}{A logical value. If \code{TRUE} (default) and
 requested \code{PDF} is not implemented in \code{R}, then throw an error;
 otherwise, return silently.}
+
+\item{...}{Additional parameters passed to selected \code{PDF} function.}
 }
 \value{
 \code{swrcp}, i.e,.

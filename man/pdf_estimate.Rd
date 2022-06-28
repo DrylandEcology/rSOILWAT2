@@ -4,7 +4,7 @@
 \alias{pdf_estimate}
 \title{Estimate \code{SWRC} parameters from soil texture with a pedotransfer function}
 \usage{
-pdf_estimate(sand, clay, fcoarse, bdensity = NULL, swrc_name, pdf_name)
+pdf_estimate(sand, clay, fcoarse, bdensity = NULL, swrc_name, pdf_name, ...)
 }
 \arguments{
 \item{sand}{A numeric value or vector.
@@ -33,6 +33,8 @@ The selected \code{SWRC} name
 \item{pdf_name}{An character string or vector.
 The selected \code{PDF} name
 (one of \code{\link[=pdf_names]{pdf_names()}}, with default \code{"Cosby1984AndOthers"}).}
+
+\item{...}{Additional parameters passed to selected \code{PDF} function.}
 }
 \value{
 \code{swrcp}, i.e,.
@@ -50,7 +52,8 @@ Estimate \code{SWRC} parameters from soil texture with a pedotransfer function
 \section{Notes}{
 
 \code{\link[=swrc_names]{swrc_names()}} lists implemented \code{SWRCs};
-\code{\link[=pdf_names]{pdf_names()}} lists implemented \code{PDFs}.
+\code{\link[=pdf_names]{pdf_names()}} lists implemented \code{PDFs}; and
+\code{\link[=check_pdf_availability]{check_pdf_availability()}} checks availability of \code{PDFs}.
 
 
 The soil parameters \code{sand}, \code{clay}, \code{fcoarse}, and \code{bdensity} must be of
@@ -58,16 +61,14 @@ the same length, i.e., represent one soil (length 1) or
 multiple soil (layers) (length > 1); however, \code{bdensity} may be \code{NULL}.
 The arguments selecting \code{SWRC} (\code{swrc_name}) and \code{PDF} (\code{pdf_name})
 are recycled for multiple soil layers.
-
-
-Some \code{PDFs} require a live internet connection to be able to obtain
-\code{SWRC} parameter estimates.
 }
 
 \examples{
 pdf_estimate(sand = c(0.5, 0.3), clay = c(0.2, 0.1), fcoarse = c(0, 0))
 
 soils <- swSoils_Layers(rSOILWAT2::sw_exampleData)
+
+# Use PDF "Cosby1984" to estimate parameters of SWRC "Campbell1974"
 pdf_estimate(
   sand = soils[, "sand_frac"],
   clay = soils[, "clay_frac"],
@@ -76,7 +77,8 @@ pdf_estimate(
   pdf_name = "Cosby1984"
 )
 
-if (requireNamespace("curl") && curl::has_internet()) {
+# Use PDF "Rosetta3" to estimate parameters of SWRC "vanGenuchten1980"
+if (check_pdf_availability("Rosetta3")) {
   pdf_estimate(
     sand = soils[, "sand_frac"],
     clay = soils[, "clay_frac"],
@@ -84,6 +86,23 @@ if (requireNamespace("curl") && curl::has_internet()) {
     bdensity = soils[, "bulkDensity_g/cm^3"],
     swrc_name = "vanGenuchten1980",
     pdf_name = "Rosetta3"
+  )
+}
+
+# Use PDF "neuroFX2021" to estimate parameters of SWRC `FXW`
+\dontrun{
+# Set neuroFX2021 file path, see details in `pdf_neuroFX2021_for_FXW()`
+options(RSW2_FILENEUROFX2021 = "path/to/sscbd.RData")
+}
+
+if (check_pdf_availability("neuroFX2021")) {
+  pdf_estimate(
+    sand = soils[, "sand_frac"],
+    clay = soils[, "clay_frac"],
+    fcoarse = soils[, "gravel_content"],
+    bdensity = soils[, "bulkDensity_g/cm^3"],
+    swrc_name = "FXW",
+    pdf_name = "neuroFX2021"
   )
 }
 

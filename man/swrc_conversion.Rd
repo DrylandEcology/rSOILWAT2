@@ -134,7 +134,8 @@ to convert from `VWC` to `SWP` with selected `SWRC`
 \section{Details}{
 
 \code{\link[=swrc_names]{swrc_names()}} lists implemented \code{SWRCs};
-\code{\link[=pdf_names]{pdf_names()}} lists implemented \code{PDFs}.
+\code{\link[=pdf_names]{pdf_names()}} lists implemented \code{PDFs}; and
+\code{\link[=check_pdf_availability]{check_pdf_availability()}} checks availability of \code{PDFs}.
 
 
 For backward compatibility, \code{fcoarse} and \code{layer_width} may be missing.
@@ -211,7 +212,8 @@ awc <- diff(c(0, soils[, "depth_cm"])) * as.vector(diff(tmp))
 theta <- seq(0.05, 0.55, by = 0.001)
 soils <- data.frame(
   sand_frac = c(sand = 0.92, silty_loam = 0.17, silty_clay = 0.06),
-  clay_frac = c(0.03, 0.13, 0.58)
+  clay_frac = c(0.03, 0.13, 0.58),
+  bd = c(1.614, 1.464, 1.437)
 )
 phi <- list(
   Campbell1974 = swrc_vwc_to_swp(
@@ -222,17 +224,34 @@ phi <- list(
   )
 )
 
-if (requireNamespace("curl") && curl::has_internet()) {
+if (check_pdf_availability("Rosetta3")) {
   phi[["vanGenuchten1980"]] <- swrc_vwc_to_swp(
     theta,
     sand = soils[, "sand_frac"],
     clay = soils[, "clay_frac"],
+    bdensity = soils[, "bd"],
     swrc = list(swrc_name = "vanGenuchten1980", pdf_name = "Rosetta3")
   )
 }
 
+# Use PDF "neuroFX2021" to estimate parameters of SWRC `FXW`
+\dontrun{
+# Set neuroFX2021 file path, see details in `pdf_neuroFX2021_for_FXW()`
+options(RSW2_FILENEUROFX2021 = "path/to/sscbd.RData")
+}
+
+if (check_pdf_availability("neuroFX2021")) {
+  phi[["FXW"]] <- swrc_vwc_to_swp(
+    theta,
+    sand = soils[, "sand_frac"],
+    clay = soils[, "clay_frac"],
+    bdensity = soils[, "bd"],
+    swrc = list(swrc_name = "FXW", pdf_name = "neuroFX2021")
+  )
+}
+
 if (requireNamespace("graphics")) {
-  par_prev <- graphics::par(mfcol = c(2, 1))
+  par_prev <- graphics::par(mfcol = c(length(phi), 1))
 
   for (k in seq_along(phi)) {
     graphics::matplot(
@@ -262,5 +281,6 @@ Water Resources Research, 20:682-690, \doi{10.1029/WR020i006p00682}
 }
 \seealso{
 \code{\link[=pdf_estimate]{pdf_estimate()}},
-\code{\link[=check_swrcp]{check_swrcp()}}
+\code{\link[=check_swrcp]{check_swrcp()}},
+\code{\link[=check_pdf_availability]{check_pdf_availability()}}
 }

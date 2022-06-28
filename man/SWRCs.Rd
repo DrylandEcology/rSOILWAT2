@@ -73,6 +73,7 @@ Water Resources Research, 20:682-690, \doi{10.1029/WR020i006p00682}
 \seealso{
 \code{\link[=swrc_names]{swrc_names()}},
 \code{\link[=pdf_names]{pdf_names()}},
+\code{\link[=check_pdf_availability]{check_pdf_availability()}},
 \code{\link[=pdf_estimate]{pdf_estimate()}},
 \code{\link[=check_swrcp]{check_swrcp()}},
 \code{\link[=swrc_swp_to_vwc]{swrc_swp_to_vwc()}},

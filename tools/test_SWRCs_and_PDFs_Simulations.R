@@ -9,16 +9,23 @@
 
 
 # Required packages not part of `rSOILWAT2`
-stopifnot(
-  requireNamespace("ggplot2"),
-  requireNamespace("curl") && curl::has_internet()
-)
+stopifnot(requireNamespace("ggplot2"))
 
 
-#--- List of SWRC-PDF combinations ------
+#--- List of (available) SWRC-PDF combinations ------
 list_swrcs_pdfs <- unname(as.list(as.data.frame(t(
   rSOILWAT2::list_matched_swrcs_pdfs()
 ))))
+
+tmp <- check_pdf_availability(sapply(list_swrcs_pdfs, `[`, j = 2))
+list_swrcs_pdfs <- list_swrcs_pdfs[tmp]
+
+if (!all(tmp)) {
+  message(
+    "Unavailable PDFs are skipped: ",
+    toString(shQuote(names(tmp)[!tmp]))
+  )
+}
 
 
 #--- Settings ------
@@ -39,7 +46,11 @@ soiltxtcls <- data.frame(
   clay_frac = c(
     0.03, 0.06, 0.1, 0.18, 0.13, 0.27, 0.34, 0.34, 0.42, 0.47, 0.58
   ),
-  gravel_content = 0
+  `bulkDensity_g/cm^3` = c(
+    1.614, 1.482, 1.520, 1.246, 1.464, 1.700, 1.143, 1.384, 1.26, 1.437, 1.277
+  ),
+  gravel_content = 0,
+  check.names = FALSE
 )
 rownames(soiltxtcls) <- gsub(
   " ",

@@ -210,8 +210,10 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #   2) rSOILWAT2:
 #     * if "YYY" is implemented in R, then:
 #       * new `pdf_YYY_for_XXX()`
+#       * new `pdf_YYY_availability(verbose = interactive(), ...)`
 #       * update `pdfs_implemented_in_rSW2()`
 #       * update `rSW2_SWRC_PDF_estimate_parameters()`
+#       * update `check_pdf_availability()`
 #     * update examples and unit tests to utilize new XXX/YYY functions
 
 
@@ -268,6 +270,7 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #' [pdf_names()] lists implemented `PDFs`.
 #'
 #' @inherit pdf_Rosetta_for_vanGenuchten1980 references
+#' @inherit pdf_neuroFX2021_for_FXW references
 #' @references
 #'   Cosby, B. J., G. M. Hornberger, R. B. Clapp, & T. R. Ginn. 1984.
 #'   A statistical exploration of the relationships of soil moisture
@@ -277,6 +280,7 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #' @seealso
 #'   [swrc_names()],
 #'   [pdf_names()],
+#'   [check_pdf_availability()],
 #'   [pdf_estimate()],
 #'   [check_swrcp()],
 #'   [swrc_swp_to_vwc()],
@@ -294,7 +298,7 @@ NULL
 #' @details Notes:
 #' The integer values may change with new versions of `SOILWAT2.`
 #'
-#' @seealso [`SWRCs`], [pdf_names()]
+#' @seealso [`SWRCs`], [pdf_names()], [check_pdf_availability()]
 #'
 #' @md
 #' @export
@@ -309,7 +313,7 @@ swrc_names <- function() {
 #' @details Notes:
 #' The integer values may change with new versions of `SOILWAT2.`
 #'
-#' @seealso [`SWRCs`], [swrc_names()]
+#' @seealso [`SWRCs`], [swrc_names()], [check_pdf_availability()]
 #'
 #' @md
 #' @export
@@ -364,6 +368,18 @@ encode_name2pdf <- function(pdf_name) {
 #'   `SWRCs` are listed.
 #'   \var{"NoPDF"} is not included in the list.
 #'
+#' @examples
+#' # Data frame of SWRC-PDF combinations
+#' df_swrc_pdfs <- rSOILWAT2::list_matched_swrcs_pdfs()
+#'
+#' # List of SWRC-PDF combinations
+#' list_swrcs_pdfs <- unname(as.list(as.data.frame(t(df_swrc_pdfs))))
+#'
+#' # Available SWRC-PDF combinations
+#' has_pdf <- check_pdf_availability(df_swrc_pdfs[, "PDF"])
+#' df_swrc_pdfs[has_pdf, , drop = FALSE]
+#' list_swrcs_pdfs[has_pdf]
+#'
 #' @export
 list_matched_swrcs_pdfs <- function(swrc_name) {
   swrc_name <- if (
@@ -396,10 +412,12 @@ list_matched_swrcs_pdfs <- function(swrc_name) {
 #' Estimate `SWRC` parameters from soil texture with a pedotransfer function
 #'
 #' @inheritParams SWRCs
+#' @param ... Additional parameters passed to selected `PDF` function.
 #'
 #' @section Notes:
 #' [swrc_names()] lists implemented `SWRCs`;
-#' [pdf_names()] lists implemented `PDFs`.
+#' [pdf_names()] lists implemented `PDFs`; and
+#' [check_pdf_availability()] checks availability of `PDFs`.
 #'
 #' @section Notes:
 #' The soil parameters `sand`, `clay`, `fcoarse`, and `bdensity` must be of
@@ -408,10 +426,6 @@ list_matched_swrcs_pdfs <- function(swrc_name) {
 #' The arguments selecting `SWRC` (`swrc_name`) and `PDF` (`pdf_name`)
 #' are recycled for multiple soil layers.
 #'
-#' @section Notes:
-#' Some `PDFs` require a live internet connection to be able to obtain
-#' `SWRC` parameter estimates.
-#'
 #' @inherit SWRCs references
 #'
 #' @return `swrcp`, i.e,.
@@ -419,8 +433,8 @@ list_matched_swrcs_pdfs <- function(swrc_name) {
 #' columns represent a fixed number of `SWRC` parameters.
 #' The interpretation is dependent on the selected `SWRC`, see
 #' `SOILWAT2` input file `swrc_param.in`
+# nolint start: line_length_linter.
 #' (
-# nolint start
 #' `system.file("extdata", "example1", "Input", "swrc_params.in", package = "rSOILWAT2")`
 #' ).
 # nolint end
@@ -429,6 +443,8 @@ list_matched_swrcs_pdfs <- function(swrc_name) {
 #' pdf_estimate(sand = c(0.5, 0.3), clay = c(0.2, 0.1), fcoarse = c(0, 0))
 #'
 #' soils <- swSoils_Layers(rSOILWAT2::sw_exampleData)
+#'
+#' # Use PDF "Cosby1984" to estimate parameters of SWRC "Campbell1974"
 #' pdf_estimate(
 #'   sand = soils[, "sand_frac"],
 #'   clay = soils[, "clay_frac"],
@@ -437,7 +453,8 @@ list_matched_swrcs_pdfs <- function(swrc_name) {
 #'   pdf_name = "Cosby1984"
 #' )
 #'
-#' if (requireNamespace("curl") && curl::has_internet()) {
+#' # Use PDF "Rosetta3" to estimate parameters of SWRC "vanGenuchten1980"
+#' if (check_pdf_availability("Rosetta3")) {
 #'   pdf_estimate(
 #'     sand = soils[, "sand_frac"],
 #'     clay = soils[, "clay_frac"],
@@ -445,6 +462,23 @@ list_matched_swrcs_pdfs <- function(swrc_name) {
 #'     bdensity = soils[, "bulkDensity_g/cm^3"],
 #'     swrc_name = "vanGenuchten1980",
 #'     pdf_name = "Rosetta3"
+#'   )
+#' }
+#'
+#' # Use PDF "neuroFX2021" to estimate parameters of SWRC `FXW`
+#' \dontrun{
+#' # Set neuroFX2021 file path, see details in `pdf_neuroFX2021_for_FXW()`
+#' options(RSW2_FILENEUROFX2021 = "path/to/sscbd.RData")
+#' }
+#'
+#' if (check_pdf_availability("neuroFX2021")) {
+#'   pdf_estimate(
+#'     sand = soils[, "sand_frac"],
+#'     clay = soils[, "clay_frac"],
+#'     fcoarse = soils[, "gravel_content"],
+#'     bdensity = soils[, "bulkDensity_g/cm^3"],
+#'     swrc_name = "FXW",
+#'     pdf_name = "neuroFX2021"
 #'   )
 #' }
 #'
@@ -456,7 +490,8 @@ pdf_estimate <- function(
   fcoarse,
   bdensity = NULL,
   swrc_name,
-  pdf_name
+  pdf_name,
+  ...
 ) {
 
   #--- Check for consistency between SWRC and PDF
@@ -480,7 +515,8 @@ pdf_estimate <- function(
       sand = sand,
       clay = clay,
       fcoarse = fcoarse,
-      bdensity = bdensity
+      bdensity = bdensity,
+      ...
     )
 
   } else {
@@ -507,14 +543,72 @@ pdf_estimate <- function(
 #' List PDFs implemented only in `rSOILWAT2` instead of `SOILWAT2`
 #' @md
 pdfs_implemented_in_rSW2 <- function() {
-  "Rosetta3"
+  c(
+    # `Rosetta3` estimates parameters of `vanGenuchten1980` SWRC
+    "Rosetta3",
+    # `neuroFX2021` estimates parameters of `FXW` SWRC
+    "neuroFX2021"
+  )
+}
+
+#' Check availability of `PDFs`
+#'
+#' PDFs implemented in `SOILWAT2` are always available;
+#' PDFs implemented in `rSOILWAT2` may have additional requirements, e.g.,
+#' live internet connection or access to specific data files.
+#'
+#' @param pdfs A character vector. `PDF` names to be checked;
+#'   defaults to `pdf_names()`.
+#' @param verbose A logical value.
+#'
+#' @return A named logical vector with current availability of `PDFs`;
+#' `pdfs` that are not implemented return `NA`.
+#'
+#' @examples
+#' check_pdf_availability()
+#' check_pdf_availability("neuroFX2021")
+#' check_pdf_availability("nonexistent_PDF")
+#'
+#' @export
+#' @md
+check_pdf_availability <- function(
+  pdfs = names(pdf_names()),
+  verbose = interactive()
+) {
+  res <- rep(NA, length(pdfs))
+  names(res) <- pdfs
+
+  rpdfs <- pdfs_implemented_in_rSW2()
+
+  # PDFs implemented in SOILWAT2 are always available
+  tmp <- pdfs %in% names(pdf_names()) & !(pdfs %in% rpdfs)
+  res[tmp] <- TRUE
+
+  # Check requested PDFs implemented in R
+  has_rpdfs <- vapply(
+    pdfs[pdfs %in% rpdfs],
+    function(pdf) {
+      switch(
+        EXPR = pdf,
+        Rosetta3 = pdf_Rosetta3_availability(verbose = verbose),
+        neuroFX2021 = pdf_neuroFX2021_availability(verbose = verbose),
+        NA
+      )
+    },
+    FUN.VALUE = NA,
+    USE.NAMES = TRUE
+  )
+
+  res[names(has_rpdfs)] <- has_rpdfs
+
+  res
 }
 
 
 #' Estimate parameters of selected soil water retention curve (`SWRC`)
 #' using selected pedotransfer function (`PDF`) that are implemented in `R`
 #'
-#' @inheritParams SWRCs
+#' @inheritParams pdf_estimate
 #' @param fail A logical value. If `TRUE` (default) and
 #'   requested `PDF` is not implemented in `R`, then throw an error;
 #'   otherwise, return silently.
@@ -543,18 +637,36 @@ rSW2_SWRC_PDF_estimate_parameters <- function( # nolint: object_length_linter.
   clay,
   fcoarse,
   bdensity = NULL,
-  fail = TRUE
+  fail = TRUE,
+  ...
 ) {
   pdf_name <- std_pdf(pdf_name)[1]
   has_pdf <- pdf_name %in% pdfs_implemented_in_rSW2()
 
+  list_soilargs <- list(
+    sand = sand,
+    clay = clay,
+    bdensity = bdensity
+  )
+
   if (has_pdf && pdf_name %in% "Rosetta3") {
-    pdf_Rosetta_for_vanGenuchten1980(
-      sand = sand,
-      clay = clay,
-      bdensity = bdensity,
-      version = "3"
+    dots <- list(...)
+    dots[["version"]] <- if ("version" %in% names(dots)) {
+      as.character(dots[["version"]])
+    } else {
+      "3"
+    }
+
+    do.call(
+      pdf_Rosetta_for_vanGenuchten1980,
+      args = c(list_soilargs, dots)
     )
+
+  } else if (has_pdf && pdf_name %in% "neuroFX2021") {
+    do.call(
+      pdf_neuroFX2021_for_FXW,
+      args = c(list_soilargs, list(...))
+    )[["mean"]]
 
   } else {
     if (isTRUE(fail)) {
@@ -613,13 +725,10 @@ pdf_Rosetta_for_vanGenuchten1980 <- function( # nolint: object_length_linter.
   clay,
   bdensity = NULL,
   version = c("3", "1", "2"),
-  verbose = interactive()
+  verbose = interactive(),
+  ...
 ) {
-  stopifnot(requireNamespace("soilDB"), requireNamespace("curl"))
-
-  if (!curl::has_internet()) {
-    stop("`pdf_Rosetta_for_vanGenuchten1980()` requires live internet.")
-  }
+  stopifnot(pdf_Rosetta3_availability(verbose = verbose))
 
   version <- match.arg(version)
 
@@ -651,6 +760,219 @@ pdf_Rosetta_for_vanGenuchten1980 <- function( # nolint: object_length_linter.
     10 ^ tmp[, "ksat"],
     0
   )))
+}
+
+# Checks availability of `Rosetta3` `PDF`
+#
+# Note: `check_pdf_availability()` requires function name
+# to match pattern "pdf_XXX_availability" where XXX = name of PDF
+pdf_Rosetta3_availability <- function(verbose = interactive(), ...) {
+  tmp <- c(
+    requireNamespace("soilDB"),
+    requireNamespace("curl") && curl::has_internet()
+  )
+
+  res <- all(tmp)
+
+  if (!res && verbose) {
+    if (!tmp[1]) {
+      message(
+        "`pdf_Rosetta3_availability()`: ",
+        "R package 'soilDB' is not available."
+      )
+    }
+    if (!tmp[2]) {
+      message(
+        "`pdf_Rosetta3_availability()`: ",
+        "R package 'curl' is not available or there is no live internet."
+      )
+    }
+  }
+
+  res
+}
+
+
+#' Estimate `FXW` `SWRC` parameters using `neuroFX2021`
+#'
+#' @inheritParams SWRCs
+#' @param file_neuroFX2021 A character string that contains the file name with
+#'   full path of the `neuroFX2021` R object provided by Rudiyanto et al. 2021;
+#'   The path to the appropriate file can be set per R session
+#'   via option `"RSW2_FILENEUROFX2021"`, see additional details.
+#'
+#' @return `swrcp`, i.e,.
+#' a numeric matrix where rows represent soil (layers) and
+#' columns represent a fixed number of `SWRC` parameters: \itemize{
+#'   \item `swrcp[0]` (`theta_s`): saturated volumetric water content
+#'         of the matric component (units of `[cm / cm]`)
+#'   \item `swrcp[1]` (`alpha`): shape parameter (units of `[cm-1]`)
+#'   \item `swrcp[2]` (`n`): shape parameter  `[-]`
+#'   \item `swrcp[3]` (`n`): shape parameter  `[-]`
+#'   \item `swrcp[4]` (`K_sat`): saturated hydraulic conductivity `[cm / day]`
+#'   \item `swrcp[5]` (`L`): tortuosity/connectivity parameter `[-]`
+#' }
+#'
+#' @references
+#'   Rudiyanto, Minasny, B., Chaney, N. W., Maggi, F., Goh Eng Giap, S.,
+#'   Shah, R. M., Fiantis, D., & Setiawan, B. I. 2021.
+#'   Pedotransfer functions for estimating soil hydraulic properties from
+#'   saturation to dryness.
+#'   Geoderma, 403:115194, \doi{10.1016/j.geoderma.2021.115194}
+#' @references
+#'   Fredlund, D. G., & Xing, A. 1994.
+#'   Equations for the soil-water characteristic curve.
+#'   Canadian Geotechnical Journal, 31: 512–532, \doi{10.1139/t94-061}
+#' @references
+#'   Wang, Y., Jin, M., & Deng, Z. 2018.
+#'   Alternative model for predicting soil hydraulic conductivity over
+#'   the complete moisture range.
+#'   Water Resources Research, 54:6860–6876, \doi{10.1029/2018WR023037}
+#'
+#' @section Details:
+#' [pdf_estimate()] is the function that should be directly called; this here
+#' is an internal helper function.
+#'
+#' @section Details:
+#' This function requires that users download
+#' the fitted `neuroFX2021` neural networks published by Rudiyanto et al. 2021
+#' in Supplementary Material 1 (resulting in a local file named `xxx_mmc1.zip`).
+#' This needs to be unzipped and the resulting `tar` file unpacked;
+#' this produces a folder `R code for neuroFX2021`.
+#' This folder contains two R data files : `ssc.RData` and `sscbd.RData`.
+#' The argument `file_neuroFX2021` is the file name (with path) to `sscbd.RData`
+#' if soil density data are available and to `ssc.RData` otherwise
+#' (see Rudiyanto et al. 2021).
+#' The path to the appropriate file can be set per R session
+#' via option `"RSW2_FILENEUROFX2021"`
+#' (and avoid passing it directly as argument to the function);
+#' this can be useful, for example, if `pdf_estimate()` is used for `FXW`.
+#'
+#' @md
+pdf_neuroFX2021_for_FXW <- function(
+  sand,
+  clay,
+  bdensity = NULL,
+  file_neuroFX2021 = getOption("RSW2_FILENEUROFX2021", NULL),
+  ...
+) {
+  stopifnot(pdf_neuroFX2021_availability(file_neuroFX2021))
+
+  # Load `neuroFX2021`
+  nfx <- new.env()
+  load(file_neuroFX2021, envir = nfx)
+
+  # Check whether type of neuroFX2021 is
+  #    SSC (sand, silt, clay) or
+  #    SSCBD (sand, silt, clay, bulk density)
+  is_sscbd <- dim(nfx[["tW1"]])[2] == 4
+
+  # Prepare soil data
+  tmp_txt <- data.frame(
+    sand = sand,
+    silt = 1 - (sand + clay),
+    clay = clay
+  )
+
+  if (!is.null(bdensity)) {
+    if (is_sscbd) {
+      tmp_txt[, "bd"] <- bdensity
+    } else {
+      warning(
+        "`pdf_neuroFX2021_for_FXW()`: ",
+        "`bdensity` ignored because ",
+        "'neuroFX2021' object is for SSC (sand, silt, clay)."
+      )
+    }
+  } else {
+    if (is_sscbd) {
+      stop(
+        "`pdf_neuroFX2021_for_FXW()`: ",
+        "'neuroFX2021' object is for SSCBD (sand, silt, clay, bulk density) ",
+        "but `bdensity` contains no values."
+      )
+    }
+  }
+
+  # Evaluate neuroFX2021
+  res <- iterate_neuroFX(tmp_txt, nfx, niter = dim(nfx[["tW1"]])[1])
+
+  # Aggregate across iterations
+  tmp_res <- lapply(c("mean", "sd"), function(f) apply(res, 2:3, f))
+
+  # Backtransformation
+  for (k in seq_along(tmp_res)) {
+    # backtransform log(alpha) -> alpha
+    tmp_res[[k]][, 2] <- exp(tmp_res[[k]][, 2])
+    # backtransform log(n - 1) -> n
+    tmp_res[[k]][, 3] <- 1 + exp(tmp_res[[k]][, 3])
+    # backtransform log10(Ks) -> Ks
+    tmp_res[[k]][, 5] <- 10 ^ tmp_res[[k]][, 5]
+  }
+
+  list(
+    mean = tmp_res[[1]],
+    sd = tmp_res[[2]]
+  )
+}
+
+# Checks availability of `neuroFX2021` `PDF`
+#
+# Note: `check_pdf_availability()` requires function name
+# to match pattern "pdf_XXX_availability" where XXX = name of PDF
+pdf_neuroFX2021_availability <- function(
+  file_neuroFX2021 = getOption("RSW2_FILENEUROFX2021", NULL),
+  verbose = interactive(),
+  ...
+) {
+  res <- !is.null(file_neuroFX2021) && file.exists(file_neuroFX2021)
+
+  if (!res && verbose) {
+    message(
+      "`pdf_neuroFX2021_availability()`: ",
+      "data file 'file_neuroFX2021' does not exist; ",
+      "see documentation for `pdf_neuroFX2021_for_FXW()` and consider setting ",
+      "`options(RSW2_FILENEUROFX2021 = \"path/to/sscbd.RData\")`"
+    )
+  }
+
+  res
+}
+
+
+# Evaluate neural net: code based on Rudiyanto et al. 2021
+eval_nnet <- function(X, W1, W2) {
+  N <- nrow(X)
+  # from input layer to hidden layer
+  xt <- rbind(t(X), matrix(1, nrow = 1, ncol = N))
+  h <- W1 %*% xt
+  # activation function
+  y1 <- tanh(h)
+  # from hidden layer to output layer
+  t(W2 %*% rbind(y1, matrix(1, nrow = 1, ncol = N)))
+}
+
+# Iterate over neuroFX2021: code based on Rudiyanto et al. 2021
+iterate_neuroFX <- function(x, nfx, niter = 50) {
+  res <- array(dim = c(niter, nrow(x), 6))
+
+  # loop though n iteration
+  for (k in seq_len(niter)) {
+    # Predict theta_sat, log(alpha), log(n-1), m
+    res[k, , 1:4] <- eval_nnet(
+      x,
+      W1 = nfx[["tW1"]][k, , ],
+      W2 = nfx[["tW2"]][k, , ]
+    )
+    # Predict log10(K_sat), L
+    res[k, , 5:6] <- eval_nnet(
+      x,
+      W1 = nfx[["kW1"]][k, , ],
+      W2 = nfx[["kW2"]][k, , ]
+    )
+  }
+
+  res
 }
 
 
@@ -742,7 +1064,8 @@ check_swrcp <- function(swrc_name, swrcp) {
 #'
 #' @section Details:
 #' [swrc_names()] lists implemented `SWRCs`;
-#' [pdf_names()] lists implemented `PDFs`.
+#' [pdf_names()] lists implemented `PDFs`; and
+#' [check_pdf_availability()] checks availability of `PDFs`.
 #'
 #' @section Details:
 #' For backward compatibility, `fcoarse` and `layer_width` may be missing.
@@ -764,7 +1087,8 @@ check_swrcp <- function(swrc_name, swrcp) {
 #'
 #' @seealso
 #'   [pdf_estimate()],
-#'   [check_swrcp()]
+#'   [check_swrcp()],
+#'   [check_pdf_availability()]
 #'
 #' @examples
 #' fsand <- c(0.5, 0.3)
@@ -823,7 +1147,8 @@ check_swrcp <- function(swrc_name, swrcp) {
 #' theta <- seq(0.05, 0.55, by = 0.001)
 #' soils <- data.frame(
 #'   sand_frac = c(sand = 0.92, silty_loam = 0.17, silty_clay = 0.06),
-#'   clay_frac = c(0.03, 0.13, 0.58)
+#'   clay_frac = c(0.03, 0.13, 0.58),
+#'   bd = c(1.614, 1.464, 1.437)
 #' )
 #' phi <- list(
 #'   Campbell1974 = swrc_vwc_to_swp(
@@ -834,17 +1159,34 @@ check_swrcp <- function(swrc_name, swrcp) {
 #'   )
 #' )
 #'
-#' if (requireNamespace("curl") && curl::has_internet()) {
+#' if (check_pdf_availability("Rosetta3")) {
 #'   phi[["vanGenuchten1980"]] <- swrc_vwc_to_swp(
 #'     theta,
 #'     sand = soils[, "sand_frac"],
 #'     clay = soils[, "clay_frac"],
+#'     bdensity = soils[, "bd"],
 #'     swrc = list(swrc_name = "vanGenuchten1980", pdf_name = "Rosetta3")
 #'   )
 #' }
 #'
+#' # Use PDF "neuroFX2021" to estimate parameters of SWRC `FXW`
+#' \dontrun{
+#' # Set neuroFX2021 file path, see details in `pdf_neuroFX2021_for_FXW()`
+#' options(RSW2_FILENEUROFX2021 = "path/to/sscbd.RData")
+#' }
+#'
+#' if (check_pdf_availability("neuroFX2021")) {
+#'   phi[["FXW"]] <- swrc_vwc_to_swp(
+#'     theta,
+#'     sand = soils[, "sand_frac"],
+#'     clay = soils[, "clay_frac"],
+#'     bdensity = soils[, "bd"],
+#'     swrc = list(swrc_name = "FXW", pdf_name = "neuroFX2021")
+#'   )
+#' }
+#'
 #' if (requireNamespace("graphics")) {
-#'   par_prev <- graphics::par(mfcol = c(2, 1))
+#'   par_prev <- graphics::par(mfcol = c(length(phi), 1))
 #'
 #'   for (k in seq_along(phi)) {
 #'     graphics::matplot(

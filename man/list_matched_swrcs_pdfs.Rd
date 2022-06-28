@@ -25,3 +25,16 @@ Matching pairs of implemented `SWRCs` and `PDFs`
   \var{"NoPDF"} is not included in the list.
 }
 
+\examples{
+# Data frame of SWRC-PDF combinations
+df_swrc_pdfs <- rSOILWAT2::list_matched_swrcs_pdfs()
+
+# List of SWRC-PDF combinations
+list_swrcs_pdfs <- unname(as.list(as.data.frame(t(df_swrc_pdfs))))
+
+# Available SWRC-PDF combinations
+has_pdf <- check_pdf_availability(df_swrc_pdfs[, "PDF"])
+df_swrc_pdfs[has_pdf, , drop = FALSE]
+list_swrcs_pdfs[has_pdf]
+
+}

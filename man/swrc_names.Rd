@@ -17,5 +17,5 @@ Notes:
 The integer values may change with new versions of \code{SOILWAT2.}
 }
 \seealso{
-\code{\link{SWRCs}}, \code{\link[=pdf_names]{pdf_names()}}
+\code{\link{SWRCs}}, \code{\link[=pdf_names]{pdf_names()}}, \code{\link[=check_pdf_availability]{check_pdf_availability()}}
 }

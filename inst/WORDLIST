@@ -29,6 +29,7 @@ evapotranspiration
 exter
 forb
 geoscientific
+geotechnical
 gregorian
 lodgepole
 loess
@@ -48,6 +49,7 @@ spatiotemporal
 submodule
 symlink
 toolchain
+tortuosity
 transmissivity
 xeric
 
@@ -91,15 +93,21 @@ Canadell
 Clapp
 codecov
 Espinosa
+Fiantis
+Fredlund
 Freund
 Genuchten
+Geoderma
 Gessner
+Giap
 Gidden
 Ginn
 github
+Goh
 Havlina
 Hornberger
 Innis
+Jin
 Kainuma
 Krummel
 Lamarque
@@ -107,10 +115,12 @@ Lauenroth
 Lavin
 Luderer
 Maestas
+Maggi
 Markov
 Matsumoto
 Meinshausen
 Milchunas
+Minasny
 Montzka
 Mualem
 Nauels
@@ -128,13 +138,15 @@ rhub
 Riahi
 Rotella
 roxygen
-rSOILWAT
 rSFSTEP
 rSFSW
+rSOILWAT
 rSW
+Rudiyanto
 Sala
 Schaap
 Schlaepfer
+Setiawan
 SOILWAT
 Springer
 SQLite
@@ -148,5 +160,6 @@ Vollmer
 Vuuren
 Wickham
 Wuenschel
+Xing
 Zach
 Zhang

@@ -10,50 +10,61 @@
 
 
 # Required packages not part of `rSOILWAT2`
-stopifnot(
-  requireNamespace("ggplot2"),
-  requireNamespace("curl") && curl::has_internet()
-)
+stopifnot(requireNamespace("ggplot2"))
 
 
-#--- List of SWRC-PDF combinations ------
+
+#--- List of (available) SWRC-PDF combinations ------
 list_swrcs_pdfs <- unname(as.list(as.data.frame(t(
   rSOILWAT2::list_matched_swrcs_pdfs()
 ))))
+
+tmp <- check_pdf_availability(sapply(list_swrcs_pdfs, `[`, j = 2))
+list_swrcs_pdfs <- list_swrcs_pdfs[tmp]
+
+if (!all(tmp)) {
+  message(
+    "Unavailable PDFs are skipped: ",
+    toString(shQuote(names(tmp)[!tmp]))
+  )
+}
 
 
 
 #--- Inputs ------
 thetas <- seq(0.00, 0.55, by = 0.001)
-phis <- sort(c(
+phis <- unique(sort(c(
   seq(-1000, -4, by = 1),
   seq(-4, -1, by = 0.1),
   seq(-1, -0.01, by = 0.01),
   -0.033,
   seq(-0.01, 0, by = 0.001),
   seq(-0.001, 0, by = 0.0001)
-))
+)))
 
-soils <- data.frame(
+soiltxtcls <- data.frame(
   sand_frac = c(
     0.92, 0.82, 0.58, 0.43, 0.17, 0.58, 0.32, 0.1, 0.52, 0.06, 0.22
   ),
   clay_frac = c(
     0.03, 0.06, 0.1, 0.18, 0.13, 0.27, 0.34, 0.34, 0.42, 0.47, 0.58
   ),
+  bd = c(
+    1.614, 1.482, 1.520, 1.246, 1.464, 1.700, 1.143, 1.384, 1.26, 1.437, 1.277
+  ),
   fcoarse = 0
 )
-rownames(soils) <- gsub(
+rownames(soiltxtcls) <- gsub(
   " ",
   ".",
   c(
-  "Sand", "Loamy sand", "Sandy loam", "Loam", "Silty loam", "Sandy clay loam",
-  "Clay loam", "Silty clay loam", "Sandy clay", "Silty clay", "Clay"
+    "Sand", "Loamy sand", "Sandy loam", "Loam", "Silty loam", "Sandy clay loam",
+    "Clay loam", "Silty clay loam", "Sandy clay", "Silty clay", "Clay"
   )
 )
 
 
-tag_soils <- paste0("soil__", rownames(soils))
+tag_soils <- paste0("soil__", rownames(soiltxtcls))
 
 
 #--- Estimate SWRCp ------
@@ -61,9 +72,10 @@ swrcps <- lapply(
   list_swrcs_pdfs,
   function(sp){
     rSOILWAT2::pdf_estimate(
-      sand = soils[, "sand_frac"],
-      clay = soils[, "clay_frac"],
-      fcoarse = soils[, "fcoarse"],
+      sand = soiltxtcls[, "sand_frac"],
+      clay = soiltxtcls[, "clay_frac"],
+      bdensity = soiltxtcls[, "bd"],
+      fcoarse = soiltxtcls[, "fcoarse"],
       swrc_name = sp[1],
       pdf_name = sp[2]
     )

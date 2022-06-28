@@ -15,9 +15,17 @@ temp <- sapply(strsplit(temp, "_", fixed = TRUE), function(x) x[[1]])
 tests <- unique(temp)
 test_that("Test data availability", expect_gt(length(tests), 0))
 
+# List of (available) SWRC-PDF combinations
 list_swrcs_pdfs <- unname(as.list(as.data.frame(t(
   rSOILWAT2::list_matched_swrcs_pdfs()
 ))))
+
+tmp <- check_pdf_availability(
+  sapply(list_swrcs_pdfs, `[`, j = 2),
+  verbose = FALSE
+)
+list_swrcs_pdfs <- list_swrcs_pdfs[tmp]
+
 
 aggregate_for_each_timestep <- function(x, dyt) {
   nid <- 1:2

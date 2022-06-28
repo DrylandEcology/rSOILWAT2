@@ -9,7 +9,8 @@ pdf_Rosetta_for_vanGenuchten1980(
   clay,
   bdensity = NULL,
   version = c("3", "1", "2"),
-  verbose = interactive()
+  verbose = interactive(),
+  ...
 )
 }
 \arguments{
