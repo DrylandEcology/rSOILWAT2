@@ -52,7 +52,7 @@ static char *cSW_WTH_names[] = {
 /* --------------------------------------------------- */
 
 static SEXP onGet_WTH_DATA_YEAR(TimeInt year);
-static Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year);
+static Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year, SW_WEATHER_HIST *hist);
 
 
 
@@ -60,21 +60,21 @@ static Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year);
 /*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
-Bool onSet_WTH_DATA_YEAR(TimeInt year) {
+Bool onSet_WTH_DATA_YEAR(TimeInt year, SW_WEATHER_HIST *hist) {
   int i = 0;
   Bool has_weather = FALSE;
 
   if (bWeatherList) {
     for (i = 0; i < LENGTH(WeatherList); i++) {
       if (year == *INTEGER(GET_SLOT(VECTOR_ELT(WeatherList, i), install("year")))) {
-        has_weather = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT(WeatherList, i), install("data")), year);
+        has_weather = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT(WeatherList, i), install("data")), year, hist);
       }
     }
 
   } else {
     for (i = 0; i < LENGTH(GET_SLOT(InputData, install("weatherHistory"))); i++) {
       if (year == *INTEGER(GET_SLOT(VECTOR_ELT(GET_SLOT(InputData, install("weatherHistory")), i), install("year")))) {
-        has_weather = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT(GET_SLOT(InputData, install("weatherHistory")), i), install("data")), year);
+        has_weather = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT(GET_SLOT(InputData, install("weatherHistory")), i), install("data")), year, hist);
       }
     }
   }
@@ -228,7 +228,7 @@ SEXP onGet_WTH_DATA(void) {
 			has_weather = FALSE;
 
 		} else {
-			has_weather = _read_weather_hist(year);
+			has_weather = _read_weather_hist(year, SW_Weather.allHist[year - SW_Model.startyr]);
 		}
 
 		if (has_weather) {
@@ -298,8 +298,7 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	return WeatherData;
 }
 
-Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year) {
-	SW_WEATHER_HIST *wh = &SW_Weather.hist;
+Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year, SW_WEATHER_HIST *hist) {
 	int lineno = 0, i, j, days;
 	Bool has_values = FALSE;
 	RealD *p_WTH_DATA;
@@ -332,23 +331,23 @@ Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year) {
 		 * either valid or SW_MISSING. */
 		j = i + days * 1;
 		if (missing(p_WTH_DATA[j]) || ISNA(p_WTH_DATA[j])) {
-			wh->temp_max[doy] = SW_MISSING;
+            hist->temp_max[doy] = SW_MISSING;
 		} else {
-			wh->temp_max[doy] = p_WTH_DATA[j];
+            hist->temp_max[doy] = p_WTH_DATA[j];
 		}
 
 		j = i + days * 2;
 		if (missing(p_WTH_DATA[j]) || ISNA(p_WTH_DATA[j])) {
-			wh->temp_min[doy] = SW_MISSING;
+            hist->temp_min[doy] = SW_MISSING;
 		} else {
-			wh->temp_min[doy] = p_WTH_DATA[j];
+            hist->temp_min[doy] = p_WTH_DATA[j];
 		}
 
 		j = i + days * 3;
 		if (missing(p_WTH_DATA[j]) || ISNA(p_WTH_DATA[j])) {
-			wh->ppt[doy] = SW_MISSING;
+            hist->ppt[doy] = SW_MISSING;
 		} else {
-			wh->ppt[doy] = p_WTH_DATA[j];
+            hist->ppt[doy] = p_WTH_DATA[j];
 			has_values = TRUE;
 		}
 	} /* end of input lines */
