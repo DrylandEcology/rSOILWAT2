@@ -37,8 +37,8 @@ columns represent a fixed number of \code{SWRC} parameters: \itemize{
 \item \code{swrcp[0]} (\code{theta_s}): saturated volumetric water content
 of the matric component (units of \verb{[cm / cm]})
 \item \code{swrcp[1]} (\code{alpha}): shape parameter (units of \verb{[cm-1]})
-\item \code{swrcp[2]} (\code{n}): shape parameter  \verb{[-]}
-\item \code{swrcp[3]} (\code{n}): shape parameter  \verb{[-]}
+\item \code{swrcp[2]} (\code{n}): shape parameter \verb{[-]}
+\item \code{swrcp[3]} (\code{m}): shape parameter \verb{[-]}
 \item \code{swrcp[4]} (\code{K_sat}): saturated hydraulic conductivity \verb{[cm / day]}
 \item \code{swrcp[5]} (\code{L}): tortuosity/connectivity parameter \verb{[-]}
 }

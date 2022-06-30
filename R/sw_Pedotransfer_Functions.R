@@ -807,8 +807,8 @@ pdf_Rosetta3_availability <- function(verbose = interactive(), ...) {
 #'   \item `swrcp[0]` (`theta_s`): saturated volumetric water content
 #'         of the matric component (units of `[cm / cm]`)
 #'   \item `swrcp[1]` (`alpha`): shape parameter (units of `[cm-1]`)
-#'   \item `swrcp[2]` (`n`): shape parameter  `[-]`
-#'   \item `swrcp[3]` (`n`): shape parameter  `[-]`
+#'   \item `swrcp[2]` (`n`): shape parameter `[-]`
+#'   \item `swrcp[3]` (`m`): shape parameter `[-]`
 #'   \item `swrcp[4]` (`K_sat`): saturated hydraulic conductivity `[cm / day]`
 #'   \item `swrcp[5]` (`L`): tortuosity/connectivity parameter `[-]`
 #' }
