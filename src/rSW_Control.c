@@ -77,7 +77,7 @@ void rSW_CTL_obtain_inputs(Bool from_files) {
     if (debug) swprintf(" > 'model'");
     #endif
 
-    onSet_SW_WTH(GET_SLOT(InputData, install("weather")));
+    onSet_SW_WTH_setup(GET_SLOT(InputData, install("weather")));
     #ifdef RSWDEBUG
     if (debug) swprintf(" > 'weather-setup'");
     #endif
@@ -95,6 +95,8 @@ void rSW_CTL_obtain_inputs(Bool from_files) {
       if (debug) swprintf(" > 'mwgen'");
       #endif
     }
+      
+    onSet_SW_WTH_read();
 
     onSet_SW_VPD(GET_SLOT(InputData, install("prod")));
     #ifdef RSWDEBUG

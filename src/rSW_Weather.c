@@ -148,7 +148,7 @@ SEXP onGet_SW_WTH() {
 	return SW_WTH;
 }
 
-void onSet_SW_WTH(SEXP SW_WTH) {
+void onSet_SW_WTH_setup(SEXP SW_WTH) {
 	int i, tmp;
 	SW_WEATHER *w = &SW_Weather;
 	SEXP
@@ -353,4 +353,23 @@ Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year, SW_WEATHER_HIST *hist) {
 	} /* end of input lines */
 
 	return has_values;
+}
+
+void onSet_SW_WTH_read() {
+
+    int year;
+    
+    SW_WEATHER *w = &SW_Weather;
+    SW_MODEL *m = &SW_Model;
+    
+    w->n_years = m->endyr - m->startyr + 1;
+    
+    w->allHist = (SW_WEATHER_HIST **)malloc(sizeof(SW_WEATHER_HIST *) * w->n_years);
+    
+    for(year = 0; year < w->n_years; year++) {
+        w->allHist[year] = (SW_WEATHER_HIST *)malloc(sizeof(SW_WEATHER_HIST));
+    }
+    
+    readAllWeather(w->allHist, w->yr.first, w->n_years);
+
 }
