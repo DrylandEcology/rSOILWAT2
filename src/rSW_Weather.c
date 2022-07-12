@@ -316,7 +316,7 @@ Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year, SW_WEATHER_HIST *hist) {
 	}
 
 	p_WTH_DATA = REAL(WTH_DATA_YEAR);
-	_clear_hist_weather();
+	_clear_hist_weather(hist);
 
 	for (i = 0; i < days; i++) {
 		doy = p_WTH_DATA[i + days * 0];
