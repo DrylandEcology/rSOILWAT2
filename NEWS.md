@@ -1,4 +1,13 @@
 # rSOILWAT2 v5.3.1-9000
+* This version produces identical simulation output as the previous release.
+* New `get_soiltemp_avg()` extracts average soil temperature from simulation
+  output.
+* New `get_surfacetemp_avg()` extracts average soil surface temperature
+  from simulation output.
+* These functions work with rSOILWAT2 versions before and after `v5.3.0`
+  which changed column names of average soil temperature from
+  `Lyr_X` to `Lyr_X_avg_C` and of average soil surface temperature from
+  `surfaceTemp_C` to `surfaceTemp_avg_C`.
 
 
 # rSOILWAT2 v5.3.0
