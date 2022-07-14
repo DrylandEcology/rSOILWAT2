@@ -95,3 +95,92 @@ get_evaporation <- function(x, timestep = c("Day", "Week", "Month", "Year")) {
   # convert [cm] to [mm]
   10 * res
 }
+
+
+#' Extract average soil temperature
+#'
+#' @inheritParams get_derived_output
+#'
+#' @return A numeric matrix of soil temperature [C] for each time step
+#'   at depth of each soil layer.
+#'
+#' @examples
+#' sw_out <- sw_exec(inputData = rSOILWAT2::sw_exampleData)
+#' get_soiltemp_avg(sw_out, "Month")
+#'
+#' @export
+get_soiltemp_avg <- function(x, timestep = c("Day", "Week", "Month", "Year")) {
+  timestep <- match.arg(timestep)
+
+  tmp <- slot(slot(x, sw_out_flags()["sw_soiltemp"]), timestep)
+
+  res <- NULL
+
+  if (nrow(tmp) > 0) {
+    # soil temperature output was produced
+    cns_sl <- grep("Lyr_", colnames(tmp), fixed = TRUE, value = TRUE)
+    cns_avg <- grep("Lyr_[[:digit:]]+_avg_C", cns_sl, value = TRUE)
+
+    res <- if (length(cns_avg) > 0) {
+      # rSOILWAT2 since v5.3.0: `Lyr_1_max_C`, `Lyr_1_min_C`, `Lyr_1_avg_C`, ...
+      tmp[, cns_avg, drop = FALSE]
+    } else {
+      # rSOILWAT2 before v5.3.0: `Lyr_1`, ...
+      tmp[, cns_sl, drop = FALSE]
+    }
+
+  } else {
+    stop(
+      "Simulation run without producing soil temperature output: ",
+      "consider turning on output key ",
+      shQuote(sw_out_flags()["sw_soiltemp"]),
+      "."
+    )
+  }
+
+  res
+}
+
+
+#' Extract average soil surface temperature
+#'
+#' @inheritParams get_derived_output
+#'
+#' @return A numeric vector of soil surface temperature [C] for each time step.
+#'
+#' @examples
+#' sw_out <- sw_exec(inputData = rSOILWAT2::sw_exampleData)
+#' get_surfacetemp_avg(sw_out, "Month")
+#'
+#' @export
+get_surfacetemp_avg <- function(
+  x,
+  timestep = c("Day", "Week", "Month", "Year")
+) {
+  timestep <- match.arg(timestep)
+
+  tmp <- slot(slot(x, sw_out_flags()["sw_temp"]), timestep)
+
+  res <- NULL
+
+  if (nrow(tmp) > 0) {
+    # surface temperature output was produced
+    res <- if ("surfaceTemp_C" %in% colnames(tmp)) {
+      # rSOILWAT2 before v5.3.0
+      tmp[, "surfaceTemp_C"]
+    } else if ("surfaceTemp_avg_C" %in% colnames(tmp)) {
+      # rSOILWAT2 since v5.3.0
+      tmp[, "surfaceTemp_avg_C"]
+    }
+
+  } else {
+    stop(
+      "Simulation run without producing surface temperature output: ",
+      "consider turning on output key ",
+      shQuote(sw_out_flags()["sw_temp"]),
+      "."
+    )
+  }
+
+  res
+}
