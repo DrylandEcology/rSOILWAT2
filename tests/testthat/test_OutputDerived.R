@@ -59,7 +59,7 @@ test_that("Derived output: soil/surface temperature", {
   )
 
   for (lvl in req_levels) {
-    expect_equal(st[[lvl]], NULL)
+    expect_null(st[[lvl]])
   }
 
 
@@ -73,7 +73,7 @@ test_that("Derived output: soil/surface temperature", {
   )
 
   for (lvl in req_levels) {
-    expect_equal(st[[lvl]], NULL)
+    expect_null(st[[lvl]])
   }
 
 
