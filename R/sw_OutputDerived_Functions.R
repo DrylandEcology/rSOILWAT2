@@ -97,90 +97,197 @@ get_evaporation <- function(x, timestep = c("Day", "Week", "Month", "Year")) {
 }
 
 
-#' Extract average soil temperature
+#' Extract soil temperature
 #'
 #' @inheritParams get_derived_output
+#' @param levels A character string indicating which
+#'   within-day minimum, average, or maximum values are requested.
+#' @param surface A logical value. Output surface soil temperature as first
+#'   column in returned matrices;
+#'   equivalent to requesting a `0` via `soillayers`.
+#' @param soillayers An integer vector of requested soil layers.
+#'   `NULL` returns soil temperature from all available soil layers;
+#'   `NA` does not return soil temperature;
+#'   including a `0` is equivalent to setting `surface` to `TRUE`.
+#' @param verbose A logical value. Issue warnings if requested `levels` are
+#'   not available.
 #'
-#' @return A numeric matrix of soil temperature [C] for each time step
-#'   at depth of each soil layer.
+#' @return A named list of length `levels` where elements are
+#' numeric matrices of soil temperature `[C]` with time steps as rows
+#' and (requested) soil surface and soil layers as columns.
+#'
+#' @section Notes:
+#' Requested `soillayers` that are not available in `x` are ignored
+#' (with a warning if `verbose`).
+#'
+#' @section Notes:
+#' Requested `levels` that are not available
+#' (e.g., `"min"` before `rSOILWAT2` `v3.5.0`)
+#' are replaced by values from the average level
+#' (with a warning if `verbose`).
 #'
 #' @examples
 #' sw_out <- sw_exec(inputData = rSOILWAT2::sw_exampleData)
-#' get_soiltemp_avg(sw_out, "Month")
+#' get_soiltemp(sw_out, "Month")
+#' get_soiltemp(sw_out, "Month", "avg")
+#' get_soiltemp(sw_out, "Month", "avg", surface = TRUE, soillayers = NA)
+#' get_soiltemp(sw_out, "Month", "avg", soillayers = 0)
+#' get_soiltemp(sw_out, "Month", "avg", surface = FALSE, soillayers = NULL)
+#' get_soiltemp(sw_out, "Month", "avg", surface = FALSE, soillayers = c(1, 3))
+#' get_soiltemp(sw_out, "Month", "avg", surface = FALSE, soillayers = c(1, 30))
 #'
+#' @md
 #' @export
-get_soiltemp_avg <- function(x, timestep = c("Day", "Week", "Month", "Year")) {
-  timestep <- match.arg(timestep)
-
-  tmp <- slot(slot(x, sw_out_flags()["sw_soiltemp"]), timestep)
-
-  res <- NULL
-
-  if (nrow(tmp) > 0) {
-    # soil temperature output was produced
-    cns_sl <- grep("Lyr_", colnames(tmp), fixed = TRUE, value = TRUE)
-    cns_avg <- grep("Lyr_[[:digit:]]+_avg_C", cns_sl, value = TRUE)
-
-    res <- if (length(cns_avg) > 0) {
-      # rSOILWAT2 since v5.3.0: `Lyr_1_max_C`, `Lyr_1_min_C`, `Lyr_1_avg_C`, ...
-      tmp[, cns_avg, drop = FALSE]
-    } else {
-      # rSOILWAT2 before v5.3.0: `Lyr_1`, ...
-      tmp[, cns_sl, drop = FALSE]
-    }
-
-  } else {
-    stop(
-      "Simulation run without producing soil temperature output: ",
-      "consider turning on output key ",
-      shQuote(sw_out_flags()["sw_soiltemp"]),
-      "."
-    )
-  }
-
-  res
-}
-
-
-#' Extract average soil surface temperature
-#'
-#' @inheritParams get_derived_output
-#'
-#' @return A numeric vector of soil surface temperature [C] for each time step.
-#'
-#' @examples
-#' sw_out <- sw_exec(inputData = rSOILWAT2::sw_exampleData)
-#' get_surfacetemp_avg(sw_out, "Month")
-#'
-#' @export
-get_surfacetemp_avg <- function(
+get_soiltemp <- function(
   x,
-  timestep = c("Day", "Week", "Month", "Year")
+  timestep = c("Day", "Week", "Month", "Year"),
+  levels = c("min", "avg", "max"),
+  surface = TRUE,
+  soillayers = NULL,
+  verbose = FALSE
 ) {
   timestep <- match.arg(timestep)
+  levels <- match.arg(levels, several.ok = TRUE)
 
-  tmp <- slot(slot(x, sw_out_flags()["sw_temp"]), timestep)
-
-  res <- NULL
-
-  if (nrow(tmp) > 0) {
-    # surface temperature output was produced
-    res <- if ("surfaceTemp_C" %in% colnames(tmp)) {
-      # rSOILWAT2 before v5.3.0
-      tmp[, "surfaceTemp_C"]
-    } else if ("surfaceTemp_avg_C" %in% colnames(tmp)) {
-      # rSOILWAT2 since v5.3.0
-      tmp[, "surfaceTemp_avg_C"]
-    }
-
-  } else {
-    stop(
-      "Simulation run without producing surface temperature output: ",
-      "consider turning on output key ",
-      shQuote(sw_out_flags()["sw_temp"]),
-      "."
-    )
+  #--- Deal with`soillayers`: NA, NULL, or integer vector
+  if (!isTRUE(is.na(soillayers)) && !is.null(soillayers)) {
+    soillayers <- sort(unique(as.integer(soillayers)))
   }
 
+  #--- Deal with `0` for surface in `soillayers`
+  if (0L %in% soillayers) {
+    surface <- TRUE
+    tmp <- setdiff(soillayers, 0L)
+    soillayers <- if (length(tmp) > 0) tmp else NA
+  }
+
+
+  #--- Load surface temperatures if requested
+  req_sf <- as.logical(surface)[1]
+
+  if (req_sf) {
+    tmp_sf <- slot(slot(x, sw_out_flags()["sw_temp"]), timestep)
+
+    if (nrow(tmp_sf) == 0) {
+      stop(
+        "Simulation run without producing soil surface temperature output: ",
+        "consider turning on output key ",
+        shQuote(sw_out_flags()["sw_temp"]),
+        "."
+      )
+    }
+
+    # rSOILWAT2 before v5.3.0: `surfaceTemp_C`
+    # rSOILWAT2 since v5.3.0: `surfaceTemp_min/avg/max_C`
+    cns_sf <- if ("surfaceTemp_C" %in% colnames(tmp_sf)) {
+      "surfaceTemp_C"
+    } else {
+      grep("surfaceTemp_[[:alpha:]]{3}_C", colnames(tmp_sf), value = TRUE)
+    }
+  }
+
+
+  #--- Load soil temperatures at depth if requested
+  req_sl <- !isTRUE(is.na(soillayers)) || is.null(soillayers)
+
+  if (req_sl) {
+    tmp_sl <- slot(slot(x, sw_out_flags()["sw_soiltemp"]), timestep)
+
+    if (nrow(tmp_sl) == 0) {
+      stop(
+        "Simulation run without producing soil temperature output: ",
+        "consider turning on output key ",
+        shQuote(sw_out_flags()["sw_soiltemp"]),
+        "."
+      )
+    }
+
+    # rSOILWAT2 before v5.3.0: `Lyr_1`, ...
+    # rSOILWAT2 since v5.3.0: `Lyr_1_max_C`, `Lyr_1_min_C`, `Lyr_1_avg_C`, ...
+    if (is.null(soillayers)) {
+      cns_sl <- grep("Lyr_", colnames(tmp_sl), fixed = TRUE, value = TRUE)
+    } else {
+      tmp <- lapply(
+        soillayers,
+        function(k) {
+          grep(
+            paste0("Lyr_", k, "_"),
+            colnames(tmp_sl),
+            fixed = TRUE,
+            value = TRUE
+          )
+        }
+      )
+
+      cns_sl <- unlist(tmp)
+      req_has_sl <- lengths(tmp) > 0
+
+      if (verbose) {
+        if (length(soillayers) != sum(req_has_sl)) {
+          warning("Some requested `soillayers` are not available.")
+        }
+      }
+
+      soillayers <- soillayers[req_has_sl]
+      if (length(soillayers) == 0) {
+        # None of the requested layers are available
+        soillayers <- NA
+        req_sl <- FALSE
+      }
+    }
+  }
+
+
+  #--- Extract requested levels and depths
+  res <- lapply(
+    levels,
+    function(lvl) {
+      res_sf <- if (req_sf) {
+        cns_sf_lvl <- grep(
+          paste0("surfaceTemp_", lvl, "_C"),
+          cns_sf,
+          value = TRUE
+        )
+
+        if (length(cns_sf_lvl) > 0) {
+          tmp_sf[, cns_sf_lvl, drop = FALSE] # rSOILWAT2 since v5.3.0
+        } else {
+          # Repeat average for each requested level
+          if (verbose) {
+            warning(
+              shQuote(lvl),
+              " soil surface temperature not available: average used instead."
+            )
+          }
+          tmp_sf[, cns_sf, drop = FALSE] # rSOILWAT2 before 5.3.0
+        }
+      }
+
+      res_sl <- if (req_sl) {
+        cns_sl_lvl <- grep(
+          paste0("Lyr_[[:digit:]]+_", lvl, "_C"),
+          cns_sl,
+          value = TRUE
+        )
+
+        if (length(cns_sl_lvl) > 0) {
+          tmp_sl[, cns_sl_lvl, drop = FALSE] # rSOILWAT2 since v5.3.0
+        } else {
+          # Repeat average for each requested level
+          if (verbose) {
+            warning(
+              shQuote(lvl),
+              " soil temperature not available: average used instead."
+            )
+          }
+          tmp_sl[, cns_sl, drop = FALSE] # rSOILWAT2 before 5.3.0
+        }
+      }
+
+      cbind(res_sf, res_sl)
+    }
+  )
+
+  names(res) <- levels
   res
 }
