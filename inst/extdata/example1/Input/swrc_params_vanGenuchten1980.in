@@ -6,11 +6,6 @@
 #     selected SWRC (see `siteparam.in`)
 #   - unused columns are ignored (if selected SWRC uses fewer than 6 parameters)
 
-# swrc = "Campbell1974"
-#   * param1 = air-entry suction [cm]
-#   * param2 = saturated volumetric water content for the matric component [cm/cm]
-#   * param3 = b, slope of the linear log-log retention curve [-]
-
 # swrc = "vanGenuchten1980" (values below, from "Rosetta3")
 #   * param1 = residual volumetric water content for the matric component [cm/cm]
 #   * param2 = saturated volumetric water content for the matric component [cm/cm]

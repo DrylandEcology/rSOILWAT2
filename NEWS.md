@@ -16,12 +16,26 @@
   between field capacity and saturation.
 
 
+# rSOILWAT2 v5.3.1
+* This version fixes a bug in soil temperature output that was
+  introduced with version `3.5.0` (#194).
+* New `get_soiltemp()` extracts soil temperature at surface and/or at
+  requested depths of soil layers from simulation output.
+  This function works with simulation output from
+  rSOILWAT2 versions before and after `v5.3.0`.
+
+
 # rSOILWAT2 v5.3.0
 * This version adds new output to otherwise identical simulation output.
 * `SOILWAT2` is updated to `v6.5.0` which provides
   the estimated minimum/maximum soil temperature for every layer and
   at the surface.
-* The new output is provided as an extention to slot "TEMP" and "SOILTEMP".
+* Surface temperature is provided in slot "TEMP" in columns
+  `surfaceTemp_min_C`, `surfaceTemp_avg_C` (previously `surfaceTemp_C`),
+  and `surfaceTemp_max_C`.
+* Soil temperature at depths of soil layers is provided in slot "SOILTEMP"
+  in columns `Lyr_X_min_C`, `Lyr_X_avg_C` (previously `Lyr_X`),
+  and `Lyr_X_max_C` where `X` stands for layer number 1, 2, ...
 * Package linting updated to `lintr` >= 3 and
   lint workflow switched from package tests to Github Action.
 

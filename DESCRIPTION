@@ -10,6 +10,7 @@ Authors@R: c(
     comment = c(ORCID = "0000-0001-9973-2065"),
     role = c("aut", "cre")),
   person("Ryan", "Murphy", role = "aut"),
+  person("Persley", "Nicholas", role = "ctb"),
   person("Zach", "Kramer", role = "ctb"),
   person("Brenden", "Bernal", role = "ctb"),
   person("Ashish", "Tiwari", role = "ctb"))
@@ -43,8 +44,8 @@ NeedsCompilation: yes
 License: GPL-3
 URL: https://github.com/DrylandEcology/rSOILWAT2
 BugReports: https://github.com/DrylandEcology/rSOILWAT2/issues
+Encoding: UTF-8
 RoxygenNote: 7.1.2
 LazyData: true
 Language: en-US
 VignetteBuilder: knitr
-Encoding: UTF-8

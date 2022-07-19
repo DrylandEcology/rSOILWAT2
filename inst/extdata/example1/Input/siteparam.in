@@ -95,12 +95,12 @@ RCP85
 #     * pdf_name = "Cosby1984": PDFs by Cosby et al. 1984
 #   - swrc_name = "vanGenuchten1980": van Genuchten-Mualem (van Genuchten 1980)
 #     * pdf_name = "Rosetta3": not implemented in C (but see rSOILWAT2)
-#   - swrc_name = "BrooksCorey1964": (Brooks and Corey 1964)
-#     * pdf_name: currently, no implemented PDF (but see rSOILWAT2)
-#   - swrc_name = "Brunswick": (Weber et al. 2019)
-#     * pdf_name: currently, no implemented PDF (but see rSOILWAT2)
-#   - swrc_name = "FXW": (Fredlund and Xing 1994, Wang et al. 2018, Rudiyanto et al. 2020)
-#     * pdf_name: currently, no implemented PDF (but see rSOILWAT2)
+##   - swrc_name = "BrooksCorey1964": (Brooks and Corey 1964)
+##     * pdf_name: currently, no implemented PDF
+##   - swrc_name = "Brunswick": (Weber et al. 2019)
+##     * pdf_name: currently, no implemented PDF
+#   - swrc_name = "FXW": (Fredlund and Xing 1994, Wang et al. 2018)
+#     * pdf_name: "neuroFX2021": not implemented PDF in C (but see rSOILWAT2)
 #
 # Note: option "Campbell1974"/"Cosby1984AndOthers" was hard-coded < v7.0.0
 #

@@ -11,6 +11,11 @@
 # rSOILWAT2 doesn't meet documentation standards (see issues #12 and #105): once these are resolved, reset to
 # `rcmdcheck::rcmdcheck(..., error_on = "warning", ...)`
 
+# frequent failures because suggested package "rSW2exter" cannot be installed
+# (usually GDAL-related problems on GHA)
+# -> remove `_R_CHECK_FORCE_SUGGESTS_: false` once issue #198 is resolved
+
+
 on:
   push:
     branches: [main, release/**]
@@ -84,6 +89,7 @@ jobs:
       - name: Check
         env:
           _R_CHECK_CRAN_INCOMING_REMOTE_: false
+          _R_CHECK_FORCE_SUGGESTS_: false
         run: |
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "error", check_dir = "check")
