@@ -1,5 +1,5 @@
 Package: rSOILWAT2
-Version: 5.3.1-9000
+Version: 5.3.1
 Title: An Ecohydrological Ecosystem-Scale Water Balance Simulation Model
 Description: Access to the C-based SOILWAT2 v6.5.0 and functionality for
   SQLite-database of weather data.

@@ -1,4 +1,6 @@
-# rSOILWAT2 v5.3.1-9000
+# rSOILWAT2 v5.3.1
+* This version fixes a bug in soil temperature output that was
+  introduced with version `3.5.0` (#194).
 * New `get_soiltemp()` extracts soil temperature at surface and/or at
   requested depths of soil layers from simulation output.
   This function works with simulation output from
