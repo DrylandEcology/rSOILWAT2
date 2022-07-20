@@ -87,3 +87,67 @@ for (it in tests) {
     }
   })
 }
+
+
+
+#--- Check that min <= avg <= max soil temperature ------
+test_that("Check min/avg/max soil temperature", {
+  sw_in <- rSOILWAT2::sw_exampleData
+  n_sl <- nrow(rSOILWAT2::swSoils_Layers(sw_in))
+
+  sw_out <- rSOILWAT2::sw_exec(inputData = sw_in)
+
+  tsoil <- slot(slot(sw_out, sw_out_flags()["sw_soiltemp"]), "Day")
+
+  snow <- slot(slot(sw_out, sw_out_flags()["sw_snow"]), "Day")
+  has_snow <- snow[, "snowdepth_cm"] > 0
+
+  tsurf <- slot(slot(sw_out, sw_out_flags()["sw_temp"]), "Day")
+  var_tsurf_avg <- "surfaceTemp_avg_C"
+  var_tsurf_min <- "surfaceTemp_min_C"
+  var_tsurf_max <- "surfaceTemp_max_C"
+
+
+  #--- Expect that
+  #  - if snow-free: average temperature > minimum temperature
+  #  - if snow covered: average temperature >= minimum temperature
+
+  # soil surface temperature
+  expect_true(
+    all(tsurf[!has_snow, var_tsurf_avg] > tsurf[!has_snow, var_tsurf_min])
+  )
+  expect_true(
+    all(tsurf[has_snow, var_tsurf_avg] >= tsurf[has_snow, var_tsurf_min])
+  )
+
+  # soil temperature at layer depth
+  for (k in seq_len(n_sl)) {
+    var_avg <- paste0("Lyr_", k, "_avg_C")
+    var_min <- paste0("Lyr_", k, "_min_C")
+
+    expect_true(all(tsoil[!has_snow, var_avg] > tsoil[!has_snow, var_min]))
+    expect_true(all(tsoil[has_snow, var_avg] >= tsoil[has_snow, var_min]))
+  }
+
+
+  #--- Expect that
+  #  - if snow-free: average temperature < maximum temperature
+  #  - if snow covered: average temperature <= maximum temperature
+
+  # soil surface temperature
+  expect_true(
+    all(tsurf[!has_snow, var_tsurf_avg] < tsurf[!has_snow, var_tsurf_max])
+  )
+  expect_true(
+    all(tsurf[has_snow, var_tsurf_avg] <= tsurf[has_snow, var_tsurf_max])
+  )
+
+  # soil temperature at layer depth
+  for (k in seq_len(n_sl)) {
+    var_avg <- paste0("Lyr_", k, "_avg_C")
+    var_max <- paste0("Lyr_", k, "_max_C")
+
+    expect_true(all(tsoil[!has_snow, var_avg] < tsoil[!has_snow, var_max]))
+    expect_true(all(tsoil[has_snow, var_avg] <= tsoil[has_snow, var_max]))
+  }
+})
