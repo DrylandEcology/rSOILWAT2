@@ -224,29 +224,8 @@ SEXP onGet_WTH_DATA(void) {
 		sprintf(cYear, "%4d", year);
 		SET_STRING_ELT(WTH_DATA_names, i, mkChar(cYear));
 
-		if (SW_Weather.use_weathergenerator_only) {
-			has_weather = FALSE;
-
-		} else {
-			has_weather = _read_weather_hist(year, SW_Weather.allHist[year - SW_Model.startyr]);
-		}
-
-		if (has_weather) {
-			// copy values from SOILWAT2 variables to rSOILWAT2 S4 class object
-			SET_VECTOR_ELT(WTH_DATA, i, onGet_WTH_DATA_YEAR(year));
-
-		} else if (SW_Weather.use_weathergenerator) {
-			// set the missing values from SOILWAT2 into rSOILWAT2 S4 weather object
-			SET_VECTOR_ELT(WTH_DATA, i, onGet_WTH_DATA_YEAR(year));
-
-		} else {
-			LogError(
-				logfp,
-				LOGFATAL,
-				"Markov Simulator turned off and weather file found not for year %d",
-				year
-			);
-		}
+        // copy values from SOILWAT2 variables to rSOILWAT2 S4 class object
+        SET_VECTOR_ELT(WTH_DATA, i, onGet_WTH_DATA_YEAR(year));
 	}
 
 	setAttrib(WTH_DATA, R_NamesSymbol, WTH_DATA_names);
