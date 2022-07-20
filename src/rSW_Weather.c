@@ -243,7 +243,7 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	SEXP nYear;
 	char *cYear[] = {"DOY", "Tmax_C", "Tmin_C", "PPT_cm"};
 	RealD *p_Year;
-	SW_WEATHER_HIST *wh = &SW_Weather.hist;
+	SW_WEATHER *w = &SW_Weather;
 
 	days = Time_get_lastdoy_y(year);
 
@@ -257,9 +257,9 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	p_Year = REAL(Year);
 	for (i = 0; i < days; i++) {
 		p_Year[i + days * 0] = (i + 1);
-		p_Year[i + days * 1] = wh->temp_max[i];
-		p_Year[i + days * 2] = wh->temp_min[i];
-		p_Year[i + days * 3] = wh->ppt[i];
+		p_Year[i + days * 1] = w->allHist[year - SW_Model.startyr]->temp_max[i];
+		p_Year[i + days * 2] = w->allHist[year - SW_Model.startyr]->temp_min[i];
+		p_Year[i + days * 3] = w->allHist[year - SW_Model.startyr]->ppt[i];
 	}
 
 	PROTECT(Year_names = allocVector(VECSXP, 2));
@@ -295,7 +295,7 @@ Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year, SW_WEATHER_HIST *hist) {
 	}
 
 	p_WTH_DATA = REAL(WTH_DATA_YEAR);
-	_clear_hist_weather();
+	_clear_hist_weather(hist);
 
 	for (i = 0; i < days; i++) {
 		doy = p_WTH_DATA[i + days * 0];
