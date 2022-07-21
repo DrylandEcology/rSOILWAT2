@@ -52,42 +52,12 @@ static char *cSW_WTH_names[] = {
 /* --------------------------------------------------- */
 
 static SEXP onGet_WTH_DATA_YEAR(TimeInt year);
-static Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year, SW_WEATHER_HIST *hist);
 
 
 
 /* =================================================== */
 /*             Global Function Definitions             */
 /* --------------------------------------------------- */
-
-/**
-  @brief Copy weather data for `year` from `rSOILWAT2` to `SOILWAT2`
-
-  Called by SOILWAT2's `SW_WTH_new_year()`.
-
-  @note This function is no longer used with `feature_read_weather`
-*/
-Bool onSet_WTH_DATA_YEAR(TimeInt year, SW_WEATHER_HIST *hist) {
-  int i = 0;
-  Bool has_weather = FALSE;
-
-  if (bWeatherList) {
-    for (i = 0; i < LENGTH(WeatherList); i++) {
-      if (year == *INTEGER(GET_SLOT(VECTOR_ELT(WeatherList, i), install("year")))) {
-        has_weather = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT(WeatherList, i), install("data")), year, hist);
-      }
-    }
-
-  } else {
-    for (i = 0; i < LENGTH(GET_SLOT(InputData, install("weatherHistory"))); i++) {
-      if (year == *INTEGER(GET_SLOT(VECTOR_ELT(GET_SLOT(InputData, install("weatherHistory")), i), install("year")))) {
-        has_weather = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT(GET_SLOT(InputData, install("weatherHistory")), i), install("data")), year, hist);
-      }
-    }
-  }
-
-  return has_weather;
-}
 
 
 /**
@@ -312,71 +282,6 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	return WeatherData;
 }
 
-
-/**
-  @brief Copy weather data for `year` from `rSOILWAT2` `p_WTH_DATA` to
-    `SOILWAT2` data structure
-
-  Called by `onSet_WTH_DATA_YEAR()`
-
-  @note This function is no longer used with `feature_read_weather`
-*/
-Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year, SW_WEATHER_HIST *hist) {
-	int lineno = 0, i, j, days;
-	Bool has_values = FALSE;
-	RealD *p_WTH_DATA;
-	TimeInt doy;
-
-	if (isnull(WTH_DATA_YEAR)) {
-		return FALSE; // no weather data for this year --> use weather generator
-	}
-
-	days = Time_get_lastdoy_y(year);
-
-	if (nrows(WTH_DATA_YEAR) != days || ncols(WTH_DATA_YEAR) != 4) {
-		LogError(logfp, LOGFATAL, "weath.%4d : Wrong number of days or columns in data. Expected rows %d had %d. Expected columns 4 had %d.", year, days,nrows(WTH_DATA_YEAR),ncols(WTH_DATA_YEAR));
-		return FALSE;
-	}
-
-	p_WTH_DATA = REAL(WTH_DATA_YEAR);
-	_clear_hist_weather(hist);
-
-	for (i = 0; i < days; i++) {
-		doy = p_WTH_DATA[i + days * 0];
-		if (doy < 1 || doy > days) {
-			LogError(logfp, LOGFATAL, "weath.%4d : Day of year out of range, line %d.", year, lineno);
-		}
-
-		/* --- Make the assignments ---- */
-		doy--;
-
-		/* Reassign if invalid values are found.  The values are
-		 * either valid or SW_MISSING. */
-		j = i + days * 1;
-		if (missing(p_WTH_DATA[j]) || ISNA(p_WTH_DATA[j])) {
-            hist->temp_max[doy] = SW_MISSING;
-		} else {
-            hist->temp_max[doy] = p_WTH_DATA[j];
-		}
-
-		j = i + days * 2;
-		if (missing(p_WTH_DATA[j]) || ISNA(p_WTH_DATA[j])) {
-            hist->temp_min[doy] = SW_MISSING;
-		} else {
-            hist->temp_min[doy] = p_WTH_DATA[j];
-		}
-
-		j = i + days * 3;
-		if (missing(p_WTH_DATA[j]) || ISNA(p_WTH_DATA[j])) {
-            hist->ppt[doy] = SW_MISSING;
-		} else {
-            hist->ppt[doy] = p_WTH_DATA[j];
-			has_values = TRUE;
-		}
-	} /* end of input lines */
-
-	return has_values;
-}
 
 
 /**
