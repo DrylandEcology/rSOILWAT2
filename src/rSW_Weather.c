@@ -209,7 +209,6 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 SEXP onGet_WTH_DATA(void) {
 	TimeInt year;
 	SEXP WTH_DATA, WTH_DATA_names;
-	Bool has_weather = FALSE;
 	char cYear[5];
 	int n_yrs, i;
 
