@@ -292,7 +292,7 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 
   Called by `rSW_CTL_obtain_inputs()` if `from_files` is `FALSE`.
 */
-void onSet_SW_WTH_read() {
+void onSet_WTH_DATA(void) {
 
     int year;
 

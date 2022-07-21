@@ -96,7 +96,7 @@ void rSW_CTL_obtain_inputs(Bool from_files) {
       #endif
     }
 
-    onSet_SW_WTH_read();
+    onSet_WTH_DATA();
     #ifdef RSWDEBUG
     if (debug) swprintf(" > 'weather-history'");
     #endif
