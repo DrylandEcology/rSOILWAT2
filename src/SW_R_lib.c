@@ -167,7 +167,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   if (debug) swprintf(" > 'model'");
   #endif
 
-  SET_SLOT(SW_DataList, install("weather"), onGet_SW_WTH());
+  SET_SLOT(SW_DataList, install("weather"), onGet_SW_WTH_setup());
   #ifdef RSWDEBUG
   if (debug) swprintf(" > 'weather-setup'");
   #endif

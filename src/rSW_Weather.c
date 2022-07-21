@@ -66,7 +66,7 @@ static SEXP onGet_WTH_DATA_YEAR(TimeInt year);
 
   Called by `onGetInputDataFromFiles()`.
 */
-SEXP onGet_SW_WTH() {
+SEXP onGet_SW_WTH_setup() {
 	int i;
 	const int nitems = 6;
 	RealD *p_MonthlyValues;
