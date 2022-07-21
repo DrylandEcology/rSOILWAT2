@@ -60,6 +60,13 @@ static Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year, SW_WEATHER_HIST *hi
 /*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
+/**
+  @brief Copy weather data for `year` from `rSOILWAT2` to `SOILWAT2`
+
+  Called by SOILWAT2's `SW_WTH_new_year()`.
+
+  @note This function is no longer used with `feature_read_weather`
+*/
 Bool onSet_WTH_DATA_YEAR(TimeInt year, SW_WEATHER_HIST *hist) {
   int i = 0;
   Bool has_weather = FALSE;
@@ -82,6 +89,13 @@ Bool onSet_WTH_DATA_YEAR(TimeInt year, SW_WEATHER_HIST *hist) {
   return has_weather;
 }
 
+
+/**
+  @brief Copy weather setup from `SOILWAT2` `SW_WEATHER`
+    to `rSOILWAT2` S4 `swWeather`
+
+  Called by `onGetInputDataFromFiles()`.
+*/
 SEXP onGet_SW_WTH() {
 	int i;
 	const int nitems = 6;
@@ -148,6 +162,13 @@ SEXP onGet_SW_WTH() {
 	return SW_WTH;
 }
 
+
+/**
+  @brief Copy weather setup from `rSOILWAT2` S4 `swWeather`
+    to `SOILWAT2` `SW_WEATHER`
+
+  Called by `rSW_CTL_obtain_inputs()` if `from_files` is `FALSE`.
+*/
 void onSet_SW_WTH_setup(SEXP SW_WTH) {
 	int i, tmp;
 	SW_WEATHER *w = &SW_Weather;
@@ -208,6 +229,13 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 	UNPROTECT(7);
 }
 
+
+/**
+  @brief Copy all weather data from `SOILWAT2` data structure
+    to `rSOILWAT2` list of `swWeatherData`
+
+  Called by `onGetInputDataFromFiles()`
+*/
 SEXP onGet_WTH_DATA(void) {
 	TimeInt year;
 	SEXP WTH_DATA, WTH_DATA_names;
@@ -234,6 +262,13 @@ SEXP onGet_WTH_DATA(void) {
 	return WTH_DATA;
 }
 
+
+/**
+  @brief Copy weather data for `year` from `SOILWAT2` data structure
+    to `rSOILWAT2` `swWeatherData`
+
+  Called by `onGet_WTH_DATA_YEAR()`
+*/
 SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	int i,days;
 	const int nitems = 4;
@@ -277,6 +312,15 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	return WeatherData;
 }
 
+
+/**
+  @brief Copy weather data for `year` from `rSOILWAT2` `p_WTH_DATA` to
+    `SOILWAT2` data structure
+
+  Called by `onSet_WTH_DATA_YEAR()`
+
+  @note This function is no longer used with `feature_read_weather`
+*/
 Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year, SW_WEATHER_HIST *hist) {
 	int lineno = 0, i, j, days;
 	Bool has_values = FALSE;
@@ -334,21 +378,31 @@ Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year, SW_WEATHER_HIST *hist) {
 	return has_values;
 }
 
+
+/**
+  @brief Copy all weather data from `rSOILWAT2` list of `swWeatherData` to
+    `SOILWAT2` `allHist`
+
+  @note However, currently, it creates `allHist` and
+    reads all data from files instead.
+
+  Called by `rSW_CTL_obtain_inputs()` if `from_files` is `FALSE`.
+*/
 void onSet_SW_WTH_read() {
 
     int year;
-    
+
     SW_WEATHER *w = &SW_Weather;
     SW_MODEL *m = &SW_Model;
-    
+
     w->n_years = m->endyr - m->startyr + 1;
-    
+
     w->allHist = (SW_WEATHER_HIST **)malloc(sizeof(SW_WEATHER_HIST *) * w->n_years);
-    
+
     for(year = 0; year < w->n_years; year++) {
         w->allHist[year] = (SW_WEATHER_HIST *)malloc(sizeof(SW_WEATHER_HIST));
     }
-    
+
     readAllWeather(w->allHist, w->yr.first, w->n_years);
 
 }
