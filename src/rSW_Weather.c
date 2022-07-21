@@ -236,7 +236,7 @@ SEXP onGet_WTH_DATA(void) {
   @brief Copy weather data for `year` from `SOILWAT2` data structure
     to `rSOILWAT2` `swWeatherData`
 
-  Called by `onGet_WTH_DATA_YEAR()`
+  Called by `onGet_WTH_DATA()`
 */
 SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	int i,days;
