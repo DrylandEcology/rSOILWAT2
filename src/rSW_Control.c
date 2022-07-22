@@ -63,8 +63,12 @@ void rSW_CTL_obtain_inputs(Bool from_files) {
 
   } else { //Use R data to set the data
     #ifdef RSWDEBUG
-    if (debug) swprintf("'rSW_CTL_obtain_inputs': Copy data from rSOILWAT2 S4 "
-      "'InputData' object to SOILWAT2 variables:");
+    if (debug) {
+      swprintf(
+        "\n'rSW_CTL_obtain_inputs': Copy data from rSOILWAT2 S4 "
+        "'InputData' object to SOILWAT2 variables:"
+      );
+    }
     #endif
 
     onSet_SW_F(GET_SLOT(InputData, install("files")));
