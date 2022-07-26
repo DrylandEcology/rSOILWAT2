@@ -52,7 +52,7 @@ static char *cSW_WTH_names[] = {
 /* --------------------------------------------------- */
 
 static SEXP onGet_WTH_DATA_YEAR(TimeInt year);
-static void rSW2_passAllWeather(
+static void rSW2_setAllWeather(
   SEXP listAllW,
   SW_WEATHER_HIST **allHist,
   int startYear,
@@ -98,7 +98,7 @@ SEXP onGet_SW_WTH_setup() {
 	PROTECT(pct_snowRunoff = NEW_NUMERIC(1));
 	REAL(pct_snowRunoff)[0] = w->pct_snowRunoff;
 	PROTECT(use_weathergenerator = NEW_LOGICAL(1));
-	LOGICAL_POINTER(use_weathergenerator)[0] = w->use_weathergenerator;
+	LOGICAL_POINTER(use_weathergenerator)[0] = w->generateWeatherMethod == 2;
 	PROTECT(use_weathergenerator_only = NEW_LOGICAL(1));
 	LOGICAL_POINTER(use_weathergenerator_only)[0] = w->use_weathergenerator_only;
 	PROTECT(yr_first = NEW_INTEGER(1));
@@ -163,11 +163,11 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 	w->pct_snowRunoff = *REAL(pct_snowRunoff);
 
 	PROTECT(use_weathergenerator = GET_SLOT(SW_WTH, install(cSW_WTH_names[3])));
-	w->use_weathergenerator = (Bool) *INTEGER(use_weathergenerator);
+	w->generateWeatherMethod = *INTEGER(use_weathergenerator) ? 2 : 0;
 	PROTECT(use_weathergenerator_only = GET_SLOT(SW_WTH, install(cSW_WTH_names[4])));
 	w->use_weathergenerator_only = (Bool) *INTEGER(use_weathergenerator_only);
 	if (w->use_weathergenerator_only) {
-		w->use_weathergenerator = TRUE;
+		w->generateWeatherMethod = 2;
 	}
 
 	PROTECT(yr_first = GET_SLOT(SW_WTH, install(cSW_WTH_names[5])));
@@ -190,13 +190,13 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 	w->yr.last = SW_Model.endyr;
 	w->yr.total = w->yr.last - w->yr.first + 1;
 
-	if (!w->use_weathergenerator && SW_Model.startyr < w->yr.first) {
+	if (SW_Weather.generateWeatherMethod != 2 && SW_Model.startyr < w->yr.first) {
 		LogError(
 			logfp,
 			LOGFATAL,
 			"%s : Model year (%d) starts before weather files (%d)"
-				" and use_weathergenerator=swFALSE.\nPlease synchronize the years"
-				" or set up the Markov weather files",
+				" and weather generator turned off.\n"
+				" Please synchronize the years or set up the weather generator files",
 			MyFileName, SW_Model.startyr, w->yr.first
 		);
 	}
@@ -326,7 +326,7 @@ void onSet_WTH_DATA(void) {
 
   // Equivalent to `readAllWeather()`:
   // fill `SOILWAT2` `allHist` with values from `rSOILWAT2`
-  rSW2_passAllWeather(
+  rSW2_setAllWeather(
     listAllWeather,
     SW_Weather.allHist,
     SW_Model.startyr,
@@ -334,13 +334,13 @@ void onSet_WTH_DATA(void) {
   );
 
 
-  // Impute missing values
-  imputeMissingWeather(
+  // Generate missing values
+  generateMissingWeather(
     SW_Weather.allHist,
     SW_Model.startyr,
     SW_Weather.n_years,
-    (Bool) SW_Weather.use_weathergenerator,
-    3 // nMaxLOCF
+    SW_Weather.generateWeatherMethod,
+    3 // optLOCF_nMax (TODO: make this user input)
   );
 
 
@@ -356,7 +356,9 @@ void onSet_WTH_DATA(void) {
 }
 
 
-static void rSW2_passAllWeather(
+// Equivalent to `readAllWeather()`:
+// fill `SOILWAT2` `allHist` with values from `rSOILWAT2`
+static void rSW2_setAllWeather(
   SEXP listAllW,
   SW_WEATHER_HIST **allHist,
   int startYear,
@@ -373,7 +375,7 @@ static void rSW2_passAllWeather(
   for (yearIndex = 0; yearIndex < n_years; yearIndex++) {
 
     if (SW_Weather.use_weathergenerator_only) {
-      // Set values to missing for call to `imputeMissingWeather()`
+      // Set values to missing for call to `generateMissingWeather()`
       _clear_hist_weather(allHist[yearIndex]);
 
     } else {
@@ -461,7 +463,7 @@ static void rSW2_passAllWeather(
         }
 
       } else {
-        // Set values to missing for call to `imputeMissingWeather()`
+        // Set values to missing for call to `generateMissingWeather()`
         _clear_hist_weather(allHist[yearIndex]);
       }
     }
