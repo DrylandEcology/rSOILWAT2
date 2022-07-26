@@ -815,6 +815,8 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 #' @inheritParams dbW_estimate_WGen_coefs
 #' @param years An integer vector. The calendar years for which to generate
 #'   daily weather. If \code{NULL}, then extracted from \code{weatherData}.
+#' @param digits An integer value. The returned values will be rounded to
+#'   the specified number of decimal places.
 #' @param wgen_coeffs A list with two named elements \var{mkv_doy} and
 #'   \var{mkv_woy}, i.e., the return value of
 #'   \code{\link{dbW_estimate_WGen_coefs}}. If \code{NULL}, then determined
@@ -878,12 +880,20 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 #' unlink(list.files(path), force = TRUE)
 #'
 #' @export
-dbW_generateWeather <- function(weatherData, years = NULL, wgen_coeffs = NULL,
-  imputation_type = "mean", imputation_span = 5L, seed = NULL) {
+dbW_generateWeather <- function(
+  weatherData,
+  years = NULL,
+  wgen_coeffs = NULL,
+  imputation_type = "mean",
+  imputation_span = 5L,
+  digits = 4L,
+  seed = NULL
+) {
 
   #--- Obtain missing/null arguments
   if (is.null(wgen_coeffs)) {
-    wgen_coeffs <- dbW_estimate_WGen_coefs(weatherData,
+    wgen_coeffs <- dbW_estimate_WGen_coefs(
+      weatherData,
       propagate_NAs = FALSE,
       imputation_type = imputation_type,
       imputation_span = imputation_span
@@ -891,23 +901,23 @@ dbW_generateWeather <- function(weatherData, years = NULL, wgen_coeffs = NULL,
   }
 
   if (is.data.frame(weatherData)) {
-    weatherData <- dbW_dataframe_to_weatherData(weatherData)
+    weatherData <- dbW_dataframe_to_weatherData(
+      weatherData,
+      round = digits + 2L
+    )
   }
 
   if (is.null(years)) {
     years <- get_years_from_weatherData(weatherData)
   }
 
-  #--- Put rSOILWAT2 run together to produce imputed daily weather
+  #--- Put rSOILWAT2 input object together to produce imputed daily weather
   sw_in <- rSOILWAT2::sw_exampleData
 
   # Set years
   swWeather_FirstYearHistorical(sw_in) <- min(years)
   swYears_EndYear(sw_in) <- max(years)
   swYears_StartYear(sw_in) <- min(years)
-
-  # Set weather data
-  set_WeatherHistory(sw_in) <- weatherData
 
   # Turn on weather generator
   swWeather_UseMarkov(sw_in) <- TRUE
@@ -916,23 +926,11 @@ dbW_generateWeather <- function(weatherData, years = NULL, wgen_coeffs = NULL,
   swMarkov_Prob(sw_in) <- wgen_coeffs[["mkv_doy"]]
   swMarkov_Conv(sw_in) <- wgen_coeffs[["mkv_woy"]]
 
-  # Turn off CO2-effects to avoid any issues
-  swCarbon_Use_Bio(sw_in) <- 0
-  swCarbon_Use_WUE(sw_in) <- 0
 
-  #--- Execute SOILWAT2 to generate weather
+  #--- Process weather in SOILWAT2
   set.seed(seed)
-  sw_out <- sw_exec(inputData = sw_in)
-
-
-  #--- Extract weather generator imputed daily weather
-  xdf <- slot(slot(sw_out, "TEMP"), "Day")[, c("Year", "Day", "max_C", "min_C")]
-  colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C")
-  xdf <- data.frame(
-    xdf,
-    PPT_cm = slot(slot(sw_out, "PRECIP"), "Day")[, "ppt"]
+  dbW_weatherData_round(
+    .Call(C_rSW2_processAllWeather, weatherData, sw_in),
+    digits = digits
   )
-
-  # Convert to rSOILWAT2 weather data format
-  dbW_dataframe_to_weatherData(xdf)
 }
