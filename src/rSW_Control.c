@@ -65,8 +65,8 @@ void rSW_CTL_obtain_inputs(Bool from_files) {
     #ifdef RSWDEBUG
     if (debug) {
       swprintf(
-        "\n'rSW_CTL_obtain_inputs': Copy data from rSOILWAT2 S4 "
-        "'InputData' object to SOILWAT2 variables:"
+        "\n'rSW_CTL_obtain_inputs()': "
+        "Copy data from rSOILWAT2 S4 'InputData' object to SOILWAT2 variables:"
       );
     }
     #endif
@@ -96,7 +96,7 @@ void rSW_CTL_obtain_inputs(Bool from_files) {
     ) {
       onSet_MKV(GET_SLOT(InputData, install("markov")));
       #ifdef RSWDEBUG
-      if (debug) swprintf(" > 'mwgen'");
+      if (debug) swprintf(" > 'weather generator'");
       #endif
     }
 

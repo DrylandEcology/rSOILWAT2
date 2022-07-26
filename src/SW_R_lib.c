@@ -117,6 +117,9 @@ void setupSOILWAT2(SEXP inputOptions) {
 }
 
 
+/**
+  @brief Read inputs from SOILWAT2 input files on disk using SOILWAT2 code
+*/
 SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   SEXP swInputData, SW_DataList, swLog, oRlogfile;
   #ifdef RSWDEBUG
@@ -149,8 +152,12 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   SW_CTL_init_run();
 
   #ifdef RSWDEBUG
-  if (debug) swprintf("onGetInputDataFromFiles: copy data from SOILWAT2 "
-    "variables to rSOILWAT2 S4 classes: ");
+  if (debug) {
+    swprintf(
+      "\n'onGetInputDataFromFiles()': "
+      "copy data from SOILWAT2 variables to rSOILWAT2 S4 classes: "
+    );
+  }
   #endif
 
   PROTECT(swInputData = MAKE_CLASS("swInputData"));
@@ -182,10 +189,20 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   if (debug) swprintf(" > 'climate'");
   #endif
 
-  if (LOGICAL(GET_SLOT(GET_SLOT(SW_DataList, install("weather")), install("use_weathergenerator")))[0]) {
+  if (
+    LOGICAL(
+      GET_SLOT(
+        GET_SLOT(
+          SW_DataList,
+          install("weather")
+        ),
+        install("use_weathergenerator")
+      )
+    )[0]
+  ) {
     SET_SLOT(SW_DataList, install("markov"), onGet_MKV());
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'mwgen'");
+    if (debug) swprintf(" > 'weather generator'");
     #endif
   }
 
@@ -240,6 +257,14 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   return SW_DataList;
 }
 
+
+/**
+  @brief Run a SOILWAT2 simulation
+
+  - Copies R inputs to C variables
+  - Executes a SOILWAT2 simulation
+  - Copies output to R output variable
+*/
 SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 	SEXP outputData, swLog, oRlogfile;
   #ifdef RSWDEBUG
