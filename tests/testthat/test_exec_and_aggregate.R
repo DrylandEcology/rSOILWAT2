@@ -279,7 +279,7 @@ for (it in tests) {
       #--- Test: Compare aggregated daily against yearly output
       # Exclusions:
       #   * "ESTABL" produces only yearly output
-      #   * SWP is not additive; SOILWAT uses pedotransfer functions
+      #   * SWP is not additive; SOILWAT uses soil water release curves
       if (all(unlist(has_times))) {
         if (fun_agg[k] %in% c("mean", "sum") &&
             !(vars[k] %in% c("SWPMATRIC", "ESTABL"))

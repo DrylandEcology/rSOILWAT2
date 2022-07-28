@@ -1,4 +1,4 @@
-context("Pedotransfer functions: SWP <-> VWC")
+context("Soil water release functions: SWP <-> VWC")
 
 # How the functions are applied in rSFSW2
 # section: aggregation
