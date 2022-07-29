@@ -1,3 +1,8 @@
+# rSOILWAT2 devel
+* `r-lib` Github Actions updated to `v2`;
+  separate workflows for `R-CMD-check` and `test-coverage` (#202).
+
+
 # rSOILWAT2 v5.3.1
 * This version fixes a bug in soil temperature output that was
   introduced with version `3.5.0` (#194).
