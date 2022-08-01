@@ -56,15 +56,15 @@ setClass(
     last_orig = "integer",
     outfile = "character"
   ),
-  # TODO: 31 should be rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]
+  # TODO: lengths must be rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]
   prototype = list(
-    mykey = rep(NA_integer_, 31),
-    myobj = rep(NA_integer_, 31),
-    sumtype = rep(NA_integer_, 31),
-    use = rep(NA, 31),
-    first_orig = rep(NA_integer_, 31),
-    last_orig = rep(NA_integer_, 31),
-    outfile = rep(NA_character_, 31)
+    mykey = rep(NA_integer_, 32L),
+    myobj = rep(NA_integer_, 32L),
+    sumtype = rep(NA_integer_, 32L),
+    use = rep(NA, 32L),
+    first_orig = rep(NA_integer_, 32L),
+    last_orig = rep(NA_integer_, 32L),
+    outfile = rep(NA_character_, 32L)
   )
 )
 
@@ -172,8 +172,11 @@ setClass(
   contains = "swOUT_key",
   prototype = list(
     outputSeparator = NA_character_,
-    # 999 must be rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]]
-    timeSteps = array(999, dim = c(31, 4))
+    # timeSteps:
+    #   * 999 must be rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]]
+    #   * nrows = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]
+    #   * ncols = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
+    timeSteps = array(999, dim = c(32L, 4L))
   )
 )
 
@@ -183,12 +186,12 @@ setValidity(
   function(object) {
     val <- TRUE
 
-    if (length(object@outputSeparator) != 1) {
+    if (length(object@outputSeparator) != 1L) {
       msg <- "@outputSeparator needs to be of length 1."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
-    if (length(dim(object@timeSteps)) != 2) {
+    if (length(dim(object@timeSteps)) != 2L) {
       msg <- "@timeSteps must be a 2-dimensional matrix"
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
