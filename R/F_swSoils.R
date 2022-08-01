@@ -62,7 +62,7 @@ setClass(
   prototype = list(
     Layers = array(
       NA_real_,
-      dim = c(0, 12),
+      dim = c(0L, 12L),
       dimnames = list(
         NULL,
         c(
@@ -75,10 +75,10 @@ setClass(
     ),
     SWRCp = array(
       NA_real_,
-      dim = c(0, 6),
+      dim = c(0L, 6L),
       dimnames = list(
         NULL,
-        paste0("Param", seq_len(6))
+        paste0("Param", seq_len(6L))
       )
     )
   )
@@ -91,14 +91,10 @@ setValidity(
     val <- TRUE
     tmpL <- dim(object@Layers)
     tmpp <- dim(object@SWRCp)
-    dtol1 <- 1 + tmpL[1] * rSW2_glovars[["tol"]]
+    dtol1 <- 1. + tmpL[1] * rSW2_glovars[["tol"]]
 
     #--- Check "Layers"
-    if (tmpL[1] == 0) {
-      msg <- "@Layers must have at least one row/soil layer."
-      val <- if (isTRUE(val)) msg else c(val, msg)
-    }
-    if (tmpL[2] != 12) {
+    if (tmpL[2] != 12L) {
       msg <- paste(
         "@Layers must have exactly 12 columns corresponding to",
         "depth_cm, bulkDensity_g/cm^3, gravel_content, EvapBareSoil_frac,",
@@ -108,46 +104,61 @@ setValidity(
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
+    depths <- object@Layers[, 1L]
+
     if (
-      !all(is.na(object@Layers[, 1])) && (
-        any(object@Layers[, 1] <= 0) ||
-          any(diff(object@Layers[, 1]) < rSW2_glovars[["tol"]])
+      !(
+        all(is.na(depths)) ||
+          all(depths > 0.) &&
+          !anyNA(
+            rSW2utils::check_monotonic_increase(
+              depths,
+              MARGIN = 2L,
+              strictly = TRUE
+            )
+          )
       )
     ) {
-      msg <- "@Layers[, 'depth_cm'] must be positive increasing depths."
+      msg <- paste(
+        "@Layers[, 'depth_cm'] must be positive, strictly increasing depths",
+        "(or all NA)."
+      )
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
-    if (
-      !all(is.na(object@Layers[, 3:11])) &&
-        (any(object@Layers[, 3:11] < 0) || any(object@Layers[, 3:11] > dtol1))
-    ) {
+
+    tmp <- object@Layers[, 3L:11L]
+    if (!(all(is.na(tmp)) || all(tmp >= 0., tmp <= dtol1))) {
       msg <- paste(
         "@Layers values of gravel, evco, trcos, sand, clay, and",
-        "impermeability must be between 0 and 1."
+        "impermeability must be between 0 and 1",
+        "(or all NA)."
       )
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
-    tmp <- colSums(object@Layers[, 4:8, drop = FALSE])
-    if (any(tmp > dtol1, na.rm = TRUE)) {
+    tmp <- colSums(object@Layers[, 4L:8L, drop = FALSE])
+    if (!(all(is.na(tmp)) || all(tmp <= dtol1, na.rm = TRUE))) {
       msg <- paste(
         "@Layers values of profile sums of evco and trcos must be",
-        "between 0 and 1."
+        "between 0 and 1",
+        "(or all NA)."
       )
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
     #--- Check "SWRCp"
     # `SW_SIT_init_run()` will call function to check validity of SWRCp values
-    if (tmpp[1] != tmpL[1]) {
+    if (tmpp[1L] != tmpL[1L]) {
       msg <- paste(
         "@SWRCp must have exactly the same number of soil layers (rows)",
         "as @Layers."
       )
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
-    if (tmpp[2] != rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SWRC_PARAM_NMAX"]]) {
+    if (
+      tmpp[2L] != rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SWRC_PARAM_NMAX"]]
+    ) {
       msg <- paste(
         "@SWRCp must have exactly",
         rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SWRC_PARAM_NMAX"]],

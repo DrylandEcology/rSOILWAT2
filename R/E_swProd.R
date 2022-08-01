@@ -81,7 +81,7 @@ setClass(
     Albedo = stats::setNames(rep(NA_real_, 5), lc_names),
     CanopyHeight = array(
       NA_real_,
-      dim = c(5, 4),
+      dim = c(5L, 4L),
       dimnames = list(
         c("xinflec", "yinflec", "range", "slope", "height_cm"),
         veg_names
@@ -89,7 +89,7 @@ setClass(
     ),
     VegetationInterceptionParameters = array(
       NA_real_,
-      dim = c(2, 4),
+      dim = c(2L, 4L),
       dimnames = list(
         c("kSmax", "kdead"),
         veg_names
@@ -97,17 +97,17 @@ setClass(
     ),
     LitterInterceptionParameters = array(
       NA_real_,
-      dim = c(1, 4),
+      dim = c(1L, 4L),
       dimnames = list(
         "kSmax",
         veg_names
       )
     ),
-    EsTpartitioning_param = stats::setNames(rep(NA_real_, 4), veg_names),
-    Es_param_limit = stats::setNames(rep(NA_real_, 4), veg_names),
+    EsTpartitioning_param = stats::setNames(rep(NA_real_, 4L), veg_names),
+    Es_param_limit = stats::setNames(rep(NA_real_, 4L), veg_names),
     Shade = array(
       NA_real_,
-      dim = c(6, 4),
+      dim = c(6L, 4L),
       dimnames = list(
         c(
           "ShadeScale", "ShadeMaximalDeadBiomass", "tanfuncXinflec",
@@ -116,19 +116,19 @@ setClass(
         veg_names
       )
     ),
-    HydraulicRedistribution_use = stats::setNames(rep(NA, 4), veg_names),
+    HydraulicRedistribution_use = stats::setNames(rep(NA, 4L), veg_names),
     HydraulicRedistribution = array(
       NA_real_,
-      dim = c(3, 4),
+      dim = c(3L, 4L),
       dimnames = list(
         c("MaxCondRoot", "SoilWaterPotential50", "ShapeCond"),
         veg_names
       )
     ),
-    CriticalSoilWaterPotential = stats::setNames(rep(NA_real_, 4), veg_names),
+    CriticalSoilWaterPotential = stats::setNames(rep(NA_real_, 4L), veg_names),
     CO2Coefficients = array(
       NA_real_,
-      dim = c(4, 4),
+      dim = c(4L, 4L),
       dimnames = list(
         veg_names,
         c("Biomass Coeff1", "Biomass Coeff2", "WUE Coeff1", "WUE Coeff2")
@@ -140,7 +140,7 @@ setClass(
         function(k) {
           array(
             NA_real_,
-            dim = c(12, 4),
+            dim = c(12L, 4L),
             dimnames = list(
               c(
                 "January", "February", "March", "April", "May", "June",
@@ -165,9 +165,9 @@ setValidity(
     nvegs <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["NVEGTYPES"]]
 
     if (
-      length(object@Composition) != 1 + nvegs ||
-        !all(is.na(object@Composition) | (object@Composition >= 0 &
-            object@Composition <= 1))
+      length(object@Composition) != 1L + nvegs ||
+        !all(is.na(object@Composition) | (object@Composition >= 0. &
+            object@Composition <= 1.))
     ) {
       msg <- paste(
         "@Composition must have 1 + NVEGTYPES values",
@@ -177,49 +177,46 @@ setValidity(
     }
 
     if (
-      length(object@Albedo) != 1 + nvegs ||
-        !all(is.na(object@Albedo) | (object@Albedo >= 0 & object@Albedo <= 1))
+      length(object@Albedo) != 1L + nvegs ||
+        !all(is.na(object@Albedo) | (object@Albedo >= 0. & object@Albedo <= 1.))
     ) {
       msg <- "@Albedo must have 1 + NVEGTYPES values between 0 and 1 or NA."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
     temp <- dim(object@CanopyHeight)
-    if (identical(temp, c(5, nvegs))) {
+    if (!identical(temp, c(5L, nvegs))) {
       msg <- "@CanopyHeight must be a 5xNVEGTYPES matrix."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
     temp <- dim(object@VegetationInterceptionParameters)
-    if (identical(temp, c(2, nvegs))) {
+    if (!identical(temp, c(2L, nvegs))) {
       msg <- "@VegetationInterceptionParameters must be a 4xNVEGTYPES matrix."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
     temp <- dim(object@LitterInterceptionParameters)
-    if (identical(temp, c(1, nvegs))) {
+    if (!identical(temp, c(1L, nvegs))) {
       msg <- "@LitterInterceptionParameters must be a 1xNVEGTYPES matrix."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
-    if (
-      length(object@EsTpartitioning_param) != nvegs ||
-      !all(is.finite(object@EsTpartitioning_param))
-    ) {
-      msg <- "@EsTpartitioning_param must have NVEGTYPES finite values."
+    if (length(object@EsTpartitioning_param) != nvegs) {
+      msg <- "@EsTpartitioning_param must have NVEGTYPES values."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
     if (
       length(object@Es_param_limit) != nvegs ||
-        !all(object@Es_param_limit >= 0)
+        !all(is.na(object@Es_param_limit) | object@Es_param_limit >= 0.)
     ) {
       msg <- "@Es_param_limit must have NVEGTYPES non-negative values."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
     temp <- dim(object@Shade)
-    if (identical(temp, c(6, nvegs))) {
+    if (!identical(temp, c(6L, nvegs))) {
       msg <- "@Shade must be a 6xNVEGTYPES matrix."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
@@ -230,27 +227,36 @@ setValidity(
     }
 
     temp <- dim(object@HydraulicRedistribution)
-    if (identical(temp, c(3, nvegs))) {
+    if (!identical(temp, c(3L, nvegs))) {
       msg <- "@HydraulicRedistribution must be a 3xNVEGTYPES matrix."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
     if (length(object@CriticalSoilWaterPotential) != nvegs ||
-        !all(object@CriticalSoilWaterPotential < 0)) {
+        !all(
+          is.na(object@CriticalSoilWaterPotential) |
+            object@CriticalSoilWaterPotential < 0.
+        )
+    ) {
       msg <- "@CriticalSoilWaterPotential must have NVEGTYPES negative values."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
     temp <- dim(object@CO2Coefficients)
-    if (identical(temp, c(4, nvegs))) {
+    if (!identical(temp, c(4L, nvegs))) {
       msg <- "@CO2Coefficients must be a 4xNVEGTYPES matrix."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
     if (
       length(object@MonthlyVeg) != nvegs ||
-      any(sapply(object@MonthlyVeg,
-          function(x) !identical(dim(x), c(12L, 4L))))
+      !all(
+        vapply(
+          object@MonthlyVeg,
+          function(x) identical(dim(x), c(12L, 4L)),
+          FUN.VALUE = NA
+        )
+      )
     ) {
       msg <- paste(
         "@MonthlyVeg must be a list with NVEGTYPES elements of a",

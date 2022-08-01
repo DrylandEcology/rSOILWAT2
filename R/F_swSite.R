@@ -80,25 +80,25 @@ setClass(
       DailyRunon = NA_real_
     ),
     SnowSimulationParameters = stats::setNames(
-      rep(NA_real_, 5),
+      rep(NA_real_, 5L),
       c("TminAccu2", "TmaxCrit", "lambdaSnow", "RmeltMin", "RmeltMax")
     ),
     DrainageCoefficient = c("SlowDrainCoefficientPerYear_cm/dy" = NA_real_),
     EvaporationCoefficients = stats::setNames(
-      rep(NA_real_, 4),
+      rep(NA_real_, 4L),
       c("RateShift", "RateSlope", "InflectionPoint", "Range")
     ),
     TranspirationCoefficients = stats::setNames(
-      rep(NA_real_, 4),
+      rep(NA_real_, 4L),
       c("RateShift", "RateShape", "InflectionPoint", "Range")
     ),
     IntrinsicSiteParams = stats::setNames(
-      rep(NA_real_, 5),
+      rep(NA_real_, 5L),
       c("Longitude", "Latitude", "Altitude", "Slope", "Aspect")
     ),
     SoilTemperatureFlag = NA,
     SoilTemperatureConstants = stats::setNames(
-      rep(NA_real_, 10),
+      rep(NA_real_, 10L),
       c(
         "BiomassLimiter_g/m^2", "T1constant_a", "T1constant_b", "T1constant_c",
         "cs_constant_SoilThermCondct", "cs_constant",
@@ -107,8 +107,8 @@ setClass(
       )
     ),
     TranspirationRegions = array(
-      NA_real_,
-      dim = c(3, 2),
+      NA_integer_,
+      dim = c(3L, 2L),
       dimnames = list(NULL, c("ndx", "layer"))
     ),
     swrc_flags = c(swrc_name = NA_character_, pdf_name = NA_character_)
@@ -120,72 +120,49 @@ setValidity(
   function(object) {
     val <- TRUE
 
-    if (length(object@SWClimits) != 3) {
+    if (length(object@SWClimits) != 3L) {
       msg <- "@SWClimits length != 3."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
-    if (length(object@ModelFlags) != 2) {
+    if (length(object@ModelFlags) != 2L) {
       msg <- "@ModelFlags length != 2."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
-    if (length(object@ModelCoefficients) != 3) {
+    if (length(object@ModelCoefficients) != 3L) {
       msg <- "@ModelCoefficients length != 3."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
-    x <- slot(object, "ModelCoefficients")[1]
-    if (!is.na(x) && x < 0) {
-      msg <- paste("@ModelCoefficients:PETmultiplier =", x,
-        "must be a non-negative number")
-      val <- if (isTRUE(val)) msg else c(val, msg)
-    }
-    x <- slot(object, "ModelCoefficients")[2]
-    if (!is.na(x) && !(x >= 0 && x <= 1)) {
-      msg <- paste("@ModelCoefficients:DailyRunoff =", x,
-        "must be a number between 0 and 1",
-        "(inclusive)")
-      val <- if (isTRUE(val)) msg else c(val, msg)
-    }
-    x <- slot(object, "ModelCoefficients")[3]
-    if (!is.na(x) && x < 0) {
-      msg <- paste("@ModelCoefficients:DailyRunon =", x,
-        "must be a non-negative number")
-      val <- if (isTRUE(val)) msg else c(val, msg)
-    }
 
-    if (length(object@SnowSimulationParameters) != 5) {
+    if (length(object@SnowSimulationParameters) != 5L) {
       msg <- "@SnowSimulationParameters length != 5."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
-    if (length(object@DrainageCoefficient) != 1) {
+    if (length(object@DrainageCoefficient) != 1L) {
       msg <- "@DrainageCoefficient length != 1."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
-    if (length(object@EvaporationCoefficients) != 4) {
+    if (length(object@EvaporationCoefficients) != 4L) {
       msg <- "@EvaporationCoefficients length != 4."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
-    if (length(object@TranspirationCoefficients) != 4) {
+    if (length(object@TranspirationCoefficients) != 4L) {
       msg <- "@TranspirationCoefficients length != 4."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
-    if (length(object@IntrinsicSiteParams) != 5) {
+    if (length(object@IntrinsicSiteParams) != 5L) {
       msg <- "@IntrinsicSiteParams length != 5."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
-    if (length(object@SoilTemperatureFlag) != 1) {
+    if (length(object@SoilTemperatureFlag) != 1L) {
       msg <- "@SoilTemperatureFlag length != 1."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
-    if (length(object@SoilTemperatureConstants) != 10) {
+    if (length(object@SoilTemperatureConstants) != 10L) {
       msg <- "@SoilTemperatureConstants length != 10."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
-    if (typeof(object@TranspirationRegions) != "integer") {
-      msg <- "@TranspirationRegions is of integer type."
-      val <- if (isTRUE(val)) msg else c(val, msg)
-    }
-    if (NCOL(object@TranspirationRegions) != 2) {
+    if (NCOL(object@TranspirationRegions) != 2L) {
       msg <- "@TranspirationRegions columns != 2."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
@@ -194,7 +171,7 @@ setValidity(
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
-    if (length(object@swrc_flags) != 2) {
+    if (length(object@swrc_flags) != 2L) {
       msg <- "@swrc_flags length != 2."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }

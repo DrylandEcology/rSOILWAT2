@@ -67,9 +67,9 @@ setClass(
   prototype = list(
     StartYear = NA_integer_,
     EndYear = NA_integer_,
-    FDOFY = NA_integer_,
-    EDOEY = NA_integer_,
-    isNorth = NA
+    FDOFY = 1L,
+    EDOEY = 365L,
+    isNorth = TRUE
   )
 )
 
@@ -108,16 +108,16 @@ setValidity(
     val <- TRUE
 
     if (
-      length(object@StartYear) != 1 ||
-      (!anyNA(object@StartYear) && isTRUE(object@StartYear < 0))
+      length(object@StartYear) != 1L ||
+      (!anyNA(object@StartYear) && isTRUE(object@StartYear < 0L))
     ) {
       msg <- "There must be exactly one NA or non-negative @StartYear value."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
     if (
-      length(object@EndYear) != 1 ||
-        (!anyNA(object@EndYear) && isTRUE(object@EndYear < 0)) ||
+      length(object@EndYear) != 1L ||
+        (!anyNA(object@EndYear) && isTRUE(object@EndYear < 0L)) ||
         (!anyNA(object@EndYear) && !anyNA(object@StartYear) &&
             isTRUE(object@EndYear < object@StartYear))
     ) {
@@ -129,10 +129,10 @@ setValidity(
     }
 
     if (
-      length(object@FDOFY) != 1 ||
+      length(object@FDOFY) != 1L ||
       !is.finite(object@FDOFY) ||
-      object@FDOFY < 0 ||
-      object@FDOFY > 365
+      object@FDOFY < 0L ||
+      object@FDOFY > 365L
     ) {
       msg <- paste(
         "There must be exactly one non-negative finite @FDOFY value",
@@ -142,10 +142,10 @@ setValidity(
     }
 
     if (
-      length(object@EDOEY) != 1 ||
+      length(object@EDOEY) != 1L ||
       !is.finite(object@EDOEY) ||
-      object@EDOEY < 0 ||
-      object@EDOEY > 366 ||
+      object@EDOEY < 0L ||
+      object@EDOEY > 366L ||
       object@EDOEY < object@FDOFY
     ) {
       msg <- paste(
@@ -155,7 +155,7 @@ setValidity(
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
-    if (length(object@isNorth) != 1 || is.na(object@isNorth)) {
+    if (length(object@isNorth) != 1L || is.na(object@isNorth)) {
       msg <- "There must be exactly one non-NA logical @isNorth value."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }

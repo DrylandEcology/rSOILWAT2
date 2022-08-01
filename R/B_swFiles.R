@@ -99,7 +99,7 @@ setValidity(
   function(object) {
     val <- TRUE
 
-    if (length(object@ProjDir) != 1) {
+    if (length(object@ProjDir) != 1L) {
       msg <- "There must be exactly one @ProjDir value."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
@@ -112,12 +112,12 @@ setValidity(
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
-    if (length(object@WeatherPrefix) != 1 || nchar(object@WeatherPrefix) == 0) {
-      msg <- "There must be exactly one non-empty @WeatherPrefix value."
+    if (length(object@WeatherPrefix) != 1L) {
+      msg <- "There must be exactly one @WeatherPrefix value."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
-    if (length(object@OutputPrefix) != 1) {
+    if (length(object@OutputPrefix) != 1L) {
       msg <- "There must be exactly one @OutputPrefix value."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
