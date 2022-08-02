@@ -124,13 +124,13 @@ Conversion between soil water content and soil water potential
 }
 \section{Functions}{
 \itemize{
-\item \code{swrc_swp_to_vwc}: Convenience wrapper
+\item \code{swrc_swp_to_vwc()}: Convenience wrapper
 to convert from `SWP` to `VWC` with selected `SWRC`
 
-\item \code{swrc_vwc_to_swp}: Convenience wrapper
+\item \code{swrc_vwc_to_swp()}: Convenience wrapper
 to convert from `VWC` to `SWP` with selected `SWRC`
-}}
 
+}}
 \section{Details}{
 
 \code{\link[=swrc_names]{swrc_names()}} lists implemented \code{SWRCs};
