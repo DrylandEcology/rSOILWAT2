@@ -1483,6 +1483,16 @@ setGeneric(
   function(object) standardGeneric("swSite_SoilTemperatureConsts")
 )
 
+#' \code{swSite_SoilTemperatureFlag}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_SoilDensityInputType",
+  function(object) standardGeneric("swSite_SoilDensityInputType")
+)
+
+
 #' \code{swSite_TranspirationRegions}
 #' @param object An object of class \code{\linkS4class{swSite}} or
 #'   \code{\linkS4class{swInputData}}.
@@ -1606,6 +1616,16 @@ setGeneric(
 setGeneric(
   "swSite_SoilTemperatureConsts<-",
   function(object, value) standardGeneric("swSite_SoilTemperatureConsts<-")
+)
+
+#' \code{swSite_SoilDensityInputType<-}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_SoilDensityInputType<-",
+  function(object, value) standardGeneric("swSite_SoilDensityInputType<-")
 )
 
 #' \code{swSite_TranspirationRegions<-}
