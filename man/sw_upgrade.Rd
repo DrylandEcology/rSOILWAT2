@@ -26,7 +26,7 @@ sw_upgrade(object, verbose = FALSE)
 \S4method{sw_upgrade}{swInputData}(object, verbose = FALSE)
 }
 \arguments{
-\item{x}{An object of a "sw" class.}
+\item{x}{An object of a \code{rSOILWAT2} class.}
 }
 \value{
 The upgraded \code{x}, if needed, to match the current version
@@ -42,25 +42,25 @@ List of changes:
 \itemize{
 \item Changes with \code{v6.0.0}:
 \itemize{
-\item class \code{\linkS4class{swSite}}: new slot "swrc_flags"
-\item class \code{\linkS4class{swSoils}}: new slot "SWRCp"
+\item class \code{\linkS4class{swSite}}: new slot \code{"swrc_flags"}
+\item class \code{\linkS4class{swSoils}}: new slot \code{"SWRCp"}
 \item class \code{\linkS4class{swFiles}}:
-SWRC parameter input file added as file 6 for a new total of 23
+\code{SWRC} parameter input file added as file 6 for a new total of 23
 }
 \item Changes with \code{v5.2.0}:
 \itemize{
 \item class \code{\linkS4class{swOUT}}:
-"FROZEN" added as \code{outkey} 28 for a new total of 32
+\code{"FROZEN"} added as \code{outkey} 28 for a new total of 32
 }
 \item Changes with \code{v3.1.0}:
 \itemize{
 \item class \code{\linkS4class{swOUT}}:
-"BIOMASS" added as \code{outkey} 31 for a new total of 31
+\code{"BIOMASS"} added as \code{outkey} 31 for a new total of 31
 }
 \item Changes with \code{v2.3.0}:
 \itemize{
 \item class \code{\linkS4class{swOUT}}:
-"SWA" added as \code{outkey} 8 for a new total of 30
+\code{"SWA"} added as \code{outkey} 8 for a new total of 30
 }
 }
 }

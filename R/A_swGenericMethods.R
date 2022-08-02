@@ -192,26 +192,26 @@ format_timestamp <- function(object) {
 #' Missing slots and elements are added and
 #' take the new default values from `SOILWAT2`.
 #'
-#' @param x An object of a "sw" class.
+#' @param x An object of a `rSOILWAT2` class.
 #' @return The upgraded `x`, if needed, to match the current version
 #'   with missing slots and elements filled with default values.
 #'
 #' @section Details:
 #' List of changes:
 #'   * Changes with `v6.0.0`:
-#'       * class [`swSite-class`]: new slot "swrc_flags"
-#'       * class [`swSoils-class`]: new slot "SWRCp"
+#'       * class [`swSite-class`]: new slot `"swrc_flags"`
+#'       * class [`swSoils-class`]: new slot `"SWRCp"`
 #'       * class [`swFiles-class`]:
-#'         SWRC parameter input file added as file 6 for a new total of 23
+#'         `SWRC` parameter input file added as file 6 for a new total of 23
 #'   * Changes with `v5.2.0`:
 #'       * class [`swOUT-class`]:
-#'         "FROZEN" added as `outkey` 28 for a new total of 32
+#'         `"FROZEN"` added as `outkey` 28 for a new total of 32
 #'   * Changes with `v3.1.0`:
 #'       * class [`swOUT-class`]:
-#'         "BIOMASS" added as `outkey` 31 for a new total of 31
+#'         `"BIOMASS"` added as `outkey` 31 for a new total of 31
 #'   * Changes with `v2.3.0`:
 #'       * class [`swOUT-class`]:
-#'         "SWA" added as `outkey` 8 for a new total of 30
+#'         `"SWA"` added as `outkey` 8 for a new total of 30
 #'
 #' @examples
 #'   x <- sw_upgrade(rSOILWAT2::sw_exampleData, verbose = TRUE)

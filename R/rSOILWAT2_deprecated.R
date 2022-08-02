@@ -88,7 +88,15 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 	.Deprecated("dbW_addWeatherData")
 	stopifnot(dbW_IsValid())
 
-	if( (is.null(weatherFolderPath) | ifelse(!is.null(weatherFolderPath), (weatherFolderPath == "" | !file.exists(weatherFolderPath)), FALSE)) & (is.null(weatherData) | !is.list(weatherData) | class(weatherData[[1]]) != "swWeatherData") ) stop("addWeatherDataToDataBase does not have folder path or weatherData to insert")
+  if (
+    (
+      is.null(weatherFolderPath) |
+      ifelse(!is.null(weatherFolderPath), (weatherFolderPath == "" | !file.exists(weatherFolderPath)), FALSE)
+    ) &
+    (is.null(weatherData) | !is.list(weatherData) | !inherits(weatherData[[1]], "swWeatherData"))
+  ) {
+    stop("addWeatherDataToDataBase does not have folder path or weatherData to insert")
+  }
 	if( (is.null(Site_id) & is.null(lat) & is.null(long) & is.null(weatherFolderPath) & (is.null(label))) | ((!is.null(Site_id) & !is.numeric(Site_id)) & (!is.null(lat) & !is.numeric(lat)) & (!is.null(long) & !is.numeric(long))) ) stop("addWeatherDataToDataBase not enough info to create Site in Sites table.")
 
 	Site_id <- dbW_addSite(
