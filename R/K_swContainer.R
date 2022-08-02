@@ -252,6 +252,13 @@ setMethod(
 
 
       if (length(msg_upgrades) > 1) {
+        if (verbose) {
+          message(
+            "Upgrading object of class `swInputData`: ",
+            toString(shQuote(msg_upgrades))
+          )
+        }
+
         #--- Update version/timestamp
         object@version <- rSW2_version()
         object@timestamp <- rSW2_timestamp()
@@ -260,19 +267,6 @@ setMethod(
         validObject(object)
       }
     }
-
-
-    if (verbose) {
-      if (length(msg_upgrades) > 1) {
-        message(
-          "Upgrading object of class `swInputData`: ",
-          toString(shQuote(msg_upgrades))
-        )
-      } else {
-        message("Object of class `swInputData` was already up-to-date.")
-      }
-    }
-
 
     object
   }
