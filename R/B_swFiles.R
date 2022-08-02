@@ -128,6 +128,74 @@ setValidity(
 
 
 
+#' @rdname sw_upgrade
+#' @export
+setMethod(
+  "sw_upgrade",
+  signature = "swFiles",
+  definition = function(object, verbose = FALSE) {
+    #--- Compare available and expected number of files
+    n_exp <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_NFILES"]]
+    n_has <- length(object@InFiles)
+
+
+    #--- Identify upgrade(s)
+    # Maintenance:
+    #   update `do_upgrade` when `n_exp` changes or new upgrades required!
+    do_upgrade <- c(
+      from_v230 = n_has == 22L && n_exp %in% 23L
+    )
+
+    do_upgrade <- do_upgrade[do_upgrade]
+
+    if (any(do_upgrade)) {
+      target <- swFiles()
+      stopifnot(nrow(target) == n_exp)
+
+
+      #--- Loop over upgrades sequentially
+      for (k in seq_along(do_upgrade)) {
+
+        if (verbose) {
+          message(
+            "Upgrading object of class `swFiles`: ",
+            shQuote(names(do_upgrade)[k])
+          )
+        }
+
+        # Maintenance: update `switch` when `n_exp` changes!
+        id_new <- switch(
+          EXPR = names(do_upgrade)[k],
+          from_v230 = 6L,
+          stop(
+            "Upgrade ", shQuote(names(do_upgrade)[k]),
+            " is not implemented for class `swFiles`."
+          )
+        )
+
+
+        #--- Upgrade `InFiles`
+        object@InFiles <- c(
+          if (id_new > 1L) {
+            object@InFiles[1L:(id_new - 1L)]
+          },
+          target@InFiles[id_new],
+          if (id_new <= n_has) {
+            object@InFiles[id_new:n_has]
+          }
+        )
+      }
+
+
+      #--- Check validity and return
+      validObject(object)
+    }
+
+    object
+  }
+)
+
+
 #' @rdname swFiles-class
 #' @export
 setMethod(
@@ -340,6 +408,7 @@ setReplaceMethod(
     object
   }
 )
+
 
 set_InFiles <- function(object, eID, value) {
   id <- 1 + rSW2_glovars[["kSOILWAT2"]][["InFiles"]][[eID]]

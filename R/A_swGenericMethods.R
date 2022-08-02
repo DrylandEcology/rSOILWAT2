@@ -185,6 +185,55 @@ format_timestamp <- function(object) {
 }
 
 
+#------ Upgrade sw objects to newer rSOILWAT2 versions ------
+
+#' Upgrade a `rSOILWAT2`-classed object from an older package version
+#'
+#' Missing slots and elements are added and
+#' take the new default values from `SOILWAT2`.
+#'
+#' @param x An object of a "sw" class.
+#' @return The upgraded `x`, if needed, to match the current version
+#'   with missing slots and elements filled with default values.
+#'
+#' @section Details:
+#' List of changes:
+#'   * Changes with `v6.0.0`:
+#'       * class [`swSite-class`]: new slot "swrc_flags"
+#'       * class [`swSoils-class`]: new slot "SWRCp"
+#'       * class [`swFiles-class`]:
+#'         SWRC parameter input file added as file 6 for a new total of 23
+#'   * Changes with `v5.2.0`:
+#'       * class [`swOUT-class`]:
+#'         "FROZEN" added as `outkey` 28 for a new total of 32
+#'   * Changes with `v3.1.0`:
+#'       * class [`swOUT-class`]:
+#'         "BIOMASS" added as `outkey` 31 for a new total of 31
+#'   * Changes with `v2.3.0`:
+#'       * class [`swOUT-class`]:
+#'         "SWA" added as `outkey` 8 for a new total of 30
+#'
+#' @examples
+#'   x <- sw_upgrade(rSOILWAT2::sw_exampleData, verbose = TRUE)
+#'
+#' @md
+#' @export
+setGeneric(
+  "sw_upgrade",
+  function(object, verbose = FALSE) standardGeneric("sw_upgrade")
+)
+
+#' @rdname sw_upgrade
+setMethod(
+  "sw_upgrade",
+  signature = "ANY",
+  definition = function(object, verbose = FALSE) {
+    object
+  }
+)
+
+
+
 #########FILES##########
 #' \code{get_swFiles}
 #' @param object An object of class \code{\linkS4class{swFiles}} or

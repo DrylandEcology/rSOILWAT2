@@ -15,6 +15,11 @@
   Small deviations arise due to a fix in the handling of soil moisture values
   between field capacity and saturation.
 
+## New features
+* New method `sw_upgrade()` upgrades objects with
+  outdated `rSOILWAT2` S4 classes to the current version.
+
+
 
 # rSOILWAT2 v5.3.1
 * This version fixes a bug in soil temperature output that was

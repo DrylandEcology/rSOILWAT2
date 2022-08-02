@@ -255,7 +255,7 @@ sw_exec <- function(
 
 
   # Upgrade essential slots if input object is from an older version
-  inputData <- upgrade_swInputData(inputData)
+  inputData <- sw_upgrade(inputData, verbose = !quiet)
 
 
   if (!check_version(inputData, level = "minor")) {

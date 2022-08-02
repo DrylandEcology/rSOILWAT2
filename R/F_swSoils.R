@@ -216,6 +216,27 @@ swSoils <- function(...) {
 }
 
 
+
+#' @rdname sw_upgrade
+#' @export
+setMethod(
+  "sw_upgrade",
+  signature = "swSoils",
+  definition = function(object, verbose = FALSE) {
+    #--- Make sure we have SWRC parameters
+    tmp <- try(object@SWRCp, silent = TRUE)
+    if (inherits(tmp, "try-error")) {
+      if (verbose) {
+        message("Upgrading object of class `swSoils`.")
+      }
+      object <- suppressWarnings(swSoils(object))
+    }
+
+    object
+  }
+)
+
+
 #' @rdname swSoils-class
 #' @export
 setMethod("get_swSoils", "swSoils", function(object) object)

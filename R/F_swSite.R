@@ -226,6 +226,26 @@ swSite <- function(...) {
 
 
 
+#' @rdname sw_upgrade
+#' @export
+setMethod(
+  "sw_upgrade",
+  signature = "swSite",
+  definition = function(object, verbose = FALSE) {
+    #--- Make sure we have SWRC/PDF flags
+    tmp <- try(object@swrc_flags, silent = TRUE)
+    if (inherits(tmp, "try-error")) {
+      if (verbose) {
+        message("Upgrading object of class `swSite`.")
+      }
+      object <- suppressWarnings(swSite(object))
+    }
+
+    object
+  }
+)
+
+
 #' @rdname swSite-class
 #' @export
 setMethod("get_swSite", "swSite", function(object) object)

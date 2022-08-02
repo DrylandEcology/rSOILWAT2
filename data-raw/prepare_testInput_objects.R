@@ -188,3 +188,9 @@ print(paste(
   shQuote(dir_backup),
   "before pushing to repository if script worked well."
 ))
+
+print(paste(
+  "NOTE: Copy",
+  "'Ex1_input.rds' to 'versioned_swInputData/' as 'Ex1_input_vX.Y.Z.rds'",
+  "if significant changes to any class occurred."
+))

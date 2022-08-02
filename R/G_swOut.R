@@ -265,6 +265,114 @@ swOUT <- function(...) {
 }
 
 
+#' @rdname sw_upgrade
+#' @export
+setMethod(
+  "sw_upgrade",
+  signature = "swOUT",
+  definition = function(object, verbose = FALSE) {
+    #--- Compare available and expected number of outkeys
+    n_exp <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]
+    n_has <- nrow(object@timeSteps)
+
+
+    #--- Identify upgrade(s)
+    # Maintenance:
+    #   update `do_upgrade` when `n_exp` changes or new upgrades required!
+    do_upgrade <- c(
+      from_v230 = n_has == 30L && n_exp %in% 31L:32L,
+      from_v310 = n_has == 31L && n_exp %in% 32L
+    )
+
+    do_upgrade <- do_upgrade[do_upgrade]
+
+    if (any(do_upgrade)) {
+      target <- swOUT()
+      stopifnot(nrow(target) == n_exp)
+
+
+      #--- Loop over upgrades sequentially
+      for (k in seq_along(do_upgrade)) {
+
+        if (verbose) {
+          message(
+            "Upgrading object of class `swOUT`: ",
+            shQuote(names(do_upgrade)[k])
+          )
+        }
+
+        # Maintenance: update `switch` when `n_exp` changes!
+        id_new <- switch(
+          EXPR = names(do_upgrade)[k],
+          from_v230 = n_exp,
+          from_v310 = 28L,
+          stop(
+            "Upgrade ", shQuote(names(do_upgrade)[k]),
+            " is not implemented for class `swOUT`."
+          )
+        )
+
+
+        #--- Upgrade `timeSteps`
+        tmp <- object@timeSteps
+
+        # Grab available values or default
+        has_missing <- apply(
+          tmp,
+          MARGIN = 1L,
+          function(object) {
+            any(object == rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]])
+          }
+        )
+        id <- which(!has_missing)
+        tmp_new <- if (length(id) > 0) {
+          tmp[id[[1L]], , drop = FALSE]
+        } else {
+          target@timeSteps[id_new, , drop = FALSE]
+        }
+
+        object@timeSteps <- rbind(
+          if (id_new > 1L) {
+            tmp[1L:(id_new - 1L), , drop = FALSE]
+          },
+          tmp_new,
+          if (id_new <= n_has) {
+            tmp[id_new:n_has, , drop = FALSE]
+          }
+        )
+
+        #--- Upgrade `swOUT_key`s
+        object@mykey <- target@mykey
+
+        list_keys <- c(
+          "myobj", "sumtype", "use", "first_orig", "last_orig", "outfile"
+        )
+
+        for (sn in list_keys) {
+          tmp <- slot(object, sn)
+          slot(object, sn) <- c(
+            if (id_new > 1L) {
+              tmp[1L:(id_new - 1L)]
+            },
+            slot(target, sn)[id_new],
+            if (id_new <= n_has) {
+              tmp[id_new:n_has]
+            }
+          )
+        }
+
+      }
+
+
+      #--- Check validity and return
+      validObject(object)
+    }
+
+    object
+  }
+)
+
+
 #' @rdname swOUT-class
 #' @export
 setMethod("get_swOUT", "swOUT", function(object) object)
