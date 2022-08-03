@@ -3,7 +3,8 @@
   separate workflows for `R-CMD-check` and `test-coverage` (#202).
 * Class `swSite` gains new slot `"SoilDensityInputType"` and associated
   methods `swSite_SoilDensityInputType()` (#209).
-  This encodes if soil density inputs represent matric soil or bulk soil values.
+  This encodes whether soil density inputs represent
+  matric soil or bulk soil values.
 
 
 # rSOILWAT2 v5.3.1
