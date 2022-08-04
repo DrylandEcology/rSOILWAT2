@@ -1025,15 +1025,15 @@ check_swrcp <- function(swrc_name, swrcp) {
 
 #------ Soil Water Retention Curves ------
 
-#' Conversion between soil water content and soil water potential
+#' Conversion between bulk soil water content and soil water potential
 #'
 #' @inheritParams SWRCs
 #' @param direction A character string. Indicates the direction of
 #'   soil water conversion.
 #' @param x A numeric value, vector, or matrix.
 #'   The soil water values to be converted,
-#'   either soil water potential (units `[MPa]`) or
-#'   volumetric water content (units `[cm/cm]`).
+#'   either soil water potential (units `[MPa]`) of the soil matric component or
+#'   bulk volumetric water content (units `[cm/cm]`).
 #' @param outer_if_equalsize A logical value.
 #'   Relevant only if `x` of length `l` and soils of length `d` are equal.
 #'   If `TRUE`, then the returned object has a size of `l x d` = `l x l`
@@ -1083,6 +1083,12 @@ check_swrcp <- function(swrc_name, swrcp) {
 #' @section Details:
 #' If `swrc` contains element `swrcp` with one set of `SWRC` parameters,
 #' i.e., one row, then the parameter set is repeated for each value of `x`.
+#'
+#' @section Details:
+#' If `vwc` inputs represent the matric component
+#' (instead of expected bulk values), then set `fcoarse` to 0.
+#' This works, however, only if `swrcp` are provided or `fcoarse` is not
+#' utilized by the requested `pdf`.
 #'
 #'
 #' @seealso
@@ -1489,11 +1495,12 @@ swrc_conversion_1d <- function(direction, x, soils, swrc, verbose) {
 
 
 #' @describeIn swrc_conversion Convenience wrapper
-#'   to convert from `SWP` to `VWC` with selected `SWRC`
+#'   to convert from `SWP` to bulk `VWC` with selected `SWRC`
 #'
 #' @param swp_MPa A numeric object. The soil water potential values
-#'   (units `[MPa]`) to be converted to
-#'   volumetric water content (relative to the whole soil; units `[cm/cm]`).
+#'   (units `[MPa]`) of the soil matric component to be converted to
+#'   bulk volumetric water content
+#'   (i.e., relative to the whole soil; units `[cm/cm]`).
 #'
 #' @export
 swrc_swp_to_vwc <- function(
@@ -1524,11 +1531,12 @@ swrc_swp_to_vwc <- function(
 
 
 #' @describeIn swrc_conversion Convenience wrapper
-#'   to convert from `VWC` to `SWP` with selected `SWRC`
+#'   to convert from bulk `VWC` to matric `SWP` with selected `SWRC`
 #'
 #' @param vwcBulk A numeric object. The volumetric water content values
 #'   (relative to the whole soil; units `[cm/cm]`)
-#'   to be converted to soil water potential values (units `[MPa]`).
+#'   to be converted to soil water potential (units `[MPa]`)
+#'   of the soil matric component.
 #'
 #' @export
 swrc_vwc_to_swp <- function(

@@ -4,7 +4,7 @@
 \alias{swrc_conversion}
 \alias{swrc_swp_to_vwc}
 \alias{swrc_vwc_to_swp}
-\title{Conversion between soil water content and soil water potential}
+\title{Conversion between bulk soil water content and soil water potential}
 \usage{
 swrc_conversion(
   direction = c("swp_to_vwc", "vwc_to_swp"),
@@ -49,8 +49,8 @@ soil water conversion.}
 
 \item{x}{A numeric value, vector, or matrix.
 The soil water values to be converted,
-either soil water potential (units \verb{[MPa]}) or
-volumetric water content (units \verb{[cm/cm]}).}
+either soil water potential (units \verb{[MPa]}) of the soil matric component or
+bulk volumetric water content (units \verb{[cm/cm]}).}
 
 \item{fcoarse}{A numeric value or vector.
 Coarse fragments, e.g., gravel, (> 2 mm; units of \verb{[m3/m3]})
@@ -94,12 +94,14 @@ first element of \code{x} and soils, the second elements, and so on.}
 \code{SOILWAT2} internal warnings and other messages.}
 
 \item{swp_MPa}{A numeric object. The soil water potential values
-(units `[MPa]`) to be converted to
-volumetric water content (relative to the whole soil; units `[cm/cm]`).}
+(units `[MPa]`) of the soil matric component to be converted to
+bulk volumetric water content
+(i.e., relative to the whole soil; units `[cm/cm]`).}
 
 \item{vwcBulk}{A numeric object. The volumetric water content values
 (relative to the whole soil; units `[cm/cm]`)
-to be converted to soil water potential values (units `[MPa]`).}
+to be converted to soil water potential (units `[MPa]`)
+of the soil matric component.}
 }
 \value{
 The dimensions of the output are a function of \code{x} and the
@@ -120,15 +122,15 @@ the \code{d} sets of soil values are repeated for each row of \code{x}.
 }
 }
 \description{
-Conversion between soil water content and soil water potential
+Conversion between bulk soil water content and soil water potential
 }
 \section{Functions}{
 \itemize{
 \item \code{swrc_swp_to_vwc()}: Convenience wrapper
-to convert from `SWP` to `VWC` with selected `SWRC`
+to convert from `SWP` to bulk `VWC` with selected `SWRC`
 
 \item \code{swrc_vwc_to_swp()}: Convenience wrapper
-to convert from `VWC` to `SWP` with selected `SWRC`
+to convert from bulk `VWC` to matric `SWP` with selected `SWRC`
 
 }}
 \section{Details}{
@@ -153,6 +155,12 @@ the element \code{pdf_name} for argument \code{swrc}.
 
 If \code{swrc} contains element \code{swrcp} with one set of \code{SWRC} parameters,
 i.e., one row, then the parameter set is repeated for each value of \code{x}.
+
+
+If \code{vwc} inputs represent the matric component
+(instead of expected bulk values), then set \code{fcoarse} to 0.
+This works, however, only if \code{swrcp} are provided or \code{fcoarse} is not
+utilized by the requested \code{pdf}.
 }
 
 \examples{
