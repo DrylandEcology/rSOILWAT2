@@ -291,3 +291,188 @@ get_soiltemp <- function(
   names(res) <- levels
   res
 }
+
+
+
+#' Extract or calculate soil moisture
+#'
+#' @inheritParams get_derived_output
+#' @param type A character string selecting type of soil moisture.
+#' @param swInput An object of class [`swInputData`].
+#' @param widths_cm A numeric vector of soil layer widths (units `[cm]`).
+#' @param fcoarse A numeric vector of coarse fragments per soil layer
+#'   (units `[volume fraction]`).
+#'
+#' @section Details:
+#' Information on soil layer `widths` and coarse fragments `fcoarse`
+#' are only used if requested type of soil moisture is
+#' not available and has to be calculated from a different type.
+#' `widths` and `fcoarse` may be provided directly or via `swInput`
+#' from which the information is extracted (see examples.)
+#'
+#' @return A data frame with requested soil moisture;
+#' rows represent time steps and columns represent soil layers.
+#'
+#' @examples
+#' sw_in <- rSOILWAT2::sw_exampleData
+#'
+#' sw_out <- sw_exec(inputData = sw_in)
+#' res1 <- get_soilmoisture(sw_out, "Month", type = "swc")
+#'
+#' deactivate_swOUT_OutKey(sw_in) <- sw_out_flags()[["sw_swcbulk"]]
+#' sw_out <- sw_exec(inputData = sw_in)
+#' res2 <- get_soilmoisture(sw_out, "Month", type = "swc", swInput = sw_in)
+#' all.equal(res1, res2)
+#'
+#' res3 <- get_soilmoisture(
+#'   sw_out,
+#'   timestep = "Month",
+#'   type = "swc",
+#'   widths = diff(c(0., swSoils_Layers(sw_in)[, "depth_cm"])),
+#'   fcoarse = swSoils_Layers(sw_in)[, "gravel_content"]
+#' )
+#' all.equal(res1, res3)
+#'
+#' @md
+#' @export
+get_soilmoisture <- function(
+  x,
+  timestep = c("Day", "Week", "Month", "Year"),
+  type = c("swc", "vwc_bulk", "vwc_matric"),
+  swInput = NULL,
+  widths_cm = NULL,
+  fcoarse = NULL
+) {
+  timestep <- match.arg(timestep)
+  type <- match.arg(type)
+
+  out_flag <- switch(
+    EXPR = type,
+    swc = sw_out_flags()[["sw_swcbulk"]],
+    vwc_bulk = sw_out_flags()[["sw_vwcbulk"]],
+    vwc_matric = sw_out_flags()[["sw_vwcmatric"]]
+  )
+
+  icols <- switch(
+    EXPR = timestep,
+    Year = -1L,
+    Month = ,
+    Week = ,
+    Day = -(1L:2L)
+  )
+
+  res <- slot(slot(x, out_flag), timestep)[, icols, drop = FALSE]
+
+  msg <- NULL
+
+  if (nrow(res) == 0) {
+    #--- Requested soil moisture output not stored in simulation output `x`
+
+    # Check if any of the other soil moisture types are available
+    tmp_swc <- slot(slot(x, sw_out_flags()[["sw_swcbulk"]]), timestep)
+    tmp_vwcbulk <- slot(slot(x, sw_out_flags()[["sw_vwcbulk"]]), timestep)
+    tmp_vwcmatric <- slot(slot(x, sw_out_flags()[["sw_vwcmatric"]]), timestep)
+
+    has_swc <- nrow(tmp_swc) > 0L
+    has_vwcbulk <- nrow(tmp_vwcbulk) > 0L
+    has_vwcmatric <- nrow(tmp_vwcmatric) > 0L
+
+    if (any(has_swc, has_vwcbulk, has_vwcmatric)) {
+      # Determine whether we have enough soil information for calculations
+      has_soil <-
+        inherits(swInput, "swInputData") ||
+        !any(is.null(widths_cm), is.null(fcoarse))
+
+      if (has_soil) {
+        if (is.null(widths_cm)) {
+          widths_cm <- diff(c(0., swSoils_Layers(swInput)[, "depth_cm"]))
+        }
+
+        one_minus_fcoarse <- 1. - if (is.null(fcoarse)) {
+          swSoils_Layers(swInput)[, "gravel_content"]
+        } else {
+          fcoarse
+        }
+
+        if (type == "swc") {
+          if (has_vwcbulk) {
+            # calculate swc as depth * vwc_bulk
+            res <- sweep(
+              tmp_vwcbulk[, icols, drop = FALSE],
+              MARGIN = 2L,
+              STATS = widths_cm,
+              FUN = "*"
+            )
+          } else if (has_vwcmatric) {
+            # calculate swc as depth * vwc_matric * (1 - fcoarse)
+            res <- sweep(
+              tmp_vwcmatric[, icols, drop = FALSE],
+              MARGIN = 2L,
+              STATS = widths_cm * one_minus_fcoarse,
+              FUN = "*"
+            )
+          }
+
+        } else if (type == "vwc_bulk") {
+          if (has_swc) {
+            # calculate vwc_bulk as swc / depth
+            res <- sweep(
+              tmp_swc[, icols, drop = FALSE],
+              MARGIN = 2L,
+              STATS = widths_cm,
+              FUN = "/"
+            )
+          } else if (has_vwcmatric) {
+            # calculate vwc_bulk as vwc_matric * (1 - fcoarse)
+            res <- sweep(
+              tmp_vwcmatric[, icols, drop = FALSE],
+              MARGIN = 2L,
+              STATS = one_minus_fcoarse,
+              FUN = "*"
+            )
+          }
+
+        } else if (type == "vwc_matric") {
+          if (has_swc) {
+            # calculate vwc_matric as swc / (depth * (1 - fcoarse))
+            res <- sweep(
+              tmp_swc[, icols, drop = FALSE],
+              MARGIN = 2L,
+              STATS = widths_cm * one_minus_fcoarse,
+              FUN = "/"
+            )
+          } else if (has_vwcbulk) {
+            # calculate vwc_matric as vwc_bulk / (1 - fcoarse)
+            res <- sweep(
+              tmp_vwcbulk[, icols, drop = FALSE],
+              MARGIN = 2L,
+              STATS = one_minus_fcoarse,
+              FUN = "/"
+            )
+          }
+        }
+
+      } else {
+        msg <- paste(
+          "Simulation run without requested soil moisture output:",
+          "converting available to requested output requires",
+          "`swInput` or, alternatively, `widths_cm` and `fcoarse`."
+        )
+      }
+
+
+    } else {
+      msg <- paste(
+        "Simulation run without producing soil moisture output:",
+        "consider turning output on for at least one of",
+        "'SWCBULK', 'VWCBULK', or 'VWCMATRIC'."
+      )
+    }
+  }
+
+  if (!is.null(msg)) {
+    stop(msg)
+  }
+
+  res
+}

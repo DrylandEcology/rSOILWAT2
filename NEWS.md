@@ -18,7 +18,11 @@
 ## New features
 * New method `sw_upgrade()` upgrades objects with
   outdated `rSOILWAT2` S4 classes to the current version.
-
+* New `get_soilmoisture()` to consistently extract soil moisture content,
+  volumetric water content (bulk soil), or
+  volumetric water content for the matric component.
+  The function calculates the requested type if not stored in the output
+  from those that are available.
 
 
 # rSOILWAT2 v5.3.1

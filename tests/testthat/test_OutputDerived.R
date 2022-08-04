@@ -169,3 +169,122 @@ test_that("Derived output: soil/surface temperature", {
     expect_equal(nrow(st[[lvl]]), slot(sw_out, "mo_nrow"))
   }
 })
+
+
+test_that("Derived output: soil moisture", {
+  timesteps <- c("Day", "Week", "Month", "Year")
+  types <- c(
+    sw_swcbulk = "swc",
+    sw_vwcbulk = "vwc_bulk",
+    sw_vwcmatric = "vwc_matric"
+  )
+
+  sw_in <- rSOILWAT2::sw_exampleData
+  n_soillayers <- nrow(swSoils_Layers(sw_in))
+  widths_cm <- diff(c(0., swSoils_Layers(sw_in)[, "depth_cm"]))
+  fcoarse <- swSoils_Layers(sw_in)[, "gravel_content"]
+
+
+  # Loop over time steps
+  for (tp in timesteps) {
+    id_out_nrows <- switch(
+      EXPR = tp,
+      Day = "dy_nrow",
+      Week = "wk_nrow",
+      Month = "mo_nrow",
+      Year = "yr_nrow"
+    )
+
+    #--- Requested soil moisture directly available
+    sw_out <- sw_exec(inputData = sw_in)
+    res0 <- lapply(
+      types,
+      function(type) {
+        get_soilmoisture(sw_out, timestep = tp, type = type)
+      }
+    )
+
+    for (k1 in seq_along(types)) {
+      # Expect that columns represent soil layers and rows time steps
+      expect_identical(ncol(res0[[k1]]), n_soillayers)
+      expect_identical(nrow(res0[[k1]]), slot(sw_out, id_out_nrows))
+    }
+
+
+    #--- Convert soil moisture among swc, vwc_bulk, and vwc_matric
+    for (k2 in seq_along(types)) {
+      sw_in1 <- sw_in
+      # turn off the other soil moisture types
+      for (k3 in seq_along(types)[-k2]) {
+        deactivate_swOUT_OutKey(sw_in1) <- sw_out_flags()[[names(types)[[k3]]]]
+      }
+      sw_out <- sw_exec(inputData = sw_in1)
+
+      #--- Derive soil information from `swInput`
+      res1 <- lapply(
+        types,
+        function(type) {
+          get_soilmoisture(
+            sw_out,
+            timestep = tp,
+            type = type,
+            swInput = sw_in1
+          )
+        }
+      )
+
+      for (k1 in seq_along(types)) {
+        # Expect that calculated moisture is (almost) equal to direct version
+        expect_equal(
+          res1[[k1]],
+          res0[[k1]],
+          tolerance = sqrt(.Machine[["double.eps"]])
+        )
+      }
+
+      #--- Derive soil information from `widths_cm` and `fcoarse`
+      res2 <- lapply(
+        types,
+        function(type) {
+          get_soilmoisture(
+            sw_out,
+            timestep = tp,
+            type = type,
+            widths_cm = widths_cm,
+            fcoarse = fcoarse
+          )
+        }
+      )
+
+      for (k1 in seq_along(types)) {
+        # Expect that calculated moisture is (almost) equal to direct version
+        expect_equal(
+          res2[[k1]],
+          res0[[k1]],
+          tolerance = sqrt(.Machine[["double.eps"]])
+        )
+      }
+
+      #--- Expect error if calculation does not have enough soil information
+      expect_error(
+        get_soilmoisture(sw_out, timestep = tp, type = "Month")
+      )
+      expect_error(
+        get_soilmoisture(
+          sw_out,
+          timestep = tp,
+          type = "Month",
+          widths_cm = widths_cm
+        )
+      )
+      expect_error(
+        get_soilmoisture(
+          sw_out,
+          timestep = to,
+          type = "Month",
+          fcoarse = fcoarse
+        )
+      )
+    }
+  }
+})
