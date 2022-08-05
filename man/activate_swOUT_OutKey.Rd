@@ -4,6 +4,7 @@
 \alias{activate_swOUT_OutKey}
 \alias{activate_swOUT_OutKey,}
 \alias{deactivate_swOUT_OutKey}
+\alias{activate_swOUT_OutKey<-}
 \alias{deactivate_swOUT_OutKey<-}
 \title{Activate/deactivate an output slot (\var{swOUT_OutKey})}
 \usage{

@@ -2292,6 +2292,10 @@ setGeneric(
 #'   \code{\link{sw_exec}}
 #' @aliases activate_swOUT_OutKey, deactivate_swOUT_OutKey
 #' @name activate_swOUT_OutKey
+NULL
+
+
+#' @rdname activate_swOUT_OutKey
 setGeneric(
   "activate_swOUT_OutKey<-",
   function(object, value) standardGeneric("activate_swOUT_OutKey<-")
