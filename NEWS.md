@@ -23,7 +23,11 @@
   volumetric water content for the matric component.
   The function calculates the requested type if not stored in the output
   from those that are available.
-
+* Derived output functions `get_XXX()` gain new argument `keep_time`;
+  if `keep_time` is requested (`TRUE`), then year and sub-year time step values
+  are added as first one or two columns to the returned matrix.
+* New `time_columns()` returns the output column indices with time information.
+* New `nrow_output()` returns the number of time steps in output.
 
 # rSOILWAT2 v5.3.1
 * This version fixes a bug in soil temperature output that was

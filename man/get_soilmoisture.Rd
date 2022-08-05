@@ -10,7 +10,8 @@ get_soilmoisture(
   type = c("swc", "vwc_bulk", "vwc_matric"),
   swInput = NULL,
   widths_cm = NULL,
-  fcoarse = NULL
+  fcoarse = NULL,
+  keep_time = FALSE
 )
 }
 \arguments{
@@ -26,6 +27,9 @@ get_soilmoisture(
 
 \item{fcoarse}{A numeric vector of coarse fragments per soil layer
 (units \verb{[volume fraction]}).}
+
+\item{keep_time}{A logical value. Include time information in the returned
+object.}
 }
 \value{
 A data frame with requested soil moisture;

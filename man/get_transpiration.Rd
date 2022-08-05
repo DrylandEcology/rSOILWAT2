@@ -4,15 +4,23 @@
 \alias{get_transpiration}
 \title{Calculate transpiration from output}
 \usage{
-get_transpiration(x, timestep = c("Day", "Week", "Month", "Year"))
+get_transpiration(
+  x,
+  timestep = c("Day", "Week", "Month", "Year"),
+  keep_time = FALSE
+)
 }
 \arguments{
 \item{x}{An object of class \code{\linkS4class{swOutput}}.}
 
 \item{timestep}{A character string. One of the \pkg{rSOILWAT2} time steps.}
+
+\item{keep_time}{A logical value. Include time information in the returned
+object.}
 }
 \value{
-A numeric vector of transpiration [mm] for each time step.
+A numeric vector of transpiration [mm] for each time step or
+  a numeric matrix if `keep_time`.
 }
 \description{
 Calculate transpiration from output
@@ -20,5 +28,6 @@ Calculate transpiration from output
 \examples{
 sw_out <- sw_exec(inputData = rSOILWAT2::sw_exampleData)
 get_transpiration(sw_out, "Month")
+get_transpiration(sw_out, "Month", keep_time = TRUE)
 
 }
