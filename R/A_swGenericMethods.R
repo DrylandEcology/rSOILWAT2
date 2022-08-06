@@ -192,8 +192,10 @@ format_timestamp <- function(object) {
 #' Missing slots and elements are added and
 #' take the new default values from `SOILWAT2`.
 #'
-#' @param x An object of a `rSOILWAT2` class.
-#' @return The upgraded `x`, if needed, to match the current version
+#' @param object An object of a `rSOILWAT2` class.
+#' @param verbose A logical value.
+#'
+#' @return The upgraded `object`, if needed, to match the current version
 #'   with missing slots and elements filled with default values.
 #'
 #' @section Details:
@@ -218,7 +220,7 @@ format_timestamp <- function(object) {
 #'   x <- sw_upgrade(rSOILWAT2::sw_exampleData, verbose = TRUE)
 #'
 #' @md
-#' @export
+#' @exportMethod sw_upgrade
 setGeneric(
   "sw_upgrade",
   function(object, verbose = FALSE) standardGeneric("sw_upgrade")
@@ -1566,10 +1568,14 @@ setGeneric(
   function(object) standardGeneric("get_swSite")
 )
 
-#' \code{swSite_SWRCflags}
-#' @param object An object of class \code{\linkS4class{swSite}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+#' Names of `SWRC` and `PDF`
+#'
+#' @param object An object of class [swSite-class] or [swInputData-class].
+#'
+#' @return A character vector with two elements `"swrc_name"` and `"pdf_name"`.
+#'
+#' @md
+#' @exportMethod swSite_SWRCflags
 setGeneric(
   "swSite_SWRCflags",
   function(object) standardGeneric("swSite_SWRCflags")
@@ -1725,10 +1731,12 @@ setGeneric(
   function(object, value) standardGeneric("set_swSite<-")
 )
 
-#' \code{swSite_SWRCflags<-}
-#' @param object An object of class \code{\linkS4class{swSite}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+#' @rdname swSite_SWRCflags
+#'
+#' @param value A character vector with two elements for
+#' `"swrc_name"` and `"pdf_name"`.
+#'
+#' @exportMethod swSite_SWRCflags<-
 setGeneric(
   "swSite_SWRCflags<-",
   function(object, value) standardGeneric("swSite_SWRCflags<-")
@@ -1865,19 +1873,25 @@ setGeneric(
   function(object) standardGeneric("get_swSoils")
 )
 
-#' \code{swSoils_Layers}
-#' @param object An object of class \code{\linkS4class{swSoils}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @seealso \code{\linkS4class{swSoils}} and \code{\linkS4class{swInputData}}
+#' Interact with the soil layer data frame
+#'
+#' @param object An object of class [`swSoils`] or [swInputData-class].
+#'
+#' @md
+#' @exportMethod swSoils_Layers
 setGeneric(
   "swSoils_Layers",
   function(object) standardGeneric("swSoils_Layers")
 )
 
-#' \code{swSoils_SWRCp}
-#' @param object An object of class \code{\linkS4class{swSoils}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @seealso \code{\linkS4class{swSoils}} and \code{\linkS4class{swInputData}}
+#' `SWRC` parameters
+#'
+#' @param object An object of class [`swSoils`] or [swInputData-class].
+#'
+#' @return A data matrix.
+#'
+#' @md
+#' @exportMethod swSoils_SWRCp
 setGeneric(
   "swSoils_SWRCp",
   function(object) standardGeneric("swSoils_SWRCp")
@@ -1903,25 +1917,28 @@ setGeneric(
   function(object, value) standardGeneric("set_swSoils<-")
 )
 
-#' \code{swSoils_Layers<-}
-#' @param object An object of class \code{\linkS4class{swSoils}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
-#' @seealso \code{\linkS4class{swSoils}} and \code{\linkS4class{swInputData}}
+#' @rdname swSoils_Layers
+#'
+#' @param value An object that can be converted to a data matrix and represents
+#' required soil layer information.
+#'
+#' @exportMethod swSoils_Layers<-
 setGeneric(
   "swSoils_Layers<-",
   function(object, value) standardGeneric("swSoils_Layers<-")
 )
 
-#' \code{swSoils_SWRCp<-}
-#' @param object An object of class \code{\linkS4class{swSoils}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
-#' @seealso \code{\linkS4class{swSoils}} and \code{\linkS4class{swInputData}}
+#' @rdname swSoils_SWRCp
+#'
+#' @param value An object that can be converted to a data matrix and represents
+#' required `SWRC` parameters.
+#'
+#' @exportMethod swSoils_SWRCp<-
 setGeneric(
   "swSoils_SWRCp<-",
   function(object, value) standardGeneric("swSoils_SWRCp<-")
 )
+
 ########################
 
 #########ESTAB##########

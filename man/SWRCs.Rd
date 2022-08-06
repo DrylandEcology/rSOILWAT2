@@ -48,6 +48,8 @@ soil parameters, i.e., \code{swrc_name} and \code{pdf_name}.}
 
 \item{verbose}{A logical value. If \code{TRUE}, then display
 \code{SOILWAT2} internal warnings and other messages.}
+
+\item{...}{Additional function arguments passed on or ignored.}
 }
 \description{
 \code{SWRCs} convert between soil water content and soil water potential

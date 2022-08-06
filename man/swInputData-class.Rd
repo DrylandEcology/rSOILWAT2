@@ -136,7 +136,6 @@
 \alias{swProd_MonProd_forb<-,swInputData-method}
 \alias{get_swEstab,swInputData-method}
 \alias{get_swSite,swInputData-method}
-\alias{swSite_SWRCflags,swInputData-method}
 \alias{swSite_SWClimits,swInputData-method}
 \alias{swSite_ModelFlags,swInputData-method}
 \alias{swSite_ModelCoefficients,swInputData-method}
@@ -149,7 +148,6 @@
 \alias{swSite_SoilTemperatureConsts,swInputData-method}
 \alias{swSite_TranspirationRegions,swInputData-method}
 \alias{set_swSite<-,swInputData-method}
-\alias{swSite_SWRCflags<-,swInputData-method}
 \alias{swSite_SWClimits<-,swInputData-method}
 \alias{swSite_ModelFlags<-,swInputData-method}
 \alias{swSite_ModelCoefficients<-,swInputData-method}
@@ -162,12 +160,8 @@
 \alias{swSite_SoilTemperatureConsts<-,swInputData-method}
 \alias{swSite_TranspirationRegions<-,swInputData-method}
 \alias{get_swSoils,swInputData-method}
-\alias{swSoils_Layers,swInputData-method}
-\alias{swSoils_SWRCp,swInputData-method}
 \alias{set_swSoils<-,swInputData,swSoils-method}
 \alias{set_swSoils<-,swInputData,list-method}
-\alias{swSoils_Layers<-,swInputData-method}
-\alias{swSoils_SWRCp<-,swInputData-method}
 \alias{get_swSWC,swInputData-method}
 \alias{swSWC_use,swInputData-method}
 \alias{swSWC_prefix,swInputData-method}
@@ -477,8 +471,6 @@ swInputData(...)
 
 \S4method{get_swSite}{swInputData}(object)
 
-\S4method{swSite_SWRCflags}{swInputData}(object)
-
 \S4method{swSite_SWClimits}{swInputData}(object)
 
 \S4method{swSite_ModelFlags}{swInputData}(object)
@@ -502,8 +494,6 @@ swInputData(...)
 \S4method{swSite_TranspirationRegions}{swInputData}(object)
 
 \S4method{set_swSite}{swInputData}(object) <- value
-
-\S4method{swSite_SWRCflags}{swInputData}(object) <- value
 
 \S4method{swSite_SWClimits}{swInputData}(object) <- value
 
@@ -529,17 +519,9 @@ swInputData(...)
 
 \S4method{get_swSoils}{swInputData}(object)
 
-\S4method{swSoils_Layers}{swInputData}(object)
-
-\S4method{swSoils_SWRCp}{swInputData}(object)
-
 \S4method{set_swSoils}{swInputData,swSoils}(object) <- value
 
 \S4method{set_swSoils}{swInputData,list}(object) <- value
-
-\S4method{swSoils_Layers}{swInputData}(object) <- value
-
-\S4method{swSoils_SWRCp}{swInputData}(object) <- value
 
 \S4method{get_swSWC}{swInputData}(object)
 

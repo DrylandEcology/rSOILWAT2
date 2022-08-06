@@ -30,6 +30,8 @@ Density of the whole soil
 
 \item{verbose}{A logical value. If \code{TRUE}, then display
 \code{SOILWAT2} internal warnings and other messages.}
+
+\item{...}{Additional function arguments passed on or ignored.}
 }
 \value{
 \code{swrcp}, i.e,.
@@ -56,7 +58,7 @@ is an internal helper function.
 
 \section{Notes}{
 
-This function calls \code{soilDB::ROSETTA()} and
+This function calls \code{\link[soilDB:ROSETTA]{soilDB::ROSETTA()}} and
 a live internet connection is required to access \code{Rosetta}.
 }
 
@@ -76,5 +78,5 @@ hydraulic parameter distributions and summary statistics (Rosetta3).
 Journal of Hydrology, 547:39-53, \doi{10.1016/j.jhydrol.2017.01.004}
 }
 \seealso{
-\code{soilDB::ROSETTA()}
+\code{\link[soilDB:ROSETTA]{soilDB::ROSETTA()}}
 }

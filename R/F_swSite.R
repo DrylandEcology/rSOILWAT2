@@ -233,7 +233,6 @@ swSite <- function(...) {
 
 
 #' @rdname sw_upgrade
-#' @export
 setMethod(
   "sw_upgrade",
   signature = "swSite",
@@ -255,8 +254,7 @@ setMethod(
 #' @export
 setMethod("get_swSite", "swSite", function(object) object)
 
-#' @rdname swSite-class
-#' @export
+#' @rdname swSite_SWRCflags
 setMethod(
   "swSite_SWRCflags",
   signature = "swSite",
@@ -388,8 +386,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname swSite-class
-#' @export
+#' @rdname swSite_SWRCflags
 setReplaceMethod(
   "swSite_SWRCflags",
   signature = "swSite",

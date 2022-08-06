@@ -29,6 +29,8 @@ Density of the whole soil
 full path of the \code{neuroFX2021} R object provided by Rudiyanto et al. 2021;
 The path to the appropriate file can be set per R session
 via option \code{"RSW2_FILENEUROFX2021"}, see additional details.}
+
+\item{...}{Additional function arguments passed on or ignored.}
 }
 \value{
 \code{swrcp}, i.e,.

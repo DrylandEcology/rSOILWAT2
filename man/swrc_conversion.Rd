@@ -94,13 +94,13 @@ first element of \code{x} and soils, the second elements, and so on.}
 \code{SOILWAT2} internal warnings and other messages.}
 
 \item{swp_MPa}{A numeric object. The soil water potential values
-(units `[MPa]`) of the soil matric component to be converted to
+(units \verb{[MPa]}) of the soil matric component to be converted to
 bulk volumetric water content
-(i.e., relative to the whole soil; units `[cm/cm]`).}
+(i.e., relative to the whole soil; units \verb{[cm/cm]}).}
 
 \item{vwcBulk}{A numeric object. The volumetric water content values
-(relative to the whole soil; units `[cm/cm]`)
-to be converted to soil water potential (units `[MPa]`)
+(relative to the whole soil; units \verb{[cm/cm]})
+to be converted to soil water potential (units \verb{[MPa]})
 of the soil matric component.}
 }
 \value{
@@ -127,10 +127,10 @@ Conversion between bulk soil water content and soil water potential
 \section{Functions}{
 \itemize{
 \item \code{swrc_swp_to_vwc()}: Convenience wrapper
-to convert from `SWP` to bulk `VWC` with selected `SWRC`
+to convert from \code{SWP} to bulk \code{VWC} with selected \code{SWRC}
 
 \item \code{swrc_vwc_to_swp()}: Convenience wrapper
-to convert from bulk `VWC` to matric `SWP` with selected `SWRC`
+to convert from bulk \code{VWC} to matric \code{SWP} with selected \code{SWRC}
 
 }}
 \section{Details}{

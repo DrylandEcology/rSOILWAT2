@@ -2,7 +2,7 @@
 % Please edit documentation in R/sw_Pedotransfer_Functions.R
 \name{list_matched_swrcs_pdfs}
 \alias{list_matched_swrcs_pdfs}
-\title{Matching pairs of implemented `SWRCs` and `PDFs`}
+\title{Matching pairs of implemented \code{SWRCs} and \code{PDFs}}
 \usage{
 list_matched_swrcs_pdfs(swrc_name)
 }
@@ -12,17 +12,17 @@ The selected \code{SWRC} name
 (one of \code{\link[=swrc_names]{swrc_names()}}, with default \code{"Campbell1974"}).}
 }
 \value{
-A `data.frame` with two columns `SWRC` and `PDF` where each
-  row contains a matching pair of `SWRC` and `PDF` that are implemented.
+A \code{data.frame} with two columns \code{SWRC} and \code{PDF} where each
+row contains a matching pair of \code{SWRC} and \code{PDF} that are implemented.
 }
 \description{
-Matching pairs of implemented `SWRCs` and `PDFs`
+Matching pairs of implemented \code{SWRCs} and \code{PDFs}
 }
 \section{Details}{
 
-  The argument `swrc_name` is optional. If missing, then all implemented
-  `SWRCs` are listed.
-  \var{"NoPDF"} is not included in the list.
+The argument \code{swrc_name} is optional. If missing, then all implemented
+\code{SWRCs} are listed.
+\code{"NoPDF"} is not included in the list.
 }
 
 \examples{

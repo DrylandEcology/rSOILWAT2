@@ -26,10 +26,12 @@ sw_upgrade(object, verbose = FALSE)
 \S4method{sw_upgrade}{swInputData}(object, verbose = FALSE)
 }
 \arguments{
-\item{x}{An object of a \code{rSOILWAT2} class.}
+\item{object}{An object of a \code{rSOILWAT2} class.}
+
+\item{verbose}{A logical value.}
 }
 \value{
-The upgraded \code{x}, if needed, to match the current version
+The upgraded \code{object}, if needed, to match the current version
 with missing slots and elements filled with default values.
 }
 \description{
@@ -42,7 +44,8 @@ List of changes:
 \itemize{
 \item Changes with \code{v6.0.0}:
 \itemize{
-\item class \code{\linkS4class{swSite}}: new slot \code{"swrc_flags"}
+\item class \code{\linkS4class{swSite}}:
+new slots \code{"swrc_flags"} and \code{"pdf_for_NoPDF"}
 \item class \code{\linkS4class{swSoils}}: new slot \code{"SWRCp"}
 \item class \code{\linkS4class{swFiles}}:
 \code{SWRC} parameter input file added as file 6 for a new total of 23

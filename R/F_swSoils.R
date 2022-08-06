@@ -241,12 +241,10 @@ setMethod(
 #' @export
 setMethod("get_swSoils", "swSoils", function(object) object)
 
-#' @rdname swSoils-class
-#' @export
+#' @rdname swSoils_Layers
 setMethod("swSoils_Layers", "swSoils", function(object) object@Layers)
 
-#' @rdname swSoils-class
-#' @export
+#' @rdname swSoils_SWRCp
 setMethod("swSoils_SWRCp", "swSoils", function(object) object@SWRCp)
 
 #' @rdname swSoils-class
@@ -280,8 +278,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname swSoils-class
-#' @export
+#' @rdname swSoils_Layers
 setReplaceMethod(
   "swSoils_Layers",
   signature = "swSoils",
@@ -297,8 +294,7 @@ setReplaceMethod(
 )
 
 
-#' @rdname swSoils-class
-#' @export
+#' @rdname swSoils_SWRCp
 setReplaceMethod(
   "swSoils_SWRCp",
   signature = "swSoils",

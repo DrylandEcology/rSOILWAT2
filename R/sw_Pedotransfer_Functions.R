@@ -264,6 +264,7 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #'   soil parameters, i.e., `swrc_name` and `pdf_name`.
 #' @param verbose A logical value. If `TRUE`, then display
 #'   `SOILWAT2` internal warnings and other messages.
+#' @param ... Additional function arguments passed on or ignored.
 #'
 #' @section Details:
 #' [swrc_names()] lists implemented `SWRCs`;
@@ -323,6 +324,7 @@ pdf_names <- function() {
 
 
 #' Standardize a `SWRC` name
+#' @md
 #' @noRd
 std_swrc <- function(swrc_name) {
   if (missing(swrc_name) || is.null(swrc_name) || all(is.na(swrc_name))) {
@@ -333,6 +335,7 @@ std_swrc <- function(swrc_name) {
 }
 
 #' Standardize a `PDF` name
+#' @md
 #' @noRd
 std_pdf <- function(pdf_name) {
   if (missing(pdf_name) || is.null(pdf_name) || all(is.na(pdf_name))) {
@@ -344,12 +347,14 @@ std_pdf <- function(pdf_name) {
 
 
 #' Translate a `SWRC` name to its internal integer code
+#' @md
 #' @noRd
 encode_name2swrc <- function(swrc_name) {
   as.integer(unname(swrc_names()[std_swrc(swrc_name)]))
 }
 
 #' Translate a `PDF` name to its internal integer code
+#' @md
 #' @noRd
 encode_name2pdf <- function(pdf_name) {
   as.integer(unname(pdf_names()[std_pdf(pdf_name)]))
@@ -366,7 +371,7 @@ encode_name2pdf <- function(pdf_name) {
 #' @section Details:
 #'   The argument `swrc_name` is optional. If missing, then all implemented
 #'   `SWRCs` are listed.
-#'   \var{"NoPDF"} is not included in the list.
+#'   `"NoPDF"` is not included in the list.
 #'
 #' @examples
 #' # Data frame of SWRC-PDF combinations
@@ -380,6 +385,7 @@ encode_name2pdf <- function(pdf_name) {
 #' df_swrc_pdfs[has_pdf, , drop = FALSE]
 #' list_swrcs_pdfs[has_pdf]
 #'
+#' @md
 #' @export
 list_matched_swrcs_pdfs <- function(swrc_name) {
   swrc_name <- if (
@@ -729,10 +735,10 @@ rSW2_SWRC_PDF_estimate_parameters <- function( # nolint: object_length_linter.
 #' is an internal helper function.
 #'
 #' @section Notes:
-#' This function calls `soilDB::ROSETTA()` and
+#' This function calls [soilDB::ROSETTA()] and
 #' a live internet connection is required to access `Rosetta`.
 #'
-#' @seealso `soilDB::ROSETTA()`
+#' @seealso [soilDB::ROSETTA()]
 #'
 #' @md
 pdf_Rosetta_for_vanGenuchten1980 <- function( # nolint: object_length_linter.
@@ -1518,6 +1524,7 @@ swrc_conversion_1d <- function(direction, x, soils, swrc, verbose) {
 #'   (i.e., relative to the whole soil; units `[cm/cm]`).
 #'
 #' @export
+#' @md
 swrc_swp_to_vwc <- function(
   swp_MPa,
   fcoarse,
@@ -1554,6 +1561,7 @@ swrc_swp_to_vwc <- function(
 #'   of the soil matric component.
 #'
 #' @export
+#' @md
 swrc_vwc_to_swp <- function(
   vwcBulk,
   fcoarse,

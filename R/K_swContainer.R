@@ -1591,8 +1591,7 @@ setMethod("get_swEstab", "swInputData", function(object) object@estab)
 #' @export
 setMethod("get_swSite", "swInputData", function(object) slot(object, "site"))
 
-#' @rdname swInputData-class
-#' @export
+#' @rdname swSite_SWRCflags
 setMethod(
   "swSite_SWRCflags",
   signature = "swInputData",
@@ -1879,16 +1878,14 @@ setReplaceMethod(
 #' @export
 setMethod("get_swSoils", "swInputData", function(object) object@soils)
 
-#' @rdname swInputData-class
-#' @export
+#' @rdname swSoils_Layers
 setMethod(
   "swSoils_Layers",
   signature = "swInputData",
   function(object) swSoils_Layers(object@soils)
 )
 
-#' @rdname swInputData-class
-#' @export
+#' @rdname swSoils_SWRCp
 setMethod(
  "swSoils_SWRCp",
  signature = "swInputData",
@@ -1973,6 +1970,7 @@ setReplaceMethod(
     object
   }
 )
+
 
 
 # Methods for slot \code{swc}

@@ -21,7 +21,7 @@ get_soilmoisture(
 
 \item{type}{A character string selecting type of soil moisture.}
 
-\item{swInput}{An object of class \code{\link{swInputData}}.}
+\item{swInput}{An object of class \linkS4class{swInputData}.}
 
 \item{widths_cm}{A numeric vector of soil layer widths (units \verb{[cm]}).}
 
@@ -44,7 +44,7 @@ Information on soil layer \code{widths} and coarse fragments \code{fcoarse}
 are only used if requested type of soil moisture is
 not available and has to be calculated from a different type.
 \code{widths} and \code{fcoarse} may be provided directly or via \code{swInput}
-from which the information is extracted (see examples.)
+from which the information is extracted (see examples).
 }
 
 \examples{

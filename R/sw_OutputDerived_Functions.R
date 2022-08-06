@@ -394,7 +394,7 @@ get_soiltemp <- function(
 #'
 #' @inheritParams get_derived_output
 #' @param type A character string selecting type of soil moisture.
-#' @param swInput An object of class [`swInputData`].
+#' @param swInput An object of class [swInputData-class].
 #' @param widths_cm A numeric vector of soil layer widths (units `[cm]`).
 #' @param fcoarse A numeric vector of coarse fragments per soil layer
 #'   (units `[volume fraction]`).
@@ -404,7 +404,7 @@ get_soiltemp <- function(
 #' are only used if requested type of soil moisture is
 #' not available and has to be calculated from a different type.
 #' `widths` and `fcoarse` may be provided directly or via `swInput`
-#' from which the information is extracted (see examples.)
+#' from which the information is extracted (see examples).
 #'
 #' @return A data frame with requested soil moisture;
 #' rows represent time steps and columns represent soil layers.
