@@ -427,6 +427,8 @@ list_matched_swrcs_pdfs <- function(swrc_name) {
 #' are recycled for multiple soil layers.
 #'
 #' @inherit SWRCs references
+#' @param fail A logical value. If requested `PDF` fails,
+#' then issue a warning (`FALSE`, default) or throw an error (`TRUE`).
 #'
 #' @return `swrcp`, i.e,.
 #' a numeric matrix where rows represent soil (layers) and
@@ -491,6 +493,7 @@ pdf_estimate <- function(
   bdensity = NULL,
   swrc_name,
   pdf_name,
+  fail = FALSE,
   ...
 ) {
 
@@ -516,6 +519,7 @@ pdf_estimate <- function(
       clay = clay,
       fcoarse = fcoarse,
       bdensity = bdensity,
+      fail = fail,
       ...
     )
 
@@ -533,7 +537,9 @@ pdf_estimate <- function(
 
   #--- Check validity of estimated SWRCp
   if (!all(check_swrcp(swrc_name, swrcp))) {
-    warning("Some estimated parameters failed checks.")
+    msg <- "Some estimated parameters failed checks."
+
+    if (isTRUE(fail)) stop(msg) else warning(msg)
   }
 
   swrcp
@@ -609,9 +615,8 @@ check_pdf_availability <- function(
 #' using selected pedotransfer function (`PDF`) that are implemented in `R`
 #'
 #' @inheritParams pdf_estimate
-#' @param fail A logical value. If `TRUE` (default) and
-#'   requested `PDF` is not implemented in `R`, then throw an error;
-#'   otherwise, return silently.
+#' @param fail A logical value. If requested `PDF` fails,
+#' then issue a warning (`FALSE`) or throw an error (`TRUE`, default).
 #'
 #' @return `swrcp`, i.e,.
 #' a numeric matrix where rows represent soil (layers) and
@@ -669,9 +674,11 @@ rSW2_SWRC_PDF_estimate_parameters <- function( # nolint: object_length_linter.
     )[["mean"]]
 
   } else {
-    if (isTRUE(fail)) {
-      stop("PDF ", shQuote(pdf_name), " is not implemented in rSOILWAT2.")
-    }
+    msg <- paste("PDF", shQuote(pdf_name), "is not implemented in rSOILWAT2.")
+
+    if (isTRUE(fail)) stop(msg) else warning(msg)
+
+    NULL
   }
 }
 

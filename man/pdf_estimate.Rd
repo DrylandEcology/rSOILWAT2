@@ -4,7 +4,16 @@
 \alias{pdf_estimate}
 \title{Estimate \code{SWRC} parameters from soil texture with a pedotransfer function}
 \usage{
-pdf_estimate(sand, clay, fcoarse, bdensity = NULL, swrc_name, pdf_name, ...)
+pdf_estimate(
+  sand,
+  clay,
+  fcoarse,
+  bdensity = NULL,
+  swrc_name,
+  pdf_name,
+  fail = FALSE,
+  ...
+)
 }
 \arguments{
 \item{sand}{A numeric value or vector.
@@ -33,6 +42,9 @@ The selected \code{SWRC} name
 \item{pdf_name}{An character string or vector.
 The selected \code{PDF} name
 (one of \code{\link[=pdf_names]{pdf_names()}}, with default \code{"Cosby1984AndOthers"}).}
+
+\item{fail}{A logical value. If requested \code{PDF} fails,
+then issue a warning (\code{FALSE}, default) or throw an error (\code{TRUE}).}
 
 \item{...}{Additional parameters passed to selected \code{PDF} function.}
 }

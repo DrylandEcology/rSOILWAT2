@@ -39,9 +39,8 @@ relative to the whole soil (matric soil plus coarse fragments).}
 Density of the whole soil
 (matric soil plus coarse fragments; units \verb{[g/cm3]}).}
 
-\item{fail}{A logical value. If \code{TRUE} (default) and
-requested \code{PDF} is not implemented in \code{R}, then throw an error;
-otherwise, return silently.}
+\item{fail}{A logical value. If requested \code{PDF} fails,
+then issue a warning (\code{FALSE}) or throw an error (\code{TRUE}, default).}
 
 \item{...}{Additional parameters passed to selected \code{PDF} function.}
 }
