@@ -254,7 +254,7 @@ test_that("Simulate with all SWRC/PDF combinations", {
       rSOILWAT2::swSite_SWRCflags(sw_input) <- list_swrcs_pdfs[[isp]]
 
       # Run SOILWAT
-      x <- try(
+      x0 <- try(
         rSOILWAT2::sw_exec(
           inputData = sw_input,
           weatherList = sw_weather,
@@ -265,7 +265,7 @@ test_that("Simulate with all SWRC/PDF combinations", {
       )
 
 
-      if (inherits(x, "try-error")) {
+      if (inherits(x0, "try-error")) {
         succeed(
           paste(
             paste0(list_swrcs_pdfs[[isp]], collapse = "/"),
@@ -274,29 +274,57 @@ test_that("Simulate with all SWRC/PDF combinations", {
         )
 
       } else {
-        expect_s4_class(x, "swOutput")
+        # Check that we got correct output class
+        expect_s4_class(x0, "swOutput")
 
-        # Estimate SWRCp and set "NoPDF"
-        soils <- rSOILWAT2::swSoils_Layers(sw_input)
 
-        rSOILWAT2::swSoils_SWRCp(sw_input) <- rSOILWAT2::pdf_estimate(
+        #--- Estimate SWRCp and set "NoPDF" ----
+        sw_input1 <- sw_input
+        soils <- rSOILWAT2::swSoils_Layers(sw_input1)
+
+        rSOILWAT2::swSite_SWRCflags(sw_input1)["pdf_name"] <- "NoPDF"
+
+        rSOILWAT2::swSoils_SWRCp(sw_input1) <- rSOILWAT2::pdf_estimate(
           sand = soils[, "sand_frac"],
           clay = soils[, "clay_frac"],
           fcoarse = soils[, "gravel_content"],
+          bdensity = soils[, "bulkDensity_g/cm^3"],
           swrc_name = list_swrcs_pdfs[[isp]][1],
           pdf_name = list_swrcs_pdfs[[isp]][2]
         )
 
-        rSOILWAT2::swSite_SWRCflags(sw_input)["pdf_name"] <- "NoPDF"
-
         # Run SOILWAT
-        x <- rSOILWAT2::sw_exec(
-          inputData = sw_input,
+        x1 <- rSOILWAT2::sw_exec(
+          inputData = sw_input1,
           weatherList = sw_weather,
           echo = FALSE,
           quiet = TRUE
         )
-        expect_s4_class(x, "swOutput")
+        expect_s4_class(x1, "swOutput")
+
+
+        #--- Expect simulation output identical independent of
+        # when SWRCp are estimated (before/during `sw_exec()`)
+        vars <- grep(
+          pattern = "version|timestamp",
+          x = slotNames(x1),
+          value = TRUE,
+          invert = TRUE
+        )
+
+        for (sv in vars) {
+          expect_equal(
+            object = slot(x1, !!sv),
+            expected = slot(x0, !!sv),
+            tolerance = rSW2_glovars[["tol"]],
+            info = paste0(
+              it, ": ",
+              paste0(list_swrcs_pdfs[[isp]], collapse = "/"),
+              " - slot ",
+              shQuote(sv)
+            )
+          )
+        }
       }
     }
   }
