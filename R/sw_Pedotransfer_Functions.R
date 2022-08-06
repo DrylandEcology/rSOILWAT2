@@ -564,7 +564,9 @@ pdfs_implemented_in_rSW2 <- function() {
 #' live internet connection or access to specific data files.
 #'
 #' @param pdfs A character vector. `PDF` names to be checked;
-#'   defaults to `pdf_names()`.
+#' defaults to [pdf_names()].
+#' @param exclude_NoPDF A logical value. Consider `"NoPDF"` to be
+#' available (`FALSE`, default) or unavailable (`TRUE`).
 #' @param verbose A logical value.
 #'
 #' @return A named logical vector with current availability of `PDFs`;
@@ -574,11 +576,13 @@ pdfs_implemented_in_rSW2 <- function() {
 #' check_pdf_availability()
 #' check_pdf_availability("neuroFX2021")
 #' check_pdf_availability("nonexistent_PDF")
+#' check_pdf_availability(exclude_NoPDF = TRUE)
 #'
 #' @export
 #' @md
 check_pdf_availability <- function(
   pdfs = names(pdf_names()),
+  exclude_NoPDF = FALSE,
   verbose = interactive()
 ) {
   res <- rep(NA, length(pdfs))
@@ -589,6 +593,10 @@ check_pdf_availability <- function(
   # PDFs implemented in SOILWAT2 are always available
   tmp <- pdfs %in% names(pdf_names()) & !(pdfs %in% rpdfs)
   res[tmp] <- TRUE
+
+  if (isTRUE(exclude_NoPDF) && "NoPDF" %in% pdfs) {
+    res["NoPDF"] <- FALSE
+  }
 
   # Check requested PDFs implemented in R
   has_rpdfs <- vapply(
