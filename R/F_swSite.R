@@ -68,9 +68,9 @@ setClass(
     SoilTemperatureFlag = "logical",
     SoilTemperatureConstants = "numeric",
     TranspirationRegions = "matrix",
-    swrc_flags = "character"
-  )
-  ,
+    swrc_flags = "character",
+    pdf_for_NoPDF = "character"
+  ),
   prototype = list(
     SWClimits = c(swc_min = NA_real_, swc_init = NA_real_, swc_wet = NA_real_),
     ModelFlags = c(Reset = NA, DeepDrain = NA),
@@ -111,7 +111,8 @@ setClass(
       dim = c(3L, 2L),
       dimnames = list(NULL, c("ndx", "layer"))
     ),
-    swrc_flags = c(swrc_name = NA_character_, pdf_name = NA_character_)
+    swrc_flags = c(swrc_name = NA_character_, pdf_name = NA_character_),
+    pdf_for_NoPDF = NA_character_
   )
 )
 
@@ -176,6 +177,11 @@ setValidity(
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
+    if (length(object@pdf_for_NoPDF) != 1L) {
+      msg <- "@pdf_for_NoPDF length != 1."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
     val
   }
 )
@@ -232,8 +238,7 @@ setMethod(
   "sw_upgrade",
   signature = "swSite",
   definition = function(object, verbose = FALSE) {
-    #--- Make sure we have SWRC/PDF flags
-    tmp <- try(object@swrc_flags, silent = TRUE)
+    tmp <- try(validObject(object), silent = TRUE)
     if (inherits(tmp, "try-error")) {
       if (verbose) {
         message("Upgrading object of class `swSite`.")
@@ -256,6 +261,31 @@ setMethod(
   "swSite_SWRCflags",
   signature = "swSite",
   function(object) slot(object, "swrc_flags")
+)
+
+#' @rdname swSite_PDFNoPDF
+setMethod(
+  "swSite_PDFNoPDF",
+  signature = "swSite",
+  function(object) slot(object, "pdf_for_NoPDF")
+)
+
+#' @rdname swSite_PDFutilized
+setMethod(
+  "swSite_PDFutilized",
+  signature = "swSite",
+  function(object) {
+    swrc_flags <- swSite_SWRCflags(object)
+    pdf_for_NoPDF <- swSite_PDFNoPDF(object)
+
+    uses_NoPDF <- swrc_flags[["pdf_name"]] == "NoPDF"
+
+    if (!uses_NoPDF || (uses_NoPDF && is.na(pdf_for_NoPDF))) {
+      swrc_flags[["pdf_name"]]
+    } else {
+      pdf_for_NoPDF
+    }
+  }
 )
 
 #' @rdname swSite-class
@@ -365,6 +395,18 @@ setReplaceMethod(
   signature = "swSite",
   definition = function(object, value) {
     object@swrc_flags[] <- as.character(value)
+    validObject(object)
+    object
+  }
+)
+
+
+#' @rdname swSite_PDFNoPDF
+setReplaceMethod(
+  "swSite_PDFNoPDF",
+  signature = "swSite",
+  definition = function(object, value) {
+    object@pdf_for_NoPDF[] <- as.character(value)
     validObject(object)
     object
   }

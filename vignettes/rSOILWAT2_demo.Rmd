@@ -606,15 +606,20 @@ see `pdf_names()`.
     pdf_name = tmp["pdf_name"]
   )
 
+
+  # Update `pdf_name` to indicate that parameter values are already estimated
+  rSOILWAT2::swSite_SWRCflags(sw_in)["pdf_name"] <- "NoPDF"
+
+  # Optionally, store `pdf_name` for later (e.g., if we need to update `SWRCp`)
+  rSOILWAT2::swSite_PDFNoPDF(sw_in) <- tmp["pdf_name"]
+
+  # Set estimated `SWRC` parameter values
   rSOILWAT2::swSoils_SWRCp(sw_in) <- swrcp
 
   if (FALSE) {
     # Alternatively, set soil properties and SWRC parameters at once
     rSOILWAT2::set_swSoils(sw_in) <- list(Layers = soil_new, SWRCp = swrcp)
   }
-
-  # Update `pdf_name` to indicate that parameter values are already estimated
-  rSOILWAT2::swSite_SWRCflags(sw_in)["pdf_name"] <- "NoPDF"
 ```
 
 

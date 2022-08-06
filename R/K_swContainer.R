@@ -1599,6 +1599,21 @@ setMethod(
   function(object) swSite_SWRCflags(object@site)
 )
 
+#' @rdname swSite_PDFNoPDF
+setMethod(
+  "swSite_PDFNoPDF",
+  signature = "swInputData",
+  function(object) swSite_PDFNoPDF(object@site)
+)
+
+#' @rdname swSite_PDFutilized
+setMethod(
+  "swSite_PDFutilized",
+  signature = "swInputData",
+  function(object) swSite_PDFutilized(object@site)
+)
+
+
 #' @rdname swInputData-class
 #' @export
 setMethod(
@@ -1710,6 +1725,15 @@ setReplaceMethod(
   }
 )
 
+#' @rdname swSite_PDFNoPDF
+setReplaceMethod(
+  "swSite_PDFNoPDF",
+  signature = "swInputData",
+  function(object, value) {
+    swSite_PDFNoPDF(object@site) <- value
+    object
+  }
+)
 #' @rdname swInputData-class
 #' @export
 setReplaceMethod(

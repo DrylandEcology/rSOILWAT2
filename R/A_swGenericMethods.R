@@ -199,7 +199,8 @@ format_timestamp <- function(object) {
 #' @section Details:
 #' List of changes:
 #'   * Changes with `v6.0.0`:
-#'       * class [`swSite-class`]: new slot `"swrc_flags"`
+#'       * class [`swSite-class`]:
+#'         new slots `"swrc_flags"` and `"pdf_for_NoPDF"`
 #'       * class [`swSoils-class`]: new slot `"SWRCp"`
 #'       * class [`swFiles-class`]:
 #'         `SWRC` parameter input file added as file 6 for a new total of 23
@@ -1574,6 +1575,37 @@ setGeneric(
   function(object) standardGeneric("swSite_SWRCflags")
 )
 
+#' The utilized `pdf` name stored for later use
+#'
+#' @param object An object of class [swSite-class] or [swInputData-class].
+#'
+#' @return The pedotransfer function name that was stored
+#'   with [swSite_PDFNoPDF()] for later usage
+#'   in the situation when `pdf_name` is set to `"NoPDF"` but
+#'  the `pdf` was actually being for estimating the `SWRC` parameters.
+#'
+#' @md
+#' @exportMethod swSite_PDFNoPDF
+setGeneric(
+  "swSite_PDFNoPDF",
+  function(object) standardGeneric("swSite_PDFNoPDF")
+)
+
+#' Identify the actually utilized `pdf` name
+#'
+#' @param object An object of class [swSite-class] or [swInputData-class].
+#'
+#' @return The pedotransfer function name that was utilized for estimating
+#'   `SWRC` given that it was stored either via [swSite_SWRCflags()] or
+#'   [swSite_PDFNoPDF()].
+#'
+#' @md
+#' @exportMethod swSite_PDFutilized
+setGeneric(
+  "swSite_PDFutilized",
+  function(object) standardGeneric("swSite_PDFutilized")
+)
+
 #' \code{swSite_SWClimits}
 #' @param object An object of class \code{\linkS4class{swSite}} or
 #'   \code{\linkS4class{swInputData}}.
@@ -1700,6 +1732,16 @@ setGeneric(
 setGeneric(
   "swSite_SWRCflags<-",
   function(object, value) standardGeneric("swSite_SWRCflags<-")
+)
+
+#' @rdname swSite_PDFNoPDF
+#'
+#' @param value A character vector of a pedotransfer function name.
+#'
+#' @exportMethod swSite_PDFNoPDF<-
+setGeneric(
+  "swSite_PDFNoPDF<-",
+  function(object, value) standardGeneric("swSite_PDFNoPDF<-")
 )
 
 #' \code{swSite_SWClimits<-}
