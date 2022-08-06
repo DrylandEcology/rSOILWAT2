@@ -1714,13 +1714,31 @@ setReplaceMethod(
   }
 )
 
-#' @rdname swInputData-class
-#' @export
+#' @rdname swSite_SWRCflags
+#'
+#' @section Details:
+#' The replacement method [swSite_SWRCflags()] for class [swInputData-class]
+#' resets `SWRCp` to `NA` if `"swrc_name"` or `"pdf_name"` are updated.
+#' This is to avoid inconsistency between `SWRCp` and `swrc_flags`.
+#'
+#' @section Details:
+#' The correct sequence for setting values is
+#'   1. [swSoils_Layers()],
+#'   2. [swSite_SWRCflags()], and
+#'   3. [swSoils_SWRCp()]
+#'
+#' @md
 setReplaceMethod(
   "swSite_SWRCflags",
   signature = "swInputData",
   function(object, value) {
-    swSite_SWRCflags(object@site) <- value
+    prev <- as.character(swSite_SWRCflags(object@site))
+    value <- as.character(value)
+    if (!identical(prev, value)) {
+      swSite_SWRCflags(object@site) <- value
+      # Reset SWRCp -- avoid inconsistency between SWRCp and swrc_flags
+      object@soils@SWRCp[] <- NA_real_
+    }
     object
   }
 )
@@ -1899,14 +1917,26 @@ setReplaceMethod(
   }
 )
 
-#' @rdname swInputData-class
-#' @export
+#' @rdname swSoils_Layers
+#'
+#' @section Details:
+#' The replacement method `swSoils_Layers<-` for class [swInputData-class]
+#' resizes `SWRCp` to match number of new soil layers
+#' (and reset `SWRCp` values to `NA`) if `"pdf_name"` is not `"NoPDF"` (fixed).
+#'
+#' @section Details:
+#' The correct sequence for setting values is
+#'   1. [swSoils_Layers()],
+#'   2. [swSite_SWRCflags()], and
+#'   3. [swSoils_SWRCp()]
+#'
+#' @md
 setReplaceMethod(
   "swSoils_Layers",
   signature = "swInputData",
   function(object, value) {
 
-    if (as.vector(object@site@swrc_flags["pdf_name"]) != "NoPDF") {
+    if (object@site@swrc_flags[["pdf_name"]] != "NoPDF") {
       # Note: If `pdf_type` == 0, then SWRC parameters are not estimated
       # but they are either read in from disk or passed as object.
       # --> however, assigning new soil layers fails `swSoils` validity checks
@@ -1914,10 +1944,9 @@ setReplaceMethod(
       # If `pdf_type` != 0, then SWRC parameters will be estimated later;
       # thus current values will be discarded and
       # we can resize empty SWRC parameter object to avoid validity failure.
-      object@soils@SWRCp <- array(
-        data = NA_real_,
-        dim = c(nrow(value), ncol(object@soils@SWRCp)),
-        dimnames = list(NULL, colnames(object@soils@SWRCp))
+      object@soils@SWRCp <- reset_SWRCp(
+        SWRCp = object@soils@SWRCp,
+        new_nrow = nrow(value)
       )
     }
 
@@ -1926,8 +1955,16 @@ setReplaceMethod(
   }
 )
 
-#' @rdname swInputData-class
-#' @export
+
+#' @rdname swSoils_SWRCp
+#'
+#' @section Details:
+#' The correct sequence for setting values is
+#'   1. [swSoils_Layers()],
+#'   2. [swSite_SWRCflags()], and
+#'   3. [swSoils_SWRCp()]
+#'
+#' @md
 setReplaceMethod(
   "swSoils_SWRCp",
   signature = "swInputData",

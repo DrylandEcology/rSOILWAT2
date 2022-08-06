@@ -312,6 +312,15 @@ setReplaceMethod(
 
 
 
+reset_SWRCp <- function(SWRCp, new_nrow = 1L) {
+  array(
+    data = NA_real_,
+    dim = c(new_nrow, ncol(SWRCp)),
+    dimnames = list(NULL, colnames(SWRCp))
+  )
+}
+
+
 
 #' @rdname swSoils-class
 #' @export

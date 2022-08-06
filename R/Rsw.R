@@ -281,14 +281,13 @@ sw_exec <- function(
     )
 
     if (!is.null(swrcp)) {
-      rSOILWAT2::swSoils_SWRCp(inputData) <- swrcp
       swSite_SWRCflags(inputData)["pdf_name"] <- "NoPDF"
       swSite_PDFNoPDF(inputData) <- pdf_name
+      swSoils_SWRCp(inputData) <- swrcp
     } else {
-      tmp <- rSOILWAT2::swSoils_SWRCp(inputData)
-      rSOILWAT2::swSoils_SWRCp(inputData) <- array(
+      swSoils_SWRCp(inputData) <- array(
         data = NA_real_,
-        dim = dim(tmp)
+        dim = dim(swSoils_SWRCp(inputData))
       )
     }
   }
