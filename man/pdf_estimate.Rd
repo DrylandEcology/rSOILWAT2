@@ -43,8 +43,9 @@ The selected \code{SWRC} name
 The selected \code{PDF} name
 (one of \code{\link[=pdf_names]{pdf_names()}}, with default \code{"Cosby1984AndOthers"}).}
 
-\item{fail}{A logical value. If requested \code{PDF} fails,
-then issue a warning (\code{FALSE}, default) or throw an error (\code{TRUE}).}
+\item{fail}{A logical value.
+Issue a warning (\code{FALSE}, default) or throw an error (\code{TRUE})
+if request fails.}
 
 \item{...}{Additional parameters passed to selected \code{PDF} function.}
 }

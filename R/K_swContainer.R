@@ -1598,18 +1598,11 @@ setMethod(
   function(object) swSite_SWRCflags(object@site)
 )
 
-#' @rdname swSite_PDFNoPDF
+#' @rdname swSite_hasSWRCp
 setMethod(
-  "swSite_PDFNoPDF",
+  "swSite_hasSWRCp",
   signature = "swInputData",
-  function(object) swSite_PDFNoPDF(object@site)
-)
-
-#' @rdname swSite_PDFutilized
-setMethod(
-  "swSite_PDFutilized",
-  signature = "swInputData",
-  function(object) swSite_PDFutilized(object@site)
+  function(object) swSite_hasSWRCp(object@site)
 )
 
 
@@ -1717,14 +1710,15 @@ setReplaceMethod(
 #'
 #' @section Details:
 #' The replacement method [swSite_SWRCflags()] for class [swInputData-class]
-#' resets `SWRCp` to `NA` if `"swrc_name"` or `"pdf_name"` are updated.
-#' This is to avoid inconsistency between `SWRCp` and `swrc_flags`.
+#' resets `has_swrcp` to `FALSE` if `"swrc_name"` or `"pdf_name"` are updated.
+#' This is to avoid inconsistency between
+#' `SWRCp`, `has_swrcp`, and `swrc_flags`.
 #'
 #' @section Details:
 #' The correct sequence for setting values is
 #'   1. [swSoils_Layers()],
 #'   2. [swSite_SWRCflags()], and
-#'   3. [swSoils_SWRCp()]
+#'   3. [swSoils_SWRCp()] and [swSite_hasSWRCp()]
 #'
 #' @md
 setReplaceMethod(
@@ -1735,19 +1729,19 @@ setReplaceMethod(
     value <- as.character(value)
     if (!identical(prev, value)) {
       swSite_SWRCflags(object@site) <- value
-      # Reset SWRCp -- avoid inconsistency between SWRCp and swrc_flags
-      object@soils@SWRCp[] <- NA_real_
+      # Reset has_swrcp -- avoid inconsistency between SWRCp and swrc_flags
+      swSite_hasSWRCp(object) <- FALSE
     }
     object
   }
 )
 
-#' @rdname swSite_PDFNoPDF
+#' @rdname swSite_hasSWRCp
 setReplaceMethod(
-  "swSite_PDFNoPDF",
+  "swSite_hasSWRCp",
   signature = "swInputData",
   function(object, value) {
-    swSite_PDFNoPDF(object@site) <- value
+    swSite_hasSWRCp(object@site) <- value
     object
   }
 )
@@ -1919,13 +1913,16 @@ setReplaceMethod(
 #' @section Details:
 #' The replacement method `swSoils_Layers<-` for class [swInputData-class]
 #' resizes `SWRCp` to match number of new soil layers
-#' (and reset `SWRCp` values to `NA`) if `"pdf_name"` is not `"NoPDF"` (fixed).
+#' (and reset `SWRCp` values to `NA`) if `"has_swrcp"` is `FALSE`.
+#' This is to avoid inconsistency between
+#' soil properties and `SWRCp`.
+
 #'
 #' @section Details:
 #' The correct sequence for setting values is
 #'   1. [swSoils_Layers()],
 #'   2. [swSite_SWRCflags()], and
-#'   3. [swSoils_SWRCp()]
+#'   3. [swSoils_SWRCp()] and [swSite_hasSWRCp()]
 #'
 #' @md
 setReplaceMethod(
@@ -1933,14 +1930,9 @@ setReplaceMethod(
   signature = "swInputData",
   function(object, value) {
 
-    if (object@site@swrc_flags[["pdf_name"]] != "NoPDF") {
-      # Note: If `pdf_type` == 0, then SWRC parameters are not estimated
-      # but they are either read in from disk or passed as object.
-      # --> however, assigning new soil layers fails `swSoils` validity checks
+    if (!swSite_hasSWRCp(object@site)) {
+      # --> assigning new soil layers fails `swSoils` validity checks
       # if number of soil layers disagrees with the SWRC parameter object.
-      # If `pdf_type` != 0, then SWRC parameters will be estimated later;
-      # thus current values will be discarded and
-      # we can resize empty SWRC parameter object to avoid validity failure.
       object@soils@SWRCp <- reset_SWRCp(
         SWRCp = object@soils@SWRCp,
         new_nrow = nrow(value)
@@ -1959,7 +1951,7 @@ setReplaceMethod(
 #' The correct sequence for setting values is
 #'   1. [swSoils_Layers()],
 #'   2. [swSite_SWRCflags()], and
-#'   3. [swSoils_SWRCp()]
+#'   3. [swSoils_SWRCp()] and [swSite_hasSWRCp()]
 #'
 #' @md
 setReplaceMethod(

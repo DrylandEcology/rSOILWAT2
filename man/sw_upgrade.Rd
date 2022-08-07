@@ -45,7 +45,7 @@ List of changes:
 \item Changes with \code{v6.0.0}:
 \itemize{
 \item class \code{\linkS4class{swSite}}:
-new slots \code{"swrc_flags"} and \code{"pdf_for_NoPDF"}
+new slots \code{"swrc_flags"} and \code{"has_swrcp"}
 \item class \code{\linkS4class{swSoils}}: new slot \code{"SWRCp"}
 \item class \code{\linkS4class{swFiles}}:
 \code{SWRC} parameter input file added as file 6 for a new total of 23

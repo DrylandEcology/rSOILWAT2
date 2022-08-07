@@ -237,7 +237,7 @@ test_that("Simulate with all SWRC/PDF combinations", {
 
 
   #--- Loop over test cases ------
-  for (it in tests) {
+  for (it in tests[1]) {
     #---INPUTS
     sw_weather <- readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
     sw_input <- readRDS(file.path(dir_test_data, paste0(it, "_input.rds")))
@@ -268,8 +268,9 @@ test_that("Simulate with all SWRC/PDF combinations", {
       if (inherits(x0, "try-error")) {
         succeed(
           paste(
+            "No live access to",
             paste0(list_swrcs_pdfs[[isp]], collapse = "/"),
-            "requires live internet, skipping for now!"
+            ", skipping for now!"
           )
         )
 
@@ -278,11 +279,11 @@ test_that("Simulate with all SWRC/PDF combinations", {
         expect_s4_class(x0, "swOutput")
 
 
-        #--- Estimate SWRCp and set "NoPDF" ----
+        #--- Estimate SWRCp and set "has_swrcp" ----
         sw_input1 <- sw_input
         soils <- rSOILWAT2::swSoils_Layers(sw_input1)
 
-        rSOILWAT2::swSite_SWRCflags(sw_input1)["pdf_name"] <- "NoPDF"
+        rSOILWAT2::swSite_hasSWRCp(sw_input1) <- TRUE
 
         rSOILWAT2::swSoils_SWRCp(sw_input1) <- rSOILWAT2::pdf_estimate(
           sand = soils[, "sand_frac"],

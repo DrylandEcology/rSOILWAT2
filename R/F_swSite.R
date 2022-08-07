@@ -69,7 +69,7 @@ setClass(
     SoilTemperatureConstants = "numeric",
     TranspirationRegions = "matrix",
     swrc_flags = "character",
-    pdf_for_NoPDF = "character"
+    has_swrcp = "logical"
   ),
   prototype = list(
     SWClimits = c(swc_min = NA_real_, swc_init = NA_real_, swc_wet = NA_real_),
@@ -112,7 +112,7 @@ setClass(
       dimnames = list(NULL, c("ndx", "layer"))
     ),
     swrc_flags = c(swrc_name = NA_character_, pdf_name = NA_character_),
-    pdf_for_NoPDF = NA_character_
+    has_swrcp = NA
   )
 )
 
@@ -177,8 +177,8 @@ setValidity(
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
-    if (length(object@pdf_for_NoPDF) != 1L) {
-      msg <- "@pdf_for_NoPDF length != 1."
+    if (length(object@has_swrcp) != 1L) {
+      msg <- "@has_swrcp length != 1."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
@@ -261,30 +261,13 @@ setMethod(
   function(object) slot(object, "swrc_flags")
 )
 
-#' @rdname swSite_PDFNoPDF
+#' @rdname swSite_hasSWRCp
 setMethod(
-  "swSite_PDFNoPDF",
+  "swSite_hasSWRCp",
   signature = "swSite",
-  function(object) slot(object, "pdf_for_NoPDF")
+  function(object) slot(object, "has_swrcp")
 )
 
-#' @rdname swSite_PDFutilized
-setMethod(
-  "swSite_PDFutilized",
-  signature = "swSite",
-  function(object) {
-    swrc_flags <- swSite_SWRCflags(object)
-    pdf_for_NoPDF <- swSite_PDFNoPDF(object)
-
-    uses_NoPDF <- swrc_flags[["pdf_name"]] == "NoPDF"
-
-    if (!uses_NoPDF || (uses_NoPDF && is.na(pdf_for_NoPDF))) {
-      swrc_flags[["pdf_name"]]
-    } else {
-      pdf_for_NoPDF
-    }
-  }
-)
 
 #' @rdname swSite-class
 #' @export
@@ -398,12 +381,12 @@ setReplaceMethod(
 )
 
 
-#' @rdname swSite_PDFNoPDF
+#' @rdname swSite_hasSWRCp
 setReplaceMethod(
-  "swSite_PDFNoPDF",
+  "swSite_hasSWRCp",
   signature = "swSite",
   definition = function(object, value) {
-    object@pdf_for_NoPDF[] <- as.character(value)
+    object@has_swrcp <- isTRUE(as.logical(value))
     validObject(object)
     object
   }

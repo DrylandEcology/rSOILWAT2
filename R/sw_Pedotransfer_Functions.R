@@ -199,22 +199,19 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #------ SWRC parameters & pedotransfer functions ------
 
 # MAINTENANCE:
-# Notes for implementing a new SWRC "XXX" and corresponding PDF "YYY"
-#   1) SOILWAT2: see notes in SOILWAT2/SW_Site.h, i.e.,
-#      --> updated `N_SWRCs`, `N_PDFs`, `swrc2str[]`, `pdf2str[]`
-#      --> updated `check_SWRC_vs_PDF()`, `SWRC_PDF_estimate_parameters()`,
-#          `SWRC_check_parameters()`, `SWRC_SWCtoSWP()`, `SWRC_SWPtoSWC()`
-#      --> new `SWRC_check_parameters_for_XXX()`, `SWRC_PDF_YYY_for_XXX()`,
-#          `SWRC_SWCtoSWP_XXX()`, `SWRC_SWPtoSWC_XXX()`
+# Notes for implementing a new PDF "YYY" in `rSOILWAT2`
+#   * new `pdf_YYY_for_XXX()`
+#   * new `pdf_YYY_availability(verbose = interactive(), ...)`
+#   * update `pdfs_implemented_by_rSW2()`
+#   * update `rSW2_check_SWRC_vs_PDF()`
+#   * update `rSW2_SWRC_PDF_estimate_parameters()`
+#   * update `check_pdf_availability()`
+#   * update examples and unit tests to utilize new functions
 #
-#   2) rSOILWAT2:
-#     * if "YYY" is implemented in R, then:
-#       * new `pdf_YYY_for_XXX()`
-#       * new `pdf_YYY_availability(verbose = interactive(), ...)`
-#       * update `pdfs_implemented_in_rSW2()`
-#       * update `rSW2_SWRC_PDF_estimate_parameters()`
-#       * update `check_pdf_availability()`
-#     * update examples and unit tests to utilize new XXX/YYY functions
+# Notes for implementing a new SWRC "XXX" and/or PDF "YYY" in `SOILWAT2`
+#   1) SOILWAT2: see notes in SOILWAT2/SW_Site.h
+#   2) rSOILWAT2: everything should automatically work with new XXX/YYY
+#      * update examples and unit tests to utilize new functions
 
 
 #' Functionality for Soil Water Retention Curves (`SWRC`)
@@ -262,6 +259,9 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #'   i.e., `name` (short for `swrc_name`) and `swrcp`,
 #'   or all necessary elements to estimate parameters of a `SWRC` given
 #'   soil parameters, i.e., `swrc_name` and `pdf_name`.
+#' @param fail A logical value.
+#'   Issue a warning (`FALSE`, default) or throw an error (`TRUE`)
+#'   if request fails.
 #' @param verbose A logical value. If `TRUE`, then display
 #'   `SOILWAT2` internal warnings and other messages.
 #' @param ... Additional function arguments passed on or ignored.
@@ -309,7 +309,7 @@ swrc_names <- function() {
 
 #' List Pedotransfer Functions `PDFs`
 #'
-#' @return An integer vector with names of implemented `PDFs`
+#' @return An named integer vector with names of implemented `PDFs`
 #'
 #' @details Notes:
 #' The integer values may change with new versions of `SOILWAT2.`
@@ -319,11 +319,47 @@ swrc_names <- function() {
 #' @md
 #' @export
 pdf_names <- function() {
-  rSW2_glovars[["kSOILWAT2"]][["PDF_types"]]
+  tmp1 <- pdfs_implemented_by_SW2(names_only = FALSE)
+  tmp2 <- pdfs_implemented_by_rSW2()
+
+  c(
+    tmp1,
+    stats::setNames(max(tmp1) + seq_along(tmp2), tmp2)
+  )
+}
+
+
+
+#' List PDFs implemented by `rSOILWAT2`
+#' @md
+pdfs_implemented_by_rSW2 <- function() {
+  c(
+    # `Rosetta3` estimates parameters of `vanGenuchten1980` SWRC
+    "Rosetta3",
+    # `neuroFX2021` estimates parameters of `FXW` SWRC
+    "neuroFX2021"
+  )
+}
+
+#' List PDFs implemented by `SOILWAT2`
+#'
+#' @param names_only A logical value, see `return` value.
+#'
+#' @return An named integer vector (if not `names_only`)
+#' with or a character vector (if `names_only`) names of implemented `PDFs`.
+#'
+#' @md
+pdfs_implemented_by_SW2 <- function(names_only = FALSE) {
+  res <- rSW2_glovars[["kSOILWAT2"]][["PDF_types"]]
+
+  if (isTRUE(names_only)) names(res) else res
 }
 
 
 #' Standardize a `SWRC` name
+#'
+#' `"Campbell1974"` is the backwards compatible default.
+#'
 #' @md
 #' @noRd
 std_swrc <- function(swrc_name) {
@@ -335,6 +371,9 @@ std_swrc <- function(swrc_name) {
 }
 
 #' Standardize a `PDF` name
+#'
+#' `"Cosby1984AndOthers"` is the backwards compatible default.
+#'
 #' @md
 #' @noRd
 std_pdf <- function(pdf_name) {
@@ -346,18 +385,40 @@ std_pdf <- function(pdf_name) {
 }
 
 
-#' Translate a `SWRC` name to its internal integer code
+#' Translate a `SWRC` name to its `SOILWAT2` internal integer code
+#'
+#' @return An integer value. `NA` if `swrc_name` is not implemented.
+#'
 #' @md
 #' @noRd
-encode_name2swrc <- function(swrc_name) {
-  as.integer(unname(swrc_names()[std_swrc(swrc_name)]))
+encode_name2swrc <- function(swrc_name, fail = TRUE) {
+  res <- as.integer(unname(swrc_names()[std_swrc(swrc_name)]))
+
+  if (isTRUE(fail) && anyNA(res)) {
+    stop(
+      "Requested SWRC ",
+      shQuote(swrc_name[is.na(res)]),
+      " is not available."
+    )
+  }
+
+  res
 }
 
-#' Translate a `PDF` name to its internal integer code
+#' Translate a `PDF` name to its `SOILWAT2` internal integer code
+#'
+#' @return An integer value. `NA` if `pdf_name` is not implemented.
+#'
 #' @md
 #' @noRd
-encode_name2pdf <- function(pdf_name) {
-  as.integer(unname(pdf_names()[std_pdf(pdf_name)]))
+encode_name2pdf <- function(pdf_name, fail = TRUE) {
+  res <- as.integer(unname(pdfs_implemented_by_SW2()[std_pdf(pdf_name)]))
+
+  if (isTRUE(fail) && anyNA(res)) {
+    stop("Requested PDF ", shQuote(pdf_name[is.na(res)]), " is not available.")
+  }
+
+  res
 }
 
 
@@ -367,11 +428,6 @@ encode_name2pdf <- function(pdf_name) {
 #'
 #' @return A `data.frame` with two columns `SWRC` and `PDF` where each
 #'   row contains a matching pair of `SWRC` and `PDF` that are implemented.
-#'
-#' @section Details:
-#'   The argument `swrc_name` is optional. If missing, then all implemented
-#'   `SWRCs` are listed.
-#'   `"NoPDF"` is not included in the list.
 #'
 #' @examples
 #' # Data frame of SWRC-PDF combinations
@@ -387,31 +443,90 @@ encode_name2pdf <- function(pdf_name) {
 #'
 #' @md
 #' @export
-list_matched_swrcs_pdfs <- function(swrc_name) {
-  swrc_name <- if (
-    missing(swrc_name) || is.null(swrc_name) || all(is.na(swrc_name))
-  ) {
-    names(swrc_names())
-  } else {
-    as.character(swrc_name)
-  }
-
+list_matched_swrcs_pdfs <- function(swrc_name = names(swrc_names())) {
   res <- expand.grid(
-    SWRC = swrc_name,
-    PDF = names(pdf_names()[-1]),
+    SWRC = std_swrc(swrc_name),
+    PDF = names(pdf_names()),
     stringsAsFactors = FALSE,
     KEEP.OUT.ATTRS = FALSE
   )
 
-  ids <- mapply(
-    function(s, p) .Call(C_rSW2_check_SWRC_vs_PDF, s, p),
-    res[, "SWRC"],
-    res[, "PDF"]
-  )
+  ids <- check_SWRC_vs_PDF(res[, "SWRC"], res[, "PDF"])
 
   res <- res[ids, , drop = FALSE]
   rownames(res) <- NULL
   res
+}
+
+
+#' Check whether PDF and SWRC are compatible and implemented
+#'
+#' @inheritParams SWRCs
+#'
+#' @return A logical vector.
+#'
+#' @examples
+#' check_SWRC_vs_PDF("Campbell1974", c("Cosby1984", "Rosetta3"))
+#'
+#' @md
+#' @export
+check_SWRC_vs_PDF <- function(swrc_name, pdf_name, fail = FALSE) {
+  swrc_names <- std_swrc(swrc_name)
+  pdf_names <- std_pdf(pdf_name)
+
+  n_swrcs <- length(swrc_names)
+  n_pdfs <- length(pdf_names)
+
+  if (n_swrcs == 1L && n_pdfs > 1L) {
+    swrc_names <- rep(swrc_names, n_pdfs)
+    n_swrcs <- n_pdfs
+  } else if (n_swrcs > 1L && n_pdfs == 1L) {
+    pdf_names <- rep(pdf_names, n_swrcs)
+    n_pdfs <- n_swrcs
+  }
+
+  stopifnot(n_swrcs == n_pdfs)
+
+  # Check if SWRC/PDF implemented in rSOILWAT2
+  has_rSW2 <- rSW2_check_SWRC_vs_PDF(swrc_names, pdf_names)
+
+  # Check if SWRC/PDF implemented in SOILWAT2
+  has_SW2 <- mapply(
+    function(s, p) .Call(C_sw_check_SWRC_vs_PDF, s, p),
+    swrc_names,
+    pdf_names
+  )
+
+  # SWRC/PDF implemented in either rSOILWAT2 or SOILWAT2
+  res <- unname(has_rSW2 | has_SW2)
+
+
+  if (!all(res) && isTRUE(fail)) {
+    ids <- which(!res)
+
+    stop(
+      toString(paste(swrc_names[ids], pdf_names[ids], collapse = "-")),
+      " are not available or incompatible."
+    )
+  }
+
+  res
+}
+
+#' Check whether PDF and SWRC are compatible and implemented in `rSOILWAT2`
+#'
+#' @inheritParams SWRCs
+#'
+#' @md
+#' @noRd
+rSW2_check_SWRC_vs_PDF <- function(swrc_name, pdf_name) {
+  swrc_name <- std_swrc(swrc_name)
+  pdf_name <- std_pdf(pdf_name)
+
+  pdf_name %in% pdfs_implemented_by_rSW2() & (
+    swrc_name == "vanGenuchten1980" & pdf_name == "Rosetta3" |
+      swrc_name == "FXW" & pdf_name == "neuroFX2021"
+  )
 }
 
 
@@ -433,8 +548,6 @@ list_matched_swrcs_pdfs <- function(swrc_name) {
 #' are recycled for multiple soil layers.
 #'
 #' @inherit SWRCs references
-#' @param fail A logical value. If requested `PDF` fails,
-#' then issue a warning (`FALSE`, default) or throw an error (`TRUE`).
 #'
 #' @return `swrcp`, i.e,.
 #' a numeric matrix where rows represent soil (layers) and
@@ -507,18 +620,11 @@ pdf_estimate <- function(
   swrc_name <- std_swrc(swrc_name)[1]
   pdf_name <- std_pdf(pdf_name)[1]
 
-  if (!.Call(C_rSW2_check_SWRC_vs_PDF, swrc_name, pdf_name)) {
-    stop(
-      "Selected PDF ",
-      shQuote(pdf_name),
-      " is incompatible with selected SWRC ",
-      shQuote(swrc_name)
-    )
-  }
+  check_SWRC_vs_PDF(swrc_name, pdf_name, fail = TRUE)
 
 
   #--- Determine whether we use a C- or R-implemented PDF
-  swrcp <- if (pdf_name %in% pdfs_implemented_in_rSW2()) {
+  swrcp <- if (pdf_name %in% pdfs_implemented_by_rSW2()) {
     rSW2_SWRC_PDF_estimate_parameters(
       pdf_name = pdf_name,
       sand = sand,
@@ -552,17 +658,6 @@ pdf_estimate <- function(
 }
 
 
-#' List PDFs implemented only in `rSOILWAT2` instead of `SOILWAT2`
-#' @md
-pdfs_implemented_in_rSW2 <- function() {
-  c(
-    # `Rosetta3` estimates parameters of `vanGenuchten1980` SWRC
-    "Rosetta3",
-    # `neuroFX2021` estimates parameters of `FXW` SWRC
-    "neuroFX2021"
-  )
-}
-
 #' Check availability of `PDFs`
 #'
 #' PDFs implemented in `SOILWAT2` are always available;
@@ -571,8 +666,6 @@ pdfs_implemented_in_rSW2 <- function() {
 #'
 #' @param pdfs A character vector. `PDF` names to be checked;
 #' defaults to [pdf_names()].
-#' @param exclude_NoPDF A logical value. Consider `"NoPDF"` to be
-#' available (`FALSE`, default) or unavailable (`TRUE`).
 #' @param verbose A logical value.
 #'
 #' @return A named logical vector with current availability of `PDFs`;
@@ -582,31 +675,26 @@ pdfs_implemented_in_rSW2 <- function() {
 #' check_pdf_availability()
 #' check_pdf_availability("neuroFX2021")
 #' check_pdf_availability("nonexistent_PDF")
-#' check_pdf_availability(exclude_NoPDF = TRUE)
 #'
 #' @export
 #' @md
 check_pdf_availability <- function(
   pdfs = names(pdf_names()),
-  exclude_NoPDF = FALSE,
   verbose = interactive()
 ) {
   res <- rep(NA, length(pdfs))
   names(res) <- pdfs
 
-  rpdfs <- pdfs_implemented_in_rSW2()
+  rpdfs <- pdfs_implemented_by_rSW2()
+  is_rpdf <- pdfs %in% rpdfs
 
   # PDFs implemented in SOILWAT2 are always available
-  tmp <- pdfs %in% names(pdf_names()) & !(pdfs %in% rpdfs)
+  tmp <- pdfs %in% pdfs_implemented_by_SW2(names_only = TRUE) & !is_rpdf
   res[tmp] <- TRUE
-
-  if (isTRUE(exclude_NoPDF) && "NoPDF" %in% pdfs) {
-    res["NoPDF"] <- FALSE
-  }
 
   # Check requested PDFs implemented in R
   has_rpdfs <- vapply(
-    pdfs[pdfs %in% rpdfs],
+    pdfs[is_rpdf],
     function(pdf) {
       switch(
         EXPR = pdf,
@@ -660,7 +748,7 @@ rSW2_SWRC_PDF_estimate_parameters <- function( # nolint: object_length_linter.
   ...
 ) {
   pdf_name <- std_pdf(pdf_name)[1]
-  has_pdf <- pdf_name %in% pdfs_implemented_in_rSW2()
+  has_pdf <- pdf_name %in% pdfs_implemented_by_rSW2()
 
   list_soilargs <- list(
     sand = sand,
@@ -1279,8 +1367,6 @@ swrc_conversion <- function(
         is.null(sand) || is.null(clay)
     ) {
       stop("Insufficient information to estimate SWRC parameters.")
-    } else {
-      swrc[["pdf_type"]] <- encode_name2swrc(swrc[["pdf_name"]])[1]
     }
   }
 

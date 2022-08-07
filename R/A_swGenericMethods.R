@@ -202,7 +202,7 @@ format_timestamp <- function(object) {
 #' List of changes:
 #'   * Changes with `v6.0.0`:
 #'       * class [`swSite-class`]:
-#'         new slots `"swrc_flags"` and `"pdf_for_NoPDF"`
+#'         new slots `"swrc_flags"` and `"has_swrcp"`
 #'       * class [`swSoils-class`]: new slot `"SWRCp"`
 #'       * class [`swFiles-class`]:
 #'         `SWRC` parameter input file added as file 6 for a new total of 23
@@ -1581,36 +1581,25 @@ setGeneric(
   function(object) standardGeneric("swSite_SWRCflags")
 )
 
-#' The utilized `pdf` name stored for later use
+#' Are `SWRC` parameters provided in `SWRCp`?
+#'
+#' Set to `TRUE` once `SWRCp` are set.
 #'
 #' @param object An object of class [swSite-class] or [swInputData-class].
 #'
-#' @return The pedotransfer function name that was stored
-#'   with [swSite_PDFNoPDF()] for later usage
-#'   in the situation when `pdf_name` is set to `"NoPDF"` but
-#'  the `pdf` was actually being for estimating the `SWRC` parameters.
+#' @return A logical value.
+#' `TRUE` if `SWRC` parameters are provided in `SWRCp`;
+#' `FALSE` if `SWRCp` should be estimated during a simulation run
+#' via specified pedotransfer function
+#' (see `"pdf_name"` of [swSite_SWRCflags()]).
 #'
 #' @md
-#' @exportMethod swSite_PDFNoPDF
+#' @exportMethod swSite_hasSWRCp
 setGeneric(
-  "swSite_PDFNoPDF",
-  function(object) standardGeneric("swSite_PDFNoPDF")
+  "swSite_hasSWRCp",
+  function(object) standardGeneric("swSite_hasSWRCp")
 )
 
-#' Identify the actually utilized `pdf` name
-#'
-#' @param object An object of class [swSite-class] or [swInputData-class].
-#'
-#' @return The pedotransfer function name that was utilized for estimating
-#'   `SWRC` given that it was stored either via [swSite_SWRCflags()] or
-#'   [swSite_PDFNoPDF()].
-#'
-#' @md
-#' @exportMethod swSite_PDFutilized
-setGeneric(
-  "swSite_PDFutilized",
-  function(object) standardGeneric("swSite_PDFutilized")
-)
 
 #' \code{swSite_SWClimits}
 #' @param object An object of class \code{\linkS4class{swSite}} or
@@ -1742,14 +1731,14 @@ setGeneric(
   function(object, value) standardGeneric("swSite_SWRCflags<-")
 )
 
-#' @rdname swSite_PDFNoPDF
+#' @rdname swSite_hasSWRCp
 #'
-#' @param value A character vector of a pedotransfer function name.
+#' @param value A logical value.
 #'
-#' @exportMethod swSite_PDFNoPDF<-
+#' @exportMethod swSite_hasSWRCp<-
 setGeneric(
-  "swSite_PDFNoPDF<-",
-  function(object, value) standardGeneric("swSite_PDFNoPDF<-")
+  "swSite_hasSWRCp<-",
+  function(object, value) standardGeneric("swSite_hasSWRCp<-")
 )
 
 #' \code{swSite_SWClimits<-}

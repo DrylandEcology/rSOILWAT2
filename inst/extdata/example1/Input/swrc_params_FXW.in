@@ -6,7 +6,7 @@
 #     selected SWRC (see `siteparam.in`)
 #   - unused columns are ignored (if selected SWRC uses fewer than 6 parameters)
 
-# swrc = "FXW"
+# swrc = "FXW" (values below, from "neuroFX2021")
 #   * param1 = saturated volumetric water content of the matric component [cm/cm]
 #   * param2 = alpha, shape parameter [cm-1]
 #   * param3 = n, shape parameter [-]

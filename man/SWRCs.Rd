@@ -46,6 +46,10 @@ i.e., \code{name} (short for \code{swrc_name}) and \code{swrcp},
 or all necessary elements to estimate parameters of a \code{SWRC} given
 soil parameters, i.e., \code{swrc_name} and \code{pdf_name}.}
 
+\item{fail}{A logical value.
+Issue a warning (\code{FALSE}, default) or throw an error (\code{TRUE})
+if request fails.}
+
 \item{verbose}{A logical value. If \code{TRUE}, then display
 \code{SOILWAT2} internal warnings and other messages.}
 

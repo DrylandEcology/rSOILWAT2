@@ -4,7 +4,7 @@
 \alias{list_matched_swrcs_pdfs}
 \title{Matching pairs of implemented \code{SWRCs} and \code{PDFs}}
 \usage{
-list_matched_swrcs_pdfs(swrc_name)
+list_matched_swrcs_pdfs(swrc_name = names(swrc_names()))
 }
 \arguments{
 \item{swrc_name}{An character string or vector.
@@ -18,13 +18,6 @@ row contains a matching pair of \code{SWRC} and \code{PDF} that are implemented.
 \description{
 Matching pairs of implemented \code{SWRCs} and \code{PDFs}
 }
-\section{Details}{
-
-The argument \code{swrc_name} is optional. If missing, then all implemented
-\code{SWRCs} are listed.
-\code{"NoPDF"} is not included in the list.
-}
-
 \examples{
 # Data frame of SWRC-PDF combinations
 df_swrc_pdfs <- rSOILWAT2::list_matched_swrcs_pdfs()

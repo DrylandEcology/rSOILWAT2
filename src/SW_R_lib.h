@@ -52,7 +52,7 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
   SEXP bdensity
 );
 
-SEXP rSW2_SWRC_check_parameters(SEXP swrc_type, SEXP swrcp);
+SEXP sw_check_SWRC_vs_PDF(SEXP swrc_type, SEXP swrcp);
 
 SEXP rSW2_SWRC(
   SEXP x,

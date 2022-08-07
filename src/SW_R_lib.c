@@ -703,14 +703,14 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
 
 
 /**
-  @brief Check whether selected PDF and SWRC are compatible
+  @brief Check whether PDF and SWRC are compatible and implemented in `SOILWAT2`
 
-  @param[in] swrc_name Name selected SWRC
-  @param[in] pdf_name Name selected PDF
+  @param[in] swrc_name Name of SWRC
+  @param[in] pdf_name Name of PDF
 
   @return A logical value indicating if SWRC and PDF are compatible.
 */
-SEXP rSW2_check_SWRC_vs_PDF(SEXP swrc_name, SEXP pdf_name) {
+SEXP sw_check_SWRC_vs_PDF(SEXP swrc_name, SEXP pdf_name) {
 	SEXP res;
 	PROTECT(res = NEW_LOGICAL(1));
 	LOGICAL(res)[0] = swFALSE;
@@ -731,7 +731,7 @@ SEXP rSW2_check_SWRC_vs_PDF(SEXP swrc_name, SEXP pdf_name) {
 		strcpy(sw_swrc_name, CHAR(STRING_ELT(swrc_name, 0)));
 		strcpy(sw_pdf_name, CHAR(STRING_ELT(pdf_name, 0)));
 
-		LOGICAL(res)[0] = check_SWRC_vs_PDF(sw_swrc_name, sw_pdf_name, swFALSE);
+		LOGICAL(res)[0] = check_SWRC_vs_PDF(sw_swrc_name, sw_pdf_name);
 	}
 
 	UNPROTECT(3);

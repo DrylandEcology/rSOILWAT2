@@ -266,29 +266,32 @@ sw_exec <- function(
   }
 
 
-  # Estimate SWRC parameters if requested PDF only implemented in R
-  pdf_name <- std_pdf(swSite_SWRCflags(inputData)["pdf_name"])
-  if (pdf_name %in% pdfs_implemented_in_rSW2()) {
-    soils <- swSoils_Layers(inputData)
+  #--- Estimate SWRC parameters
+  # if not yet estimated
+  # if requested PDF only implemented in R
+  if (!swSite_hasSWRCp(inputData)) {
+    pdf_name <- std_pdf(swSite_SWRCflags(inputData)["pdf_name"])
+    if (pdf_name %in% pdfs_implemented_by_rSW2()) {
+      soils <- swSoils_Layers(inputData)
 
-    swrcp <- rSW2_SWRC_PDF_estimate_parameters(
-      sand = soils[, "sand_frac"],
-      clay = soils[, "clay_frac"],
-      fcoarse = soils[, "gravel_content"],
-      bdensity = soils[, "bulkDensity_g/cm^3"],
-      pdf_name = pdf_name,
-      fail = FALSE
-    )
-
-    if (!is.null(swrcp)) {
-      swSite_SWRCflags(inputData)["pdf_name"] <- "NoPDF"
-      swSite_PDFNoPDF(inputData) <- pdf_name
-      swSoils_SWRCp(inputData) <- swrcp
-    } else {
-      swSoils_SWRCp(inputData) <- array(
-        data = NA_real_,
-        dim = dim(swSoils_SWRCp(inputData))
+      swrcp <- rSW2_SWRC_PDF_estimate_parameters(
+        sand = soils[, "sand_frac"],
+        clay = soils[, "clay_frac"],
+        fcoarse = soils[, "gravel_content"],
+        bdensity = soils[, "bulkDensity_g/cm^3"],
+        pdf_name = pdf_name,
+        fail = FALSE
       )
+
+      if (!is.null(swrcp)) {
+        swSite_hasSWRCp(inputData) <- TRUE
+        swSoils_SWRCp(inputData) <- swrcp
+      } else {
+        swSoils_SWRCp(inputData) <- array(
+          data = NA_real_,
+          dim = dim(swSoils_SWRCp(inputData))
+        )
+      }
     }
   }
 

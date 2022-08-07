@@ -40,7 +40,7 @@ The correct sequence for setting values is
 \enumerate{
 \item \code{\link[=swSoils_Layers]{swSoils_Layers()}},
 \item \code{\link[=swSite_SWRCflags]{swSite_SWRCflags()}}, and
-\item \code{\link[=swSoils_SWRCp]{swSoils_SWRCp()}}
+\item \code{\link[=swSoils_SWRCp]{swSoils_SWRCp()}} and \code{\link[=swSite_hasSWRCp]{swSite_hasSWRCp()}}
 }
 }
 

@@ -35,14 +35,16 @@ Interact with the soil layer data frame
 
 The replacement method \verb{swSoils_Layers<-} for class \linkS4class{swInputData}
 resizes \code{SWRCp} to match number of new soil layers
-(and reset \code{SWRCp} values to \code{NA}) if \code{"pdf_name"} is not \code{"NoPDF"} (fixed).
+(and reset \code{SWRCp} values to \code{NA}) if \code{"has_swrcp"} is \code{FALSE}.
+This is to avoid inconsistency between
+soil properties and \code{SWRCp}.
 
 
 The correct sequence for setting values is
 \enumerate{
 \item \code{\link[=swSoils_Layers]{swSoils_Layers()}},
 \item \code{\link[=swSite_SWRCflags]{swSite_SWRCflags()}}, and
-\item \code{\link[=swSoils_SWRCp]{swSoils_SWRCp()}}
+\item \code{\link[=swSoils_SWRCp]{swSoils_SWRCp()}} and \code{\link[=swSite_hasSWRCp]{swSite_hasSWRCp()}}
 }
 }
 

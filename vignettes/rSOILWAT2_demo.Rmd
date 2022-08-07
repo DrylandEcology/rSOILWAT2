@@ -591,10 +591,8 @@ You may organize weather data in a variety of ways:
 
 ## Estimate parameters of Soil Water Retention Curve before simulation
 Note: This step is usually not necessarily;
-instead, the default is to use the selected pedotransfer function to have the
-parameters estimated automatically.
-If we pass parameter values, then we need to set the `PDF` name to `"NoPDF"`,
-see `pdf_names()`.
+instead, the default setup is that parameters are estimated automatically
+by `SOILWAT2` with the selected pedotransfer function.
 ```{r, soils_swrc}
   tmp <- rSOILWAT2::swSite_SWRCflags(sw_in)
   swrcp <- rSOILWAT2::pdf_estimate(
@@ -607,14 +605,11 @@ see `pdf_names()`.
   )
 
 
-  # Update `pdf_name` to indicate that parameter values are already estimated
-  rSOILWAT2::swSite_SWRCflags(sw_in)["pdf_name"] <- "NoPDF"
-
-  # Optionally, store `pdf_name` for later (e.g., if we need to update `SWRCp`)
-  rSOILWAT2::swSite_PDFNoPDF(sw_in) <- tmp["pdf_name"]
-
   # Set estimated `SWRC` parameter values
   rSOILWAT2::swSoils_SWRCp(sw_in) <- swrcp
+
+  # Declare that parameter values are already estimated
+  rSOILWAT2::swSite_hasSWRCp(sw_in) <- TRUE
 
   if (FALSE) {
     # Alternatively, set soil properties and SWRC parameters at once

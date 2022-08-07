@@ -37,15 +37,16 @@ Names of \code{SWRC} and \code{PDF}
 \section{Details}{
 
 The replacement method \code{\link[=swSite_SWRCflags]{swSite_SWRCflags()}} for class \linkS4class{swInputData}
-resets \code{SWRCp} to \code{NA} if \code{"swrc_name"} or \code{"pdf_name"} are updated.
-This is to avoid inconsistency between \code{SWRCp} and \code{swrc_flags}.
+resets \code{has_swrcp} to \code{FALSE} if \code{"swrc_name"} or \code{"pdf_name"} are updated.
+This is to avoid inconsistency between
+\code{SWRCp}, \code{has_swrcp}, and \code{swrc_flags}.
 
 
 The correct sequence for setting values is
 \enumerate{
 \item \code{\link[=swSoils_Layers]{swSoils_Layers()}},
 \item \code{\link[=swSite_SWRCflags]{swSite_SWRCflags()}}, and
-\item \code{\link[=swSoils_SWRCp]{swSoils_SWRCp()}}
+\item \code{\link[=swSoils_SWRCp]{swSoils_SWRCp()}} and \code{\link[=swSite_hasSWRCp]{swSite_hasSWRCp()}}
 }
 }
 

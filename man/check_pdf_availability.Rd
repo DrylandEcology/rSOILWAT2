@@ -4,18 +4,11 @@
 \alias{check_pdf_availability}
 \title{Check availability of \code{PDFs}}
 \usage{
-check_pdf_availability(
-  pdfs = names(pdf_names()),
-  exclude_NoPDF = FALSE,
-  verbose = interactive()
-)
+check_pdf_availability(pdfs = names(pdf_names()), verbose = interactive())
 }
 \arguments{
 \item{pdfs}{A character vector. \code{PDF} names to be checked;
 defaults to \code{\link[=pdf_names]{pdf_names()}}.}
-
-\item{exclude_NoPDF}{A logical value. Consider \code{"NoPDF"} to be
-available (\code{FALSE}, default) or unavailable (\code{TRUE}).}
 
 \item{verbose}{A logical value.}
 }
@@ -32,6 +25,5 @@ live internet connection or access to specific data files.
 check_pdf_availability()
 check_pdf_availability("neuroFX2021")
 check_pdf_availability("nonexistent_PDF")
-check_pdf_availability(exclude_NoPDF = TRUE)
 
 }

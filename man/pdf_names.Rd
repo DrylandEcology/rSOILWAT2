@@ -7,7 +7,7 @@
 pdf_names()
 }
 \value{
-An integer vector with names of implemented \code{PDFs}
+An named integer vector with names of implemented \code{PDFs}
 }
 \description{
 List Pedotransfer Functions \code{PDFs}

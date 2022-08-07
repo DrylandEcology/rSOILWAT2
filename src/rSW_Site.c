@@ -50,7 +50,7 @@ static char *cSW_SIT[] = {
   "SnowSimulationParameters", "DrainageCoefficient", "EvaporationCoefficients",
   "TranspirationCoefficients", "IntrinsicSiteParams", "SoilTemperatureFlag",
   "SoilTemperatureConstants", "TranspirationRegions",
-  "swrc_flags"
+  "swrc_flags", "has_swrcp"
 };
 
 static char *cLayers[] = {
@@ -317,6 +317,8 @@ SEXP onGet_SW_SIT() {
 	SEXP swrc_flags, swrc_names;
 	char *cSWRCflags[] = {"swrc_name", "pdf_name"};
 
+	SEXP has_swrcp;
+
 	SEXP TranspirationRegions, TranspirationRegions_names, TranspirationRegions_names_y;
 	char *cTranspirationRegions[] = { "ndx", "layer" };
 	int *p_transp; // ideally `LyrIndex` so that same type as `_TranspRgnBounds`, but R API INTEGER() is signed
@@ -444,6 +446,9 @@ SEXP onGet_SW_SIT() {
 	}
 	setAttrib(swrc_flags, R_NamesSymbol, swrc_names);
 
+	PROTECT(has_swrcp = NEW_LOGICAL(1));
+	LOGICAL(has_swrcp)[0] = v->site_has_swrcp;
+
 
 	// Fill all slots of `SW_SIT`
 	SET_SLOT(SW_SIT, install(cSW_SIT[0]), SWClimits);
@@ -458,8 +463,9 @@ SEXP onGet_SW_SIT() {
 	SET_SLOT(SW_SIT, install(cSW_SIT[9]), SoilTemperatureConstants);
 	SET_SLOT(SW_SIT, install(cSW_SIT[10]), TranspirationRegions);
 	SET_SLOT(SW_SIT, install(cSW_SIT[11]), swrc_flags);
+	SET_SLOT(SW_SIT, install(cSW_SIT[12]), has_swrcp);
 
-	UNPROTECT(26);
+	UNPROTECT(27);
 	return SW_SIT;
 }
 
@@ -477,7 +483,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	SEXP IntrinsicSiteParams;
 	SEXP SoilTemperatureConstants_use;
 	SEXP SoilTemperatureConstants;
-	SEXP swrc_flags;
+	SEXP swrc_flags, has_swrcp;
 	SEXP TranspirationRegions;
 	int *p_transp; // ideally `LyrIndex` so that same type as `_TranspRgnBounds`, but R API INTEGER() is signed
 
@@ -590,6 +596,9 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	v->site_swrc_type = encode_str2swrc(v->site_swrc_name);
 	strcpy(v->site_pdf_name, CHAR(STRING_ELT(swrc_flags, 1)));
 	v->site_pdf_type = encode_str2pdf(v->site_pdf_name);
+	PROTECT(has_swrcp = GET_SLOT(SW_SIT, install("has_swrcp")));
+	v->site_has_swrcp = LOGICAL(has_swrcp)[0];
+
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" > 'swrc/pdf-type'");
 	#endif
@@ -624,5 +633,5 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	if (debug) swprintf(" ... done. \n");
 	#endif
 
-	UNPROTECT(12);
+	UNPROTECT(13);
 }
