@@ -41,6 +41,7 @@ extern Bool bWeatherList;
 SEXP tempError(void);
 SEXP onGetInputDataFromFiles(SEXP input);
 SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet);
+SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData);
 SEXP sw_consts(void);
 
 #endif /* SW_R_LIB_H_ */

@@ -24,8 +24,10 @@ test_that("Manipulate 'swSite' class", {
   expect_equal(xinput, xinput2)
 
   #--- Slot 'ModelCoefficients'
-  expect_equal(swSite_ModelCoefficients(xinput),
-    swSite_ModelCoefficients(get_swSite(xinput)))
+  expect_equal(
+    swSite_ModelCoefficients(xinput),
+    swSite_ModelCoefficients(get_swSite(xinput))
+  )
 
   mc <- mc_ok <- swSite_ModelCoefficients(xinput2)
   expect_equal(swSite_ModelCoefficients(xinput2), mc)
@@ -33,8 +35,10 @@ test_that("Manipulate 'swSite' class", {
   mc["PETmultiplier"] <- 4
   swSite_ModelCoefficients(site1) <- mc
   swSite_ModelCoefficients(xinput2) <- mc
-  expect_equal(swSite_ModelCoefficients(xinput2),
-    swSite_ModelCoefficients(site1))
+  expect_equal(
+    swSite_ModelCoefficients(xinput2),
+    swSite_ModelCoefficients(site1)
+  )
 
   mc["PETmultiplier"] <- -1
   expect_error(swSite_ModelCoefficients(site1) <- mc)
@@ -44,8 +48,10 @@ test_that("Manipulate 'swSite' class", {
   mc["DailyRunoff"] <- 0.9
   swSite_ModelCoefficients(site1) <- mc
   swSite_ModelCoefficients(xinput2) <- mc
-  expect_equal(swSite_ModelCoefficients(xinput2),
-    swSite_ModelCoefficients(site1))
+  expect_equal(
+    swSite_ModelCoefficients(xinput2),
+    swSite_ModelCoefficients(site1)
+  )
 
   mc["DailyRunoff"] <- -1
   expect_error(swSite_ModelCoefficients(site1) <- mc)
@@ -59,16 +65,20 @@ test_that("Manipulate 'swSite' class", {
   mc["DailyRunon"] <- 4
   swSite_ModelCoefficients(site1) <- mc
   swSite_ModelCoefficients(xinput2) <- mc
-  expect_equal(swSite_ModelCoefficients(xinput2),
-    swSite_ModelCoefficients(site1))
+  expect_equal(
+    swSite_ModelCoefficients(xinput2),
+    swSite_ModelCoefficients(site1)
+  )
 
   mc["DailyRunon"] <- -1
   expect_error(swSite_ModelCoefficients(site1) <- mc)
   expect_error(swSite_ModelCoefficients(xinput2) <- mc)
 
   #--- Slot TranspirationRegions
-  expect_equal(swSite_TranspirationRegions(xinput),
-    swSite_TranspirationRegions(get_swSite(xinput)))
+  expect_equal(
+    swSite_TranspirationRegions(xinput),
+    swSite_TranspirationRegions(get_swSite(xinput))
+  )
 
   mc <- mc_ok <- swSite_TranspirationRegions(xinput2)
   expect_equal(swSite_TranspirationRegions(xinput2), mc)
@@ -97,8 +107,13 @@ test_that("Run 'rSOILWAT2' with different 'swSite' inputs", {
 
     # Run SOILWAT
     expect_s4_class(
-      sw_exec(inputData = sw_input, weatherList = sw_weather, echo = FALSE,
-        quiet = TRUE),
-      "swOutput")
+      sw_exec(
+        inputData = sw_input,
+        weatherList = sw_weather,
+        echo = FALSE,
+        quiet = TRUE
+      ),
+      "swOutput"
+    )
   }
 })

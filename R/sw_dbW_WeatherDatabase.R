@@ -1946,6 +1946,35 @@ dbW_weatherData_to_dataframe <- function(weatherData, valNA = NULL) {
   )
 }
 
+#' Round weather data in a list class \code{\linkS4class{swWeatherData}}
+#'
+#' @param weatherData A list with \code{\linkS4class{swWeatherData}} elements.
+#' @param digits An integer value. The returned values will be rounded to
+#'   the specified number of decimal places.
+#' @param weatherDF_dataColumns A character vector. The column names
+#'   that should be rounded.
+#'
+#' @return A list with \code{\linkS4class{swWeatherData}} elements.
+#'
+#' @export
+dbW_weatherData_round <- function(
+  weatherData,
+  digits = 4L,
+  weatherDF_dataColumns = c("Tmax_C", "Tmin_C", "PPT_cm")
+) {
+  lapply(
+    weatherData,
+    function(x) {
+      slot(x, "data")[, weatherDF_dataColumns] <- round(
+        slot(x, "data")[, weatherDF_dataColumns],
+        digits = digits
+      )
+      x
+    }
+  )
+}
+
+
 #' Conversion: object of class \code{\linkS4class{swWeatherData}} to
 #' matrix of monthly values (\var{mean Tmax}, \var{mean Tmin}, \var{sum PPT})
 #'
