@@ -665,7 +665,10 @@ You may organize weather data in a variety of ways:
   (iii) run SOILWAT2 with filled-in data
 
 ```{r, weather3}
-  wgen_coeffs <- rSOILWAT2::dbW_estimate_WGen_coefs(weatherData = wdata)
+  wgen_coeffs <- rSOILWAT2::dbW_estimate_WGen_coefs(
+    weatherData = wdata,
+    imputation_type = "locf"
+  )
 
   wdata_filled <- rSOILWAT2::dbW_generateWeather(
     weatherData = wdata_gaps,

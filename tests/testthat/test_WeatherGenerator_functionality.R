@@ -28,14 +28,22 @@ test_that("Weather generator: estimate input parameters", {
     test_df <- data.frame(dbW_weatherData_to_dataframe(test_dat, valNA = NULL))
 
     if (anyNA(test_df)) {
-      expect_warning(res <- dbW_estimate_WGen_coefs(test_df,
-        propagate_NAs = TRUE),
-        "Insufficient weather data to estimate values")
+      expect_warning(
+        res <- dbW_estimate_WGen_coefs(
+          test_df,
+          propagate_NAs = TRUE
+        ),
+        "Insufficient weather data to estimate values"
+      )
 
-      expect_message(res <- dbW_estimate_WGen_coefs(test_df,
-        propagate_NAs = FALSE,
-        imputation_type = "mean"),
-        "Impute missing")
+      expect_message(
+        res <- dbW_estimate_WGen_coefs(
+          test_df,
+          propagate_NAs = FALSE,
+          imputation_type = "mean"
+        ),
+        "Impute missing"
+      )
 
     } else {
       res <- dbW_estimate_WGen_coefs(test_df)
@@ -48,8 +56,14 @@ test_that("Weather generator: estimate input parameters", {
 
     # validity tests ok
     sw_in <- rSOILWAT2::sw_exampleData
-    expect_equal(swMarkov_Prob(sw_in) <- res[["mkv_doy"]], res[["mkv_doy"]])
-    expect_equal(swMarkov_Conv(sw_in) <- res[["mkv_woy"]], res[["mkv_woy"]])
+    expect_equal(
+      swMarkov_Prob(sw_in) <- res[["mkv_doy"]],
+      res[["mkv_doy"]]
+    )
+    expect_equal(
+      swMarkov_Conv(sw_in) <- res[["mkv_woy"]],
+      res[["mkv_woy"]]
+    )
   }
 })
 
@@ -63,25 +77,34 @@ test_that("Weather generator: generate weather", {
     wout <- list()
 
     # Case 1: generate weather for dataset and impute missing values
-    wout[[1]] <- dbW_generateWeather(test_dat,
+    wout[[1]] <- dbW_generateWeather(
+      test_dat,
       imputation_type = "mean",
-      imputation_span = 5)
+      imputation_span = 5
+    )
 
     # Case 2: generate weather based on partial dataset,
     #   use estimated weather generator coefficients from full dataset
-    wgen_coeffs <- dbW_estimate_WGen_coefs(test_dat,
+    wgen_coeffs <- dbW_estimate_WGen_coefs(
+      test_dat,
       imputation_type = "mean",
-      imputation_span = 5)
-    wout[[2]] <- dbW_generateWeather(test_dat[(n - 5):n],
+      imputation_span = 5
+    )
+
+    wout[[2]] <- dbW_generateWeather(
+      test_dat[(n - 5):n],
       years = years[length(years)] + 0:10 - 5,
-      wgen_coeffs = wgen_coeffs)
+      wgen_coeffs = wgen_coeffs
+    )
 
     # Case 3: generate weather based only on estimated weather generator
     #   coefficients from full dataset
     x_empty <- list(new("swWeatherData"))
-    wout[[3]] <- dbW_generateWeather(x_empty,
+    wout[[3]] <- dbW_generateWeather(
+      x_empty,
       years = years[length(years)] + 30:40,
-      wgen_coeffs = wgen_coeffs)
+      wgen_coeffs = wgen_coeffs
+    )
 
     # Expectations
     for (k in seq_along(wout)) {
@@ -101,7 +124,8 @@ test_that("Weather generator: generate weather", {
           check_weather(
             weather = wdf,
             required_variables = c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
-        ))
+          )
+        )
 
         # There are no missing data
         expect_false(anyNA(wdf))
@@ -112,8 +136,12 @@ test_that("Weather generator: generate weather", {
 
 
 test_that("Weather generator (integration tests): compare input/output", {
-  skip_if_not(identical(tolower(Sys.getenv("RSOILWAT_INTEGRATIONTESTS")),
-    "true"))
+  skip_if_not(
+    identical(
+      tolower(Sys.getenv("RSOILWAT_INTEGRATIONTESTS")),
+      "true"
+    )
+  )
 
   dir_inttests <- file.path("..", "rSOILWAT_IntegrationTestOutput")
   dir.create(dir_inttests, showWarnings = FALSE)
@@ -139,30 +167,42 @@ test_that("Weather generator (integration tests): compare input/output", {
   swMarkov_Conv(sw_in) <- res[["mkv_woy"]]
   set_swWeatherData(sw_in) <- new("swWeatherData")
 
-  wgen_df <- replicate(N, {
-    res <- sw_exec(inputData = sw_in)
+  wgen_df <- replicate(
+    N,
+    {
+      res <- sw_exec(inputData = sw_in)
 
-    out <- lapply(time_steps, function(it) {
-      temp <- slot(slot(res, "TEMP"), it)
+      out <- lapply(
+        time_steps,
+        function(it) {
+          temp <- slot(slot(res, "TEMP"), it)
 
-      data.frame(
-        if (it == "Year") {
-          temp[, "Year", drop = FALSE]
-        } else {
-          temp[, c("Year", it)]
-        },
-        Tmax_C = temp[, "max_C"],
-        Tmin_C = temp[, "min_C"],
-        PPT_cm = slot(slot(res, "PRECIP"), it)[, "ppt"]
+          data.frame(
+            if (it == "Year") {
+              temp[, "Year", drop = FALSE]
+            } else {
+              temp[, c("Year", it)]
+            },
+            Tmax_C = temp[, "max_C"],
+            Tmin_C = temp[, "min_C"],
+            PPT_cm = slot(slot(res, "PRECIP"), it)[, "ppt"]
+          )
+        }
       )
-    })
-    names(out) <- time_steps
-    out
-  }, simplify = FALSE)
+      names(out) <- time_steps
+      out
+    },
+    simplify = FALSE
+  )
 
 
   #--- Comparison
-  compare_weather(ref_weather = obs_df, weather = wgen_df, N = N,
-    path = dir_inttests, tag = "IntegrationTest-WeatherGenerator")
+  compare_weather(
+    ref_weather = obs_df,
+    weather = wgen_df,
+    N = N,
+    path = dir_inttests,
+    tag = "IntegrationTest-WeatherGenerator"
+  )
 
 })

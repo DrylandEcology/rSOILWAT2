@@ -117,18 +117,27 @@
 #' swMarkov_Conv(sw_in) <- res2[["mkv_woy"]]
 #'
 #' @export
-dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
-  propagate_NAs = FALSE, valNA = NULL,
+dbW_estimate_WGen_coefs <- function(
+  weatherData,
+  WET_limit_cm = 0,
+  propagate_NAs = FALSE,
+  valNA = NULL,
   imputation_type = c("none", "mean", "locf"),
-  imputation_span = 5L) {
+  imputation_span = 5L
+) {
 
   # daily weather data
-  if (inherits(weatherData, "list") &&
-      all(sapply(weatherData, inherits, what = "swWeatherData"))) {
-    wdata <- data.frame(dbW_weatherData_to_dataframe(weatherData,
-      valNA = valNA))
+  if (
+      inherits(weatherData, "list") &&
+      all(sapply(weatherData, inherits, what = "swWeatherData"))
+  ) {
+    wdata <- data.frame(
+      dbW_weatherData_to_dataframe(weatherData, valNA = valNA)
+    )
   } else {
-    wdata <- data.frame(set_missing_weather(weatherData, valNA = valNA))
+    wdata <- data.frame(
+      set_missing_weather(weatherData, valNA = valNA)
+    )
   }
 
   n_days <- nrow(wdata)
@@ -137,10 +146,13 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
 
   na.rm <- !propagate_NAs
 
-  #-----------------------------------------------------------------------------
   #------ calculate mkv_prob.in
-  icol_day <- grep("DOY|Day", colnames(wdata), ignore.case = TRUE,
-    value = TRUE)
+  icol_day <- grep(
+    "DOY|Day",
+    colnames(wdata),
+    ignore.case = TRUE,
+    value = TRUE
+  )
 
   #--- calculate WET days
   wdata[["WET"]] <- wdata[["PPT_cm"]] > WET_limit_cm
@@ -156,25 +168,35 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   #--- output container: dataframe for storing mkv_prob.in data
   doys <- 366  # see SOILWAT2 constant `MAX_DAYS`
   outs <- c("DOY", "p_W_W", "p_W_D", "PPT_avg", "PPT_sd")
-  mkv_prob <- data.frame(matrix(NA, nrow = doys, ncol = length(outs),
-    dimnames = list(NULL, outs)))
+  mkv_prob <- data.frame(
+    matrix(nrow = doys, ncol = length(outs), dimnames = list(NULL, outs))
+  )
   mkv_prob[, "DOY"] <- seq_len(doys)
 
   #--- mean/sd of precipitation across years for doy i if it is a wet day
-  temp <- by(wdata[, c("WET", "PPT_cm")], INDICES = wdata[, icol_day],
+  temp <- by(
+    wdata[, c("WET", "PPT_cm")],
+    INDICES = wdata[, icol_day],
     function(x) {
       # if `na.rm` is TRUE, then remove NAs in `WET`; if only NAs -> PPT_avg = 0
       # if `na.rm` is FALSE, then any NA propagates to PPT_avg = NA
       iswet <- if (na.rm) which(x[, "WET"]) else x[, "WET"]
       ppt <- x[iswet, "PPT_cm"]
+
       if (length(ppt) > 0) {
-        c(PPT_avg = mean(ppt, na.rm = na.rm),
-          PPT_sd = sd(ppt, na.rm = na.rm))
+        c(
+          PPT_avg = mean(ppt, na.rm = na.rm),
+          PPT_sd = sd(ppt, na.rm = na.rm)
+        )
       } else {
         # there are no wet days for this DOY; thus PPT = 0
-        c(PPT_avg = 0, PPT_sd = 0)
+        c(
+          PPT_avg = 0,
+          PPT_sd = 0
+        )
       }
-    })
+    }
+  )
   mkv_prob[, c("PPT_avg", "PPT_sd")] <- do.call(rbind, temp)
 
 
@@ -184,8 +206,10 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   #    dryprob = p(wet|dry) = "p_W_D" #nolint
   #    = probability that it precipitates today if it was dry
   #      (did not precipitate) yesterday
-  temp <- by(wdata[, c("WET", "WET_yesterday", "WW", "WD")],
-    INDICES = wdata[, icol_day], function(x) {
+  temp <- by(
+    wdata[, c("WET", "WET_yesterday", "WW", "WD")],
+    INDICES = wdata[, icol_day],
+    function(x) {
       # p(wet): probability that today is wet
       p_W <- mean(x[, "WET"], na.rm = na.rm)
       # number of DOY = i that follow a wet day
@@ -195,30 +219,34 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
 
       c(
         p_W_W = if (isTRUE(n_Wy > 0)) {
-            # `p(wet|wet)` estimated as the number of years with doy being wet
-            # given previous day is wet divided by the number of years with
-            # the previous day being wet
-            sum(x[, "WW"], na.rm = na.rm) / n_Wy
-          } else {
-            # `p(wet|wet)` approximated with frequency that today is wet for
-            # data where yesterday is never wet (avoid division by zero);
-            # this value is likely near 0 because p(wet yesterday) = 0
-            # and p(wet today) ~ p(wet yesterday)
-            p_W
-          },
+          # `p(wet|wet)` estimated as the number of years with doy being wet
+          # given previous day is wet divided by the number of years with
+          # the previous day being wet
+          sum(x[, "WW"], na.rm = na.rm) / n_Wy
+        } else {
+          # `p(wet|wet)` approximated with frequency that today is wet for
+          # data where yesterday is never wet (avoid division by zero);
+          # this value is likely near 0 because p(wet yesterday) = 0
+          # and p(wet today) ~ p(wet yesterday)
+          p_W
+        },
+
         p_W_D = if (isTRUE(n_Dy > 0)) {
-            # `p(wet|dry)` estimated as the number of years with doy being wet
-            # given previous day is dry divided by the number of years with
-            # the previous day being dry
-            sum(x[, "WD"], na.rm = na.rm) / n_Dy
-          } else {
-            # `p(wet|dry)` approximated with frequency that today is wet for
-            # data where yesterday is never dry (avoid division by zero);
-            # this value is likely near 1 because p(wet yesterday) = 1
-            # and p(wet today) ~ p(wet yesterday)
-            p_W
-          })
-    })
+          # `p(wet|dry)` estimated as the number of years with doy being wet
+          # given previous day is dry divided by the number of years with
+          # the previous day being dry
+          sum(x[, "WD"], na.rm = na.rm) / n_Dy
+        } else {
+          # `p(wet|dry)` approximated with frequency that today is wet for
+          # data where yesterday is never dry (avoid division by zero);
+          # this value is likely near 1 because p(wet yesterday) = 1
+          # and p(wet today) ~ p(wet yesterday)
+          p_W
+        }
+      )
+    }
+  )
+
   mkv_prob[, c("p_W_W", "p_W_D")] <- do.call(rbind, temp)
 
   #--- Make sure probability values are well formed: 0 <= p <= 1
@@ -242,7 +270,8 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
       warning("Insufficient weather data to estimate ", msg)
     } else {
       message("Impute missing `mkv_prob` ", msg)
-      mkv_prob <- rSW2utils::impute_df(mkv_prob,
+      mkv_prob <- rSW2utils::impute_df(
+        mkv_prob,
         imputation_type = imputation_type,
         imputation_span = imputation_span,
         cyclic = TRUE
@@ -252,7 +281,6 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
 
 
 
-  #-----------------------------------------------------------------------------
   #------ mkv_covar.in
 
   #--- week as interpreted by SOILWAT2 function `Doy2Week`
@@ -260,26 +288,43 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
 
   #--- output container: dataframe for storing mkv_cov.in data
   weeks <- 53 # see SOILWAT2 constant `MAX_WEEKS`
-  outs <- c("WEEK", "wTmax_C", "wTmin_C",
+  outs <- c(
+    "WEEK", "wTmax_C", "wTmin_C",
     "var_MAX", "cov_MAXMIN", "cov_MINMAX", "var_MIN",
-    "CF_Tmax_wet", "CF_Tmax_dry", "CF_Tmin_wet", "CF_Tmin_dry")
-  mkv_cov <- data.frame(matrix(NA, nrow = weeks, ncol = length(outs),
-    dimnames = list(NULL, outs)))
+    "CF_Tmax_wet", "CF_Tmax_dry", "CF_Tmin_wet", "CF_Tmin_dry"
+  )
+  mkv_cov <- data.frame(
+    matrix(nrow = weeks, ncol = length(outs), dimnames = list(NULL, outs))
+  )
 
 
   #--- Aggregate for each week
   mkv_cov[, "WEEK"] <- seq_len(weeks)
 
   # Average weekly temperature values
-  mkv_cov[, "wTmax_C"] <- tapply(wdata[["Tmax_C"]], wdata[["WEEK"]], mean,
-    na.rm = na.rm)
-  mkv_cov[, "wTmin_C"] <- tapply(wdata[["Tmin_C"]], wdata[["WEEK"]], mean,
-    na.rm = na.rm)
+  mkv_cov[, "wTmax_C"] <- tapply(
+    wdata[["Tmax_C"]],
+    wdata[["WEEK"]],
+    mean,
+    na.rm = na.rm
+  )
+
+  mkv_cov[, "wTmin_C"] <- tapply(
+    wdata[["Tmin_C"]],
+    wdata[["WEEK"]],
+    mean,
+    na.rm = na.rm
+  )
 
   # Variance-covariance values among maximum and minimum temperature
-  temp <- by(wdata[, c("Tmax_C", "Tmin_C")], wdata[["WEEK"]], cov,
-    use = if (na.rm) "na.or.complete" else "everything")
+  temp <- by(
+    wdata[, c("Tmax_C", "Tmin_C")],
+    wdata[["WEEK"]],
+    cov,
+    use = if (na.rm) "na.or.complete" else "everything"
+  )
   temp <- sapply(temp, function(x) c(x[1, 1], x[1, 2], x[2, 1], x[2, 2]))
+
   mkv_cov[, "var_MAX"] <- temp[1, ]
   mkv_cov[, "cov_MAXMIN"] <- temp[2, ]
   mkv_cov[, "cov_MINMAX"] <- temp[3, ]
@@ -290,20 +335,24 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
   # Used to correct random temperature values based on average conditions
   # if that target day is wet or dry (e.g., overcast weather tends to
   # increase minimum daily temperature and decrease maximum daily tempature)
-  temp <- by(wdata[, c("WET", "Tmax_C", "Tmin_C")], INDICES = wdata[, "WEEK"],
+  temp <- by(
+    wdata[, c("WET", "Tmax_C", "Tmin_C")],
+    INDICES = wdata[, "WEEK"],
     function(x) {
       # if `na.rm` is TRUE, then consider `WET` = NA as FALSE
       # if `na.rm` is FALSE, then propagate NAs in `WET` -> neither wet nor dry
       iswet <- if (na.rm) {
-          which_wet <- which(x[, "WET"]) # numeric vector
-          out <- rep(FALSE, length(x[, "WET"]))
-          # only days where 'WET' is TRUE are considered wet
-          out[which_wet] <- TRUE
-          out # logical vector same length as x[, "WET"]
-        } else {
-          x[, "WET"] # logical vector
-        }
+        which_wet <- which(x[, "WET"]) # numeric vector
+        out <- rep(FALSE, length(x[, "WET"]))
+        # only days where 'WET' is TRUE are considered wet
+        out[which_wet] <- TRUE
+        out # logical vector same length as x[, "WET"]
+      } else {
+        x[, "WET"] # logical vector
+      }
+
       isanywet <- isTRUE(any(iswet, na.rm = na.rm))
+
       # previously isdry became all FALSE if na.rm = TRUE (because then iswet
       # was numeric  vector with all positive digits)
       isdry <- !iswet
@@ -311,26 +360,27 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
 
       # if no wet/dry days in week of year, then use overall mean instead
       # of conditional mean (i.e., given wet/dry)
-      c(Tmax_mean_wet = if (isanywet) {
-            mean(x[iswet, "Tmax_C"], na.rm = na.rm)
-          } else {
-            mean(x[, "Tmax_C"], na.rm = na.rm)
-          },
+      c(
+        Tmax_mean_wet = if (isanywet) {
+          mean(x[iswet, "Tmax_C"], na.rm = na.rm)
+        } else {
+          mean(x[, "Tmax_C"], na.rm = na.rm)
+        },
         Tmax_mean_dry = if (isanydry) {
-            mean(x[isdry, "Tmax_C"], na.rm = na.rm)
-          } else {
-            mean(x[, "Tmax_C"], na.rm = na.rm)
-          },
+          mean(x[isdry, "Tmax_C"], na.rm = na.rm)
+        } else {
+          mean(x[, "Tmax_C"], na.rm = na.rm)
+        },
         Tmin_mean_wet = if (isanywet) {
-            mean(x[iswet, "Tmin_C"], na.rm = na.rm)
-          } else {
-            mean(x[, "Tmin_C"], na.rm = na.rm)
-          },
+          mean(x[iswet, "Tmin_C"], na.rm = na.rm)
+        } else {
+          mean(x[, "Tmin_C"], na.rm = na.rm)
+        },
         Tmin_mean_dry = if (isanydry) {
-            mean(x[isdry, "Tmin_C"], na.rm = na.rm)
-          } else {
-            mean(x[, "Tmin_C"], na.rm = na.rm)
-          }
+          mean(x[isdry, "Tmin_C"], na.rm = na.rm)
+        } else {
+          mean(x[, "Tmin_C"], na.rm = na.rm)
+        }
       )
     }
   )
@@ -355,7 +405,8 @@ dbW_estimate_WGen_coefs <- function(weatherData, WET_limit_cm = 0,
       warning("Insufficient weather data to estimate ", msg)
     } else {
       message("Impute missing `mkv_cov` ", msg)
-      mkv_cov <- rSW2utils::impute_df(mkv_cov,
+      mkv_cov <- rSW2utils::impute_df(
+        mkv_cov,
         imputation_type = imputation_type,
         imputation_span = imputation_span,
         cyclic = TRUE
@@ -815,6 +866,8 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 #' @inheritParams dbW_estimate_WGen_coefs
 #' @param years An integer vector. The calendar years for which to generate
 #'   daily weather. If \code{NULL}, then extracted from \code{weatherData}.
+#' @param digits An integer value. The returned values will be rounded to
+#'   the specified number of decimal places.
 #' @param wgen_coeffs A list with two named elements \var{mkv_doy} and
 #'   \var{mkv_woy}, i.e., the return value of
 #'   \code{\link{dbW_estimate_WGen_coefs}}. If \code{NULL}, then determined
@@ -878,12 +931,20 @@ compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
 #' unlink(list.files(path), force = TRUE)
 #'
 #' @export
-dbW_generateWeather <- function(weatherData, years = NULL, wgen_coeffs = NULL,
-  imputation_type = "mean", imputation_span = 5L, seed = NULL) {
+dbW_generateWeather <- function(
+  weatherData,
+  years = NULL,
+  wgen_coeffs = NULL,
+  imputation_type = "mean",
+  imputation_span = 5L,
+  digits = 4L,
+  seed = NULL
+) {
 
   #--- Obtain missing/null arguments
   if (is.null(wgen_coeffs)) {
-    wgen_coeffs <- dbW_estimate_WGen_coefs(weatherData,
+    wgen_coeffs <- dbW_estimate_WGen_coefs(
+      weatherData,
       propagate_NAs = FALSE,
       imputation_type = imputation_type,
       imputation_span = imputation_span
@@ -891,23 +952,23 @@ dbW_generateWeather <- function(weatherData, years = NULL, wgen_coeffs = NULL,
   }
 
   if (is.data.frame(weatherData)) {
-    weatherData <- dbW_dataframe_to_weatherData(weatherData)
+    weatherData <- dbW_dataframe_to_weatherData(
+      weatherData,
+      round = digits + 2L
+    )
   }
 
   if (is.null(years)) {
     years <- get_years_from_weatherData(weatherData)
   }
 
-  #--- Put rSOILWAT2 run together to produce imputed daily weather
+  #--- Put rSOILWAT2 input object together to produce imputed daily weather
   sw_in <- rSOILWAT2::sw_exampleData
 
   # Set years
   swWeather_FirstYearHistorical(sw_in) <- min(years)
   swYears_EndYear(sw_in) <- max(years)
   swYears_StartYear(sw_in) <- min(years)
-
-  # Set weather data
-  set_WeatherHistory(sw_in) <- weatherData
 
   # Turn on weather generator
   swWeather_UseMarkov(sw_in) <- TRUE
@@ -916,23 +977,11 @@ dbW_generateWeather <- function(weatherData, years = NULL, wgen_coeffs = NULL,
   swMarkov_Prob(sw_in) <- wgen_coeffs[["mkv_doy"]]
   swMarkov_Conv(sw_in) <- wgen_coeffs[["mkv_woy"]]
 
-  # Turn off CO2-effects to avoid any issues
-  swCarbon_Use_Bio(sw_in) <- 0
-  swCarbon_Use_WUE(sw_in) <- 0
 
-  #--- Execute SOILWAT2 to generate weather
+  #--- Process weather in SOILWAT2
   set.seed(seed)
-  sw_out <- sw_exec(inputData = sw_in)
-
-
-  #--- Extract weather generator imputed daily weather
-  xdf <- slot(slot(sw_out, "TEMP"), "Day")[, c("Year", "Day", "max_C", "min_C")]
-  colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C")
-  xdf <- data.frame(
-    xdf,
-    PPT_cm = slot(slot(sw_out, "PRECIP"), "Day")[, "ppt"]
+  dbW_weatherData_round(
+    .Call(C_rSW2_processAllWeather, weatherData, sw_in),
+    digits = digits
   )
-
-  # Convert to rSOILWAT2 weather data format
-  dbW_dataframe_to_weatherData(xdf)
 }
