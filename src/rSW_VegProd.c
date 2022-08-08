@@ -622,3 +622,120 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 
 	UNPROTECT(17);
 }
+
+SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_monthly_ppt_mm,
+                                         SEXP mean_monthly_Temp_C, SEXP shrub_limit, SEXP SumGrasses_Fraction,
+                                         SEXP fill_empty_with_BareGround, SEXP warn_extrapolation, SEXP dailyC4vars,
+                                         SEXP isNorth, SEXP Succulents_Fraction, SEXP Annuals_Fraction, SEXP C4_Fraction,
+                                         SEXP C3_Fraction, SEXP Shrubs_Fraction, SEXP Forbs_Fraction,
+                                         SEXP Trees_Fraction, SEXP BareGround_Fraction) {
+
+    double RelAbundanceL0[8], RelAbundanceL1[5], grasses[3];
+
+    // "final_" in the beginning meaning it's the final R -> conversion
+    double final_MAP_cm = asReal(MAP_mm) / 10, final_MAT_C = asReal(MAT_C), final_MonPPT_cm[MAX_MONTHS],
+    final_MonTemp_C[MAX_MONTHS], final_shrubLimit = asReal(shrub_limit),
+    final_SumGrassesFraction = asReal(SumGrasses_Fraction), C4Variables[3] = {SW_MISSING, SW_MISSING, SW_MISSING};
+
+    // Following variable names end with "_D" to denote they are of C type double
+    double Succulents_Fraction_D = (asReal(Succulents_Fraction) == NA_INTEGER) ? SW_MISSING : asReal(Succulents_Fraction);
+    double Annuals_Fraction_D = asReal(Annuals_Fraction);
+    double C4_Fraction_D = (asReal(C4_Fraction) == NA_INTEGER) ? SW_MISSING : asReal(C4_Fraction);
+    double C3_Fraction_D = (asReal(C3_Fraction) == NA_INTEGER) ? SW_MISSING : asReal(C3_Fraction);
+    double Shrubs_Fraction_D = (asReal(Shrubs_Fraction) == NA_INTEGER) ? SW_MISSING : asReal(Shrubs_Fraction);
+    double Forbs_Fraction_D = (asReal(Forbs_Fraction) == NA_INTEGER) ? SW_MISSING : asReal(Forbs_Fraction);
+    double Trees_Fraction_D = asReal(Trees_Fraction);
+    double BareGround_Fraction_D = asReal(BareGround_Fraction);
+
+    double inputValues_D[8] = {Succulents_Fraction_D, Annuals_Fraction_D, C4_Fraction_D,
+        C3_Fraction_D, Shrubs_Fraction_D, Forbs_Fraction_D, Trees_Fraction_D, BareGround_Fraction_D};
+
+    char *RelAbundanceL0Names[] = {"Succulents", "Forbs", "Grasses_C3", "Grasses_C4",
+        "Grasses_Annuals", "Shrubs", "Trees", "BareGround"};
+    char *RelAbundanceL1Names[] = {"SW_TREES", "SW_SHRUB", "SW_FORBS", "SW_GRASS", "SW_BAREGROUND"};
+    char *finalListNames[] = {"Rel_Abundance_L0", "Rel_Abundance_L1", "Grasses"};
+    char *grassesNames[] = {"Grasses_C3", "Grasses_C4", "Grasses_Annuals"};
+
+    // "inter_" meaning the intermediate R -> C conversion
+    int inter_fill_empty_with_BareGround = asLogical(fill_empty_with_BareGround),
+    inter_warn_extrapolation = asLogical(warn_extrapolation), index, final_isNorth = asLogical(isNorth);
+
+    Bool final_fill_empty_with_BareGround = swFALSE, final_warn_extrapolation = swFALSE;
+
+    SEXP cRelAbL1Names, cRelAbL0Names, cfinalNames, cgrasses,
+    final_RelAbundanceL1, final_RelAbundanceL0, final_grasses, res;
+
+    res = PROTECT(allocVector(VECSXP, 3));
+    final_RelAbundanceL0 = PROTECT(allocVector(REALSXP, 8));
+    final_RelAbundanceL1 = PROTECT(allocVector(REALSXP, 5));
+    final_grasses = PROTECT(allocVector(REALSXP, 3));
+    cRelAbL1Names = PROTECT(allocVector(STRSXP, 5));
+    cRelAbL0Names = PROTECT(allocVector(STRSXP, 8));
+    cfinalNames = PROTECT(allocVector(STRSXP, 3));
+    cgrasses = PROTECT(allocVector(STRSXP, 3));
+
+    for(index = 0; index < 3; index++) {
+        SET_STRING_ELT(cfinalNames, index, mkChar(finalListNames[index]));
+        SET_STRING_ELT(cgrasses, index, mkChar(grassesNames[index]));
+    }
+
+    for(index = 0; index < 8; index++) {
+        SET_STRING_ELT(cRelAbL0Names, index, mkChar(RelAbundanceL0Names[index]));
+        if(index < 5) SET_STRING_ELT(cRelAbL1Names, index, mkChar(RelAbundanceL1Names[index]));
+    }
+
+    namesgets(final_RelAbundanceL0, cRelAbL0Names);
+    namesgets(final_RelAbundanceL1, cRelAbL1Names);
+    namesgets(res, cfinalNames);
+    namesgets(final_grasses, cgrasses);
+
+    if(inter_fill_empty_with_BareGround != 0) {
+        final_fill_empty_with_BareGround = swTRUE;
+    }
+    if(inter_warn_extrapolation != 0) {
+        final_warn_extrapolation = swTRUE;
+    }
+    if(final_isNorth != 0) {
+        final_isNorth = swTRUE;
+    }
+
+    for(index = 0; index < MAX_MONTHS; index++) {
+        final_MonPPT_cm[index] = REAL(mean_monthly_ppt_mm)[index] / 10;
+        final_MonTemp_C[index] = REAL(mean_monthly_Temp_C)[index];
+    }
+
+    // Check if dailyC4vars is not NULL
+    if(!isNull(dailyC4vars)) {
+        C4Variables[0] = REAL(dailyC4vars)[0];
+        C4Variables[1] = REAL(dailyC4vars)[1];
+        C4Variables[2] = REAL(dailyC4vars)[2];
+    } else {
+        C4Variables[0] = SW_MISSING;
+        C4Variables[1] = SW_MISSING;
+        C4Variables[2] = SW_MISSING;
+    }
+
+    estimatePotNatVegComposition(final_MAT_C, final_MAP_cm, final_MonTemp_C,
+          final_MonPPT_cm, inputValues_D, final_shrubLimit, final_SumGrassesFraction, C4Variables,
+          final_fill_empty_with_BareGround, final_isNorth, final_warn_extrapolation,
+          grasses, RelAbundanceL0, RelAbundanceL1);
+
+    for(index = 0; index < 8; index++) {
+        REAL(final_RelAbundanceL0)[index] = RelAbundanceL0[index];
+        if(index < 5) {
+            REAL(final_RelAbundanceL1)[index] = RelAbundanceL1[index];
+        }
+        if(index < 3) {
+            REAL(final_grasses)[index] = grasses[index];
+        }
+    }
+
+    SET_VECTOR_ELT(res, 0, final_RelAbundanceL0);
+    SET_VECTOR_ELT(res, 1, final_RelAbundanceL1);
+    SET_VECTOR_ELT(res, 2, final_grasses);
+
+    UNPROTECT(8);
+
+    return res;
+
+}
