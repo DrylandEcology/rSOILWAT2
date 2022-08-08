@@ -646,12 +646,12 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
     final_SumGrassesFraction = asReal(SumGrasses_Fraction), C4Variables[3] = {SW_MISSING, SW_MISSING, SW_MISSING};
 
     // Following variable names end with "_D" to denote they are of C type double
-    double Succulents_Fraction_D = (asReal(Succulents_Fraction) == NA_INTEGER) ? SW_MISSING : asReal(Succulents_Fraction);
+    double Succulents_Fraction_D = ISNAN(asReal(Succulents_Fraction)) ? SW_MISSING : asReal(Succulents_Fraction);
     double Annuals_Fraction_D = asReal(Annuals_Fraction);
-    double C4_Fraction_D = (asReal(C4_Fraction) == NA_INTEGER) ? SW_MISSING : asReal(C4_Fraction);
-    double C3_Fraction_D = (asReal(C3_Fraction) == NA_INTEGER) ? SW_MISSING : asReal(C3_Fraction);
-    double Shrubs_Fraction_D = (asReal(Shrubs_Fraction) == NA_INTEGER) ? SW_MISSING : asReal(Shrubs_Fraction);
-    double Forbs_Fraction_D = (asReal(Forbs_Fraction) == NA_INTEGER) ? SW_MISSING : asReal(Forbs_Fraction);
+    double C4_Fraction_D = ISNAN(asReal(C4_Fraction)) ? SW_MISSING : asReal(C4_Fraction);
+    double C3_Fraction_D = ISNAN(asReal(C3_Fraction)) ? SW_MISSING : asReal(C3_Fraction);
+    double Shrubs_Fraction_D = ISNAN(asReal(Shrubs_Fraction)) ? SW_MISSING : asReal(Shrubs_Fraction);
+    double Forbs_Fraction_D = ISNAN(asReal(Forbs_Fraction)) ? SW_MISSING : asReal(Forbs_Fraction);
     double Trees_Fraction_D = asReal(Trees_Fraction);
     double BareGround_Fraction_D = asReal(BareGround_Fraction);
 
@@ -665,10 +665,10 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
     char *grassesNames[] = {"Grasses_C3", "Grasses_C4", "Grasses_Annuals"};
 
     // "inter_" meaning the intermediate R -> C conversion
-    int inter_fill_empty_with_BareGround = asLogical(fill_empty_with_BareGround),
-    inter_warn_extrapolation = asLogical(warn_extrapolation), index, final_isNorth = asLogical(isNorth);
+    int index;
 
-    Bool final_fill_empty_with_BareGround = swFALSE, final_warn_extrapolation = swFALSE;
+    Bool final_fill_empty_with_BareGround = (Bool) LOGICAL(fill_empty_with_BareGround),
+    final_warn_extrapolation = (Bool) LOGICAL(warn_extrapolation), final_isNorth = (Bool) LOGICAL(isNorth);
 
     SEXP cRelAbL1Names, cRelAbL0Names, cfinalNames, cgrasses,
     final_RelAbundanceL1, final_RelAbundanceL0, final_grasses, res;
@@ -696,16 +696,6 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
     namesgets(final_RelAbundanceL1, cRelAbL1Names);
     namesgets(res, cfinalNames);
     namesgets(final_grasses, cgrasses);
-
-    if(inter_fill_empty_with_BareGround != 0) {
-        final_fill_empty_with_BareGround = swTRUE;
-    }
-    if(inter_warn_extrapolation != 0) {
-        final_warn_extrapolation = swTRUE;
-    }
-    if(final_isNorth != 0) {
-        final_isNorth = swTRUE;
-    }
 
     for(index = 0; index < MAX_MONTHS; index++) {
         final_MonPPT_cm[index] = REAL(mean_monthly_ppt_mm)[index] / 10;
