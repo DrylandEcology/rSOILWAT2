@@ -59,6 +59,7 @@ Authors:
 
 Other contributors:
 \itemize{
+  \item Persley Nicholas [contributor]
   \item Zach Kramer [contributor]
   \item Brenden Bernal [contributor]
   \item Ashish Tiwari [contributor]
