@@ -48,7 +48,9 @@
 #'
 #' @name swProd-class
 #' @export
-setClass("swProd", slots = c(Composition = "numeric", Albedo = "numeric",
+setClass("swProd", slots = c(
+  veg_method = "integer",
+  Composition = "numeric", Albedo = "numeric",
   CanopyHeight = "matrix",
   VegetationInterceptionParameters = "matrix",
   LitterInterceptionParameters = "matrix",
@@ -62,6 +64,12 @@ setClass("swProd", slots = c(Composition = "numeric", Albedo = "numeric",
 swProd_validity <- function(object) {
   val <- TRUE
   nvegs <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["NVEGTYPES"]]
+
+  if (length(object@veg_method) != 1 ||
+    !all(is.na(object@veg_method) | (object@veg_method >= 0) & object@veg_method <= 1) {
+    msg <- "@veg_method must have 1 values between 0 and 1."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
 
   if (length(object@Composition) != 1 + nvegs ||
     !all(is.na(object@Composition) | (object@Composition >= 0 &
@@ -154,6 +162,10 @@ setMethod("initialize", signature = "swProd", function(.Object, ...) {
   sns <- slotNames(def)
   dots <- list(...)
   dns <- names(dots)
+
+  if(!("veg_method") %in% dns) {
+      def@veg_method[] <- NA_integer_
+  }
 
   # We don't set values for slot `Composition`; this is to prevent simulation
   # runs with accidentally incorrect values
