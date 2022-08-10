@@ -224,3 +224,224 @@ dbW_addSite <- function(Site_id = NULL, lat = NULL, long = NULL, Label = NULL) {
 
 	Site_id
 }
+
+#' Calculate variables required to estimate percent C4 species in North America
+#'
+#' @return A named numeric vector of length 6.
+#' @references Teeri J.A., Stowe L.G. (1976) Climatic patterns and the
+#'   distribution of C4 grasses in North America. Oecologia, 23, 1-12.
+#'
+#' @export
+sw_dailyC4_TempVar <- function(dailyTempMin, dailyTempMean, simTime2) {
+
+  temp7 <- simTime2$month_ForEachUsedDay_NSadj == 7
+  Month7th_MinTemp_C <- tapply(dailyTempMin[temp7],
+    simTime2$year_ForEachUsedDay_NSadj[temp7], min)
+  FrostFree_Days <- tapply(dailyTempMin, simTime2$year_ForEachUsedDay_NSadj,
+    function(x) {
+      temp <- rle(x > 0)
+      if (any(temp$values)) max(temp$lengths[temp$values], na.rm = TRUE) else 0
+    })
+
+  # 18.333 C = 65 F with (65 - 32) * 5 / 9
+  temp_base65F <- dailyTempMean - 18.333
+  temp_base65F[temp_base65F < 0] <- 0
+  DegreeDaysAbove65F_DaysC <- tapply(temp_base65F,
+    simTime2$year_ForEachUsedDay_NSadj, sum)
+
+  # if southern Hemisphere, then 7th month of last year is not included
+  nyrs <- seq_along(Month7th_MinTemp_C)
+  temp <- cbind(Month7th_MinTemp_C[nyrs], FrostFree_Days[nyrs],
+    DegreeDaysAbove65F_DaysC[nyrs])
+  res <- c(apply(temp, 2, mean), apply(temp, 2, sd))
+  temp <- c("Month7th_NSadj_MinTemp_C",
+    "LengthFreezeFreeGrowingPeriod_NSadj_Days",
+    "DegreeDaysAbove65F_NSadj_DaysC")
+  names(res) <- c(temp, paste0(temp, ".sd"))
+
+  res
+}
+
+#' Calculate climate variables required to estimate percent cheatgrass cover
+#' in North America
+#'
+#' @section Note: This function does not correct for northern/southern
+#'   hemisphere.
+#'
+#' @param monthlyPPT_cm A numeric matrix of monthly precipitation values in
+#'   centimeter. There are 12 rows, one for each month of the year;
+#'   and there is one column for each year.
+#' @param monthlyTempMean_C A numeric matrix of monthly mean temperature values
+#'   in degree Celsius. There are 12 rows, one for each month of the year;
+#'   and there is one column for each year.
+#' @param monthlyTempMin_C A numeric matrix of monthly minimum temperature
+#'   value sin degree Celsius. There are 12 rows, one for each month of the
+#'   year; and there is one column for each year.
+#'
+#' @return A named numeric vector of length 6 with mean and standard deviation
+#'   for \var{Month7th_PPT_mm}, \var{MeanTemp_ofDriestQuarter_C}, and
+#'   \var{MinTemp_of2ndMonth_C}.
+#'
+#' @references Brummer, T. J., K. T. Taylor, J. Rotella, B. D. Maxwell,
+#'   L. J. Rew, and M. Lavin. 2016. Drivers of Bromus tectorum Abundance in
+#'   the Western North American Sagebrush Steppe. Ecosystems 19:986-1000.
+#'
+#' @export
+sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
+  monthlyTempMean_C = NULL, monthlyTempMin_C = NULL) {
+
+  # Mean precipitation sum of seventh month of the season (i.e.,
+  # July in northern hemisphere)
+  Month7th_PPT_mm <- 10 * monthlyPPT_cm[7, ]
+  nyrs <- seq_along(Month7th_PPT_mm)
+
+  # Mean temperature of driest quarter (Bioclim variable 9)
+  # see \code{link[dismo]{biovars}}
+  if (!is.null(monthlyTempMean_C)) {
+    wet <- t(apply(monthlyPPT_cm, 2, rSW2utils::moving_function,
+      k = 3, win_fun = sum, na.rm = TRUE, circular = TRUE
+    ))
+    tmp <- t(apply(monthlyTempMean_C, 2, rSW2utils::moving_function,
+      k = 3, win_fun = mean, na.rm = TRUE, circular = TRUE
+    ))
+    dryqrt <- cbind(
+      seq_len(ncol(monthlyPPT_cm)),
+      as.integer(apply(wet, 1, which.min))
+    )
+    MeanTemp_ofDriestQuarter_C <- tmp[dryqrt]
+
+  } else {
+    MeanTemp_ofDriestQuarter_C <- rep(NA, length(Month7th_PPT_mm))
+  }
+
+  # Minimum February temperature
+  if (!is.null(monthlyTempMin_C)) {
+    MinTemp_of2ndMonth_C <- monthlyTempMin_C[2, , ]
+  } else {
+    MinTemp_of2ndMonth_C <- rep(NA, length(Month7th_PPT_mm))
+  }
+
+
+  # Aggregate
+  temp <- cbind(
+    Month7th_PPT_mm[nyrs],
+    MeanTemp_ofDriestQuarter_C[nyrs],
+    MinTemp_of2ndMonth_C[nyrs]
+  )
+
+  res <- c(apply(temp, 2, mean), apply(temp, 2, sd))
+  temp <- c("Month7th_PPT_mm", "MeanTemp_ofDriestQuarter_C",
+    "MinTemp_of2ndMonth_C")
+  names(res) <- c(temp, paste0(temp, "_SD"))
+
+  res
+}
+
+# Old way of calculating climate variables
+calc_SiteClimate_old <- function(weatherList, year.start = NA, year.end = NA,
+  do_C4vars = FALSE, do_Cheatgrass_ClimVars = FALSE, simTime2 = NULL,
+  latitude = 90) {
+
+  x <- dbW_weatherData_to_dataframe(weatherList)
+
+  # Trim to requested years
+  if (!is.na(year.start)) {
+    x <- x[x[, "Year"] >= year.start, ]
+  } else {
+    year.start <- x[1, "Year"]
+  }
+
+  if (!is.na(year.end)) {
+    x <- x[x[, "Year"] <= year.end, ]
+  } else {
+    year.end <- x[nrow(x), "Year"]
+  }
+
+  years <- unique(x[, "Year"])
+
+  if (length(years) == 0) {
+    stop("'calc_SiteClimate': no weather data available for ",
+      "requested range of years")
+  }
+
+  # Mean daily temperature
+  Tmean_C <- rowMeans(x[, c("Tmax_C", "Tmin_C")])
+
+  # Get time sequence information
+  is_simTime2_good <- !is.null(simTime2) &&
+    identical(years, simTime2[["useyrs_NSadj"]]) &&
+    !is.null(simTime2[["month_ForEachUsedDay"]])
+
+  is_simTime2_good_for_C4vars <- if (do_C4vars) {
+      if (is_simTime2_good) {
+        !is.null(simTime2[["month_ForEachUsedDay_NSadj"]]) &&
+        !is.null(simTime2[["year_ForEachUsedDay_NSadj"]])
+      } else {
+        FALSE
+      }
+    } else {
+      TRUE
+    }
+
+  if (is_simTime2_good && is_simTime2_good_for_C4vars) {
+    st2 <- simTime2
+  } else {
+    st2 <- rSW2data::simTiming_ForEachUsedTimeUnit(
+      useyrs = years,
+      sim_tscales = "daily",
+      latitude = latitude,
+      account_NorthSouth = do_C4vars
+    )
+  }
+
+
+  # Calculate monthly values
+  index <- st2[["month_ForEachUsedDay"]] + 100 * x[, "Year"]
+
+  mon_Temp <- vapply(
+    list(Tmean_C, x[, "Tmin_C"], x[, "Tmax_C"]),
+    function(data) matrix(tapply(data, index, mean, na.rm = TRUE), nrow = 12),
+    FUN.VALUE = matrix(NA_real_, nrow = 12, ncol = length(years))
+  )
+
+  mon_PPT <- matrix(tapply(x[, "PPT_cm"], index, sum, na.rm = TRUE), nrow = 12)
+
+  list(
+    # Calculate mean monthly values
+    meanMonthlyTempC = apply(mon_Temp[, , 1, drop = FALSE], 1, mean,
+      na.rm = TRUE),
+    minMonthlyTempC = apply(mon_Temp[, , 2, drop = FALSE], 1, mean,
+      na.rm = TRUE),
+    maxMonthlyTempC = apply(mon_Temp[, , 3, drop = FALSE], 1, mean,
+      na.rm = TRUE),
+    meanMonthlyPPTcm = apply(mon_PPT, 1, mean, na.rm = TRUE),
+
+    # Calculate mean annual values
+    MAP_cm = sum(mon_PPT, na.rm = TRUE) / length(years),
+    MAT_C = mean(Tmean_C, na.rm = TRUE),
+
+    # If C4-variables are requested
+    dailyTempMin = if (do_C4vars) x[, "Tmin_C"] else NA,
+    dailyTempMean = if (do_C4vars) Tmean_C else NA,
+    dailyC4vars = if (do_C4vars) {
+      sw_dailyC4_TempVar(
+        dailyTempMin = x[, "Tmin_C"],
+        dailyTempMean = Tmean_C,
+        simTime2 = st2
+      )
+    } else {
+      NA
+    },
+
+    # If cheatgrass-variables are requested
+    Cheatgrass_ClimVars = if (do_Cheatgrass_ClimVars) {
+      sw_Cheatgrass_ClimVar(
+        monthlyPPT_cm = mon_PPT,
+        monthlyTempMean_C = mon_Temp[, , 1, drop = FALSE],
+        monthlyTempMin_C = mon_Temp[, , 2, drop = FALSE]
+      )
+    } else {
+      NA
+    }
+  )
+}
