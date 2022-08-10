@@ -12,6 +12,7 @@ extern SEXP onGetInputDataFromFiles(SEXP);
 extern SEXP onGetOutput(SEXP);
 extern SEXP rSW2_processAllWeather(SEXP, SEXP);
 extern SEXP sw_consts();
+extern SEXP rSW2_calc_SiteClimate(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
   {"start",                   (DL_FUNC) &start,                   4},
@@ -20,6 +21,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"onGetOutput",             (DL_FUNC) &onGetOutput,             1},
   {"rSW2_processAllWeather",  (DL_FUNC) &rSW2_processAllWeather,  2},
   {"sw_consts",               (DL_FUNC) &sw_consts,               0},
+  {"rSW2_calc_SiteClimate",   (DL_FUNC) &rSW2_calc_SiteClimate,   6},
   {NULL, NULL, 0}
 };
 
