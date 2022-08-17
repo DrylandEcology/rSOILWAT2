@@ -233,7 +233,7 @@ dbW_addSite <- function(Site_id = NULL, lat = NULL, long = NULL, Label = NULL) {
 #'
 #' @export
 sw_dailyC4_TempVar <- function(dailyTempMin, dailyTempMean, simTime2) {
-
+  .Deprecated("calc_SiteClimate")
   temp7 <- simTime2$month_ForEachUsedDay_NSadj == 7
   Month7th_MinTemp_C <- tapply(dailyTempMin[temp7],
     simTime2$year_ForEachUsedDay_NSadj[temp7], min)
@@ -289,7 +289,7 @@ sw_dailyC4_TempVar <- function(dailyTempMin, dailyTempMean, simTime2) {
 #' @export
 sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
   monthlyTempMean_C = NULL, monthlyTempMin_C = NULL) {
-
+  .Deprecated("calc_SiteClimate")
   # Mean precipitation sum of seventh month of the season (i.e.,
   # July in northern hemisphere)
   Month7th_PPT_mm <- 10 * monthlyPPT_cm[7, ]
@@ -341,7 +341,7 @@ sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
 calc_SiteClimate_old <- function(weatherList, year.start = NA, year.end = NA,
   do_C4vars = FALSE, do_Cheatgrass_ClimVars = FALSE, simTime2 = NULL,
   latitude = 90) {
-
+  .Deprecated("calc_SiteClimate")
   x <- dbW_weatherData_to_dataframe(weatherList)
 
   # Trim to requested years
