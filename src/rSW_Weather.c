@@ -468,3 +468,144 @@ static void rSW2_setAllWeather(
     }
   }
 }
+
+SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
+                           SEXP do_C4vars, SEXP do_Cheatgrass_ClimVars, SEXP latitude) {
+
+    SW_WEATHER_HIST **allHist;
+
+    SW_CLIMATE_YEARLY climateOutput;
+    SW_CLIMATE_CLIM climateAverages;
+
+    int numYears = asInteger(yearEnd) - asInteger(yearStart) + 1, year, calcSiteOutputNum = 10,
+    deallocate = 0, allocate = 1, index;
+
+    SEXP res, monthlyMean, monthlyMax, monthlyMin, monthlyPPT, MAT_C, MAP_cm, vectorNames,
+    C4Variables, Cheatgrass, cnamesC4SEXP, cnamesCheatgrassSEXP;
+
+    char *cnames[] = {"meanMonthlyTempC","minMonthlyTempC","maxMonthlyTempC",
+        "meanMonthlyPPTcm","MAP_cm","MAT_C", "dailyTempMin", "dailyTempMean",
+        "dailyC4vars","Cheatgrass_ClimVars"};
+
+    char *cnamesC4[] = {"Month7th_NSadj_MinTemp_C","LengthFreezeFreeGrowingPeriod_NSadj_Days",
+        "DegreeDaysAbove65F_NSadj_DaysC","Month7th_NSadj_MinTemp_C.sd", "LengthFreezeFreeGrowingPeriod_NSadj_Days.sd",
+        "DegreeDaysAbove65F_NSadj_DaysC.sd"};
+
+    char *cnamesCheatgrass[] = {"Month7th_PPT_mm","MeanTemp_ofDriestQuarter_C","MinTemp_of2ndMonth_C",
+        "Month7th_PPT_mm_SD","MeanTemp_ofDriestQuarter_C_SD","MinTemp_of2ndMonth_C_SD"};
+
+    monthlyMean = PROTECT(allocVector(REALSXP, MAX_MONTHS));
+    monthlyMax = PROTECT(allocVector(REALSXP, MAX_MONTHS));
+    monthlyMin = PROTECT(allocVector(REALSXP, MAX_MONTHS));
+    monthlyPPT = PROTECT(allocVector(REALSXP, MAX_MONTHS));
+    MAT_C = PROTECT(allocVector(REALSXP, 1));
+    MAP_cm = PROTECT(allocVector(REALSXP, 1));
+    vectorNames = PROTECT(allocVector(STRSXP, calcSiteOutputNum));
+    cnamesC4SEXP = PROTECT(allocVector(STRSXP, 6));
+    cnamesCheatgrassSEXP = PROTECT(allocVector(STRSXP, 6));
+    C4Variables = PROTECT(allocVector(REALSXP, 6));
+    Cheatgrass = PROTECT(allocVector(REALSXP, 6));
+
+    allHist = (SW_WEATHER_HIST **)malloc(sizeof(SW_WEATHER_HIST *) * numYears);
+
+    for(year = 0; year < numYears; year++) {
+        allHist[year] = (SW_WEATHER_HIST *)malloc(sizeof(SW_WEATHER_HIST));
+    }
+
+    Time_init_model();
+
+    // Fill SOILWAT `allHist` with data from weatherList
+    rSW2_setAllWeather(weatherList, allHist, asInteger(yearStart), numYears);
+
+    // Allocate memory of structs for climate on SOILWAT side
+    allocDeallocClimateStructs(allocate, numYears, &climateOutput, &climateAverages);
+
+    // Calculate climate variables
+    calcSiteClimate(allHist, numYears, asInteger(yearStart), &climateOutput, asReal(latitude));
+
+    // Average climate variables
+    averageClimateAcrossYears(&climateOutput, numYears, &climateAverages);
+
+    res = PROTECT(allocVector(VECSXP, calcSiteOutputNum));
+
+    double *xmonthlyMean = REAL(monthlyMean), *xmonthlyMax = REAL(monthlyMax),
+    *xmonthlyMin = REAL(monthlyMin), *xmontlyPPT = REAL(monthlyPPT);
+
+    for(index = 0; index < MAX_MONTHS; index++) {
+        xmonthlyMean[index] = climateAverages.meanTempMon_C[index];
+        xmonthlyMax[index] = climateAverages.maxTempMon_C[index];
+        xmonthlyMin[index] = climateAverages.minTempMon_C[index];
+        xmontlyPPT[index] = climateAverages.PPTMon_cm[index];
+    }
+
+    for(index = 0; index < calcSiteOutputNum; index++) {
+        SET_STRING_ELT(vectorNames, index, mkChar(cnames[index]));
+    }
+
+    for(index = 0; index < 6; index++) {
+        SET_STRING_ELT(cnamesC4SEXP, index, mkChar(cnamesC4[index]));
+        SET_STRING_ELT(cnamesCheatgrassSEXP, index, mkChar(cnamesCheatgrass[index]));
+    }
+
+    // Set names of res, C4Variables and Cheatgrass
+    namesgets(res, vectorNames);
+    namesgets(C4Variables, cnamesC4SEXP);
+    namesgets(Cheatgrass, cnamesCheatgrassSEXP);
+
+    // Set mean annual temperature and precipitation values
+    REAL(MAT_C)[0] = climateAverages.meanTemp_C;
+    REAL(MAP_cm)[0] = climateAverages.PPT_cm;
+
+    // Set C4Variables and Cheatgrass values
+
+    REAL(C4Variables)[0] = climateAverages.minTempJuly_C;
+    REAL(C4Variables)[1] = climateAverages.frostFree_days;
+    REAL(C4Variables)[2] = climateAverages.ddAbove65F_degday;
+
+    REAL(C4Variables)[3] = climateAverages.sdC4[0];
+    REAL(C4Variables)[4] = climateAverages.sdC4[1];
+    REAL(C4Variables)[5] = climateAverages.sdC4[2];
+
+    REAL(Cheatgrass)[0] = climateAverages.PPTJuly_mm;
+    REAL(Cheatgrass)[1] = climateAverages.meanTempDriestQtr_C;
+    REAL(Cheatgrass)[2] = climateAverages.minTempFeb_C;
+
+    REAL(Cheatgrass)[3] = climateAverages.sdCheatgrass[0];
+    REAL(Cheatgrass)[4] = climateAverages.sdCheatgrass[1];
+    REAL(Cheatgrass)[5] = climateAverages.sdCheatgrass[2];
+
+    // Set mean average monthly temperature
+    SET_VECTOR_ELT(res, 0, monthlyMean);
+
+    // Set mean minimum temperature
+    SET_VECTOR_ELT(res, 1, monthlyMax);
+
+    // Set mean maximum temperature
+    SET_VECTOR_ELT(res, 2, monthlyMin);
+
+    // Set mean annual precipitation (cm)
+    SET_VECTOR_ELT(res, 3, monthlyPPT);
+
+    // Set mean annual temperature (C)
+    SET_VECTOR_ELT(res, 4, MAT_C);
+
+    // Set mean annual precipitation (cm)
+    SET_VECTOR_ELT(res, 5, MAP_cm);
+
+    // Set values of the two standard deviation categories (C4 and cheatgrass)
+    // in result variable
+    SET_VECTOR_ELT(res, 8, C4Variables);
+    SET_VECTOR_ELT(res, 9, Cheatgrass);
+
+    allocDeallocClimateStructs(deallocate, numYears, &climateOutput, &climateAverages);
+
+    UNPROTECT(12);
+
+    for(year = 0; year < numYears; year++) {
+        free(allHist[year]);
+    }
+    free(allHist);
+
+    return res;
+
+}

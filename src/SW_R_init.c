@@ -15,6 +15,7 @@ extern SEXP sw_consts();
 extern SEXP rSW2_estimate_PotNatVeg_composition(SEXP, SEXP, SEXP, SEXP,SEXP, SEXP, SEXP,
                                                 SEXP,SEXP, SEXP, SEXP, SEXP,SEXP, SEXP,
                                                 SEXP, SEXP,SEXP, SEXP);
+extern SEXP rSW2_calc_SiteClimate(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
   {"start",                   (DL_FUNC) &start,                   4},
@@ -24,6 +25,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"rSW2_processAllWeather",  (DL_FUNC) &rSW2_processAllWeather,  2},
   {"sw_consts",               (DL_FUNC) &sw_consts,               0},
   {"rSW2_estimate_PotNatVeg_composition", (DL_FUNC) &rSW2_estimate_PotNatVeg_composition, 18},
+  {"rSW2_calc_SiteClimate",   (DL_FUNC) &rSW2_calc_SiteClimate,   6},
   {NULL, NULL, 0}
 };
 
