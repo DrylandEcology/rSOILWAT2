@@ -66,7 +66,7 @@ swProd_validity <- function(object) {
   nvegs <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["NVEGTYPES"]]
 
   if (length(object@veg_method) != 1 ||
-    !all(is.na(object@veg_method) | (object@veg_method >= 0) & object@veg_method <= 1) {
+    !all(is.na(object@veg_method) | (object@veg_method >= 0) & object@veg_method <= 1)) {
     msg <- "@veg_method must have 1 values between 0 and 1."
     val <- if (isTRUE(val)) msg else c(val, msg)
   }

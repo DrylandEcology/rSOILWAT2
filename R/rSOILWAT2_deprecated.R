@@ -394,8 +394,59 @@ calc_SiteClimate_old <- function(weatherList, year.start = NA, year.end = NA,
     )
   }
 
+  # Calculate monthly values
+  index <- st2[["month_ForEachUsedDay"]] + 100 * x[, "Year"]
+
+  mon_Temp <- vapply(
+    list(Tmean_C, x[, "Tmin_C"], x[, "Tmax_C"]),
+    function(data) matrix(tapply(data, index, mean, na.rm = TRUE), nrow = 12),
+    FUN.VALUE = matrix(NA_real_, nrow = 12, ncol = length(years))
+  )
+
+  mon_PPT <- matrix(tapply(x[, "PPT_cm"], index, sum, na.rm = TRUE), nrow = 12)
+
+  list(
+    # Calculate mean monthly values
+    meanMonthlyTempC = apply(mon_Temp[, , 1, drop = FALSE], 1, mean,
+      na.rm = TRUE),
+    minMonthlyTempC = apply(mon_Temp[, , 2, drop = FALSE], 1, mean,
+      na.rm = TRUE),
+    maxMonthlyTempC = apply(mon_Temp[, , 3, drop = FALSE], 1, mean,
+      na.rm = TRUE),
+    meanMonthlyPPTcm = apply(mon_PPT, 1, mean, na.rm = TRUE),
+
+    # Calculate mean annual values
+    MAP_cm = sum(mon_PPT, na.rm = TRUE) / length(years),
+    MAT_C = mean(Tmean_C, na.rm = TRUE),
+
+    # If C4-variables are requested
+    dailyTempMin = if (do_C4vars) x[, "Tmin_C"] else NA,
+    dailyTempMean = if (do_C4vars) Tmean_C else NA,
+    dailyC4vars = if (do_C4vars) {
+      sw_dailyC4_TempVar(
+        dailyTempMin = x[, "Tmin_C"],
+        dailyTempMean = Tmean_C,
+        simTime2 = st2
+      )
+    } else {
+      NA
+    },
+
+    # If cheatgrass-variables are requested
+    Cheatgrass_ClimVars = if (do_Cheatgrass_ClimVars) {
+      sw_Cheatgrass_ClimVar(
+        monthlyPPT_cm = mon_PPT,
+        monthlyTempMean_C = mon_Temp[, , 1, drop = FALSE],
+        monthlyTempMin_C = mon_Temp[, , 2, drop = FALSE]
+      )
+    } else {
+      NA
+    }
+  )
+}
+
 # Old way of calculating esimates of natural vegetation cover
-estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
+estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
   mean_monthly_ppt_mm, mean_monthly_Temp_C, dailyC4vars = NULL,
   isNorth = TRUE, shrub_limit = 0.2,
   fix_succulents = FALSE, Succulents_Fraction = NA,
@@ -409,7 +460,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
   fix_BareGround = TRUE, BareGround_Fraction = 0,
   fill_empty_with_BareGround = TRUE,
   warn_extrapolation = TRUE) {
-
+  .Deprecated("estimate_PotNatVeg_composition")
   veg_types <- c(
     "Succulents", "Forbs",
     "Grasses_C3", "Grasses_C4", "Grasses_Annuals",
@@ -521,6 +572,9 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
       "'estimate_PotNatVeg_composition': ",
       "User defined relative abundance values sum to more than ",
       "1 = full land cover."
+    )
+  }
+
 
   #--- Incomplete surface cover
   veg_cover <- input_cover
@@ -831,54 +885,5 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
 
     # Relative contributions of sub-types to the grass type
     Grasses = c3c4ann
-
-  # Calculate monthly values
-  index <- st2[["month_ForEachUsedDay"]] + 100 * x[, "Year"]
-
-  mon_Temp <- vapply(
-    list(Tmean_C, x[, "Tmin_C"], x[, "Tmax_C"]),
-    function(data) matrix(tapply(data, index, mean, na.rm = TRUE), nrow = 12),
-    FUN.VALUE = matrix(NA_real_, nrow = 12, ncol = length(years))
-  )
-
-  mon_PPT <- matrix(tapply(x[, "PPT_cm"], index, sum, na.rm = TRUE), nrow = 12)
-
-  list(
-    # Calculate mean monthly values
-    meanMonthlyTempC = apply(mon_Temp[, , 1, drop = FALSE], 1, mean,
-      na.rm = TRUE),
-    minMonthlyTempC = apply(mon_Temp[, , 2, drop = FALSE], 1, mean,
-      na.rm = TRUE),
-    maxMonthlyTempC = apply(mon_Temp[, , 3, drop = FALSE], 1, mean,
-      na.rm = TRUE),
-    meanMonthlyPPTcm = apply(mon_PPT, 1, mean, na.rm = TRUE),
-
-    # Calculate mean annual values
-    MAP_cm = sum(mon_PPT, na.rm = TRUE) / length(years),
-    MAT_C = mean(Tmean_C, na.rm = TRUE),
-
-    # If C4-variables are requested
-    dailyTempMin = if (do_C4vars) x[, "Tmin_C"] else NA,
-    dailyTempMean = if (do_C4vars) Tmean_C else NA,
-    dailyC4vars = if (do_C4vars) {
-      sw_dailyC4_TempVar(
-        dailyTempMin = x[, "Tmin_C"],
-        dailyTempMean = Tmean_C,
-        simTime2 = st2
-      )
-    } else {
-      NA
-    },
-
-    # If cheatgrass-variables are requested
-    Cheatgrass_ClimVars = if (do_Cheatgrass_ClimVars) {
-      sw_Cheatgrass_ClimVar(
-        monthlyPPT_cm = mon_PPT,
-        monthlyTempMean_C = mon_Temp[, , 1, drop = FALSE],
-        monthlyTempMin_C = mon_Temp[, , 2, drop = FALSE]
-      )
-    } else {
-      NA
-    }
   )
 }
