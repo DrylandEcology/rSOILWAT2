@@ -521,7 +521,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     allocDeallocClimateStructs(allocate, numYears, &climateOutput, &climateAverages);
 
     // Calculate climate variables
-    calcSiteClimate(allHist, numYears, asInteger(yearStart), &climateOutput);
+    calcSiteClimate(allHist, numYears, asInteger(yearStart), &climateOutput, asReal(latitude));
 
     // Average climate variables
     averageClimateAcrossYears(&climateOutput, numYears, &climateAverages);
@@ -557,21 +557,22 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     REAL(MAP_cm)[0] = climateAverages.PPT_cm;
 
     // Set C4Variables and Cheatgrass values
-    REAL(C4Variables)[0] = climateAverages.sdC4[0];
-    REAL(C4Variables)[1] = climateAverages.sdC4[1];
-    REAL(C4Variables)[2] = climateAverages.sdC4[2];
 
-    REAL(C4Variables)[3] = climateAverages.minTempJuly_C;
-    REAL(C4Variables)[4] = climateAverages.frostFree_days;
-    REAL(C4Variables)[5] = climateAverages.ddAbove65F_degday;
+    REAL(C4Variables)[0] = climateAverages.minTempJuly_C;
+    REAL(C4Variables)[1] = climateAverages.frostFree_days;
+    REAL(C4Variables)[2] = climateAverages.ddAbove65F_degday;
 
-    REAL(Cheatgrass)[0] = climateAverages.sdCheatgrass[0];
-    REAL(Cheatgrass)[1] = climateAverages.sdCheatgrass[1];
-    REAL(Cheatgrass)[2] = climateAverages.sdCheatgrass[2];
+    REAL(C4Variables)[3] = climateAverages.sdC4[0];
+    REAL(C4Variables)[4] = climateAverages.sdC4[1];
+    REAL(C4Variables)[5] = climateAverages.sdC4[2];
 
-    REAL(Cheatgrass)[3] = climateAverages.PPTJuly_mm;
-    REAL(Cheatgrass)[4] = climateAverages.meanTempDriestQtr_C;
-    REAL(Cheatgrass)[5] = climateAverages.minTempFeb_C;
+    REAL(Cheatgrass)[0] = climateAverages.PPTJuly_mm;
+    REAL(Cheatgrass)[1] = climateAverages.meanTempDriestQtr_C;
+    REAL(Cheatgrass)[2] = climateAverages.minTempFeb_C;
+
+    REAL(Cheatgrass)[3] = climateAverages.sdCheatgrass[0];
+    REAL(Cheatgrass)[4] = climateAverages.sdCheatgrass[1];
+    REAL(Cheatgrass)[5] = climateAverages.sdCheatgrass[2];
 
     // Set mean average monthly temperature
     SET_VECTOR_ELT(res, 0, monthlyMean);
