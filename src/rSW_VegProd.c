@@ -647,13 +647,13 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
 
     // Following variable names end with "_D" to denote they are of C type double
     double Succulents_Fraction_D = ISNAN(asReal(Succulents_Fraction)) ? SW_MISSING : asReal(Succulents_Fraction);
-    double Annuals_Fraction_D = asReal(Annuals_Fraction);
+    double Annuals_Fraction_D = ISNAN(asReal(Annuals_Fraction)) ? 0.0 : asReal(Annuals_Fraction);
     double C4_Fraction_D = ISNAN(asReal(C4_Fraction)) ? SW_MISSING : asReal(C4_Fraction);
     double C3_Fraction_D = ISNAN(asReal(C3_Fraction)) ? SW_MISSING : asReal(C3_Fraction);
     double Shrubs_Fraction_D = ISNAN(asReal(Shrubs_Fraction)) ? SW_MISSING : asReal(Shrubs_Fraction);
     double Forbs_Fraction_D = ISNAN(asReal(Forbs_Fraction)) ? SW_MISSING : asReal(Forbs_Fraction);
-    double Trees_Fraction_D = asReal(Trees_Fraction);
-    double BareGround_Fraction_D = asReal(BareGround_Fraction);
+    double Trees_Fraction_D = ISNAN(asReal(Trees_Fraction)) ? 0.0 : asReal(Trees_Fraction);
+    double BareGround_Fraction_D = ISNAN(asReal(BareGround_Fraction)) ? 0.0 : asReal(BareGround_Fraction);
 
     double inputValues_D[8] = {Succulents_Fraction_D, Annuals_Fraction_D, C4_Fraction_D,
         C3_Fraction_D, Shrubs_Fraction_D, Forbs_Fraction_D, Trees_Fraction_D, BareGround_Fraction_D};
