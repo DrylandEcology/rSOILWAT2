@@ -6,7 +6,7 @@ clim <- calc_SiteClimate(
   weatherList = weatherData,
   year.start = 1949,
   year.end = 2010,
-  do_C4vars = FALSE,
+  do_C4vars = TRUE,
   simTime2 = NULL
 )
 
@@ -86,7 +86,7 @@ test_that("Vegetation: estimate land cover composition", {
   )
 
   expect_pnv(pnv)
-  expect_equal(pnv, pnv0_expected)
+  expect_equal(pnv, pnv0_expected, tolerance = 1e-6)
 
   # The set land cover types are 0
   for (k in iset) {
