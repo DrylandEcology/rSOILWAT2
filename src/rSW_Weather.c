@@ -578,19 +578,19 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     SET_VECTOR_ELT(res, 0, monthlyMean);
 
     // Set mean minimum temperature
-    SET_VECTOR_ELT(res, 1, monthlyMax);
+    SET_VECTOR_ELT(res, 1, monthlyMin);
 
     // Set mean maximum temperature
-    SET_VECTOR_ELT(res, 2, monthlyMin);
+    SET_VECTOR_ELT(res, 2, monthlyMax);
 
     // Set mean annual precipitation (cm)
     SET_VECTOR_ELT(res, 3, monthlyPPT);
 
     // Set mean annual temperature (C)
-    SET_VECTOR_ELT(res, 4, MAT_C);
+    SET_VECTOR_ELT(res, 4, MAP_cm);
 
     // Set mean annual precipitation (cm)
-    SET_VECTOR_ELT(res, 5, MAP_cm);
+    SET_VECTOR_ELT(res, 5, MAT_C);
 
     // Set values of the two standard deviation categories (C4 and cheatgrass)
     // in result variable
