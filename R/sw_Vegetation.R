@@ -192,7 +192,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
                 mean_monthly_ppt_mm,
                 mean_monthly_Temp_C,
                 shrub_limit,
-                if(fix_sumgrasses) {
+                if (fix_sumgrasses) {
                     SumGrasses_Fraction
                 } else {
                     NA
@@ -201,42 +201,42 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
                 warn_extrapolation,
                 dailyC4vars,
                 isNorth,
-                if(fix_succulents) {
+                if (fix_succulents) {
                     Succulents_Fraction
                 } else {
                     NA
                 },
-                if(fix_annuals) {
+                if (fix_annuals) {
                     Annuals_Fraction
                 } else {
                     NA
                 },
-                if(fix_C4grasses) {
+                if (fix_C4grasses) {
                     C4_Fraction
                 } else {
                     NA
                 },
-                if(fix_C3grasses) {
+                if (fix_C3grasses) {
                     C3_Fraction
                 } else {
                     NA
                 },
-                if(fix_shrubs) {
+                if (fix_shrubs) {
                     Shrubs_Fraction
                 } else {
                     NA
                 },
-                if(fix_forbs) {
+                if (fix_forbs) {
                     Forbs_Fraction
                 } else {
                     NA
                 },
-                if(fix_trees) {
+                if (fix_trees) {
                     Trees_Fraction
                 } else {
                     NA
                 },
-                if(fix_BareGround) {
+                if (fix_BareGround) {
                     BareGround_Fraction
                 } else {
                     NA
