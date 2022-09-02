@@ -54,12 +54,39 @@ Bool bWeatherList;
 /*                  Local Variables                    */
 /* --------------------------------------------------- */
 static SEXP Rlogfile;
+static Bool current_sw_quiet = swFALSE;
 
 
 
 /* =================================================== */
 /*             Global Function Definitions             */
 /* --------------------------------------------------- */
+
+/**
+ * Turn on/off `SOILWAT2` messages including errors, notes, and warnings
+ *
+ * @param verbose A logical value.
+ * @return The previous logical value
+ */
+SEXP sw_quiet(SEXP quiet) {
+    SEXP prev_quiet;
+
+    PROTECT(prev_quiet = NEW_LOGICAL(1));
+    LOGICAL_POINTER(prev_quiet)[0] = current_sw_quiet;
+
+    if(LOGICAL(coerceVector(quiet, LGLSXP))[0]) {
+        // tell `LogError()` that R should NOT print messages to the console
+        logfp = NULL;
+        current_sw_quiet = swTRUE;
+    } else {
+        // tell `LogError()` that R should print messages to the console
+        logfp = (FILE *) swTRUE; // any non-NULL file pointer
+        current_sw_quiet = swFALSE;
+    }
+
+    UNPROTECT(1);
+    return prev_quiet;
+}
 
 /**
  * Determines if a constant in the Parton equation 2.21 is invalid and would

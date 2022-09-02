@@ -250,19 +250,6 @@ test_that("Vegetation: estimate land cover composition", {
     )
   )
 
-  # converted from error into warning:
-  # (iii) cover to estimate is 0, fixed types are less than 1, and bare-ground
-  # is fixed
-  expect_warning(
-    estimate_PotNatVeg_composition(
-      MAP_mm = 900,
-      MAT_C = -10,
-      mean_monthly_ppt_mm = c(0, 0, rep(100, 9), 0),
-      mean_monthly_Temp_C = rep(-10, 12),
-      fill_empty_with_BareGround = FALSE
-    )
-  )
-
   # The last errors are avoided if `fill_empty_with_BareGround = TRUE`
   # and bare-ground is not fixed; we get 100% bare-ground cover
   expect_silent(
@@ -284,6 +271,24 @@ test_that("Vegetation: estimate land cover composition", {
 
   expect_pnv(pnv[1:2])
   expect_equivalent(pnv[["Rel_Abundance_L0"]][ibar], 1)
+
+  # Make sure `SOILWAT2` throws a warning that R, we use `sw_verbosity()`
+  # to do that
+  prev_quiet <- sw_verbosity(TRUE)
+
+  # Expecting warning because MAT_C is outside of formulas domain
+  expect_warning(
+    estimate_PotNatVeg_composition(
+      MAP_mm = 900,
+      MAT_C = -10,
+      mean_monthly_ppt_mm = c(0, 0, rep(100, 9), 0),
+      mean_monthly_Temp_C = rep(-10, 12),
+      fill_empty_with_BareGround = FALSE
+    )
+  )
+
+  # Undo what the previous call to `sw_verbosity()` did
+  sw_verbosity(prev_quiet)
 })
 
 
