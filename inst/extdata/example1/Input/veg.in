@@ -8,6 +8,9 @@
 #       describe the four available vegetation types and should not be
 #       modified unless a vegetation type itself is altered.
 
+#---- Select method for vegetation parameters
+0	# 0 - Read in the values from file
+ 	# 1 - Estimate fixed vegetation composition (fractional cover) from long-term climate conditions
 
 #---- Composition of vegetation type components (0-1; must add up to 1)
 #	Grasses	Shrubs	Trees	Forbs	BareGround
