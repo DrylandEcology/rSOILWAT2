@@ -96,10 +96,10 @@ calc_SiteClimate <- function(weatherList, year.start = NA, year.end = NA,
                    latitude
       )
 
-      res[["dailyTempMin"]] <- if(do_C4vars) x[, "Tmin_C"] else NA
-      res[["dailyTempMean"]] <- if(do_C4vars) Tmean_C else NA
-      res[["dailyC4vars"]] <- if(do_C4vars) res[["dailyC4vars"]] else NA
-      res[["Cheatgrass_ClimVars"]] <- if(do_Cheatgrass_ClimVars)
+      res[["dailyTempMin"]] <- if (do_C4vars) x[, "Tmin_C"] else NA
+      res[["dailyTempMean"]] <- if (do_C4vars) Tmean_C else NA
+      res[["dailyC4vars"]] <- if (do_C4vars) res[["dailyC4vars"]] else NA
+      res[["Cheatgrass_ClimVars"]] <- if (do_Cheatgrass_ClimVars)
                                             res[["Cheatgrass_ClimVars"]] else NA
 
       res
