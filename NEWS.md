@@ -1,3 +1,11 @@
+
+# rSOILWAT2 v5.3.2
+* This version produces identical simulation output as the previous release.
+* `SOILWAT2` is updated to `v6.6.0` which updated random number functionality;
+  however, none of those updates affect `rSOILWAT2` because `rSOILWAT2` utilizes
+  R API random number functionality which has not changed.
+
+
 # rSOILWAT2 v5.3.1
 * This version fixes a bug in soil temperature output that was
   introduced with version `3.5.0` (#194).
