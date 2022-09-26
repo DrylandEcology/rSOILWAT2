@@ -185,7 +185,6 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
   fill_empty_with_BareGround = TRUE,
   warn_extrapolation = TRUE) {
 
-
       res <- .Call(C_rSW2_estimate_PotNatVeg_composition,
                 MAP_mm,
                 MAT_C,
@@ -193,53 +192,57 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
                 mean_monthly_Temp_C,
                 shrub_limit,
                 if (fix_sumgrasses) {
-                    SumGrasses_Fraction
+                  as.numeric(SumGrasses_Fraction)
                 } else {
-                    NA
+                  NA_real_
                 },
-                fill_empty_with_BareGround,
-                warn_extrapolation,
-                dailyC4vars,
-                isNorth,
-                if (fix_succulents) {
-                    Succulents_Fraction
+                as.logical(fill_empty_with_BareGround),
+                as.logical(warn_extrapolation),
+                if (is.null(dailyC4vars) || anyNA(dailyC4vars[1:3])) {
+                  NULL
                 } else {
-                    NA
+                  as.numeric(dailyC4vars[1:3])
+                },
+                as.logical(isNorth),
+                if (fix_succulents) {
+                  as.numeric(Succulents_Fraction)
+                } else {
+                  NA_real_
                 },
                 if (fix_annuals) {
-                    Annuals_Fraction
+                  as.numeric(Annuals_Fraction)
                 } else {
-                    NA
+                  NA_real_
                 },
                 if (fix_C4grasses) {
-                    C4_Fraction
+                  as.numeric(C4_Fraction)
                 } else {
-                    NA
+                  NA_real_
                 },
                 if (fix_C3grasses) {
-                    C3_Fraction
+                  as.numeric(C3_Fraction)
                 } else {
-                    NA
+                  NA_real_
                 },
                 if (fix_shrubs) {
-                    Shrubs_Fraction
+                  as.numeric(Shrubs_Fraction)
                 } else {
-                    NA
+                  NA_real_
                 },
                 if (fix_forbs) {
-                    Forbs_Fraction
+                  as.numeric(Forbs_Fraction)
                 } else {
-                    NA
+                  NA_real_
                 },
                 if (fix_trees) {
-                    Trees_Fraction
+                  as.numeric(Trees_Fraction)
                 } else {
-                    NA
+                  NA_real_
                 },
                 if (fix_BareGround) {
-                    BareGround_Fraction
+                  as.numeric(BareGround_Fraction)
                 } else {
-                    NA
+                  NA_real_
                 }
       )
 

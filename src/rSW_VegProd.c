@@ -703,11 +703,14 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
         final_MonTemp_C[index] = REAL(mean_monthly_Temp_C)[index];
     }
 
-    // Check if dailyC4vars is not NULL
+    // Check if dailyC4vars is not NULL and assume that not NA/NAN
     if(!isNull(dailyC4vars)) {
+        // Coerce `dailyC4vars` to numeric (double)
+        dailyC4vars = PROTECT(coerceVector(dailyC4vars, REALSXP));
         C4Variables[0] = REAL(dailyC4vars)[0];
         C4Variables[1] = REAL(dailyC4vars)[1];
         C4Variables[2] = REAL(dailyC4vars)[2];
+        UNPROTECT(1);
     } else {
         C4Variables[0] = SW_MISSING;
         C4Variables[1] = SW_MISSING;
