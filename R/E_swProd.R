@@ -164,10 +164,6 @@ setMethod("initialize", signature = "swProd", function(.Object, ...) {
   dots <- list(...)
   dns <- names(dots)
 
-  if (!("veg_method") %in% dns) {
-      def@veg_method[] <- NA_integer_
-  }
-
   # We don't set values for slot `Composition`; this is to prevent simulation
   # runs with accidentally incorrect values
   if (!("Composition" %in% dns)) {
