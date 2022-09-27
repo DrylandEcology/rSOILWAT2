@@ -272,6 +272,12 @@ You may organize weather data in a variety of ways:
 
       # Check that weather data is well-formed
       stopifnot(rSOILWAT2::dbW_check_weatherData(wdata))
+
+    } else {
+      # Fix simulation years to weather data that we have at hand
+      rSOILWAT2::swYears_EndYear(sw_in) <- max(
+        rSOILWAT2::get_years_from_weatherData(wdata)
+      )
     }
   }
 ```
