@@ -494,6 +494,8 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     char *cnamesCheatgrass[] = {"Month7th_PPT_mm","MeanTemp_ofDriestQuarter_C","MinTemp_of2ndMonth_C",
         "Month7th_PPT_mm_SD","MeanTemp_ofDriestQuarter_C_SD","MinTemp_of2ndMonth_C_SD"};
 
+    Bool isNorth = asReal(latitude) > 0.0;
+
     monthlyMean = PROTECT(allocVector(REALSXP, MAX_MONTHS));
     monthlyMax = PROTECT(allocVector(REALSXP, MAX_MONTHS));
     monthlyMin = PROTECT(allocVector(REALSXP, MAX_MONTHS));
@@ -521,7 +523,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     allocDeallocClimateStructs(allocate, numYears, &climateOutput, &climateAverages);
 
     // Calculate climate variables
-    calcSiteClimate(allHist, numYears, asInteger(yearStart), &climateOutput, asReal(latitude));
+    calcSiteClimate(allHist, numYears, asInteger(yearStart), &climateOutput, isNorth);
 
     // Average climate variables
     averageClimateAcrossYears(&climateOutput, numYears, &climateAverages);
