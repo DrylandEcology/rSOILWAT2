@@ -445,7 +445,72 @@ calc_SiteClimate_old <- function(weatherList, year.start = NA, year.end = NA,
   )
 }
 
-# Old way of calculating esimates of natural vegetation cover
+#' Old function to estimate natural vegetation cover (previous to `v6.0.0`)
+#'
+#' @examples
+#' # Compare new and old function
+#' wdata <- rSOILWAT2::get_WeatherHistory(rSOILWAT2::sw_exampleData)
+#' clim1 <- calc_SiteClimate(weatherList = wdata, do_C4vars = TRUE)
+#'
+#' fun_pnvcov <- function(fun, clim) {
+#'   lapply(
+#'     c(90, -90),
+#'     function(latitude) {
+#'       fun(
+#'         MAP_mm = 10 * clim[["MAP_cm"]],
+#'         MAT_C = clim[["MAT_C"]],
+#'         mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
+#'         mean_monthly_Temp_C = clim[["meanMonthlyTempC"]],
+#'         dailyC4vars = clim[["dailyC4vars"]],
+#'         isNorth = latitude >= 0
+#'       )
+#'     }
+#'   )
+#' }
+#'
+#' cov_old <- fun_pnvcov(rSOILWAT2:::estimate_PotNatVeg_composition_old, clim1)
+#' cov_new <- fun_pnvcov(rSOILWAT2::estimate_PotNatVeg_composition, clim1)
+#'
+#' # Compare values assuming hemisphere:
+#' all.equal(cov_old[[1]], cov_new[[1]])
+#' # TRUE
+#'
+#' # Compare values assuming southern hemisphere:
+#' all.equal(cov_old[[2]], cov_new[[2]])
+#' # Rel_Abundance_L0: Mean relative difference: 0.3153386
+#' # Rel_Abundance_L1: Mean relative difference: 0.1424291
+#' # Grasses: Mean relative difference: 0.4614127
+#'
+#' # Differences in Rel_Abundance_L0:
+#' print(
+#'   cbind(
+#'     old = cov_old[[2]][["Rel_Abundance_L0"]],
+#'     new = cov_new[[2]][["Rel_Abundance_L0"]]
+#'   )
+#' )
+#' #                        old        new
+#' # Succulents      0.00000000 0.01915593
+#' # Forbs           0.22804606 0.26554610
+#' # Grasses_C3      0.52575060 0.61220536
+#' # Grasses_C4      0.15766932 0.00000000
+#' # Grasses_Annuals 0.00000000 0.00000000
+#' # Shrubs          0.08853402 0.10309262
+#' # Trees           0.00000000 0.00000000
+#' # BareGround      0.00000000 0.00000000
+#'
+#'
+#' # Benchmarks: new version is about 15x faster
+#' bm <- microbenchmark::microbenchmark(
+#'   old = fun_pnvcov(rSOILWAT2:::estimate_PotNatVeg_composition_old, clim1),
+#'   new = fun_pnvcov(rSOILWAT2::estimate_PotNatVeg_composition, clim1)
+#' )
+#'
+#' # Unit: microseconds
+#' # expr     min       lq      mean   median       uq     max neval
+#' # old  450.820 467.7365 499.84000 503.8165 515.4235 711.459   100
+#' # new   25.467  28.3930  33.95104  31.4155  39.8005  54.414   100
+#'
+#' @noRd
 estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
   mean_monthly_ppt_mm, mean_monthly_Temp_C, dailyC4vars = NULL,
   isNorth = TRUE, shrub_limit = 0.2,
