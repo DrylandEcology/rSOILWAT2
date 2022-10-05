@@ -966,7 +966,6 @@ dbW_generateWeather <- function(
   sw_in <- rSOILWAT2::sw_exampleData
 
   # Set years
-  swWeather_FirstYearHistorical(sw_in) <- min(years)
   swYears_EndYear(sw_in) <- max(years)
   swYears_StartYear(sw_in) <- min(years)
 
