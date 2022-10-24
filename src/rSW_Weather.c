@@ -102,7 +102,7 @@ SEXP onGet_SW_WTH_setup() {
 	PROTECT(use_weathergenerator_only = NEW_LOGICAL(1));
 	LOGICAL_POINTER(use_weathergenerator_only)[0] = w->use_weathergenerator_only;
 	PROTECT(yr_first = NEW_INTEGER(1));
-	INTEGER_POINTER(yr_first)[0] = w->yr.first;
+	INTEGER_POINTER(yr_first)[0] = w->startYear;
 
 	PROTECT(MonthlyScalingParams = allocMatrix(REALSXP, 12, nitems));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
@@ -172,7 +172,7 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 
 	PROTECT(yr_first = GET_SLOT(SW_WTH, install(cSW_WTH_names[5])));
 	tmp = *INTEGER(yr_first);
-	w->yr.first = (tmp < 0) ? SW_Model.startyr : yearto4digit(tmp);
+	w->startYear = (tmp < 0) ? SW_Model.startyr : yearto4digit(tmp);
 
 	PROTECT(MonthlyScalingParams = GET_SLOT(SW_WTH, install(cSW_WTH_names[6])));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
@@ -187,17 +187,14 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 
 	SW_WeatherPrefix(w->name_prefix);
 
-	w->yr.last = SW_Model.endyr;
-	w->yr.total = w->yr.last - w->yr.first + 1;
-
-	if (SW_Weather.generateWeatherMethod != 2 && SW_Model.startyr < w->yr.first) {
+	if (SW_Weather.generateWeatherMethod != 2 && SW_Model.startyr < w->startYear) {
 		LogError(
 			logfp,
 			LOGFATAL,
 			"%s : Model year (%d) starts before weather files (%d)"
 				" and weather generator turned off.\n"
 				" Please synchronize the years or set up the weather generator files",
-			MyFileName, SW_Model.startyr, w->yr.first
+			MyFileName, SW_Model.startyr, w->startYear
 		);
 	}
 
@@ -306,6 +303,8 @@ void onSet_WTH_DATA(void) {
 
   SEXP listAllWeather;
 
+  SW_WEATHER *weather = &SW_Weather;
+
   // Determine which `rSOILWAT2` list of `swWeatherData` we are using
   listAllWeather = bWeatherList ?
     WeatherList :
@@ -314,13 +313,13 @@ void onSet_WTH_DATA(void) {
 
   // Deallocate (previous, if any) `allHist`
   // (using value of `SW_Weather.n_years` previously used to allocate)
-  deallocateAllWeather();
+  deallocateAllWeather(weather);
 
   // Determine required size of new `allHist`
   SW_Weather.n_years = SW_Model.endyr - SW_Model.startyr + 1;
 
   // Allocate new `allHist` (based on current `SW_Weather.n_years`)
-  allocateAllWeather();
+  allocateAllWeather(weather);
 
 
   // Equivalent to `readAllWeather()`:
@@ -494,7 +493,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     char *cnamesCheatgrass[] = {"Month7th_PPT_mm","MeanTemp_ofDriestQuarter_C","MinTemp_of2ndMonth_C",
         "Month7th_PPT_mm_SD","MeanTemp_ofDriestQuarter_C_SD","MinTemp_of2ndMonth_C_SD"};
 
-    Bool isNorth = asReal(latitude) > 0.0;
+    Bool inNorthHem = asReal(latitude) > 0.0;
 
     monthlyMean = PROTECT(allocVector(REALSXP, MAX_MONTHS));
     monthlyMax = PROTECT(allocVector(REALSXP, MAX_MONTHS));
@@ -523,7 +522,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     allocDeallocClimateStructs(allocate, numYears, &climateOutput, &climateAverages);
 
     // Calculate climate variables
-    calcSiteClimate(allHist, numYears, asInteger(yearStart), &climateOutput, isNorth);
+    calcSiteClimate(allHist, numYears, asInteger(yearStart), inNorthHem, &climateOutput);
 
     // Average climate variables
     averageClimateAcrossYears(&climateOutput, numYears, &climateAverages);

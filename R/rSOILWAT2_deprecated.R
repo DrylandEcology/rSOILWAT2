@@ -337,7 +337,91 @@ sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
   res
 }
 
-# Old way of calculating climate variables
+#' Old way of calculating climate variables (previous to `v6.0.0`)
+#'
+#' @examples
+#' # Compare new and old function
+#' wdata <- rSOILWAT2::get_WeatherHistory(rSOILWAT2::sw_exampleData)
+#'
+#' fun_clim <- function(fun) {
+#'   lapply(
+#'     c(-90, 90),
+#'     function(latitude) {
+#'       fun(
+#'         weatherList = wdata,
+#'         do_C4vars = TRUE,
+#'         do_Cheatgrass_ClimVars = TRUE,
+#'         latitude = latitude
+#'       )
+#'     }
+#'   )
+#' }
+#'
+#' clim_old <- fun_clim(rSOILWAT2:::calc_SiteClimate_old)
+#' clim_new <- fun_clim(rSOILWAT2::calc_SiteClimate)
+#'
+#' # Compare values assuming northern hemisphere:
+#' all.equal(clim_old[[1]], clim_new[[1]])
+#' # MAT_C: Mean relative difference: 2.740629e-05
+#'
+#' # Compare values assuming southern hemisphere:
+#' all.equal(clim_old[[2]], clim_new[[2]])
+#' # MAT_C: Mean relative difference: 2.740629e-05
+#' # dailyC4vars: Mean relative difference: 0.05932631
+#' # Cheatgrass_ClimVars: Mean relative difference: 0.707922
+#'
+#' # Difference in MAT:
+#' cat(
+#'   "MAT_C(old) = ", clim_old[[2]][["MAT_C"]],
+#'   "vs. MAT_C(new) = ", clim_new[[2]][["MAT_C"]],
+#'   fill = TRUE
+#' )
+#' # MAT_C(old) =  4.153896 vs. MAT_C(new) =  4.154009
+#'
+#' # Differences in dailyC4vars:
+#' print(
+#'   cbind(
+#'     old = clim_old[[2]][["dailyC4vars"]],
+#'     new = clim_new[[2]][["dailyC4vars"]]
+#'   )
+#' )
+#' #                                                    old        new
+#' # Month7th_NSadj_MinTemp_C                    -27.243871 -27.199333
+#' # LengthFreezeFreeGrowingPeriod_NSadj_Days     68.290323  72.600000
+#' # DegreeDaysAbove65F_NSadj_DaysC               20.684935  21.357533
+#' # Month7th_NSadj_MinTemp_C.sd                   5.241726   5.325365
+#' # LengthFreezeFreeGrowingPeriod_NSadj_Days.sd  13.446669   9.586629
+#' # DegreeDaysAbove65F_NSadj_DaysC.sd            19.755513  19.550419
+#'
+#' # Differences in Cheatgrass_ClimVars:
+#' print(
+#'   cbind(
+#'     old = clim_old[[2]][["Cheatgrass_ClimVars"]],
+#'     new = clim_new[[2]][["Cheatgrass_ClimVars"]]
+#'   )
+#' )
+#' #                                      old       new
+#' # Month7th_PPT_mm                35.729032 65.916667
+#' # MeanTemp_ofDriestQuarter_C     11.524859 11.401228
+#' # MinTemp_of2ndMonth_C          -13.904600  6.545578
+#' # Month7th_PPT_mm_SD             21.598367 35.285409
+#' # MeanTemp_ofDriestQuarter_C_SD   7.171922  7.260852
+#' # MinTemp_of2ndMonth_C_SD         2.618434  1.639640
+#'
+#'
+#' # Benchmarks: new version is about 20x faster
+#' bm <- microbenchmark::microbenchmark(
+#'   old = fun_clim(rSOILWAT2:::calc_SiteClimate_old),
+#'   new = fun_clim(rSOILWAT2::calc_SiteClimate)
+#' )
+#'
+#' # Unit: milliseconds
+#' # expr       min         lq       mean     median         uq      max neval
+#' # old  136.41207 149.689687 157.494004 154.114424 157.490437 277.3953   100
+#' # new    3.07084   3.422651   6.992061   3.694008   4.082199 119.7300   100
+#'
+#'
+#' @noRd
 calc_SiteClimate_old <- function(weatherList, year.start = NA, year.end = NA,
   do_C4vars = FALSE, do_Cheatgrass_ClimVars = FALSE, simTime2 = NULL,
   latitude = 90) {
