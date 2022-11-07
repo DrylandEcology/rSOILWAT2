@@ -95,6 +95,27 @@ for (k in seq_along(list_backups)) {
 
 
 #------ Helper functions -----
+compare_objects <- function(new, old) {
+  # Compare to previous version
+  res_cmp <- waldo::compare(old, new)
+
+  # Ignore "timestamp"
+  has_timestamp_diff <- grepl("timestamp", res_cmp, fixed = TRUE)
+
+  # Ignore difference in version less than minor
+  has_version_diff <- rSOILWAT2::check_version(
+    new,
+    rSOILWAT2::get_version(old),
+    level = "minor"
+  )
+
+  list(
+    res_waldo = res_cmp,
+    resave =
+      length(res_cmp) > sum(has_timestamp_diff) + sum(has_version_diff)
+  )
+}
+
 toggleWeatherGenerator <- function(path, activate = FALSE) {
   ftmp <- file.path(path, "Input", "weathsetup.in")
   fin <- readLines(ftmp)
@@ -249,15 +270,11 @@ for (it in seq_along(tests)) {
   if (it == 1) {
     sw_exampleData <- sw_input
 
-    # Compare to previous version
-    res_cmp <- waldo::compare(rSOILWAT2::sw_exampleData, sw_exampleData)
-
-    # Ignore "timestamp"
-    has_timestamp_diff <- grepl("timestamp", res_cmp, fixed = TRUE)
+    res_cmp <- compare_objects(sw_exampleData, old = rSOILWAT2::sw_exampleData)
 
     # Save default package data (if different from previous)
-    if (length(res_cmp) > sum(has_timestamp_diff)) {
-      print(res_cmp)
+    if (res_cmp[["resave"]]) {
+      print(res_cmp[["waldo_cmp"]])
 
       message("Update default package data: 'sw_exampleData'")
 
@@ -311,23 +328,20 @@ for (it in seq_along(tests)) {
   #--- Compare input to previous version
   slot(sw_input, "weatherHistory") <- list(new("swWeatherData"))
 
-  res_cmp <- waldo::compare(
-    readRDS(
+  res_cmp <- compare_objects(
+    sw_input,
+    old = readRDS(
       file.path(
         dir_backup,
         basename(dir_testdata),
         paste0("Ex", tests[it], "_input.rds")
       )
-    ),
-    sw_input
+    )
   )
 
-  # Ignore "timestamp"
-  has_timestamp_diff <- grepl("timestamp", res_cmp, fixed = TRUE)
-
   #--- Save input for unit testing (if different from previous)
-  if (length(res_cmp) > sum(has_timestamp_diff)) {
-    print(res_cmp)
+  if (res_cmp[["resave"]]) {
+    print(res_cmp[["waldo_cmp"]])
 
     saveRDS(
       object = sw_input,
@@ -348,23 +362,20 @@ for (it in seq_along(tests)) {
     )
 
     #--- Compare ouput to previous version
-    res_cmp <- waldo::compare(
-      readRDS(
+    res_cmp <- compare_objects(
+      rdy,
+      old = readRDS(
         file.path(
           dir_backup,
           basename(dir_testdata),
           paste0("Ex", tests[it], "_output.rds")
         )
-      ),
-      rdy
+      )
     )
 
-    # Ignore "timestamp"
-    has_timestamp_diff <- grepl("timestamp", res_cmp, fixed = TRUE)
-
     # Save test output (if different from previous)
-    if (length(res_cmp) > sum(has_timestamp_diff)) {
-      print(res_cmp)
+    if (res_cmp[["resave"]]) {
+      print(res_cmp[["waldo_cmp"]])
 
       saveRDS(
         object = rdy,
