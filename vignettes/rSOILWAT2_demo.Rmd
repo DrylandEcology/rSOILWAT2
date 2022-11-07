@@ -283,17 +283,6 @@ You may organize weather data in a variety of ways:
 ```
 
 
-### Specify first year of observed weather data
-```{r, wyr}
-  # `FirstYearHistorical` can be set to a negative value (the default),
-  # then the code will use the first simulation year.
-  # That is, the two lines below will produce identical simulations:
-  rSOILWAT2::swWeather_FirstYearHistorical(sw_in) <-
-    rSOILWAT2::swYears_StartYear(sw_in)
-  rSOILWAT2::swWeather_FirstYearHistorical(sw_in) <- -1
-```
-
-
 ### Calculate site climate from daily values
 ```{r, siteclim}
   clim <- rSOILWAT2::calc_SiteClimate(weatherList = wdata, do_C4vars = TRUE)

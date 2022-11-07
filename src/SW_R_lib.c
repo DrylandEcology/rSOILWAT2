@@ -145,6 +145,12 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   #endif
   rSW_CTL_obtain_inputs(TRUE);
 
+  // finalize daily weather
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" finalize daily weather ...\n");
+  #endif
+  SW_WTH_finalize_all_weather();
+
   // initialize simulation run (based on user inputs)
   #ifdef RSWDEBUG
   if (debug) swprintf(" init simulation run ...\n");
@@ -314,6 +320,12 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 	#endif
 	rSW_CTL_obtain_inputs(useFiles);
 
+	// finalize daily weather
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" finalize daily weather ...\n");
+	#endif
+	SW_WTH_finalize_all_weather();
+
 	// initialize simulation run (based on user inputs)
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" init simulation run ...");
@@ -417,9 +429,16 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
 
   // Process weather data
   #ifdef RSWDEBUG
-  if (debug) swprintf("'rSW2_processAllWeather': process weather data.");
+  if (debug) swprintf("'rSW2_processAllWeather': process weather data");
   #endif
   onSet_WTH_DATA();
+
+
+  // Finalize daily weather (weather generator & monthly scaling)
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" > finalize daily weather.\n");
+  #endif
+  SW_WTH_finalize_all_weather();
 
 
   // Return processed weather data

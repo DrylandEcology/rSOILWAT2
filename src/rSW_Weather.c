@@ -39,9 +39,12 @@
 static char *MyFileName;
 
 static char *cSW_WTH_names[] = {
-  "UseSnow", "pct_SnowDrift", "pct_SnowRunoff",
-  "use_weathergenerator", "use_weathergenerator_only",
-  "FirstYear_Historical",
+  "UseSnow",
+  "pct_SnowDrift",
+  "pct_SnowRunoff",
+  "use_weathergenerator",
+  "use_weathergenerator_only",
+  "FirstYear_Historical", // removed from SOILWAT2; kept here for backwards compatibility
   "MonthlyScalingParams"
 };
 
@@ -56,7 +59,8 @@ static void rSW2_setAllWeather(
   SEXP listAllW,
   SW_WEATHER_HIST **allHist,
   int startYear,
-  unsigned int n_years
+  unsigned int n_years,
+  Bool use_weathergenerator_only
 );
 
 
@@ -102,7 +106,10 @@ SEXP onGet_SW_WTH_setup() {
 	PROTECT(use_weathergenerator_only = NEW_LOGICAL(1));
 	LOGICAL_POINTER(use_weathergenerator_only)[0] = w->use_weathergenerator_only;
 	PROTECT(yr_first = NEW_INTEGER(1));
-	INTEGER_POINTER(yr_first)[0] = w->startYear;
+	/* `SW_weather.yr` was removed from SOILWAT2:
+	INTEGER_POINTER(yr_first)[0] = w->yr.first;
+	*/
+	INTEGER_POINTER(yr_first)[0] = SW_Weather.startYear;
 
 	PROTECT(MonthlyScalingParams = allocMatrix(REALSXP, 12, nitems));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
@@ -145,11 +152,11 @@ SEXP onGet_SW_WTH_setup() {
   Called by `rSW_CTL_obtain_inputs()` if `from_files` is `FALSE`.
 */
 void onSet_SW_WTH_setup(SEXP SW_WTH) {
-	int i, tmp;
+	int i;
 	SW_WEATHER *w = &SW_Weather;
 	SEXP
 		use_snow, pct_snowdrift, pct_snowRunoff,
-		use_weathergenerator, use_weathergenerator_only, yr_first;
+		use_weathergenerator, use_weathergenerator_only;
 	SEXP MonthlyScalingParams;
 	RealD *p_MonthlyValues;
 
@@ -170,9 +177,14 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 		w->generateWeatherMethod = 2;
 	}
 
+	/* `SW_weather.yr` was removed from SOILWAT2:
+	SEXP yr_first;
+	int tmp;
+
 	PROTECT(yr_first = GET_SLOT(SW_WTH, install(cSW_WTH_names[5])));
 	tmp = *INTEGER(yr_first);
-	w->startYear = (tmp < 0) ? SW_Model.startyr : yearto4digit(tmp);
+	w->yr.first = (tmp < 0) ? SW_Model.startyr : yearto4digit(tmp);
+	*/
 
 	PROTECT(MonthlyScalingParams = GET_SLOT(SW_WTH, install(cSW_WTH_names[6])));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
@@ -187,7 +199,11 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 
 	SW_WeatherPrefix(w->name_prefix);
 
-	if (SW_Weather.generateWeatherMethod != 2 && SW_Model.startyr < w->startYear) {
+  /* `SW_weather.yr` was removed from SOILWAT2:
+	w->yr.last = SW_Model.endyr;
+	w->yr.total = w->yr.last - w->yr.first + 1;
+
+	if (SW_Weather.generateWeatherMethod != 2 && SW_Model.startyr < w->yr.first) {
 		LogError(
 			logfp,
 			LOGFATAL,
@@ -197,8 +213,9 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 			MyFileName, SW_Model.startyr, w->startYear
 		);
 	}
+	*/
 
-	UNPROTECT(7);
+	UNPROTECT(6);
 }
 
 
@@ -209,22 +226,20 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
   Called by `onGetInputDataFromFiles()`
 */
 SEXP onGet_WTH_DATA(void) {
-	TimeInt year;
+	TimeInt year, yearIndex;
 	SEXP WTH_DATA, WTH_DATA_names;
 	char cYear[5];
-	int n_yrs, i;
 
-	// number of years
-	n_yrs = SW_Model.endyr - SW_Model.startyr + 1;
-	PROTECT(WTH_DATA = allocVector(VECSXP, n_yrs));
-	PROTECT(WTH_DATA_names = allocVector(STRSXP, n_yrs));
+	PROTECT(WTH_DATA = allocVector(VECSXP, SW_Weather.n_years));
+	PROTECT(WTH_DATA_names = allocVector(STRSXP, SW_Weather.n_years));
 
-	for (year = SW_Model.startyr, i = 0; year <= SW_Model.endyr; year++, i++) {
+	for (yearIndex = 0; yearIndex < SW_Weather.n_years; yearIndex++) {
+		year = SW_Weather.startYear + yearIndex;
 		sprintf(cYear, "%4d", year);
-		SET_STRING_ELT(WTH_DATA_names, i, mkChar(cYear));
+		SET_STRING_ELT(WTH_DATA_names, yearIndex, mkChar(cYear));
 
-        // copy values from SOILWAT2 variables to rSOILWAT2 S4 class object
-        SET_VECTOR_ELT(WTH_DATA, i, onGet_WTH_DATA_YEAR(year));
+		// copy values from SOILWAT2 variables to rSOILWAT2 S4 class object
+		SET_VECTOR_ELT(WTH_DATA, yearIndex, onGet_WTH_DATA_YEAR(year));
 	}
 
 	setAttrib(WTH_DATA, R_NamesSymbol, WTH_DATA_names);
@@ -241,7 +256,7 @@ SEXP onGet_WTH_DATA(void) {
   Called by `onGet_WTH_DATA()`
 */
 SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
-	int i,days;
+	int i, days, yearIndex;
 	const int nitems = 4;
 	SEXP swWeatherData;
 	SEXP WeatherData;
@@ -252,6 +267,7 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	SW_WEATHER *w = &SW_Weather;
 
 	days = Time_get_lastdoy_y(year);
+	yearIndex = year - SW_Weather.startYear;
 
 	PROTECT(swWeatherData = MAKE_CLASS("swWeatherData"));
 	PROTECT(WeatherData = NEW_OBJECT(swWeatherData));
@@ -263,9 +279,9 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	p_Year = REAL(Year);
 	for (i = 0; i < days; i++) {
 		p_Year[i + days * 0] = (i + 1);
-		p_Year[i + days * 1] = w->allHist[year - SW_Model.startyr]->temp_max[i];
-		p_Year[i + days * 2] = w->allHist[year - SW_Model.startyr]->temp_min[i];
-		p_Year[i + days * 3] = w->allHist[year - SW_Model.startyr]->ppt[i];
+		p_Year[i + days * 1] = w->allHist[yearIndex]->temp_max[i];
+		p_Year[i + days * 2] = w->allHist[yearIndex]->temp_min[i];
+		p_Year[i + days * 3] = w->allHist[yearIndex]->ppt[i];
 	}
 
 	PROTECT(Year_names = allocVector(VECSXP, 2));
@@ -286,14 +302,13 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 
 
 /**
-  @brief Move all weather data from `rSOILWAT2` to `SOILWAT2`, impute
-    missing values (weather generator), and apply scaling parameters
+  @brief Move all weather data from `rSOILWAT2` to `SOILWAT2`
 
   Equivalent functionality to `SW_WTH_read()`with the difference that
   `SOILWAT2` `allHist` is filled with values that are
   copied from `rSOILWAT2` list of `swWeatherData`
   instead of being read from files on disk.
-
+ 
   Called by `rSW_CTL_obtain_inputs()` if `from_files` is `FALSE`.
 
   @note Elements `endyr` and `startyr` of `SW_Model` must be set/updated
@@ -303,8 +318,6 @@ void onSet_WTH_DATA(void) {
 
   SEXP listAllWeather;
 
-  SW_WEATHER *weather = &SW_Weather;
-
   // Determine which `rSOILWAT2` list of `swWeatherData` we are using
   listAllWeather = bWeatherList ?
     WeatherList :
@@ -313,13 +326,15 @@ void onSet_WTH_DATA(void) {
 
   // Deallocate (previous, if any) `allHist`
   // (using value of `SW_Weather.n_years` previously used to allocate)
-  deallocateAllWeather(weather);
+  // `SW_WTH_construct()` sets `n_years` to zero
+  deallocateAllWeather(&SW_Weather);
 
-  // Determine required size of new `allHist`
+  // Update number of years and first calendar year represented
   SW_Weather.n_years = SW_Model.endyr - SW_Model.startyr + 1;
+  SW_Weather.startYear = SW_Model.startyr;
 
   // Allocate new `allHist` (based on current `SW_Weather.n_years`)
-  allocateAllWeather(weather);
+  allocateAllWeather(&SW_Weather);
 
 
   // Equivalent to `readAllWeather()`:
@@ -327,29 +342,9 @@ void onSet_WTH_DATA(void) {
   rSW2_setAllWeather(
     listAllWeather,
     SW_Weather.allHist,
-    SW_Model.startyr,
-    SW_Weather.n_years
-  );
-
-
-  // Generate missing values
-  generateMissingWeather(
-    SW_Weather.allHist,
-    SW_Model.startyr,
+    SW_Weather.startYear,
     SW_Weather.n_years,
-    SW_Weather.generateWeatherMethod,
-    3 // optLOCF_nMax (TODO: make this user input)
-  );
-
-
-  // Scale with monthly additive/multiplicative parameters
-  scaleAllWeather(
-    SW_Weather.allHist,
-    SW_Model.startyr,
-    SW_Weather.n_years,
-    SW_Weather.scale_temp_max,
-    SW_Weather.scale_temp_min,
-    SW_Weather.scale_precip
+    SW_Weather.use_weathergenerator_only
   );
 }
 
@@ -360,7 +355,8 @@ static void rSW2_setAllWeather(
   SEXP listAllW,
   SW_WEATHER_HIST **allHist,
   int startYear,
-  unsigned int n_years
+  unsigned int n_years,
+  Bool use_weathergenerator_only
 ) {
   int nList, yearIndex, year, numDaysYear, day, doy, i, j;
   Bool weth_found;
@@ -372,7 +368,7 @@ static void rSW2_setAllWeather(
   // Loop over years and move weather data to `SOILWAT2` `allHist`
   for (yearIndex = 0; yearIndex < n_years; yearIndex++) {
 
-    if (SW_Weather.use_weathergenerator_only) {
+    if (use_weathergenerator_only) {
       // Set values to missing for call to `generateMissingWeather()`
       _clear_hist_weather(allHist[yearIndex]);
 
@@ -473,6 +469,8 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
 
     SW_WEATHER_HIST **allHist;
 
+    SW_WEATHER *weather = &SW_Weather;
+
     SW_CLIMATE_YEARLY climateOutput;
     SW_CLIMATE_CLIM climateAverages;
 
@@ -516,7 +514,8 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     Time_init_model();
 
     // Fill SOILWAT `allHist` with data from weatherList
-    rSW2_setAllWeather(weatherList, allHist, asInteger(yearStart), numYears);
+    rSW2_setAllWeather(weatherList, allHist, asInteger(yearStart), numYears,
+                       weather->use_weathergenerator_only);
 
     // Allocate memory of structs for climate on SOILWAT side
     allocDeallocClimateStructs(allocate, numYears, &climateOutput, &climateAverages);
