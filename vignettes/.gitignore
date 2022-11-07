@@ -2,3 +2,4 @@
 *.pdf
 *.R
 \.build.timestamp
+*.log
