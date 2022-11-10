@@ -528,6 +528,29 @@ calc_SiteClimate_old <- function(weatherList, year.start = NA, year.end = NA,
 #'   print(tmp[["Grasses"]])
 #' }
 #'
+#'
+#' # issue 219: output incorrectly contained negative cover
+#' # if fixed `SumGrasses_Fraction` caused that other fixed cover summed > 1
+#' # expect error with issue 219 fixed
+#' for (fix_issue219 in c(FALSE, TRUE)) {
+#'   tmp <- try(
+#'     rSOILWAT2:::estimate_PotNatVeg_composition_old(
+#'       MAP_mm = 10 * clim1[["MAP_cm"]],
+#'       MAT_C = clim1[["MAT_C"]],
+#'       mean_monthly_ppt_mm = 10 * clim1[["meanMonthlyPPTcm"]],
+#'       mean_monthly_Temp_C = clim1[["meanMonthlyTempC"]],
+#'       dailyC4vars = clim1[["dailyC4vars"]],
+#'       fix_shrubs = TRUE,
+#'       Shrubs_Fraction = 0.5,
+#'       fix_sumgrasses = TRUE,
+#'       SumGrasses_Fraction = 0.7,
+#'       fix_issue219 = fix_issue219
+#'     ),
+#'     silent = TRUE
+#'   )
+#'   print(tmp)
+#' }
+#'
 #' @noRd
 estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
   mean_monthly_ppt_mm, mean_monthly_Temp_C, dailyC4vars = NULL,
@@ -543,7 +566,8 @@ estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
   fix_BareGround = TRUE, BareGround_Fraction = 0,
   fill_empty_with_BareGround = TRUE,
   warn_extrapolation = TRUE,
-  fix_issue218 = FALSE
+  fix_issue218 = FALSE,
+  fix_issue219 = FALSE
 ) {
   .Deprecated("estimate_PotNatVeg_composition")
   veg_types <- c(
@@ -647,6 +671,13 @@ estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
   #--- Decide if all fractions are sufficiently defined or if they need to be
   # estimated based on climate reltionships
   input_sum <- sum(input_cover, na.rm = TRUE)
+
+  if (isTRUE(fix_issue219)) {
+    if (add_sum_grasses > 0) {
+      input_sum <- input_sum + add_sum_grasses
+    }
+  }
+
   ifixed <- unique(c(iset, which(!is.na(input_cover))))
 
   ids_to_estim <- which(is.na(input_cover))
