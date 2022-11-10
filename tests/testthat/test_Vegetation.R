@@ -218,6 +218,32 @@ test_that("Vegetation: estimate land cover composition", {
     )
   }
 
+
+  # issue 218: correction to C4 grass cover was not carried out as documented
+  # without C4 correction, C4 grass cover was 0.1166967
+  res_wo218 <- estimate_PotNatVeg_composition(
+    MAP_mm = 10 * clim[["MAP_cm"]],
+    MAT_C = 15,
+    mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
+    mean_monthly_Temp_C = 5 + clim[["meanMonthlyTempC"]],
+    dailyC4vars = NULL
+  )
+  expect_gt(res_wo218[["Rel_Abundance_L0"]][["Grasses_C4"]], 0)
+
+  res_w218 <- estimate_PotNatVeg_composition(
+    MAP_mm = 10 * clim[["MAP_cm"]],
+    MAT_C = 15,
+    mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
+    mean_monthly_Temp_C = 5 + clim[["meanMonthlyTempC"]],
+    dailyC4vars = c(
+      Month7th_NSadj_MinTemp_C = 5,
+      LengthFreezeFreeGrowingPeriod_NSadj_Days = 150,
+      DegreeDaysAbove65F_NSadj_DaysC = 110
+    )
+  )
+  expect_equal(res_w218[["Rel_Abundance_L0"]][["Grasses_C4"]], 0)
+
+
   #--- The function `estimate_PotNatVeg_composition` can fail under a few
   # situations:
   # (i) fixed sum is more than 1
@@ -228,6 +254,23 @@ test_that("Vegetation: estimate land cover composition", {
       mean_monthly_ppt_mm = rep(0, 12),
       mean_monthly_Temp_C = rep(0, 12),
       fix_succulents = TRUE, Succulents_Fraction = 10
+    )
+  )
+
+  # issue 219: output incorrectly contained negative cover
+  # if fixed `SumGrasses_Fraction` caused that other fixed cover summed > 1
+  # correct behavior is error
+  expect_error(
+    estimate_PotNatVeg_composition(
+      MAP_mm = 10 * clim[["MAP_cm"]],
+      MAT_C = clim[["MAT_C"]],
+      mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
+      mean_monthly_Temp_C = clim[["meanMonthlyTempC"]],
+      dailyC4vars = clim[["dailyC4vars"]],
+      fix_shrubs = TRUE,
+      Shrubs_Fraction = 0.5,
+      fix_sumgrasses = TRUE,
+      SumGrasses_Fraction = 0.7
     )
   )
 
