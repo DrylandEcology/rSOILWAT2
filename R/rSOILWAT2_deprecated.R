@@ -594,6 +594,47 @@ calc_SiteClimate_old <- function(weatherList, year.start = NA, year.end = NA,
 #' # old  450.820 467.7365 499.84000 503.8165 515.4235 711.459   100
 #' # new   25.467  28.3930  33.95104  31.4155  39.8005  54.414   100
 #'
+#'
+#' # issue 218: correction to C4 grass cover was not carried out as documented
+#' for (fix_issue218 in c(FALSE, TRUE)) {
+#'   tmp <- rSOILWAT2:::estimate_PotNatVeg_composition_old(
+#'     MAP_mm = 10 * clim1[["MAP_cm"]],
+#'     MAT_C = 10,
+#'     mean_monthly_ppt_mm = 10 * clim1[["meanMonthlyPPTcm"]],
+#'     mean_monthly_Temp_C = 5 + clim1[["meanMonthlyTempC"]],
+#'     dailyC4vars = c(
+#'       Month7th_NSadj_MinTemp_C = 3,
+#'       LengthFreezeFreeGrowingPeriod_NSadj_Days = 150,
+#'       DegreeDaysAbove65F_NSadj_DaysC = 110
+#'     ),
+#'     fix_issue218 = fix_issue218
+#'   )
+#'   print(tmp[["Grasses"]])
+#' }
+#'
+#'
+#' # issue 219: output incorrectly contained negative cover
+#' # if fixed `SumGrasses_Fraction` caused that other fixed cover summed > 1
+#' # expect error with issue 219 fixed
+#' for (fix_issue219 in c(FALSE, TRUE)) {
+#'   tmp <- try(
+#'     rSOILWAT2:::estimate_PotNatVeg_composition_old(
+#'       MAP_mm = 10 * clim1[["MAP_cm"]],
+#'       MAT_C = clim1[["MAT_C"]],
+#'       mean_monthly_ppt_mm = 10 * clim1[["meanMonthlyPPTcm"]],
+#'       mean_monthly_Temp_C = clim1[["meanMonthlyTempC"]],
+#'       dailyC4vars = clim1[["dailyC4vars"]],
+#'       fix_shrubs = TRUE,
+#'       Shrubs_Fraction = 0.5,
+#'       fix_sumgrasses = TRUE,
+#'       SumGrasses_Fraction = 0.7,
+#'       fix_issue219 = fix_issue219
+#'     ),
+#'     silent = TRUE
+#'   )
+#'   print(tmp)
+#' }
+#'
 #' @noRd
 estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
   mean_monthly_ppt_mm, mean_monthly_Temp_C, dailyC4vars = NULL,
@@ -608,7 +649,10 @@ estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
   fix_trees = TRUE, Trees_Fraction = 0,
   fix_BareGround = TRUE, BareGround_Fraction = 0,
   fill_empty_with_BareGround = TRUE,
-  warn_extrapolation = TRUE) {
+  warn_extrapolation = TRUE,
+  fix_issue218 = FALSE,
+  fix_issue219 = FALSE
+) {
   .Deprecated("estimate_PotNatVeg_composition")
   veg_types <- c(
     "Succulents", "Forbs",
@@ -711,6 +755,13 @@ estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
   #--- Decide if all fractions are sufficiently defined or if they need to be
   # estimated based on climate reltionships
   input_sum <- sum(input_cover, na.rm = TRUE)
+
+  if (isTRUE(fix_issue219)) {
+    if (add_sum_grasses > 0) {
+      input_sum <- input_sum + add_sum_grasses
+    }
+  }
+
   ifixed <- unique(c(iset, which(!is.na(input_cover))))
 
   ids_to_estim <- which(is.na(input_cover))
@@ -844,7 +895,13 @@ estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
         # 2. step: Teeri JA, Stowe LG (1976)
         # This equations give percent species/vegetation -> use to limit
         # Paruelo's C4 equation, i.e., where no C4 species => C4 abundance == 0
-        if (is.list(dailyC4vars)) {
+        do_c4_correction <- if (isTRUE(fix_issue218)) {
+          !is.null(dailyC4vars)
+        } else {
+          is.list(dailyC4vars) # always FALSE because `dailyC4vars` is vector
+        }
+
+        if (do_c4_correction) {
           if (dailyC4vars["LengthFreezeFreeGrowingPeriod_NSadj_Days"] <= 0) {
             grass_c4_species <- 0
           } else {
