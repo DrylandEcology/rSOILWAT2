@@ -452,11 +452,11 @@ calc_SiteClimate_old <- function(weatherList, year.start = NA, year.end = NA,
 #' wdata <- rSOILWAT2::get_WeatherHistory(rSOILWAT2::sw_exampleData)
 #' clim1 <- calc_SiteClimate(weatherList = wdata, do_C4vars = TRUE)
 #'
-#' fun_pnvcov <- function(fun, clim) {
+#' fun_pnvcov <- function(fun, clim, fix_issues = FALSE) {
 #'   lapply(
 #'     c(90, -90),
 #'     function(latitude) {
-#'       fun(
+#'       tmp_args <- list(
 #'         MAP_mm = 10 * clim[["MAP_cm"]],
 #'         MAT_C = clim[["MAT_C"]],
 #'         mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
@@ -464,39 +464,58 @@ calc_SiteClimate_old <- function(weatherList, year.start = NA, year.end = NA,
 #'         dailyC4vars = clim[["dailyC4vars"]],
 #'         isNorth = latitude >= 0
 #'       )
+#'       if (fix_issues) {
+#'         tmp_args[["fix_issue218"]] <- TRUE
+#'         tmp_args[["fix_issue219"]] <- TRUE
+#'       }
+#'       do.call(fun, tmp_args)
 #'     }
 #'   )
 #' }
 #'
 #' cov_old <- fun_pnvcov(rSOILWAT2:::estimate_PotNatVeg_composition_old, clim1)
+#' cov_old2 <- fun_pnvcov(
+#'   rSOILWAT2:::estimate_PotNatVeg_composition_old,
+#'   clim1,
+#'   fix_issues = TRUE
+#' )
 #' cov_new <- fun_pnvcov(rSOILWAT2::estimate_PotNatVeg_composition, clim1)
 #'
-#' # Compare values assuming hemisphere:
-#' all.equal(cov_old[[1]], cov_new[[1]])
-#' # TRUE
+#' # Compare values as if northern hemisphere:
+#' print(
+#'   cbind(
+#'     old = cov_old[[1]][["Rel_Abundance_L0"]],
+#'     oldfixed = cov_old2[[1]][["Rel_Abundance_L0"]],
+#'     new = cov_new[[1]][["Rel_Abundance_L0"]]
+#'   )
+#' )
+#' #                       old  oldfixed       new
+#' # Succulents      0.0000000 0.0000000 0.0000000
+#' # Forbs           0.2608391 0.2608391 0.2608391
+#' # Grasses_C3      0.4307061 0.4307061 0.4307061
+#' # Grasses_C4      0.0000000 0.0000000 0.0000000
+#' # Grasses_Annuals 0.0000000 0.0000000 0.0000000
+#' # Shrubs          0.3084547 0.3084547 0.3084547
+#' # Trees           0.0000000 0.0000000 0.0000000
+#' # BareGround      0.0000000 0.0000000 0.0000000
 #'
-#' # Compare values assuming southern hemisphere:
-#' all.equal(cov_old[[2]], cov_new[[2]])
-#' # Rel_Abundance_L0: Mean relative difference: 0.3153386
-#' # Rel_Abundance_L1: Mean relative difference: 0.1424291
-#' # Grasses: Mean relative difference: 0.4614127
-#'
-#' # Differences in Rel_Abundance_L0:
+#' # Compare values as if southern hemisphere:
 #' print(
 #'   cbind(
 #'     old = cov_old[[2]][["Rel_Abundance_L0"]],
+#'     oldfixed = cov_old2[[2]][["Rel_Abundance_L0"]],
 #'     new = cov_new[[2]][["Rel_Abundance_L0"]]
 #'   )
 #' )
-#' #                        old        new
-#' # Succulents      0.00000000 0.01915593
-#' # Forbs           0.22804606 0.26554610
-#' # Grasses_C3      0.52575060 0.61220536
-#' # Grasses_C4      0.15766932 0.00000000
-#' # Grasses_Annuals 0.00000000 0.00000000
-#' # Shrubs          0.08853402 0.10309262
-#' # Trees           0.00000000 0.00000000
-#' # BareGround      0.00000000 0.00000000
+#' #                        old  oldfixed        new
+#' # Succulents      0.00000000 0.0000000 0.01915593
+#' # Forbs           0.22804606 0.2707322 0.26554610
+#' # Grasses_C3      0.52575060 0.6241618 0.61220536
+#' # Grasses_C4      0.15766932 0.0000000 0.00000000
+#' # Grasses_Annuals 0.00000000 0.0000000 0.00000000
+#' # Shrubs          0.08853402 0.1051060 0.10309262
+#' # Trees           0.00000000 0.0000000 0.00000000
+#' # BareGround      0.00000000 0.0000000 0.00000000
 #'
 #'
 #' # Benchmarks: new version is about 15x faster
@@ -527,6 +546,10 @@ calc_SiteClimate_old <- function(weatherList, year.start = NA, year.end = NA,
 #'   )
 #'   print(tmp[["Grasses"]])
 #' }
+#' #      Grasses_C3      Grasses_C4 Grasses_Annuals
+#' #       0.4522766       0.5477234       0.0000000
+#' #      Grasses_C3      Grasses_C4 Grasses_Annuals
+#' #               1               0               0
 #'
 #'
 #' # issue 219: output incorrectly contained negative cover
@@ -548,8 +571,15 @@ calc_SiteClimate_old <- function(weatherList, year.start = NA, year.end = NA,
 #'     ),
 #'     silent = TRUE
 #'   )
-#'   print(tmp)
+#'   if (inherits(tmp, "try-error")) {
+#'     print(as.character(tmp))
+#'   } else {
+#'     print(tmp[["Rel_Abundance_L1"]])
+#'   }
 #' }
+#' #      SW_TREES      SW_SHRUB      SW_FORBS      SW_GRASS SW_BAREGROUND
+#' #           0.0           0.5          -0.2           0.7           0.0
+#' # [1] "Error in rSOILWAT2:::estimate_PotNatVeg_composition_old ..."
 #'
 #' @noRd
 estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
