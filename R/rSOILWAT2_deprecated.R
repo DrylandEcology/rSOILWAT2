@@ -673,7 +673,7 @@ estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
   input_sum <- sum(input_cover, na.rm = TRUE)
 
   if (isTRUE(fix_issue219)) {
-    if (add_sum_grasses > 0) {
+    if (fix_sumgrasses && isTRUE(add_sum_grasses > 0)) {
       input_sum <- input_sum + add_sum_grasses
     }
   }
