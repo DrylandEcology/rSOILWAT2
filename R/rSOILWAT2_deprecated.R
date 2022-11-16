@@ -393,6 +393,16 @@ sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
 #' # LengthFreezeFreeGrowingPeriod_NSadj_Days.sd  13.446669   9.586629
 #' # DegreeDaysAbove65F_NSadj_DaysC.sd            19.755513  19.550419
 #'
+#' Explanation for different values:
+#'
+#'  Within the old versions of rSOILWAT2 (rSOILWAT2 < v7.0.0), a different method
+#'  for deciding when a year started and ended for the southern hemisphere was used.
+#'  Using the old method, a given year had the chance to start on any day
+#'  from July 1st to July 4th ultimately ignoring anywhere from zero to three days
+#'  for that year. With the new method, the program now correctly starts on July 1st
+#'  and handles a leap year properly. This difference in number of days within the year
+#'  is enough to change overall values slightly.
+#'
 #' # Differences in Cheatgrass_ClimVars:
 #' print(
 #'   cbind(
