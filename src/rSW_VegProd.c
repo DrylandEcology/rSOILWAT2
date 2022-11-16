@@ -634,8 +634,8 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_monthly_ppt_mm,
                                          SEXP mean_monthly_Temp_C, SEXP shrub_limit, SEXP SumGrasses_Fraction,
                                          SEXP fill_empty_with_BareGround, SEXP warn_extrapolation, SEXP dailyC4vars,
-                                         SEXP isNorth, SEXP Succulents_Fraction, SEXP Annuals_Fraction, SEXP C4_Fraction,
-                                         SEXP C3_Fraction, SEXP Shrubs_Fraction, SEXP Forbs_Fraction,
+                                         SEXP isNorth, SEXP fixBareGround, SEXP Succulents_Fraction, SEXP Annuals_Fraction,
+                                         SEXP C4_Fraction, SEXP C3_Fraction, SEXP Shrubs_Fraction, SEXP Forbs_Fraction,
                                          SEXP Trees_Fraction, SEXP BareGround_Fraction) {
 
     double RelAbundanceL0[8], RelAbundanceL1[5], grasses[3];
@@ -669,7 +669,8 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
 
     Bool final_fill_empty_with_BareGround = (Bool) asLogical(fill_empty_with_BareGround) ? swTRUE : swFALSE,
     final_warn_extrapolation = (Bool) asLogical(warn_extrapolation) ? swTRUE : swFALSE,
-    final_isNorth = (Bool) asLogical(isNorth) ? swTRUE : swFALSE;
+    final_isNorth = (Bool) asLogical(isNorth) ? swTRUE : swFALSE,
+    final_fix_bareGround = (Bool) asLogical(fixBareGround) ? swTRUE : swFALSE;
 
     SEXP cRelAbL1Names, cRelAbL0Names, cfinalNames, cgrasses,
     final_RelAbundanceL1, final_RelAbundanceL0, final_grasses, res;
@@ -720,7 +721,7 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
     estimatePotNatVegComposition(final_MAT_C, final_MAP_cm, final_MonTemp_C,
           final_MonPPT_cm, inputValues_D, final_shrubLimit, final_SumGrassesFraction, C4Variables,
           final_fill_empty_with_BareGround, final_isNorth, final_warn_extrapolation,
-          grasses, RelAbundanceL0, RelAbundanceL1);
+          final_fix_bareGround, grasses, RelAbundanceL0, RelAbundanceL1);
 
     for(index = 0; index < 8; index++) {
         REAL(final_RelAbundanceL0)[index] = RelAbundanceL0[index];

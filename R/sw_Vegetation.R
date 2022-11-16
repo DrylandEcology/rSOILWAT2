@@ -204,6 +204,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
                   as.numeric(dailyC4vars[1:3])
                 },
                 as.logical(isNorth),
+                as.logical(fix_BareGround),
                 if (fix_succulents) {
                   as.numeric(Succulents_Fraction)
                 } else {
