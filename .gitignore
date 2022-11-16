@@ -50,5 +50,4 @@ doc
 # Locally knitted vignettes
 vignettes/*.pdf
 vignettes/*.html
-/doc/
-/Meta/
+vignettes/*.log
