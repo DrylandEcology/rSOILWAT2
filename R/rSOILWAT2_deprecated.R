@@ -601,16 +601,28 @@ calc_SiteClimate_old <- function(weatherList, year.start = NA, year.end = NA,
 #'     new = cov_new[[2]][["Rel_Abundance_L0"]]
 #'   )
 #' )
-#' #                        old  oldfixed        new
-#' # Succulents      0.00000000 0.0000000 0.01915593
-#' # Forbs           0.22804606 0.2707322 0.26554610
-#' # Grasses_C3      0.52575060 0.6241618 0.61220536
-#' # Grasses_C4      0.15766932 0.0000000 0.00000000
-#' # Grasses_Annuals 0.00000000 0.0000000 0.00000000
-#' # Shrubs          0.08853402 0.1051060 0.10309262
-#' # Trees           0.00000000 0.0000000 0.00000000
-#' # BareGround      0.00000000 0.0000000 0.00000000
+#' #                        old  oldfixed       new
+#' # Succulents      0.00000000 0.0000000 0.0000000
+#' # Forbs           0.22804606 0.2707322 0.2707322
+#' # Grasses_C3      0.52575060 0.6241618 0.6241618
+#' # Grasses_C4      0.15766932 0.0000000 0.0000000
+#' # Grasses_Annuals 0.00000000 0.0000000 0.0000000
+#' # Shrubs          0.08853402 0.1051060 0.1051060
+#' # Trees           0.00000000 0.0000000 0.0000000
+#' # BareGround      0.00000000 0.0000000 0.0000000
 #'
+#' Explanation for different values:
+#'
+#' Within the transfer of vegetation estimation functionality from rSOILWAT2
+#' to SOILWAT2, a bug was found that influenced results quite a bit.
+#' In previous versions of rSOILWAT2, the mentioned bug prevented C4 from being
+#' properly calculated. It's designated area of calculation could not be reached
+#' and it's value was then calculated by the rest of vegetation estimation function.
+#' As a result of this, when the function goes to make sure the sum is one, C4
+#' influences the adjustment, changing the end values of the other nonzero values.
+#'
+#' * The column named "oldfixed" fixed the bugs in rSOILWAT2 and are compared to
+#' the old version (rSOILWAT2 < 7.0.0) and the new version (within SOILWAT2).
 #'
 #' # Benchmarks: new version is about 15x faster
 #' bm <- microbenchmark::microbenchmark(
