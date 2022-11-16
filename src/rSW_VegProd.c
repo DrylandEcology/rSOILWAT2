@@ -665,7 +665,7 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
     char *grassesNames[] = {"Grasses_C3", "Grasses_C4", "Grasses_Annuals"};
 
     // "inter_" meaning the intermediate R -> C conversion
-    int index;
+    int index, julyMin = 0, degAbove65 = 1, frostFreeDays = 2;
 
     Bool final_fill_empty_with_BareGround = (Bool) asLogical(fill_empty_with_BareGround) ? swTRUE : swFALSE,
     final_warn_extrapolation = (Bool) asLogical(warn_extrapolation) ? swTRUE : swFALSE,
@@ -708,9 +708,9 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
     if(!isNull(dailyC4vars)) {
         // Coerce `dailyC4vars` to numeric (double)
         dailyC4vars = PROTECT(coerceVector(dailyC4vars, REALSXP));
-        C4Variables[0] = REAL(dailyC4vars)[0];
-        C4Variables[1] = REAL(dailyC4vars)[1];
-        C4Variables[2] = REAL(dailyC4vars)[2];
+        C4Variables[julyMin] = REAL(dailyC4vars)[0];
+        C4Variables[frostFreeDays] = REAL(dailyC4vars)[1];
+        C4Variables[degAbove65] = REAL(dailyC4vars)[2];
         UNPROTECT(1);
     } else {
         C4Variables[0] = SW_MISSING;
