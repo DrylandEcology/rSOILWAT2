@@ -475,7 +475,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     SW_CLIMATE_CLIM climateAverages;
 
     int numYears = asInteger(yearEnd) - asInteger(yearStart) + 1, year, calcSiteOutputNum = 10,
-    deallocate = 0, allocate = 1, index;
+    index;
 
     SEXP res, monthlyMean, monthlyMax, monthlyMin, monthlyPPT, MAT_C, MAP_cm, vectorNames,
     C4Variables, Cheatgrass, cnamesC4SEXP, cnamesCheatgrassSEXP;
@@ -518,7 +518,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
                        weather->use_weathergenerator_only);
 
     // Allocate memory of structs for climate on SOILWAT side
-    allocDeallocClimateStructs(allocate, numYears, &climateOutput, &climateAverages);
+    allocateClimateStructs(numYears, &climateOutput, &climateAverages);
 
     // Calculate climate variables
     calcSiteClimate(allHist, numYears, asInteger(yearStart), inNorthHem, &climateOutput);
@@ -597,7 +597,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     SET_VECTOR_ELT(res, 8, C4Variables);
     SET_VECTOR_ELT(res, 9, Cheatgrass);
 
-    allocDeallocClimateStructs(deallocate, numYears, &climateOutput, &climateAverages);
+    deallocateClimateStructs(&climateOutput, &climateAverages);
 
     UNPROTECT(12);
 

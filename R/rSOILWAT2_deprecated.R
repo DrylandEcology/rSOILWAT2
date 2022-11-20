@@ -378,6 +378,14 @@ sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
 #' )
 #' # MAT_C(old) =  4.153896 vs. MAT_C(new) =  4.154009
 #'
+#' The difference between MAT_C in rSOILWAT2 and SOILWAT2 is small but noticable.
+#' rSOILWAT2 (rSOILWAT2 < v7.0.0) takes the average of all data with respect to total
+#' number of days involved. SOILWAT2, instead adds all daily average temperature values
+#' within a year and divides that value by the number of days in the year being
+#' calculated (365 or 366 depending on whether a year is a leap year). From there,
+#' SOILWAT2 takes the average of all yearly averages resulting in a slightly
+#' different value for MAT_C.
+#'
 #' # Differences in dailyC4vars:
 #' print(
 #'   cbind(
@@ -395,13 +403,13 @@ sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
 #'
 #' Explanation for different values:
 #'
-#'  Within the old versions of rSOILWAT2 (rSOILWAT2 < v7.0.0), a different method
-#'  for deciding when a year started and ended for the southern hemisphere was used.
-#'  Using the old method, a given year had the chance to start on any day
-#'  from July 1st to July 4th ultimately ignoring anywhere from zero to three days
-#'  for that year. With the new method, the program now correctly starts on July 1st
-#'  and handles a leap year properly. This difference in number of days within the year
-#'  is enough to change overall values slightly.
+#' Within the old versions of rSOILWAT2 (rSOILWAT2 < v7.0.0), a different method
+#' for deciding when a year started and ended for the southern hemisphere was used.
+#' Using the old method, a given year had the chance to start on any day
+#' from July 1st to July 4th ultimately ignoring anywhere from zero to three days
+#' for that year. With the new method, the program now correctly starts on July 1st
+#' and handles a leap year properly. This difference in number of days within the year
+#' is enough to change overall values slightly.
 #'
 #' # Differences in Cheatgrass_ClimVars:
 #' print(
@@ -418,6 +426,14 @@ sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
 #' # MeanTemp_ofDriestQuarter_C_SD   7.171922  7.260852
 #' # MinTemp_of2ndMonth_C_SD         2.618434  1.639640
 #'
+#' Differences between old and new columns are more straight-forward. Previously,
+#' rSOILWAT2 (rSOILWAT2 < v7.0.0) did not adjust Cheatgrass within the southern
+#' hemisphere, northern hemisphere values will be shown no matter the input.
+#' Since climate calculations have been moved to SOILWAT2, Cheatgrass
+#' is now properly adjusted for the southern hemsiphere. Though values cannot be
+#' compared between rSOILWAT2 and SOILWAT2's Cheatgrass in the southern
+#' hemisphere, the change in when southern hemisphere year are started is still a
+#' factor in calculations.
 #'
 #' # Benchmarks: new version is about 20x faster
 #' bm <- microbenchmark::microbenchmark(
