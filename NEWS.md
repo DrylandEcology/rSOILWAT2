@@ -1,4 +1,9 @@
 # rSOILWAT2 v5.3.3-9000
+* This version produces identical simulation output as the previous release.
+* `get_soiltemp()` now correctly locates soil temperature output for all
+  `rSOILWAT2` output objects
+  (even if created with `rSOILWAT2` before `v5.3.0` and
+  `soillayers` is specified).
 
 
 # rSOILWAT2 v5.3.2

@@ -211,7 +211,7 @@ get_soiltemp <- function(
         soillayers,
         function(k) {
           grep(
-            paste0("Lyr_", k, "_"),
+            paste0("Lyr_", k), # must work for `Lyr_1` and `Lyr_1_max_C`, etc
             colnames(tmp_sl),
             fixed = TRUE,
             value = TRUE
