@@ -3,7 +3,7 @@
 * `get_soiltemp()` now correctly locates soil temperature output for all
   `rSOILWAT2` output objects
   (even if created with `rSOILWAT2` before `v5.3.0` and
-  `soillayers` is specified).
+  `soillayers` is specified; issue #221, @dschlaep).
 
 
 # rSOILWAT2 v5.3.2

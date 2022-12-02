@@ -122,7 +122,7 @@ get_evaporation <- function(x, timestep = c("Day", "Week", "Month", "Year")) {
 #'
 #' @section Notes:
 #' Requested `levels` that are not available
-#' (e.g., `"min"` before `rSOILWAT2` `v3.5.0`)
+#' (e.g., `"min"` before `rSOILWAT2` `v5.3.0`)
 #' are replaced by values from the average level
 #' (with a warning if `verbose`).
 #'
@@ -161,6 +161,8 @@ get_soiltemp <- function(
     soillayers <- if (length(tmp) > 0) tmp else NA
   }
 
+  #--- Version of output object
+  is_ge_v5.3.0 <- check_version(x, "5.3.0")
 
   #--- Load surface temperatures if requested
   req_sf <- as.logical(surface)[1]
@@ -177,12 +179,12 @@ get_soiltemp <- function(
       )
     }
 
-    # rSOILWAT2 before v5.3.0: `surfaceTemp_C`
-    # rSOILWAT2 since v5.3.0: `surfaceTemp_min/avg/max_C`
-    cns_sf <- if ("surfaceTemp_C" %in% colnames(tmp_sf)) {
-      "surfaceTemp_C"
-    } else {
+    cns_sf <- if (is_ge_v5.3.0) {
+      # rSOILWAT2 since v5.3.0: `surfaceTemp_min/avg/max_C`
       grep("surfaceTemp_[[:alpha:]]{3}_C", colnames(tmp_sf), value = TRUE)
+    } else {
+      # rSOILWAT2 before v5.3.0: `surfaceTemp_C`
+      "surfaceTemp_C"
     }
   }
 
@@ -210,10 +212,12 @@ get_soiltemp <- function(
       tmp <- lapply(
         soillayers,
         function(k) {
+          # match `Lyr_1_max_C`, not `Lyr_10_max_C`, for k = 1 if v(x) >= v5.3.0
+          # match `Lyr_1`, not `Lyr_10`, for k = 1 if v(x) < v5.3.0
           grep(
-            paste0("Lyr_", k), # must work for `Lyr_1` and `Lyr_1_max_C`, etc
+            paste0("Lyr_", k, if (is_ge_v5.3.0) "_" else "$"),
             colnames(tmp_sl),
-            fixed = TRUE,
+            fixed = is_ge_v5.3.0,
             value = TRUE
           )
         }
@@ -249,7 +253,7 @@ get_soiltemp <- function(
           value = TRUE
         )
 
-        if (length(cns_sf_lvl) > 0) {
+        if (is_ge_v5.3.0 && length(cns_sf_lvl) > 0) {
           tmp_sf[, cns_sf_lvl, drop = FALSE] # rSOILWAT2 since v5.3.0
         } else {
           # Repeat average for each requested level
@@ -270,7 +274,7 @@ get_soiltemp <- function(
           value = TRUE
         )
 
-        if (length(cns_sl_lvl) > 0) {
+        if (is_ge_v5.3.0 && length(cns_sl_lvl) > 0) {
           tmp_sl[, cns_sl_lvl, drop = FALSE] # rSOILWAT2 since v5.3.0
         } else {
           # Repeat average for each requested level
