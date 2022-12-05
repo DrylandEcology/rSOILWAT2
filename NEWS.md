@@ -4,6 +4,8 @@
   `rSOILWAT2` output objects
   (even if created with `rSOILWAT2` before `v5.3.0` and
   `soillayers` is specified; issue #221, @dschlaep).
+* `r-lib` Github Actions updated to `v2`;
+  separate workflows for `R-CMD-check` and `test-coverage` (#202, @dschlaep).
 
 
 # rSOILWAT2 v5.3.2
