@@ -370,7 +370,7 @@ sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
 #' # dailyC4vars: Mean relative difference: 0.05932631
 #' # Cheatgrass_ClimVars: Mean relative difference: 0.707922
 #'
-#' # Difference in MAT:
+#' # Difference in `MAT`:
 #' cat(
 #'   "MAT_C(old) = ", clim_old[[2]][["MAT_C"]],
 #'   "vs. MAT_C(new) = ", clim_new[[2]][["MAT_C"]],
@@ -378,15 +378,13 @@ sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
 #' )
 #' # MAT_C(old) =  4.153896 vs. MAT_C(new) =  4.154009
 #'
-#' The difference between MAT_C in rSOILWAT2 and SOILWAT2 is small but noticable.
-#' rSOILWAT2 (rSOILWAT2 < v7.0.0) takes the average of all data with respect to total
-#' number of days involved. SOILWAT2, instead adds all daily average temperature values
-#' within a year and divides that value by the number of days in the year being
-#' calculated (365 or 366 depending on whether a year is a leap year). From there,
-#' SOILWAT2 takes the average of all yearly averages resulting in a slightly
-#' different value for MAT_C.
+#' # Reason for differences in mean annual temperature `MAT`:
+#' # The new version calculates the mean across years of
+#' # means across days within year of mean daily temperature;
+#' # previously, it was incorrectly calculated as the mean across all days.
 #'
-#' # Differences in dailyC4vars:
+#'
+#' # Differences in `dailyC4vars`:
 #' print(
 #'   cbind(
 #'     old = clim_old[[2]][["dailyC4vars"]],
@@ -403,15 +401,13 @@ sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
 #'
 #' Explanation for different values:
 #'
-#' Within the old versions of rSOILWAT2 (rSOILWAT2 < v7.0.0), a different method
-#' for deciding when a year started and ended for the southern hemisphere was used.
-#' Using the old method, a given year had the chance to start on any day
-#' from July 1st to July 4th ultimately ignoring anywhere from zero to three days
-#' for that year. With the new method, the program now correctly starts on July 1st
-#' and handles a leap year properly. This difference in number of days within the year
-#' is enough to change overall values slightly.
+#' # Reason for differences in `dailyC4vars`:
+#' # The new version adjusts years at locations in the southern hemisphere
+#' # to start on July 1 of the previous calendar year;
+#' # previously, the adjusted start date varied from July 1 to July 4.
 #'
-#' # Differences in Cheatgrass_ClimVars:
+#'
+#' # Differences in `Cheatgrass_ClimVars`:
 #' print(
 #'   cbind(
 #'     old = clim_old[[2]][["Cheatgrass_ClimVars"]],
@@ -426,14 +422,11 @@ sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
 #' # MeanTemp_ofDriestQuarter_C_SD   7.171922  7.260852
 #' # MinTemp_of2ndMonth_C_SD         2.618434  1.639640
 #'
-#' Differences between old and new columns are more straight-forward. Previously,
-#' rSOILWAT2 (rSOILWAT2 < v7.0.0) did not adjust Cheatgrass within the southern
-#' hemisphere, northern hemisphere values will be shown no matter the input.
-#' Since climate calculations have been moved to SOILWAT2, Cheatgrass
-#' is now properly adjusted for the southern hemsiphere. Though values cannot be
-#' compared between rSOILWAT2 and SOILWAT2's Cheatgrass in the southern
-#' hemisphere, the change in when southern hemisphere year are started is still a
-#' factor in calculations.
+#' # Reason for differences in `Cheatgrass_ClimVars`:
+#' # The new version now adjusts variables `Month7th_PPT_mm` and
+#' # `MinTemp_of2ndMonth_C` for location by hemisphere;
+#' # previously, they were calculated as if in the northern hemisphere.
+#'
 #'
 #' # Benchmarks: new version is about 20x faster
 #' bm <- microbenchmark::microbenchmark(
@@ -627,18 +620,13 @@ calc_SiteClimate_old <- function(weatherList, year.start = NA, year.end = NA,
 #' # Trees           0.00000000 0.0000000 0.0000000
 #' # BareGround      0.00000000 0.0000000 0.0000000
 #'
-#' Explanation for different values:
+#' # Explanation for different values:
+#' # `old` and `oldfixes` differ because of issue #218 (correction for
+#' # `C4` grass cover was not carried out as documented) and issue #219
+#' # (output incorrectly contained negative cover if fixed `SumGrasses_Fraction`
+#' # caused that other fixed cover summed > 1);
+#' # `oldfixed` and `new` produce identical output.
 #'
-#' Within the transfer of vegetation estimation functionality from rSOILWAT2
-#' to SOILWAT2, a bug was found that influenced results quite a bit.
-#' In previous versions of rSOILWAT2, the mentioned bug prevented C4 from being
-#' properly calculated. It's designated area of calculation could not be reached
-#' and it's value was then calculated by the rest of vegetation estimation function.
-#' As a result of this, when the function goes to make sure the sum is one, C4
-#' influences the adjustment, changing the end values of the other nonzero values.
-#'
-#' * The column named "oldfixed" fixed the bugs in rSOILWAT2 and are compared to
-#' the old version (rSOILWAT2 < 7.0.0) and the new version (within SOILWAT2).
 #'
 #' # Benchmarks: new version is about 15x faster
 #' bm <- microbenchmark::microbenchmark(
