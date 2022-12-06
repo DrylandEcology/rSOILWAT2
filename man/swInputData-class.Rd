@@ -141,6 +141,7 @@
 \alias{swSite_IntrinsicSiteParams,swInputData-method}
 \alias{swSite_SoilTemperatureFlag,swInputData-method}
 \alias{swSite_SoilTemperatureConsts,swInputData-method}
+\alias{swSite_SoilDensityInputType,swInputData-method}
 \alias{swSite_TranspirationRegions,swInputData-method}
 \alias{set_swSite<-,swInputData-method}
 \alias{swSite_SWClimits<-,swInputData-method}
@@ -153,6 +154,7 @@
 \alias{swSite_IntrinsicSiteParams<-,swInputData-method}
 \alias{swSite_SoilTemperatureFlag<-,swInputData-method}
 \alias{swSite_SoilTemperatureConsts<-,swInputData-method}
+\alias{swSite_SoilDensityInputType<-,swInputData-method}
 \alias{swSite_TranspirationRegions<-,swInputData-method}
 \alias{get_swSoils,swInputData-method}
 \alias{swSoils_Layers,swInputData-method}
@@ -477,6 +479,8 @@
 
 \S4method{swSite_SoilTemperatureConsts}{swInputData}(object)
 
+\S4method{swSite_SoilDensityInputType}{swInputData}(object)
+
 \S4method{swSite_TranspirationRegions}{swInputData}(object)
 
 \S4method{set_swSite}{swInputData}(object) <- value
@@ -500,6 +504,8 @@
 \S4method{swSite_SoilTemperatureFlag}{swInputData}(object) <- value
 
 \S4method{swSite_SoilTemperatureConsts}{swInputData}(object) <- value
+
+\S4method{swSite_SoilDensityInputType}{swInputData}(object) <- value
 
 \S4method{swSite_TranspirationRegions}{swInputData}(object) <- value
 

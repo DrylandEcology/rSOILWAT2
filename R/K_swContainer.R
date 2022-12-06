@@ -1506,6 +1506,14 @@ setMethod(
 #' @rdname swInputData-class
 #' @export
 setMethod(
+  "swSite_SoilDensityInputType",
+  signature = "swInputData",
+  function(object) swSite_SoilDensityInputType(object@site)
+)
+
+#' @rdname swInputData-class
+#' @export
+setMethod(
   "swSite_TranspirationRegions",
   signature = "swInputData",
   function(object) swSite_TranspirationRegions(object@site)
@@ -1629,6 +1637,17 @@ setReplaceMethod(
   signature = "swInputData",
   function(object, value) {
     swSite_SoilTemperatureConsts(slot(object, "site")) <- value
+    object
+  }
+)
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "swSite_SoilDensityInputType",
+  signature = "swInputData",
+  function(object, value) {
+    swSite_SoilDensityInputType(object@site) <- value
     object
   }
 )

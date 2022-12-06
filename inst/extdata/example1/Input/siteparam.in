@@ -83,6 +83,10 @@ NAN			# aspect = surface azimuth angle (degrees): S=0, E=-90, N=±180, W=90;
 # Name of CO2 scenario: see input file `carbon.in`
 RCP85
 
+# --- Soil characterization ---
+# Are inputs of density representing bulk soil (type 1) or the matric component (type 0)?
+0
+
 #---- Transpiration regions
 # ndx  : 1=shallow, 2=medium, 3=deep, 4=very deep
 # layer: deepest soil layer number of the region.

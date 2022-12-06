@@ -9,8 +9,9 @@
 #       modified unless a vegetation type itself is altered.
 
 #---- Select method for vegetation parameters
-0	# 0 - Read in the values from file
- 	# 1 - Estimate fixed vegetation composition (fractional cover) from long-term climate conditions
+0	# 0 - Use values from this file
+ 	# 1 - Estimate vegetation composition from long-term climate conditions
+ 	#     (values for other vegetation parameters from this file)
 
 #---- Composition of vegetation type components (0-1; must add up to 1)
 #	Grasses	Shrubs	Trees	Forbs	BareGround

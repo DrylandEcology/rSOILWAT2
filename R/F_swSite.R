@@ -60,6 +60,7 @@ setClass(
     IntrinsicSiteParams = "numeric",
     SoilTemperatureFlag = "logical",
     SoilTemperatureConstants = "numeric",
+    SoilDensityInputType = "integer",
     TranspirationRegions = "matrix"
   )
 )
@@ -126,6 +127,14 @@ setValidity("swSite", function(object) {
   }
   if (length(object@SoilTemperatureConstants) != 10) {
     msg <- "@SoilTemperatureConstants length != 10."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+  if (typeof(object@SoilDensityInputType) != "integer") {
+    msg <- "@SoilDensityInputType is of integer type."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
+  if (length(object@SoilDensityInputType) != 1L) {
+    msg <- "@SoilDensityInputType length != 1."
     val <- if (isTRUE(val)) msg else c(val, msg)
   }
   if (typeof(object@TranspirationRegions) != "integer") {
@@ -241,6 +250,14 @@ setMethod("swSite_SoilTemperatureConsts", "swSite",
 
 #' @rdname swSite-class
 #' @export
+setMethod(
+  "swSite_SoilDensityInputType",
+  "swSite",
+  function(object) slot(object, "SoilDensityInputType")
+)
+
+#' @rdname swSite-class
+#' @export
 setMethod("swSite_TranspirationRegions", "swSite",
   function(object) slot(object, "TranspirationRegions"))
 
@@ -339,6 +356,17 @@ setReplaceMethod("swSite_SoilTemperatureFlag", signature = "swSite",
 setReplaceMethod("swSite_SoilTemperatureConsts", signature = "swSite",
   definition = function(object, value) {
     object@SoilTemperatureConstants[] <- value
+    validObject(object)
+    object
+})
+
+#' @rdname swSite-class
+#' @export
+setReplaceMethod(
+  "swSite_SoilDensityInputType",
+  signature = "swSite",
+  definition = function(object, value) {
+    object@SoilDensityInputType <- as.integer(value[1L])
     validObject(object)
     object
 })

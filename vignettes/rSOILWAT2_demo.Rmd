@@ -461,6 +461,9 @@ You may organize weather data in a variety of ways:
 
 ## Assign new soil data to rSOILWAT2 input object
 ```{r, soils_final1}
+  # NRCS SSURGO `dbovendry` represents the soil density of the matric component
+  rSOILWAT2::swSite_SoilDensityInputType(sw_in) <- 0L
+
   # This fails because rooting profile values are still missing
   try(rSOILWAT2::swSoils_Layers(sw_in) <- data.matrix(soil_new))
 ```
