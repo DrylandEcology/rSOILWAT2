@@ -154,15 +154,14 @@ test_that("dbW creation", {
     regexp = "arguments ignored/deprecated"
   )
   unlink(fdbWeather)
-  expect_false(dbW_createDatabase(fdbWeather))
+
+  # Minimal inputs
+  expect_true(dbW_createDatabase(fdbWeather))
   expect_message(
     unlink_forcefully(fdbWeather, info = "2nd"),
     regexp = "sucessfully deleted"
   )
-  expect_message(
-    dbW_createDatabase(fdbWeather, verbose = TRUE),
-    regexp = "errors in the table data"
-  )
+
 
   # this is a warning coming from 'normalizePath':
   #   - on 'unix': regexp = "No such file or directory"

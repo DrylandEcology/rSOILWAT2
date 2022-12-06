@@ -5,7 +5,14 @@
 \title{Compare two weather datasets: produces comparison plots for means, quantiles,
 and Markov weather generator input parameters for all time steps}
 \usage{
-compare_weather(ref_weather, weather, N, WET_limit_cm = 0, path, tag)
+compare_weather(
+  ref_weather,
+  weather,
+  N,
+  WET_limit_cm = 0,
+  path = ".",
+  tag = format(Sys.time(), "\%Y\%m\%d-\%H\%M")
+)
 }
 \arguments{
 \item{ref_weather}{A \code{list} of or a two-dimensional numerical object,

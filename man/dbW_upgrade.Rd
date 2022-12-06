@@ -24,7 +24,13 @@ dbW_upgrade_v3to31(dbWeatherDataFile, fbackup = NULL, type_new = "gzip")
 
 dbW_upgrade_v2to3(dbWeatherDataFile, fbackup = NULL)
 
-dbW_upgrade_v1to2(dbWeatherDataFile, fbackup = NULL, SWRunInformation)
+dbW_upgrade_v1to2(
+  dbWeatherDataFile,
+  fbackup = NULL,
+  SWRunInformation = data.frame(site_id = NA_character_, X_WGS84 = NA_real_, Y_WGS84 =
+    NA_real_, WeatherFolder = NA_character_, Include_YN = NA, stringsAsFactors =
+    FALSE)[0, , drop = FALSE]
+)
 
 backup_copy(dbWeatherDataFile, fbackup = NULL)
 }
