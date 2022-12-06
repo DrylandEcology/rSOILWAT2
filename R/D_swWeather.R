@@ -186,7 +186,7 @@ setMethod("swWeather_DaysRunningAverage", "swWeather",
 #' @export
 setMethod("swWeather_FirstYearHistorical", "swWeather",
   function(object) {
-    .Deprecated("`FirstYear_Historical` is no longer used by SOILWAT2.")
+    .Deprecated() # `FirstYear_Historical` is no longer used by SOILWAT2.
     object@FirstYear_Historical
   }
 )
@@ -235,7 +235,7 @@ setReplaceMethod("swWeather_DaysRunningAverage", signature = "swWeather",
 #' @export
 setReplaceMethod("swWeather_FirstYearHistorical", signature = "swWeather",
   function(object, value) {
-    .Deprecated("`FirstYear_Historical` is no longer used by SOILWAT2.")
+    .Deprecated() # `FirstYear_Historical` is no longer used by SOILWAT2.
     object@FirstYear_Historical <- as.integer(value)
     validObject(object)
     object
