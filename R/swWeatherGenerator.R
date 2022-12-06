@@ -607,8 +607,14 @@ prepare_weather_for_comparison <- function(weather,
 #' unlink(list.files(path), force = TRUE)
 #'
 #' @export
-compare_weather <- function(ref_weather, weather, N, WET_limit_cm = 0,
-  path, tag) {
+compare_weather <- function(
+  ref_weather,
+  weather,
+  N,
+  WET_limit_cm = 0,
+  path = ".",
+  tag = format(Sys.time(), "%Y%m%d-%H%M")
+) {
 
   dir.create(path, recursive = TRUE, showWarnings = FALSE)
   time_steps <- c("Year", "Month", "Week", "Day")

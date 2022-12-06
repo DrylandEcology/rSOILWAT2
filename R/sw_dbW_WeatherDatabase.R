@@ -1429,8 +1429,13 @@ dbW_addWeatherData <- function(
 #' @export
 dbW_createDatabase <- function(
   dbFilePath = "dbWeatherData.sqlite3",
-  site_data,
-  Scenarios,
+  site_data = data.frame(
+    Label = NA_character_,
+    Longitude = NA_real_,
+    Latitude = NA_real_,
+    stringsAsFactors = FALSE
+  )[0, , drop = FALSE],
+  Scenarios = NULL,
   scen_ambient = "Current",
   compression_type = "gzip",
   verbose = FALSE,
@@ -1553,7 +1558,7 @@ dbW_createDatabase <- function(
 #' @export
 dbW_addFromFolders <- function(
   MetaData = NULL,
-  FoldersPath,
+  FoldersPath = ".",
   ScenarioName = "Current",
   weather_tag = "weath"
 ) {

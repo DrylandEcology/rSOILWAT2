@@ -1527,8 +1527,12 @@ estimate_PotNatVeg_roots <- function(
 #' @param use A logical vector.
 #'
 #' @export
-update_biomass <- function(fg = c("Grass", "Shrub", "Tree", "Forb"), use,
-  prod_input, prod_default) {
+update_biomass <- function(
+  fg = c("Grass", "Shrub", "Tree", "Forb"),
+  use, # nolint: function_argument_linter.
+  prod_input, # nolint: function_argument_linter.
+  prod_default # nolint: function_argument_linter.
+) {
 
   fg <- match.arg(fg)
 
