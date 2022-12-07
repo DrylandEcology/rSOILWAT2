@@ -423,9 +423,9 @@ sw_Cheatgrass_ClimVar <- function(monthlyPPT_cm,
 #' # MinTemp_of2ndMonth_C_SD         2.618434  1.639640
 #'
 #' # Reason for differences in `Cheatgrass_ClimVars`:
-#' # The new version now adjusts variables `Month7th_PPT_mm` and
-#' # `MinTemp_of2ndMonth_C` for location by hemisphere;
-#' # previously, they were calculated as if in the northern hemisphere.
+#' # The new version now adjusts these variables for location by hemisphere;
+#' # previously, they were calculated as if in the northern hemisphere
+#' # regardless of actual location.
 #'
 #'
 #' # Benchmarks: new version is about 20x faster
