@@ -35,6 +35,16 @@ sw_args <- function(dir, files.in, echo, quiet) {
 
 
 
+#' Turn on/off `SOILWAT2` notes and warnings
+#'
+#' @param quiet A logical value.
+#' @return The previous logical value.
+#'
+#' @export
+sw_verbosity <- function(verbose = TRUE) {
+    invisible(!.Call(C_sw_quiet, !as.logical(verbose)))
+}
+
 #' Execute a \pkg{rSOILWAT2} simulation run
 #'
 #' Run the simulation and get the output data.  Executes the \pkg{SOILWAT2}

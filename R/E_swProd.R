@@ -48,7 +48,9 @@
 #'
 #' @name swProd-class
 #' @export
-setClass("swProd", slots = c(Composition = "numeric", Albedo = "numeric",
+setClass("swProd", slots = c(
+  veg_method = "integer",
+  Composition = "numeric", Albedo = "numeric",
   CanopyHeight = "matrix",
   VegetationInterceptionParameters = "matrix",
   LitterInterceptionParameters = "matrix",
@@ -62,6 +64,13 @@ setClass("swProd", slots = c(Composition = "numeric", Albedo = "numeric",
 swProd_validity <- function(object) {
   val <- TRUE
   nvegs <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["NVEGTYPES"]]
+
+  if (length(object@veg_method) != 1 ||
+    !all(is.na(object@veg_method) | (object@veg_method >= 0) &
+    object@veg_method <= 1)) {
+    msg <- "@veg_method must have 1 values between 0 and 1."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
 
   if (length(object@Composition) != 1 + nvegs ||
     !all(is.na(object@Composition) | (object@Composition >= 0 &

@@ -36,6 +36,7 @@ Thumbs.db
 rSOILWAT2.Rcheck
 rSOILWAT_IntegrationTestOutput/
 tests/spelling.Rout.save
+backup/
 
 # Package build files
 *tar.gz
@@ -49,3 +50,4 @@ doc
 # Locally knitted vignettes
 vignettes/*.pdf
 vignettes/*.html
+vignettes/*.log

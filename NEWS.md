@@ -1,10 +1,52 @@
-# rSOILWAT2 devel
+# rSOILWAT2 v6.0.0-9000
 * `r-lib` Github Actions updated to `v2`;
-  separate workflows for `R-CMD-check` and `test-coverage` (#202).
+  separate workflows for `R-CMD-check` and `test-coverage`
+  (issue #202; @dschlaep).
+* Soil density inputs can now represent either matric or bulk density
+  (issue #280; @dschlaep).
+    * Automatic conversion by `SOILWAT2` between matric and bulk density
+      as needed using the new slot `"SoilDensityInputType"`.
+* `calc_SiteClimate()` is now implemented via `SOILWAT2`
+  (issue #205; @N1ckP3rsl3y, @dschlaep).
+  The old implementation in R is still available as non-exported and deprecated
+  `calc_SiteClimate_old()`.
+    * This version fixes issues from the previous R version:
+       * Mean annual temperature is now the mean across years of
+         means across days within year of mean daily temperature.
+       * Years at locations in the southern hemisphere are now adjusted to start
+         on July 1 of the previous calendar year.
+       * The cheatgrass-related variables, i.e., `Month7th_PPT_mm`,
+         `MeanTemp_ofDriestQuarter_C`, and `MinTemp_of2ndMonth_C`,
+         are now adjusted for location by hemisphere.
+* `estimate_PotNatVeg_composition()` is now implemented via `SOILWAT2`
+  (issues #206, #218, #219; @N1ckP3rsl3y, @dschlaep).
+  The old implementation in R is still available as non-exported and deprecated
+  `estimate_PotNatVeg_composition_old()`.
+    * This version fixes issues from the previous R version:
+       * The `C4` grass correction based on Teeri & Stowe 1976 is now applied
+         as documented (issue #218).
+       * The sum of all grass components, if fixed, is now incorporated into
+         the total sum of all fixed components (issue #219).
+
+
+## Changes to interface
 * Class `swSite` gains new slot `"SoilDensityInputType"` and associated
-  methods `swSite_SoilDensityInputType()` (#209).
+  methods `swSite_SoilDensityInputType()` (issue #209, @dschlaep).
   This encodes whether soil density inputs represent
   matric soil or bulk soil values.
+* Class `swProd` gains new slot `"veg_method"` (issue #206, @N1ckP3rsl3y).
+  This encodes if land cover is estimated at run-time by `SOILWAT2` via
+  `estimatePotNatVegComposition()` (value 1) or if land cover values are passed
+  as inputs (value 0, as previously).
+
+
+
+# rSOILWAT2 v5.3.2
+* This version produces identical simulation output as the previous release.
+* `SOILWAT2` is updated to `v6.6.0` which updated random number functionality;
+  however, none of those updates affect `rSOILWAT2` because `rSOILWAT2` utilizes
+  R API random number functionality which has not changed.
+
 
 
 # rSOILWAT2 v5.3.1

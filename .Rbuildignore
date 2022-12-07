@@ -2,6 +2,7 @@
 ^CODE_OF_CONDUCT\.md$
 ^Meta$
 ^doc$
+^backup$
 ^data-raw$
 \.git*
 ^\.travis\.yml$
