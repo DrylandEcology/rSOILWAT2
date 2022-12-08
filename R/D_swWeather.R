@@ -246,7 +246,10 @@ setMethod(
 setMethod(
   "swWeather_FirstYearHistorical",
   "swWeather",
-  function(object) object@FirstYear_Historical
+  function(object) {
+    .Deprecated() # `FirstYear_Historical` is no longer used by SOILWAT2.
+    object@FirstYear_Historical
+  }
 )
 
 #' @rdname swWeather-class
@@ -316,6 +319,7 @@ setReplaceMethod(
   "swWeather_FirstYearHistorical",
   signature = "swWeather",
   function(object, value) {
+    .Deprecated() # `FirstYear_Historical` is no longer used by SOILWAT2.
     object@FirstYear_Historical <- as.integer(value)
     validObject(object)
     object

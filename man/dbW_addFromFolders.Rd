@@ -6,7 +6,7 @@
 \usage{
 dbW_addFromFolders(
   MetaData = NULL,
-  FoldersPath,
+  FoldersPath = ".",
   ScenarioName = "Current",
   weather_tag = "weath"
 )

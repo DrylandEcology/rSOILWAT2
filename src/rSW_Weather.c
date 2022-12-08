@@ -39,9 +39,12 @@
 static char *MyFileName;
 
 static char *cSW_WTH_names[] = {
-  "UseSnow", "pct_SnowDrift", "pct_SnowRunoff",
-  "use_weathergenerator", "use_weathergenerator_only",
-  "FirstYear_Historical",
+  "UseSnow",
+  "pct_SnowDrift",
+  "pct_SnowRunoff",
+  "use_weathergenerator",
+  "use_weathergenerator_only",
+  "FirstYear_Historical", // removed from SOILWAT2; kept here for backwards compatibility
   "MonthlyScalingParams"
 };
 
@@ -52,37 +55,27 @@ static char *cSW_WTH_names[] = {
 /* --------------------------------------------------- */
 
 static SEXP onGet_WTH_DATA_YEAR(TimeInt year);
-static Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year);
-
+static void rSW2_setAllWeather(
+  SEXP listAllW,
+  SW_WEATHER_HIST **allHist,
+  int startYear,
+  unsigned int n_years,
+  Bool use_weathergenerator_only
+);
 
 
 /* =================================================== */
 /*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
-Bool onSet_WTH_DATA_YEAR(TimeInt year) {
-  int i = 0;
-  Bool has_weather = FALSE;
 
-  if (bWeatherList) {
-    for (i = 0; i < LENGTH(WeatherList); i++) {
-      if (year == *INTEGER(GET_SLOT(VECTOR_ELT(WeatherList, i), install("year")))) {
-        has_weather = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT(WeatherList, i), install("data")), year);
-      }
-    }
+/**
+  @brief Copy weather setup from `SOILWAT2` `SW_WEATHER`
+    to `rSOILWAT2` S4 `swWeather`
 
-  } else {
-    for (i = 0; i < LENGTH(GET_SLOT(InputData, install("weatherHistory"))); i++) {
-      if (year == *INTEGER(GET_SLOT(VECTOR_ELT(GET_SLOT(InputData, install("weatherHistory")), i), install("year")))) {
-        has_weather = onSet_WTH_DATA(GET_SLOT(VECTOR_ELT(GET_SLOT(InputData, install("weatherHistory")), i), install("data")), year);
-      }
-    }
-  }
-
-  return has_weather;
-}
-
-SEXP onGet_SW_WTH() {
+  Called by `onGetInputDataFromFiles()`.
+*/
+SEXP onGet_SW_WTH_setup() {
 	int i;
 	const int nitems = 6;
 	RealD *p_MonthlyValues;
@@ -109,11 +102,14 @@ SEXP onGet_SW_WTH() {
 	PROTECT(pct_snowRunoff = NEW_NUMERIC(1));
 	REAL(pct_snowRunoff)[0] = w->pct_snowRunoff;
 	PROTECT(use_weathergenerator = NEW_LOGICAL(1));
-	LOGICAL_POINTER(use_weathergenerator)[0] = w->use_weathergenerator;
+	LOGICAL_POINTER(use_weathergenerator)[0] = w->generateWeatherMethod == 2;
 	PROTECT(use_weathergenerator_only = NEW_LOGICAL(1));
 	LOGICAL_POINTER(use_weathergenerator_only)[0] = w->use_weathergenerator_only;
 	PROTECT(yr_first = NEW_INTEGER(1));
+	/* `SW_weather.yr` was removed from SOILWAT2:
 	INTEGER_POINTER(yr_first)[0] = w->yr.first;
+	*/
+	INTEGER_POINTER(yr_first)[0] = SW_Weather.startYear;
 
 	PROTECT(MonthlyScalingParams = allocMatrix(REALSXP, 12, nitems));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
@@ -148,12 +144,19 @@ SEXP onGet_SW_WTH() {
 	return SW_WTH;
 }
 
-void onSet_SW_WTH(SEXP SW_WTH) {
-	int i, tmp;
+
+/**
+  @brief Copy weather setup from `rSOILWAT2` S4 `swWeather`
+    to `SOILWAT2` `SW_WEATHER`
+
+  Called by `rSW_CTL_obtain_inputs()` if `from_files` is `FALSE`.
+*/
+void onSet_SW_WTH_setup(SEXP SW_WTH) {
+	int i;
 	SW_WEATHER *w = &SW_Weather;
 	SEXP
 		use_snow, pct_snowdrift, pct_snowRunoff,
-		use_weathergenerator, use_weathergenerator_only, yr_first;
+		use_weathergenerator, use_weathergenerator_only;
 	SEXP MonthlyScalingParams;
 	RealD *p_MonthlyValues;
 
@@ -167,16 +170,21 @@ void onSet_SW_WTH(SEXP SW_WTH) {
 	w->pct_snowRunoff = *REAL(pct_snowRunoff);
 
 	PROTECT(use_weathergenerator = GET_SLOT(SW_WTH, install(cSW_WTH_names[3])));
-	w->use_weathergenerator = (Bool) *INTEGER(use_weathergenerator);
+	w->generateWeatherMethod = *INTEGER(use_weathergenerator) ? 2 : 0;
 	PROTECT(use_weathergenerator_only = GET_SLOT(SW_WTH, install(cSW_WTH_names[4])));
 	w->use_weathergenerator_only = (Bool) *INTEGER(use_weathergenerator_only);
 	if (w->use_weathergenerator_only) {
-		w->use_weathergenerator = TRUE;
+		w->generateWeatherMethod = 2;
 	}
+
+	/* `SW_weather.yr` was removed from SOILWAT2:
+	SEXP yr_first;
+	int tmp;
 
 	PROTECT(yr_first = GET_SLOT(SW_WTH, install(cSW_WTH_names[5])));
 	tmp = *INTEGER(yr_first);
 	w->yr.first = (tmp < 0) ? SW_Model.startyr : yearto4digit(tmp);
+	*/
 
 	PROTECT(MonthlyScalingParams = GET_SLOT(SW_WTH, install(cSW_WTH_names[6])));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
@@ -191,62 +199,47 @@ void onSet_SW_WTH(SEXP SW_WTH) {
 
 	SW_WeatherPrefix(w->name_prefix);
 
+  /* `SW_weather.yr` was removed from SOILWAT2:
 	w->yr.last = SW_Model.endyr;
 	w->yr.total = w->yr.last - w->yr.first + 1;
 
-	if (!w->use_weathergenerator && SW_Model.startyr < w->yr.first) {
+	if (SW_Weather.generateWeatherMethod != 2 && SW_Model.startyr < w->yr.first) {
 		LogError(
 			logfp,
 			LOGFATAL,
 			"%s : Model year (%d) starts before weather files (%d)"
-				" and use_weathergenerator=swFALSE.\nPlease synchronize the years"
-				" or set up the Markov weather files",
-			MyFileName, SW_Model.startyr, w->yr.first
+				" and weather generator turned off.\n"
+				" Please synchronize the years or set up the weather generator files",
+			MyFileName, SW_Model.startyr, w->startYear
 		);
 	}
+	*/
 
-	UNPROTECT(7);
+	UNPROTECT(6);
 }
 
+
+/**
+  @brief Copy all weather data from `SOILWAT2` data structure
+    to `rSOILWAT2` list of `swWeatherData`
+
+  Called by `onGetInputDataFromFiles()`
+*/
 SEXP onGet_WTH_DATA(void) {
-	TimeInt year;
+	TimeInt year, yearIndex;
 	SEXP WTH_DATA, WTH_DATA_names;
-	Bool has_weather = FALSE;
 	char cYear[5];
-	int n_yrs, i;
 
-	// number of years
-	n_yrs = SW_Model.endyr - SW_Model.startyr + 1;
-	PROTECT(WTH_DATA = allocVector(VECSXP, n_yrs));
-	PROTECT(WTH_DATA_names = allocVector(STRSXP, n_yrs));
+	PROTECT(WTH_DATA = allocVector(VECSXP, SW_Weather.n_years));
+	PROTECT(WTH_DATA_names = allocVector(STRSXP, SW_Weather.n_years));
 
-	for (year = SW_Model.startyr, i = 0; year <= SW_Model.endyr; year++, i++) {
+	for (yearIndex = 0; yearIndex < SW_Weather.n_years; yearIndex++) {
+		year = SW_Weather.startYear + yearIndex;
 		sprintf(cYear, "%4d", year);
-		SET_STRING_ELT(WTH_DATA_names, i, mkChar(cYear));
+		SET_STRING_ELT(WTH_DATA_names, yearIndex, mkChar(cYear));
 
-		if (SW_Weather.use_weathergenerator_only) {
-			has_weather = FALSE;
-
-		} else {
-			has_weather = _read_weather_hist(year);
-		}
-
-		if (has_weather) {
-			// copy values from SOILWAT2 variables to rSOILWAT2 S4 class object
-			SET_VECTOR_ELT(WTH_DATA, i, onGet_WTH_DATA_YEAR(year));
-
-		} else if (SW_Weather.use_weathergenerator) {
-			// set the missing values from SOILWAT2 into rSOILWAT2 S4 weather object
-			SET_VECTOR_ELT(WTH_DATA, i, onGet_WTH_DATA_YEAR(year));
-
-		} else {
-			LogError(
-				logfp,
-				LOGFATAL,
-				"Markov Simulator turned off and weather file found not for year %d",
-				year
-			);
-		}
+		// copy values from SOILWAT2 variables to rSOILWAT2 S4 class object
+		SET_VECTOR_ELT(WTH_DATA, yearIndex, onGet_WTH_DATA_YEAR(year));
 	}
 
 	setAttrib(WTH_DATA, R_NamesSymbol, WTH_DATA_names);
@@ -255,8 +248,15 @@ SEXP onGet_WTH_DATA(void) {
 	return WTH_DATA;
 }
 
+
+/**
+  @brief Copy weather data for `year` from `SOILWAT2` data structure
+    to `rSOILWAT2` `swWeatherData`
+
+  Called by `onGet_WTH_DATA()`
+*/
 SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
-	int i,days;
+	int i, days, yearIndex;
 	const int nitems = 4;
 	SEXP swWeatherData;
 	SEXP WeatherData;
@@ -264,9 +264,10 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	SEXP nYear;
 	char *cYear[] = {"DOY", "Tmax_C", "Tmin_C", "PPT_cm"};
 	RealD *p_Year;
-	SW_WEATHER_HIST *wh = &SW_Weather.hist;
+	SW_WEATHER *w = &SW_Weather;
 
 	days = Time_get_lastdoy_y(year);
+	yearIndex = year - SW_Weather.startYear;
 
 	PROTECT(swWeatherData = MAKE_CLASS("swWeatherData"));
 	PROTECT(WeatherData = NEW_OBJECT(swWeatherData));
@@ -278,9 +279,9 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	p_Year = REAL(Year);
 	for (i = 0; i < days; i++) {
 		p_Year[i + days * 0] = (i + 1);
-		p_Year[i + days * 1] = wh->temp_max[i];
-		p_Year[i + days * 2] = wh->temp_min[i];
-		p_Year[i + days * 3] = wh->ppt[i];
+		p_Year[i + days * 1] = w->allHist[yearIndex]->temp_max[i];
+		p_Year[i + days * 2] = w->allHist[yearIndex]->temp_min[i];
+		p_Year[i + days * 3] = w->allHist[yearIndex]->ppt[i];
 	}
 
 	PROTECT(Year_names = allocVector(VECSXP, 2));
@@ -298,60 +299,313 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	return WeatherData;
 }
 
-Bool onSet_WTH_DATA(SEXP WTH_DATA_YEAR, TimeInt year) {
-	SW_WEATHER_HIST *wh = &SW_Weather.hist;
-	int lineno = 0, i, j, days;
-	Bool has_values = FALSE;
-	RealD *p_WTH_DATA;
-	TimeInt doy;
 
-	if (isnull(WTH_DATA_YEAR)) {
-		return FALSE; // no weather data for this year --> use weather generator
-	}
 
-	days = Time_get_lastdoy_y(year);
+/**
+  @brief Move all weather data from `rSOILWAT2` to `SOILWAT2`
 
-	if (nrows(WTH_DATA_YEAR) != days || ncols(WTH_DATA_YEAR) != 4) {
-		LogError(logfp, LOGFATAL, "weath.%4d : Wrong number of days or columns in data. Expected rows %d had %d. Expected columns 4 had %d.", year, days,nrows(WTH_DATA_YEAR),ncols(WTH_DATA_YEAR));
-		return FALSE;
-	}
+  Equivalent functionality to `SW_WTH_read()`with the difference that
+  `SOILWAT2` `allHist` is filled with values that are
+  copied from `rSOILWAT2` list of `swWeatherData`
+  instead of being read from files on disk.
+ 
+  Called by `rSW_CTL_obtain_inputs()` if `from_files` is `FALSE`.
 
-	p_WTH_DATA = REAL(WTH_DATA_YEAR);
-	_clear_hist_weather();
+  @note Elements `endyr` and `startyr` of `SW_Model` must be set/updated
+    via `onSet_SW_MDL()` before this function is called.
+*/
+void onSet_WTH_DATA(void) {
 
-	for (i = 0; i < days; i++) {
-		doy = p_WTH_DATA[i + days * 0];
-		if (doy < 1 || doy > days) {
-			LogError(logfp, LOGFATAL, "weath.%4d : Day of year out of range, line %d.", year, lineno);
-		}
+  SEXP listAllWeather;
 
-		/* --- Make the assignments ---- */
-		doy--;
+  // Determine which `rSOILWAT2` list of `swWeatherData` we are using
+  listAllWeather = bWeatherList ?
+    WeatherList :
+    GET_SLOT(InputData, install("weatherHistory"));
 
-		/* Reassign if invalid values are found.  The values are
-		 * either valid or SW_MISSING. */
-		j = i + days * 1;
-		if (missing(p_WTH_DATA[j]) || ISNA(p_WTH_DATA[j])) {
-			wh->temp_max[doy] = SW_MISSING;
-		} else {
-			wh->temp_max[doy] = p_WTH_DATA[j];
-		}
 
-		j = i + days * 2;
-		if (missing(p_WTH_DATA[j]) || ISNA(p_WTH_DATA[j])) {
-			wh->temp_min[doy] = SW_MISSING;
-		} else {
-			wh->temp_min[doy] = p_WTH_DATA[j];
-		}
+  // Deallocate (previous, if any) `allHist`
+  // (using value of `SW_Weather.n_years` previously used to allocate)
+  // `SW_WTH_construct()` sets `n_years` to zero
+  deallocateAllWeather(&SW_Weather);
 
-		j = i + days * 3;
-		if (missing(p_WTH_DATA[j]) || ISNA(p_WTH_DATA[j])) {
-			wh->ppt[doy] = SW_MISSING;
-		} else {
-			wh->ppt[doy] = p_WTH_DATA[j];
-			has_values = TRUE;
-		}
-	} /* end of input lines */
+  // Update number of years and first calendar year represented
+  SW_Weather.n_years = SW_Model.endyr - SW_Model.startyr + 1;
+  SW_Weather.startYear = SW_Model.startyr;
 
-	return has_values;
+  // Allocate new `allHist` (based on current `SW_Weather.n_years`)
+  allocateAllWeather(&SW_Weather);
+
+
+  // Equivalent to `readAllWeather()`:
+  // fill `SOILWAT2` `allHist` with values from `rSOILWAT2`
+  rSW2_setAllWeather(
+    listAllWeather,
+    SW_Weather.allHist,
+    SW_Weather.startYear,
+    SW_Weather.n_years,
+    SW_Weather.use_weathergenerator_only
+  );
+}
+
+
+// Equivalent to `readAllWeather()`:
+// fill `SOILWAT2` `allHist` with values from `rSOILWAT2`
+static void rSW2_setAllWeather(
+  SEXP listAllW,
+  SW_WEATHER_HIST **allHist,
+  int startYear,
+  unsigned int n_years,
+  Bool use_weathergenerator_only
+) {
+  int nList, yearIndex, year, numDaysYear, day, doy, i, j;
+  Bool weth_found;
+  SEXP tmpW, yrWData;
+  double *p_yrWData;
+
+  nList = LENGTH(listAllW);
+
+  // Loop over years and move weather data to `SOILWAT2` `allHist`
+  for (yearIndex = 0; yearIndex < n_years; yearIndex++) {
+
+    if (use_weathergenerator_only) {
+      // Set values to missing for call to `generateMissingWeather()`
+      _clear_hist_weather(allHist[yearIndex]);
+
+    } else {
+      year = yearIndex + startYear;
+
+      // Locate suitable year among rSOILWAT2 list of `swWeatherData`
+      weth_found = swFALSE;
+
+      for (i = 0; !weth_found && i < nList; i++) {
+        tmpW = VECTOR_ELT(listAllW, i);
+        weth_found = (Bool) year == *INTEGER(GET_SLOT(tmpW, install("year")));
+      }
+
+      if (weth_found) {
+        yrWData = GET_SLOT(tmpW, install("data"));
+        weth_found = !isnull(yrWData);
+      }
+      if (weth_found) {
+        numDaysYear = Time_get_lastdoy_y(year);
+
+        if (nrows(yrWData) != numDaysYear || ncols(yrWData) != 4) {
+          LogError(
+            logfp,
+            LOGFATAL,
+            "Weather data (year %d): wrong dimensions: "
+            "expected %d rows (had %d) and 4 columns (had %d).\n",
+            year,
+            numDaysYear,
+            nrows(yrWData),
+            ncols(yrWData)
+          );
+          return;
+        }
+
+        p_yrWData = REAL(yrWData);
+
+        // Loop over days of current year
+        for (day = 0; day < numDaysYear; day++) {
+
+            doy = p_yrWData[day + numDaysYear * 0];
+            if (doy < 1 || doy > numDaysYear) {
+              LogError(
+                logfp,
+                LOGFATAL,
+                "Weather data (year %d): "
+                "day of year out of range (%d), expected: %d.\n",
+                year,
+                doy,
+                day + 1
+              );
+            }
+
+            // Copy weather data to `SOILWAT2` `allHist`
+
+            // Translate `NA` to `SW_MISSING`
+            j = day + numDaysYear * 1;
+            allHist[yearIndex]->temp_max[day] =
+              (R_FINITE(p_yrWData[j]) && !missing(p_yrWData[j])) ?
+              p_yrWData[j] :
+              SW_MISSING;
+
+            j = day + numDaysYear * 2;
+            allHist[yearIndex]->temp_min[day] =
+              (R_FINITE(p_yrWData[j]) && !missing(p_yrWData[j])) ?
+              p_yrWData[j] :
+              SW_MISSING;
+
+            j = day + numDaysYear * 3;
+            allHist[yearIndex]->ppt[day] =
+              (R_FINITE(p_yrWData[j]) && !missing(p_yrWData[j])) ?
+              p_yrWData[j] :
+              SW_MISSING;
+
+
+            // Calculate average air temperature
+            if (
+              !missing(allHist[yearIndex]->temp_max[day]) &&
+              !missing(allHist[yearIndex]->temp_min[day])
+            ) {
+              allHist[yearIndex]->temp_avg[day] = (
+                allHist[yearIndex]->temp_max[day] +
+                allHist[yearIndex]->temp_min[day]
+              ) / 2.;
+            }
+        }
+
+      } else {
+        // Set values to missing for call to `generateMissingWeather()`
+        _clear_hist_weather(allHist[yearIndex]);
+      }
+    }
+  }
+}
+
+SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
+                           SEXP do_C4vars, SEXP do_Cheatgrass_ClimVars, SEXP latitude) {
+
+    SW_WEATHER_HIST **allHist;
+
+    SW_WEATHER *weather = &SW_Weather;
+
+    SW_CLIMATE_YEARLY climateOutput;
+    SW_CLIMATE_CLIM climateAverages;
+
+    int numYears = asInteger(yearEnd) - asInteger(yearStart) + 1, year, calcSiteOutputNum = 10,
+    index;
+
+    SEXP res, monthlyMean, monthlyMax, monthlyMin, monthlyPPT, MAT_C, MAP_cm, vectorNames,
+    C4Variables, Cheatgrass, cnamesC4SEXP, cnamesCheatgrassSEXP;
+
+    char *cnames[] = {"meanMonthlyTempC","minMonthlyTempC","maxMonthlyTempC",
+        "meanMonthlyPPTcm","MAP_cm","MAT_C", "dailyTempMin", "dailyTempMean",
+        "dailyC4vars","Cheatgrass_ClimVars"};
+
+    char *cnamesC4[] = {"Month7th_NSadj_MinTemp_C","LengthFreezeFreeGrowingPeriod_NSadj_Days",
+        "DegreeDaysAbove65F_NSadj_DaysC","Month7th_NSadj_MinTemp_C.sd", "LengthFreezeFreeGrowingPeriod_NSadj_Days.sd",
+        "DegreeDaysAbove65F_NSadj_DaysC.sd"};
+
+    char *cnamesCheatgrass[] = {"Month7th_PPT_mm","MeanTemp_ofDriestQuarter_C","MinTemp_of2ndMonth_C",
+        "Month7th_PPT_mm_SD","MeanTemp_ofDriestQuarter_C_SD","MinTemp_of2ndMonth_C_SD"};
+
+    Bool inNorthHem = asReal(latitude) > 0.0;
+
+    monthlyMean = PROTECT(allocVector(REALSXP, MAX_MONTHS));
+    monthlyMax = PROTECT(allocVector(REALSXP, MAX_MONTHS));
+    monthlyMin = PROTECT(allocVector(REALSXP, MAX_MONTHS));
+    monthlyPPT = PROTECT(allocVector(REALSXP, MAX_MONTHS));
+    MAT_C = PROTECT(allocVector(REALSXP, 1));
+    MAP_cm = PROTECT(allocVector(REALSXP, 1));
+    vectorNames = PROTECT(allocVector(STRSXP, calcSiteOutputNum));
+    cnamesC4SEXP = PROTECT(allocVector(STRSXP, 6));
+    cnamesCheatgrassSEXP = PROTECT(allocVector(STRSXP, 6));
+    C4Variables = PROTECT(allocVector(REALSXP, 6));
+    Cheatgrass = PROTECT(allocVector(REALSXP, 6));
+
+    allHist = (SW_WEATHER_HIST **)malloc(sizeof(SW_WEATHER_HIST *) * numYears);
+
+    for(year = 0; year < numYears; year++) {
+        allHist[year] = (SW_WEATHER_HIST *)malloc(sizeof(SW_WEATHER_HIST));
+    }
+
+    Time_init_model();
+
+    // Fill SOILWAT `allHist` with data from weatherList
+    rSW2_setAllWeather(weatherList, allHist, asInteger(yearStart), numYears,
+                       weather->use_weathergenerator_only);
+
+    // Allocate memory of structs for climate on SOILWAT side
+    allocateClimateStructs(numYears, &climateOutput, &climateAverages);
+
+    // Calculate climate variables
+    calcSiteClimate(allHist, numYears, asInteger(yearStart), inNorthHem, &climateOutput);
+
+    // Average climate variables
+    averageClimateAcrossYears(&climateOutput, numYears, &climateAverages);
+
+    res = PROTECT(allocVector(VECSXP, calcSiteOutputNum));
+
+    double *xmonthlyMean = REAL(monthlyMean), *xmonthlyMax = REAL(monthlyMax),
+    *xmonthlyMin = REAL(monthlyMin), *xmontlyPPT = REAL(monthlyPPT);
+
+    for(index = 0; index < MAX_MONTHS; index++) {
+        xmonthlyMean[index] = climateAverages.meanTempMon_C[index];
+        xmonthlyMax[index] = climateAverages.maxTempMon_C[index];
+        xmonthlyMin[index] = climateAverages.minTempMon_C[index];
+        xmontlyPPT[index] = climateAverages.PPTMon_cm[index];
+    }
+
+    for(index = 0; index < calcSiteOutputNum; index++) {
+        SET_STRING_ELT(vectorNames, index, mkChar(cnames[index]));
+    }
+
+    for(index = 0; index < 6; index++) {
+        SET_STRING_ELT(cnamesC4SEXP, index, mkChar(cnamesC4[index]));
+        SET_STRING_ELT(cnamesCheatgrassSEXP, index, mkChar(cnamesCheatgrass[index]));
+    }
+
+    // Set names of res, C4Variables and Cheatgrass
+    namesgets(res, vectorNames);
+    namesgets(C4Variables, cnamesC4SEXP);
+    namesgets(Cheatgrass, cnamesCheatgrassSEXP);
+
+    // Set mean annual temperature and precipitation values
+    REAL(MAT_C)[0] = climateAverages.meanTemp_C;
+    REAL(MAP_cm)[0] = climateAverages.PPT_cm;
+
+    // Set C4Variables and Cheatgrass values
+
+    REAL(C4Variables)[0] = climateAverages.minTemp7thMon_C;
+    REAL(C4Variables)[1] = climateAverages.frostFree_days;
+    REAL(C4Variables)[2] = climateAverages.ddAbove65F_degday;
+
+    REAL(C4Variables)[3] = climateAverages.sdC4[0];
+    REAL(C4Variables)[4] = climateAverages.sdC4[1];
+    REAL(C4Variables)[5] = climateAverages.sdC4[2];
+
+    REAL(Cheatgrass)[0] = climateAverages.PPT7thMon_mm;
+    REAL(Cheatgrass)[1] = climateAverages.meanTempDriestQtr_C;
+    REAL(Cheatgrass)[2] = climateAverages.minTemp2ndMon_C;
+
+    REAL(Cheatgrass)[3] = climateAverages.sdCheatgrass[0];
+    REAL(Cheatgrass)[4] = climateAverages.sdCheatgrass[1];
+    REAL(Cheatgrass)[5] = climateAverages.sdCheatgrass[2];
+
+    // Set mean average monthly temperature
+    SET_VECTOR_ELT(res, 0, monthlyMean);
+
+    // Set mean minimum temperature
+    SET_VECTOR_ELT(res, 1, monthlyMin);
+
+    // Set mean maximum temperature
+    SET_VECTOR_ELT(res, 2, monthlyMax);
+
+    // Set mean annual precipitation (cm)
+    SET_VECTOR_ELT(res, 3, monthlyPPT);
+
+    // Set mean annual temperature (C)
+    SET_VECTOR_ELT(res, 4, MAP_cm);
+
+    // Set mean annual precipitation (cm)
+    SET_VECTOR_ELT(res, 5, MAT_C);
+
+    // Set values of the two standard deviation categories (C4 and cheatgrass)
+    // in result variable
+    SET_VECTOR_ELT(res, 8, C4Variables);
+    SET_VECTOR_ELT(res, 9, Cheatgrass);
+
+    deallocateClimateStructs(&climateOutput, &climateAverages);
+
+    UNPROTECT(12);
+
+    for(year = 0; year < numYears; year++) {
+        free(allHist[year]);
+    }
+    free(allHist);
+
+    return res;
+
 }

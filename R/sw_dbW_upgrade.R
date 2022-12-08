@@ -496,8 +496,18 @@ dbW_upgrade_v2to3 <- function(dbWeatherDataFile, fbackup = NULL) {
 #' @inheritParams dbW_upgrade
 #'
 #' @export
-dbW_upgrade_v1to2 <- function(dbWeatherDataFile, fbackup = NULL,
-  SWRunInformation) {
+dbW_upgrade_v1to2 <- function(
+  dbWeatherDataFile,
+  fbackup = NULL,
+  SWRunInformation = data.frame(
+    site_id = NA_character_,
+    X_WGS84 = NA_real_,
+    Y_WGS84 = NA_real_,
+    WeatherFolder = NA_character_,
+    Include_YN = NA,
+    stringsAsFactors = FALSE
+  )[0, , drop = FALSE]
+) {
 
   con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbWeatherDataFile)
   v_dbW <- try(numeric_version(as.character(DBI::dbGetQuery(con,

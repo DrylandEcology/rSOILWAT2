@@ -146,6 +146,9 @@ void setupSOILWAT2(SEXP inputOptions) {
 }
 
 
+/**
+  @brief Read inputs from SOILWAT2 input files on disk using SOILWAT2 code
+*/
 SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   SEXP swInputData, SW_DataList, swLog, oRlogfile;
   #ifdef RSWDEBUG
@@ -171,6 +174,12 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   #endif
   rSW_CTL_obtain_inputs(TRUE);
 
+  // finalize daily weather
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" finalize daily weather ...\n");
+  #endif
+  SW_WTH_finalize_all_weather();
+
   // initialize simulation run (based on user inputs)
   #ifdef RSWDEBUG
   if (debug) swprintf(" init simulation run ...\n");
@@ -180,8 +189,8 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   #ifdef RSWDEBUG
   if (debug) {
     swprintf(
-      "onGetInputDataFromFiles: copy data from SOILWAT2 variables "
-      "to rSOILWAT2 S4 classes: "
+      "\n'onGetInputDataFromFiles()': "
+      "copy data from SOILWAT2 variables to rSOILWAT2 S4 classes: "
     );
   }
   #endif
@@ -200,7 +209,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   if (debug) swprintf(" > 'model'");
   #endif
 
-  SET_SLOT(SW_DataList, install("weather"), onGet_SW_WTH());
+  SET_SLOT(SW_DataList, install("weather"), onGet_SW_WTH_setup());
   #ifdef RSWDEBUG
   if (debug) swprintf(" > 'weather-setup'");
   #endif
@@ -215,10 +224,20 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   if (debug) swprintf(" > 'climate'");
   #endif
 
-  if (LOGICAL(GET_SLOT(GET_SLOT(SW_DataList, install("weather")), install("use_weathergenerator")))[0]) {
+  if (
+    LOGICAL(
+      GET_SLOT(
+        GET_SLOT(
+          SW_DataList,
+          install("weather")
+        ),
+        install("use_weathergenerator")
+      )
+    )[0]
+  ) {
     SET_SLOT(SW_DataList, install("markov"), onGet_MKV());
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'mwgen'");
+    if (debug) swprintf(" > 'weather generator'");
     #endif
   }
 
@@ -274,7 +293,13 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
 }
 
 
+/**
+  @brief Run a SOILWAT2 simulation
 
+  - Copies R inputs to C variables
+  - Executes a SOILWAT2 simulation
+  - Copies output to R output variable
+*/
 SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 	SEXP outputData, swLog, oRlogfile;
   #ifdef RSWDEBUG
@@ -318,6 +343,12 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 	#endif
 	rSW_CTL_obtain_inputs(useFiles);
 
+	// finalize daily weather
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" finalize daily weather ...\n");
+	#endif
+	SW_WTH_finalize_all_weather();
+
 	// initialize simulation run (based on user inputs)
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" init simulation run ...");
@@ -353,6 +384,93 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 
 	return(outputData);
 }
+
+
+/**
+  @brief Process daily driving (weather) variables using SOILWAT2 code
+
+  Applies additive/multiplicative scaling parameters and
+  uses imputation/weather generator to fill missing values
+*/
+SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
+  SEXP res;
+  #ifdef RSWDEBUG
+  int debug = 0;
+  #endif
+
+
+  #ifdef RSWDEBUG
+  if (debug) swprintf("\n'rSW2_processAllWeather': data preparation: ");
+  #endif
+
+  // Copy `swInputData` to global variable `InputData` which is used
+  // by `onSet_XXX()` functions
+  InputData = inputData;
+
+  // Copy `weatherList` to global variable `WeatherList` which is used
+  // by `onSet_WTH_DATA()` if `bWeatherList`
+  bWeatherList = TRUE;
+  WeatherList = weatherList;
+
+
+  // setup and construct model (independent of inputs)
+  #ifdef RSWDEBUG
+  if (debug) swprintf("'setup' > ");
+  #endif
+  SW_CTL_setup_model(_firstfile);
+
+  // `onSet_WTH_DATA()` requires correct `endyr` and `startyr` of `SW_Model`
+  #ifdef RSWDEBUG
+  if (debug) swprintf("'model' > ");
+  #endif
+  onSet_SW_MDL(GET_SLOT(inputData, install("years")));
+
+  // `onSet_WTH_DATA()` requires additive/multiplicative scaling parameters
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" > 'weather-setup'");
+  #endif
+  onSet_SW_WTH_setup(GET_SLOT(inputData, install("weather")));
+
+  // `onSet_WTH_DATA()` requires ready-to-go weather generator
+  if (
+    LOGICAL(
+      GET_SLOT(
+        GET_SLOT(
+          inputData,
+          install("weather")
+        ),
+        install("use_weathergenerator")
+      )
+    )[0]
+  ) {
+    onSet_MKV(GET_SLOT(inputData, install("markov")));
+    #ifdef RSWDEBUG
+    if (debug) swprintf(" > 'weather generator'.\n");
+    #endif
+  }
+
+
+  // Process weather data
+  #ifdef RSWDEBUG
+  if (debug) swprintf("'rSW2_processAllWeather': process weather data");
+  #endif
+  onSet_WTH_DATA();
+
+
+  // Finalize daily weather (weather generator & monthly scaling)
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" > finalize daily weather.\n");
+  #endif
+  SW_WTH_finalize_all_weather();
+
+
+  // Return processed weather data
+  PROTECT(res = onGet_WTH_DATA());
+
+  UNPROTECT(1);
+  return res;
+}
+
 
 
 /** Expose SOILWAT2 constants and defines to internal R code of rSOILWAT2

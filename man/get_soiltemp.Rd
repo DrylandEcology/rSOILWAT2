@@ -52,7 +52,7 @@ Requested \code{soillayers} that are not available in \code{x} are ignored
 
 
 Requested \code{levels} that are not available
-(e.g., \code{"min"} before \code{rSOILWAT2} \code{v3.5.0})
+(e.g., \code{"min"} before \code{rSOILWAT2} \code{v5.3.0})
 are replaced by values from the average level
 (with a warning if \code{verbose}).
 }

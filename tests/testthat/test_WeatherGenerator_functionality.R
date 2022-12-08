@@ -55,8 +55,14 @@ test_that("Weather generator: estimate input parameters", {
 
     # validity tests ok
     sw_in <- rSOILWAT2::sw_exampleData
-    expect_equal(swMarkov_Prob(sw_in) <- res[["mkv_doy"]], res[["mkv_doy"]])
-    expect_equal(swMarkov_Conv(sw_in) <- res[["mkv_woy"]], res[["mkv_woy"]])
+    expect_equal(
+      swMarkov_Prob(sw_in) <- res[["mkv_doy"]],
+      res[["mkv_doy"]]
+    )
+    expect_equal(
+      swMarkov_Conv(sw_in) <- res[["mkv_woy"]],
+      res[["mkv_woy"]]
+    )
   }
 })
 
@@ -83,6 +89,7 @@ test_that("Weather generator: generate weather", {
       imputation_type = "mean",
       imputation_span = 5
     )
+
     wout[[2]] <- dbW_generateWeather(
       test_dat[(n - 5):n],
       years = years[length(years)] + 0:10 - 5,
@@ -129,7 +136,10 @@ test_that("Weather generator: generate weather", {
 
 test_that("Weather generator (integration tests): compare input/output", {
   skip_if_not(
-    identical(tolower(Sys.getenv("RSOILWAT_INTEGRATIONTESTS")), "true")
+    identical(
+      tolower(Sys.getenv("RSOILWAT_INTEGRATIONTESTS")),
+      "true"
+    )
   )
 
   dir_inttests <- file.path("..", "rSOILWAT_IntegrationTestOutput")
@@ -157,7 +167,8 @@ test_that("Weather generator (integration tests): compare input/output", {
   set_WeatherHistory(sw_in) <- weatherHistory()
 
   wgen_df <- replicate(
-    N, {
+    N,
+    {
       res <- sw_exec(inputData = sw_in)
 
       out <- lapply(

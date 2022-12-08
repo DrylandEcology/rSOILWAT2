@@ -6,7 +6,7 @@ clim <- calc_SiteClimate(
   weatherList = weatherData,
   year.start = 1949,
   year.end = 2010,
-  do_C4vars = FALSE,
+  do_C4vars = TRUE,
   simTime2 = NULL
 )
 
@@ -86,7 +86,7 @@ test_that("Vegetation: estimate land cover composition", {
   )
 
   expect_pnv(pnv)
-  expect_equal(pnv, pnv0_expected)
+  expect_equal(pnv, pnv0_expected, tolerance = 1e-6)
 
   # The set land cover types are 0
   for (k in iset) {
@@ -218,6 +218,32 @@ test_that("Vegetation: estimate land cover composition", {
     )
   }
 
+
+  # issue 218: correction to C4 grass cover was not carried out as documented
+  # without C4 correction, C4 grass cover was 0.1166967
+  res_wo218 <- estimate_PotNatVeg_composition(
+    MAP_mm = 10 * clim[["MAP_cm"]],
+    MAT_C = 15,
+    mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
+    mean_monthly_Temp_C = 5 + clim[["meanMonthlyTempC"]],
+    dailyC4vars = NULL
+  )
+  expect_gt(res_wo218[["Rel_Abundance_L0"]][["Grasses_C4"]], 0)
+
+  res_w218 <- estimate_PotNatVeg_composition(
+    MAP_mm = 10 * clim[["MAP_cm"]],
+    MAT_C = 15,
+    mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
+    mean_monthly_Temp_C = 5 + clim[["meanMonthlyTempC"]],
+    dailyC4vars = c(
+      Month7th_NSadj_MinTemp_C = 5,
+      LengthFreezeFreeGrowingPeriod_NSadj_Days = 150,
+      DegreeDaysAbove65F_NSadj_DaysC = 110
+    )
+  )
+  expect_equal(res_w218[["Rel_Abundance_L0"]][["Grasses_C4"]], 0)
+
+
   #--- The function `estimate_PotNatVeg_composition` can fail under a few
   # situations:
   # (i) fixed sum is more than 1
@@ -228,6 +254,23 @@ test_that("Vegetation: estimate land cover composition", {
       mean_monthly_ppt_mm = rep(0, 12),
       mean_monthly_Temp_C = rep(0, 12),
       fix_succulents = TRUE, Succulents_Fraction = 10
+    )
+  )
+
+  # issue 219: output incorrectly contained negative cover
+  # if fixed `SumGrasses_Fraction` caused that other fixed cover summed > 1
+  # correct behavior is error
+  expect_error(
+    estimate_PotNatVeg_composition(
+      MAP_mm = 10 * clim[["MAP_cm"]],
+      MAT_C = clim[["MAT_C"]],
+      mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
+      mean_monthly_Temp_C = clim[["meanMonthlyTempC"]],
+      dailyC4vars = clim[["dailyC4vars"]],
+      fix_shrubs = TRUE,
+      Shrubs_Fraction = 0.5,
+      fix_sumgrasses = TRUE,
+      SumGrasses_Fraction = 0.7
     )
   )
 
@@ -246,19 +289,6 @@ test_that("Vegetation: estimate land cover composition", {
       fix_forbs = TRUE, Forbs_Fraction = 0,
       fix_trees = TRUE, Trees_Fraction = 0,
       fix_BareGround = TRUE, BareGround_Fraction = 0,
-      fill_empty_with_BareGround = FALSE
-    )
-  )
-
-  # converted from error into warning:
-  # (iii) cover to estimate is 0, fixed types are less than 1, and bare-ground
-  # is fixed
-  expect_warning(
-    estimate_PotNatVeg_composition(
-      MAP_mm = 900,
-      MAT_C = -10,
-      mean_monthly_ppt_mm = c(0, 0, rep(100, 9), 0),
-      mean_monthly_Temp_C = rep(-10, 12),
       fill_empty_with_BareGround = FALSE
     )
   )
@@ -284,6 +314,24 @@ test_that("Vegetation: estimate land cover composition", {
 
   expect_pnv(pnv[1:2])
   expect_equivalent(pnv[["Rel_Abundance_L0"]][ibar], 1)
+
+  # Make sure `SOILWAT2` throws a warning that R, we use `sw_verbosity()`
+  # to do that
+  prev_quiet <- sw_verbosity(TRUE)
+
+  # Expecting warning because MAT_C is outside of formulas domain
+  expect_warning(
+    estimate_PotNatVeg_composition(
+      MAP_mm = 900,
+      MAT_C = -10,
+      mean_monthly_ppt_mm = c(0, 0, rep(100, 9), 0),
+      mean_monthly_Temp_C = rep(-10, 12),
+      fill_empty_with_BareGround = FALSE
+    )
+  )
+
+  # Undo what the previous call to `sw_verbosity()` did
+  sw_verbosity(prev_quiet)
 })
 
 

@@ -24,6 +24,9 @@ editor_options:
 ---
 \pagebreak
 
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
 
 # General setup, installation, and R recap
 
@@ -272,6 +275,12 @@ You may organize weather data in a variety of ways:
 
       # Check that weather data is well-formed
       stopifnot(rSOILWAT2::dbW_check_weatherData(wdata))
+
+    } else {
+      # Fix simulation years to weather data that we have at hand
+      rSOILWAT2::swYears_EndYear(sw_in) <- max(
+        rSOILWAT2::get_years_from_weatherData(wdata)
+      )
     }
 
   } else {
@@ -283,17 +292,6 @@ You may organize weather data in a variety of ways:
     rSOILWAT2::swYears_EndYear(sw_in) <- max(years)
     rSOILWAT2::swYears_StartYear(sw_in) <- min(years)
   }
-```
-
-
-### Specify first year of observed weather data
-```{r, wyr}
-  # `FirstYearHistorical` can be set to a negative value (the default),
-  # then the code will use the first simulation year.
-  # That is, the two lines below will produce identical simulations:
-  rSOILWAT2::swWeather_FirstYearHistorical(sw_in) <-
-    rSOILWAT2::swYears_StartYear(sw_in)
-  rSOILWAT2::swWeather_FirstYearHistorical(sw_in) <- -1
 ```
 
 
@@ -472,6 +470,9 @@ You may organize weather data in a variety of ways:
 
 ## Assign new soil data to rSOILWAT2 input object
 ```{r, soils_final1}
+  # NRCS SSURGO `dbovendry` represents the soil density of the matric component
+  rSOILWAT2::swSite_SoilDensityInputType(sw_in) <- 0L
+
   # This fails because rooting profile values are still missing
   try(rSOILWAT2::swSoils_Layers(sw_in) <- soil_new)
 ```
@@ -655,9 +656,18 @@ by `SOILWAT2` with the selected pedotransfer function.
 
 
 ## Run SOILWAT2 for prepared site
+Note: Knitting vignette crashes with C-level messages -> run quietly
 ```{r, run_site}
-  sw_out <- rSOILWAT2::sw_exec(inputData = sw_in, weatherList = wdata)
-  sw_out2 <- rSOILWAT2::sw_exec(inputData = sw_in2, weatherList = wdata)
+  sw_out <- rSOILWAT2::sw_exec(
+    inputData = sw_in,
+    weatherList = wdata,
+    quiet = TRUE
+  )
+  sw_out2 <- rSOILWAT2::sw_exec(
+    inputData = sw_in2,
+    weatherList = wdata,
+    quiet = TRUE
+  )
 ```
 
 
@@ -703,7 +713,10 @@ by `SOILWAT2` with the selected pedotransfer function.
   (iii) run SOILWAT2 with filled-in data
 
 ```{r, weather3}
-  wgen_coeffs <- rSOILWAT2::dbW_estimate_WGen_coefs(weatherData = wdata)
+  wgen_coeffs <- rSOILWAT2::dbW_estimate_WGen_coefs(
+    weatherData = wdata,
+    imputation_type = "locf"
+  )
 
   wdata_filled <- rSOILWAT2::dbW_generateWeather(
     weatherData = wdata_gaps,

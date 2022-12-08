@@ -60,6 +60,7 @@ lc_names <- c(veg_names, "Bare Ground")
 setClass(
   "swProd",
   slots = c(
+    veg_method = "integer",
     Composition = "numeric",
     Albedo = "numeric",
     CanopyHeight = "matrix",
@@ -73,9 +74,9 @@ setClass(
     CriticalSoilWaterPotential = "numeric",
     CO2Coefficients = "matrix",
     MonthlyVeg = "list"
-  )
-  ,
+  ),
   prototype = list(
+    veg_method = NA_integer_,
     # this should be 1 + rSW2_glovars[["kSOILWAT2"]][["kINT"]][["NVEGTYPES"]]
     Composition = stats::setNames(rep(NA_real_, 5), lc_names),
     Albedo = stats::setNames(rep(NA_real_, 5), lc_names),
@@ -163,6 +164,11 @@ setValidity(
   function(object) {
     val <- TRUE
     nvegs <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["NVEGTYPES"]]
+
+  if (length(object@veg_method) != 1L) {
+    msg <- "@veg_method must have 1 value."
+    val <- if (isTRUE(val)) msg else c(val, msg)
+  }
 
     if (
       length(object@Composition) != 1L + nvegs ||

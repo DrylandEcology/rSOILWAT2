@@ -120,9 +120,10 @@ setValidity(
       val <- if (isTRUE(val)) msg else c(val, msg)
 
     } else {
-      is_bad <- any(is.na(object@CO2ppm[, "Year"]) |
-        round(object@CO2ppm[, "Year"]) != object@CO2ppm[, "Year"])
-      if (is_bad) {
+      is_bad <-
+        is.na(object@CO2ppm[, "Year"]) |
+        round(object@CO2ppm[, "Year"]) != object@CO2ppm[, "Year"]
+      if (any(is_bad)) {
         msg <- "@CO2ppm: has missing and/or non-integer-like years"
         val <- if (isTRUE(val)) msg else c(val, msg)
       }

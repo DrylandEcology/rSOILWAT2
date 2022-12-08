@@ -49,7 +49,9 @@ static char *cSW_SIT[] = {
   "SWClimits", "ModelFlags", "ModelCoefficients",
   "SnowSimulationParameters", "DrainageCoefficient", "EvaporationCoefficients",
   "TranspirationCoefficients", "IntrinsicSiteParams", "SoilTemperatureFlag",
-  "SoilTemperatureConstants", "TranspirationRegions",
+  "SoilTemperatureConstants",
+  "SoilDensityInputType",
+  "TranspirationRegions",
   "swrc_flags", "has_swrcp"
 };
 
@@ -79,7 +81,7 @@ static SEXP onGet_SW_LYR() {
 	p_Layers = REAL(Layers);
 	for (i = 0; i < (v->n_layers); i++) {
 		p_Layers[i + (v->n_layers) * 0] = dmax = v->lyr[i]->width + dmax;
-		p_Layers[i + (v->n_layers) * 1] = v->lyr[i]->soilMatric_density;
+		p_Layers[i + (v->n_layers) * 1] = v->lyr[i]->soilDensityInput;
 		p_Layers[i + (v->n_layers) * 2] = v->lyr[i]->fractionVolBulk_gravel;
 		p_Layers[i + (v->n_layers) * 3] = v->lyr[i]->evap_coeff;
 		p_Layers[i + (v->n_layers) * 4] = v->lyr[i]->transp_coeff[SW_GRASS];
@@ -112,7 +114,7 @@ static void onSet_SW_LYR(SEXP SW_LYR) {
 	SW_SITE *v = &SW_Site;
 	LyrIndex lyrno;
 	int i, j, k, columns;
-	RealF dmin = 0.0, dmax, evco, trco_veg[NVEGTYPES], psand, pclay, matricd, imperm, soiltemp, f_gravel;
+	RealF dmin = 0.0, dmax, evco, trco_veg[NVEGTYPES], psand, pclay, soildensity, imperm, soiltemp, f_gravel;
 	RealD *p_Layers;
 
 	/* note that Files.read() must be called prior to this. */
@@ -137,7 +139,7 @@ static void onSet_SW_LYR(SEXP SW_LYR) {
 		lyrno = _newlayer();
 
 		dmax = p_Layers[i + j * 0];
-		matricd = p_Layers[i + j * 1];
+		soildensity = p_Layers[i + j * 1];
 		f_gravel = p_Layers[i + j * 2];
 		evco = p_Layers[i + j * 3];
 		trco_veg[SW_GRASS] = p_Layers[i + j * 4];
@@ -151,7 +153,7 @@ static void onSet_SW_LYR(SEXP SW_LYR) {
 
 		v->lyr[lyrno]->width = dmax - dmin;
 		dmin = dmax;
-		v->lyr[lyrno]->soilMatric_density = matricd;
+		v->lyr[lyrno]->soilDensityInput = soildensity;
 		v->lyr[lyrno]->fractionVolBulk_gravel = f_gravel;
 		v->lyr[lyrno]->evap_coeff = evco;
 		ForEachVegType(k) {
@@ -319,6 +321,8 @@ SEXP onGet_SW_SIT() {
 
 	SEXP has_swrcp;
 
+	SEXP SoilDensityInputType;
+
 	SEXP TranspirationRegions, TranspirationRegions_names, TranspirationRegions_names_y;
 	char *cTranspirationRegions[] = { "ndx", "layer" };
 	int *p_transp; // ideally `LyrIndex` so that same type as `_TranspRgnBounds`, but R API INTEGER() is signed
@@ -422,6 +426,8 @@ SEXP onGet_SW_SIT() {
 		SET_STRING_ELT(SoilTemperatureConstants_names, i, mkChar(cSoilTempValues[i]));
 	setAttrib(SoilTemperatureConstants, R_NamesSymbol, SoilTemperatureConstants_names);
 
+	PROTECT(SoilDensityInputType = ScalarInteger(v->type_soilDensityInput));
+
 	PROTECT(TranspirationRegions = allocMatrix(INTSXP,(v->n_transp_rgn),2));
 	p_transp = INTEGER(TranspirationRegions);
 	for (i = 0; i < (v->n_transp_rgn); i++) {
@@ -461,11 +467,12 @@ SEXP onGet_SW_SIT() {
 	SET_SLOT(SW_SIT, install(cSW_SIT[7]), IntrinsicSiteParams);
 	SET_SLOT(SW_SIT, install(cSW_SIT[8]), SoilTemperatureConstants_use);
 	SET_SLOT(SW_SIT, install(cSW_SIT[9]), SoilTemperatureConstants);
-	SET_SLOT(SW_SIT, install(cSW_SIT[10]), TranspirationRegions);
-	SET_SLOT(SW_SIT, install(cSW_SIT[11]), swrc_flags);
-	SET_SLOT(SW_SIT, install(cSW_SIT[12]), has_swrcp);
+	SET_SLOT(SW_SIT, install(cSW_SIT[10]), SoilDensityInputType);
+	SET_SLOT(SW_SIT, install(cSW_SIT[11]), TranspirationRegions);
+	SET_SLOT(SW_SIT, install(cSW_SIT[12]), swrc_flags);
+	SET_SLOT(SW_SIT, install(cSW_SIT[13]), has_swrcp);
 
-	UNPROTECT(27);
+	UNPROTECT(28);
 	return SW_SIT;
 }
 
@@ -483,8 +490,10 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	SEXP IntrinsicSiteParams;
 	SEXP SoilTemperatureConstants_use;
 	SEXP SoilTemperatureConstants;
-	SEXP swrc_flags, has_swrcp;
+	SEXP SoilDensityInputType;
 	SEXP TranspirationRegions;
+	SEXP swrc_flags, has_swrcp;
+
 	int *p_transp; // ideally `LyrIndex` so that same type as `_TranspRgnBounds`, but R API INTEGER() is signed
 
   #ifdef RSWDEBUG
@@ -590,6 +599,12 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	if (debug) swprintf(" > 'soiltemp-constants'");
 	#endif
 
+	PROTECT(SoilDensityInputType = GET_SLOT(SW_SIT, install("SoilDensityInputType")));
+	v->type_soilDensityInput = INTEGER(SoilDensityInputType)[0];
+	#ifdef RSWDEBUG
+	if (debug) swprintf(" > 'density-type'");
+	#endif
+
 
 	PROTECT(swrc_flags = GET_SLOT(SW_SIT, install("swrc_flags")));
 	strcpy(v->site_swrc_name, CHAR(STRING_ELT(swrc_flags, 0)));
@@ -633,5 +648,5 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	if (debug) swprintf(" ... done. \n");
 	#endif
 
-	UNPROTECT(13);
+	UNPROTECT(14);
 }

@@ -65,8 +65,8 @@ void rSW_CTL_obtain_inputs(Bool from_files) {
     #ifdef RSWDEBUG
     if (debug) {
       swprintf(
-        "'rSW_CTL_obtain_inputs': Copy data from rSOILWAT2 S4 "
-        "'InputData' object to SOILWAT2 variables:"
+        "\n'rSW_CTL_obtain_inputs()': "
+        "Copy data from rSOILWAT2 S4 'InputData' object to SOILWAT2 variables:"
       );
     }
     #endif
@@ -81,7 +81,7 @@ void rSW_CTL_obtain_inputs(Bool from_files) {
     if (debug) swprintf(" > 'model'");
     #endif
 
-    onSet_SW_WTH(GET_SLOT(InputData, install("weather")));
+    onSet_SW_WTH_setup(GET_SLOT(InputData, install("weather")));
     #ifdef RSWDEBUG
     if (debug) swprintf(" > 'weather-setup'");
     #endif
@@ -96,9 +96,14 @@ void rSW_CTL_obtain_inputs(Bool from_files) {
     ) {
       onSet_MKV(GET_SLOT(InputData, install("markov")));
       #ifdef RSWDEBUG
-      if (debug) swprintf(" > 'mwgen'");
+      if (debug) swprintf(" > 'weather generator'");
       #endif
     }
+
+    onSet_WTH_DATA();
+    #ifdef RSWDEBUG
+    if (debug) swprintf(" > 'weather-history'");
+    #endif
 
     onSet_SW_VPD(GET_SLOT(InputData, install("prod")));
     #ifdef RSWDEBUG

@@ -186,24 +186,30 @@ for (it in tests) {
     }
 
 
-    # Check that input weather is identical to output weather (unless weather
-    # generator is turned on)
-    if (!swWeather_UseMarkov(sw_input)) {
-      # Precipitation
-      sim <- slot(slot(rd, "PRECIP"), "Day")[, "ppt"]
-      obs <- dbW_df_day[, "PPT_cm"]
-      expect_equal(sim, obs, info = info1)
+    # Check that input weather is identical to output weather
+    # (don't check missing days that the weather generator filled in)
+    is_obs <- complete.cases(dbW_df_day)
 
-      # Tmin
-      sim <- slot(slot(rd, "TEMP"), "Day")[, "min_C"]
-      obs <- dbW_df_day[, "Tmin_C"]
-      expect_equal(sim, obs, info = info1)
+    # Precipitation
+    expect_equal(
+      slot(slot(rd, "PRECIP"), "Day")[is_obs, "ppt"],
+      dbW_df_day[is_obs, "PPT_cm"],
+      info = info1
+    )
 
-      # Tmax
-      sim <- slot(slot(rd, "TEMP"), "Day")[, "max_C"]
-      obs <- dbW_df_day[, "Tmax_C"]
-      expect_equal(sim, obs, info = info1)
-    }
+    # Tmin
+    expect_equal(
+      slot(slot(rd, "TEMP"), "Day")[is_obs, "min_C"],
+      dbW_df_day[is_obs, "Tmin_C"],
+      info = info1
+    )
+
+    # Tmax
+    expect_equal(
+      slot(slot(rd, "TEMP"), "Day")[is_obs, "max_C"],
+      dbW_df_day[is_obs, "Tmax_C"],
+      info = info1
+    )
 
 
     # Loop through output

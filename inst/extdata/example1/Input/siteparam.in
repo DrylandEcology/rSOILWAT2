@@ -9,12 +9,11 @@
 
 
 #---- Soil water content initialization, minimum, and wet condition
--1.0		# swc_min : cm/cm if 0 - <1.0,
-				# 					-bars if >= 1.0.;
-				#						if < 0. then estimate residual water content for each layer
-				#										(from realistic SWP limit, or Rawls et al. 1985)
-15.0		# swc_init: cm/cm if < 1.0, -bars if >= 1.0.
-15.0		# swc_wet : cm/cm if < 1.0, -bars if >= 1.0.
+-1.0		# swc_min : [cm/cm] if >= 0. and < 1.0
+    		#           [-bars] if >= 1.0.
+    		#           estimate (from realistic limit and Rawls et al. 1985) if < 0.
+15.0		# swc_init: [cm/cm] if < 1.0, [-bars] if >= 1.0.
+15.0		# swc_wet : [cm/cm] if < 1.0, [-bars] if >= 1.0.
 
 #---- Diffuse recharge and runoff/runon
 0		# reset (1/0): do/don't reset soil water content for each year
@@ -85,6 +84,11 @@ NAN			# aspect = surface azimuth angle (degrees): S=0, E=-90, N=±180, W=90;
 1
 # Name of CO2 scenario: see input file `carbon.in`
 RCP85
+
+
+# --- Soil characterization ---
+# Are inputs of density representing bulk soil (type 1) or the matric component (type 0)?
+0
 
 
 #--- Soil water retention curve (SWRC) ------
