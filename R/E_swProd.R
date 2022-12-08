@@ -323,6 +323,24 @@ swProd <- function(...) {
 }
 
 
+#' @rdname sw_upgrade
+setMethod(
+  "sw_upgrade",
+  signature = "swProd",
+  definition = function(object, verbose = FALSE) {
+    tmp <- try(validObject(object), silent = TRUE)
+    if (inherits(tmp, "try-error")) {
+      if (verbose) {
+        message("Upgrading object of class `swProd`.")
+      }
+      object <- suppressWarnings(swProd(object))
+    }
+
+    object
+  }
+)
+
+
 #' @rdname swProd-class
 #' @export
 setMethod("get_swProd", "swProd", function(object) object)

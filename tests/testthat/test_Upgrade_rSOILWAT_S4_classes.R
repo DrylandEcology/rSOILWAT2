@@ -8,7 +8,8 @@ test_that("Upgrade old rSOILWAT2 input objects", {
   #--- Locate versioned `swInputData` objects
   dir_test_data <- file.path("..", "test_data", "versioned_swInputData")
   fnames_vdata <- list.files(
-    dir_test_data, pattern = "Ex1_input_v",
+    dir_test_data,
+    pattern = "Ex1_input_v",
     full.names = TRUE
   )
 

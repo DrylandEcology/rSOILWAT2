@@ -202,10 +202,12 @@ format_timestamp <- function(object) {
 #' List of changes:
 #'   * Changes with `v6.0.0`:
 #'       * class [`swSite-class`]:
-#'         new slots `"swrc_flags"` and `"has_swrcp"`
+#'         new slots `"swrc_flags"`, `"has_swrcp"`, and
+#'         `"SoilDensityInputType"`
 #'       * class [`swSoils-class`]: new slot `"SWRCp"`
 #'       * class [`swFiles-class`]:
 #'         `SWRC` parameter input file added as file 6 for a new total of 23
+#'       * class [`swProd-class`]: new slot `"veg_method"`
 #'   * Changes with `v5.2.0`:
 #'       * class [`swOUT-class`]:
 #'         `"FROZEN"` added as `outkey` 28 for a new total of 32
