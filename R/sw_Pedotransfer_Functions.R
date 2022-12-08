@@ -1300,7 +1300,7 @@ check_swrcp <- function(swrc_name, swrcp) {
 #'   )
 #' }
 #'
-#' if (requireNamespace("graphics")) {
+#' if (interactive() && requireNamespace("graphics")) {
 #'   par_prev <- graphics::par(mfcol = c(length(phi), 1))
 #'
 #'   for (k in seq_along(phi)) {

@@ -119,6 +119,7 @@ rSW2utils::scale_to_reference_peak_frequency(
 )
 
 ## Plot reference and adjusted monthly values
+if (interactive()) {
 par_prev <- par(mfrow = c(2, 1))
 
 plot(
@@ -148,5 +149,6 @@ plot(
 lines(1:12, phen_adj[, 2])
 
 par(par_prev)
+}
 
 }
