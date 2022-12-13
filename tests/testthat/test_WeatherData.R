@@ -1,4 +1,3 @@
-context("rSOILWAT2 weather data")
 
 
 test_that("Weather data check", {

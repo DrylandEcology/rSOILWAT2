@@ -1,4 +1,3 @@
-context("rSOILWAT2 object version tags")
 
 #---TESTS
 test_that("rSOILWAT2 object versions", {

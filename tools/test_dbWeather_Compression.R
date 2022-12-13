@@ -1,4 +1,3 @@
-context("Test dbWeather compression types")
 
 # Create reference objects
 do_benchmark <- FALSE

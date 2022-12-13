@@ -1,4 +1,3 @@
-context("Vegetation functions")
 
 # Inputs
 utils::data("weatherData", package = "rSOILWAT2")
@@ -339,7 +338,7 @@ test_that("Vegetation: estimate land cover composition", {
   )
 
   expect_pnv(pnv[1:2])
-  expect_equivalent(pnv[["Rel_Abundance_L0"]][ibar], 1)
+  expect_equal(pnv[["Rel_Abundance_L0"]][ibar], 1, ignore_attr = "names")
 
   # Make sure `SOILWAT2` throws a warning that R, we use `sw_verbosity()`
   # to do that

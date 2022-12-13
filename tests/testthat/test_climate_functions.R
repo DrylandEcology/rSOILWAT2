@@ -1,4 +1,3 @@
-context("Calculations of climate variables")
 
 # Inputs
 weatherList_year1980 <- readRDS(

@@ -1,4 +1,3 @@
-context("Pedotransfer functions: SWP <-> VWC")
 
 # How the functions are applied in rSFSW2
 # section: aggregation
@@ -72,49 +71,74 @@ test_that("To SWP", {
   # 1. VWC in fraction [single value] + sand and clay in fraction [single vals]
   #    --> SWP in MPa [single value]
   for (ifix in names(swp_fix)) for (itext in row.names(texture))
-    expect_equivalent(swp_fix[ifix],
-      VWCtoSWP(vwc_fix[itext, ifix], texture[itext, "sand"],
-        texture[itext, "clay"]))
+    expect_equal(
+      swp_fix[ifix],
+      VWCtoSWP(
+        vwc_fix[itext, ifix],
+        texture[itext, "sand"],
+        texture[itext, "clay"]
+      ),
+      ignore_attr = c("names", "dimnames")
+    )
 
   # 2. VWC in fraction [single value] + sand and clay in fraction
   #    [vectors of length d]
   #    --> SWP in MPa [vector of length d]
   for (ifix in names(swp_fix)) for (itext in row.names(texture))
-    expect_equivalent(swp_vals[itext, ifix, ],
-      VWCtoSWP(vwc_fix[itext, ifix], texture[, "sand"], texture[, "clay"]))
+    expect_equal(
+      swp_vals[itext, ifix, ],
+      VWCtoSWP(vwc_fix[itext, ifix], texture[, "sand"], texture[, "clay"]),
+      ignore_attr = c("names", "dimnames")
+    )
 
   # 3. VWC in fraction [vector of length l] + sand and clay in fraction
   #    [single values]
   #    --> SWP in MPa [vector of length l]
   for (ifix in names(swp_fix)) for (itext in row.names(texture))
-    expect_equivalent(swp_vals[, ifix, itext],
-      VWCtoSWP(vwc_fix[, ifix], texture[itext, "sand"], texture[itext, "clay"]))
+    expect_equal(
+      swp_vals[, ifix, itext],
+      VWCtoSWP(vwc_fix[, ifix], texture[itext, "sand"], texture[itext, "clay"]),
+      ignore_attr = c("names", "dimnames")
+    )
 
   # 4. VWC in fraction [vector of length l] + sand and clay in fraction
   #    [vectors of length d]
   #    --> SWP in MPa [matrix with nrow = l and ncol = d, VWC vector repeated
   #        for each column]: probably not used
   for (ifix in names(swp_fix))
-    expect_equivalent(swp_vals[, ifix, ],
-      VWCtoSWP(vwc_fix[, ifix], texture[, "sand"], texture[, "clay"]))
+    expect_equal(
+      swp_vals[, ifix, ],
+      VWCtoSWP(vwc_fix[, ifix], texture[, "sand"], texture[, "clay"]),
+      ignore_attr = c("names", "dimnames")
+    )
 
   # 5. VWC in fraction [matrix with nrow = l and ncol = d] + sand and clay in
   #    fraction [single values]
   #    --> SWP in MPa [matrix with nrow = l and ncol = d]
   for (itext in row.names(texture))
-    expect_equivalent(swp_vals[, , itext],
-      VWCtoSWP(vwc_fix, texture[itext, "sand"], texture[itext, "clay"]))
+    expect_equal(
+      swp_vals[, , itext],
+      VWCtoSWP(vwc_fix, texture[itext, "sand"], texture[itext, "clay"]),
+      ignore_attr = c("names", "dimnames")
+    )
 
   # 6. VWC in fraction [matrix with nrow = l and ncol = d] + sand and clay in
   #    fraction [vectors of length d]
   #    --> SWP in MPa [matrix with nrow = l and ncol = d, sand/clay vector
   #        repeated for each row]
   for (ifix in names(swp_fix)) {
-    xin <- matrix(vwc_fix[, ifix], nrow = nrow(vwc_fix), ncol = nrow(texture),
-      byrow = TRUE)
-    xout <- matrix(swp_fix[ifix], nrow = nrow(vwc_fix), ncol = nrow(texture))
-    expect_equivalent(xout,
-      VWCtoSWP(xin, texture[, "sand"], texture[, "clay"]))
+    xin <- matrix(
+      vwc_fix[, ifix],
+      nrow = nrow(vwc_fix),
+      ncol = nrow(texture),
+      byrow = TRUE
+    )
+
+    expect_equal(
+      matrix(swp_fix[ifix], nrow = nrow(vwc_fix), ncol = nrow(texture)),
+      VWCtoSWP(xin, texture[, "sand"], texture[, "clay"]),
+      ignore_attr = c("names", "dimnames")
+    )
   }
 })
 
@@ -123,24 +147,35 @@ test_that("To VWC", {
   # 1. SWP in MPa [single value] + sand and clay in fraction [single values]
   #    --> VWC in fraction [single value]
   for (ifix in names(swp_fix)) for (itext in row.names(texture))
-    expect_equivalent(vwc_fix[itext, ifix],
-      SWPtoVWC(swp_fix[ifix], texture[itext, "sand"], texture[itext, "clay"]))
+    expect_equal(
+      vwc_fix[itext, ifix],
+      SWPtoVWC(swp_fix[ifix], texture[itext, "sand"], texture[itext, "clay"]),
+      ignore_attr = c("names", "dimnames")
+    )
 
   # 2. SWP in MPa [single value] + sand and clay in fraction
   #    [vectors of length d]
   #    --> VWC in fraction [vector of length d]
   for (ifix in names(swp_fix)) for (itext in row.names(texture))
-    expect_equivalent(vwc_fix[, ifix],
-      SWPtoVWC(swp_fix[ifix], texture[, "sand"], texture[, "clay"]))
+    expect_equal(
+      vwc_fix[, ifix],
+      SWPtoVWC(swp_fix[ifix], texture[, "sand"], texture[, "clay"]),
+      ignore_attr = c("names", "dimnames")
+    )
 
   # 3. SWP in MPa [vector of length l] + sand and clay in fraction
   #    [single values]
   #    --> VWC in fraction [vector of length l]
   for (ifix in names(swp_fix)) for (itext in row.names(texture))
-    expect_equivalent(
-      SWPtoVWC(rep(swp_fix[ifix], nrow(texture)), texture[itext, "sand"],
-        texture[itext, "clay"]),
-      rep(vwc_fix[itext, ifix], nrow(texture)))
+    expect_equal(
+      rep(vwc_fix[itext, ifix], nrow(texture)),
+      SWPtoVWC(
+        rep(swp_fix[ifix], nrow(texture)),
+        texture[itext, "sand"],
+        texture[itext, "clay"]
+      ),
+      ignore_attr = c("names", "dimnames")
+    )
 
   # 4. SWP in MPa [vector of length l] + sand and clay in fraction
   #    [vectors of length d]
