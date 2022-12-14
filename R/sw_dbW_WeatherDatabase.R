@@ -1554,8 +1554,23 @@ dbW_createDatabase <- function(
 }
 
 
-#dataframe of columns folder, lat, long, label where label can equal folderName
+#' Read `SOILWAT2`-style weather data from disk and store in weather database
+#'
+#' @param MetaData A data frame. If not missing, then must contain columns
+#'   (in that order) (name of site weather data) `folder`,
+#'   `lat` (site latitude),
+#'   `long` (site longitude),
+#'   `label` (name of site).
+#' @param FoldersPath A character string. The path to the folder that contains
+#'   the site weather data folders.
+#' @param ScenarioName A character string. The scenario name represented by
+#'   the data.
+#' @param weather_tag A character string. The file name tag that identifies
+#'   the individual weather data files inside the site weather data folders.
+#'
+#'
 #' @export
+#' @md
 dbW_addFromFolders <- function(
   MetaData = NULL,
   FoldersPath = ".",

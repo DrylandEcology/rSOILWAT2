@@ -174,7 +174,11 @@ dbW_weatherData_to_blob_old <- function(weatherData, type = "gzip") {
 }
 
 
-
+#' Add one site to the active weather database
+#' @param Site_id An integer value. The identification number of the site.
+#' @param lat A numeric value. The latitude of the site.
+#' @param long A numeric value. The longitude of the site.
+#' @param Label A character string. The name of the site.
 #' @export
 dbW_addSite <- function(Site_id = NULL, lat = NULL, long = NULL, Label = NULL) {
 	.Deprecated("dbW_addSites")

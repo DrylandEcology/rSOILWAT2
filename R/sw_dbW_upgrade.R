@@ -615,7 +615,13 @@ dbW_upgrade_v1to2 <- function(
 }
 
 
+#' Run database integrity checks on a weather database
+#'
+#' @param con A [DBI::DBIConnection-class] object.
+#'   The connection to a weather database.
+#'
 #' @export
+#' @md
 check_updatedDB <- function(con) {
   print(paste0(Sys.time(),
     ": 'check_updatedDB' started with database integrity"))
