@@ -6,6 +6,9 @@
 \usage{
 dbW_check_version(dbW_min_version = NULL)
 }
+\arguments{
+\item{dbW_min_version}{A numeric version number.}
+}
 \value{
 A logical value.
 }

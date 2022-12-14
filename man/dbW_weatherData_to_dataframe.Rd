@@ -7,6 +7,9 @@
 dbW_weatherData_to_dataframe(weatherData, valNA = NULL)
 }
 \arguments{
+\item{weatherData}{A list of elements of class \code{\linkS4class{swWeatherData}}
+that each hold daily weather data for one calendar year.}
+
 \item{valNA}{The (numerical) value of missing weather data.
 If \code{NULL}, then default values are interpreted as missing.}
 }

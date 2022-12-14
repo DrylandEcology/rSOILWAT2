@@ -7,7 +7,7 @@
 sw_verbosity(verbose = TRUE)
 }
 \arguments{
-\item{quiet}{A logical value.}
+\item{verbose}{A logical value.}
 }
 \value{
 The previous logical value.

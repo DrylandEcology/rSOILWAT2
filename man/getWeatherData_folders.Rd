@@ -34,6 +34,12 @@ A list of elements of class \code{\linkS4class{swWeatherData}}.
 data, then you have to impute yourself or use the built-in Markov weather
 generator (see examples for \code{\link{sw_exec}}).
 }
+\section{Details}{
+
+\code{\link[=dbW_weather_to_SOILWATfiles]{dbW_weather_to_SOILWATfiles()}} offers the inverse operation, i.e.,
+writing weather data to disk files.
+}
+
 \examples{
 
 path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")

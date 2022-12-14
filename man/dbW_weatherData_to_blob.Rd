@@ -7,11 +7,11 @@
 dbW_weatherData_to_blob(weatherData, type = "gzip")
 }
 \arguments{
-\item{weatherData}{A list of elements of class
-\code{\linkS4class{swWeatherData}} or any suitable object.}
+\item{weatherData}{A list of elements of class \code{\linkS4class{swWeatherData}}
+that each hold daily weather data for one calendar year.}
 
-\item{type}{A character string. One of
-\code{c("gzip", "bzip2", "xz", "none")}.}
+\item{type}{A character string. One of \code{c("gzip", "bzip2", "xz",
+"none")}.}
 }
 \description{
 The \pkg{rSOILWAT2} database which manages daily weather data (each as a

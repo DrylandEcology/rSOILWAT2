@@ -604,8 +604,6 @@
 \item{vegtype}{The name or index of the vegetation type.}
 
 \item{file}{A character string. The file name from which to read.}
-
-\item{...}{Further arguments to methods.}
 }
 \description{
 This class is a container class to the input file \var{S4} objects. The

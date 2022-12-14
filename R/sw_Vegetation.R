@@ -979,6 +979,7 @@ Grass_ANPP <- function(MAP_mm) 0.646 * MAP_mm - 102.5
 #' Adjust mean monthly biomass values by precipitation
 #' @section Details: Internally used by
 #'   \code{\link{estimate_PotNatVeg_biomass}}.
+#' @noRd
 adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
   biom_maxs, map_mm_shrubs, map_mm_std_shrubs,
   map_mm_grasses, map_mm_std_grasses,
@@ -1056,8 +1057,8 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #' climate relationships
 #'
 #' @inheritParams adj_phenology_by_temp
-#' @param MAP_mm A numeric value. Mean annual precipitation in millimeter of the
-#'   location.
+#' @param target_MAP_mm A numeric value. Mean annual precipitation
+#'   in millimeter of the location.
 #' @param tr_VegBiom A data.frame with 12 rows (one for each month) and columns
 #'   \code{X.Biomass}, \code{X.Amount.Live}, \code{X.Perc.Live}, and
 #'   \code{X.Litter} where \code{X} are for the functional groups shrubs,
@@ -1070,17 +1071,17 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #' @param do_adjust_biomass A logical value. If \code{TRUE} then monthly biomass
 #'   is adjusted by precipitation.
 #' @param fgrass_c3c4ann A numeric vector of length 3. Relative contribution
-#'   [0-1] of the C3-grasses, C4-grasses, and annuals functional groups. The sum
-#'   of \code{fgrass_c3c4ann} is 1.
+#'   `[0-1]` of the C3-grasses, C4-grasses, and annuals functional groups.
+#'   The sum of `fgrass_c3c4ann` is 1.
 #'
 #' @section Default inputs: \itemize{
 #'   \item Shrubs are based on location \var{\sQuote{IM_USC00107648_Reynolds}}
-#'     which resulted in a vegetation composition of 70 \% shrubs and 30 \%
+#'     which resulted in a vegetation composition of 70 % shrubs and 30 %
 #'     C3-grasses. Default monthly biomass values were estimated for
 #'     MAP = 450 mm yr-1.
 #'   \item Grasses are based on location \var{\sQuote{GP_SGSLTER}}
-#'     (shortgrass steppe) which resulted in 12 \% shrubs, 22 \% C3-grasses,
-#'     and 66 \% C4-grasses. Default biomass values were estimated for
+#'     (shortgrass steppe) which resulted in 12 % shrubs, 22 % C3-grasses,
+#'     and 66 % C4-grasses. Default biomass values were estimated for
 #'     MAP = 340 mm yr-1.
 #'  \item Mean monthly reference temperature are the median values across
 #'    898 big sagebrush sites
@@ -1091,10 +1092,12 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #'   a matrix with 12 rows (one for each month) and columns \code{Biomass},
 #'   \code{Amount.Live}, \code{Perc.Live}, and \code{Litter}.
 #'
-#' @seealso Function \code{\link{adjBiom_by_ppt}} is called
-#'   if \code{do_adjust_biomass};
-#'   function \code{\link{adj_phenology_by_temp}} is called
-#'   if \code{do_adjust_phenology}.
+#' @section Details:
+#' If `do_adjust_biomass`, then the internal function `adjBiom_by_ppt()` is
+#' used to adjust biomass by annual precipitation amount.
+#' If `do_adjust_phenology`, then the exported function
+#' [adj_phenology_by_temp()] is used to adjust the seasonal pattern of biomass
+#' (phenology) by monthly temperature.
 #'
 #' @references Bradford, J.B., Schlaepfer, D.R., Lauenroth, W.K. & Burke, I.C.
 #'   (2014). Shifts in plant functional types have time-dependent and regionally
@@ -1121,6 +1124,7 @@ adjBiom_by_ppt <- function(biom_shrubs, biom_C3, biom_C4, biom_annuals,
 #' )
 #'
 #' @export
+#' @md
 estimate_PotNatVeg_biomass <- function(
   target_temp,
   target_MAP_mm,
@@ -1298,12 +1302,29 @@ estimate_PotNatVeg_biomass <- function(
 #'    \item second row of datafile is source of data
 #'    \item the other rows contain the data for each distribution type = columns
 #' }
-#' @section Note: cannot write data from \var{\sQuote{sw_input_soils}} to
-#'   \var{\sQuote{datafile.soils}}
+#'
+#' @param tr_input_code
+#'   The `"desc"` component of [`rSOILWAT2::sw2_trco_table`].
+#' @param tr_input_coeff
+#'   The `"data"` component of [`rSOILWAT2::sw2_trco_table`].
+#' @param soillayer_no An integer value. The number of soil layers.
+#' @param trco_type A character string. A column name of `tr_input_code`.
+#' @param layers_depth An integer vector. The lower depths of soil layers [`cm`]
+#' @param adjustType A character string. The method to adjust prescribed
+#'   coefficient profile onto provided depth profile `layers_depth`.
+#'
+#' @seealso [estimate_PotNatVeg_roots()] with example code
+#'
 #' @export
-TranspCoeffByVegType <- function(tr_input_code, tr_input_coeff,
-  soillayer_no, trco_type, layers_depth,
-  adjustType = c("positive", "inverse", "allToLast")) {
+#' @md
+TranspCoeffByVegType <- function(
+  tr_input_code,
+  tr_input_coeff,
+  soillayer_no,
+  trco_type,
+  layers_depth,
+  adjustType = c("positive", "inverse", "allToLast")
+) {
 
   #extract data from table by category
   trco.code <- as.character(tr_input_code[,
@@ -1554,10 +1575,19 @@ estimate_PotNatVeg_roots <- function(
 #' \link[rSOILWAT2:swProd-class]{rSOILWAT2::swProd} object
 #'
 #' @param fg A character string. One of the functional groups represented by
-#'  \pkg{rSOILWAT2}
-#' @param use A logical vector.
+#'   \pkg{rSOILWAT2}
+#' @param use A named logical vector. The names must represent the column
+#'   names of a `MonthlyVeg` element of an [`swProd-class`] object
+#' @param prod_input A data frame. The values that replace the selected
+#'   biomass values.
+#' @param prod_default A [`swProd-class`] object that contains
+#'   the `MonthlyVeg` element with biomass values to be updated.
+#'
+#' @return The requested `MonthlyVeg` element from `prod_default` with updated
+#'   values.
 #'
 #' @export
+#' @md
 update_biomass <- function(
   fg = c("Grass", "Shrub", "Tree", "Forb"),
   use, # nolint: function_argument_linter.

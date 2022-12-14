@@ -8,6 +8,8 @@ swReadLines(object, file)
 }
 \arguments{
 \item{object}{An object of a class such \code{\linkS4class{swInputData}}.}
+
+\item{file}{A character string. The file path.}
 }
 \description{
 \code{swReadLines}

@@ -158,6 +158,7 @@ setReplaceMethod(
 #'   \code{\linkS4class{swInputData}}.
 #'
 #' @param object An object of class \code{\linkS4class{swOutput}}.
+#' @param .Object An object of class \code{\linkS4class{swOutput}}.
 #' @param x An object of class \code{\linkS4class{swOutput}}.
 #' @param value A value to assign to a specific slot of the object.
 #' @param index An integer value. One of the four possible time steps.

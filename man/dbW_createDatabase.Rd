@@ -21,7 +21,7 @@ This will be a file of type \code{sqlite3}. In-memory databases are not
 supported.}
 
 \item{site_data}{A data.frame. The site data with column names
-\var{Latitude}, \var{Longitude}, and \var{Label}.}
+\code{Longitude}, \code{Latitude}, and \code{Label}.}
 
 \item{Scenarios}{A vector of character strings. The climate scenarios of
 which the first one is enforced to be \code{scen_ambient}.}
@@ -59,5 +59,8 @@ Create a weather database
   \item{Table \var{Scenarios}}{contains two fields \var{id} and
      \var{Scenario} (i.e., the scenario name)}
 }
+
+
+`site_data` requires columns `Longitude`, `Latitude`, and `Label`.
 }
 

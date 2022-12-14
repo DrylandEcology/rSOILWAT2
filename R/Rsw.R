@@ -37,7 +37,7 @@ sw_args <- function(dir, files.in, echo, quiet) {
 
 #' Turn on/off `SOILWAT2` notes and warnings
 #'
-#' @param quiet A logical value.
+#' @param verbose A logical value.
 #' @return The previous logical value.
 #'
 #' @export

@@ -8,6 +8,12 @@ Need to define and export this generic method -- otherwise,
 \usage{
 set_swSoils(object, value)
 }
+\arguments{
+\item{object}{An object of class \code{\linkS4class{swSoils}} or
+\code{\linkS4class{swInputData}}.}
+
+\item{value}{A value to assign to a specific slot of the \code{object}.}
+}
 \description{
 \code{set_swSoils}
 Need to define and export this generic method -- otherwise,

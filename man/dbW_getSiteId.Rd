@@ -16,20 +16,22 @@ dbW_getSiteId(
 }
 \arguments{
 \item{lat}{A numeric vector or \code{NULL}. The latitude in decimal degrees
-of \var{WGS84}. Northern latitude are positive, sites on the southern
+of \code{WGS84}. Northern latitude are positive, sites on the southern
 hemisphere have negative values.}
 
 \item{long}{A numeric vector or \code{NULL}. The longitude in decimal degrees
-of \var{WGS84}. Eastern longitudes are positive, sites on the western
+of \code{WGS84}. Eastern longitudes are positive, sites on the western
 hemisphere have negative values.}
 
 \item{tol_xy}{A numeric value. The tolerance used to match requested
 longitude and latitude values.}
 
-\item{Labels}{A vector of character strings. The names/labels of the queried
-sites.}
+\item{Labels}{A vector of character strings. The names/labels of
+queried sites.}
 
 \item{ignore.case}{A logical value.}
+
+\item{verbose}{A logical value.}
 }
 \value{
 An integer vector with the values of the keys or \code{NA} if not

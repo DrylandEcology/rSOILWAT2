@@ -8,7 +8,11 @@ weather database}
 dbW_getScenarioId(Scenario, ignore.case = FALSE, verbose = FALSE)
 }
 \arguments{
+\item{Scenario}{A character string. The name/label of a climate scenario.}
+
 \item{ignore.case}{A logical value.}
+
+\item{verbose}{A logical value.}
 }
 \value{
 An integer vector with the values of the keys or \code{NA} if not

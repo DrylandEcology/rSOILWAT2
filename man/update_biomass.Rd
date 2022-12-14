@@ -16,7 +16,18 @@ update_biomass(
 \item{fg}{A character string. One of the functional groups represented by
 \pkg{rSOILWAT2}}
 
-\item{use}{A logical vector.}
+\item{use}{A named logical vector. The names must represent the column
+names of a \code{MonthlyVeg} element of an \code{\linkS4class{swProd}} object}
+
+\item{prod_input}{A data frame. The values that replace the selected
+biomass values.}
+
+\item{prod_default}{A \code{\linkS4class{swProd}} object that contains
+the \code{MonthlyVeg} element with biomass values to be updated.}
+}
+\value{
+The requested \code{MonthlyVeg} element from \code{prod_default} with updated
+values.
 }
 \description{
 Replace selected biomass values of a

@@ -18,6 +18,8 @@
 \S4method{swOutput_setKEY}{swOutput,ANY,swOutput_KEY}(object, index) <- value
 }
 \arguments{
+\item{.Object}{An object of class \code{\linkS4class{swOutput}}.}
+
 \item{x}{An object of class \code{\linkS4class{swOutput}}.}
 
 \item{name}{A character string. The name of the of the slots of this class.}

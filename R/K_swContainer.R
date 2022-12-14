@@ -54,7 +54,6 @@
 #' @param .Object An object of class \code{\linkS4class{swInputData}}.
 #' @param value A value to assign to a specific slot of the object.
 #' @param file A character string. The file name from which to read.
-#' @param ... Further arguments to methods.
 #' @param year An integer value. The calendar year of the weather or
 #'   \var{SWC} \code{data} object.
 #' @param vegtype The name or index of the vegetation type.

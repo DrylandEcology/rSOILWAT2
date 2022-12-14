@@ -425,6 +425,10 @@ dbW_estimate_WGen_coefs <- function(
 #'   \code{\link{dbW_estimate_WGen_coefs}}.
 #' @param mkv_woy A data.frame. The same named output element of
 #'   \code{\link{dbW_estimate_WGen_coefs}}.
+#' @param path A character string. The path on disk to the location
+#'   where output files should be created.
+#' @param digits An integer value. The number of digits with which to write
+#'   the values to disk.
 #'
 #' @seealso \code{\link{dbW_estimate_WGen_coefs}} to
 #'   calculate the necessary values based on daily weather data.

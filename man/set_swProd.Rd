@@ -8,6 +8,12 @@ Need to define and export this generic method -- otherwise,
 \usage{
 set_swProd(object, value)
 }
+\arguments{
+\item{object}{An object of class \code{\linkS4class{swProd}} or
+\code{\linkS4class{swInputData}}.}
+
+\item{value}{A value to assign to a specific slot of the \code{object}.}
+}
 \description{
 \code{set_swProd}
 Need to define and export this generic method -- otherwise,

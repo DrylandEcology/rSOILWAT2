@@ -8,6 +8,12 @@ Need to define and export this generic method -- otherwise,
 \usage{
 swOUT_TimeStepsForEveryKey(object, value)
 }
+\arguments{
+\item{object}{An object of class \code{\linkS4class{swOUT}} or
+\code{\linkS4class{swInputData}}.}
+
+\item{value}{A value to assign to a specific slot of the \code{object}.}
+}
 \description{
 \code{swOUT_TimeStepsForEveryKey}
 Need to define and export this generic method -- otherwise,
