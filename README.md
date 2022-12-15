@@ -29,12 +29,11 @@
 [rSFSW2]: https://github.com/DrylandEcology/rSFSW2
 [issues]: https://github.com/DrylandEcology/rSOILWAT2/issues
 [pull request]: https://github.com/DrylandEcology/rSOILWAT2/pulls
-[guidelines]: https://github.com/DrylandEcology/workflow_guidelines
+[guidelines]: https://github.com/DrylandEcology/DrylandEcologyProtocols
 [semantic versioning]: https://semver.org/
 [testthat]: https://github.com/r-lib/testthat
 [roxygen2]: https://cran.r-project.org/package=roxygen2
-[r-pkgs man]: https://r-pkgs.org/man.html
-[r-pkgs tests]: https://r-pkgs.org/tests.html
+[r-pkgs]: https://r-pkgs.org/
 
 
 <br>
@@ -49,8 +48,9 @@
 3. [How to contribute](#contribute)
     1. [Code guidelines](#follow_guidelines)
     2. [Code documentation](#code_documentation)
-    3. [Code tests](#code_tests)
-    4. [Code versioning](#code_versioning)
+    3. [Code linting](#code_linting)
+    4. [Code tests](#code_tests)
+    5. [Code versioning](#code_versioning)
 4. [Additional notes](#more_notes)
 
 <br>
@@ -124,13 +124,13 @@ then you may consider using one of the cloud services (no endorsements), e.g.,
       GNU-compliant [`make`](https://www.gnu.org/software/make/)
     - `git` to download the code
   - additionally, on Windows OS:
-    - [`Rtools`](http://cran.us.r-project.org/bin/windows/Rtools/)
+    - [`Rtools`](https://cloud.r-project.org/bin/windows/Rtools/)
       that match your R version
   - on `macOS`:
     - `xcode` command line tools
       (run `xcode-select --install` on the command line)
     - having agreed to the `xcode` license (run `xcodebuild -license`)
-    - or, alternatively, the full [`xcode`](https://developer.apple.com/xcode)
+    - or, alternatively, the full [`xcode`](https://developer.apple.com/xcode/)
       installation
   - optional:
     - a minimal `latex` installation (see below) and
@@ -139,7 +139,7 @@ then you may consider using one of the cloud services (no endorsements), e.g.,
 
 
 #### Example instructions for a minimal `latex` installation
-  * install the R package [`tinytex`](https://yihui.name/tinytex/)
+  * install the R package [`tinytex`](https://yihui.org/tinytex/)
     ```{r}
     install.packages("tinytex")
     tinytex::install_tinytex()
@@ -241,7 +241,7 @@ merge them into the main branch for release:
 <a name="code_documentation"></a>
 #### Code documentation
   * This is based on the section
-    ['Object documentation' of the book 'R packages' by Wickham][r-pkgs man]
+    ['Documentation' of the book 'R packages' by Wickham][r-pkgs]
   * Use [roxygen2][] to write inline code documentation of functions
   * Use regular R-style comments to additionally document code
   * Update help pages and the `NAMESPACE` file with the command
@@ -251,10 +251,22 @@ merge them into the main branch for release:
 
 <br>
 
+
+<a name="code_linting"></a>
+#### Code linting
+  * Please run `lintr::lint_package()` to confirm that code conforms to
+    our style guide (see file `.lintr`) and update code style where needed
+    before pushing a commit or finalizing a pull-request.
+  * These checks are also run automatically as a github action
+    to confirm that a pull-request meets our requirements for merging.
+
+<br>
+
+
 <a name="code_tests"></a>
 #### Code tests and package checks
   * This is based on the section
-    ['Testing' of the book 'R packages' by Wickham][r-pkgs tests]
+    ['Testing' of the book 'R packages' by Wickham][r-pkgs]
 
   * Unit tests
     * Use [testthat][] to add unit tests to the existing framework
@@ -396,7 +408,7 @@ after they are reviewed and pass required checks.
 If the version numbers changes, then the following files must be updated
 * `DESCRIPTION`: adjust lines 'Version'
 * `NEWS`: add a new section describing pertinent changes to a package user
-  (see [`r-pkgs` news](https://r-pkgs.org/release.html#news) and
+  (see section ['NEWS' of the book 'R packages' by Wickham][r-pkgs] and
   [`tidyverse` news style](https://style.tidyverse.org/news.html?q=news#news))
 
 
