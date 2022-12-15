@@ -49,7 +49,7 @@ static char *MyFileName;
 /*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
-SEXP onGet_SW_MDL() {
+SEXP onGet_SW_MDL(void) {
 	SW_MODEL *m = &SW_Model;
 
 	SEXP swYears;

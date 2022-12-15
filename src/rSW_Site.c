@@ -65,7 +65,7 @@ static char *cLayers[] = {
 /*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
-SEXP onGet_SW_LYR() {
+SEXP onGet_SW_LYR(void) {
 	int i, dmax = 0;
 	SW_SITE *v = &SW_Site;
 	SEXP swSoils, SW_SOILS;
@@ -177,7 +177,7 @@ void onSet_SW_LYR(SEXP SW_SOILS) {
 	UNPROTECT(1);
 }
 
-SEXP onGet_SW_SIT() {
+SEXP onGet_SW_SIT(void) {
 	int i;
 	SW_SITE *v = &SW_Site;
 

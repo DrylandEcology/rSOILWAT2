@@ -75,7 +75,7 @@ static void rSW2_setAllWeather(
 
   Called by `onGetInputDataFromFiles()`.
 */
-SEXP onGet_SW_WTH_setup() {
+SEXP onGet_SW_WTH_setup(void) {
 	int i;
 	const int nitems = 6;
 	RealD *p_MonthlyValues;
@@ -308,7 +308,7 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
   `SOILWAT2` `allHist` is filled with values that are
   copied from `rSOILWAT2` list of `swWeatherData`
   instead of being read from files on disk.
- 
+
   Called by `rSW_CTL_obtain_inputs()` if `from_files` is `FALSE`.
 
   @note Elements `endyr` and `startyr` of `SW_Model` must be set/updated

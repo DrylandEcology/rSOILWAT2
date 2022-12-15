@@ -3,5 +3,5 @@
 /* =================================================== */
 /*             Global Function Declarations            */
 /* --------------------------------------------------- */
-SEXP onGet_SW_MDL();
+SEXP onGet_SW_MDL(void);
 void onSet_SW_MDL(SEXP SW_MDL);

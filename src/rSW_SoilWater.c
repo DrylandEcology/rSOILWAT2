@@ -57,7 +57,7 @@ void rSW_SWC_construct(void) {
 }
 
 
-SEXP onGet_SW_SWC() {
+SEXP onGet_SW_SWC(void) {
 	SW_SOILWAT *v = &SW_Soilwat;
 	SEXP swSWC;
 	SEXP SWC;
@@ -129,7 +129,7 @@ void onSet_SW_SWC(SEXP SWC) {
 }
 
 
-SEXP onGet_SW_SWC_hists() {
+SEXP onGet_SW_SWC_hists(void) {
 	TimeInt year;
 	SEXP SWC_hists, SWC_hists_names;
 	int years = ((SW_Model.endyr + 1) - SW_Model.startyr), i = 0;

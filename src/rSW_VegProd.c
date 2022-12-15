@@ -59,7 +59,7 @@ char *cMonths[] = {
 /*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
-SEXP onGet_SW_VPD() {
+SEXP onGet_SW_VPD(void) {
 	int i;
 	SW_VEGPROD *v = &SW_VegProd;
 	SEXP swProd;
