@@ -371,7 +371,7 @@ test_that("Vegetation: adjust phenology", {
     swProd_MonProd_tree(sw_exampleData)
   )
 
-  phen_in <- lapply(phen_in, as.data.frame)
+  phen_in <- lapply(phen_in, function(x) as.data.frame(x))
 
   clim <- calc_SiteClimate(weatherList = rSOILWAT2::weatherData)
   ref_temp <- clim[["meanMonthlyTempC"]]
