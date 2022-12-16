@@ -140,7 +140,7 @@ void onSet_SW_MDL(SEXP SW_MDL) {
 	fhemi = TRUE;
 
 	if (!(fstartdy && fenddy && fhemi)) {
-		sprintf(errstr, "\nNot found in %s:\n", MyFileName);
+		snprintf(errstr, MAX_ERROR, "\nNot found in %s:\n", MyFileName);
 		if (!fstartdy) {
 			strcat(errstr, "\tStart Day  - using 1\n");
 			m->startstart = 1;

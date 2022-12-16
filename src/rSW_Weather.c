@@ -235,7 +235,7 @@ SEXP onGet_WTH_DATA(void) {
 
 	for (yearIndex = 0; yearIndex < SW_Weather.n_years; yearIndex++) {
 		year = SW_Weather.startYear + yearIndex;
-		sprintf(cYear, "%4d", year);
+		snprintf(cYear, sizeof cYear, "%4d", year);
 		SET_STRING_ELT(WTH_DATA_names, yearIndex, mkChar(cYear));
 
 		// copy values from SOILWAT2 variables to rSOILWAT2 S4 class object

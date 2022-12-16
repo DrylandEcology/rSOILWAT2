@@ -101,7 +101,7 @@ void onSet_SW_OUT(SEXP OUT) {
 
 	ForEachOutKey(k) {
 		msg_type = SW_OUT_read_onekey(k, sumtype[k], stub, first_orig[k],
-			last_orig[k], msg);
+			last_orig[k], msg, sizeof msg);
 
 		if (msg_type > 0) {
 			LogError(logfp, msg_type, "%s", msg);

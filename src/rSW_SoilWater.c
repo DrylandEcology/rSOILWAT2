@@ -142,7 +142,7 @@ SEXP onGet_SW_SWC_hists(void) {
 		if (SW_Soilwat.hist_use && year >= SW_Soilwat.hist.yr.first) {
 			_read_swc_hist(year);
 			SET_VECTOR_ELT(SWC_hists, i, onGet_SW_SWC_hist(year));
-			sprintf(cYear, "%4d", year);
+			snprintf(cYear, sizeof cYear, "%4d", year);
 			SET_STRING_ELT(SWC_hists_names, i, mkChar(cYear));
 		}
 		i++;
