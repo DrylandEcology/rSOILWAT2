@@ -6,11 +6,11 @@
 
 /* .Call calls */
 extern SEXP start(SEXP, SEXP, SEXP, SEXP);
-extern SEXP tempError();
+extern SEXP tempError(void);
 extern SEXP onGetInputDataFromFiles(SEXP, SEXP);
 extern SEXP onGetOutput(SEXP);
 extern SEXP rSW2_processAllWeather(SEXP, SEXP);
-extern SEXP sw_consts();
+extern SEXP sw_consts(void);
 extern SEXP sw_quiet(SEXP);
 extern SEXP rSW2_SWRC_PDF_estimate_parameters(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP sw_check_SWRC_vs_PDF(SEXP, SEXP);

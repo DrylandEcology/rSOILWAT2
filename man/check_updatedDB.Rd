@@ -2,13 +2,14 @@
 % Please edit documentation in R/sw_dbW_upgrade.R
 \name{check_updatedDB}
 \alias{check_updatedDB}
-\title{Check an updated weather database}
+\title{Run database integrity checks on a weather database}
 \usage{
 check_updatedDB(con)
 }
 \arguments{
-\item{con}{A connection to an updated weather database.}
+\item{con}{A \link[DBI:DBIConnection-class]{DBI::DBIConnection} object.
+The connection to a weather database.}
 }
 \description{
-Check an updated weather database
+Run database integrity checks on a weather database
 }

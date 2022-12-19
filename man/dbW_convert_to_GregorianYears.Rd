@@ -16,9 +16,8 @@ dbW_convert_to_GregorianYears(
 )
 }
 \arguments{
-\item{weatherData}{A list of elements of class
-\code{\linkS4class{swWeatherData}} or a \code{data.frame} as returned by
-\code{\link{dbW_weatherData_to_dataframe}}.}
+\item{weatherData}{A list of elements of class \code{\linkS4class{swWeatherData}}
+that each hold daily weather data for one calendar year.}
 
 \item{new_startYear}{An integer value. The first Calendar year of the new
 time period. If \code{NULL}, then the first year of \code{weatherData}.}

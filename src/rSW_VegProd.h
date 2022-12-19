@@ -3,7 +3,7 @@
 /* =================================================== */
 /*             Global Function Declarations            */
 /* --------------------------------------------------- */
-SEXP onGet_SW_VPD();
+SEXP onGet_SW_VPD(void);
 void onSet_SW_VPD(SEXP SW_VPD);
 SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_monthly_ppt_mm,
                                          SEXP mean_monthly_Temp_C, SEXP shrub_limit, SEXP SumGrasses_Fraction,

@@ -11,6 +11,28 @@ dbW_dataframe_to_weatherData(
   round = 2
 )
 }
+\arguments{
+\item{weatherDF}{A \code{data.frame}. Daily weather data where rows represent
+days and columns represent the weather variables
+(see \code{weatherDF_dataColumns}).}
+
+\item{years}{A numeric vector. The calendar years.}
+
+\item{weatherDF_dataColumns}{A vector of character strings. The column
+names of \code{weatherDF} in the correct order for \code{SOILWAT2} that are
+representing calendar year \code{year} (optional), day of year \code{DOY},
+daily maximum air temperature \code{Tmax_C}, daily minimum air temperature
+\code{Tmin_C}, and daily precipitation amount \code{PPT_cm}.}
+
+\item{round}{An integer value. The number of decimal places for rounding
+weather values.}
+}
 \description{
 Conversion: data.frame to object of class \code{\linkS4class{swWeatherData}}
 }
+\section{Notes}{
+
+\code{weatherDF_dataColumns} must exactly contain entries for day of year and
+the three weather variables.
+}
+

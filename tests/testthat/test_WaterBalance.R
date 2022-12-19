@@ -1,4 +1,3 @@
-context("rSOILWAT2 water balance")
 
 # The 8 checks, implemented below, correspond to the checks in
 # \var{SOILWAT/test/test_WaterBalance.cc}
@@ -13,7 +12,10 @@ dir_test_data <- file.path("..", "test_data")
 temp <- list.files(dir_test_data, pattern = "Ex")
 temp <- sapply(strsplit(temp, "_", fixed = TRUE), function(x) x[[1]])
 tests <- unique(temp)
-test_that("Test data availability", expect_gt(length(tests), 0))
+test_that("Test data availability", {
+  expect_gt(length(tests), 0)
+})
+
 
 # List of (available) SWRC-PDF combinations
 list_swrcs_pdfs <- unname(as.list(as.data.frame(t(

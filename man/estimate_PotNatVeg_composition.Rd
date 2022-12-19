@@ -194,7 +194,8 @@ clim2 <- calc_SiteClimate(weatherList = weatherData, do_C4vars = TRUE)
 
 ## All estimable vegetation types are estimated:
 estimate_PotNatVeg_composition(
-  MAP_mm = 10 * clim1[["MAP_cm"]], MAT_C = clim1[["MAT_C"]],
+  MAP_mm = 10 * clim1[["MAP_cm"]],
+  MAT_C = clim1[["MAT_C"]],
   mean_monthly_ppt_mm = 10 * clim1[["meanMonthlyPPTcm"]],
   mean_monthly_Temp_C = clim1[["meanMonthlyTempC"]]
 )
@@ -210,7 +211,8 @@ estimate_PotNatVeg_composition(
 ## Some land cover types are fixed and others are estimated, and
 ## the C4-grass adjustment is used:
 estimate_PotNatVeg_composition(
-  MAP_mm = 10 * clim2[["MAP_cm"]], MAT_C = clim2[["MAT_C"]],
+  MAP_mm = 10 * clim2[["MAP_cm"]],
+  MAT_C = clim2[["MAT_C"]],
   mean_monthly_ppt_mm = 10 * clim2[["meanMonthlyPPTcm"]],
   mean_monthly_Temp_C = clim2[["meanMonthlyTempC"]],
   dailyC4vars = clim2[["dailyC4vars"]],
@@ -221,13 +223,42 @@ estimate_PotNatVeg_composition(
 ## Fix total grass cover and annual grass cover,
 ## but estimate relative proportions of C3 and C4 grasses:
 estimate_PotNatVeg_composition(
-  MAP_mm = 10 * clim2[["MAP_cm"]], MAT_C = clim2[["MAT_C"]],
+  MAP_mm = 10 * clim2[["MAP_cm"]],
+  MAT_C = clim2[["MAT_C"]],
   mean_monthly_ppt_mm = 10 * clim2[["meanMonthlyPPTcm"]],
   mean_monthly_Temp_C = clim2[["meanMonthlyTempC"]],
   dailyC4vars = clim2[["dailyC4vars"]],
-  fix_sumgrasses = TRUE, SumGrasses_Fraction = 0.8,
-  fix_annuals = TRUE, Annuals_Fraction = 0.3
+  fix_sumgrasses = TRUE,
+  SumGrasses_Fraction = 0.8,
+  fix_annuals = TRUE,
+  Annuals_Fraction = 0.3
 )
+
+
+## SOILWAT2 uses the same algorithm internally if requested to do so
+# Obtain cover values from SOILWAT2 output
+swin <- rSOILWAT2::sw_exampleData
+swin@prod@veg_method <- 1L
+swout <- sw_exec(swin)
+tmp <- slot(slot(swout, "BIOMASS"), "Year")
+pnvsim <- tmp[1, grep("fCover", colnames(tmp)), drop = TRUE]
+
+# Directly calculate cover values
+climex <- calc_SiteClimate(weatherList = get_WeatherHistory(swin))
+pnvex <- estimate_PotNatVeg_composition(
+  MAP_mm = 10 * climex[["MAP_cm"]],
+  MAT_C = climex[["MAT_C"]],
+  mean_monthly_ppt_mm = 10 * climex[["meanMonthlyPPTcm"]],
+  mean_monthly_Temp_C = climex[["meanMonthlyTempC"]]
+)[["Rel_Abundance_L1"]]
+
+# They are identical
+identical(pnvsim[["fCover_shrub"]], pnvex[["SW_SHRUB"]])
+identical(pnvsim[["fCover_grass"]], pnvex[["SW_GRASS"]])
+identical(pnvsim[["fCover_forbs"]], pnvex[["SW_FORBS"]])
+identical(pnvsim[["fCover_tree"]], pnvex[["SW_TREES"]])
+identical(pnvsim[["fCover_BareGround"]], pnvex[["SW_BAREGROUND"]])
+
 
 }
 \references{

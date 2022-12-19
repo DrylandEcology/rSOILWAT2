@@ -46,9 +46,21 @@ fractional value in \code{[0,1]}.}
 \item{clay}{A numeric value or vector. Clay content of the soil layer(s) as
 fractional value in \code{[0,1]}.}
 
+\item{thetas}{Soon obsolete ... (see \code{feature_swrc})}
+
+\item{psis}{Soon obsolete ... (see \code{feature_swrc})}
+
+\item{b}{Soon obsolete ... (see \code{feature_swrc})}
+
+\item{MPa_toBar}{Soon obsolete ... (see \code{feature_swrc})}
+
+\item{bar_conversion}{Soon obsolete ... (see \code{feature_swrc})}
+
 \item{vwc}{A numeric value, vector, or 2-dimensional object
 (matrix or data.frame). The matric soil moisture, i.e., reduced by the
 volume of rock and gravel.}
+
+\item{bar_toMPa}{Soon obsolete ... (see \code{feature_swrc})}
 }
 \value{
 Volumetric water content in units of m^3 (of water) / m^3 (of soil)

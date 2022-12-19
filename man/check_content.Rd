@@ -25,23 +25,35 @@ dbW_have_sites_all_weatherData(
   site_ids = NULL,
   scen_labels = NULL,
   scen_ids = NULL,
-  chunk_size = 1500L,
   verbose = FALSE
 )
 }
 \arguments{
-\item{Labels}{A vector of character strings. The names/labels of the queried
-sites.}
+\item{Labels}{A vector of character strings. The names/labels of
+queried sites.}
 
 \item{ignore.case}{A logical value.}
 
-\item{Site_ids}{An integer vector. The IDs/database keys of the queried site.}
+\item{Site_ids}{An integer vector. The IDs/database keys of the queried sites}
 
 \item{Scenario_ids}{An integer vector. The IDs/database keys of the queried
 scenario.}
 
-\item{Scenarios}{A vector of character strings. The names/labels of the
-queried scenarios.}
+\item{Scenarios}{A vector of character strings. The climate scenarios of
+which the first one is enforced to be \code{scen_ambient}.}
+
+\item{site_labels}{A vector of character string. The names/labels of
+queried sites.}
+
+\item{site_ids}{An integer vector. The IDs/database keys of the queried sites}
+
+\item{scen_labels}{A vector of character strings. The climate scenarios of
+which the first one is enforced to be \code{scen_ambient}.}
+
+\item{scen_ids}{An integer vector. The IDs/database keys of the queried
+scenario.}
+
+\item{verbose}{A logical value.}
 }
 \value{
 \code{dbW_has_siteIDs} returns a logical vector of the length of

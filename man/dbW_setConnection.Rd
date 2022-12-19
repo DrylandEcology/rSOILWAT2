@@ -15,10 +15,12 @@ dbW_setConnection(
 .dbW_setConnection(dbFilePath)
 }
 \arguments{
-\item{dbFilePath}{A character string. The weather database file path.}
+\item{dbFilePath}{A character string. The file path of the weather database.
+This will be a file of type \code{sqlite3}. In-memory databases are not
+supported.}
 
-\item{create_if_missing}{A logical value. If \code{TRUE} and now file
-\code{dbFilePath} exists then create a new file.}
+\item{create_if_missing}{A logical value. If \code{TRUE} and file
+\code{dbFilePath} does not exist then create a new database file.}
 
 \item{check_version}{A logical value. If \code{TRUE} then check database
 version against currently implemented version by the package.}
@@ -33,7 +35,7 @@ Registers/connects a SQLite weather database with the package
 }
 \section{Details}{
 
-\code{.dbW_setConnection()} is a bare-bones version of \code{dbW_setConnection()}.
+\code{\link[=.dbW_setConnection]{.dbW_setConnection()}} is a bare-bones version of \code{\link[=dbW_setConnection]{dbW_setConnection()}}.
 It doesn't carry out any checks that make sure the database works
 correctly.
 }

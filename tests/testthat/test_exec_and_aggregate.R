@@ -1,4 +1,3 @@
-context("rSOILWAT2 runs")
 
 #---CONSTANTS
 tols <- list(
@@ -13,15 +12,24 @@ temp <- list.files(dir_test_data, pattern = "Ex")
 temp <- sapply(strsplit(temp, "_", fixed = TRUE), function(x) x[[1]])
 tests <- unique(temp)
 
-test_that("Test data availability", expect_gt(length(tests), 0))
+test_that("Test data availability", {
+  expect_gt(length(tests), 0)
+})
+
 
 var_maybeZero <- c("ESTABL", "RUNOFF", "SOILTEMP", "SURFACEWATER", "LOG")
 var_SumNotZero <- sw_out_flags()
 var_SumNotZero <- var_SumNotZero[!(var_SumNotZero %in% var_maybeZero)]
 
 
-expect_within <- function(object, expected, ..., info = NULL,
-  tol = tols[["ranges"]], digits_N = 4L) {
+expect_within <- function(
+  object,
+  expected,
+  ...,
+  info = NULL,
+  tol = tols[["ranges"]],
+  digits_N = 4L
+) {
 
   robj <- range(object)
   rexp <- range(expected)
@@ -32,7 +40,8 @@ expect_within <- function(object, expected, ..., info = NULL,
   lte <- rexp[2] - robj[2] >= -tol
   within <- gte & lte
 
-  expect_equivalent(within, TRUE,
+  expect_true(
+    within,
     info = paste(
       info,
       if (!gte) {
@@ -137,14 +146,14 @@ for (it in tests) {
 
   dbW_df_day <- dbW_weatherData_to_dataframe(sw_weather)
   test_that("Check weather", {
-    expect_equivalent(
+    expect_equal(
       dbW_dataframe_to_monthly(dbW_df_day),
       dbW_weatherData_to_monthly(sw_weather),
       info = info1
     )
 
     if (anyNA(dbW_df_day)) {
-      expect_equivalent(
+      expect_equal(
         dbW_dataframe_to_monthly(dbW_df_day, na.rm = TRUE),
         dbW_weatherData_to_monthly(sw_weather, na.rm = TRUE),
         info = info1
@@ -291,18 +300,19 @@ for (it in tests) {
             !(vars[k] %in% c("SWPMATRIC", "ESTABL"))
         ) {
 
-          res_true <- matrix(TRUE, nrow = rd@yr_nrow, ncol = x1@Columns)
-          expect_equivalent({
-              nid <- 1:2
-              temp1d <- aggregate(
-                x1@Day[, -nid],
-                by = list(x1@Day[, 1]),
-                FUN = fun_agg[k]
-              )
-              diff1d <- data.matrix(x1@Year[, -1]) - data.matrix(temp1d[, -1])
-              abs(diff1d) < tols[["aggregations"]]
-            },
-            res_true,
+          # Aggregate daily to yearly values
+          nid <- 1:2
+          temp1d <- aggregate(
+            x1@Day[, -nid],
+            by = list(x1@Day[, 1]),
+            FUN = fun_agg[k]
+          )
+
+          # Expect that aggregated daily are equal to SOILWAT2 yearly output
+          expect_equal(
+            data.matrix(temp1d[, -1]),
+            data.matrix(x1@Year[, -1]),
+            tolerance =  tols[["aggregations"]],
             info = info2
           )
         }

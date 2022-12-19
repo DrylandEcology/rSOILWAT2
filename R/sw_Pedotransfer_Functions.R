@@ -5,6 +5,12 @@
 #'   fractional value in \code{[0,1]}.
 #' @param clay A numeric value or vector. Clay content of the soil layer(s) as
 #'   fractional value in \code{[0,1]}.
+#' @param thetas Soon obsolete ... (see `feature_swrc`)
+#' @param psis Soon obsolete ... (see `feature_swrc`)
+#' @param b Soon obsolete ... (see `feature_swrc`)
+#' @param MPa_toBar Soon obsolete ... (see `feature_swrc`)
+#' @param bar_conversion Soon obsolete ... (see `feature_swrc`)
+#' @param bar_toMPa Soon obsolete ... (see `feature_swrc`)
 #'
 #' @references Cosby, B. J., G. M. Hornberger, R. B. Clapp, and T. R. Ginn.
 #' 1984. A statistical exploration of the relationships of soil moisture
@@ -12,6 +18,7 @@
 #' 20:682-690.
 #'
 #' @name pedotransfer
+#' @md
 NULL
 
 #' @rdname pedotransfer

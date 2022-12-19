@@ -1,5 +1,3 @@
-context("Derived output functions")
-
 
 # Tests
 test_that("Derived output: transpiration and evaporation", {

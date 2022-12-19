@@ -34,6 +34,9 @@ simTiming_ForEachUsedTimeUnit(...)
 
 update_requested_years(...)
 }
+\arguments{
+\item{...}{Function arguments. Unused since functions are defunct.}
+}
 \description{
 Executing a defunct function will fail and tell you which function
 replaces them.

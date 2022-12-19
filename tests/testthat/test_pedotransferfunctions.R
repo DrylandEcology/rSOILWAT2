@@ -1,4 +1,3 @@
-context("Soil water release functions: SWP <-> VWC")
 
 # How the functions are applied in rSFSW2
 # section: aggregation
@@ -87,7 +86,8 @@ test_that("Use SWRC to convert between VWC/SWP", {
           sand = texture[itext, "sand"],
           clay = texture[itext, "clay"]
         ),
-        unname(swp_fix[ifix])
+        swp_fix[ifix],
+        ignore_attr = c("names", "dimnames")
       )
 
       expect_equal(
@@ -96,7 +96,8 @@ test_that("Use SWRC to convert between VWC/SWP", {
           sand = texture[itext, "sand"],
           clay = texture[itext, "clay"]
         ),
-        unname(vwc_fix[itext, ifix])
+        vwc_fix[itext, ifix],
+        ignore_attr = c("names", "dimnames")
       )
     }
   }
@@ -109,7 +110,8 @@ test_that("Use SWRC to convert between VWC/SWP", {
         sand = texture[, "sand"],
         clay = texture[, "clay"]
       ),
-      unname(diag(swp_vals[, ifix, ]))
+      diag(swp_vals[, ifix, ]),
+      ignore_attr = c("names", "dimnames")
     )
   }
 
@@ -123,7 +125,8 @@ test_that("Use SWRC to convert between VWC/SWP", {
           sand = texture[, "sand"],
           clay = texture[, "clay"]
         ),
-        unname(swp_vals[itext, ifix, ])
+        swp_vals[itext, ifix, ],
+        ignore_attr = c("names", "dimnames")
       )
 
       expect_equal(
@@ -147,7 +150,8 @@ test_that("Use SWRC to convert between VWC/SWP", {
           sand = texture[itext, "sand"],
           clay = texture[itext, "clay"]
         ),
-        unname(swp_vals[, ifix, itext])
+        swp_vals[, ifix, itext],
+        ignore_attr = c("names", "dimnames")
       )
 
       expect_equal(

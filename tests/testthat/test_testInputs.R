@@ -1,4 +1,3 @@
-testthat::local_edition(3L)
 
 #------ Check that test inputs conform to specifications ------
 # see data-raw/prepare_testInput_objects.R

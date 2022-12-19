@@ -1,4 +1,3 @@
-context("rSOILWAT2 weather database")
 
 #--- INPUTS ------
 path_extdata <- file.path("..", "..", "inst", "extdata")
@@ -15,7 +14,9 @@ dir_test_data <- file.path("..", "test_data")
 tmp <- list.files(dir_test_data, pattern = "Ex")
 tmp <- sapply(strsplit(tmp, "_", fixed = TRUE), function(x) x[[1]])
 tests <- unique(tmp)
-test_that("Test data availability", expect_gt(length(tests), 0))
+test_that("Test data availability", {
+  expect_gt(length(tests), 0)
+})
 
 sw_weather <- lapply(
   tests,
@@ -96,10 +97,11 @@ test_that("Disk file write and delete permissions", {
     info = paste("Failed to create file", fdbWeather)
   )
 
-  expect_message(
-    tmp <- try(unlink_forcefully(fdbWeather, info = "1st"), silent = TRUE),
-    regexp = "sucessfully deleted"
+  tmp <- try(
+    suppressMessages(unlink_forcefully(fdbWeather, info = "1st")),
+    silent = TRUE
   )
+
   hasnot_fdbW <- !inherits(tmp, "try-error") && !file.exists(fdbWeather)
   expect_true(
     hasnot_fdbW,
@@ -123,10 +125,11 @@ test_that("dbW creation", {
     dbW_setConnection(fdbWeather, create_if_missing = FALSE, verbose = TRUE),
     regexp = "does not exist"
   )
-  expect_message(
-    dbW_setConnection(fdbWeather, create_if_missing = TRUE, verbose = TRUE),
-    regexp = "creating a new database"
+  expect_true(
+    dbW_setConnection(fdbWeather, create_if_missing = TRUE, verbose = FALSE)
   )
+  expect_true(file.exists(fdbWeather))
+  expect_true(dbW_IsValid())
   unlink(fdbWeather)
 
   expect_false(dbW_setConnection(fdbWeather2, create_if_missing = TRUE))
@@ -135,31 +138,42 @@ test_that("dbW creation", {
     regexp = "exists but is likely not a SQLite-database"
   )
   expect_false(dbW_setConnection(fdbWeather3, create_if_missing = TRUE))
-  expect_message(
-    dbW_setConnection(fdbWeather3, create_if_missing = TRUE, verbose = TRUE),
-    regexp = "cannot be created likely because the path does not exist"
+  expect_false(
+    dbW_setConnection(fdbWeather3, create_if_missing = TRUE, verbose = FALSE)
   )
+  expect_false(file.exists(fdbWeather3))
   expect_false(dbW_IsValid())
 
+
   #--- * Create weather database and check that connection ------
-  expect_message(
-    dbW_createDatabase(
-      fdbWeather,
-      site_data = site_data1,
-      Scenarios = scenarios,
-      scen_ambient = scenarios[1],
-      verbose = TRUE,
-      ARG_DOESNT_EXIST = 1:3
-    ),
-    regexp = "arguments ignored/deprecated"
+  # Warnings: arguments ignored/deprecated 'ARG_DOESNT_EXIST'
+  expect_true(
+    suppressMessages(
+      dbW_createDatabase(
+        fdbWeather,
+        site_data = site_data1,
+        Scenarios = scenarios,
+        scen_ambient = scenarios[1],
+        verbose = FALSE,
+        ARG_DOESNT_EXIST = 1:3
+      )
+    )
   )
+  expect_true(file.exists(fdbWeather))
+  expect_true(dbW_IsValid())
   unlink(fdbWeather)
 
   # Minimal inputs
   expect_true(dbW_createDatabase(fdbWeather))
-  expect_message(
-    unlink_forcefully(fdbWeather, info = "2nd"),
-    regexp = "sucessfully deleted"
+  # expect that deletion does not result in an error
+  expect_false(
+    inherits(
+      try(
+        suppressMessages(unlink_forcefully(fdbWeather, info = "1st")),
+        silent = TRUE
+      ),
+      "try-error"
+    )
   )
 
 
@@ -191,18 +205,19 @@ test_that("dbW creation", {
     unlink_forcefully(fdbWeather, info = "4th"),
     regexp = "sucessfully deleted"
   )
-  expect_message(
-    dbW_createDatabase(
-      fdbWeather,
-      site_data = NA,
-      Scenarios = scenarios,
-      scen_ambient = scenarios[1],
-      verbose = TRUE
-    ),
-    regexp = "errors in the table data"
-  )
 
+  # 'dbW_createDatabase': deletes db-file due to failure.
+  dbW_createDatabase(
+    fdbWeather,
+    site_data = NA,
+    Scenarios = scenarios,
+    scen_ambient = scenarios[1],
+    verbose = FALSE
+  )
+  expect_false(file.exists(fdbWeather))
+  expect_false(dbW_IsValid())
   unlink(fdbWeather)
+
   expect_true(
     dbW_createDatabase(
       fdbWeather,
@@ -876,7 +891,7 @@ test_that("Manipulate weather data: years", {
       expect_equal(
         datA[select_years(datA_yrs, min(yrs_joint), max(yrs_joint))],
         datB[select_years(datB_yrs, min(yrs_joint), max(yrs_joint))],
-        tol = 1e-3
+        tolerance = 1e-3
       )
     }
   }

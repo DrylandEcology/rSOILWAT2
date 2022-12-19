@@ -18,7 +18,7 @@ A named list with two elements:
     represent amount of roots per centimeter soil depth.
   }
   \item{data}{
-    A code{data.frame} with the rooting profile values.
+    A \code{data.frame} with the rooting profile values.
   }
 }
 }

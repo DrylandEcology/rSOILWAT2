@@ -7,13 +7,13 @@
 dbW_addSite(Site_id = NULL, lat = NULL, long = NULL, Label = NULL)
 }
 \arguments{
-\item{Site_id}{An integer number.}
+\item{Site_id}{An integer value. The identification number of the site.}
 
-\item{lat}{A numeric value.}
+\item{lat}{A numeric value. The latitude of the site.}
 
-\item{long}{A numeric value.}
+\item{long}{A numeric value. The longitude of the site.}
 
-\item{Label}{A character string.}
+\item{Label}{A character string. The name of the site.}
 }
 \description{
 Add a new site description to a weather database

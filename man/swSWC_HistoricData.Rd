@@ -9,6 +9,8 @@ swSWC_HistoricData(object, year)
 \arguments{
 \item{object}{An object of class \code{\linkS4class{swSWC}} or
 \code{\linkS4class{swInputData}}.}
+
+\item{year}{An numeric value. The calendar year.}
 }
 \description{
 \code{swSWC_HistoricData}

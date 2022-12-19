@@ -7,8 +7,8 @@
 dbW_addScenarios(Scenarios, ignore.case = FALSE, verbose = FALSE)
 }
 \arguments{
-\item{Scenarios}{A vector of character strings. The names/labels of the
-queried scenarios.}
+\item{Scenarios}{A vector of character strings. The climate scenarios of
+which the first one is enforced to be \code{scen_ambient}.}
 
 \item{ignore.case}{A logical value.}
 

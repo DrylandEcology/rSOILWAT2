@@ -11,13 +11,17 @@ dbW_weatherData_round(
 )
 }
 \arguments{
-\item{weatherData}{A list with \code{\linkS4class{swWeatherData}} elements.}
+\item{weatherData}{A list of elements of class \code{\linkS4class{swWeatherData}}
+that each hold daily weather data for one calendar year.}
 
-\item{digits}{An integer value. The returned values will be rounded to
-the specified number of decimal places.}
+\item{digits}{An integer value. The number of decimal places for rounding
+weather values.}
 
-\item{weatherDF_dataColumns}{A character vector. The column names
-that should be rounded.}
+\item{weatherDF_dataColumns}{A vector of character strings. The column
+names of \code{weatherDF} in the correct order for \code{SOILWAT2} that are
+representing calendar year \code{year} (optional), day of year \code{DOY},
+daily maximum air temperature \code{Tmax_C}, daily minimum air temperature
+\code{Tmin_C}, and daily precipitation amount \code{PPT_cm}.}
 }
 \value{
 A list with \code{\linkS4class{swWeatherData}} elements.
@@ -25,3 +29,8 @@ A list with \code{\linkS4class{swWeatherData}} elements.
 \description{
 Round weather data in a list class \code{\linkS4class{swWeatherData}}
 }
+\section{Notes}{
+
+\code{weatherDF_dataColumns} lists the columns of \code{weatherData} to be rounded.
+}
+

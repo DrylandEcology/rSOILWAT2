@@ -1,4 +1,3 @@
-context("Carbon dioxide class")
 
 #---TESTS
 test_that("Manipulate swCarbon", {

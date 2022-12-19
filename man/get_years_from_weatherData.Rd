@@ -7,7 +7,8 @@
 get_years_from_weatherData(wd)
 }
 \arguments{
-\item{wd}{A list of elements of class \code{\linkS4class{swWeatherData}}}
+\item{wd}{A list of elements of class \code{\linkS4class{swWeatherData}}
+that each hold daily weather data for one calendar year.}
 }
 \description{
 Extract years from a \var{weatherData} object

@@ -35,7 +35,7 @@
 /*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
-SEXP onGet_SW_F() {
+SEXP onGet_SW_F(void) {
 	int i = 0;
 
 	SEXP swFiles;

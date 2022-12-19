@@ -58,6 +58,8 @@ removed once upgrade completed successfully.}
 
 \item{type_new}{The type of compression used to compress the weather blobs.
 See \code{\link[base]{memCompress}}.}
+
+\item{SWRunInformation}{A data frame.}
 }
 \description{
 Weather database upgrade functions

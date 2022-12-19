@@ -6,6 +6,12 @@
 \usage{
 dbW_deleteSiteData(Site_id, Scenario_id = NULL)
 }
+\arguments{
+\item{Site_id}{An integer value. The IDs/database key of the queried site.}
+
+\item{Scenario_id}{An integer value The ID/database key of the queried
+scenario.}
+}
 \value{
 An invisible logical value indicating success with \code{TRUE} and
   failure with \code{FALSE}.

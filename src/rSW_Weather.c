@@ -75,7 +75,7 @@ static void rSW2_setAllWeather(
 
   Called by `onGetInputDataFromFiles()`.
 */
-SEXP onGet_SW_WTH_setup() {
+SEXP onGet_SW_WTH_setup(void) {
 	int i;
 	const int nitems = 6;
 	RealD *p_MonthlyValues;
@@ -235,7 +235,7 @@ SEXP onGet_WTH_DATA(void) {
 
 	for (yearIndex = 0; yearIndex < SW_Weather.n_years; yearIndex++) {
 		year = SW_Weather.startYear + yearIndex;
-		sprintf(cYear, "%4d", year);
+		snprintf(cYear, sizeof cYear, "%4d", year);
 		SET_STRING_ELT(WTH_DATA_names, yearIndex, mkChar(cYear));
 
 		// copy values from SOILWAT2 variables to rSOILWAT2 S4 class object
@@ -308,7 +308,7 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
   `SOILWAT2` `allHist` is filled with values that are
   copied from `rSOILWAT2` list of `swWeatherData`
   instead of being read from files on disk.
- 
+
   Called by `rSW_CTL_obtain_inputs()` if `from_files` is `FALSE`.
 
   @note Elements `endyr` and `startyr` of `SW_Model` must be set/updated

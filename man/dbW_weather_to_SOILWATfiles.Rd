@@ -14,7 +14,43 @@ dbW_weather_to_SOILWATfiles(
   weatherDF_dataColumns = c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
 )
 }
+\arguments{
+\item{path}{A character string. Path on disk to where to write files.}
+
+\item{site.label}{A character string. Site identification name added to
+comment on first line of each file.}
+
+\item{weatherData}{A list of elements of class \code{\linkS4class{swWeatherData}}
+that each hold daily weather data for one calendar year.}
+
+\item{weatherDF}{A data.frame. Weather data, see details.}
+
+\item{years}{A numeric vector. The calendar years.}
+
+\item{weatherDF_dataColumns}{A vector of character strings. The column
+names of \code{weatherDF} in the correct order for \code{SOILWAT2} that are
+representing calendar year \code{year} (optional), day of year \code{DOY},
+daily maximum air temperature \code{Tmax_C}, daily minimum air temperature
+\code{Tmin_C}, and daily precipitation amount \code{PPT_cm}.}
+}
 \description{
 Conversion: object of class \code{\linkS4class{swWeatherData}} or
 data.frame to \pkg{SOILWAT} input text files
 }
+\section{Notes}{
+
+\code{weatherDF_dataColumns} must exactly contain entries for day of year and
+the three weather variables.
+}
+
+\section{Details}{
+
+The weather data must be provided either via \code{weatherData} or \code{weatherDF}.
+See \code{\link[=dbW_weatherData_to_dataframe]{dbW_weatherData_to_dataframe()}} and \code{\link[=dbW_weatherData_to_dataframe]{dbW_weatherData_to_dataframe()}}
+for conversions between formats of \code{weatherData} and \code{weatherDF}.
+
+
+\code{\link[=getWeatherData_folders]{getWeatherData_folders()}} offers the inverse operation, i.e.,
+reading weather data from disk files.
+}
+

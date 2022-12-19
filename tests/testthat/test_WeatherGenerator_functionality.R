@@ -1,47 +1,41 @@
 
 #---INPUTS
-path_extdata <- file.path("..", "..", "inst", "extdata")
-if (!dir.exists(path_extdata)) {
-  path_extdata <- system.file("extdata", package = "rSOILWAT2")
-}
-
-
 dir_test_data <- file.path("..", "test_data")
 temp <- list.files(dir_test_data, pattern = "Ex")
 temp <- sapply(strsplit(temp, "_", fixed = TRUE), function(x) x[[1]])
 tests <- unique(temp)
-test_that("Test data availability", expect_gt(length(tests), 0))
+test_that("Test data availability", {
+  expect_gt(length(tests), 0)
+})
 
-sw_weather <- lapply(
-  tests,
-  function(it) readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
-)
 
 
 #---TESTS
-
-
 test_that("Weather generator: estimate input parameters", {
   for (k in seq_along(tests)) {
-    test_dat <- sw_weather[[k]]
+    test_dat <- readRDS(
+      file.path(dir_test_data, paste0(tests[k], "_weather.rds"))
+    )
+
     test_df <- data.frame(dbW_weatherData_to_dataframe(test_dat, valNA = NULL))
 
     if (anyNA(test_df)) {
-      expect_warning(
-        res <- dbW_estimate_WGen_coefs(
-          test_df,
-          propagate_NAs = TRUE
-        ),
-        "Insufficient weather data to estimate values"
+      # We have NAs that propagate
+      # --> warnings: "Insufficient weather data to estimate values [...]"
+      res <- suppressWarnings(
+        dbW_estimate_WGen_coefs(test_df, propagate_NAs = TRUE)
       )
+      expect_true(all(is.na(res[["mkv_woy"]][, -1])))
+      expect_true(all(is.na(res[["mkv_doy"]][, -1])))
 
-      expect_message(
-        res <- dbW_estimate_WGen_coefs(
+      # We have NAs that we impute
+      # --> messages: "Impute missing [...]"
+      res <- suppressMessages(
+        dbW_estimate_WGen_coefs(
           test_df,
           propagate_NAs = FALSE,
           imputation_type = "mean"
-        ),
-        "Impute missing"
+        )
       )
 
     } else {
@@ -69,25 +63,31 @@ test_that("Weather generator: estimate input parameters", {
 
 test_that("Weather generator: generate weather", {
   for (k in seq_along(tests)) {
-    test_dat <- sw_weather[[k]]
+    test_dat <- readRDS(
+      file.path(dir_test_data, paste0(tests[k], "_weather.rds"))
+    )
     years <- get_years_from_weatherData(test_dat)
     n <- length(test_dat)
 
     wout <- list()
 
     # Case 1: generate weather for dataset and impute missing values
-    wout[[1]] <- dbW_generateWeather(
-      test_dat,
-      imputation_type = "mean",
-      imputation_span = 5
+    wout[[1]] <- suppressMessages(
+      dbW_generateWeather(
+        test_dat,
+        imputation_type = "mean",
+        imputation_span = 5
+      )
     )
 
     # Case 2: generate weather based on partial dataset,
     #   use estimated weather generator coefficients from full dataset
-    wgen_coeffs <- dbW_estimate_WGen_coefs(
-      test_dat,
-      imputation_type = "mean",
-      imputation_span = 5
+    wgen_coeffs <- suppressMessages(
+      dbW_estimate_WGen_coefs(
+        test_dat,
+        imputation_type = "mean",
+        imputation_span = 5
+      )
     )
 
     wout[[2]] <- dbW_generateWeather(
@@ -141,6 +141,8 @@ test_that("Weather generator (integration tests): compare input/output", {
       "true"
     )
   )
+
+  tag <- "IntegrationTest-WeatherGenerator"
 
   dir_inttests <- file.path("..", "rSOILWAT_IntegrationTestOutput")
   dir.create(dir_inttests, showWarnings = FALSE)
@@ -197,11 +199,20 @@ test_that("Weather generator (integration tests): compare input/output", {
 
 
   #--- Comparison
-  compare_weather(
-    ref_weather = obs_df,
-    weather = wgen_df,
-    N = N,
-    path = dir_inttests,
-    tag = "IntegrationTest-WeatherGenerator"
+  suppressMessages(
+    compare_weather(
+      ref_weather = obs_df,
+      weather = wgen_df,
+      N = N,
+      path = dir_inttests,
+      tag = tag
+    )
+  )
+  expect_length(
+    list.files(
+      path = dir_inttests,
+      pattern = tag
+    ),
+    n = 4L
   )
 })

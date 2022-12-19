@@ -71,7 +71,7 @@ static char *cSWRCp[] = {
 /* --------------------------------------------------- */
 
 /* Copy soil properties into "Layers" matrix */
-static SEXP onGet_SW_LYR() {
+static SEXP onGet_SW_LYR(void) {
 	int i, dmax = 0;
 	SW_SITE *v = &SW_Site;
 	SEXP Layers, Layers_names, Layers_names_y;
@@ -251,7 +251,7 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp) {
 /* --------------------------------------------------- */
 
 /* Copy SOILWAT2 soil properties and SWRC parameters into S4 class "swSoils" */
-SEXP onGet_SW_SOILS() {
+SEXP onGet_SW_SOILS(void) {
 	SEXP swSoils, SW_SOILS;
 
 	PROTECT(swSoils = MAKE_CLASS("swSoils"));
@@ -278,7 +278,7 @@ void onSet_SW_SOILS(SEXP SW_SOILS) {
 }
 
 
-SEXP onGet_SW_SIT() {
+SEXP onGet_SW_SIT(void) {
 	int i;
 	SW_SITE *v = &SW_Site;
 

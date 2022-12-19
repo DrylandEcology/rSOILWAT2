@@ -23,6 +23,7 @@
 #'
 #' @param dbWeatherDataFile A character string. The path to the weather database
 #'   file.
+#' @param SWRunInformation A data frame.
 #' @param fbackup A character string. The path to where the weather database
 #'   should be backed up. If \code{NULL}, then '_copy' is appended to
 #'   \code{dbWeatherDataFile}.
@@ -36,7 +37,6 @@ NULL
 #'   that was created under \pkg{Rsoilwat31} to the current package version
 #'   \pkg{rSOILWAT2}
 #'
-#' @inheritParams dbW_upgrade
 #' @param check_all A logical value. If \code{TRUE}, then every record is
 #'   checked; otherwise, only the first record is checked for the package
 #'   version.
@@ -243,8 +243,6 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
 #' @section Details: \code{dbW_upgrade_v31to32} upgrades a weather database
 #'   from version 3.1.z' to '3.2.0'
 #'
-#' @inheritParams dbW_upgrade
-#'
 #' @export
 dbW_upgrade_v31to32 <- function(dbWeatherDataFile, fbackup = NULL) {
 
@@ -334,7 +332,6 @@ dbW_upgrade_v31to32 <- function(dbWeatherDataFile, fbackup = NULL) {
 #' @section Details: \code{dbW_upgrade_v3to31} upgrades a weather database
 #'  from version '3.0.x' to '3.1.0'
 #'
-#' @inheritParams dbW_upgrade
 #' @param type_new The type of compression used to compress the weather blobs.
 #'  See \code{\link[base]{memCompress}}.
 #'
@@ -447,8 +444,6 @@ dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL,
 #' @section Details: \code{dbW_upgrade_v2to3} upgrades a weather database
 #'  from version '2.x.y' to '3.0.0'
 #'
-#' @inheritParams dbW_upgrade
-#'
 #' @export
 dbW_upgrade_v2to3 <- function(dbWeatherDataFile, fbackup = NULL) {
   con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbWeatherDataFile)
@@ -492,8 +487,6 @@ dbW_upgrade_v2to3 <- function(dbWeatherDataFile, fbackup = NULL) {
 #'
 #' @section Details: \code{dbW_upgrade_v1to2} upgrades a weather database
 #'  from version '1.x.y' to '2.0.0'
-#'
-#' @inheritParams dbW_upgrade
 #'
 #' @export
 dbW_upgrade_v1to2 <- function(
@@ -615,11 +608,13 @@ dbW_upgrade_v1to2 <- function(
 }
 
 
-#' Check an updated weather database
+#' Run database integrity checks on a weather database
 #'
-#' @param con A connection to an updated weather database.
+#' @param con A [DBI::DBIConnection-class] object.
+#'   The connection to a weather database.
 #'
 #' @export
+#' @md
 check_updatedDB <- function(con) {
   print(paste0(
     Sys.time(),
@@ -647,8 +642,6 @@ check_updatedDB <- function(con) {
 #'
 #' @section Details: \code{backup_copy} creates a backup copy of a weather
 #'   database file if not already present
-#'
-#' @inheritParams dbW_upgrade
 #'
 #' @export
 backup_copy <- function(dbWeatherDataFile, fbackup = NULL) {

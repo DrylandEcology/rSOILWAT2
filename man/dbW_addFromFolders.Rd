@@ -2,7 +2,7 @@
 % Please edit documentation in R/sw_dbW_WeatherDatabase.R
 \name{dbW_addFromFolders}
 \alias{dbW_addFromFolders}
-\title{Add weather data from \pkg{SOILWAT2} weather "folders" to a weather database}
+\title{Read \code{SOILWAT2}-style weather data from disk and store in weather database}
 \usage{
 dbW_addFromFolders(
   MetaData = NULL,
@@ -12,14 +12,21 @@ dbW_addFromFolders(
 )
 }
 \arguments{
-\item{MetaData}{A data.frame with suitable columns.}
+\item{MetaData}{A data frame. If not missing, then must contain columns
+(in that order) (name of site weather data) \code{folder},
+\code{lat} (site latitude),
+\code{long} (site longitude),
+\code{label} (name of site).}
 
-\item{FoldersPath}{A character string.}
+\item{FoldersPath}{A character string. The path to the folder that contains
+the site weather data folders.}
 
-\item{ScenarioName}{A character string.}
+\item{ScenarioName}{A character string. The scenario name represented by
+the data.}
 
-\item{weather_tag}{A character string.}
+\item{weather_tag}{A character string. The file name tag that identifies
+the individual weather data files inside the site weather data folders.}
 }
 \description{
-Add weather data from \pkg{SOILWAT2} weather "folders" to a weather database
+Read \code{SOILWAT2}-style weather data from disk and store in weather database
 }

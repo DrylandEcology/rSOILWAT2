@@ -4,5 +4,5 @@
 /* =================================================== */
 /*             Global Function Declarations            */
 /* --------------------------------------------------- */
-SEXP onGet_SW_F();
+SEXP onGet_SW_F(void);
 void onSet_SW_F(SEXP SW_F_construct);

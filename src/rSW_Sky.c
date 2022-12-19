@@ -41,7 +41,7 @@ static char *MyFileName;
 /*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
-SEXP onGet_SW_SKY() {
+SEXP onGet_SW_SKY(void) {
 	int i;
 
 	SW_SKY *v = &SW_Sky;
