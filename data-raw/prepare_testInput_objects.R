@@ -103,11 +103,17 @@ compare_objects <- function(new, old) {
   has_timestamp_diff <- grepl("timestamp", res_cmp, fixed = TRUE)
 
   # Ignore difference in version less than minor
-  has_version_diff <- rSOILWAT2::check_version(
+  vge <- rSOILWAT2::check_version(
     new,
     rSOILWAT2::get_version(old),
     level = "minor"
   )
+  vle <- rSOILWAT2::check_version(
+    new,
+    rSOILWAT2::get_version(old),
+    level = "minor"
+  )
+  has_version_diff <- !(vge && vle)
 
   list(
     res_waldo = res_cmp,
