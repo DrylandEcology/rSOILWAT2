@@ -11,6 +11,7 @@
 #' @param MPa_toBar Soon obsolete ... (see `feature_swrc`)
 #' @param bar_conversion Soon obsolete ... (see `feature_swrc`)
 #' @param bar_toMPa Soon obsolete ... (see `feature_swrc`)
+#' @param ... Additional arguments.
 #'
 #' @references Cosby, B. J., G. M. Hornberger, R. B. Clapp, and T. R. Ginn.
 #' 1984. A statistical exploration of the relationships of soil moisture

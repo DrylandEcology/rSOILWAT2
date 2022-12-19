@@ -25,8 +25,6 @@
 \item{index}{An integer value. One of the four possible time steps.}
 
 \item{value}{A value to assign to a specific slot of the object.}
-
-\item{.Object}{An object of class \code{\linkS4class{swOutput}}.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class

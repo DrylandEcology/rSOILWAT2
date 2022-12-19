@@ -61,6 +61,8 @@ fractional value in \code{[0,1]}.}
 volume of rock and gravel.}
 
 \item{bar_toMPa}{Soon obsolete ... (see \code{feature_swrc})}
+
+\item{...}{Additional arguments.}
 }
 \value{
 Volumetric water content in units of m^3 (of water) / m^3 (of soil)

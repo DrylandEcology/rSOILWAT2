@@ -30,6 +30,9 @@
 #'
 #' @param object An object of class \code{\linkS4class{swWeatherData}}.
 #' @param file A character string. The file name from which to read.
+#' @param weatherList A list or \code{NULL}. Each element is an object of class
+#'   \code{\link[rSOILWAT2:swWeatherData-class]{rSOILWAT2::swWeatherData}}
+#'   containing daily weather data of a specific year.
 #' @param ... Arguments to the helper constructor function.
 #'  Dots can either contain objects to copy into slots of that class
 #'  (must be named identical to the corresponding slot) or

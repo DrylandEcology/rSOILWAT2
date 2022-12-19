@@ -24,6 +24,10 @@ If dots are missing, then corresponding values of
 \code{rSOILWAT2::sw_exampleData}
 (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
 
+\item{weatherList}{A list or \code{NULL}. Each element is an object of class
+\code{\link[rSOILWAT2:swWeatherData-class]{rSOILWAT2::swWeatherData}}
+containing daily weather data of a specific year.}
+
 \item{object}{An object of class \code{\linkS4class{swWeatherData}}.}
 
 \item{file}{A character string. The file name from which to read.}
