@@ -7,8 +7,9 @@
 * New inputs are required to select a `SWRC` and `PTF` as well as to provide
   parameter values of the selected `SWRC` for each soil layer.
   Default values are backwards compatible, i.e.,
-  default `SWRC` is "Campbell1974" and default `PTF` is "Cosby1984AndOthers".
-  If these new inputs are missing in an `rSOILWAT2` "swInputData" object,
+  default `SWRC` is `"Campbell1974"` and
+  default `PTF` is `"Cosby1984AndOthers"`.
+  If these new inputs are missing in an `rSOILWAT2` `swInputData` object,
   then they are automatically set to their default values.
 * This version produces nearly identical simulation output
   as the previous release under default values.
@@ -100,10 +101,10 @@
 * `SOILWAT2` is updated to `v6.5.0` which provides
   the estimated minimum/maximum soil temperature for every layer and
   at the surface.
-* Surface temperature is provided in slot "TEMP" in columns
+* Surface temperature is provided in slot `"TEMP"` in columns
   `surfaceTemp_min_C`, `surfaceTemp_avg_C` (previously `surfaceTemp_C`),
   and `surfaceTemp_max_C`.
-* Soil temperature at depths of soil layers is provided in slot "SOILTEMP"
+* Soil temperature at depths of soil layers is provided in slot `"SOILTEMP"`
   in columns `Lyr_X_min_C`, `Lyr_X_avg_C` (previously `Lyr_X`),
   and `Lyr_X_max_C` where `X` stands for layer number 1, 2, ...
 * Package linting updated to `lintr` >= 3 and
@@ -115,7 +116,7 @@
 * This version adds new output to otherwise identical simulation output.
 * `SOILWAT2` is updated to `v6.4.0` which provides
   the phase of soil moisture (frozen or not) in each soil layer.
-* The new output is provided in slot "FROZEN" of class `swOutput` (#101).
+* The new output is provided in slot `"FROZEN"` of class `swOutput` (#101).
 
 
 # rSOILWAT2 v5.1.3
@@ -156,7 +157,7 @@
     * Unsaturated percolation rate is now adjusted for `swc_min`,
       i.e., percolation rate is smaller at very low moisture levels.
     * Bare-soil evaporation, transpiration, and hydraulic redistribution
-      no longer remove soil moisture held below swc_min.
+      no longer remove soil moisture held below `swc_min`.
     * Lower limit of `swc_min` is now set at -30 MPa.
 
 
@@ -224,4 +225,4 @@
 * `SOILWAT2` updated to v6.2.1
 * Many improvements in documentation and unit tests.
 * Closed issues and bug reports, including #58, #164, #170, #171, #176.
-* Moved CI from travis and appveyor to Github Actions.
+* Moved CI from `travis` and `appveyor` to Github Actions.
