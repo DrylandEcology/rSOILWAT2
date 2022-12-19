@@ -228,9 +228,9 @@ test_that("Use SWRC to convert between VWC/SWP", {
 })
 
 
-test_that("Simulate with all SWRC/PDF combinations", {
-  list_swrcs_pdfs <- unname(as.list(as.data.frame(t(
-    rSOILWAT2::list_matched_swrcs_pdfs()
+test_that("Simulate with all SWRC/PTF combinations", {
+  list_swrcs_ptfs <- unname(as.list(as.data.frame(t(
+    rSOILWAT2::list_matched_swrcs_ptfs()
   ))))
 
   dir_test_data <- file.path("..", "test_data")
@@ -251,11 +251,11 @@ test_that("Simulate with all SWRC/PDF combinations", {
       rSOILWAT2::swYears_StartYear(sw_input) + 5
 
 
-    #--- Loop over SWRC-PDF combinations ------
-    for (isp in seq_along(list_swrcs_pdfs)) {
+    #--- Loop over SWRC-PTF combinations ------
+    for (isp in seq_along(list_swrcs_ptfs)) {
 
-      # Set SWRC/PDF
-      rSOILWAT2::swSite_SWRCflags(sw_input) <- list_swrcs_pdfs[[isp]]
+      # Set SWRC/PTF
+      rSOILWAT2::swSite_SWRCflags(sw_input) <- list_swrcs_ptfs[[isp]]
 
       # Run SOILWAT
       x0 <- try(
@@ -273,7 +273,7 @@ test_that("Simulate with all SWRC/PDF combinations", {
         succeed(
           paste(
             "No live access to",
-            paste0(list_swrcs_pdfs[[isp]], collapse = "/"),
+            paste0(list_swrcs_ptfs[[isp]], collapse = "/"),
             ", skipping for now!"
           )
         )
@@ -289,13 +289,13 @@ test_that("Simulate with all SWRC/PDF combinations", {
 
         rSOILWAT2::swSite_hasSWRCp(sw_input1) <- TRUE
 
-        rSOILWAT2::swSoils_SWRCp(sw_input1) <- rSOILWAT2::pdf_estimate(
+        rSOILWAT2::swSoils_SWRCp(sw_input1) <- rSOILWAT2::ptf_estimate(
           sand = soils[, "sand_frac"],
           clay = soils[, "clay_frac"],
           fcoarse = soils[, "gravel_content"],
           bdensity = soils[, "bulkDensity_g/cm^3"],
-          swrc_name = list_swrcs_pdfs[[isp]][1],
-          pdf_name = list_swrcs_pdfs[[isp]][2]
+          swrc_name = list_swrcs_ptfs[[isp]][1],
+          ptf_name = list_swrcs_ptfs[[isp]][2]
         )
 
         # Run SOILWAT
@@ -324,7 +324,7 @@ test_that("Simulate with all SWRC/PDF combinations", {
             tolerance = rSW2_glovars[["tol"]],
             info = paste0(
               it, ": ",
-              paste0(list_swrcs_pdfs[[isp]], collapse = "/"),
+              paste0(list_swrcs_ptfs[[isp]], collapse = "/"),
               " - slot ",
               shQuote(sv)
             )

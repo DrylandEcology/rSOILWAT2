@@ -268,18 +268,18 @@ sw_exec <- function(
 
   #--- Estimate SWRC parameters
   # if not yet estimated
-  # if requested PDF only implemented in R
+  # if requested PTF only implemented in R
   if (!swSite_hasSWRCp(inputData)) {
-    pdf_name <- std_pdf(swSite_SWRCflags(inputData)["pdf_name"])
-    if (pdf_name %in% pdfs_implemented_by_rSW2()) {
+    ptf_name <- std_ptf(swSite_SWRCflags(inputData)["ptf_name"])
+    if (ptf_name %in% ptfs_implemented_by_rSW2()) {
       soils <- swSoils_Layers(inputData)
 
-      swrcp <- rSW2_SWRC_PDF_estimate_parameters(
+      swrcp <- rSW2_SWRC_PTF_estimate_parameters(
         sand = soils[, "sand_frac"],
         clay = soils[, "clay_frac"],
         fcoarse = soils[, "gravel_content"],
         bdensity = soils[, "bulkDensity_g/cm^3"],
-        pdf_name = pdf_name,
+        ptf_name = ptf_name,
         fail = FALSE
       )
 

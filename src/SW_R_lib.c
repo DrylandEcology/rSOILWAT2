@@ -504,7 +504,7 @@ SEXP sw_consts(void) {
     ret_str1, ret_str2, ret_str3,
     ret_infiles,
     ret_swrc,
-    ret_pdf;
+    ret_ptf;
   int i;
   int *pvINT;
   double *pvNUM;
@@ -515,7 +515,7 @@ SEXP sw_consts(void) {
     "OutKeys", "OutPeriods", "OutAggs",
     "InFiles",
     "SWRC_types",
-    "PDF_types"
+    "PTF_types"
   };
 
   // Miscellaneous numerical constants
@@ -528,14 +528,14 @@ SEXP sw_consts(void) {
     SWRC_PARAM_NMAX,
     eSW_NoTime, SW_OUTNPERIODS, SW_OUTNKEYS, SW_NSUMTYPES, NVEGTYPES,
     OUT_DIGITS,
-    N_SWRCs, N_PDFs
+    N_SWRCs, N_PTFs
   };
   char *cINT[] = {
     "SW_NFILES", "MAX_LAYERS", "MAX_TRANSP_REGIONS", "MAX_NYEAR",
     "SWRC_PARAM_NMAX",
     "eSW_NoTime", "SW_OUTNPERIODS", "SW_OUTNKEYS", "SW_NSUMTYPES", "NVEGTYPES",
     "OUT_DIGITS",
-    "N_SWRCs", "N_PDFs"
+    "N_SWRCs", "N_PTFs"
   };
 
   // Vegetation types
@@ -678,18 +678,18 @@ SEXP sw_consts(void) {
   }
   namesgets(ret_swrc, cnames);
 
-  // create vector of PDF types
+  // create vector of PTF types
   #ifdef RSWDEBUG
-  if (debug) swprintf(" create ret_pdf ...");
+  if (debug) swprintf(" create ret_ptf ...");
   #endif
-  PROTECT(ret_pdf = allocVector(INTSXP, N_PDFs));
-  pvINT = INTEGER(ret_pdf);
-  PROTECT(cnames = allocVector(STRSXP, N_PDFs));
-  for (i = 0; i < N_PDFs; i++) {
+  PROTECT(ret_ptf = allocVector(INTSXP, N_PTFs));
+  pvINT = INTEGER(ret_ptf);
+  PROTECT(cnames = allocVector(STRSXP, N_PTFs));
+  for (i = 0; i < N_PTFs; i++) {
     pvINT[i] = i;
-    SET_STRING_ELT(cnames, i, mkChar(pdf2str[i]));
+    SET_STRING_ELT(cnames, i, mkChar(ptf2str[i]));
   }
-  namesgets(ret_pdf, cnames);
+  namesgets(ret_ptf, cnames);
 
 
   // combine vectors into a list and return
@@ -709,7 +709,7 @@ SEXP sw_consts(void) {
   SET_VECTOR_ELT(ret, 5, ret_str3);
   SET_VECTOR_ELT(ret, 6, ret_infiles);
   SET_VECTOR_ELT(ret, 7, ret_swrc);
-  SET_VECTOR_ELT(ret, 8, ret_pdf);
+  SET_VECTOR_ELT(ret, 8, ret_ptf);
 
   // clean up
   UNPROTECT(nret * 2 + 2);
@@ -724,23 +724,23 @@ SEXP sw_consts(void) {
 
 /**
   @brief Estimate parameters of selected soil water retention curve (SWRC)
-    using selected pedotransfer function (PDF)
+    using selected pedotransfer function (PTF)
 
-  See SOILWAT2's `SWRC_PDF_estimate_parameters()`, `swrc2str[]` and `pdf2str[]`.
+  See SOILWAT2's `SWRC_PTF_estimate_parameters()`, `swrc2str[]` and `ptf2str[]`.
 
-  @param[in] pdf_type Identification number of selected PDF
+  @param[in] ptf_type Identification number of selected PTF
   @param[in] sand Sand content of the matric soil (< 2 mm fraction) [g/g]
   @param[in] clay Clay content of the matric soil (< 2 mm fraction) [g/g]
   @param[in] fcoarse Coarse fragments (> 2 mm; e.g., gravel)
     of the whole soil [m3/m3]
   @param[in] bdensity Density of the whole soil
     (matric soil plus coarse fragments) [g/cm3];
-    accepts `NULL` if not used by `PDF`
+    accepts `NULL` if not used by `PTF`
 
   @return Matrix of estimated SWRC parameters
 */
-SEXP rSW2_SWRC_PDF_estimate_parameters(
-  SEXP pdf_type,
+SEXP rSW2_SWRC_PTF_estimate_parameters(
+  SEXP ptf_type,
   SEXP sand,
   SEXP clay,
   SEXP fcoarse,
@@ -753,14 +753,14 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
   if (
     nlyrs != length(clay) ||
     nlyrs != length(fcoarse) ||
-    nlyrs != length(pdf_type) ||
+    nlyrs != length(ptf_type) ||
     (has_bd && nlyrs != length(bdensity))
   ) {
     error("inputs are not of the same length.");
   }
 
   /* Convert inputs to correct type */
-  pdf_type = PROTECT(coerceVector(pdf_type, INTSXP));
+  ptf_type = PROTECT(coerceVector(ptf_type, INTSXP));
   sand = PROTECT(coerceVector(sand, REALSXP));
   clay = PROTECT(coerceVector(clay, REALSXP));
   fcoarse = PROTECT(coerceVector(fcoarse, REALSXP));
@@ -782,7 +782,7 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
 
   /* Create convenience pointers */
   unsigned int
-    *xpdf_type = (unsigned int *) INTEGER(pdf_type);
+    *xptf_type = (unsigned int *) INTEGER(ptf_type);
 
   double
     *xsand = REAL(sand),
@@ -793,15 +793,15 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
 
 
   /* Loop over soil layers */
-  /* Ideally, SOILWAT2's `SWRC_PDF_estimate_parameters()`
+  /* Ideally, SOILWAT2's `SWRC_PTF_estimate_parameters()`
      would loop over soil layers internally,
      but SOILWAT2 uses a list of soil layer structures instead of an array
   */
   int k1, k2;
 
   for (k1 = 0; k1 < nlyrs; k1++) {
-    SWRC_PDF_estimate_parameters(
-      xpdf_type[k1],
+    SWRC_PTF_estimate_parameters(
+      xptf_type[k1],
       REAL(swrcpk),
       xsand[k1],
       xclay[k1],
@@ -821,35 +821,35 @@ SEXP rSW2_SWRC_PDF_estimate_parameters(
 
 
 /**
-  @brief Check whether PDF and SWRC are compatible and implemented in `SOILWAT2`
+  @brief Check whether PTF and SWRC are compatible and implemented in `SOILWAT2`
 
   @param[in] swrc_name Name of SWRC
-  @param[in] pdf_name Name of PDF
+  @param[in] ptf_name Name of PTF
 
-  @return A logical value indicating if SWRC and PDF are compatible.
+  @return A logical value indicating if SWRC and PTF are compatible.
 */
-SEXP sw_check_SWRC_vs_PDF(SEXP swrc_name, SEXP pdf_name) {
+SEXP sw_check_SWRC_vs_PTF(SEXP swrc_name, SEXP ptf_name) {
 	SEXP res;
 	PROTECT(res = NEW_LOGICAL(1));
 	LOGICAL(res)[0] = swFALSE;
 
 	PROTECT(swrc_name = AS_CHARACTER(swrc_name));
-	PROTECT(pdf_name = AS_CHARACTER(pdf_name));
+	PROTECT(ptf_name = AS_CHARACTER(ptf_name));
 
 	if (
 		!isNull(swrc_name) &&
-		!isNull(pdf_name) &&
+		!isNull(ptf_name) &&
 		strlen(CHAR(STRING_ELT(swrc_name, 0))) < 64 &&
-		strlen(CHAR(STRING_ELT(pdf_name, 0))) < 64
+		strlen(CHAR(STRING_ELT(ptf_name, 0))) < 64
 	) {
 		char
 			sw_swrc_name[64],
-			sw_pdf_name[64];
+			sw_ptf_name[64];
 
 		strcpy(sw_swrc_name, CHAR(STRING_ELT(swrc_name, 0)));
-		strcpy(sw_pdf_name, CHAR(STRING_ELT(pdf_name, 0)));
+		strcpy(sw_ptf_name, CHAR(STRING_ELT(ptf_name, 0)));
 
-		LOGICAL(res)[0] = check_SWRC_vs_PDF(sw_swrc_name, sw_pdf_name);
+		LOGICAL(res)[0] = check_SWRC_vs_PTF(sw_swrc_name, sw_ptf_name);
 	}
 
 	UNPROTECT(3);

@@ -93,16 +93,16 @@ RCP85
 
 #--- Soil water retention curve (SWRC) ------
 #
-# Implemented options (`swrc_name`/`pdf_name`, see `swrc2str[]`/`pdf2str[]`):
-#   - pdf_name = <other>: SWRC parameters must be provided via "swrc_params.in"
+# Implemented options (`swrc_name`/`ptf_name`, see `swrc2str[]`/`ptf2str[]`):
+#   - ptf_name = <other>: SWRC parameters must be provided via "swrc_params.in"
 #   - swrc_name = "Campbell1974" (Campbell 1974)
-#     * pdf_name = "Cosby1984AndOthers" (Cosby et al. 1984 but `swc_sat` by Saxton et al. 2006)
-#     * pdf_name = "Cosby1984" (Cosby et al. 1984)
+#     * ptf_name = "Cosby1984AndOthers" (Cosby et al. 1984 but `swc_sat` by Saxton et al. 2006)
+#     * ptf_name = "Cosby1984" (Cosby et al. 1984)
 #   - swrc_name = "vanGenuchten1980" (van Genuchten 1980)
 #   - swrc_name = "FXW" (Fredlund and Xing 1994, Wang et al. 2018)
 #
 # Note: option "Campbell1974"/"Cosby1984AndOthers" was hard-coded < v7.0.0
-# Note: `rSOILWAT2` may implement additional PDFs
+# Note: `rSOILWAT2` may implement additional PTFs
 
 Campbell1974				# Specify soil water retention curve
 Cosby1984AndOthers	# Specify pedotransfer function

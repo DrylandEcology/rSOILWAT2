@@ -1,7 +1,7 @@
-#--- Compare SOILWAT2 simulations under varying SWRCs and PDFs ------
+#--- Compare SOILWAT2 simulations under varying SWRCs and PTFs ------
 
 # This script runs SOILWAT2 simulations (using the package default dataset)
-#   * for each implemented pair of SWRC/PDF
+#   * for each implemented pair of SWRC/PTF
 #   * for default and 50% reduced precipitation events
 #
 # and produced time-series plots by soil layer and by year of
@@ -12,17 +12,17 @@
 stopifnot(requireNamespace("ggplot2"))
 
 
-#--- List of (available) SWRC-PDF combinations ------
-list_swrcs_pdfs <- unname(as.list(as.data.frame(t(
-  rSOILWAT2::list_matched_swrcs_pdfs()
+#--- List of (available) SWRC-PTF combinations ------
+list_swrcs_ptfs <- unname(as.list(as.data.frame(t(
+  rSOILWAT2::list_matched_swrcs_ptfs()
 ))))
 
-tmp <- check_pdf_availability(sapply(list_swrcs_pdfs, `[`, j = 2))
-list_swrcs_pdfs <- list_swrcs_pdfs[tmp]
+tmp <- check_ptf_availability(sapply(list_swrcs_ptfs, `[`, j = 2))
+list_swrcs_ptfs <- list_swrcs_ptfs[tmp]
 
 if (!all(tmp)) {
   message(
-    "Unavailable PDFs are skipped: ",
+    "Unavailable PTFs are skipped: ",
     toString(shQuote(names(tmp)[!tmp]))
   )
 }
@@ -79,7 +79,7 @@ for (k0a in seq_along(fadj_ppts)) {
     year_start <- rSOILWAT2::swYears_StartYear(rSOILWAT2::sw_exampleData)
 
     swout <- lapply(
-      list_swrcs_pdfs,
+      list_swrcs_ptfs,
       function(sp) {
         sw_in <- rSOILWAT2::sw_exampleData
         rSOILWAT2::swSoils_Layers(sw_in) <- soils
@@ -96,7 +96,7 @@ for (k0a in seq_along(fadj_ppts)) {
       fname_fig <- file.path(
         ".",
         paste0(
-          "Fig_SOILWAT2_SWRCs-PDFs_Simulation-Run_",
+          "Fig_SOILWAT2_SWRCs-PTFs_Simulation-Run_",
           "_Soil-", rownames(soiltxtcls)[k0b],
           "_PPT", round(100 * fadj_ppts[k0a]), "pct",
           "__response-", list_plot_vars[[k1]][["slot"]],
@@ -112,7 +112,7 @@ for (k0a in seq_along(fadj_ppts)) {
           tmp <- slot(slot(x, list_plot_vars[[k1]][["slot"]]), "Day")
           res <- data.frame(
             SWRC = sp[1],
-            PDF = sp[2],
+            PTF = sp[2],
             tmp[, c("Year", "Day")],
             date = as.Date(
               paste(tmp[, "Year"], tmp[, "Day"], sep = "-"),
@@ -124,7 +124,7 @@ for (k0a in seq_along(fadj_ppts)) {
           res
         },
         swout,
-        list_swrcs_pdfs,
+        list_swrcs_ptfs,
         SIMPLIFY = FALSE
       )
 
@@ -139,10 +139,10 @@ for (k0a in seq_along(fadj_ppts)) {
       colnames(var_swout)[grep("Lyr", colnames(var_swout))] <-
         list_plot_vars[[k1]][["var"]]
 
-      # create combined SWRC-PDF name (for coloration)
-      var_swout[, "SWRC-PDF"] <- paste(
+      # create combined SWRC-PTF name (for coloration)
+      var_swout[, "SWRC-PTF"] <- paste(
         var_swout[, "SWRC"],
-        var_swout[, "PDF"],
+        var_swout[, "PTF"],
         sep = "-"
       )
 
@@ -170,8 +170,8 @@ for (k0a in seq_along(fadj_ppts)) {
           ggplot2::aes(
             x = Day,
             y = .data[[list_plot_vars[[k1]][["var"]]]],
-            color = `SWRC-PDF`,
-            linetype = `SWRC-PDF`
+            color = `SWRC-PTF`,
+            linetype = `SWRC-PTF`
           )
         ) +
         ggplot2::facet_wrap(

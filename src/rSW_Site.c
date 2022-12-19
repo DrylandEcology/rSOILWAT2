@@ -317,7 +317,7 @@ SEXP onGet_SW_SIT(void) {
 	};
 
 	SEXP swrc_flags, swrc_names;
-	char *cSWRCflags[] = {"swrc_name", "pdf_name"};
+	char *cSWRCflags[] = {"swrc_name", "ptf_name"};
 
 	SEXP has_swrcp;
 
@@ -444,7 +444,7 @@ SEXP onGet_SW_SIT(void) {
 
 	PROTECT(swrc_flags = NEW_CHARACTER(2));
 	SET_STRING_ELT(swrc_flags, 0, mkChar(v->site_swrc_name));
-	SET_STRING_ELT(swrc_flags, 1, mkChar(v->site_pdf_name));
+	SET_STRING_ELT(swrc_flags, 1, mkChar(v->site_ptf_name));
 
 	PROTECT(swrc_names = NEW_CHARACTER(2));
 	for (i = 0; i < 2; i++) {
@@ -609,13 +609,13 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	PROTECT(swrc_flags = GET_SLOT(SW_SIT, install("swrc_flags")));
 	strcpy(v->site_swrc_name, CHAR(STRING_ELT(swrc_flags, 0)));
 	v->site_swrc_type = encode_str2swrc(v->site_swrc_name);
-	strcpy(v->site_pdf_name, CHAR(STRING_ELT(swrc_flags, 1)));
-	v->site_pdf_type = encode_str2pdf(v->site_pdf_name);
+	strcpy(v->site_ptf_name, CHAR(STRING_ELT(swrc_flags, 1)));
+	v->site_ptf_type = encode_str2ptf(v->site_ptf_name);
 	PROTECT(has_swrcp = GET_SLOT(SW_SIT, install("has_swrcp")));
 	v->site_has_swrcp = LOGICAL(has_swrcp)[0];
 
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'swrc/pdf-type'");
+	if (debug) swprintf(" > 'swrc/ptf-type'");
 	#endif
 
 

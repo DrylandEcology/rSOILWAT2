@@ -23,7 +23,7 @@ swrc_swp_to_vwc(
   swp_MPa,
   fcoarse,
   layer_width,
-  swrc = list(swrc_name = NULL, pdf_name = NULL, swrcp = NULL),
+  swrc = list(swrc_name = NULL, ptf_name = NULL, swrcp = NULL),
   sand = NULL,
   clay = NULL,
   bdensity = NULL,
@@ -35,7 +35,7 @@ swrc_vwc_to_swp(
   vwcBulk,
   fcoarse,
   layer_width,
-  swrc = list(swrc_name = NULL, pdf_name = NULL, swrcp = NULL),
+  swrc = list(swrc_name = NULL, ptf_name = NULL, swrcp = NULL),
   sand = NULL,
   clay = NULL,
   bdensity = NULL,
@@ -68,7 +68,7 @@ soil water content of a soil layer and volumetric water content.}
 Contains all necessary elements of a \code{SWRC},
 i.e., \code{name} (short for \code{swrc_name}) and \code{swrcp},
 or all necessary elements to estimate parameters of a \code{SWRC} given
-soil parameters, i.e., \code{swrc_name} and \code{pdf_name}.}
+soil parameters, i.e., \code{swrc_name} and \code{ptf_name}.}
 
 \item{sand}{A numeric value or vector.
 Sand content of the matric soil component
@@ -136,8 +136,8 @@ to convert from bulk \code{VWC} to matric \code{SWP} with selected \code{SWRC}
 \section{Details}{
 
 \code{\link[=swrc_names]{swrc_names()}} lists implemented \code{SWRCs};
-\code{\link[=pdf_names]{pdf_names()}} lists implemented \code{PDFs}; and
-\code{\link[=check_pdf_availability]{check_pdf_availability()}} checks availability of \code{PDFs}.
+\code{\link[=ptf_names]{ptf_names()}} lists implemented \code{PTFs}; and
+\code{\link[=check_ptf_availability]{check_ptf_availability()}} checks availability of \code{PTFs}.
 
 
 For backward compatibility, \code{fcoarse} and \code{layer_width} may be missing.
@@ -149,8 +149,8 @@ Arguments \code{sand}, \code{clay}, and \code{bdensity} are only required
 if \code{SWRC} parameter values need to be estimated on the fly,
 i.e., if \code{swrc} does not contain the element \code{swrcp}
 (with suitable \code{SWRC} parameter values).
-This is handled by \code{\link[=pdf_estimate]{pdf_estimate()}} and additionally requires
-the element \code{pdf_name} for argument \code{swrc}.
+This is handled by \code{\link[=ptf_estimate]{ptf_estimate()}} and additionally requires
+the element \code{ptf_name} for argument \code{swrc}.
 
 
 If \code{swrc} contains element \code{swrcp} with one set of \code{SWRC} parameters,
@@ -160,7 +160,7 @@ i.e., one row, then the parameter set is repeated for each value of \code{x}.
 If \code{vwc} inputs represent the matric component
 (instead of expected bulk values), then set \code{fcoarse} to 0.
 This works, however, only if \code{swrcp} are provided or \code{fcoarse} is not
-utilized by the requested \code{pdf}.
+utilized by the requested \code{PTF}.
 }
 
 \examples{
@@ -171,12 +171,12 @@ fcrs2 <- c(0.4, 0.1)
 
 swrc1 <- list(
   name = "Campbell1974",
-  swrcp = pdf_estimate(
+  swrcp = ptf_estimate(
     sand = fsand,
     clay = fclay,
     fcoarse = fcrs1,
     swrc_name = "Campbell1974",
-    pdf_name = "Cosby1984"
+    ptf_name = "Cosby1984"
   )
 )
 swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, swrc = swrc1)
@@ -187,12 +187,12 @@ swrc_vwc_to_swp(c(0.10, NA, 0.20), fcoarse = fcrs1, swrc = swrc1)
 
 swrc2 <- list(
   name = "Campbell1974",
-  swrcp = pdf_estimate(
+  swrcp = ptf_estimate(
     sand = fsand,
     clay = fclay,
     fcoarse = fcrs2,
     swrc_name = "Campbell1974",
-    pdf_name = "Cosby1984"
+    ptf_name = "Cosby1984"
   )
 )
 swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, swrc = swrc2)
@@ -203,7 +203,7 @@ swrc_vwc_to_swp(c(0.10, 0.15, 0.20), fcoarse = fcrs2, swrc = swrc2)
 
 # Available water holding capacity "AWC"
 soils <- swSoils_Layers(rSOILWAT2::sw_exampleData)
-p <- pdf_estimate(
+p <- ptf_estimate(
   sand = soils[, "sand_frac"],
   clay = soils[, "clay_frac"],
   fcoarse = soils[, "gravel_content"]
@@ -228,33 +228,33 @@ phi <- list(
     theta,
     sand = soils[, "sand_frac"],
     clay = soils[, "clay_frac"],
-    swrc = list(swrc_name = "Campbell1974", pdf_name = "Cosby1984")
+    swrc = list(swrc_name = "Campbell1974", ptf_name = "Cosby1984")
   )
 )
 
-if (check_pdf_availability("Rosetta3")) {
+if (check_ptf_availability("Rosetta3")) {
   phi[["vanGenuchten1980"]] <- swrc_vwc_to_swp(
     theta,
     sand = soils[, "sand_frac"],
     clay = soils[, "clay_frac"],
     bdensity = soils[, "bd"],
-    swrc = list(swrc_name = "vanGenuchten1980", pdf_name = "Rosetta3")
+    swrc = list(swrc_name = "vanGenuchten1980", ptf_name = "Rosetta3")
   )
 }
 
-# Use PDF "neuroFX2021" to estimate parameters of SWRC `FXW`
+# Use PTF "neuroFX2021" to estimate parameters of SWRC `FXW`
 \dontrun{
-# Set neuroFX2021 file path, see details in `pdf_neuroFX2021_for_FXW()`
+# Set neuroFX2021 file path, see details in `ptf_neuroFX2021_for_FXW()`
 options(RSW2_FILENEUROFX2021 = "path/to/sscbd.RData")
 }
 
-if (check_pdf_availability("neuroFX2021")) {
+if (check_ptf_availability("neuroFX2021")) {
   phi[["FXW"]] <- swrc_vwc_to_swp(
     theta,
     sand = soils[, "sand_frac"],
     clay = soils[, "clay_frac"],
     bdensity = soils[, "bd"],
-    swrc = list(swrc_name = "FXW", pdf_name = "neuroFX2021")
+    swrc = list(swrc_name = "FXW", ptf_name = "neuroFX2021")
   )
 }
 
@@ -288,7 +288,7 @@ characteristics to the physical properties of soils.
 Water Resources Research, 20:682-690, \doi{10.1029/WR020i006p00682}
 }
 \seealso{
-\code{\link[=pdf_estimate]{pdf_estimate()}},
+\code{\link[=ptf_estimate]{ptf_estimate()}},
 \code{\link[=check_swrcp]{check_swrcp()}},
-\code{\link[=check_pdf_availability]{check_pdf_availability()}}
+\code{\link[=check_ptf_availability]{check_ptf_availability()}}
 }

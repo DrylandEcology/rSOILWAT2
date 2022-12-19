@@ -1,7 +1,7 @@
 #--- Plot and compare Shape of Soil Water Retention Curves ------
 
 # This script builds theoretical theta-phi (and phi-theta) relationships (SWRCs)
-#   * for each implemented pair of SWRC/PDF
+#   * for each implemented pair of SWRC/PTF
 #   * for a variety of soil textures
 #
 # and produced plots:
@@ -14,17 +14,17 @@ stopifnot(requireNamespace("ggplot2"))
 
 
 
-#--- List of (available) SWRC-PDF combinations ------
-list_swrcs_pdfs <- unname(as.list(as.data.frame(t(
-  rSOILWAT2::list_matched_swrcs_pdfs()
+#--- List of (available) SWRC-PTF combinations ------
+list_swrcs_ptfs <- unname(as.list(as.data.frame(t(
+  rSOILWAT2::list_matched_swrcs_ptfs()
 ))))
 
-tmp <- check_pdf_availability(sapply(list_swrcs_pdfs, `[`, j = 2))
-list_swrcs_pdfs <- list_swrcs_pdfs[tmp]
+tmp <- check_ptf_availability(sapply(list_swrcs_ptfs, `[`, j = 2))
+list_swrcs_ptfs <- list_swrcs_ptfs[tmp]
 
 if (!all(tmp)) {
   message(
-    "Unavailable PDFs are skipped: ",
+    "Unavailable PTFs are skipped: ",
     toString(shQuote(names(tmp)[!tmp]))
   )
 }
@@ -69,15 +69,15 @@ tag_soils <- paste0("soil__", rownames(soiltxtcls))
 
 #--- Estimate SWRCp ------
 swrcps <- lapply(
-  list_swrcs_pdfs,
+  list_swrcs_ptfs,
   function(sp){
-    rSOILWAT2::pdf_estimate(
+    rSOILWAT2::ptf_estimate(
       sand = soiltxtcls[, "sand_frac"],
       clay = soiltxtcls[, "clay_frac"],
       bdensity = soiltxtcls[, "bd"],
       fcoarse = soiltxtcls[, "fcoarse"],
       swrc_name = sp[1],
-      pdf_name = sp[2]
+      ptf_name = sp[2]
     )
   }
 )
@@ -91,7 +91,7 @@ phi_sim <- mapply(
       swrc = list(name = sp[1], swrcp = ps)
     )
   },
-  list_swrcs_pdfs,
+  list_swrcs_ptfs,
   swrcps,
   SIMPLIFY = FALSE
 )
@@ -103,8 +103,8 @@ tmp <- mapply(
   function(sp, theta, phi) {
     data.frame(
       SWRC = sp[1],
-      PDF = sp[2],
-      `SWRC-PDF` = paste(sp, collapse = "-"),
+      PTF = sp[2],
+      `SWRC-PTF` = paste(sp, collapse = "-"),
       theta = theta,
       {
         colnames(phi) <- tag_soils
@@ -112,8 +112,8 @@ tmp <- mapply(
       }
     )
   },
-  list_swrcs_pdfs,
-  lapply(seq_along(list_swrcs_pdfs), function(k) thetas),
+  list_swrcs_ptfs,
+  lapply(seq_along(list_swrcs_ptfs), function(k) thetas),
   phi_sim,
   SIMPLIFY = FALSE
 )
@@ -129,13 +129,13 @@ x_phi <- reshape(
 x_phi[, "time"] <- gsub(".", " ", x_phi[, "time"], fixed = TRUE)
 colnames(x_phi)[colnames(x_phi) == "time"] <- "soil texture"
 colnames(x_phi)[colnames(x_phi) == "soil"] <- "phi"
-colnames(x_phi)[colnames(x_phi) == "SWRC.PDF"] <- "SWRC-PDF"
+colnames(x_phi)[colnames(x_phi) == "SWRC.PTF"] <- "SWRC-PTF"
 
 
 
 
 #--- * Figure of phi: compare curves among soil textures within a SWRC ------
-fname1 <- file.path("Fig_SOILWAT2_SWRCs-PDFs_Curves-phi_SoilTextures.pdf")
+fname1 <- file.path("Fig_SOILWAT2_SWRCs-PTFs_Curves-phi_SoilTextures.pdf")
 
 if (!file.exists(fname1)) {
   tmp <- ggplot2::ggplot(x_phi) +
@@ -152,7 +152,7 @@ if (!file.exists(fname1)) {
       color = "gray",
       linetype = "dotted"
     ) +
-    ggplot2::facet_wrap(ggplot2::vars(`SWRC-PDF`)) +
+    ggplot2::facet_wrap(ggplot2::vars(`SWRC-PTF`)) +
     ggplot2::scale_y_log10(limits = c(1e-4, 1e3)) +
     ggplot2::xlab(Volumetric~Water~Content~~(cm^3/cm^3)) +
     ggplot2::ylab(Matric~~Potential~~(-MPa)) +
@@ -178,7 +178,7 @@ if (!file.exists(fname1)) {
 
 
 #--- * Figure of phi: compare curves among SWRCs within each soil texture ------
-fname2 <- file.path(".", "Fig_SOILWAT2_SWRCs-PDFs_Curves-phi_SWRCs.pdf")
+fname2 <- file.path(".", "Fig_SOILWAT2_SWRCs-PTFs_Curves-phi_SWRCs.pdf")
 
 if (!file.exists(fname2)) {
   tmp <- ggplot2::ggplot(x_phi) +
@@ -186,8 +186,8 @@ if (!file.exists(fname2)) {
       ggplot2::aes(
         x = theta,
         y = -phi,
-        color = `SWRC-PDF`,
-        linetype = `SWRC-PDF`
+        color = `SWRC-PTF`,
+        linetype = `SWRC-PTF`
       )
     ) +
     ggplot2::geom_hline(
@@ -229,7 +229,7 @@ theta_sim <- mapply(
       swrc = list(name = sp[1], swrcp = ps)
     )
   },
-  list_swrcs_pdfs,
+  list_swrcs_ptfs,
   swrcps,
   SIMPLIFY = FALSE
 )
@@ -241,8 +241,8 @@ tmp <- mapply(
   function(sp, theta, phi) {
     data.frame(
       SWRC = sp[1],
-      PDF = sp[2],
-      `SWRC-PDF` = paste(sp, collapse = "-"),
+      PTF = sp[2],
+      `SWRC-PTF` = paste(sp, collapse = "-"),
       phi = phi,
       {
         colnames(theta) <- tag_soils
@@ -250,9 +250,9 @@ tmp <- mapply(
       }
     )
   },
-  list_swrcs_pdfs,
+  list_swrcs_ptfs,
   theta_sim,
-  lapply(seq_along(list_swrcs_pdfs), function(k) phis),
+  lapply(seq_along(list_swrcs_ptfs), function(k) phis),
   SIMPLIFY = FALSE
 )
 
@@ -267,13 +267,13 @@ x_theta <- reshape(
 x_theta[, "time"] <- gsub(".", " ", x_theta[, "time"], fixed = TRUE)
 colnames(x_theta)[colnames(x_theta) == "time"] <- "soil texture"
 colnames(x_theta)[colnames(x_theta) == "soil"] <- "theta"
-colnames(x_theta)[colnames(x_theta) == "SWRC.PDF"] <- "SWRC-PDF"
+colnames(x_theta)[colnames(x_theta) == "SWRC.PTF"] <- "SWRC-PTF"
 
 
 
 
 #--- * Figure of theta: compare curves among soil textures within a SWRC ------
-fname1 <- file.path("Fig_SOILWAT2_SWRCs-PDFs_Curves-theta_SoilTextures.pdf")
+fname1 <- file.path("Fig_SOILWAT2_SWRCs-PTFs_Curves-theta_SoilTextures.pdf")
 
 if (!file.exists(fname1)) {
   tmp <- ggplot2::ggplot(x_theta) +
@@ -290,7 +290,7 @@ if (!file.exists(fname1)) {
       color = "gray",
       linetype = "dotted"
     ) +
-    ggplot2::facet_wrap(ggplot2::vars(`SWRC-PDF`)) +
+    ggplot2::facet_wrap(ggplot2::vars(`SWRC-PTF`)) +
     ggplot2::scale_x_log10(limits = c(1e-4, 1e3)) +
     ggplot2::xlab(Matric~~Potential~~(-MPa)) +
     ggplot2::ylab(Volumetric~Water~Content~~(cm^3/cm^3)) +
@@ -316,7 +316,7 @@ if (!file.exists(fname1)) {
 
 
 #--- * Figure of theta: compare curves among SWRCs within each soil texture ------
-fname2 <- file.path(".", "Fig_SOILWAT2_SWRCs-PDFs_Curves-theta_SWRCs.pdf")
+fname2 <- file.path(".", "Fig_SOILWAT2_SWRCs-PTFs_Curves-theta_SWRCs.pdf")
 
 if (!file.exists(fname2)) {
   tmp <- ggplot2::ggplot(x_theta) +
@@ -324,8 +324,8 @@ if (!file.exists(fname2)) {
       ggplot2::aes(
         x = -phi,
         y = theta,
-        color = `SWRC-PDF`,
-        linetype = `SWRC-PDF`
+        color = `SWRC-PTF`,
+        linetype = `SWRC-PTF`
       )
     ) +
     ggplot2::geom_vline(

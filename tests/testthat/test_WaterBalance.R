@@ -17,16 +17,16 @@ test_that("Test data availability", {
 })
 
 
-# List of (available) SWRC-PDF combinations
-list_swrcs_pdfs <- unname(as.list(as.data.frame(t(
-  rSOILWAT2::list_matched_swrcs_pdfs()
+# List of (available) SWRC-PTF combinations
+list_swrcs_ptfs <- unname(as.list(as.data.frame(t(
+  rSOILWAT2::list_matched_swrcs_ptfs()
 ))))
 
-tmp <- check_pdf_availability(
-  sapply(list_swrcs_pdfs, `[`, j = 2),
+tmp <- check_ptf_availability(
+  sapply(list_swrcs_ptfs, `[`, j = 2),
   verbose = FALSE
 )
-list_swrcs_pdfs <- list_swrcs_pdfs[tmp]
+list_swrcs_ptfs <- list_swrcs_ptfs[tmp]
 
 
 aggregate_for_each_timestep <- function(x, dyt) {
@@ -70,20 +70,20 @@ for (it in tests) {
   slot(slot(sw_input, "output"), "sumtype")[] <- 1L
 
 
-  #--- Loop over SWRC-PDF combinations ------
-  for (isp in seq_along(list_swrcs_pdfs)) {
-    # Set SWRC/PDF
-    rSOILWAT2::swSite_SWRCflags(sw_input) <- list_swrcs_pdfs[[isp]]
+  #--- Loop over SWRC-PTF combinations ------
+  for (isp in seq_along(list_swrcs_ptfs)) {
+    # Set SWRC/PTF
+    rSOILWAT2::swSite_SWRCflags(sw_input) <- list_swrcs_ptfs[[isp]]
 
 
     #---TESTS
     info1 <- paste(
       "test-data:", it, "/",
-      paste(list_swrcs_pdfs[[isp]], collapse = "-")
+      paste(list_swrcs_ptfs[[isp]], collapse = "-")
     )
 
     test_that("Water balance & cycle", {
-      # Run SOILWAT (but some PDFs require live internet!)
+      # Run SOILWAT (but some PTFs require live internet!)
       x <- try(
         sw_exec(
           inputData = sw_input,
@@ -95,7 +95,7 @@ for (it in tests) {
       )
 
       if (inherits(x, "try-error")) {
-        # Skip if it failed because PDF requires internet but we are offline
+        # Skip if it failed because PTF requires internet but we are offline
         if (isTRUE(grepl("requires live internet", x, fixed = TRUE))) {
           succeed(paste(info1, "requires live internet, skipping for now!"))
         } else {

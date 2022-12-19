@@ -45,15 +45,15 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet);
 SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData);
 SEXP sw_consts(void);
 
-SEXP rSW2_SWRC_PDF_estimate_parameters(
-  SEXP pdf_type,
+SEXP rSW2_SWRC_PTF_estimate_parameters(
+  SEXP ptf_type,
   SEXP sand,
   SEXP clay,
   SEXP gravel,
   SEXP bdensity
 );
 
-SEXP sw_check_SWRC_vs_PDF(SEXP swrc_type, SEXP swrcp);
+SEXP sw_check_SWRC_vs_PTF(SEXP swrc_type, SEXP swrcp);
 
 SEXP rSW2_SWRC(
   SEXP x,

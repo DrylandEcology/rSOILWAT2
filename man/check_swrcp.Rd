@@ -31,13 +31,13 @@ for multiple parameter sets, i.e., rows of \code{swrcp}.
 
 \examples{
 swrc_name <- "Campbell1974"
-pdf_name <- "Cosby1984AndOthers"
-swrcp <- pdf_estimate(
+ptf_name <- "Cosby1984AndOthers"
+swrcp <- ptf_estimate(
   sand = c(0.5, 0.3),
   clay = c(0.2, 0.1),
   fcoarse = c(0, 0),
   swrc_name = swrc_name,
-  pdf_name = pdf_name
+  ptf_name = ptf_name
 )
 
 check_swrcp(swrc_name, swrcp)
@@ -49,5 +49,5 @@ check_swrcp(swrc_name, swrcp2)
 
 }
 \seealso{
-\code{\link[=pdf_estimate]{pdf_estimate()}}
+\code{\link[=ptf_estimate]{ptf_estimate()}}
 }

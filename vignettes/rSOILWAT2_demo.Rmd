@@ -618,13 +618,13 @@ instead, the default setup is that parameters are estimated automatically
 by `SOILWAT2` with the selected pedotransfer function.
 ```{r, soils_swrc}
   tmp <- rSOILWAT2::swSite_SWRCflags(sw_in)
-  swrcp <- rSOILWAT2::pdf_estimate(
+  swrcp <- rSOILWAT2::ptf_estimate(
     sand = soil_new[, "sand_frac"],
     clay = soil_new[, "clay_frac"],
     fcoarse = soil_new[, "gravel_content"],
     bdensity = soil_new[, "bulkDensity_g.cm.3"],
     swrc_name = tmp["swrc_name"],
-    pdf_name = tmp["pdf_name"]
+    ptf_name = tmp["ptf_name"]
   )
 
 

@@ -32,9 +32,9 @@ soil water content of a soil layer and volumetric water content.}
 The selected \code{SWRC} name
 (one of \code{\link[=swrc_names]{swrc_names()}}, with default \code{"Campbell1974"}).}
 
-\item{pdf_name}{An character string or vector.
-The selected \code{PDF} name
-(one of \code{\link[=pdf_names]{pdf_names()}}, with default \code{"Cosby1984AndOthers"}).}
+\item{ptf_name}{An character string or vector.
+The selected \code{PTF} name
+(one of \code{\link[=ptf_names]{ptf_names()}}, with default \code{"Cosby1984AndOthers"}).}
 
 \item{swrcp}{A numeric vector or matrix.
 The parameters of a selected \code{SWRC};
@@ -44,7 +44,7 @@ each row represents one \code{SWRC}, e.g., one per soil layer.}
 Contains all necessary elements of a \code{SWRC},
 i.e., \code{name} (short for \code{swrc_name}) and \code{swrcp},
 or all necessary elements to estimate parameters of a \code{SWRC} given
-soil parameters, i.e., \code{swrc_name} and \code{pdf_name}.}
+soil parameters, i.e., \code{swrc_name} and \code{ptf_name}.}
 
 \item{fail}{A logical value.
 Issue a warning (\code{FALSE}, default) or throw an error (\code{TRUE})
@@ -60,14 +60,14 @@ if request fails.}
 using a set of parameters, see \code{\link[=swrc_swp_to_vwc]{swrc_swp_to_vwc()}} and \code{\link[=swrc_vwc_to_swp]{swrc_vwc_to_swp()}}.
 
 The \code{SWRC} parameters may be estimated from soil properties with suitable
-pedotransfer functions \code{PDFs}, see \code{\link[=pdf_estimate]{pdf_estimate()}}.
+pedotransfer functions \code{PTFs}, see \code{\link[=ptf_estimate]{ptf_estimate()}}.
 
 The \code{SWRC} parameters can be checked for consistency with \code{\link[=check_swrcp]{check_swrcp()}}.
 }
 \section{Details}{
 
 \code{\link[=swrc_names]{swrc_names()}} lists implemented \code{SWRCs};
-\code{\link[=pdf_names]{pdf_names()}} lists implemented \code{PDFs}.
+\code{\link[=ptf_names]{ptf_names()}} lists implemented \code{PTFs}.
 }
 
 \references{
@@ -78,9 +78,9 @@ Water Resources Research, 20:682-690, \doi{10.1029/WR020i006p00682}
 }
 \seealso{
 \code{\link[=swrc_names]{swrc_names()}},
-\code{\link[=pdf_names]{pdf_names()}},
-\code{\link[=check_pdf_availability]{check_pdf_availability()}},
-\code{\link[=pdf_estimate]{pdf_estimate()}},
+\code{\link[=ptf_names]{ptf_names()}},
+\code{\link[=check_ptf_availability]{check_ptf_availability()}},
+\code{\link[=ptf_estimate]{ptf_estimate()}},
 \code{\link[=check_swrcp]{check_swrcp()}},
 \code{\link[=swrc_swp_to_vwc]{swrc_swp_to_vwc()}},
 \code{\link[=swrc_vwc_to_swp]{swrc_vwc_to_swp()}}

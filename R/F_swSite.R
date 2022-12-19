@@ -113,7 +113,7 @@ setClass(
       dim = c(3L, 2L),
       dimnames = list(NULL, c("ndx", "layer"))
     ),
-    swrc_flags = c(swrc_name = NA_character_, pdf_name = NA_character_),
+    swrc_flags = c(swrc_name = NA_character_, ptf_name = NA_character_),
     has_swrcp = NA
   )
 )

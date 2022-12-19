@@ -1718,7 +1718,7 @@ setReplaceMethod(
 #'
 #' @section Details:
 #' The replacement method [swSite_SWRCflags()] for class [swInputData-class]
-#' resets `has_swrcp` to `FALSE` if `"swrc_name"` or `"pdf_name"` are updated.
+#' resets `has_swrcp` to `FALSE` if `"swrc_name"` or `"ptf_name"` are updated.
 #' This is to avoid inconsistency between
 #' `SWRCp`, `has_swrcp`, and `swrc_flags`.
 #'

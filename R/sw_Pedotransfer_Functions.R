@@ -207,16 +207,16 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #------ SWRC parameters & pedotransfer functions ------
 
 # MAINTENANCE:
-# Notes for implementing a new PDF "YYY" in `rSOILWAT2`
-#   * new `pdf_YYY_for_XXX()`
-#   * new `pdf_YYY_availability(verbose = interactive(), ...)`
-#   * update `pdfs_implemented_by_rSW2()`
-#   * update `rSW2_check_SWRC_vs_PDF()`
-#   * update `rSW2_SWRC_PDF_estimate_parameters()`
-#   * update `check_pdf_availability()`
+# Notes for implementing a new PTF "YYY" in `rSOILWAT2`
+#   * new `ptf_YYY_for_XXX()`
+#   * new `ptf_YYY_availability(verbose = interactive(), ...)`
+#   * update `ptfs_implemented_by_rSW2()`
+#   * update `rSW2_check_SWRC_vs_PTF()`
+#   * update `rSW2_SWRC_PTF_estimate_parameters()`
+#   * update `check_ptf_availability()`
 #   * update examples and unit tests to utilize new functions
 #
-# Notes for implementing a new SWRC "XXX" and/or PDF "YYY" in `SOILWAT2`
+# Notes for implementing a new SWRC "XXX" and/or PTF "YYY" in `SOILWAT2`
 #   1) SOILWAT2: see notes in SOILWAT2/SW_Site.h
 #   2) rSOILWAT2: everything should automatically work with new XXX/YYY
 #      * update examples and unit tests to utilize new functions
@@ -229,7 +229,7 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #' using a set of parameters, see [swrc_swp_to_vwc()] and [swrc_vwc_to_swp()].
 #'
 #' The `SWRC` parameters may be estimated from soil properties with suitable
-#' pedotransfer functions `PDFs`, see [pdf_estimate()].
+#' pedotransfer functions `PTFs`, see [ptf_estimate()].
 #'
 #' The `SWRC` parameters can be checked for consistency with [check_swrcp()].
 #'
@@ -256,9 +256,9 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #' @param swrc_name An character string or vector.
 #'   The selected `SWRC` name
 #'   (one of [swrc_names()], with default `"Campbell1974"`).
-#' @param pdf_name An character string or vector.
-#'   The selected `PDF` name
-#'   (one of [pdf_names()], with default `"Cosby1984AndOthers"`).
+#' @param ptf_name An character string or vector.
+#'   The selected `PTF` name
+#'   (one of [ptf_names()], with default `"Cosby1984AndOthers"`).
 #' @param swrcp A numeric vector or matrix.
 #'   The parameters of a selected `SWRC`;
 #'   each row represents one `SWRC`, e.g., one per soil layer.
@@ -266,7 +266,7 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #'   Contains all necessary elements of a `SWRC`,
 #'   i.e., `name` (short for `swrc_name`) and `swrcp`,
 #'   or all necessary elements to estimate parameters of a `SWRC` given
-#'   soil parameters, i.e., `swrc_name` and `pdf_name`.
+#'   soil parameters, i.e., `swrc_name` and `ptf_name`.
 #' @param fail A logical value.
 #'   Issue a warning (`FALSE`, default) or throw an error (`TRUE`)
 #'   if request fails.
@@ -276,10 +276,10 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #'
 #' @section Details:
 #' [swrc_names()] lists implemented `SWRCs`;
-#' [pdf_names()] lists implemented `PDFs`.
+#' [ptf_names()] lists implemented `PTFs`.
 #'
-#' @inherit pdf_Rosetta_for_vanGenuchten1980 references
-#' @inherit pdf_neuroFX2021_for_FXW references
+#' @inherit ptf_Rosetta_for_vanGenuchten1980 references
+#' @inherit ptf_neuroFX2021_for_FXW references
 #' @references
 #'   Cosby, B. J., G. M. Hornberger, R. B. Clapp, & T. R. Ginn. 1984.
 #'   A statistical exploration of the relationships of soil moisture
@@ -288,9 +288,9 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #'
 #' @seealso
 #'   [swrc_names()],
-#'   [pdf_names()],
-#'   [check_pdf_availability()],
-#'   [pdf_estimate()],
+#'   [ptf_names()],
+#'   [check_ptf_availability()],
+#'   [ptf_estimate()],
 #'   [check_swrcp()],
 #'   [swrc_swp_to_vwc()],
 #'   [swrc_vwc_to_swp()]
@@ -307,7 +307,7 @@ NULL
 #' @details Notes:
 #' The integer values may change with new versions of `SOILWAT2.`
 #'
-#' @seealso [`SWRCs`], [pdf_names()], [check_pdf_availability()]
+#' @seealso [`SWRCs`], [ptf_names()], [check_ptf_availability()]
 #'
 #' @md
 #' @export
@@ -315,20 +315,20 @@ swrc_names <- function() {
   rSW2_glovars[["kSOILWAT2"]][["SWRC_types"]]
 }
 
-#' List Pedotransfer Functions `PDFs`
+#' List Pedotransfer Functions `PTFs`
 #'
-#' @return An named integer vector with names of implemented `PDFs`
+#' @return An named integer vector with names of implemented `PTFs`
 #'
 #' @details Notes:
 #' The integer values may change with new versions of `SOILWAT2.`
 #'
-#' @seealso [`SWRCs`], [swrc_names()], [check_pdf_availability()]
+#' @seealso [`SWRCs`], [swrc_names()], [check_ptf_availability()]
 #'
 #' @md
 #' @export
-pdf_names <- function() {
-  tmp1 <- pdfs_implemented_by_SW2(names_only = FALSE)
-  tmp2 <- pdfs_implemented_by_rSW2()
+ptf_names <- function() {
+  tmp1 <- ptfs_implemented_by_SW2(names_only = FALSE)
+  tmp2 <- ptfs_implemented_by_rSW2()
 
   c(
     tmp1,
@@ -338,9 +338,9 @@ pdf_names <- function() {
 
 
 
-#' List PDFs implemented by `rSOILWAT2`
+#' List `PTFs` implemented by `rSOILWAT2`
 #' @md
-pdfs_implemented_by_rSW2 <- function() {
+ptfs_implemented_by_rSW2 <- function() {
   c(
     # `Rosetta3` estimates parameters of `vanGenuchten1980` SWRC
     "Rosetta3",
@@ -349,16 +349,16 @@ pdfs_implemented_by_rSW2 <- function() {
   )
 }
 
-#' List PDFs implemented by `SOILWAT2`
+#' List `PTFs` implemented by `SOILWAT2`
 #'
 #' @param names_only A logical value, see `return` value.
 #'
 #' @return An named integer vector (if not `names_only`)
-#' with or a character vector (if `names_only`) names of implemented `PDFs`.
+#' with or a character vector (if `names_only`) names of implemented `PTFs`.
 #'
 #' @md
-pdfs_implemented_by_SW2 <- function(names_only = FALSE) {
-  res <- rSW2_glovars[["kSOILWAT2"]][["PDF_types"]]
+ptfs_implemented_by_SW2 <- function(names_only = FALSE) {
+  res <- rSW2_glovars[["kSOILWAT2"]][["PTF_types"]]
 
   if (isTRUE(names_only)) names(res) else res
 }
@@ -378,17 +378,17 @@ std_swrc <- function(swrc_name) {
   }
 }
 
-#' Standardize a `PDF` name
+#' Standardize a `PTF` name
 #'
 #' `"Cosby1984AndOthers"` is the backwards compatible default.
 #'
 #' @md
 #' @noRd
-std_pdf <- function(pdf_name) {
-  if (missing(pdf_name) || is.null(pdf_name) || all(is.na(pdf_name))) {
+std_ptf <- function(ptf_name) {
+  if (missing(ptf_name) || is.null(ptf_name) || all(is.na(ptf_name))) {
     "Cosby1984AndOthers"
   } else {
-    as.character(pdf_name)
+    as.character(ptf_name)
   }
 }
 
@@ -413,53 +413,53 @@ encode_name2swrc <- function(swrc_name, fail = TRUE) {
   res
 }
 
-#' Translate a `PDF` name to its `SOILWAT2` internal integer code
+#' Translate a `PTF` name to its `SOILWAT2` internal integer code
 #'
-#' @return An integer value. `NA` if `pdf_name` is not implemented.
+#' @return An integer value. `NA` if `ptf_name` is not implemented.
 #'
 #' @md
 #' @noRd
-encode_name2pdf <- function(pdf_name, fail = TRUE) {
-  res <- as.integer(unname(pdfs_implemented_by_SW2()[std_pdf(pdf_name)]))
+encode_name2ptf <- function(ptf_name, fail = TRUE) {
+  res <- as.integer(unname(ptfs_implemented_by_SW2()[std_ptf(ptf_name)]))
 
   if (isTRUE(fail) && anyNA(res)) {
-    stop("Requested PDF ", shQuote(pdf_name[is.na(res)]), " is not available.")
+    stop("Requested PTF ", shQuote(ptf_name[is.na(res)]), " is not available.")
   }
 
   res
 }
 
 
-#' Matching pairs of implemented `SWRCs` and `PDFs`
+#' Matching pairs of implemented `SWRCs` and `PTFs`
 #'
 #' @inheritParams SWRCs
 #'
-#' @return A `data.frame` with two columns `SWRC` and `PDF` where each
-#'   row contains a matching pair of `SWRC` and `PDF` that are implemented.
+#' @return A `data.frame` with two columns `SWRC` and `PTF` where each
+#'   row contains a matching pair of `SWRC` and `PTF` that are implemented.
 #'
 #' @examples
-#' # Data frame of SWRC-PDF combinations
-#' df_swrc_pdfs <- rSOILWAT2::list_matched_swrcs_pdfs()
+#' # Data frame of SWRC-PTF combinations
+#' df_swrc_ptfs <- rSOILWAT2::list_matched_swrcs_ptfs()
 #'
-#' # List of SWRC-PDF combinations
-#' list_swrcs_pdfs <- unname(as.list(as.data.frame(t(df_swrc_pdfs))))
+#' # List of SWRC-PTF combinations
+#' list_swrcs_ptfs <- unname(as.list(as.data.frame(t(df_swrc_ptfs))))
 #'
-#' # Available SWRC-PDF combinations
-#' has_pdf <- check_pdf_availability(df_swrc_pdfs[, "PDF"])
-#' df_swrc_pdfs[has_pdf, , drop = FALSE]
-#' list_swrcs_pdfs[has_pdf]
+#' # Available SWRC-PTF combinations
+#' has_ptf <- check_ptf_availability(df_swrc_ptfs[, "PTF"])
+#' df_swrc_ptfs[has_ptf, , drop = FALSE]
+#' list_swrcs_ptfs[has_ptf]
 #'
 #' @md
 #' @export
-list_matched_swrcs_pdfs <- function(swrc_name = names(swrc_names())) {
+list_matched_swrcs_ptfs <- function(swrc_name = names(swrc_names())) {
   res <- expand.grid(
     SWRC = std_swrc(swrc_name),
-    PDF = names(pdf_names()),
+    PTF = names(ptf_names()),
     stringsAsFactors = FALSE,
     KEEP.OUT.ATTRS = FALSE
   )
 
-  ids <- check_SWRC_vs_PDF(res[, "SWRC"], res[, "PDF"])
+  ids <- check_SWRC_vs_PTF(res[, "SWRC"], res[, "PTF"])
 
   res <- res[ids, , drop = FALSE]
   rownames(res) <- NULL
@@ -467,45 +467,45 @@ list_matched_swrcs_pdfs <- function(swrc_name = names(swrc_names())) {
 }
 
 
-#' Check whether PDF and SWRC are compatible and implemented
+#' Check whether `PTF` and `SWRC` are compatible and implemented
 #'
 #' @inheritParams SWRCs
 #'
 #' @return A logical vector.
 #'
 #' @examples
-#' check_SWRC_vs_PDF("Campbell1974", c("Cosby1984", "Rosetta3"))
+#' check_SWRC_vs_PTF("Campbell1974", c("Cosby1984", "Rosetta3"))
 #'
 #' @md
 #' @export
-check_SWRC_vs_PDF <- function(swrc_name, pdf_name, fail = FALSE) {
+check_SWRC_vs_PTF <- function(swrc_name, ptf_name, fail = FALSE) {
   swrc_names <- std_swrc(swrc_name)
-  pdf_names <- std_pdf(pdf_name)
+  ptf_names <- std_ptf(ptf_name)
 
   n_swrcs <- length(swrc_names)
-  n_pdfs <- length(pdf_names)
+  n_ptfs <- length(ptf_names)
 
-  if (n_swrcs == 1L && n_pdfs > 1L) {
-    swrc_names <- rep(swrc_names, n_pdfs)
-    n_swrcs <- n_pdfs
-  } else if (n_swrcs > 1L && n_pdfs == 1L) {
-    pdf_names <- rep(pdf_names, n_swrcs)
-    n_pdfs <- n_swrcs
+  if (n_swrcs == 1L && n_ptfs > 1L) {
+    swrc_names <- rep(swrc_names, n_ptfs)
+    n_swrcs <- n_ptfs
+  } else if (n_swrcs > 1L && n_ptfs == 1L) {
+    ptf_names <- rep(ptf_names, n_swrcs)
+    n_ptfs <- n_swrcs
   }
 
-  stopifnot(n_swrcs == n_pdfs)
+  stopifnot(n_swrcs == n_ptfs)
 
-  # Check if SWRC/PDF implemented in rSOILWAT2
-  has_rSW2 <- rSW2_check_SWRC_vs_PDF(swrc_names, pdf_names)
+  # Check if SWRC/PTF implemented in rSOILWAT2
+  has_rSW2 <- rSW2_check_SWRC_vs_PTF(swrc_names, ptf_names)
 
-  # Check if SWRC/PDF implemented in SOILWAT2
+  # Check if SWRC/PTF implemented in SOILWAT2
   has_SW2 <- mapply(
-    function(s, p) .Call(C_sw_check_SWRC_vs_PDF, s, p),
+    function(s, p) .Call(C_sw_check_SWRC_vs_PTF, s, p),
     swrc_names,
-    pdf_names
+    ptf_names
   )
 
-  # SWRC/PDF implemented in either rSOILWAT2 or SOILWAT2
+  # SWRC/PTF implemented in either rSOILWAT2 or SOILWAT2
   res <- unname(has_rSW2 | has_SW2)
 
 
@@ -513,7 +513,7 @@ check_SWRC_vs_PDF <- function(swrc_name, pdf_name, fail = FALSE) {
     ids <- which(!res)
 
     stop(
-      toString(paste(swrc_names[ids], pdf_names[ids], collapse = "-")),
+      toString(paste(swrc_names[ids], ptf_names[ids], collapse = "-")),
       " are not available or incompatible."
     )
   }
@@ -521,19 +521,19 @@ check_SWRC_vs_PDF <- function(swrc_name, pdf_name, fail = FALSE) {
   res
 }
 
-#' Check whether PDF and SWRC are compatible and implemented in `rSOILWAT2`
+#' Check whether `PTF` and `SWRC` are compatible and implemented in `rSOILWAT2`
 #'
 #' @inheritParams SWRCs
 #'
 #' @md
 #' @noRd
-rSW2_check_SWRC_vs_PDF <- function(swrc_name, pdf_name) {
+rSW2_check_SWRC_vs_PTF <- function(swrc_name, ptf_name) {
   swrc_name <- std_swrc(swrc_name)
-  pdf_name <- std_pdf(pdf_name)
+  ptf_name <- std_ptf(ptf_name)
 
-  pdf_name %in% pdfs_implemented_by_rSW2() & (
-    swrc_name == "vanGenuchten1980" & pdf_name == "Rosetta3" |
-      swrc_name == "FXW" & pdf_name == "neuroFX2021"
+  ptf_name %in% ptfs_implemented_by_rSW2() & (
+    swrc_name == "vanGenuchten1980" & ptf_name == "Rosetta3" |
+      swrc_name == "FXW" & ptf_name == "neuroFX2021"
   )
 }
 
@@ -541,18 +541,18 @@ rSW2_check_SWRC_vs_PDF <- function(swrc_name, pdf_name) {
 #' Estimate `SWRC` parameters from soil texture with a pedotransfer function
 #'
 #' @inheritParams SWRCs
-#' @param ... Additional parameters passed to selected `PDF` function.
+#' @param ... Additional parameters passed to selected `PTF` function.
 #'
 #' @section Notes:
 #' [swrc_names()] lists implemented `SWRCs`;
-#' [pdf_names()] lists implemented `PDFs`; and
-#' [check_pdf_availability()] checks availability of `PDFs`.
+#' [ptf_names()] lists implemented `PTFs`; and
+#' [check_ptf_availability()] checks availability of `PTFs`.
 #'
 #' @section Notes:
 #' The soil parameters `sand`, `clay`, `fcoarse`, and `bdensity` must be of
 #' the same length, i.e., represent one soil (length 1) or
 #' multiple soil (layers) (length > 1); however, `bdensity` may be `NULL`.
-#' The arguments selecting `SWRC` (`swrc_name`) and `PDF` (`pdf_name`)
+#' The arguments selecting `SWRC` (`swrc_name`) and `PTF` (`ptf_name`)
 #' are recycled for multiple soil layers.
 #'
 #' @inherit SWRCs references
@@ -569,72 +569,72 @@ rSW2_check_SWRC_vs_PDF <- function(swrc_name, pdf_name) {
 # nolint end
 #'
 #' @examples
-#' pdf_estimate(sand = c(0.5, 0.3), clay = c(0.2, 0.1), fcoarse = c(0, 0))
+#' ptf_estimate(sand = c(0.5, 0.3), clay = c(0.2, 0.1), fcoarse = c(0, 0))
 #'
 #' soils <- swSoils_Layers(rSOILWAT2::sw_exampleData)
 #'
-#' # Use PDF "Cosby1984" to estimate parameters of SWRC "Campbell1974"
-#' pdf_estimate(
+#' # Use PTF "Cosby1984" to estimate parameters of SWRC "Campbell1974"
+#' ptf_estimate(
 #'   sand = soils[, "sand_frac"],
 #'   clay = soils[, "clay_frac"],
 #'   fcoarse = soils[, "gravel_content"],
 #'   swrc_name = "Campbell1974",
-#'   pdf_name = "Cosby1984"
+#'   ptf_name = "Cosby1984"
 #' )
 #'
-#' # Use PDF "Rosetta3" to estimate parameters of SWRC "vanGenuchten1980"
-#' if (check_pdf_availability("Rosetta3")) {
-#'   pdf_estimate(
+#' # Use PTF "Rosetta3" to estimate parameters of SWRC "vanGenuchten1980"
+#' if (check_ptf_availability("Rosetta3")) {
+#'   ptf_estimate(
 #'     sand = soils[, "sand_frac"],
 #'     clay = soils[, "clay_frac"],
 #'     fcoarse = soils[, "gravel_content"],
 #'     bdensity = soils[, "bulkDensity_g/cm^3"],
 #'     swrc_name = "vanGenuchten1980",
-#'     pdf_name = "Rosetta3"
+#'     ptf_name = "Rosetta3"
 #'   )
 #' }
 #'
-#' # Use PDF "neuroFX2021" to estimate parameters of SWRC `FXW`
+#' # Use PTF "neuroFX2021" to estimate parameters of SWRC `FXW`
 #' \dontrun{
-#' # Set neuroFX2021 file path, see details in `pdf_neuroFX2021_for_FXW()`
+#' # Set neuroFX2021 file path, see details in `ptf_neuroFX2021_for_FXW()`
 #' options(RSW2_FILENEUROFX2021 = "path/to/sscbd.RData")
 #' }
 #'
-#' if (check_pdf_availability("neuroFX2021")) {
-#'   pdf_estimate(
+#' if (check_ptf_availability("neuroFX2021")) {
+#'   ptf_estimate(
 #'     sand = soils[, "sand_frac"],
 #'     clay = soils[, "clay_frac"],
 #'     fcoarse = soils[, "gravel_content"],
 #'     bdensity = soils[, "bulkDensity_g/cm^3"],
 #'     swrc_name = "FXW",
-#'     pdf_name = "neuroFX2021"
+#'     ptf_name = "neuroFX2021"
 #'   )
 #' }
 #'
 #' @md
 #' @export
-pdf_estimate <- function(
+ptf_estimate <- function(
   sand,
   clay,
   fcoarse,
   bdensity = NULL,
   swrc_name,
-  pdf_name,
+  ptf_name,
   fail = FALSE,
   ...
 ) {
 
-  #--- Check for consistency between SWRC and PDF
+  #--- Check for consistency between SWRC and PTF
   swrc_name <- std_swrc(swrc_name)[1]
-  pdf_name <- std_pdf(pdf_name)[1]
+  ptf_name <- std_ptf(ptf_name)[1]
 
-  check_SWRC_vs_PDF(swrc_name, pdf_name, fail = TRUE)
+  check_SWRC_vs_PTF(swrc_name, ptf_name, fail = TRUE)
 
 
-  #--- Determine whether we use a C- or R-implemented PDF
-  swrcp <- if (pdf_name %in% pdfs_implemented_by_rSW2()) {
-    rSW2_SWRC_PDF_estimate_parameters(
-      pdf_name = pdf_name,
+  #--- Determine whether we use a C- or R-implemented PTF
+  swrcp <- if (ptf_name %in% ptfs_implemented_by_rSW2()) {
+    rSW2_SWRC_PTF_estimate_parameters(
+      ptf_name = ptf_name,
       sand = sand,
       clay = clay,
       fcoarse = fcoarse,
@@ -645,8 +645,8 @@ pdf_estimate <- function(
 
   } else {
     .Call(
-      C_rSW2_SWRC_PDF_estimate_parameters,
-      pdf_type = rep_len(encode_name2pdf(pdf_name), length(sand)),
+      C_rSW2_SWRC_PTF_estimate_parameters,
+      ptf_type = rep_len(encode_name2ptf(ptf_name), length(sand)),
       sand = sand,
       clay = clay,
       fcoarse = fcoarse,
@@ -666,48 +666,48 @@ pdf_estimate <- function(
 }
 
 
-#' Check availability of `PDFs`
+#' Check availability of `PTFs`
 #'
-#' PDFs implemented in `SOILWAT2` are always available;
-#' PDFs implemented in `rSOILWAT2` may have additional requirements, e.g.,
+#' `PTFs` implemented in `SOILWAT2` are always available;
+#' `PTFs` implemented in `rSOILWAT2` may have additional requirements, e.g.,
 #' live internet connection or access to specific data files.
 #'
-#' @param pdfs A character vector. `PDF` names to be checked;
-#' defaults to [pdf_names()].
+#' @param ptfs A character vector. `PTF` names to be checked;
+#' defaults to [ptf_names()].
 #' @param verbose A logical value.
 #'
-#' @return A named logical vector with current availability of `PDFs`;
-#' `pdfs` that are not implemented return `NA`.
+#' @return A named logical vector with current availability of `PTFs`;
+#' `PTFs` that are not implemented return `NA`.
 #'
 #' @examples
-#' check_pdf_availability()
-#' check_pdf_availability("neuroFX2021")
-#' check_pdf_availability("nonexistent_PDF")
+#' check_ptf_availability()
+#' check_ptf_availability("neuroFX2021")
+#' check_ptf_availability("nonexistent_PTF")
 #'
 #' @export
 #' @md
-check_pdf_availability <- function(
-  pdfs = names(pdf_names()),
+check_ptf_availability <- function(
+  ptfs = names(ptf_names()),
   verbose = interactive()
 ) {
-  res <- rep(NA, length(pdfs))
-  names(res) <- pdfs
+  res <- rep(NA, length(ptfs))
+  names(res) <- ptfs
 
-  rpdfs <- pdfs_implemented_by_rSW2()
-  is_rpdf <- pdfs %in% rpdfs
+  rptfs <- ptfs_implemented_by_rSW2()
+  is_rptf <- ptfs %in% rptfs
 
-  # PDFs implemented in SOILWAT2 are always available
-  tmp <- pdfs %in% pdfs_implemented_by_SW2(names_only = TRUE) & !is_rpdf
+  # PTFs implemented in SOILWAT2 are always available
+  tmp <- ptfs %in% ptfs_implemented_by_SW2(names_only = TRUE) & !is_rptf
   res[tmp] <- TRUE
 
-  # Check requested PDFs implemented in R
-  has_rpdfs <- vapply(
-    pdfs[is_rpdf],
-    function(pdf) {
+  # Check requested PTFs implemented in R
+  has_rptfs <- vapply(
+    ptfs[is_rptf],
+    function(ptf) {
       switch(
-        EXPR = pdf,
-        Rosetta3 = pdf_Rosetta3_availability(verbose = verbose),
-        neuroFX2021 = pdf_neuroFX2021_availability(verbose = verbose),
+        EXPR = ptf,
+        Rosetta3 = ptf_Rosetta3_availability(verbose = verbose),
+        neuroFX2021 = ptf_neuroFX2021_availability(verbose = verbose),
         NA
       )
     },
@@ -715,17 +715,17 @@ check_pdf_availability <- function(
     USE.NAMES = TRUE
   )
 
-  res[names(has_rpdfs)] <- has_rpdfs
+  res[names(has_rptfs)] <- has_rptfs
 
   res
 }
 
 
 #' Estimate parameters of selected soil water retention curve (`SWRC`)
-#' using selected pedotransfer function (`PDF`) that are implemented in `R`
+#' using selected pedotransfer function (`PTF`) that are implemented in `R`
 #'
-#' @inheritParams pdf_estimate
-#' @param fail A logical value. If requested `PDF` fails,
+#' @inheritParams ptf_estimate
+#' @param fail A logical value. If requested `PTF` fails,
 #' then issue a warning (`FALSE`) or throw an error (`TRUE`, default).
 #'
 #' @return `swrcp`, i.e,.
@@ -733,21 +733,21 @@ check_pdf_availability <- function(
 #' columns represent a fixed number of `SWRC` parameters.
 #' The interpretation is dependent on the selected `SWRC`.
 #' However, return value is `NULL`
-#' only if `fail` is `FALSE` and requested `PDF` is not implemented in `R`.
+#' only if `fail` is `FALSE` and requested `PTF` is not implemented in `R`.
 #'
 #' @inherit SWRCs references
 #'
 #' @section Details:
-#' [pdf_estimate()] is the function that should be directly called; this here
+#' [ptf_estimate()] is the function that should be directly called; this here
 #' is an internal helper function.
 #'
 #' @section Notes:
-#' See `SWRC_PDF_estimate_parameters()` in `SOILWAT2` for `PDFs`
+#' See `SWRC_PTF_estimate_parameters()` in `SOILWAT2` for `PTFs`
 #' implemented in C.
 #'
 #' @md
-rSW2_SWRC_PDF_estimate_parameters <- function( # nolint: object_length_linter.
-  pdf_name,
+rSW2_SWRC_PTF_estimate_parameters <- function( # nolint: object_length_linter.
+  ptf_name,
   sand,
   clay,
   fcoarse,
@@ -755,8 +755,8 @@ rSW2_SWRC_PDF_estimate_parameters <- function( # nolint: object_length_linter.
   fail = TRUE,
   ...
 ) {
-  pdf_name <- std_pdf(pdf_name)[1]
-  has_pdf <- pdf_name %in% pdfs_implemented_by_rSW2()
+  ptf_name <- std_ptf(ptf_name)[1]
+  has_ptf <- ptf_name %in% ptfs_implemented_by_rSW2()
 
   list_soilargs <- list(
     sand = sand,
@@ -764,7 +764,7 @@ rSW2_SWRC_PDF_estimate_parameters <- function( # nolint: object_length_linter.
     bdensity = bdensity
   )
 
-  if (has_pdf && pdf_name %in% "Rosetta3") {
+  if (has_ptf && ptf_name %in% "Rosetta3") {
     dots <- list(...)
     dots[["version"]] <- if ("version" %in% names(dots)) {
       as.character(dots[["version"]])
@@ -773,18 +773,18 @@ rSW2_SWRC_PDF_estimate_parameters <- function( # nolint: object_length_linter.
     }
 
     do.call(
-      pdf_Rosetta_for_vanGenuchten1980,
+      ptf_Rosetta_for_vanGenuchten1980,
       args = c(list_soilargs, dots)
     )
 
-  } else if (has_pdf && pdf_name %in% "neuroFX2021") {
+  } else if (has_ptf && ptf_name %in% "neuroFX2021") {
     do.call(
-      pdf_neuroFX2021_for_FXW,
+      ptf_neuroFX2021_for_FXW,
       args = c(list_soilargs, list(...))
     )[["mean"]]
 
   } else {
-    msg <- paste("PDF", shQuote(pdf_name), "is not implemented in rSOILWAT2.")
+    msg <- paste("PTF", shQuote(ptf_name), "is not implemented in rSOILWAT2.")
 
     if (isTRUE(fail)) stop(msg) else warning(msg)
 
@@ -827,7 +827,7 @@ rSW2_SWRC_PDF_estimate_parameters <- function( # nolint: object_length_linter.
 #'   Journal of Hydrology, 547:39-53, \doi{10.1016/j.jhydrol.2017.01.004}
 #'
 #' @section Details:
-#' [pdf_estimate()] is the function that should be directly called; this here
+#' [ptf_estimate()] is the function that should be directly called; this here
 #' is an internal helper function.
 #'
 #' @section Notes:
@@ -837,7 +837,7 @@ rSW2_SWRC_PDF_estimate_parameters <- function( # nolint: object_length_linter.
 #' @seealso [soilDB::ROSETTA()]
 #'
 #' @md
-pdf_Rosetta_for_vanGenuchten1980 <- function( # nolint: object_length_linter.
+ptf_Rosetta_for_vanGenuchten1980 <- function( # nolint: object_length_linter.
   sand,
   clay,
   bdensity = NULL,
@@ -845,7 +845,7 @@ pdf_Rosetta_for_vanGenuchten1980 <- function( # nolint: object_length_linter.
   verbose = interactive(),
   ...
 ) {
-  stopifnot(pdf_Rosetta3_availability(verbose = verbose))
+  stopifnot(ptf_Rosetta3_availability(verbose = verbose))
 
   version <- match.arg(version)
 
@@ -879,11 +879,11 @@ pdf_Rosetta_for_vanGenuchten1980 <- function( # nolint: object_length_linter.
   )))
 }
 
-# Checks availability of `Rosetta3` `PDF`
+# Checks availability of `Rosetta3` `PTF`
 #
-# Note: `check_pdf_availability()` requires function name
-# to match pattern "pdf_XXX_availability" where XXX = name of PDF
-pdf_Rosetta3_availability <- function(verbose = interactive(), ...) {
+# Note: `check_ptf_availability()` requires function name
+# to match pattern "ptf_XXX_availability" where XXX = name of PTF
+ptf_Rosetta3_availability <- function(verbose = interactive(), ...) {
   tmp <- c(
     requireNamespace("soilDB"),
     requireNamespace("curl") && curl::has_internet()
@@ -894,13 +894,13 @@ pdf_Rosetta3_availability <- function(verbose = interactive(), ...) {
   if (!res && verbose) {
     if (!tmp[1]) {
       message(
-        "`pdf_Rosetta3_availability()`: ",
+        "`ptf_Rosetta3_availability()`: ",
         "R package 'soilDB' is not available."
       )
     }
     if (!tmp[2]) {
       message(
-        "`pdf_Rosetta3_availability()`: ",
+        "`ptf_Rosetta3_availability()`: ",
         "R package 'curl' is not available or there is no live internet."
       )
     }
@@ -947,7 +947,7 @@ pdf_Rosetta3_availability <- function(verbose = interactive(), ...) {
 #'   Water Resources Research, 54:6860–6876, \doi{10.1029/2018WR023037}
 #'
 #' @section Details:
-#' [pdf_estimate()] is the function that should be directly called; this here
+#' [ptf_estimate()] is the function that should be directly called; this here
 #' is an internal helper function.
 #'
 #' @section Details:
@@ -963,17 +963,17 @@ pdf_Rosetta3_availability <- function(verbose = interactive(), ...) {
 #' The path to the appropriate file can be set per R session
 #' via option `"RSW2_FILENEUROFX2021"`
 #' (and avoid passing it directly as argument to the function);
-#' this can be useful, for example, if `pdf_estimate()` is used for `FXW`.
+#' this can be useful, for example, if `ptf_estimate()` is used for `FXW`.
 #'
 #' @md
-pdf_neuroFX2021_for_FXW <- function(
+ptf_neuroFX2021_for_FXW <- function(
   sand,
   clay,
   bdensity = NULL,
   file_neuroFX2021 = getOption("RSW2_FILENEUROFX2021", NULL),
   ...
 ) {
-  stopifnot(pdf_neuroFX2021_availability(file_neuroFX2021))
+  stopifnot(ptf_neuroFX2021_availability(file_neuroFX2021))
 
   # Load `neuroFX2021`
   nfx <- new.env()
@@ -996,7 +996,7 @@ pdf_neuroFX2021_for_FXW <- function(
       tmp_txt[, "bd"] <- bdensity
     } else {
       warning(
-        "`pdf_neuroFX2021_for_FXW()`: ",
+        "`ptf_neuroFX2021_for_FXW()`: ",
         "`bdensity` ignored because ",
         "'neuroFX2021' object is for SSC (sand, silt, clay)."
       )
@@ -1004,7 +1004,7 @@ pdf_neuroFX2021_for_FXW <- function(
   } else {
     if (is_sscbd) {
       stop(
-        "`pdf_neuroFX2021_for_FXW()`: ",
+        "`ptf_neuroFX2021_for_FXW()`: ",
         "'neuroFX2021' object is for SSCBD (sand, silt, clay, bulk density) ",
         "but `bdensity` contains no values."
       )
@@ -1033,11 +1033,11 @@ pdf_neuroFX2021_for_FXW <- function(
   )
 }
 
-# Checks availability of `neuroFX2021` `PDF`
+# Checks availability of `neuroFX2021` `PTF`
 #
-# Note: `check_pdf_availability()` requires function name
-# to match pattern "pdf_XXX_availability" where XXX = name of PDF
-pdf_neuroFX2021_availability <- function(
+# Note: `check_ptf_availability()` requires function name
+# to match pattern "ptf_XXX_availability" where XXX = name of PTF
+ptf_neuroFX2021_availability <- function(
   file_neuroFX2021 = getOption("RSW2_FILENEUROFX2021", NULL),
   verbose = interactive(),
   ...
@@ -1046,9 +1046,9 @@ pdf_neuroFX2021_availability <- function(
 
   if (!res && verbose) {
     message(
-      "`pdf_neuroFX2021_availability()`: ",
+      "`ptf_neuroFX2021_availability()`: ",
       "data file 'file_neuroFX2021' does not exist; ",
-      "see documentation for `pdf_neuroFX2021_for_FXW()` and consider setting ",
+      "see documentation for `ptf_neuroFX2021_for_FXW()` and consider setting ",
       "`options(RSW2_FILENEUROFX2021 = \"path/to/sscbd.RData\")`"
     )
   }
@@ -1104,17 +1104,17 @@ iterate_neuroFX <- function(x, nfx, niter = 50) {
 #' @section Details:
 #' [swrc_names()] lists implemented `SWRCs`.
 #'
-#' @seealso [pdf_estimate()]
+#' @seealso [ptf_estimate()]
 #'
 #' @examples
 #' swrc_name <- "Campbell1974"
-#' pdf_name <- "Cosby1984AndOthers"
-#' swrcp <- pdf_estimate(
+#' ptf_name <- "Cosby1984AndOthers"
+#' swrcp <- ptf_estimate(
 #'   sand = c(0.5, 0.3),
 #'   clay = c(0.2, 0.1),
 #'   fcoarse = c(0, 0),
 #'   swrc_name = swrc_name,
-#'   pdf_name = pdf_name
+#'   ptf_name = ptf_name
 #' )
 #'
 #' check_swrcp(swrc_name, swrcp)
@@ -1181,8 +1181,8 @@ check_swrcp <- function(swrc_name, swrcp) {
 #'
 #' @section Details:
 #' [swrc_names()] lists implemented `SWRCs`;
-#' [pdf_names()] lists implemented `PDFs`; and
-#' [check_pdf_availability()] checks availability of `PDFs`.
+#' [ptf_names()] lists implemented `PTFs`; and
+#' [check_ptf_availability()] checks availability of `PTFs`.
 #'
 #' @section Details:
 #' For backward compatibility, `fcoarse` and `layer_width` may be missing.
@@ -1194,8 +1194,8 @@ check_swrcp <- function(swrc_name, swrcp) {
 #' if `SWRC` parameter values need to be estimated on the fly,
 #' i.e., if `swrc` does not contain the element `swrcp`
 #' (with suitable `SWRC` parameter values).
-#' This is handled by [pdf_estimate()] and additionally requires
-#' the element `pdf_name` for argument `swrc`.
+#' This is handled by [ptf_estimate()] and additionally requires
+#' the element `ptf_name` for argument `swrc`.
 #'
 #' @section Details:
 #' If `swrc` contains element `swrcp` with one set of `SWRC` parameters,
@@ -1205,13 +1205,13 @@ check_swrcp <- function(swrc_name, swrcp) {
 #' If `vwc` inputs represent the matric component
 #' (instead of expected bulk values), then set `fcoarse` to 0.
 #' This works, however, only if `swrcp` are provided or `fcoarse` is not
-#' utilized by the requested `pdf`.
+#' utilized by the requested `PTF`.
 #'
 #'
 #' @seealso
-#'   [pdf_estimate()],
+#'   [ptf_estimate()],
 #'   [check_swrcp()],
-#'   [check_pdf_availability()]
+#'   [check_ptf_availability()]
 #'
 #' @examples
 #' fsand <- c(0.5, 0.3)
@@ -1221,12 +1221,12 @@ check_swrcp <- function(swrc_name, swrcp) {
 #'
 #' swrc1 <- list(
 #'   name = "Campbell1974",
-#'   swrcp = pdf_estimate(
+#'   swrcp = ptf_estimate(
 #'     sand = fsand,
 #'     clay = fclay,
 #'     fcoarse = fcrs1,
 #'     swrc_name = "Campbell1974",
-#'     pdf_name = "Cosby1984"
+#'     ptf_name = "Cosby1984"
 #'   )
 #' )
 #' swrc_swp_to_vwc(-1.5, fcoarse = fcrs1, swrc = swrc1)
@@ -1237,12 +1237,12 @@ check_swrcp <- function(swrc_name, swrcp) {
 #'
 #' swrc2 <- list(
 #'   name = "Campbell1974",
-#'   swrcp = pdf_estimate(
+#'   swrcp = ptf_estimate(
 #'     sand = fsand,
 #'     clay = fclay,
 #'     fcoarse = fcrs2,
 #'     swrc_name = "Campbell1974",
-#'     pdf_name = "Cosby1984"
+#'     ptf_name = "Cosby1984"
 #'   )
 #' )
 #' swrc_swp_to_vwc(-1.5, fcoarse = fcrs2, swrc = swrc2)
@@ -1253,7 +1253,7 @@ check_swrcp <- function(swrc_name, swrcp) {
 #'
 #' # Available water holding capacity "AWC"
 #' soils <- swSoils_Layers(rSOILWAT2::sw_exampleData)
-#' p <- pdf_estimate(
+#' p <- ptf_estimate(
 #'   sand = soils[, "sand_frac"],
 #'   clay = soils[, "clay_frac"],
 #'   fcoarse = soils[, "gravel_content"]
@@ -1278,33 +1278,33 @@ check_swrcp <- function(swrc_name, swrcp) {
 #'     theta,
 #'     sand = soils[, "sand_frac"],
 #'     clay = soils[, "clay_frac"],
-#'     swrc = list(swrc_name = "Campbell1974", pdf_name = "Cosby1984")
+#'     swrc = list(swrc_name = "Campbell1974", ptf_name = "Cosby1984")
 #'   )
 #' )
 #'
-#' if (check_pdf_availability("Rosetta3")) {
+#' if (check_ptf_availability("Rosetta3")) {
 #'   phi[["vanGenuchten1980"]] <- swrc_vwc_to_swp(
 #'     theta,
 #'     sand = soils[, "sand_frac"],
 #'     clay = soils[, "clay_frac"],
 #'     bdensity = soils[, "bd"],
-#'     swrc = list(swrc_name = "vanGenuchten1980", pdf_name = "Rosetta3")
+#'     swrc = list(swrc_name = "vanGenuchten1980", ptf_name = "Rosetta3")
 #'   )
 #' }
 #'
-#' # Use PDF "neuroFX2021" to estimate parameters of SWRC `FXW`
+#' # Use PTF "neuroFX2021" to estimate parameters of SWRC `FXW`
 #' \dontrun{
-#' # Set neuroFX2021 file path, see details in `pdf_neuroFX2021_for_FXW()`
+#' # Set neuroFX2021 file path, see details in `ptf_neuroFX2021_for_FXW()`
 #' options(RSW2_FILENEUROFX2021 = "path/to/sscbd.RData")
 #' }
 #'
-#' if (check_pdf_availability("neuroFX2021")) {
+#' if (check_ptf_availability("neuroFX2021")) {
 #'   phi[["FXW"]] <- swrc_vwc_to_swp(
 #'     theta,
 #'     sand = soils[, "sand_frac"],
 #'     clay = soils[, "clay_frac"],
 #'     bdensity = soils[, "bd"],
-#'     swrc = list(swrc_name = "FXW", pdf_name = "neuroFX2021")
+#'     swrc = list(swrc_name = "FXW", ptf_name = "neuroFX2021")
 #'   )
 #' }
 #'
@@ -1371,7 +1371,7 @@ swrc_conversion <- function(
   # Do we have sufficient information to estimate swrcp?
   if (is.null(swrc[["swrcp"]])) {
     if (
-      !all(c("swrc_name", "pdf_name") %in% names(swrc)) ||
+      !all(c("swrc_name", "ptf_name") %in% names(swrc)) ||
         is.null(sand) || is.null(clay)
     ) {
       stop("Insufficient information to estimate SWRC parameters.")
@@ -1468,13 +1468,13 @@ swrc_conversion <- function(
     }
 
     if (is.null(swrc[["swrcp"]])) {
-      swrc[["swrcp"]] <- pdf_estimate(
+      swrc[["swrcp"]] <- ptf_estimate(
         sand = soils[["sand"]],
         clay = soils[["clay"]],
         fcoarse = soils[["fcoarse"]],
         bdensity = soils[["bdensity"]],
         swrc_name = swrc[["swrc_name"]],
-        pdf_name = swrc[["pdf_name"]]
+        ptf_name = swrc[["ptf_name"]]
       )
     }
 
@@ -1485,13 +1485,13 @@ swrc_conversion <- function(
     # (x repeated for each soil)
 
     if (is.null(swrc[["swrcp"]])) {
-      swrc[["swrcp"]] <- pdf_estimate(
+      swrc[["swrcp"]] <- ptf_estimate(
         sand = soils[["sand"]],
         clay = soils[["clay"]],
         fcoarse = soils[["fcoarse"]],
         bdensity = soils[["bdensity"]],
         swrc_name = swrc[["swrc_name"]],
-        pdf_name = swrc[["pdf_name"]]
+        ptf_name = swrc[["ptf_name"]]
       )
     }
 
@@ -1508,13 +1508,13 @@ swrc_conversion <- function(
     soils <- lapply(soils, rep_len, length.out = nrx)
 
     if (is.null(swrc[["swrcp"]])) {
-      swrc[["swrcp"]] <- pdf_estimate(
+      swrc[["swrcp"]] <- ptf_estimate(
         sand = soils[["sand"]],
         clay = soils[["clay"]],
         fcoarse = soils[["fcoarse"]],
         bdensity = soils[["bdensity"]],
         swrc_name = swrc[["swrc_name"]],
-        pdf_name = swrc[["pdf_name"]]
+        ptf_name = swrc[["ptf_name"]]
       )
     }
 
@@ -1531,13 +1531,13 @@ swrc_conversion <- function(
     # (soils repeated for row of x value)
 
     if (is.null(swrc[["swrcp"]])) {
-      swrc[["swrcp"]] <- pdf_estimate(
+      swrc[["swrcp"]] <- ptf_estimate(
         sand = soils[["sand"]],
         clay = soils[["clay"]],
         fcoarse = soils[["fcoarse"]],
         bdensity = soils[["bdensity"]],
         swrc_name = swrc[["swrc_name"]],
-        pdf_name = swrc[["pdf_name"]]
+        ptf_name = swrc[["ptf_name"]]
       )
     }
 
@@ -1623,7 +1623,7 @@ swrc_swp_to_vwc <- function(
   swp_MPa,
   fcoarse,
   layer_width,
-  swrc = list(swrc_name = NULL, pdf_name = NULL, swrcp = NULL),
+  swrc = list(swrc_name = NULL, ptf_name = NULL, swrcp = NULL),
   sand = NULL,
   clay = NULL,
   bdensity = NULL,
@@ -1660,7 +1660,7 @@ swrc_vwc_to_swp <- function(
   vwcBulk,
   fcoarse,
   layer_width,
-  swrc = list(swrc_name = NULL, pdf_name = NULL, swrcp = NULL),
+  swrc = list(swrc_name = NULL, ptf_name = NULL, swrcp = NULL),
   sand = NULL,
   clay = NULL,
   bdensity = NULL,

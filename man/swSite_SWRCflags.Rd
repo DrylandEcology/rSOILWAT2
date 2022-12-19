@@ -8,7 +8,7 @@
 \alias{swSite_SWRCflags<-,swSite-method}
 \alias{swSite_SWRCflags,swInputData-method}
 \alias{swSite_SWRCflags<-,swInputData-method}
-\title{Names of \code{SWRC} and \code{PDF}}
+\title{Names of \code{SWRC} and \code{PTF}}
 \usage{
 swSite_SWRCflags(object)
 
@@ -26,18 +26,18 @@ swSite_SWRCflags(object) <- value
 \item{object}{An object of class \linkS4class{swSite} or \linkS4class{swInputData}.}
 
 \item{value}{A character vector with two elements for
-`"swrc_name"` and `"pdf_name"`.}
+\code{"swrc_name"} and \code{"ptf_name"}.}
 }
 \value{
-A character vector with two elements \code{"swrc_name"} and \code{"pdf_name"}.
+A character vector with two elements \code{"swrc_name"} and \code{"ptf_name"}.
 }
 \description{
-Names of \code{SWRC} and \code{PDF}
+Names of \code{SWRC} and \code{PTF}
 }
 \section{Details}{
 
 The replacement method \code{\link[=swSite_SWRCflags]{swSite_SWRCflags()}} for class \linkS4class{swInputData}
-resets \code{has_swrcp} to \code{FALSE} if \code{"swrc_name"} or \code{"pdf_name"} are updated.
+resets \code{has_swrcp} to \code{FALSE} if \code{"swrc_name"} or \code{"ptf_name"} are updated.
 This is to avoid inconsistency between
 \code{SWRCp}, \code{has_swrcp}, and \code{swrc_flags}.
 

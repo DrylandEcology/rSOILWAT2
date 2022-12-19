@@ -32,7 +32,7 @@ A logical value.
 \code{TRUE} if \code{SWRC} parameters are provided in \code{SWRCp};
 \code{FALSE} if \code{SWRCp} should be estimated during a simulation run
 via specified pedotransfer function
-(see \code{"pdf_name"} of \code{\link[=swSite_SWRCflags]{swSite_SWRCflags()}}).
+(see \code{"ptf_name"} of \code{\link[=swSite_SWRCflags]{swSite_SWRCflags()}}).
 }
 \description{
 Set to \code{TRUE} once \code{SWRCp} are set.

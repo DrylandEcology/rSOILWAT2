@@ -1572,11 +1572,11 @@ setGeneric(
   function(object) standardGeneric("get_swSite")
 )
 
-#' Names of `SWRC` and `PDF`
+#' Names of `SWRC` and `PTF`
 #'
 #' @param object An object of class [swSite-class] or [swInputData-class].
 #'
-#' @return A character vector with two elements `"swrc_name"` and `"pdf_name"`.
+#' @return A character vector with two elements `"swrc_name"` and `"ptf_name"`.
 #'
 #' @md
 #' @exportMethod swSite_SWRCflags
@@ -1595,7 +1595,7 @@ setGeneric(
 #' `TRUE` if `SWRC` parameters are provided in `SWRCp`;
 #' `FALSE` if `SWRCp` should be estimated during a simulation run
 #' via specified pedotransfer function
-#' (see `"pdf_name"` of [swSite_SWRCflags()]).
+#' (see `"ptf_name"` of [swSite_SWRCflags()]).
 #'
 #' @md
 #' @exportMethod swSite_hasSWRCp
@@ -1737,9 +1737,10 @@ setGeneric(
 #' @rdname swSite_SWRCflags
 #'
 #' @param value A character vector with two elements for
-#' `"swrc_name"` and `"pdf_name"`.
+#' `"swrc_name"` and `"ptf_name"`.
 #'
 #' @exportMethod swSite_SWRCflags<-
+#' @md
 setGeneric(
   "swSite_SWRCflags<-",
   function(object, value) standardGeneric("swSite_SWRCflags<-")
