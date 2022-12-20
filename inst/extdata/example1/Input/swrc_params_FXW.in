@@ -1,0 +1,26 @@
+#------ Input for Soil Water Retention Curves (by soil layer) ------
+
+# A table with up to `MAX_LAYERS` rows (soil layers) and 6 columns:
+#   - the soil layers must match `soils.in`
+#   - the interpretation of columns (SWRC parameters) depends on the
+#     selected SWRC (see `siteparam.in`)
+#   - unused columns are ignored (if selected SWRC uses fewer than 6 parameters)
+
+# swrc = "FXW" (values below, from "neuroFX2021")
+#   * param1 = saturated volumetric water content of the matric component [cm/cm]
+#   * param2 = alpha, shape parameter [cm-1]
+#   * param3 = n, shape parameter [-]
+#   * param4 = m, shape parameter [-]
+#   * param5 = saturated hydraulic conductivity [cm / day]
+#   * param6 = L, tortuosity/connectivity parameter [-]
+
+
+# param1 param2   param3   param4   param5     param6
+0.437461 0.050757 1.247689 0.308681  22.985379 2.697338
+0.452401 0.103033 1.146533 0.195394  89.365566 2.843288
+0.471163 0.149055 1.143810 0.124494 332.262496 2.988864
+0.475940 0.153117 1.141559 0.112295 420.418728 3.012669
+0.480690 0.157887 1.142653 0.105748 534.172981 3.049937
+0.538088 0.174184 1.124589 0.098441 978.516197 3.287010
+0.453070 0.169900 1.308269 0.182713 672.009929 3.218662
+0.453070 0.169900 1.308269 0.182713 672.009929 3.218662

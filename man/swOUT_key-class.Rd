@@ -3,15 +3,20 @@
 \docType{class}
 \name{swOUT_key-class}
 \alias{swOUT_key-class}
-\alias{initialize,swOUT_key-method}
+\alias{swOUT_key}
 \title{Class \code{"swOUT_key"}}
 \usage{
-\S4method{initialize}{swOUT_key}(.Object, ...)
+swOUT_key(...)
 }
 \arguments{
-\item{.Object}{An object of class \code{\linkS4class{swOUT_key}}.}
-
-\item{...}{Further arguments to methods.}
+\item{...}{Arguments to the helper constructor function.
+Dots can either contain objects to copy into slots of that class
+(must be named identical to the corresponding slot) or
+be one object of that class (in which case it will be copied and
+any missing slots will take their default values).
+If dots are missing, then corresponding values of
+\code{rSOILWAT2::sw_exampleData}
+(i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class
@@ -20,5 +25,6 @@ The methods listed below work on this class and the proper slot of the class
 \examples{
 showClass("swOUT_key")
 x <- new("swOUT_key")
+x <- swOUT_key()
 
 }

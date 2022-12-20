@@ -12,6 +12,7 @@ linters: lintr::linters_with_tags(
   todo_comment_linter = NULL,
   nonportable_path_linter = NULL,
   expect_identical_linter = NULL,
+  function_argument_linter = NULL,
   yoda_test_linter = NULL)
 exclusions: list(
   "R/RcppExports.R",

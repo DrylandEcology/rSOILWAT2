@@ -190,8 +190,8 @@ options(tinytex.verbose = TRUE)
 ## Create base rSOILWAT2 input object
 ```{r, input_object}
   # Preferred option:
-  # All relevant site-specific paramaters and variables are set to NA
-  sw_in <- new("swInputData")
+  # All relevant site-specific parameters and variables are set to NA
+  sw_in <- rSOILWAT2::swInputData()
 
   # Quick option:
   # This approach is discouraged because it is very easy to miss to
@@ -276,6 +276,15 @@ You may organize weather data in a variety of ways:
       # Check that weather data is well-formed
       stopifnot(rSOILWAT2::dbW_check_weatherData(wdata))
     }
+
+  } else {
+    # We don't have live internet and
+    # were not able to obtain weather data for requested years
+    # --> instead, use data we have locally and adjust years
+    years <- sapply(wdata, function(x) slot(x, "year"))
+    rSOILWAT2::swYears_StartYear(sw_in) <- 0
+    rSOILWAT2::swYears_EndYear(sw_in) <- max(years)
+    rSOILWAT2::swYears_StartYear(sw_in) <- min(years)
   }
 ```
 
@@ -328,7 +337,7 @@ data from `DayMet`
 
   # Assign CO2 values to rSOILWAT2 input object
   rSOILWAT2::swCarbon_Scenario(sw_in) <- co2_nametag
-  rSOILWAT2::swCarbon_CO2ppm(sw_in) <- data.matrix(co2_data)
+  rSOILWAT2::swCarbon_CO2ppm(sw_in) <- co2_data
 ```
 
 
@@ -487,7 +496,7 @@ data from `DayMet`
   rSOILWAT2::swSite_SoilDensityInputType(sw_in) <- 0L
 
   # This fails because rooting profile values are still missing
-  try(rSOILWAT2::swSoils_Layers(sw_in) <- data.matrix(soil_new))
+  try(rSOILWAT2::swSoils_Layers(sw_in) <- soil_new)
 ```
 
 
@@ -599,7 +608,36 @@ data from `DayMet`
 
 ## Assign new soil data to rSOILWAT2 input object
 ```{r, soils_final2, results = "hide"}
-  rSOILWAT2::swSoils_Layers(sw_in) <- data.matrix(soil_new)
+  rSOILWAT2::swSoils_Layers(sw_in) <- soil_new
+```
+
+
+## Estimate parameters of Soil Water Retention Curve before simulation
+Note: This step is usually not necessarily;
+instead, the default setup is that parameters are estimated automatically
+by `SOILWAT2` with the selected pedotransfer function.
+```{r, soils_swrc}
+  tmp <- rSOILWAT2::swSite_SWRCflags(sw_in)
+  swrcp <- rSOILWAT2::ptf_estimate(
+    sand = soil_new[, "sand_frac"],
+    clay = soil_new[, "clay_frac"],
+    fcoarse = soil_new[, "gravel_content"],
+    bdensity = soil_new[, "bulkDensity_g.cm.3"],
+    swrc_name = tmp["swrc_name"],
+    ptf_name = tmp["ptf_name"]
+  )
+
+
+  # Set estimated `SWRC` parameter values
+  rSOILWAT2::swSoils_SWRCp(sw_in) <- swrcp
+
+  # Declare that parameter values are already estimated
+  rSOILWAT2::swSite_hasSWRCp(sw_in) <- TRUE
+
+  if (FALSE) {
+    # Alternatively, set soil properties and SWRC parameters at once
+    rSOILWAT2::set_swSoils(sw_in) <- list(Layers = soil_new, SWRCp = swrcp)
+  }
 ```
 
 
@@ -614,7 +652,7 @@ data from `DayMet`
   tr_lyrs_10cm <- c(1, 1, 1, 2, 2, 2, 2, 3, 3, 3)
 
   tr <- rSOILWAT2::prepare_TranspirationRegions(tr_lyrs = tr_lyrs_10cm)
-  rSOILWAT2::swSite_TranspirationRegions(sw_in) <- data.matrix(tr)
+  rSOILWAT2::swSite_TranspirationRegions(sw_in) <- tr
 
   # Make necessary adjustments based on soil depth and rooting profiles
   rSOILWAT2::swSite_TranspirationRegions(sw_in) <-

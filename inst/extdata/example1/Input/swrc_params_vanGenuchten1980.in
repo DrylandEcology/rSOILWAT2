@@ -1,0 +1,24 @@
+#------ Input for Soil Water Retention Curves (by soil layer) ------
+
+# A table with up to `MAX_LAYERS` rows (soil layers) and 6 columns:
+#   - the soil layers must match `soils.in`
+#   - the interpretation of columns (SWRC parameters) depends on the
+#     selected SWRC (see `siteparam.in`)
+#   - unused columns are ignored (if selected SWRC uses fewer than 6 parameters)
+
+# swrc = "vanGenuchten1980" (values below, from "Rosetta3")
+#   * param1 = residual volumetric water content for the matric component [cm/cm]
+#   * param2 = saturated volumetric water content for the matric component [cm/cm]
+#   * param3 = alpha, related to the inverse of air entry suction [cm-1]
+#   * param4 = n, measure of the pore-size distribution [-]
+#   * param5 = saturated hydraulic conductivity [cm/day]
+
+# param1   param2    param3      param4   param5    param6
+0.07564425 0.3925437 0.010035788 1.412233 19.871040    0
+0.10061329 0.4011315 0.009425738 1.352274  9.090754    0
+0.12060752 0.4278807 0.010424896 1.287923  7.862807    0
+0.12336711 0.4393192 0.010807529 1.274654  9.100139    0
+0.12461498 0.4444546 0.011155912 1.267327  9.902011    0
+0.12480807 0.4426857 0.011408809 1.264873  9.784818    0
+0.10129327 0.3878319 0.014241212 1.311722 10.985124    0
+0.10129327 0.3878319 0.014241212 1.311722 10.985124    0

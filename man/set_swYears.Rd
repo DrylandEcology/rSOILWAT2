@@ -2,9 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swYears}
 \alias{set_swYears}
-\title{\code{set_swYears}
-Need to define and export this generic method -- otherwise,
-\code{\link{set_swYears<-}} doesn't work.}
+\title{\code{set_swYears}}
 \usage{
 set_swYears(object, value)
 }
@@ -16,6 +14,4 @@ set_swYears(object, value)
 }
 \description{
 \code{set_swYears}
-Need to define and export this generic method -- otherwise,
-\code{\link{set_swYears<-}} doesn't work.
 }

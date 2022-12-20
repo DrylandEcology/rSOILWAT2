@@ -29,6 +29,7 @@ evapotranspiration
 exter
 forb
 geoscientific
+geotechnical
 gregorian
 lodgepole
 loess
@@ -39,6 +40,7 @@ pedotransfer
 phenological
 phenology
 rangeland
+recalibration
 sensu
 shortgrass
 shrubland
@@ -47,7 +49,9 @@ spatiotemporal
 submodule
 symlink
 toolchain
+tortuosity
 transmissivity
+vectorized
 xeric
 
 
@@ -70,8 +74,12 @@ RCP
 README
 RMRS
 SSP
+SWP
+swrc
+SWRC
 th
 USGS
+VWC
 
 
 #------------------------------------
@@ -86,14 +94,21 @@ Canadell
 Clapp
 codecov
 Espinosa
+Fiantis
+Fredlund
 Freund
+Genuchten
+Geoderma
 Gessner
+Giap
 Gidden
 Ginn
 github
+Goh
 Havlina
 Hornberger
 Innis
+Jin
 Kainuma
 Krummel
 Lamarque
@@ -101,11 +116,14 @@ Lauenroth
 Lavin
 Luderer
 Maestas
+Maggi
 Markov
 Matsumoto
 Meinshausen
 Milchunas
+Minasny
 Montzka
+Mualem
 Nauels
 Nicholls
 Oecologia
@@ -121,12 +139,15 @@ rhub
 Riahi
 Rotella
 roxygen
-rSOILWAT
 rSFSTEP
 rSFSW
+rSOILWAT
 rSW
+Rudiyanto
 Sala
+Schaap
 Schlaepfer
+Setiawan
 SOILWAT
 Springer
 SQLite
@@ -140,4 +161,6 @@ Vollmer
 Vuuren
 Wickham
 Wuenschel
+Xing
 Zach
+Zhang

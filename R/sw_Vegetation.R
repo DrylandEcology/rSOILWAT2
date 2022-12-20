@@ -389,6 +389,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
 #' )
 #'
 #' ## Plot reference and adjusted monthly values
+#' if (interactive()) {
 #' par_prev <- par(mfrow = c(2, 1))
 #'
 #' plot(
@@ -418,6 +419,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
 #' lines(1:12, phen_adj[, 2])
 #'
 #' par(par_prev)
+#' }
 #'
 #' @export
 adj_phenology_by_temp <- function(x, ref_temp, target_temp, x_asif = NULL) {

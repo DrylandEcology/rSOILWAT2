@@ -3,7 +3,7 @@
 \docType{class}
 \name{swInputData-class}
 \alias{swInputData-class}
-\alias{initialize,swInputData-method}
+\alias{swInputData}
 \alias{get_swFiles,swInputData-method}
 \alias{swFiles_ProjDir,swInputData-method}
 \alias{swFiles_filesIn,swInputData-method}
@@ -11,6 +11,7 @@
 \alias{swFiles_LogFile,swInputData-method}
 \alias{swFiles_SiteParams,swInputData-method}
 \alias{swFiles_Soils,swInputData-method}
+\alias{swFiles_SWRCp,swInputData-method}
 \alias{swFiles_WeatherSetup,swInputData-method}
 \alias{swFiles_MarkovProbs,swInputData-method}
 \alias{swFiles_MarkovCov,swInputData-method}
@@ -29,6 +30,7 @@
 \alias{swFiles_LogFile<-,swInputData-method}
 \alias{swFiles_SiteParams<-,swInputData-method}
 \alias{swFiles_Soils<-,swInputData-method}
+\alias{swFiles_SWRCp<-,swInputData-method}
 \alias{swFiles_WeatherSetup<-,swInputData-method}
 \alias{swFiles_MarkovProbs<-,swInputData-method}
 \alias{swFiles_MarkovCov<-,swInputData-method}
@@ -83,9 +85,11 @@
 \alias{swCloud_SnowDensity<-,swInputData-method}
 \alias{swCloud_RainEvents<-,swInputData-method}
 \alias{get_Markov,swInputData-method}
+\alias{get_swMarkov,swInputData-method}
 \alias{swMarkov_Prob,swInputData-method}
 \alias{swMarkov_Conv,swInputData-method}
 \alias{set_Markov<-,swInputData-method}
+\alias{set_swMarkov<-,swInputData-method}
 \alias{swMarkov_Prob<-,swInputData-method}
 \alias{swMarkov_Conv<-,swInputData-method}
 \alias{get_WeatherHistory,swInputData-method}
@@ -130,6 +134,7 @@
 \alias{swProd_MonProd_shrub<-,swInputData-method}
 \alias{swProd_MonProd_tree<-,swInputData-method}
 \alias{swProd_MonProd_forb<-,swInputData-method}
+\alias{get_swEstab,swInputData-method}
 \alias{get_swSite,swInputData-method}
 \alias{swSite_SWClimits,swInputData-method}
 \alias{swSite_ModelFlags,swInputData-method}
@@ -157,9 +162,8 @@
 \alias{swSite_SoilDensityInputType<-,swInputData-method}
 \alias{swSite_TranspirationRegions<-,swInputData-method}
 \alias{get_swSoils,swInputData-method}
-\alias{swSoils_Layers,swInputData-method}
 \alias{set_swSoils<-,swInputData,swSoils-method}
-\alias{swSoils_Layers<-,swInputData,matrix-method}
+\alias{set_swSoils<-,swInputData,list-method}
 \alias{get_swSWC,swInputData-method}
 \alias{swSWC_use,swInputData-method}
 \alias{swSWC_prefix,swInputData-method}
@@ -199,7 +203,7 @@
 \alias{swReadLines,swInputData,character-method}
 \title{Class \code{"swInputData"}}
 \usage{
-\S4method{initialize}{swInputData}(.Object)
+swInputData(...)
 
 \S4method{get_swFiles}{swInputData}(object)
 
@@ -214,6 +218,8 @@
 \S4method{swFiles_SiteParams}{swInputData}(object)
 
 \S4method{swFiles_Soils}{swInputData}(object)
+
+\S4method{swFiles_SWRCp}{swInputData}(object)
 
 \S4method{swFiles_WeatherSetup}{swInputData}(object)
 
@@ -250,6 +256,8 @@
 \S4method{swFiles_SiteParams}{swInputData}(object) <- value
 
 \S4method{swFiles_Soils}{swInputData}(object) <- value
+
+\S4method{swFiles_SWRCp}{swInputData}(object) <- value
 
 \S4method{swFiles_WeatherSetup}{swInputData}(object) <- value
 
@@ -363,11 +371,15 @@
 
 \S4method{get_Markov}{swInputData}(object)
 
+\S4method{get_swMarkov}{swInputData}(object)
+
 \S4method{swMarkov_Prob}{swInputData}(object)
 
 \S4method{swMarkov_Conv}{swInputData}(object)
 
 \S4method{set_Markov}{swInputData}(object) <- value
+
+\S4method{set_swMarkov}{swInputData}(object) <- value
 
 \S4method{swMarkov_Prob}{swInputData}(object) <- value
 
@@ -457,6 +469,8 @@
 
 \S4method{swProd_MonProd_forb}{swInputData}(object) <- value
 
+\S4method{get_swEstab}{swInputData}(object)
+
 \S4method{get_swSite}{swInputData}(object)
 
 \S4method{swSite_SWClimits}{swInputData}(object)
@@ -511,11 +525,9 @@
 
 \S4method{get_swSoils}{swInputData}(object)
 
-\S4method{swSoils_Layers}{swInputData}(object)
-
 \S4method{set_swSoils}{swInputData,swSoils}(object) <- value
 
-\S4method{swSoils_Layers}{swInputData,matrix}(object) <- value
+\S4method{set_swSoils}{swInputData,list}(object) <- value
 
 \S4method{get_swSWC}{swInputData}(object)
 
@@ -592,7 +604,14 @@
 \S4method{swReadLines}{swInputData,character}(object, file)
 }
 \arguments{
-\item{.Object}{An object of class \code{\linkS4class{swInputData}}.}
+\item{...}{Arguments to the helper constructor function.
+Dots can either contain objects to copy into slots of that class
+(must be named identical to the corresponding slot) or
+be one object of that class (in which case it will be copied and
+any missing slots will take their default values).
+If dots are missing, then corresponding values of
+\code{rSOILWAT2::sw_exampleData}
+(i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
 
 \item{object}{An object of class \code{\linkS4class{swInputData}}.}
 
@@ -613,7 +632,7 @@ classes in the container's slots.
 \details{
 \code{\linkS4class{swInputData}} consists of slots for each file that is
 read in. These slots can be accessed via the following functions: \itemize{
-  \item \code{\link{get_Markov}}
+  \item \code{\link{get_swMarkov}}
   \item \code{\link{get_swCloud}}
   \item \code{\link{get_swFiles}}
   \item \code{\link{get_swOUT}}
@@ -636,7 +655,8 @@ Generic methods to get/set individual elements follow a format:
 }
 \examples{
 showClass("swInputData")
-x <- new("swInputData")
+x <- new("swInputData") # prototype
+x <- swInputData() # constructor helper
 
 }
 \seealso{

@@ -103,11 +103,17 @@ compare_objects <- function(new, old) {
   has_timestamp_diff <- grepl("timestamp", res_cmp, fixed = TRUE)
 
   # Ignore difference in version less than minor
-  has_version_diff <- rSOILWAT2::check_version(
+  vge <- rSOILWAT2::check_version(
     new,
     rSOILWAT2::get_version(old),
     level = "minor"
   )
+  vle <- rSOILWAT2::check_version(
+    new,
+    rSOILWAT2::get_version(old),
+    level = "minor"
+  )
+  has_version_diff <- !(vge && vle)
 
   list(
     res_waldo = res_cmp,
@@ -326,7 +332,7 @@ for (it in seq_along(tests)) {
 
 
   #--- Compare input to previous version
-  slot(sw_input, "weatherHistory") <- list(new("swWeatherData"))
+  set_WeatherHistory(sw_input) <- weatherHistory()
 
   res_cmp <- compare_objects(
     sw_input,
@@ -397,3 +403,9 @@ message(
   shQuote(dir_backup),
   " before pushing to repository if script worked well."
 )
+
+print(paste(
+  "NOTE: Copy",
+  "'Ex1_input.rds' to 'versioned_swInputData/' as 'Ex1_input_vX.Y.Z.rds'",
+  "if significant changes to any class occurred."
+))

@@ -3,7 +3,7 @@
 \docType{class}
 \name{swFiles-class}
 \alias{swFiles-class}
-\alias{initialize,swFiles-method}
+\alias{swFiles}
 \alias{swFiles_ProjDir,swFiles-method}
 \alias{swFiles_WeatherPrefix,swFiles-method}
 \alias{swFiles_OutputPrefix,swFiles-method}
@@ -12,6 +12,7 @@
 \alias{swFiles_LogFile,swFiles-method}
 \alias{swFiles_SiteParams,swFiles-method}
 \alias{swFiles_Soils,swFiles-method}
+\alias{swFiles_SWRCp,swFiles-method}
 \alias{swFiles_WeatherSetup,swFiles-method}
 \alias{swFiles_MarkovProbs,swFiles-method}
 \alias{swFiles_MarkovCov,swFiles-method}
@@ -29,6 +30,7 @@
 \alias{swFiles_LogFile<-,swFiles-method}
 \alias{swFiles_SiteParams<-,swFiles-method}
 \alias{swFiles_Soils<-,swFiles-method}
+\alias{swFiles_SWRCp<-,swFiles-method}
 \alias{swFiles_WeatherSetup<-,swFiles-method}
 \alias{swFiles_MarkovProbs<-,swFiles-method}
 \alias{swFiles_MarkovCov<-,swFiles-method}
@@ -41,7 +43,7 @@
 \alias{swReadLines,swFiles,character-method}
 \title{Class \code{"swFiles"}}
 \usage{
-\S4method{initialize}{swFiles}(.Object, ...)
+swFiles(...)
 
 \S4method{swFiles_ProjDir}{swFiles}(object)
 
@@ -58,6 +60,8 @@
 \S4method{swFiles_SiteParams}{swFiles}(object)
 
 \S4method{swFiles_Soils}{swFiles}(object)
+
+\S4method{swFiles_SWRCp}{swFiles}(object)
 
 \S4method{swFiles_WeatherSetup}{swFiles}(object)
 
@@ -93,6 +97,8 @@
 
 \S4method{swFiles_Soils}{swFiles}(object) <- value
 
+\S4method{swFiles_SWRCp}{swFiles}(object) <- value
+
 \S4method{swFiles_WeatherSetup}{swFiles}(object) <- value
 
 \S4method{swFiles_MarkovProbs}{swFiles}(object) <- value
@@ -114,9 +120,14 @@
 \S4method{swReadLines}{swFiles,character}(object, file)
 }
 \arguments{
-\item{.Object}{An object of class \code{\linkS4class{swFiles}}.}
-
-\item{...}{Further arguments to methods.}
+\item{...}{Arguments to the helper constructor function.
+Dots can either contain objects to copy into slots of that class
+(must be named identical to the corresponding slot) or
+be one object of that class (in which case it will be copied and
+any missing slots will take their default values).
+If dots are missing, then corresponding values of
+\code{rSOILWAT2::sw_exampleData}
+(i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
 
 \item{object}{An object of class \code{\linkS4class{swFiles}}.}
 
@@ -131,6 +142,7 @@ The methods listed below work on this class and the proper slot of the class
 \examples{
 showClass("swFiles")
 x <- new("swFiles")
+x <- swFiles()
 
 }
 \seealso{

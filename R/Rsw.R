@@ -38,12 +38,15 @@ sw_args <- function(dir, files.in, echo, quiet) {
 #' Turn on/off `SOILWAT2` notes and warnings
 #'
 #' @param verbose A logical value.
+#'   Verbose mode prints any \pkg{SOILWAT2} messages.
+#'
 #' @return The previous logical value.
 #'
 #' @export
 sw_verbosity <- function(verbose = TRUE) {
-    invisible(!.Call(C_sw_quiet, !as.logical(verbose)))
+  invisible(!.Call(C_sw_quiet, !as.logical(verbose)))
 }
+
 
 #' Execute a \pkg{rSOILWAT2} simulation run
 #'
@@ -79,11 +82,13 @@ sw_verbosity <- function(verbose = TRUE) {
 #'   \code{\link{dbW_getWeatherData}} or \code{\link{getWeatherData_folders}}.
 #' @param dir a character vector that represents the path to the input data. Use
 #'   with \code{files.in}
-#' @param files.in a character vector that represents the partial path of the
-#'   \var{files.in} file
+#' @param files.in A character string. The file name (and path relative to
+#'   \code{dir}) of the \var{files} input file that contains information
+#'   about the remaining input files.
 #' @param echo logical. This option will echo the inputs to the \var{logfile}.
 #'   Helpful for debugging.
-#' @param quiet logical. Quiet mode doesn't print messages to the \var{logfile}.
+#' @param quiet logical. Quiet mode hides any \pkg{SOILWAT2} messages,
+#'   see \code{\link{sw_verbosity}}.
 #'
 #' @return An object of class \code{\linkS4class{swOutput}}.
 #'
@@ -153,8 +158,11 @@ sw_verbosity <- function(verbose = TRUE) {
 #' ##   to set up a SQLite database for the weather data)
 #' sw_weath3 <- getWeatherData_folders(
 #'    LookupWeatherFolder = file.path(path_demo, "Input"),
-#'    weatherDirName = "data_weather", filebasename = "weath",
-#'    startYear = 1979, endYear = 2010)
+#'    weatherDirName = "data_weather",
+#'    filebasename = "weath",
+#'    startYear = 1979,
+#'    endYear = 2010
+#' )
 #'
 #' ## List of the slots of the input objects of class 'swWeatherData'
 #' utils::str(sw_weath3, max.level = 1)
@@ -210,20 +218,45 @@ sw_verbosity <- function(verbose = TRUE) {
 #' print(round(as.numeric(object.size(sw_out6) / object.size(sw_out5)), 2))
 #'
 #'
+#' ## ------ Simulation with different SWRC ------------
+#' if (requireNamespace("curl") && curl::has_internet()) {
+#'   sw_in7 <- sw_in3
+#'   swSite_SWRCflags(sw_in7) <- c("vanGenuchten1980", "Rosetta3")
+#'
+#'   sw_out7 <- sw_exec(inputData = sw_in7, weatherList = sw_weath3)
+#' }
+#'
 #' ## See help(package = "rSOILWAT2") for a full list of functions
 #'
 #' @export
-sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
-  files.in = "files.in", echo = FALSE, quiet = FALSE) {
+sw_exec <- function(
+  inputData = NULL,
+  weatherList = NULL,
+  dir = ".",
+  files.in = "files.in",
+  echo = FALSE,
+  quiet = FALSE
+) {
 
   dir_prev <- getwd()
   on.exit(setwd(dir_prev), add = TRUE)
 
+  quiet <- as.logical(quiet)
+
   input <- sw_args(dir, files.in, echo, quiet)
 
   if (is.null(inputData)) {
-    inputData <- sw_inputDataFromFiles(dir = dir, files.in = files.in)
+    inputData <- sw_inputDataFromFiles(
+      dir = dir,
+      files.in = files.in,
+      quiet = quiet
+    )
   }
+
+
+  # Upgrade essential slots if input object is from an older version
+  inputData <- sw_upgrade(inputData, verbose = !quiet)
+
 
   if (!check_version(inputData, level = "minor")) {
     warning(
@@ -232,7 +265,39 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
     )
   }
 
-  res <- .Call(C_start, input, inputData, weatherList, as.logical(quiet))
+
+  #--- Estimate SWRC parameters
+  # if not yet estimated
+  # if requested PTF only implemented in R
+  if (!swSite_hasSWRCp(inputData)) {
+    ptf_name <- std_ptf(swSite_SWRCflags(inputData)["ptf_name"])
+    if (ptf_name %in% ptfs_implemented_by_rSW2()) {
+      soils <- swSoils_Layers(inputData)
+
+      swrcp <- rSW2_SWRC_PTF_estimate_parameters(
+        sand = soils[, "sand_frac"],
+        clay = soils[, "clay_frac"],
+        fcoarse = soils[, "gravel_content"],
+        bdensity = soils[, "bulkDensity_g/cm^3"],
+        ptf_name = ptf_name,
+        fail = FALSE
+      )
+
+      if (!is.null(swrcp)) {
+        swSite_hasSWRCp(inputData) <- TRUE
+        swSoils_SWRCp(inputData) <- swrcp
+      } else {
+        swSoils_SWRCp(inputData) <- array(
+          data = NA_real_,
+          dim = dim(swSoils_SWRCp(inputData))
+        )
+      }
+    }
+  }
+
+
+  # Run SOILWAT2
+  res <- .Call(C_start, input, inputData, weatherList, quiet)
   slot(res, "version") <- rSW2_version()
   slot(res, "timestamp") <- rSW2_timestamp()
 
@@ -242,7 +307,7 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
     st_name <- rSW2_glovars[["kSOILWAT2"]][["OutKeys"]][["SW_SOILTEMP"]]
     tempd <- slot(res, st_name)
 
-    for (k in rSW2_glovars[["sw_TimeSteps"]]) {
+    for (k in rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]]) {
       temp <- slot(tempd, k)
       np <- dim(temp)
       if (np[1] > 0) {
@@ -262,10 +327,7 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
 
 #' Read simulation input data from files on disk
 #'
-#' @param dir A character string. The path to the simulation project directory.
-#' @param files.in A character string. The file name (and path relative to
-#'   \code{dir}) of the \var{files} input file that contains information
-#'   about the remaining input files.
+#' @inheritParams sw_exec
 #'
 #' @return An object of class \code{\linkS4class{swInputData}}.
 #'
@@ -294,14 +356,20 @@ sw_exec <- function(inputData = NULL, weatherList = NULL, dir = "",
 #'
 #'
 #' @export
-sw_inputDataFromFiles <- function(dir = "", files.in = "files.in") {
+sw_inputDataFromFiles <- function(
+  dir = "",
+  files.in = "files.in",
+  quiet = FALSE
+) {
 
   dir_prev <- getwd()
   on.exit(setwd(dir_prev), add = TRUE)
 
-  input <- sw_args(dir, files.in, echo = FALSE, quiet = FALSE)
+  quiet <- as.logical(quiet)
 
-  res <- .Call(C_onGetInputDataFromFiles, input)
+  input <- sw_args(dir, files.in, echo = FALSE, quiet = quiet)
+
+  res <- .Call(C_onGetInputDataFromFiles, input, quiet)
   slot(res, "version") <- rSW2_version()
   slot(res, "timestamp") <- rSW2_timestamp()
 
@@ -311,7 +379,8 @@ sw_inputDataFromFiles <- function(dir = "", files.in = "files.in") {
 
 #' Return output data
 #'
-#' @param inputData An object of class \code{\linkS4class{swInputData}}.
+#' @inheritParams sw_exec
+#'
 #' @return An object of class \code{\linkS4class{swOutput}}.
 #' @export
 sw_outputData <- function(inputData) {
@@ -357,11 +426,11 @@ sw_inputData <- function() {
   dir_prev <- getwd()
   on.exit(setwd(dir_prev), add = TRUE)
 
-  temp <- new("swInputData") # data are from calls to `initialize`-methods
+  tmp <- swInputData() # default values (minus some deleted slots)
   utils::data(package = "rSOILWAT2", "weatherData", envir = environment())
-  slot(temp, "weatherHistory") <- get("weatherData", envir = environment())
+  slot(tmp, "weatherHistory") <- get("weatherData", envir = environment())
 
-  temp
+  tmp
 }
 
 

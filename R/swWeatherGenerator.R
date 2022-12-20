@@ -128,8 +128,8 @@ dbW_estimate_WGen_coefs <- function(
 
   # daily weather data
   if (
-      inherits(weatherData, "list") &&
-      all(sapply(weatherData, inherits, what = "swWeatherData"))
+    inherits(weatherData, "list") &&
+    all(sapply(weatherData, inherits, what = "swWeatherData"))
   ) {
     wdata <- data.frame(
       dbW_weatherData_to_dataframe(weatherData, valNA = valNA)
@@ -487,8 +487,11 @@ check_weather <- function(weather, required_variables) {
 }
 
 # Aggregate daily weather for each time step
-prepare_weather <- function(data_daily,
-  time_steps = c("Year", "Month", "Week", "Day"), na.rm = FALSE) {
+prepare_weather <- function(
+  data_daily,
+  time_steps = c("Year", "Month", "Week", "Day"),
+  na.rm = FALSE
+) {
 
   weather_list <- list()
   id_daily <- "Day" == time_steps
@@ -502,8 +505,11 @@ prepare_weather <- function(data_daily,
 }
 
 # Prepare weather data object for \code{\link{compare_dailyweather}}
-prepare_weather_for_comparison <- function(weather,
-  time_steps = c("Year", "Month", "Week", "Day"), na.rm = FALSE) {
+prepare_weather_for_comparison <- function(
+  weather,
+  time_steps = c("Year", "Month", "Week", "Day"),
+  na.rm = FALSE
+) {
   req_vars <- c("Year", "Tmax_C", "Tmin_C", "PPT_cm")
 
   if (length(weather) == length(time_steps) &&
@@ -663,9 +669,11 @@ compare_weather <- function(
       }
     )
 
-    array(unlist(temp),
+    array(
+      unlist(temp),
       dim = c(2, length(data), length(time_steps), length(weather_vars)),
-      dimnames = list(c("mean", "sd"), names(data), time_steps, weather_vars))
+      dimnames = list(c("mean", "sd"), names(data), time_steps, weather_vars)
+    )
   }
 
   foo_bxp <- function(data, ref_data, ylab, legend = FALSE) {
@@ -677,12 +685,22 @@ compare_weather <- function(
 
     if (all(is.finite(ylim))) {
       graphics::boxplot(data, ylim = ylim, ylab = ylab)
-      graphics::points(seq_along(ref_data), ref_data, col = "red", pch = 4,
-        lwd = 2)
+      graphics::points(
+        seq_along(ref_data),
+        ref_data,
+        col = "red",
+        pch = 4,
+        lwd = 2
+      )
 
       if (legend) {
-        graphics::legend("topright", legend = c("Reference", "Weather"),
-          col = c("red", "black"), pch = c(4, 16), pt.lwd = 2)
+        graphics::legend(
+          "topright",
+          legend = c("Reference", "Weather"),
+          col = c("red", "black"),
+          pch = c(4, 16),
+          pt.lwd = 2
+        )
       }
 
     } else {
@@ -697,32 +715,54 @@ compare_weather <- function(
 
   # Make figure
   panels <- c(3, 2)
-  grDevices::png(units = "in", res = 150,
-    height = 3 * panels[1], width = 6 * panels[2],
-    file = file.path(path, paste0(tag, "_CompareWeather_Boxplots_MeanSD.png")))
-  par_prev <- graphics::par(mfrow = panels, mar = c(2, 2.5, 0.5, 0.5),
-    mgp = c(1, 0, 0), tcl = 0.3, cex = 1)
+  grDevices::png(
+    units = "in",
+    res = 150,
+    height = 3 * panels[1],
+    width = 6 * panels[2],
+    file = file.path(path, paste0(tag, "_CompareWeather_Boxplots_MeanSD.png"))
+  )
+  par_prev <- graphics::par(
+    mfrow = panels,
+    mar = c(2, 2.5, 0.5, 0.5),
+    mgp = c(1, 0, 0),
+    tcl = 0.3,
+    cex = 1
+  )
 
-  foo_bxp(data = comp_MeanSD["mean", , , "PPT_cm"],
+  foo_bxp(
+    data = comp_MeanSD["mean", , , "PPT_cm"],
     ref_data = ref_MeanSD["mean", , , "PPT_cm"],
-    ylab = "Mean Precipitation (cm)", legend = TRUE)
-  foo_bxp(data = comp_MeanSD["sd", , , "PPT_cm"],
+    ylab = "Mean Precipitation (cm)",
+    legend = TRUE
+  )
+  foo_bxp(
+    data = comp_MeanSD["sd", , , "PPT_cm"],
     ref_data = ref_MeanSD["sd", , , "PPT_cm"],
-    ylab = "SD Precipitation (cm)")
+    ylab = "SD Precipitation (cm)"
+  )
 
-  foo_bxp(data = comp_MeanSD["mean", , , "Tmax_C"],
+  foo_bxp(
+    data = comp_MeanSD["mean", , , "Tmax_C"],
     ref_data = ref_MeanSD["mean", , , "Tmax_C"],
-    ylab = "Mean Daily Max Temperature (C)")
-  foo_bxp(data = comp_MeanSD["sd", , , "Tmax_C"],
+    ylab = "Mean Daily Max Temperature (C)"
+  )
+  foo_bxp(
+    data = comp_MeanSD["sd", , , "Tmax_C"],
     ref_data = ref_MeanSD["sd", , , "Tmax_C"],
-    ylab = "SD Daily Max Temperature (C)")
+    ylab = "SD Daily Max Temperature (C)"
+  )
 
-  foo_bxp(data = comp_MeanSD["mean", , , "Tmin_C"],
+  foo_bxp(
+    data = comp_MeanSD["mean", , , "Tmin_C"],
     ref_data = ref_MeanSD["mean", , , "Tmin_C"],
-    ylab = "Mean Daily Min Temperature (C)")
-  foo_bxp(data = comp_MeanSD["sd", , , "Tmin_C"],
+    ylab = "Mean Daily Min Temperature (C)"
+  )
+  foo_bxp(
+    data = comp_MeanSD["sd", , , "Tmin_C"],
     ref_data = ref_MeanSD["sd", , , "Tmin_C"],
-    ylab = "SD Daily Min Temperature (C)")
+    ylab = "SD Daily Min Temperature (C)"
+  )
 
   graphics::par(par_prev)
   grDevices::dev.off()
@@ -731,33 +771,62 @@ compare_weather <- function(
   #--- Quantile-quantile comparisons: scatterplots
   foo_qq <- function(data, ref_data, var, time, lab, legend = FALSE) {
 
-    vlim <- range(sapply(c(ref_data, data),
-      function(x) range(x[[time]][, var], na.rm = TRUE)))
+    vlim <- range(
+      sapply(
+        c(ref_data, data),
+        function(x) range(x[[time]][, var], na.rm = TRUE)
+      )
+    )
 
     if (all(is.finite(vlim))) {
       probs <- seq(0, 1, length.out = 1000)
 
-      x <- quantile(ref_data[[1]][[time]][, var], probs = probs,
-        na.rm = TRUE)
-      graphics::plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
+      x <- quantile(
+        ref_data[[1]][[time]][, var], probs = probs,
+        na.rm = TRUE
+      )
+      graphics::plot(
+        x,
+        x,
+        type = "n",
+        xlim = vlim,
+        ylim = vlim,
+        asp = 1,
         xlab = paste0(time, "ly : reference ", lab),
-        ylab = paste0(time, "ly : weather ", lab))
+        ylab = paste0(time, "ly : weather ", lab)
+      )
+
       for (k in seq_along(data)) {
-        qy <- quantile(data[[k]][[time]][, var], probs = probs,
-          na.rm = TRUE)
+        qy <- quantile(
+          data[[k]][[time]][, var], probs = probs,
+          na.rm = TRUE
+        )
         graphics::points(x, qy, pch = 46)
       }
 
       graphics::abline(h = 0, lty = 2)
       graphics::abline(v = 0, lty = 2)
-      graphics::segments(x0 = vlim[1], y0 = vlim[1],
-        x1 = vlim[2], y1 = vlim[2], col = "red", lwd = 2)
+      graphics::segments(
+        x0 = vlim[1],
+        y0 = vlim[1],
+        x1 = vlim[2],
+        y1 = vlim[2],
+        col = "red",
+        lwd = 2
+      )
 
 
       if (legend) {
-        graphics::legend("topleft", legend = c("Reference", "Weather"),
-          col = c("red", "black"), pch = c(NA, 16), pt.lwd = 2,
-          lty = c(1, NA), lwd = 2, merge = TRUE)
+        graphics::legend(
+          "topleft",
+          legend = c("Reference", "Weather"),
+          col = c("red", "black"),
+          pch = c(NA, 16),
+          pt.lwd = 2,
+          lty = c(1, NA),
+          lwd = 2,
+          merge = TRUE
+        )
       }
 
     } else {
@@ -767,19 +836,44 @@ compare_weather <- function(
 
   # Make figure
   panels <- c(length(time_steps), 3)
-  grDevices::png(units = "in", res = 150,
-    height = 3 * panels[1], width = 3 * panels[2],
-    file = file.path(path, paste0(tag, "_CompareWeather_QQplots.png")))
-  par_prev <- graphics::par(mfrow = panels, mar = c(2, 2.5, 0.5, 0.5),
-    mgp = c(1, 0, 0), tcl = 0.3, cex = 1)
+  grDevices::png(
+    units = "in",
+    res = 150,
+    height = 3 * panels[1],
+    width = 3 * panels[2],
+    file = file.path(path, paste0(tag, "_CompareWeather_QQplots.png"))
+  )
+  par_prev <- graphics::par(
+    mfrow = panels,
+    mar = c(2, 2.5, 0.5, 0.5),
+    mgp = c(1, 0, 0),
+    tcl = 0.3,
+    cex = 1
+  )
 
   for (ts in time_steps) {
-    foo_qq(comp_df, ref_df, var = "PPT_cm", time = ts,
-      lab = "precipitation (cm)", legend = ts == time_steps[1])
-    foo_qq(comp_df, ref_df, var = "Tmax_C", time = ts,
-      lab = "max temp (C)")
-    foo_qq(comp_df, ref_df, var = "Tmin_C", time = ts,
-      lab = "min temp (C)")
+    foo_qq(
+      comp_df,
+      ref_df,
+      var = "PPT_cm",
+      time = ts,
+      lab = "precipitation (cm)",
+      legend = ts == time_steps[1]
+    )
+    foo_qq(
+      comp_df,
+      ref_df,
+      var = "Tmax_C",
+      time = ts,
+      lab = "max temp (C)"
+    )
+    foo_qq(
+      comp_df,
+      ref_df,
+      var = "Tmin_C",
+      time = ts,
+      lab = "min temp (C)"
+    )
   }
 
   graphics::par(par_prev)
@@ -815,11 +909,21 @@ compare_weather <- function(
       rep(ceiling(sqrt(length(vars))), 2)
     }
 
-    grDevices::png(units = "in", res = 150,
-      height = 3 * panels[1], width = 3 * panels[2],
-      file = fname)
-    par_prev <- graphics::par(mfrow = panels, mar = c(2, 2.5, 0.5, 0.5),
-      mgp = c(1, 0, 0), tcl = 0.3, cex = 1)
+    grDevices::png(
+      units = "in",
+      res = 150,
+      height = 3 * panels[1],
+      width = 3 * panels[2],
+      file = fname
+    )
+
+    par_prev <- graphics::par(
+      mfrow = panels,
+      mar = c(2, 2.5, 0.5, 0.5),
+      mgp = c(1, 0, 0),
+      tcl = 0.3,
+      cex = 1
+    )
 
     for (v in vars) {
       x <- ref_data[[obj]][, v]
@@ -830,22 +934,43 @@ compare_weather <- function(
       )
 
       if (all(is.finite(vlim_obs)) && all(is.finite(vlim))) {
-        graphics::plot(x, x, type = "n", xlim = vlim, ylim = vlim, asp = 1,
-          xlab = paste0("Reference ", v), ylab = paste0("Weather ", v))
+        graphics::plot(
+          x,
+          x,
+          type = "n",
+          xlim = vlim,
+          ylim = vlim,
+          asp = 1,
+          xlab = paste0("Reference ", v),
+          ylab = paste0("Weather ", v)
+        )
+
         for (k in seq_along(data)) {
           isgood <- complete.cases(cbind(x, data[[k]][[obj]][, v]))
-          graphics::lines(stats::lowess(x[isgood], data[[k]][[obj]][isgood, v]),
-            col = "gray")
+          graphics::lines(
+            stats::lowess(x[isgood], data[[k]][[obj]][isgood, v]),
+            col = "gray"
+          )
         }
 
         graphics::abline(h = 0, lty = 2)
         graphics::abline(v = 0, lty = 2)
-        graphics::segments(x0 = vlim_obs[1], y0 = vlim_obs[1],
-          x1 = vlim_obs[2], y1 = vlim_obs[2], col = "red", lwd = 2)
+        graphics::segments(
+          x0 = vlim_obs[1],
+          y0 = vlim_obs[1],
+          x1 = vlim_obs[2],
+          y1 = vlim_obs[2],
+          col = "red",
+          lwd = 2
+        )
 
         if (v == vars[1]) {
-          graphics::legend("topleft", legend = c("Reference", "Weather"),
-            col = c("red", "black"), lwd = 2)
+          graphics::legend(
+            "topleft",
+            legend = c("Reference", "Weather"),
+            col = c("red", "black"),
+            lwd = 2
+          )
         }
 
       } else {
@@ -858,12 +983,25 @@ compare_weather <- function(
   }
 
 
-  foo_scatter_wgin(data = comp_wgin, ref_data = ref_wgin, obj = "mkv_doy",
-    fname = file.path(path,
-      paste0(tag, "_CompareWeather_WGenInputs_DayOfYear.png")))
-  foo_scatter_wgin(data = comp_wgin, ref_data = ref_wgin, obj = "mkv_woy",
-    fname = file.path(path,
-      paste0(tag, "_CompareWeather_WGenInputs_WeekOfYear.png")))
+  foo_scatter_wgin(
+    data = comp_wgin,
+    ref_data = ref_wgin,
+    obj = "mkv_doy",
+    fname = file.path(
+      path,
+      paste0(tag, "_CompareWeather_WGenInputs_DayOfYear.png")
+    )
+  )
+
+  foo_scatter_wgin(
+    data = comp_wgin,
+    ref_data = ref_wgin,
+    obj = "mkv_woy",
+    fname = file.path(
+      path,
+      paste0(tag, "_CompareWeather_WGenInputs_WeekOfYear.png")
+    )
+  )
 
 }
 
@@ -921,7 +1059,7 @@ compare_weather <- function(
 #'
 #' ## Example 3: generate weather based only on estimated weather generator
 #' ## coefficients from a different dataset
-#' x_empty <- list(new("swWeatherData"))
+#' x_empty <- weatherHistory()
 #' wout3 <- dbW_generateWeather(
 #'   x_empty,
 #'   years = 2050:2055,

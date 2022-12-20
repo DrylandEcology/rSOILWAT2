@@ -4,15 +4,23 @@
 \alias{get_evaporation}
 \title{Calculate evaporation from output}
 \usage{
-get_evaporation(x, timestep = c("Day", "Week", "Month", "Year"))
+get_evaporation(
+  x,
+  timestep = c("Day", "Week", "Month", "Year"),
+  keep_time = FALSE
+)
 }
 \arguments{
 \item{x}{An object of class \code{\linkS4class{swOutput}}.}
 
 \item{timestep}{A character string. One of the \pkg{rSOILWAT2} time steps.}
+
+\item{keep_time}{A logical value. Include time information in the returned
+object.}
 }
 \value{
-A numeric vector of evaporation [mm] for each time step.
+A numeric vector of evaporation [mm] for each time step or
+  a numeric matrix if `keep_time`.
 }
 \description{
 Calculate evaporation from output

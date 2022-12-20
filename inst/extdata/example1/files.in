@@ -11,6 +11,7 @@ Output/logfile.log	# Output file to which warnings, errors, and other important 
 #--- Description of simulated site
 Input/siteparam.in	# Input file for site location, initialization, and miscellaneous model parameters
 Input/soils.in		# Input for soil information: soil layer, soil texture, etc.
+Input/swrc_params.in		# Input for soil water retention curve (used if pdf_type = 0, i.e., pedotransfer functions are not used)
 
 #--- Inputs of weather forcing and description of climate conditions
 Input/weathsetup.in	# Input file for weather-related parameters and weather generator settings

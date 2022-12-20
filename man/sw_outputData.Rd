@@ -7,7 +7,9 @@
 sw_outputData(inputData)
 }
 \arguments{
-\item{inputData}{An object of class \code{\linkS4class{swInputData}}.}
+\item{inputData}{an object of the \var{S4} class
+\code{\linkS4class{swInputData}} which is generated from
+\code{\link{sw_inputData}} or \code{\link{sw_inputDataFromFiles}}.}
 }
 \value{
 An object of class \code{\linkS4class{swOutput}}.

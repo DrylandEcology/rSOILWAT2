@@ -2,9 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swCarbon}
 \alias{set_swCarbon}
-\title{\code{set_swCarbon}
-Need to define and export this generic method -- otherwise,
-\code{\link{set_swCarbon<-}} doesn't work.}
+\title{\code{set_swCarbon}}
 \usage{
 set_swCarbon(object, value)
 }
@@ -16,6 +14,4 @@ set_swCarbon(object, value)
 }
 \description{
 \code{set_swCarbon}
-Need to define and export this generic method -- otherwise,
-\code{\link{set_swCarbon<-}} doesn't work.
 }

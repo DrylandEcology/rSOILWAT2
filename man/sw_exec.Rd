@@ -7,7 +7,7 @@
 sw_exec(
   inputData = NULL,
   weatherList = NULL,
-  dir = "",
+  dir = ".",
   files.in = "files.in",
   echo = FALSE,
   quiet = FALSE
@@ -24,13 +24,15 @@ sw_exec(
 \item{dir}{a character vector that represents the path to the input data. Use
 with \code{files.in}}
 
-\item{files.in}{a character vector that represents the partial path of the
-\var{files.in} file}
+\item{files.in}{A character string. The file name (and path relative to
+\code{dir}) of the \var{files} input file that contains information
+about the remaining input files.}
 
 \item{echo}{logical. This option will echo the inputs to the \var{logfile}.
 Helpful for debugging.}
 
-\item{quiet}{logical. Quiet mode doesn't print messages to the \var{logfile}.}
+\item{quiet}{logical. Quiet mode hides any \pkg{SOILWAT2} messages,
+see \code{\link{sw_verbosity}}.}
 }
 \value{
 An object of class \code{\linkS4class{swOutput}}.
@@ -105,8 +107,11 @@ sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 ##   to set up a SQLite database for the weather data)
 sw_weath3 <- getWeatherData_folders(
    LookupWeatherFolder = file.path(path_demo, "Input"),
-   weatherDirName = "data_weather", filebasename = "weath",
-   startYear = 1979, endYear = 2010)
+   weatherDirName = "data_weather",
+   filebasename = "weath",
+   startYear = 1979,
+   endYear = 2010
+)
 
 ## List of the slots of the input objects of class 'swWeatherData'
 utils::str(sw_weath3, max.level = 1)
@@ -161,6 +166,14 @@ sw_out6 <- sw_exec(inputData = sw_in6, weatherList = sw_weath3, quiet = TRUE)
 
 print(round(as.numeric(object.size(sw_out6) / object.size(sw_out5)), 2))
 
+
+## ------ Simulation with different SWRC ------------
+if (requireNamespace("curl") && curl::has_internet()) {
+  sw_in7 <- sw_in3
+  swSite_SWRCflags(sw_in7) <- c("vanGenuchten1980", "Rosetta3")
+
+  sw_out7 <- sw_exec(inputData = sw_in7, weatherList = sw_weath3)
+}
 
 ## See help(package = "rSOILWAT2") for a full list of functions
 

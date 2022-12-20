@@ -3,15 +3,20 @@
 \docType{class}
 \name{swLog-class}
 \alias{swLog-class}
-\alias{initialize,swLog-method}
+\alias{swLog}
 \title{Class \code{"swLog"}}
 \usage{
-\S4method{initialize}{swLog}(.Object, ...)
+swLog(...)
 }
 \arguments{
-\item{.Object}{An object of class \code{\linkS4class{swLog}}.}
-
-\item{...}{Further arguments to methods.}
+\item{...}{Arguments to the helper constructor function.
+Dots can either contain objects to copy into slots of that class
+(must be named identical to the corresponding slot) or
+be one object of that class (in which case it will be copied and
+any missing slots will take their default values).
+If dots are missing, then corresponding values of
+\code{rSOILWAT2::sw_exampleData}
+(i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class
@@ -20,6 +25,7 @@ The methods listed below work on this class and the proper slot of the class
 \examples{
 showClass("swLog")
 x <- new("swLog")
+x <- swLog()
 
 }
 \seealso{

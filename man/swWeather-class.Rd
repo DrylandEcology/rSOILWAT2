@@ -3,7 +3,7 @@
 \docType{class}
 \name{swWeather-class}
 \alias{swWeather-class}
-\alias{initialize,swWeather-method}
+\alias{swWeather}
 \alias{swWeather_DaysRunningAverage,swWeather-method}
 \alias{swWeather_FirstYearHistorical,swWeather-method}
 \alias{swWeather_pct_SnowDrift,swWeather-method}
@@ -23,7 +23,7 @@
 \alias{swReadLines,swWeather,character-method}
 \title{Class \code{"swWeather"}}
 \usage{
-\S4method{initialize}{swWeather}(.Object, ...)
+swWeather(...)
 
 \S4method{swWeather_DaysRunningAverage}{swWeather}(object)
 
@@ -60,9 +60,14 @@
 \S4method{swReadLines}{swWeather,character}(object, file)
 }
 \arguments{
-\item{.Object}{An object of class \code{\linkS4class{swWeather}}.}
-
-\item{...}{Further arguments to methods.}
+\item{...}{Arguments to the helper constructor function.
+Dots can either contain objects to copy into slots of that class
+(must be named identical to the corresponding slot) or
+be one object of that class (in which case it will be copied and
+any missing slots will take their default values).
+If dots are missing, then corresponding values of
+\code{rSOILWAT2::sw_exampleData}
+(i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
 
 \item{object}{An object of class \code{\linkS4class{swWeather}}.}
 
@@ -77,6 +82,7 @@ The methods listed below work on this class and the proper slot of the class
 \examples{
 showClass("swWeather")
 x <- new("swWeather")
+x <- swWeather()
 
 }
 \seealso{

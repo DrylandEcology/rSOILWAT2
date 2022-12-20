@@ -7,6 +7,9 @@
 \item{x}{An object of class \code{\linkS4class{swOutput}}.}
 
 \item{timestep}{A character string. One of the \pkg{rSOILWAT2} time steps.}
+
+\item{keep_time}{A logical value. Include time information in the returned
+object.}
 }
 \description{
 Calculate derived variables from output

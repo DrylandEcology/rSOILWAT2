@@ -2,9 +2,7 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swSWC}
 \alias{set_swSWC}
-\title{\code{set_swSWC}
-Need to define and export this generic method -- otherwise,
-\code{\link{set_swSWC<-}} doesn't work.}
+\title{\code{set_swSWC}}
 \usage{
 set_swSWC(object, value)
 }
@@ -16,6 +14,4 @@ set_swSWC(object, value)
 }
 \description{
 \code{set_swSWC}
-Need to define and export this generic method -- otherwise,
-\code{\link{set_swSWC<-}} doesn't work.
 }

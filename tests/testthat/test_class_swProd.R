@@ -29,11 +29,11 @@ test_that("Manipulate 'swProd' class", {
   expect_s4_class(x, "swProd")
 
   # Tests for the 'swProd' slot of signature 'swInputData'
-  xinput <- xinput2 <- new("swInputData")
+  xinput <- xinput2 <- swInputData()
   expect_s4_class(get_swProd(xinput), "swProd")
 
   x1 <- get_swProd(xinput)
-  x2 <- new("swProd")
+  x2 <- swProd()
   expect_equal(x1, x2)
   set_swProd(xinput2) <- x1
   expect_equal(xinput, xinput2)
@@ -45,18 +45,26 @@ test_that("Manipulate 'swProd' class", {
   for (k in ids_VegType) {
     #--- extraction methods
     # integer-index version
-    expect_equal(swProd_MonProd_veg(xinput, 1 + k),
-      swProd_MonProd_veg(xinv, 1 + k))
+    expect_equal(
+      swProd_MonProd_veg(xinput, 1 + k),
+      swProd_MonProd_veg(xinv, 1 + k)
+    )
 
     # character-index version
-    expect_equal(swProd_MonProd_veg(xinput, names_VegTypes[1 + k]),
-      swProd_MonProd_veg(xinv, names_VegTypes[1 + k]))
-    expect_equal(swProd_MonProd_veg(xinv, 1 + k),
-      swProd_MonProd_veg(xinv, names_VegTypes[1 + k]))
+    expect_equal(
+      swProd_MonProd_veg(xinput, names_VegTypes[1 + k]),
+      swProd_MonProd_veg(xinv, names_VegTypes[1 + k])
+    )
+    expect_equal(
+      swProd_MonProd_veg(xinv, 1 + k),
+      swProd_MonProd_veg(xinv, names_VegTypes[1 + k])
+    )
 
     # veg-type named version
-    f <- utils::getFromNamespace(paste0("swProd_MonProd_",
-      names_VegTypes2[1 + k]), ns = "rSOILWAT2")
+    f <- utils::getFromNamespace(
+      paste0("swProd_MonProd_", names_VegTypes2[1 + k]),
+      ns = "rSOILWAT2"
+    )
     expect_equal(f(xinput), f(xinv))
     expect_equal(swProd_MonProd_veg(xinv, 1 + k), f(xinv))
 
@@ -69,8 +77,10 @@ test_that("Manipulate 'swProd' class", {
     expect_error(swProd_MonProd_veg(xinput, names_VegTypes[1 + k]) <- data_fail)
     expect_error(swProd_MonProd_veg(xinv, names_VegTypes[1 + k]) <- data_fail)
 
-    fr <- utils::getFromNamespace(paste0("swProd_MonProd_",
-      names_VegTypes2[1 + k], "<-"), ns = "rSOILWAT2")
+    fr <- utils::getFromNamespace(
+      paste0("swProd_MonProd_", names_VegTypes2[1 + k], "<-"),
+      ns = "rSOILWAT2"
+    )
     expect_error(fr(xinput, data_fail))
     expect_error(fr(xinv, data_fail))
 

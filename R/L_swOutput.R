@@ -22,44 +22,49 @@
 ###############################################################################
 
 
-# TODO: link this to C code
-# Note: the values must match those of rSW2_glovars[["kSOILWAT2"]][["OutKeys"]]
 #' Slot names of \linkS4class{swOutput}
 #' @return Standardized named vector for easier access to slots of class
 #'  \linkS4class{swOutput}.
 #' @export
 sw_out_flags <- function() {
-  c(
-    sw_aet = "AET",
-    sw_deepdrain = "DEEPSWC",
-    sw_estabs = "ESTABL",
-    sw_evsoil = "EVAPSOIL",
-    sw_evapsurface = "EVAPSURFACE",
-    sw_frozen = "FROZEN",
-    sw_hd = "HYDRED",
-    sw_inf_soil = "SOILINFILT",
-    sw_interception = "INTERCEPTION",
-    sw_percolation = "LYRDRAIN",
-    sw_pet = "PET",
-    sw_precip = "PRECIP",
-    sw_runoff = "RUNOFF",
-    sw_snow = "SNOWPACK",
-    sw_soiltemp = "SOILTEMP",
-    sw_surfaceWater = "SURFACEWATER",
-    sw_swp = "SWPMATRIC",
-    sw_swabulk = "SWABULK",
-    sw_swcbulk = "SWCBULK",
-    sw_swa = "SWA",
-    sw_temp = "TEMP",
-    sw_transp = "TRANSP",
-    sw_vwcbulk = "VWCBULK",
-    sw_vwcmatric = "VWCMATRIC",
-    sw_co2effects = "CO2EFFECTS",
-    sw_veg = "BIOMASS",
-    sw_wetdays = "WETDAY",
-    sw_logfile = "LOG"
+  tmp <- rSW2_glovars[["kSOILWAT2"]][["OutKeys"]]
+  res <- c(
+    sw_aet = tmp["SW_AET"],
+    sw_deepdrain = tmp["SW_DEEPSWC"],
+    sw_estabs = tmp["SW_ESTAB"],
+    sw_evsoil = tmp["SW_EVAPSOIL"],
+    sw_evapsurface = tmp["SW_EVAPSURFACE"],
+    sw_frozen = tmp["SW_FROZEN"],
+    sw_hd = tmp["SW_HYDRED"],
+    sw_inf_soil = tmp["SW_SOILINF"],
+    sw_interception = tmp["SW_INTERCEPTION"],
+    sw_percolation = tmp["SW_LYRDRAIN"],
+    sw_pet = tmp["SW_PET"],
+    sw_precip = tmp["SW_PRECIP"],
+    sw_runoff = tmp["SW_RUNOFF"],
+    sw_snow = tmp["SW_SNOWPACK"],
+    sw_soiltemp = tmp["SW_SOILTEMP"],
+    sw_surfaceWater = tmp["SW_SURFACEW"],
+    sw_swp = tmp["SW_SWPMATRIC"],
+    sw_swabulk = tmp["SW_SWABULK"],
+    sw_swcbulk = tmp["SW_SWCBULK"],
+    sw_swa = tmp["SW_SWA"],
+    sw_temp = tmp["SW_TEMP"],
+    sw_transp = tmp["SW_TRANSP"],
+    sw_vwcbulk = tmp["SW_VWCBULK"],
+    sw_vwcmatric = tmp["SW_VWCMATRIC"],
+    sw_co2effects = tmp["SW_CO2EFFECTS"],
+    sw_veg = tmp["SW_BIOMASS"],
+    sw_wetdays = tmp["SW_WETDAY"]
   )
+
+  # Fix names
+  tmp <- sapply(strsplit(names(res), split = ".", fixed = TRUE), `[`, j = 1)
+  names(res) <- tmp
+
+  res
 }
+
 
 ###################Generic Class to Hold One Output KEY########################
 #' Class \code{"swOutput_KEY"}
@@ -84,7 +89,7 @@ sw_out_flags <- function() {
 #'
 #' @name swOutput_KEY-class
 #' @export
-setClass(
+swOutput_KEY <- setClass(
   "swOutput_KEY",
   slot = c(
     Title = "character",
@@ -94,6 +99,15 @@ setClass(
     Week = "matrix",
     Month = "matrix",
     Year = "matrix"
+  ),
+  prototype = list(
+    Title = character(),
+    TimeStep = integer(),
+    Columns = integer(),
+    Day = matrix(NA_real_)[0, 0],
+    Week = matrix(NA_real_)[0, 0],
+    Month = matrix(NA_real_)[0, 0],
+    Year = matrix(NA_real_)[0, 0]
   )
 )
 
@@ -121,7 +135,7 @@ setMethod(
   "swOutput_KEY_Period",
   signature = "swOutput_KEY",
   function(object, index) {
-    slot(object, rSW2_glovars[["sw_TimeSteps"]][index])
+    slot(object, rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]][index])
   }
 )
 
@@ -144,7 +158,7 @@ setReplaceMethod(
   "swOutput_KEY_Period",
   signature = "swOutput_KEY",
   function(object, index, value) {
-    slot(object, rSW2_glovars[["sw_TimeSteps"]][index]) <- value
+    slot(object, rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]][index]) <- value
     validObject(object)
     object
   }
@@ -158,7 +172,6 @@ setReplaceMethod(
 #'   \code{\linkS4class{swInputData}}.
 #'
 #' @param object An object of class \code{\linkS4class{swOutput}}.
-#' @param .Object An object of class \code{\linkS4class{swOutput}}.
 #' @param x An object of class \code{\linkS4class{swOutput}}.
 #' @param value A value to assign to a specific slot of the object.
 #' @param index An integer value. One of the four possible time steps.
@@ -177,7 +190,7 @@ setReplaceMethod(
 #'
 #' @name swOutput-class
 #' @export
-setClass(
+swOutput <- setClass(
   "swOutput",
   slot = c(
     version = "character",
@@ -218,51 +231,53 @@ setClass(
     ESTABL = "swOutput_KEY",
     CO2EFFECTS = "swOutput_KEY",
     BIOMASS = "swOutput_KEY"
+  ),
+  prototype = list(
+    version = rSW2_version(),
+    timestamp = rSW2_timestamp(),
+    yr_nrow = integer(),
+    mo_nrow = integer(),
+    wk_nrow = integer(),
+    dy_nrow = integer(),
+    WTHR = swOutput_KEY(),
+    TEMP = swOutput_KEY(),
+    PRECIP = swOutput_KEY(),
+    SOILINFILT = swOutput_KEY(),
+    RUNOFF = swOutput_KEY(),
+    ALLH2O = swOutput_KEY(),
+    VWCBULK = swOutput_KEY(),
+    VWCMATRIC = swOutput_KEY(),
+    SWCBULK = swOutput_KEY(),
+    SWA = swOutput_KEY(),
+    SWABULK = swOutput_KEY(),
+    SWAMATRIC = swOutput_KEY(),
+    SWPMATRIC = swOutput_KEY(),
+    SURFACEWATER = swOutput_KEY(),
+    TRANSP = swOutput_KEY(),
+    EVAPSOIL = swOutput_KEY(),
+    EVAPSURFACE = swOutput_KEY(),
+    INTERCEPTION = swOutput_KEY(),
+    LYRDRAIN = swOutput_KEY(),
+    HYDRED = swOutput_KEY(),
+    ET = swOutput_KEY(),
+    AET = swOutput_KEY(),
+    PET = swOutput_KEY(),
+    WETDAY = swOutput_KEY(),
+    SNOWPACK = swOutput_KEY(),
+    DEEPSWC = swOutput_KEY(),
+    SOILTEMP = swOutput_KEY(),
+    ALLVEG = swOutput_KEY(),
+    ESTABL = swOutput_KEY(),
+    CO2EFFECTS = swOutput_KEY(),
+    BIOMASS = swOutput_KEY()
   )
 )
 
-
-#' @rdname swOutput-class
-#' @export
-setMethod(
-  "initialize",
-  signature = "swOutput",
-  function(.Object) {
-
-    slot(.Object, "version") <- rSW2_version()
-    slot(.Object, "timestamp") <- rSW2_timestamp()
-
-    validObject(.Object)
-
-    .Object
-  }
-)
 
 setValidity(
   "swOutput",
   function(object) {
     TRUE
-  }
-)
-
-
-#' @rdname get_version
-setMethod(
-  f = "get_version",
-  signature = "swOutput",
-  definition = function(object) {
-    tmp <- try(object@version, silent = TRUE)
-    if (inherits(tmp, "try-error")) NA else tmp
-  }
-)
-
-#' @rdname get_timestamp
-setMethod(
-  f = "get_timestamp",
-  signature = "swOutput",
-  definition = function(object) {
-    tmp <- try(object@timestamp, silent = TRUE)
-    if (inherits(tmp, "try-error")) NA else tmp
   }
 )
 

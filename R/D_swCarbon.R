@@ -27,9 +27,15 @@
 #' simulate the effects of atmospheric carbon dioxide.
 #'
 #' @param object An object of class \code{\linkS4class{swCarbon}}.
-#' @param .Object An object of class \code{\linkS4class{swCarbon}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param ... Further arguments to methods.
+#' @param ... Arguments to the helper constructor function.
+#'  Dots can either contain objects to copy into slots of that class
+#'  (must be named identical to the corresponding slot) or
+#'  be one object of that class (in which case it will be copied and
+#'  any missing slots will take their default values).
+#'  If dots are missing, then corresponding values of
+#'  \code{rSOILWAT2::sw_exampleData}
+#'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
 #' @slot CarbonUseBio Object of class \code{"integer"}, where a value of 1
 #'   enables the \var{CO2} biomass multiplier.
@@ -49,6 +55,7 @@
 #' @examples
 #' showClass("swCarbon")
 #' x <- new("swCarbon")
+#' x <- swCarbon()
 #'
 #' @name swCarbon-class
 #' @export
@@ -60,71 +67,84 @@ setClass(
     Scenario = "character",
     DeltaYear = "integer",
     CO2ppm = "matrix"
+  ),
+  prototype = list(
+    CarbonUseBio = NA_integer_,
+    CarbonUseWUE = NA_integer_,
+    Scenario = NA_character_,
+    DeltaYear = NA_integer_,
+    CO2ppm = array(
+      NA_real_,
+      dim = c(0, 2),
+      dimnames = list(NULL, c("Year", "CO2ppm"))
+    )
   )
 )
 
 #' @rdname swCarbon-class
 #' @export
-setMethod(
-  "initialize",
-  signature = "swCarbon",
-  function(.Object, ...) {
-    def <- slot(rSOILWAT2::sw_exampleData, "carbon")
-    sns <- slotNames(def)
-    dots <- list(...)
-    dns <- names(dots)
+swCarbon <- function(...) {
+  def <- slot(rSOILWAT2::sw_exampleData, "carbon")
+  sns <- slotNames("swCarbon")
+  dots <- list(...)
+  if (length(dots) == 1 && inherits(dots[[1]], "swCarbon")) {
+    # If dots are one object of this class, then convert to list of its slots
+    dots <- attributes(unclass(dots[[1]]))
+  }
+  dns <- names(dots)
 
-    if ("CO2ppm" %in% dns) {
-      # Guarantee dimnames
-      dimnames(dots[["CO2ppm"]]) <- dimnames(def@CO2ppm)
+  # Guarantee names
+  if ("CO2ppm" %in% dns) {
+    dimnames(dots[["CO2ppm"]]) <- list(NULL, colnames(def@CO2ppm))
+  }
+
+  # Copy from SOILWAT2 "testing" (defaults), but dot arguments take precedence
+  tmp <- lapply(
+    sns,
+    function(sn) if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  )
+  names(tmp) <- sns
+
+  do.call("new", args = c("swCarbon", tmp))
+}
+
+
+setValidity(
+  "swCarbon",
+  function(object) {
+    val <- TRUE
+
+    if (!all(c("Year", "CO2ppm") == colnames(object@CO2ppm)) ||
+      length(colnames(object@CO2ppm)) != 2) {
+      msg <- "@CO2ppm: column names must be 'Year' and 'CO2ppm'"
+      val <- if (isTRUE(val)) msg else c(val, msg)
+
+    } else {
+      is_bad <-
+        is.na(object@CO2ppm[, "Year"]) |
+        round(object@CO2ppm[, "Year"]) != object@CO2ppm[, "Year"]
+      if (any(is_bad)) {
+        msg <- "@CO2ppm: has missing and/or non-integer-like years"
+        val <- if (isTRUE(val)) msg else c(val, msg)
+      }
+
+      is_bad <- !all(diff(object@CO2ppm[, "Year"]) == 1)
+      if (is_bad) {
+        msg <- "@CO2ppm: years are not consecutive"
+        val <- if (isTRUE(val)) msg else c(val, msg)
+      }
+
+      ids_bad <-
+        is.na(object@CO2ppm[, "CO2ppm"]) | object@CO2ppm[, "CO2ppm"] < 0
+      if (any(ids_bad)) {
+        msg <- "@CO2ppm: has missing and/or negative CO2-concentration values"
+        val <- if (isTRUE(val)) msg else c(val, msg)
+      }
     }
 
-    for (sn in sns) {
-      slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
-    }
-
-    if (FALSE) {
-      # not needed because no relevant inheritance
-      .Object <- callNextMethod(.Object, ...)
-    }
-
-    validObject(.Object)
-    .Object
+    val
   }
 )
-
-setValidity("swCarbon", function(object) {
-  val <- TRUE
-
-  if (!all(c("Year", "CO2ppm") == colnames(object@CO2ppm)) ||
-    length(colnames(object@CO2ppm)) != 2) {
-    msg <- "@CO2ppm: column names must be 'Year' and 'CO2ppm'"
-    val <- if (isTRUE(val)) msg else c(val, msg)
-
-  } else {
-    is_bad <-
-      is.na(object@CO2ppm[, "Year"]) |
-      round(object@CO2ppm[, "Year"]) != object@CO2ppm[, "Year"]
-    if (any(is_bad)) {
-      msg <- "@CO2ppm: has missing and/or non-integer-like years"
-      val <- if (isTRUE(val)) msg else c(val, msg)
-    }
-
-    is_bad <- !all(diff(object@CO2ppm[, "Year"]) == 1)
-    if (is_bad) {
-      msg <- "@CO2ppm: years are not consecutive"
-      val <- if (isTRUE(val)) msg else c(val, msg)
-    }
-
-    ids_bad <- is.na(object@CO2ppm[, "CO2ppm"]) | object@CO2ppm[, "CO2ppm"] < 0
-    if (any(ids_bad)) {
-      msg <- "@CO2ppm: has missing and/or negative CO2-concentration values"
-      val <- if (isTRUE(val)) msg else c(val, msg)
-    }
-  }
-
-  val
-})
 
 #' @rdname swCarbon-class
 #' @export
@@ -147,55 +167,73 @@ setMethod("swCarbon_CO2ppm", "swCarbon", function(object) object@CO2ppm)
 
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("set_swCarbon", signature = "swCarbon",
+setReplaceMethod(
+  "set_swCarbon",
+  signature = "swCarbon",
   function(object, value) {
     object <- value
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_Use_Bio", signature = "swCarbon",
+setReplaceMethod(
+  "swCarbon_Use_Bio",
+  signature = "swCarbon",
   function(object, value) {
     object@CarbonUseBio <- as.integer(as.logical(value))
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_Use_WUE", signature = "swCarbon",
+setReplaceMethod(
+  "swCarbon_Use_WUE",
+  signature = "swCarbon",
   function(object, value) {
     object@CarbonUseWUE <- as.integer(as.logical(value))
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_Scenario", signature = "swCarbon",
+setReplaceMethod(
+  "swCarbon_Scenario",
+  signature = "swCarbon",
   function(object, value) {
     object@Scenario <- value
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_DeltaYear", signature = "swCarbon",
+setReplaceMethod(
+  "swCarbon_DeltaYear",
+  signature = "swCarbon",
   function(object, value) {
     object@DeltaYear <- as.integer(value)
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swCarbon-class
 #' @export
-setReplaceMethod("swCarbon_CO2ppm", signature = "swCarbon",
+setReplaceMethod(
+  "swCarbon_CO2ppm",
+  signature = "swCarbon",
   function(object, value) {
     colnames(value) <- colnames(object@CO2ppm)
-    object@CO2ppm <- value
+    object@CO2ppm <- data.matrix(value)
     validObject(object)
     object
-})
+  }
+)

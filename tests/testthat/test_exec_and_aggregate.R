@@ -175,6 +175,7 @@ for (it in tests) {
     expect_true(check_version(rd, level = "minor"))
     expect_s4_class(rd, "swOutput")
     expect_false(has_soilTemp_failed())
+    expect_true(all(sw_out_flags() %in% slotNames(rd)))
 
     # Run silently/verbosely
     expect_silent(sw_exec(
@@ -293,7 +294,7 @@ for (it in tests) {
       #--- Test: Compare aggregated daily against yearly output
       # Exclusions:
       #   * "ESTABL" produces only yearly output
-      #   * SWP is not additive; SOILWAT uses pedotransfer functions
+      #   * SWP is not additive; SOILWAT uses soil water release curves
       if (all(unlist(has_times))) {
         if (fun_agg[k] %in% c("mean", "sum") &&
             !(vars[k] %in% c("SWPMATRIC", "ESTABL"))

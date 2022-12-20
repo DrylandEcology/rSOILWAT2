@@ -1975,8 +1975,13 @@ dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
 #'
 #' @export
 #' @md
-getWeatherData_folders <- function(LookupWeatherFolder, weatherDirName = NULL,
-  filebasename = "weath", startYear = NULL, endYear = NULL) {
+getWeatherData_folders <- function(
+  LookupWeatherFolder,
+  weatherDirName = NULL,
+  filebasename = "weath",
+  startYear = NULL,
+  endYear = NULL
+) {
 
   if (is.null(LookupWeatherFolder) || is.null(filebasename)) {
     stop(
@@ -2007,7 +2012,7 @@ getWeatherData_folders <- function(LookupWeatherFolder, weatherDirName = NULL,
   weathDataList <- list()
   for (k in seq_along(index)) {
     weathDataList[[k]] <- swReadLines(
-      new("swWeatherData", year = years[index[k]]),
+      swWeatherData(year = years[index[k]]),
       file.path(dir_weather, fweath[index[k]])
     )
   }
@@ -2309,8 +2314,7 @@ dbW_dataframe_to_weatherData <- function(
       weatherDF_dataColumns]
     )
     colnames(ydata) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
-    weatherData[[i]] <- new(
-      "swWeatherData",
+    weatherData[[i]] <- swWeatherData(
       year = ylist$years[i],
       data = ydata
     )
@@ -2461,25 +2465,32 @@ dbW_weather_to_SOILWATfiles <- function(
 #' wdata <- rSOILWAT2::weatherData
 #'
 #' ## Transfer to different years (partially overlapping)
-#' wnew <- dbW_convert_to_GregorianYears(wdata,
-#'   new_startYear = 2000, new_endYear = 2020
+#' wnew <- dbW_convert_to_GregorianYears(
+#'   wdata,
+#'   new_startYear = 2000,
+#'   new_endYear = 2020
 #' )
 #' all.equal(unique(wnew[, "Year"]), 2000:2020)
 #' anyNA(wnew) # --> use `dbW_generateWeather`
 #'
 #' ## Transfer to a subset of years (i.e., subset)
-#' wnew <- dbW_convert_to_GregorianYears(wdata,
-#'   new_startYear = 2000, new_endYear = 2005
+#' wnew <- dbW_convert_to_GregorianYears(
+#'   wdata,
+#'   new_startYear = 2000,
+#'   new_endYear = 2005
 #' )
 #' all.equal(unique(wnew[, "Year"]), 2000:2005)
 #' anyNA(wnew)
 #'
 #' ## Correct/convert from a non-leap to a Gregorian calendar
-#' wempty <- data.frame(dbW_weatherData_to_dataframe(
-#'   list(new("swWeatherData"))))[1:365, ]
+#' wempty <- data.frame(
+#'   dbW_weatherData_to_dataframe(weatherHistory())
+#' )[1:365, ]
 #'
-#' wnew <- dbW_convert_to_GregorianYears(wempty,
-#'   new_startYear = 2016, new_endYear = 2016
+#' wnew <- dbW_convert_to_GregorianYears(
+#'   wempty,
+#'   new_startYear = 2016,
+#'   new_endYear = 2016
 #' )
 #' all.equal(unique(wnew[, "Year"]), 2016:2016)
 #' all.equal(nrow(wnew), 366) # leap year

@@ -2,7 +2,7 @@
 % Please edit documentation in R/rSOILWAT2_deprecated.R
 \name{dbW_addSite}
 \alias{dbW_addSite}
-\title{Add one site to the active weather database}
+\title{Add a new site description to a weather database}
 \usage{
 dbW_addSite(Site_id = NULL, lat = NULL, long = NULL, Label = NULL)
 }
@@ -16,5 +16,5 @@ dbW_addSite(Site_id = NULL, lat = NULL, long = NULL, Label = NULL)
 \item{Label}{A character string. The name of the site.}
 }
 \description{
-Add one site to the active weather database
+Add a new site description to a weather database
 }

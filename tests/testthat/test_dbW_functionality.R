@@ -921,7 +921,7 @@ test_that("Convert calendar years", {
   expect_false(anyNA(wnew))
 
   ## Correct/convert from a non-leap to a Gregorian calendar
-  wempty <- dbW_weatherData_to_dataframe(list(new("swWeatherData")))[1:365, ]
+  wempty <- dbW_weatherData_to_dataframe(weatherHistory())[1:365, ]
 
   wnew <- dbW_convert_to_GregorianYears(
     wempty,

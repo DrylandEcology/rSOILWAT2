@@ -115,9 +115,9 @@ void rSW_CTL_obtain_inputs(Bool from_files) {
     if (debug) swprintf(" > 'site'");
     #endif
 
-    onSet_SW_LYR(GET_SLOT(InputData, install("soils")));
+    onSet_SW_SOILS(GET_SLOT(InputData, install("soils")));
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'soils'");
+    if (debug) swprintf(" > 'soils' + 'swrc parameters'");
     #endif
 
     onSet_SW_VES(GET_SLOT(InputData, install("estab")));
