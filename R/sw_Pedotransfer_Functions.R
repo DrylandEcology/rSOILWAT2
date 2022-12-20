@@ -1,5 +1,7 @@
-#' Pedotransfer functions to convert between soil moisture (volumetric water
-#' content, \var{VWC}) and soil water potential (\var{SWP})
+
+#------ Deprecated functions ------
+#' Deprecated pedotransfer functions to convert between soil moisture
+#' (volumetric water content, \var{VWC}) and soil water potential (\var{SWP})
 #'
 #' @param sand A numeric value or vector. Sand content of the soil layer(s) as
 #'   fractional value in \code{[0,1]}.
@@ -17,6 +19,9 @@
 #' 1984. A statistical exploration of the relationships of soil moisture
 #' characteristics to the physical properties of soils. Water Resources Research
 #' 20:682-690.
+#'
+#' @seealso The use of these functions is deprecated;
+#' please use `ptf_estimate()` and `swrc_conversion()` instead.
 #'
 #' @name pedotransfer
 #' @md

@@ -6,8 +6,8 @@
 \alias{pdf_to_swp}
 \alias{SWPtoVWC}
 \alias{VWCtoSWP}
-\title{Pedotransfer functions to convert between soil moisture (volumetric water
-content, \var{VWC}) and soil water potential (\var{SWP})}
+\title{Deprecated pedotransfer functions to convert between soil moisture
+(volumetric water content, \var{VWC}) and soil water potential (\var{SWP})}
 \usage{
 pdf_to_vwc(
   swp,
@@ -126,8 +126,8 @@ Soil water potential in units of \var{MPa} \code{[-Inf, 0]}.
  }
 }
 \description{
-Pedotransfer functions to convert between soil moisture (volumetric water
-content, \var{VWC}) and soil water potential (\var{SWP})
+Deprecated pedotransfer functions to convert between soil moisture
+(volumetric water content, \var{VWC}) and soil water potential (\var{SWP})
 
 Calculate volumetric water content from soil water potential and soil texture
 
