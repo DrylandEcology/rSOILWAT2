@@ -2,15 +2,6 @@
 
 ## Breaking changes
 * `SOILWAT2` updated to v7.0.0
-* This version now handles a variety of soil water retention curves `SWRC`
-  and pedotransfer functions `PTF`.
-* New inputs are required to select a `SWRC` and `PTF` as well as to provide
-  parameter values of the selected `SWRC` for each soil layer.
-  Default values are backwards compatible, i.e.,
-  default `SWRC` is `"Campbell1974"` and
-  default `PTF` is `"Cosby1984AndOthers"`.
-  If these new inputs are missing in an `rSOILWAT2` `swInputData` object,
-  then they are automatically set to their default values.
 * This version produces nearly identical simulation output
   as the previous release under default values.
   Small deviations arise due to a fix in the handling of soil moisture values
@@ -29,6 +20,32 @@
   are added as first one or two columns to the returned matrix.
 * New `time_columns()` returns the output column indices with time information.
 * New `nrow_output()` returns the number of time steps in output.
+
+
+* This version now handles a variety of soil water retention curves `SWRC`
+  and pedotransfer functions `PTF` (issue #207, @dschlaep).
+    * New inputs are required to select a `SWRC` and `PTF` as well as to provide
+      parameter values of the selected `SWRC` for each soil layer.
+      Default values are backwards compatible, i.e.,
+      default `SWRC` is `"Campbell1974"` and
+      default `PTF` is `"Cosby1984AndOthers"`.
+    * If these new inputs are missing in an `rSOILWAT2` `swInputData` object,
+      then they are automatically set to their default values.
+    * New functionality for working with `SWRCs` and `PTFs` include
+        * `check_SWRC_vs_PTF()`
+          checks if `PTF` and `SWRC` are compatible and implemented.
+        * `check_ptf_availability()` checks availability of `PTFs`.
+        * `list_matched_swrcs_ptfs()` lists matching pairs of
+          implemented `SWRCs` and `PTFs`.
+        * `ptf_estimate()` estimates `SWRC` parameters from soil texture
+          with a pedotransfer function.
+        * `ptf_names()` lists pedotransfer functions `PTFs`.
+        * `swrc_conversion()`, `swrc_swp_to_vwc()`, and `swrc_vwc_to_swp()`
+          convert between bulk soil water content and soil water potential.
+        * `swrc_names()` lists soil water retention curves `SWRCs`.
+    * Documentation for code developers can be found in comment sections
+      `"Notes for implementing a new PTF"` and
+      `"Notes for implementing a new SWRC"`.
 
 * Soil density inputs can now represent either matric or bulk density
   (issue #280; @dschlaep).
@@ -58,6 +75,15 @@
 
 
 ## Changes to interface
+* Class `swSite` gains new slots `"swrc_flags"` and `"has_swrcp"` and associated
+  methods `swSite_SWRCflags()` and `swSite_hasSWRCp()`
+  for names of selected `SWRC` and `PTF` as well as indicating
+  whether `SWRC` parameters are provided as inputs or to be calculated
+  at run time (issue #207, @dschlaep).
+* Class `swSoils` gains new slot `"SWRCp"` and associated methods
+  `swSoils_SWRCp()` for `SWRC` parameters by soil layer (issue #207, @dschlaep).
+* Class `swFiles` gains a new file name for the `SWRC` parameter input file and
+  associated methods `swFiles_SWRCp()` (issue #207, @dschlaep).
 * Class `swSite` gains new slot `"SoilDensityInputType"` and associated
   methods `swSite_SoilDensityInputType()` (issue #209, @dschlaep).
   This encodes whether soil density inputs represent
@@ -66,6 +92,8 @@
   This encodes if land cover is estimated at run-time by `SOILWAT2` via
   `estimatePotNatVegComposition()` (value 1) or if land cover values are passed
   as inputs (value 0, as previously).
+* `SWPtoVWC()` and `VWCtoSWP()` are deprecated in favor of
+  `swrc_swp_to_vwc()` and `swrc_vwc_to_swp()` respectively.
 
 
 # rSOILWAT2 v5.3.3
