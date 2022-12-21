@@ -147,3 +147,7 @@ Cosby, B. J., G. M. Hornberger, R. B. Clapp, and T. R. Ginn.
 characteristics to the physical properties of soils. Water Resources Research
 20:682-690.
 }
+\seealso{
+The use of these functions is deprecated;
+please use \code{ptf_estimate()} and \code{swrc_conversion()} instead.
+}
