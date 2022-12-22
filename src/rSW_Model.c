@@ -22,14 +22,14 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "SOILWAT2/generic.h"
-#include "SOILWAT2/filefuncs.h"
-#include "SOILWAT2/Times.h"
+#include "SOILWAT2/include/generic.h"
+#include "SOILWAT2/include/filefuncs.h"
+#include "SOILWAT2/include/Times.h"
 
-#include "SOILWAT2/SW_Defines.h"
-#include "SOILWAT2/SW_Times.h"
-#include "SOILWAT2/SW_Files.h"
-#include "SOILWAT2/SW_Model.h" // externs `SW_Model`
+#include "SOILWAT2/include/SW_Defines.h"
+#include "SOILWAT2/include/SW_Times.h"
+#include "SOILWAT2/include/SW_Files.h"
+#include "SOILWAT2/include/SW_Model.h" // externs `SW_Model`
 
 #include "rSW_Model.h"
 

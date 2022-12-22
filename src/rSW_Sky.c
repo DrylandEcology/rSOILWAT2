@@ -16,14 +16,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "SOILWAT2/generic.h"
-#include "SOILWAT2/filefuncs.h"
+#include "SOILWAT2/include/generic.h"
+#include "SOILWAT2/include/filefuncs.h"
 
-#include "SOILWAT2/SW_Defines.h"
-#include "SOILWAT2/SW_Files.h"
+#include "SOILWAT2/include/SW_Defines.h"
+#include "SOILWAT2/include/SW_Files.h"
 
-#include "SOILWAT2/SW_Weather.h" // externs `SW_Weather`
-#include "SOILWAT2/SW_Sky.h" // externs `SW_Sky`
+#include "SOILWAT2/include/SW_Weather.h" // externs `SW_Weather`
+#include "SOILWAT2/include/SW_Sky.h" // externs `SW_Sky`
 #include "rSW_Sky.h"
 
 #include <R.h>

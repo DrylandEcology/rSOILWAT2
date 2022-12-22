@@ -7,17 +7,7 @@
 #ifndef SW_R_LIB_H_
 #define SW_R_LIB_H_
 
-#include "SOILWAT2/SW_Model.h"
-#include "SOILWAT2/SW_Site.h"
-#include "SOILWAT2/SW_VegEstab.h"
-#include "SOILWAT2/SW_Output.h"
-#include "SOILWAT2/SW_Weather.h"
-#include "SOILWAT2/SW_Sky.h"
-#include "SOILWAT2/SW_VegProd.h"
-#include "SOILWAT2/SW_VegEstab.h"
-#include "SOILWAT2/SW_SoilWater.h"
-#include "SOILWAT2/SW_Markov.h"
-#include "SOILWAT2/SW_Control.h"
+#include "SOILWAT2/include/SW_Control.h"
 
 #include <R.h>
 #include <Rdefines.h>

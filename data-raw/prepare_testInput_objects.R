@@ -43,7 +43,7 @@ colnames(define_ex) <- cns
 
 
 #--- Inputs ------
-dSOILWAT2_inputs <- "testing"
+dSOILWAT2_inputs <- file.path("tests", "example")
 dir_orig <- file.path("src", "SOILWAT2", dSOILWAT2_inputs)
 dir_backup <- "backup"
 dir_extdata <- file.path("inst", "extdata")
@@ -237,7 +237,7 @@ for (it in seq_along(tests)) {
   )
 
   file.rename(
-    from = file.path(dir_extdata, dSOILWAT2_inputs),
+    from = file.path(dir_extdata, basename(dSOILWAT2_inputs)),
     to = dir_ex
   )
 

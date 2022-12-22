@@ -1,5 +1,5 @@
 
-#include "SOILWAT2/generic.h"
+#include "SOILWAT2/include/generic.h"
 #include <Rinternals.h> // for SEXP
 
 /* =================================================== */

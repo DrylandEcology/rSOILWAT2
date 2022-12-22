@@ -19,17 +19,17 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "SOILWAT2/generic.h" // externs `EchoInits`
-#include "SOILWAT2/filefuncs.h"
-#include "SOILWAT2/Times.h"
-#include "SOILWAT2/myMemory.h"
+#include "SOILWAT2/include/generic.h" // externs `EchoInits`
+#include "SOILWAT2/include/filefuncs.h"
+#include "SOILWAT2/include/Times.h"
+#include "SOILWAT2/include/myMemory.h"
 
-#include "SOILWAT2/SW_Defines.h"
-#include "SOILWAT2/SW_Files.h"
-#include "SOILWAT2/SW_Site.h" // externs `SW_Site`
+#include "SOILWAT2/include/SW_Defines.h"
+#include "SOILWAT2/include/SW_Files.h"
+#include "SOILWAT2/include/SW_Site.h" // externs `SW_Site`
 
-#include "SOILWAT2/SW_Output.h" // externs many variables
-#include "SOILWAT2/SW_Output_outarray.h" // for function `SW_OUT_set_nrow`
+#include "SOILWAT2/include/SW_Output.h" // externs many variables
+#include "SOILWAT2/include/SW_Output_outarray.h" // for function `SW_OUT_set_nrow`
 #include "rSW_Output.h"
 
 #include <R.h>
