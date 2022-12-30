@@ -6,17 +6,17 @@
  */
 
 // externs `*logfp`, `errstr`, `logged`, `QuietMode`, `EchoInits`
-#include "SOILWAT2/generic.h"
-#include "SOILWAT2/filefuncs.h" // externs `_firstfile`
-#include "SOILWAT2/Times.h"
-#include "SOILWAT2/SW_Defines.h"
+#include "SOILWAT2/include/generic.h"
+#include "SOILWAT2/include/filefuncs.h" // externs `_firstfile`
+#include "SOILWAT2/include/Times.h"
+#include "SOILWAT2/include/SW_Defines.h"
 
-#include "SOILWAT2/SW_Files.h"
-#include "SOILWAT2/SW_Carbon.h" // externs `SW_Carbon`
-#include "SOILWAT2/SW_SoilWater.h" // externs `SW_Soilwat`
-#include "SOILWAT2/SW_VegEstab.h" // externs `SW_VegEstab`
-#include "SOILWAT2/SW_Output.h"
-#include "SOILWAT2/SW_Main_lib.h"
+#include "SOILWAT2/include/SW_Files.h"
+#include "SOILWAT2/include/SW_Carbon.h" // externs `SW_Carbon`
+#include "SOILWAT2/include/SW_SoilWater.h" // externs `SW_Soilwat`
+#include "SOILWAT2/include/SW_VegEstab.h" // externs `SW_VegEstab`
+#include "SOILWAT2/include/SW_Output.h"
+#include "SOILWAT2/include/SW_Main_lib.h"
 
 #include "rSW_Files.h"
 #include "rSW_Model.h"

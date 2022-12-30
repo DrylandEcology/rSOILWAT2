@@ -41,6 +41,7 @@ Remotes:
     github::DrylandEcology/rSW2data,
     github::DrylandEcology/rSW2exter
 NeedsCompilation: yes
+SystemRequirements: GNU make
 License: GPL-3
 URL: https://github.com/DrylandEcology/rSOILWAT2
 BugReports: https://github.com/DrylandEcology/rSOILWAT2/issues

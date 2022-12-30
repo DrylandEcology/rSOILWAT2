@@ -1,6 +1,6 @@
 
-#include "SOILWAT2/Times.h"
-#include "SOILWAT2/SW_Weather.h"
+#include "SOILWAT2/include/Times.h"
+#include "SOILWAT2/include/SW_Weather.h"
 #include <Rinternals.h> // for SEXP
 
 /* =================================================== */

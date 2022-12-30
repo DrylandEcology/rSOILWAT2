@@ -21,17 +21,17 @@
 #include <string.h>
 #include <math.h>
 
-#include "SOILWAT2/generic.h"
-#include "SOILWAT2/filefuncs.h"
-#include "SOILWAT2/Times.h"
-#include "SOILWAT2/myMemory.h"
+#include "SOILWAT2/include/generic.h"
+#include "SOILWAT2/include/filefuncs.h"
+#include "SOILWAT2/include/Times.h"
+#include "SOILWAT2/include/myMemory.h"
 
-#include "SOILWAT2/SW_Defines.h"
-#include "SOILWAT2/SW_Files.h"
-#include "SOILWAT2/SW_Model.h" // externs `SW_Model`
-#include "SOILWAT2/SW_Site.h" // externs `SW_Site`
+#include "SOILWAT2/include/SW_Defines.h"
+#include "SOILWAT2/include/SW_Files.h"
+#include "SOILWAT2/include/SW_Model.h" // externs `SW_Model`
+#include "SOILWAT2/include/SW_Site.h" // externs `SW_Site`
 
-#include "SOILWAT2/SW_SoilWater.h" // externs `SW_Soilwat`
+#include "SOILWAT2/include/SW_SoilWater.h" // externs `SW_Soilwat`
 #include "rSW_SoilWater.h"
 #include "SW_R_lib.h" // externs `InputData`
 

@@ -16,9 +16,9 @@
 /*                INCLUDES / DEFINES                   */
 /* --------------------------------------------------- */
 
-#include "SOILWAT2/generic.h"  // for `swprintf`
-#include "SOILWAT2/SW_Carbon.h"  // for `calculate_CO2_multipliers`
-#include "SOILWAT2/SW_Control.h"  // for `SW_CTL_read_inputs_from_disk`
+#include "SOILWAT2/include/generic.h"  // for `swprintf`
+#include "SOILWAT2/include/SW_Carbon.h"  // for `calculate_CO2_multipliers`
+#include "SOILWAT2/include/SW_Control.h"  // for `SW_CTL_read_inputs_from_disk`
 
 #include "rSW_Files.h"
 #include "rSW_Model.h"

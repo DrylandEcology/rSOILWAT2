@@ -19,13 +19,13 @@
 #include <math.h>
 #include <string.h>
 
-#include "SOILWAT2/generic.h"
-#include "SOILWAT2/filefuncs.h"
-#include "SOILWAT2/Times.h"
+#include "SOILWAT2/include/generic.h"
+#include "SOILWAT2/include/filefuncs.h"
+#include "SOILWAT2/include/Times.h"
 
-#include "SOILWAT2/SW_Files.h"
-#include "SOILWAT2/SW_Weather.h"
-#include "SOILWAT2/SW_Markov.h"
+#include "SOILWAT2/include/SW_Files.h"
+#include "SOILWAT2/include/SW_Weather.h"
+#include "SOILWAT2/include/SW_Markov.h"
 
 #include "rSW_Markov.h" // externs `SW_Markov`
 

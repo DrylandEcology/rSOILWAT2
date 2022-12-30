@@ -222,7 +222,7 @@ VWCtoSWP_old <- function(vwc, sand, clay) {
 #   * update examples and unit tests to utilize new functions
 #
 # Notes for implementing a new SWRC "XXX" and/or PTF "YYY" in `SOILWAT2`
-#   1) SOILWAT2: see notes in SOILWAT2/SW_Site.h
+#   1) SOILWAT2: see notes in SOILWAT2/src/SW_Site.h
 #   2) rSOILWAT2: everything should automatically work with new XXX/YYY
 #      * update examples and unit tests to utilize new functions
 
