@@ -46,6 +46,7 @@
 #' @name swEstabSpecies-class
 #' @export
 setClass("swEstabSpecies", slot = c(fileName = "character", Name = "character",
+  vegType = "integer",
   estab_lyrs = "integer", barsGERM = "numeric", barsESTAB = "numeric",
   min_pregerm_days = "integer", max_pregerm_days = "integer",
   min_wetdays_for_germ = "integer", max_drydays_postgerm = "integer",

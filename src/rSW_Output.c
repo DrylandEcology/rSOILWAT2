@@ -89,16 +89,6 @@ void onSet_SW_OUT(SEXP OUT) {
 	last_orig = INTEGER(GET_SLOT(OUT, install("last_orig")));
 	PROTECT(outfile = GET_SLOT(OUT, install("outfile")));
 
-	if (use[eSW_Estab]) {
-		sumtype[eSW_Estab] = eSW_Sum;
-		first_orig[eSW_Estab] = 1;
-		timePeriods[eSW_Estab + 0 * SW_OUTNKEYS] = eSW_Year;
-		ForEachOutPeriod(i) {
-			timePeriods[eSW_Estab + i * SW_OUTNKEYS] = eSW_NoTime;
-		}
-		last_orig[eSW_Estab] = 366;
-	}
-
 	ForEachOutKey(k) {
 		msg_type = SW_OUT_read_onekey(k, sumtype[k], stub, first_orig[k],
 			last_orig[k], msg);
