@@ -528,14 +528,14 @@ SEXP sw_consts(void) {
     SWRC_PARAM_NMAX,
     eSW_NoTime, SW_OUTNPERIODS, SW_OUTNKEYS, SW_NSUMTYPES, NVEGTYPES,
     OUT_DIGITS,
-    N_SWRCs, N_PTFs
+    N_SWRCs, N_PTFs, MAX_INPUT_COLUMNS
   };
   char *cINT[] = {
     "SW_NFILES", "MAX_LAYERS", "MAX_TRANSP_REGIONS", "MAX_NYEAR",
     "SWRC_PARAM_NMAX",
     "eSW_NoTime", "SW_OUTNPERIODS", "SW_OUTNKEYS", "SW_NSUMTYPES", "NVEGTYPES",
     "OUT_DIGITS",
-    "N_SWRCs", "N_PTFs"
+    "N_SWRCs", "N_PTFs", "MAX_INPUT_COLUMNS"
   };
 
   // Vegetation types

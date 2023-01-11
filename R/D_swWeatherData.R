@@ -87,7 +87,7 @@ setValidity(
     }
 
     tmp <- dim(object@data)
-    if (tmp[2] != 4) {
+    if (tmp[2] != rSW2_glovars[["kSOILWAT2"]][["kINT"]][["MAX_INPUT_COLUMNS"]] + 1) {
       msg <- paste(
         "@data must have exactly 4 columns corresponding to",
         "DOY, Tmax_C, Tmin_C, PPT_cm"
