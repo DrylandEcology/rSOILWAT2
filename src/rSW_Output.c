@@ -59,9 +59,7 @@ void onSet_SW_OUT(SEXP OUT) {
 	int *use, *timePeriods, *sumtype, *first_orig, *last_orig;
 	// mykey and myobj are currently unused:
 	// int *mykey, *myobj;
-	char
-		stub[10],
-		msg[200]; // message to print
+	char msg[200]; // message to print
 	#ifdef RSWDEBUG
 	int debug = 0;
 	#endif
@@ -90,8 +88,13 @@ void onSet_SW_OUT(SEXP OUT) {
 	PROTECT(outfile = GET_SLOT(OUT, install("outfile")));
 
 	ForEachOutKey(k) {
-		msg_type = SW_OUT_read_onekey(k, sumtype[k], stub, first_orig[k],
-			last_orig[k], msg);
+		msg_type = SW_OUT_read_onekey(
+			k,
+			sumtype[k],
+			first_orig[k],
+			last_orig[k],
+			msg
+		);
 
 		if (msg_type > 0) {
 			LogError(logfp, msg_type, "%s", msg);
