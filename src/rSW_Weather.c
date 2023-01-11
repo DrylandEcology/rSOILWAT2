@@ -45,7 +45,21 @@ static char *cSW_WTH_names[] = {
   "use_weathergenerator",
   "use_weathergenerator_only",
   "FirstYear_Historical", // removed from SOILWAT2; kept here for backwards compatibility
-  "MonthlyScalingParams"
+  "MonthlyScalingParams",
+  "use_cloudCoverMonthly",
+  "use_windSpeedMonthly",
+  "use_relHumidityMonthly",
+  "has_temp2",
+  "has_ppt",
+  "has_cloudCover",
+  "has_sfcWind",
+  "has_windComp",
+  "has_hurs",
+  "has_hurs2",
+  "has_huss",
+  "has_tdps",
+  "has_vp",
+  "has_rsds"
 };
 
 
@@ -77,7 +91,7 @@ static void rSW2_setAllWeather(
 */
 SEXP onGet_SW_WTH_setup(void) {
 	int i;
-	const int nitems = 6;
+	const int nitems = 8;
 	RealD *p_MonthlyValues;
 	SW_WEATHER *w = &SW_Weather;
 
@@ -86,10 +100,12 @@ SEXP onGet_SW_WTH_setup(void) {
 
 	SEXP
 		use_snow, pct_snowdrift, pct_snowRunoff,
-		use_weathergenerator, use_weathergenerator_only, yr_first;
+		use_weathergenerator, use_weathergenerator_only, yr_first, use_cloudCoverMonthly, use_windSpeedMonthly,
+        use_relHumidityMonthly, has_temp2, has_ppt, has_cloudCover, has_sfcWind, has_windComp, has_hurs, has_hurs2,
+        has_huss, has_tdps, has_vp, has_rsds;
 	SEXP MonthlyScalingParams, MonthlyScalingParams_names, MonthlyScalingParams_names_x, MonthlyScalingParams_names_y;
 
-	char *cMonthlyScalingParams_names[] = {"PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH"};
+	char *cMonthlyScalingParams_names[] = {"PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "ActVP", "ShortWR"};
 	char *cMonths[] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
 	PROTECT(swWeather = MAKE_CLASS("swWeather"));
@@ -111,6 +127,36 @@ SEXP onGet_SW_WTH_setup(void) {
 	*/
 	INTEGER_POINTER(yr_first)[0] = SW_Weather.startYear;
 
+    PROTECT(use_cloudCoverMonthly = NEW_LOGICAL(1));
+    LOGICAL_POINTER(use_cloudCoverMonthly)[0] = w->use_cloudCoverMonthly;
+    PROTECT(use_windSpeedMonthly = NEW_LOGICAL(1));
+    LOGICAL_POINTER(use_windSpeedMonthly)[0] = w->use_windSpeedMonthly;
+    PROTECT(use_relHumidityMonthly = NEW_LOGICAL(1));
+    LOGICAL_POINTER(use_relHumidityMonthly)[0] = w->use_relHumidityMonthly;
+
+    PROTECT(has_temp2 = NEW_LOGICAL(1));
+    LOGICAL_POINTER(has_temp2)[0] = w->has_temp2;
+    PROTECT(has_ppt = NEW_LOGICAL(1));
+    LOGICAL_POINTER(has_ppt)[0] = w->has_ppt;
+    PROTECT(has_cloudCover = NEW_LOGICAL(1));
+    LOGICAL_POINTER(has_cloudCover)[0] = w->has_cloudCover;
+    PROTECT(has_sfcWind = NEW_LOGICAL(1));
+    LOGICAL_POINTER(has_sfcWind)[0] = w->has_sfcWind;
+    PROTECT(has_windComp = NEW_LOGICAL(1));
+    LOGICAL_POINTER(has_windComp)[0] = w->has_windComp;
+    PROTECT(has_hurs = NEW_LOGICAL(1));
+    LOGICAL_POINTER(has_hurs)[0] = w->has_hurs;
+    PROTECT(has_hurs2 = NEW_LOGICAL(1));
+    LOGICAL_POINTER(has_hurs2)[0] = w->has_hurs2;
+    PROTECT(has_huss = NEW_LOGICAL(1));
+    LOGICAL_POINTER(has_huss)[0] = w->has_huss;
+    PROTECT(has_tdps = NEW_LOGICAL(1));
+    LOGICAL_POINTER(has_tdps)[0] = w->has_tdps;
+    PROTECT(has_vp = NEW_LOGICAL(1));
+    LOGICAL_POINTER(has_vp)[0] = w->has_vp;
+    PROTECT(has_rsds = NEW_LOGICAL(1));
+    LOGICAL_POINTER(has_rsds)[0] = w->has_rsds;
+
 	PROTECT(MonthlyScalingParams = allocMatrix(REALSXP, 12, nitems));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
 	for (i = 0; i < 12; i++) {
@@ -120,6 +166,8 @@ SEXP onGet_SW_WTH_setup(void) {
 		p_MonthlyValues[i + 12 * 3] = w->scale_skyCover[i];
 		p_MonthlyValues[i + 12 * 4] = w->scale_wind[i];
 		p_MonthlyValues[i + 12 * 5] = w->scale_rH[i];
+        p_MonthlyValues[i + 12 * 6] = w->scale_shortWaveRad[i];
+        p_MonthlyValues[i + 12 * 7] = w->scale_actVapPress[i];
 	}
 	PROTECT(MonthlyScalingParams_names = allocVector(VECSXP, 2));
 	PROTECT(MonthlyScalingParams_names_x = allocVector(STRSXP, 12));
@@ -139,8 +187,22 @@ SEXP onGet_SW_WTH_setup(void) {
 	SET_SLOT(SW_WTH, install(cSW_WTH_names[4]), use_weathergenerator_only);
 	SET_SLOT(SW_WTH, install(cSW_WTH_names[5]), yr_first);
 	SET_SLOT(SW_WTH, install(cSW_WTH_names[6]), MonthlyScalingParams);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[7]), use_cloudCoverMonthly);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[8]), use_windSpeedMonthly);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[9]), use_relHumidityMonthly);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[10]), has_temp2);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[11]), has_ppt);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[12]), has_cloudCover);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[13]), has_sfcWind);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[14]), has_windComp);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[15]), has_hurs);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[16]), has_hurs2);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[17]), has_huss);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[18]), has_tdps);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[19]), has_vp);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[20]), has_rsds);
 
-	UNPROTECT(12);
+	UNPROTECT(26);
 	return SW_WTH;
 }
 
@@ -155,8 +217,10 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 	int i;
 	SW_WEATHER *w = &SW_Weather;
 	SEXP
-		use_snow, pct_snowdrift, pct_snowRunoff,
-		use_weathergenerator, use_weathergenerator_only;
+        use_snow, pct_snowdrift, pct_snowRunoff,
+        use_weathergenerator, use_weathergenerator_only, use_cloudCoverMonthly, use_windSpeedMonthly,
+        use_relHumidityMonthly, has_temp2, has_ppt, has_cloudCover, has_sfcWind, has_windComp, has_hurs,
+        has_hurs2, has_huss, has_tdps, has_vp, has_rsds;
 	SEXP MonthlyScalingParams;
 	RealD *p_MonthlyValues;
 
@@ -177,6 +241,34 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 		w->generateWeatherMethod = 2;
 	}
 
+    PROTECT(use_cloudCoverMonthly = GET_SLOT(SW_WTH, install(cSW_WTH_names[7])));
+    w->use_cloudCoverMonthly = (Bool) *INTEGER(use_cloudCoverMonthly);
+    PROTECT(use_windSpeedMonthly = GET_SLOT(SW_WTH, install(cSW_WTH_names[8])));
+    w->use_windSpeedMonthly = (Bool) *INTEGER(use_windSpeedMonthly);
+    PROTECT(use_relHumidityMonthly = GET_SLOT(SW_WTH, install(cSW_WTH_names[9])));
+    w->use_relHumidityMonthly = (Bool) *INTEGER(use_relHumidityMonthly);
+    PROTECT(has_temp2 = GET_SLOT(SW_WTH, install(cSW_WTH_names[10])));
+    w->has_temp2 = (Bool) *INTEGER(has_temp2);
+    PROTECT(has_ppt = GET_SLOT(SW_WTH, install(cSW_WTH_names[11])));
+    w->has_ppt = (Bool) *INTEGER(has_ppt) ? 2 : 0;
+    PROTECT(has_cloudCover = GET_SLOT(SW_WTH, install(cSW_WTH_names[12])));
+    w->has_cloudCover = (Bool) *INTEGER(has_cloudCover);
+    PROTECT(has_sfcWind = GET_SLOT(SW_WTH, install(cSW_WTH_names[13])));
+    w->has_sfcWind = (Bool) *INTEGER(has_sfcWind);
+    PROTECT(has_windComp = GET_SLOT(SW_WTH, install(cSW_WTH_names[14])));
+    w->has_windComp = (Bool) *INTEGER(has_windComp);
+    PROTECT(has_hurs = GET_SLOT(SW_WTH, install(cSW_WTH_names[15])));
+    w->has_hurs = (Bool) *INTEGER(has_hurs);
+    PROTECT(has_hurs2 = GET_SLOT(SW_WTH, install(cSW_WTH_names[16])));
+    w->has_hurs2 = (Bool) *INTEGER(has_hurs2);
+    PROTECT(has_huss = GET_SLOT(SW_WTH, install(cSW_WTH_names[17])));
+    w->has_huss = (Bool) *INTEGER(has_huss);
+    PROTECT(has_tdps = GET_SLOT(SW_WTH, install(cSW_WTH_names[18])));
+    w->has_tdps = (Bool) *INTEGER(has_tdps);
+    PROTECT(has_vp = GET_SLOT(SW_WTH, install(cSW_WTH_names[19])));
+    w->has_vp = (Bool) *INTEGER(has_vp);
+    PROTECT(has_rsds = GET_SLOT(SW_WTH, install(cSW_WTH_names[20])));
+    w->has_rsds = (Bool) *INTEGER(has_rsds);
 	/* `SW_weather.yr` was removed from SOILWAT2:
 	SEXP yr_first;
 	int tmp;
@@ -195,6 +287,8 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 		w->scale_skyCover[i] = p_MonthlyValues[i + 12 * 3];
 		w->scale_wind[i] = p_MonthlyValues[i + 12 * 4];
 		w->scale_rH[i] = p_MonthlyValues[i + 12 * 5];
+        w->scale_actVapPress[i] = p_MonthlyValues[i + 12 * 6];
+        w->scale_shortWaveRad[i] = p_MonthlyValues[i + 12 * 7];
 	}
 
 	SW_WeatherPrefix(w->name_prefix);
@@ -215,7 +309,7 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 	}
 	*/
 
-	UNPROTECT(6);
+	UNPROTECT(20);
 }
 
 

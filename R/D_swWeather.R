@@ -57,10 +57,10 @@ setClass(
   prototype = list(
     MonthlyScalingParams = array(
       NA_real_,
-      dim = c(12, 6),
+      dim = c(12, 8),
       dimnames = list(
         NULL,
-        c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH")
+        c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "actVP", "shortWR")
       )
     )
   )
@@ -163,7 +163,21 @@ setClass(
     pct_SnowRunoff = "numeric",
     use_weathergenerator = "logical",
     use_weathergenerator_only = "logical",
-    FirstYear_Historical = "integer"
+    FirstYear_Historical = "integer",
+    use_cloudCoverMonthly = "logical",
+    use_windSpeedMonthly = "logical",
+    use_relHumidityMonthly = "logical",
+    has_temp2 = "logical",
+    has_ppt = "logical",
+    has_cloudCover = "logical",
+    has_sfcWind = "logical",
+    has_windComp = "logical",
+    has_hurs = "logical",
+    has_hurs2 = "logical",
+    has_huss = "logical",
+    has_tdps = "logical",
+    has_vp = "logical",
+    has_rsds = "logical"
   ),
   # TODO: this class should not contain `swMonthlyScalingParams` but
   # instead be a composition, i.e., have a slot of that class
@@ -174,7 +188,21 @@ setClass(
     pct_SnowRunoff = NA_real_,
     use_weathergenerator = NA,
     use_weathergenerator_only = NA,
-    FirstYear_Historical = NA_integer_
+    FirstYear_Historical = NA_integer_,
+    use_cloudCoverMonthly = NA,
+    use_windSpeedMonthly = NA,
+    use_relHumidityMonthly = NA,
+    has_temp2 = NA,
+    has_ppt = NA,
+    has_cloudCover = NA,
+    has_sfcWind = NA,
+    has_windComp = NA,
+    has_hurs = NA,
+    has_hurs2 = NA,
+    has_huss = NA,
+    has_tdps = NA,
+    has_vp = NA,
+    has_rsds = NA
   )
 )
 
@@ -427,9 +455,23 @@ setMethod(
     object@pct_SnowRunoff <- readNumeric(infiletext[6])
     object@use_weathergenerator <- readLogical(infiletext[7])
     object@FirstYear_Historical <- readInteger(infiletext[8])
+    object@use_cloudCoverMonthly <- readLogical(infiletext[9])
+    object@use_windSpeedMonthly <- readLogical(infiletext[10])
+    object@use_relHumidityMonthly <- readLogical(infiletext[11])
+    object@has_temp2 <- readLogical(infiletext[12])
+    object@has_ppt <- readLogical(infiletext[13])
+    object@has_cloudCover <- readLogical(infiletext[14])
+    object@has_sfcWind <- readLogical(infiletext[15])
+    object@has_windComp <- readLogical(infiletext[16])
+    object@has_hurs <- readLogical(infiletext[17])
+    object@has_hurs2 <- readLogical(infiletext[18])
+    object@has_huss <- readLogical(infiletext[19])
+    object@has_tdps <- readLogical(infiletext[20])
+    object@has_vp <- readLogical(infiletext[21])
+    object@has_rsds <- readLogical(infiletext[22])
 
-    data <- matrix(data = c(rep(1, 12), rep(NA, 12 * 5)), nrow = 12, ncol = 6)
-    colnames(data) <- c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH")
+    data <- matrix(data = c(rep(1, 12), rep(NA, 12 * 5)), nrow = 12, ncol = 8)
+    colnames(data) <- c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "actVP", "shortWR")
     rownames(data) <- c("January", "February", "March", "April", "May",
       "June", "July", "August", "September", "October", "November", "December")
 
