@@ -257,12 +257,14 @@ SEXP onGet_WTH_DATA(void) {
 */
 SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	int i, days, yearIndex;
-	const int nitems = 4;
+	const int nitems = 15;
 	SEXP swWeatherData;
 	SEXP WeatherData;
 	SEXP Year, Year_names, Year_names_y;
 	SEXP nYear;
-	char *cYear[] = {"DOY", "Tmax_C", "Tmin_C", "PPT_cm"};
+	char *cYear[] = {"DOY", "Tmax_C", "Tmin_C", "PPT_cm", "cloudCov", "windSpeed",
+                     "windSpeed_east", "windSpeed_north", "rel_H", "rel_H_max", "rel_H_min",
+                     "spec_H", "dewpointTemp_C", "actVP", "shortWR"};
 	RealD *p_Year;
 	SW_WEATHER *w = &SW_Weather;
 
@@ -282,6 +284,11 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 		p_Year[i + days * 1] = w->allHist[yearIndex]->temp_max[i];
 		p_Year[i + days * 2] = w->allHist[yearIndex]->temp_min[i];
 		p_Year[i + days * 3] = w->allHist[yearIndex]->ppt[i];
+        p_Year[i + days * 4] = w->allHist[yearIndex]->cloudcov_daily[i];
+        p_Year[i + days * 5] = w->allHist[yearIndex]->windspeed_daily[i];
+        p_Year[i + days * 6] = w->allHist[yearIndex]->r_humidity_daily[i];
+        p_Year[i + days * 7] = w->allHist[yearIndex]->shortWaveRad[i];
+        p_Year[i + days * 8] = w->allHist[yearIndex]->actualVaporPressure[i];
 	}
 
 	PROTECT(Year_names = allocVector(VECSXP, 2));
@@ -390,12 +397,12 @@ static void rSW2_setAllWeather(
       if (weth_found) {
         numDaysYear = Time_get_lastdoy_y(year);
 
-        if (nrows(yrWData) != numDaysYear || ncols(yrWData) != 4) {
+        if (nrows(yrWData) != numDaysYear || ncols(yrWData) != MAX_INPUT_COLUMNS + 1) {
           LogError(
             logfp,
             LOGFATAL,
             "Weather data (year %d): wrong dimensions: "
-            "expected %d rows (had %d) and 4 columns (had %d).\n",
+            "expected %d rows (had %d) and 15 columns (had %d).\n",
             year,
             numDaysYear,
             nrows(yrWData),
@@ -442,6 +449,21 @@ static void rSW2_setAllWeather(
               (R_FINITE(p_yrWData[j]) && !missing(p_yrWData[j])) ?
               p_yrWData[j] :
               SW_MISSING;
+
+            j = day + numDaysYear * 4;
+            allHist[yearIndex]->cloudcov_daily[day] = p_yrWData[j];
+
+            j = day + numDaysYear * 5;
+            allHist[yearIndex]->windspeed_daily[day] = p_yrWData[j];
+
+            j = day + numDaysYear * 6;
+            allHist[yearIndex]->r_humidity_daily[day] = p_yrWData[j];
+
+            j = day + numDaysYear * 7;
+            allHist[yearIndex]->shortWaveRad[day] = p_yrWData[j];
+
+            j = day + numDaysYear * 8;
+            allHist[yearIndex]->actualVaporPressure[day] = p_yrWData[j];
 
 
             // Calculate average air temperature

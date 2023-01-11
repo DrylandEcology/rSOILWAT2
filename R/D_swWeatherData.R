@@ -68,8 +68,10 @@ setClass(
     # NOTE: 999 should be rSW2_glovars[["kSOILWAT2"]][["kNUM"]][["SW_MISSING"]]
     data = array(
       data = c(1:366, rep(999, 366 * 3)),
-      dim = c(366, 4),
-      dimnames = list(NULL, c("DOY", "Tmax_C", "Tmin_C", "PPT_cm"))
+      dim = c(366, 15),
+      dimnames = list(NULL, c("DOY", "Tmax_C", "Tmin_C", "PPT_cm", "cloudCov", "windSpeed",
+      "windSpeed_east", "windSpeed_north", "rel_H", "rel_H_max", "rel_H_min",
+      "spec_H", "dewpointTemp_C", "actVP", "shortWR"))
     ),
     year = NA_integer_
   )
