@@ -11,6 +11,7 @@
 # soil moisture and timing parameters required for the
 # species to establish in a given year.
 # There is no limit to the number of files in the list.
+# File names with paths relative to the SOILWAT2 working directory (-d flag)
 
-Input/bouteloua.estab
-Input/bromus.estab
+Input/estab/bouteloua.estab
+Input/estab/bromus.estab

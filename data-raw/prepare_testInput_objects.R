@@ -21,7 +21,7 @@ dir_in <- file.path("inst", "extdata")
 dir_backup <- sub("extdata", "extdata_copy", dir_in, fixed = TRUE)
 dir_out <- file.path("tests", "test_data")
 
-tests <- 1:5
+tests <- 1:6
 examples <- paste0("example", tests)
 
 
@@ -119,6 +119,20 @@ for (it in seq_along(tests)) {
   substr(fin[line], 1, 3) <- "-45"
   writeLines(fin, con = ftemp)
 
+# example6: vegetation establishment
+  ftemp <- file.path(dir_in, examples[6], "Input", "estab.in")
+  fin <- readLines(ftemp)
+  line <- grep("calculate and output establishment", fin, fixed = TRUE)
+  stopifnot(length(line) == 1, line > 0, line < length(fin))
+  substr(fin[line], 1, 1) <- "1"
+  writeLines(fin, con = ftemp)
+
+  ftemp <- file.path(dir_in, examples[6], "Input", "outsetup.in")
+  fin <- readLines(ftemp)
+  line <- grep("establishment results", fin, fixed = TRUE)
+  stopifnot(length(line) == 1, line > 0, line < length(fin))
+  fin[line] <- sub("OFF", "AVG", fin[line], fixed = TRUE)
+  writeLines(fin, con = ftemp)
 
 
 
