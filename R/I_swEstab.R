@@ -57,6 +57,7 @@ setClass(
   slot = c(
     fileName = "character",
     Name = "character",
+    vegType = "integer",
     estab_lyrs = "integer",
     barsGERM = "numeric",
     barsESTAB = "numeric",
@@ -75,6 +76,7 @@ setClass(
   prototype = list(
     fileName = character(),
     Name = character(),
+    vegType = integer(),
     estab_lyrs = integer(),
     barsGERM = numeric(),
     barsESTAB = numeric(),
@@ -119,6 +121,26 @@ swEstabSpecies <- function(...) {
 
   do.call("new", args = c("swEstabSpecies", tmp))
 }
+
+
+
+#' @rdname sw_upgrade
+setMethod(
+  "sw_upgrade",
+  signature = "swEstabSpecies",
+  definition = function(object, verbose = FALSE) {
+    tmp <- try(validObject(object), silent = TRUE)
+    if (inherits(tmp, "try-error")) {
+      if (verbose) {
+        message("Upgrading object of class `swEstabSpecies`.")
+      }
+      object <- suppressWarnings(swEstabSpecies(object))
+    }
+
+    object
+  }
+)
+
 
 
 #' @rdname swEstabSpecies-class
@@ -249,6 +271,24 @@ setReplaceMethod(
   }
 )
 
+
+
+#' @rdname sw_upgrade
+setMethod(
+  "sw_upgrade",
+  signature = "swEstab",
+  definition = function(object, verbose = FALSE) {
+    tmp <- try(validObject(object), silent = TRUE)
+    if (inherits(tmp, "try-error")) {
+      if (verbose) {
+        message("Upgrading object of class `swEstab`.")
+      }
+      object <- suppressWarnings(swEstab(object))
+    }
+
+    object
+  }
+)
 
 #' @rdname swEstab-class
 #' @export

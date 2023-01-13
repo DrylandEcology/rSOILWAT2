@@ -49,15 +49,23 @@ SEXP onGet_SW_VES(void) {
 	SEXP VES;
 	SEXP use;
 	SEXP count;
+
 	PROTECT(swEstab = MAKE_CLASS("swEstab"));
 	PROTECT(VES = NEW_OBJECT(swEstab));
-	PROTECT(use = NEW_LOGICAL(1));
+
 	PROTECT(count = NEW_INTEGER(1));
 	INTEGER(count)[0] = SW_VegEstab.count;
+
+	PROTECT(use = NEW_LOGICAL(1));
 	LOGICAL(use)[0] = SW_VegEstab.use;
+
+	SET_SLOT(VES, install("count"), count);
 	SET_SLOT(VES, install("useEstab"), use);
-	if (SW_VegEstab.use)
+
+	if (SW_VegEstab.use) {
 		onGet_SW_VES_spps(VES);
+	}
+
 	UNPROTECT(4);
 	return VES;
 }
@@ -71,6 +79,7 @@ void onSet_SW_VES(SEXP VES) {
 
 	PROTECT(use = GET_SLOT(VES,install("useEstab")));
 	PROTECT(count = GET_SLOT(VES,install("count")));
+
 	if (LOGICAL(use)[0] == FALSE) {
 		//LogError(logfp, LOGNOTE, "Establishment not used.\n");
 		SW_VegEstab.use = FALSE;
@@ -82,7 +91,7 @@ void onSet_SW_VES(SEXP VES) {
 		} else {
 			SW_VegEstab.use = TRUE;
 			for (i = 0; i < nSPPS; i++)
-				onSet_SW_VES_spp(VES, i);
+				onSet_SW_VES_spp(VES, i); // sets `SW_VegEstab.count` incrementally
 		}
 	}
 
@@ -100,11 +109,12 @@ void onSet_SW_VES(SEXP VES) {
 void onGet_SW_VES_spps(SEXP SPP) {
 	int i;
 	SW_VEGESTAB_INFO *v;
-	SEXP fileName, name, estab_lyrs, barsGERM, barsESTAB, min_pregerm_days, max_pregerm_days, min_wetdays_for_germ, max_drydays_postgerm, min_wetdays_for_estab, min_days_germ2estab,
+	SEXP fileName, name, vegType, estab_lyrs, barsGERM, barsESTAB, min_pregerm_days, max_pregerm_days, min_wetdays_for_germ, max_drydays_postgerm, min_wetdays_for_estab, min_days_germ2estab,
 			max_days_germ2estab, min_temp_germ, max_temp_germ, min_temp_estab, max_temp_estab;
 
 	PROTECT(fileName = allocVector(STRSXP,SW_VegEstab.count));
 	PROTECT(name = allocVector(STRSXP,SW_VegEstab.count));
+	PROTECT(vegType = NEW_INTEGER(SW_VegEstab.count));
 	PROTECT(estab_lyrs = NEW_INTEGER(SW_VegEstab.count));
 	PROTECT(barsGERM = allocVector(REALSXP,SW_VegEstab.count));
 	PROTECT(barsESTAB = allocVector(REALSXP,SW_VegEstab.count));
@@ -124,6 +134,7 @@ void onGet_SW_VES_spps(SEXP SPP) {
 		v = SW_VegEstab.parms[i];
 		SET_STRING_ELT(fileName, i, mkChar(v->sppFileName));
 		SET_STRING_ELT(name, i, mkChar(v->sppname));
+		INTEGER(vegType)[i] = v->vegType;
 		INTEGER(estab_lyrs)[i] = v->estab_lyrs;
 		REAL(barsGERM)[i] = v->bars[0];
 		REAL(barsESTAB)[i] = v->bars[1];
@@ -141,6 +152,7 @@ void onGet_SW_VES_spps(SEXP SPP) {
 	}
 	SET_SLOT(SPP, install("fileName"), fileName);
 	SET_SLOT(SPP, install("Name"), name);
+	SET_SLOT(SPP, install("vegType"), vegType);
 	SET_SLOT(SPP, install("estab_lyrs"), estab_lyrs);
 	SET_SLOT(SPP, install("barsGERM"), barsGERM);
 	SET_SLOT(SPP, install("barsESTAB"), barsESTAB);
@@ -156,7 +168,7 @@ void onGet_SW_VES_spps(SEXP SPP) {
 	SET_SLOT(SPP, install("min_temp_estab"), min_temp_estab);
 	SET_SLOT(SPP, install("max_temp_estab"), max_temp_estab);
 
-	UNPROTECT(16);
+	UNPROTECT(17);
 }
 
 void onSet_SW_VES_spp(SEXP SPP, IntU i) {
@@ -167,6 +179,7 @@ void onSet_SW_VES_spp(SEXP SPP, IntU i) {
 	count = _new_species();
 	v = SW_VegEstab.parms[count];
 
+	v->vegType = INTEGER(GET_SLOT(SPP, install("vegType")))[i];
 	v->estab_lyrs = INTEGER(GET_SLOT(SPP, install("estab_lyrs")))[i];
 	v->bars[SW_GERM_BARS] = REAL(GET_SLOT(SPP, install("barsGERM")))[i];
 	v->bars[SW_ESTAB_BARS] = REAL(GET_SLOT(SPP, install("barsESTAB")))[i];
