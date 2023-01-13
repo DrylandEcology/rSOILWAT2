@@ -1,4 +1,20 @@
-# rSOILWAT2 v5.4.0-9000
+# rSOILWAT2 v5.4.0
+* `SOILWAT2` is updated to v6.7.0 which fixed vegetation establishment.
+* This version produces identical simulation output
+  as the previous release under default values
+  (i.e., vegetation establishment is turned off).
+
+* Functionality to calculate and output establishment/recruitment of species
+  now works and is covered by tests (issue #225, @dschlaep).
+  Note that this functionality assesses yearly the chances of
+  species to recruit/establish based on simulated daily conditions;
+  however, establishment/recruitment outcomes are not utilized to inform the
+  simulation.
+
+## Changes to interface
+* Class `swEstabSpecies` gains new slot `"vegType"` to specify vegetation type
+  of a species establishment parameters (issue #225, @dschlaep).
+
 
 # rSOILWAT2 v5.3.3
 * This version produces identical simulation output as the previous release.
