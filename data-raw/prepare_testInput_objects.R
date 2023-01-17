@@ -28,16 +28,23 @@ pkgload::load_all()
 
 
 #--- Define tests/examples ------
-tests <- 1:5
+tests <- 1:6
 examples <- paste0("example", tests)
 
-cns <- c("WeatherGenerator", "SoilTemp", "CO2Effects", "TiltedSurface")
+cns <- c(
+  "WeatherGenerator",
+  "SoilTemp",
+  "CO2Effects",
+  "TiltedSurface",
+  "VegEstab"
+)
 define_ex <- rbind(
-  ex1 = c(FALSE, TRUE, TRUE, FALSE),
-  ex2 = c(TRUE, TRUE, TRUE, FALSE),
-  ex3 = c(FALSE, TRUE, TRUE, FALSE),
-  ex4 = c(FALSE, TRUE, TRUE, FALSE),
-  ex5 = c(FALSE, TRUE, TRUE, TRUE)
+  ex1 = c(FALSE, TRUE, TRUE, FALSE, FALSE),
+  ex2 = c(TRUE, TRUE, TRUE, FALSE, FALSE),
+  ex3 = c(FALSE, TRUE, TRUE, FALSE, FALSE),
+  ex4 = c(FALSE, TRUE, TRUE, FALSE, FALSE),
+  ex5 = c(FALSE, TRUE, TRUE, TRUE, FALSE),
+  ex6 = c(FALSE, TRUE, TRUE, FALSE, TRUE)
 )
 colnames(define_ex) <- cns
 
@@ -221,6 +228,28 @@ toggleSurfaceTilt <- function(path, tilt = FALSE, slope = 30, aspect = -45) {
 }
 
 
+toggleVegEstab <- function(path, activate = TRUE) {
+  ftemp <- file.path(path, "Input", "estab.in")
+  fin <- readLines(ftemp)
+  line <- grep("calculate and output establishment", fin, fixed = TRUE)
+  stopifnot(length(line) == 1, line > 0, line < length(fin))
+  substr(fin[line], 1, 1) <- if (activate) "1" else "0"
+  writeLines(fin, con = ftemp)
+
+  ftemp <- file.path(path, "Input", "outsetup.in")
+  fin <- readLines(ftemp)
+  line <- grep("establishment results", fin, fixed = TRUE)
+  stopifnot(length(line) == 1, line > 0, line < length(fin))
+  fin[line] <- sub(
+    pattern = "OFF",
+    replacement = if (activate) "AVG" else "OFF",
+    x = fin[line],
+    fixed = TRUE
+  )
+  writeLines(fin, con = ftemp)
+}
+
+
 #------- Loop over examples/tests, setup, and create test objects------
 for (it in seq_along(tests)) {
   message("\n", examples[it], " ----------------------------------")
@@ -260,6 +289,9 @@ for (it in seq_along(tests)) {
 
   #--- * example5: tilted surface ------
   toggleSurfaceTilt(dir_ex, tilt = define_ex[it, "TiltedSurface"])
+
+  #--- * example6: vegetation establishment ------
+  toggleVegEstab(dir_ex, activate = define_ex[it, "VegEstab"])
 
 
 

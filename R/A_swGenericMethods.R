@@ -209,6 +209,9 @@ format_timestamp <- function(object) {
 #'       * class [`swFiles-class`]:
 #'         `SWRC` parameter input file added as file 6 for a new total of 23
 #'       * class [`swProd-class`]: new slot `"veg_method"`
+#'   * Changes with `v5.4.0`:
+#'       * classes [`swEstabSpecies-class`] and [`swEstab-class`]:
+#'         new slot `"vegType"`
 #'   * Changes with `v5.2.0`:
 #'       * class [`swOUT-class`]:
 #'         `"FROZEN"` added as `outkey` 28 for a new total of 32
