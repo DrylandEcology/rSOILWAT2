@@ -72,10 +72,10 @@ setValidity(
     val <- TRUE
     temp <- dim(object@MonthlyScalingParams)
 
-    if (temp[2] != 6) {
+    if (temp[2] != 8) {
       msg <- paste(
         "@MonthlyScalingParams must have exactly 6 columns ",
-        "corresponding to PPT, MaxT, MinT, SkyCover, Wind, rH"
+        "corresponding to PPT, MaxT, MinT, SkyCover, Wind, rH, ActVP, ShortWR"
       )
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
@@ -166,14 +166,17 @@ setClass(
     FirstYear_Historical = "integer",
     use_cloudCoverMonthly = "logical",
     use_windSpeedMonthly = "logical",
-    use_relHumidityMonthly = "logical",
-    has_temp2 = "logical",
+    use_humidityMonthly = "logical",
+    has_tempMax = "logical",
+    has_tempMin = "logical",
     has_ppt = "logical",
     has_cloudCover = "logical",
     has_sfcWind = "logical",
-    has_windComp = "logical",
+    has_windEast = "logical",
+    has_windNorth = "logical",
     has_hurs = "logical",
-    has_hurs2 = "logical",
+    has_hursMax = "logical",
+    has_hursMin = "logical",
     has_huss = "logical",
     has_tdps = "logical",
     has_vp = "logical",
@@ -191,14 +194,17 @@ setClass(
     FirstYear_Historical = NA_integer_,
     use_cloudCoverMonthly = NA,
     use_windSpeedMonthly = NA,
-    use_relHumidityMonthly = NA,
-    has_temp2 = NA,
+    use_humidityMonthly = NA,
+    has_tempMax = NA,
+    has_tempMin = NA,
     has_ppt = NA,
     has_cloudCover = NA,
     has_sfcWind = NA,
-    has_windComp = NA,
+    has_windEast = NA,
+    has_windNorth = NA,
     has_hurs = NA,
-    has_hurs2 = NA,
+    has_hursMax = NA,
+    has_hursMin = NA,
     has_huss = NA,
     has_tdps = NA,
     has_vp = NA,

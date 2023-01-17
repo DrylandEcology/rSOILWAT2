@@ -49,14 +49,17 @@ static char *cSW_WTH_names[] = {
   "MonthlyScalingParams",
   "use_cloudCoverMonthly",
   "use_windSpeedMonthly",
-  "use_relHumidityMonthly",
-  "has_temp2",
+  "use_humidityMonthly",
+  "has_tempMax",
+  "has_tempMin",
   "has_ppt",
   "has_cloudCover",
   "has_sfcWind",
-  "has_windComp",
+  "has_windEast",
+  "has_windNorth",
   "has_hurs",
-  "has_hurs2",
+  "has_hursMax",
+  "has_hursMin",
   "has_huss",
   "has_tdps",
   "has_vp",
@@ -99,11 +102,12 @@ SEXP onGet_SW_WTH_setup(void) {
 	SEXP swWeather;
 	SEXP SW_WTH;
 
-	SEXP
-		use_snow, pct_snowdrift, pct_snowRunoff,
-		use_weathergenerator, use_weathergenerator_only, yr_first, use_cloudCoverMonthly, use_windSpeedMonthly,
-        use_relHumidityMonthly, has_temp2, has_ppt, has_cloudCover, has_sfcWind, has_windComp, has_hurs, has_hurs2,
-        has_huss, has_tdps, has_vp, has_rsds;
+    SEXP
+        use_snow, pct_snowdrift, pct_snowRunoff,
+        use_weathergenerator, use_weathergenerator_only, use_cloudCoverMonthly, use_windSpeedMonthly,
+        use_humidityMonthly, has_tempMax, has_tempMin, has_ppt, has_cloudCover, has_sfcWind,
+        has_windEast, has_windNorth, has_hurs, has_hursMax, has_hursMin, has_huss, has_tdps,
+        has_vp, has_rsds, yr_first;
 	SEXP MonthlyScalingParams, MonthlyScalingParams_names, MonthlyScalingParams_names_x, MonthlyScalingParams_names_y;
 
 	char *cMonthlyScalingParams_names[] = {"PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "ActVP", "ShortWR"};
@@ -132,31 +136,37 @@ SEXP onGet_SW_WTH_setup(void) {
     LOGICAL_POINTER(use_cloudCoverMonthly)[0] = w->use_cloudCoverMonthly;
     PROTECT(use_windSpeedMonthly = NEW_LOGICAL(1));
     LOGICAL_POINTER(use_windSpeedMonthly)[0] = w->use_windSpeedMonthly;
-    PROTECT(use_relHumidityMonthly = NEW_LOGICAL(1));
-    LOGICAL_POINTER(use_relHumidityMonthly)[0] = w->use_relHumidityMonthly;
+    PROTECT(use_humidityMonthly = NEW_LOGICAL(1));
+    LOGICAL_POINTER(use_humidityMonthly)[0] = w->use_humidityMonthly;
 
-    PROTECT(has_temp2 = NEW_LOGICAL(1));
-    LOGICAL_POINTER(has_temp2)[0] = w->has_temp2;
+    PROTECT(has_tempMax = NEW_LOGICAL(1));
+    LOGICAL_POINTER(has_tempMax)[0] = w->dailyInputFlags[TEMP_MAX];
+    PROTECT(has_tempMin = NEW_LOGICAL(1));
+    LOGICAL_POINTER(has_tempMin)[0] = w->dailyInputFlags[TEMP_MIN];
     PROTECT(has_ppt = NEW_LOGICAL(1));
-    LOGICAL_POINTER(has_ppt)[0] = w->has_ppt;
+    LOGICAL_POINTER(has_ppt)[0] = w->dailyInputFlags[PPT];
     PROTECT(has_cloudCover = NEW_LOGICAL(1));
-    LOGICAL_POINTER(has_cloudCover)[0] = w->has_cloudCover;
+    LOGICAL_POINTER(has_cloudCover)[0] = w->dailyInputFlags[CLOUD_COV];
     PROTECT(has_sfcWind = NEW_LOGICAL(1));
-    LOGICAL_POINTER(has_sfcWind)[0] = w->has_sfcWind;
-    PROTECT(has_windComp = NEW_LOGICAL(1));
-    LOGICAL_POINTER(has_windComp)[0] = w->has_windComp;
+    LOGICAL_POINTER(has_sfcWind)[0] = w->dailyInputFlags[WIND_SPEED];
+    PROTECT(has_windEast = NEW_LOGICAL(1));
+    LOGICAL_POINTER(has_sfcWind)[0] = w->dailyInputFlags[WIND_EAST];
+    PROTECT(has_windNorth = NEW_LOGICAL(1));
+    LOGICAL_POINTER(has_windEast)[0] = w->dailyInputFlags[WIND_NORTH];
     PROTECT(has_hurs = NEW_LOGICAL(1));
-    LOGICAL_POINTER(has_hurs)[0] = w->has_hurs;
-    PROTECT(has_hurs2 = NEW_LOGICAL(1));
-    LOGICAL_POINTER(has_hurs2)[0] = w->has_hurs2;
+    LOGICAL_POINTER(has_hurs)[0] = w->dailyInputFlags[REL_HUMID];
+    PROTECT(has_hursMax = NEW_LOGICAL(1));
+    LOGICAL_POINTER(has_hursMax)[0] = w->dailyInputFlags[REL_HUMID_MAX];
+    PROTECT(has_hursMin = NEW_LOGICAL(1));
+    LOGICAL_POINTER(has_hursMin)[0] = w->dailyInputFlags[REL_HUMID_MIN];
     PROTECT(has_huss = NEW_LOGICAL(1));
-    LOGICAL_POINTER(has_huss)[0] = w->has_huss;
+    LOGICAL_POINTER(has_huss)[0] = w->dailyInputFlags[SPEC_HUMID];
     PROTECT(has_tdps = NEW_LOGICAL(1));
-    LOGICAL_POINTER(has_tdps)[0] = w->has_tdps;
+    LOGICAL_POINTER(has_tdps)[0] = w->dailyInputFlags[TEMP_DEWPOINT];
     PROTECT(has_vp = NEW_LOGICAL(1));
-    LOGICAL_POINTER(has_vp)[0] = w->has_vp;
+    LOGICAL_POINTER(has_vp)[0] = w->dailyInputFlags[ACTUAL_VP];
     PROTECT(has_rsds = NEW_LOGICAL(1));
-    LOGICAL_POINTER(has_rsds)[0] = w->has_rsds;
+    LOGICAL_POINTER(has_rsds)[0] = w->dailyInputFlags[SHORT_WR];
 
 	PROTECT(MonthlyScalingParams = allocMatrix(REALSXP, 12, nitems));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
@@ -190,20 +200,23 @@ SEXP onGet_SW_WTH_setup(void) {
 	SET_SLOT(SW_WTH, install(cSW_WTH_names[6]), MonthlyScalingParams);
     SET_SLOT(SW_WTH, install(cSW_WTH_names[7]), use_cloudCoverMonthly);
     SET_SLOT(SW_WTH, install(cSW_WTH_names[8]), use_windSpeedMonthly);
-    SET_SLOT(SW_WTH, install(cSW_WTH_names[9]), use_relHumidityMonthly);
-    SET_SLOT(SW_WTH, install(cSW_WTH_names[10]), has_temp2);
-    SET_SLOT(SW_WTH, install(cSW_WTH_names[11]), has_ppt);
-    SET_SLOT(SW_WTH, install(cSW_WTH_names[12]), has_cloudCover);
-    SET_SLOT(SW_WTH, install(cSW_WTH_names[13]), has_sfcWind);
-    SET_SLOT(SW_WTH, install(cSW_WTH_names[14]), has_windComp);
-    SET_SLOT(SW_WTH, install(cSW_WTH_names[15]), has_hurs);
-    SET_SLOT(SW_WTH, install(cSW_WTH_names[16]), has_hurs2);
-    SET_SLOT(SW_WTH, install(cSW_WTH_names[17]), has_huss);
-    SET_SLOT(SW_WTH, install(cSW_WTH_names[18]), has_tdps);
-    SET_SLOT(SW_WTH, install(cSW_WTH_names[19]), has_vp);
-    SET_SLOT(SW_WTH, install(cSW_WTH_names[20]), has_rsds);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[9]), use_humidityMonthly);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[10]), has_tempMax);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[11]), has_tempMin);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[12]), has_ppt);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[13]), has_cloudCover);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[14]), has_sfcWind);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[15]), has_windEast);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[16]), has_windNorth);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[17]), has_hurs);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[18]), has_hursMax);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[19]), has_hursMin);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[20]), has_huss);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[21]), has_tdps);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[22]), has_vp);
+    SET_SLOT(SW_WTH, install(cSW_WTH_names[23]), has_rsds);
 
-	UNPROTECT(26);
+	UNPROTECT(29);
 	return SW_WTH;
 }
 
@@ -220,8 +233,9 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 	SEXP
         use_snow, pct_snowdrift, pct_snowRunoff,
         use_weathergenerator, use_weathergenerator_only, use_cloudCoverMonthly, use_windSpeedMonthly,
-        use_relHumidityMonthly, has_temp2, has_ppt, has_cloudCover, has_sfcWind, has_windComp, has_hurs,
-        has_hurs2, has_huss, has_tdps, has_vp, has_rsds;
+        use_humidityMonthly, has_tempMax, has_tempMin, has_ppt, has_cloudCover, has_sfcWind,
+        has_windEast, has_windNorth, has_hurs, has_hursMax, has_hursMin, has_huss, has_tdps,
+        has_vp, has_rsds;
 	SEXP MonthlyScalingParams;
 	RealD *p_MonthlyValues;
 
@@ -246,30 +260,36 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
     w->use_cloudCoverMonthly = (Bool) *INTEGER(use_cloudCoverMonthly);
     PROTECT(use_windSpeedMonthly = GET_SLOT(SW_WTH, install(cSW_WTH_names[8])));
     w->use_windSpeedMonthly = (Bool) *INTEGER(use_windSpeedMonthly);
-    PROTECT(use_relHumidityMonthly = GET_SLOT(SW_WTH, install(cSW_WTH_names[9])));
-    w->use_relHumidityMonthly = (Bool) *INTEGER(use_relHumidityMonthly);
-    PROTECT(has_temp2 = GET_SLOT(SW_WTH, install(cSW_WTH_names[10])));
-    w->has_temp2 = (Bool) *INTEGER(has_temp2);
-    PROTECT(has_ppt = GET_SLOT(SW_WTH, install(cSW_WTH_names[11])));
-    w->has_ppt = (Bool) *INTEGER(has_ppt) ? 2 : 0;
-    PROTECT(has_cloudCover = GET_SLOT(SW_WTH, install(cSW_WTH_names[12])));
-    w->has_cloudCover = (Bool) *INTEGER(has_cloudCover);
-    PROTECT(has_sfcWind = GET_SLOT(SW_WTH, install(cSW_WTH_names[13])));
-    w->has_sfcWind = (Bool) *INTEGER(has_sfcWind);
-    PROTECT(has_windComp = GET_SLOT(SW_WTH, install(cSW_WTH_names[14])));
-    w->has_windComp = (Bool) *INTEGER(has_windComp);
-    PROTECT(has_hurs = GET_SLOT(SW_WTH, install(cSW_WTH_names[15])));
-    w->has_hurs = (Bool) *INTEGER(has_hurs);
-    PROTECT(has_hurs2 = GET_SLOT(SW_WTH, install(cSW_WTH_names[16])));
-    w->has_hurs2 = (Bool) *INTEGER(has_hurs2);
-    PROTECT(has_huss = GET_SLOT(SW_WTH, install(cSW_WTH_names[17])));
-    w->has_huss = (Bool) *INTEGER(has_huss);
-    PROTECT(has_tdps = GET_SLOT(SW_WTH, install(cSW_WTH_names[18])));
-    w->has_tdps = (Bool) *INTEGER(has_tdps);
-    PROTECT(has_vp = GET_SLOT(SW_WTH, install(cSW_WTH_names[19])));
-    w->has_vp = (Bool) *INTEGER(has_vp);
-    PROTECT(has_rsds = GET_SLOT(SW_WTH, install(cSW_WTH_names[20])));
-    w->has_rsds = (Bool) *INTEGER(has_rsds);
+    PROTECT(use_humidityMonthly = GET_SLOT(SW_WTH, install(cSW_WTH_names[9])));
+    w->use_humidityMonthly = (Bool) *INTEGER(use_humidityMonthly);
+    PROTECT(has_tempMax = GET_SLOT(SW_WTH, install(cSW_WTH_names[10])));
+    w->dailyInputFlags[TEMP_MAX] = (Bool) *INTEGER(has_tempMax);
+    PROTECT(has_tempMin = GET_SLOT(SW_WTH, install(cSW_WTH_names[11])));
+    w->dailyInputFlags[TEMP_MIN] = (Bool) *INTEGER(has_tempMin);
+    PROTECT(has_ppt = GET_SLOT(SW_WTH, install(cSW_WTH_names[12])));
+    w->dailyInputFlags[PPT] = (Bool) *INTEGER(has_ppt);
+    PROTECT(has_cloudCover = GET_SLOT(SW_WTH, install(cSW_WTH_names[13])));
+    w->dailyInputFlags[CLOUD_COV] = (Bool) *INTEGER(has_cloudCover);
+    PROTECT(has_sfcWind = GET_SLOT(SW_WTH, install(cSW_WTH_names[14])));
+    w->dailyInputFlags[WIND_SPEED] = (Bool) *INTEGER(has_sfcWind);
+    PROTECT(has_windEast = GET_SLOT(SW_WTH, install(cSW_WTH_names[15])));
+    w->dailyInputFlags[WIND_EAST] = (Bool) *INTEGER(has_windEast);
+    PROTECT(has_windNorth = GET_SLOT(SW_WTH, install(cSW_WTH_names[16])));
+    w->dailyInputFlags[WIND_NORTH] = (Bool) *INTEGER(has_windNorth);
+    PROTECT(has_hurs = GET_SLOT(SW_WTH, install(cSW_WTH_names[17])));
+    w->dailyInputFlags[REL_HUMID] = (Bool) *INTEGER(has_hurs);
+    PROTECT(has_hursMax = GET_SLOT(SW_WTH, install(cSW_WTH_names[18])));
+    w->dailyInputFlags[REL_HUMID_MAX] = (Bool) *INTEGER(has_hursMax);
+    PROTECT(has_hursMin = GET_SLOT(SW_WTH, install(cSW_WTH_names[19])));
+    w->dailyInputFlags[REL_HUMID_MIN] = (Bool) *INTEGER(has_hursMin);
+    PROTECT(has_huss = GET_SLOT(SW_WTH, install(cSW_WTH_names[20])));
+    w->dailyInputFlags[SPEC_HUMID] = (Bool) *INTEGER(has_huss);
+    PROTECT(has_tdps = GET_SLOT(SW_WTH, install(cSW_WTH_names[21])));
+    w->dailyInputFlags[TEMP_DEWPOINT] = (Bool) *INTEGER(has_tdps);
+    PROTECT(has_vp = GET_SLOT(SW_WTH, install(cSW_WTH_names[22])));
+    w->dailyInputFlags[ACTUAL_VP] = (Bool) *INTEGER(has_vp);
+    PROTECT(has_rsds = GET_SLOT(SW_WTH, install(cSW_WTH_names[23])));
+    w->dailyInputFlags[SHORT_WR] = (Bool) *INTEGER(has_rsds);
 	/* `SW_weather.yr` was removed from SOILWAT2:
 	SEXP yr_first;
 	int tmp;
@@ -310,7 +330,7 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 	}
 	*/
 
-	UNPROTECT(20);
+	UNPROTECT(23);
 }
 
 
@@ -463,9 +483,11 @@ static void rSW2_setAllWeather(
   int nList, yearIndex, year, numDaysYear, monthIndex, day, doy, i, j, k;
   Bool weth_found, interpAsBase1 = swFALSE;
   SEXP tmpW, yrWData, swCloud;
-  SEXP use_windSpeedMonthly, has_sfcWind, has_windComp, swWeather, SW_WTH, SW_SKY,
-       use_relHumidityMonthly, has_hurs, has_hurs2, has_huss, has_vp, has_tdps,
-       has_temp2, use_cloudCoverMonthly;
+  SEXP has_windEast, has_windNorth, swWeather, SW_WTH, SW_SKY, has_tdps,
+       has_sfcWind;
+
+  Bool use_windSpeedMonthly, use_humidityMonthly, use_cloudCoverMonthly,
+       has_hurs, has_huss, has_vp, has_tempMax, has_tempMin, has_hursMax, has_hursMin;
   double *p_yrWData, svpVal, tempSlope, es, e, relHum, *p_Cloud;
   double windSpeed_mon[MAX_MONTHS], skyCover_mon[MAX_MONTHS], shortWR_mon[MAX_MONTHS];
 
@@ -480,9 +502,9 @@ static void rSW2_setAllWeather(
   PROTECT(SW_SKY = NEW_OBJECT(swCloud));
   p_Cloud = REAL(GET_SLOT(SW_SKY, install("Cloud")));
 
-  use_cloudCoverMonthly = GET_SLOT(SW_WTH, install(cSW_WTH_names[7]));
-  use_windSpeedMonthly = GET_SLOT(SW_WTH, install(cSW_WTH_names[8]));
-  use_relHumidityMonthly = GET_SLOT(SW_WTH, install(cSW_WTH_names[9]));
+  use_cloudCoverMonthly = (Bool) *INTEGER(GET_SLOT(SW_WTH, install(cSW_WTH_names[7])));
+  use_windSpeedMonthly = (Bool) *INTEGER(GET_SLOT(SW_WTH, install(cSW_WTH_names[8])));
+  use_humidityMonthly = (Bool) *INTEGER(GET_SLOT(SW_WTH, install(cSW_WTH_names[9])));
 
   for(monthIndex = 0; monthIndex < MAX_MONTHS; monthIndex++) {
       windSpeed_mon[monthIndex] = isnan(p_Cloud[0 + 5 * monthIndex]) ? 0. : p_Cloud[0 + 5 * monthIndex];
@@ -501,7 +523,7 @@ static void rSW2_setAllWeather(
           interpolate_monthlyValues(windSpeed_mon, interpAsBase1, allHist[yearIndex]->windspeed_daily);
       }
 
-      if(use_relHumidityMonthly) {
+      if(use_humidityMonthly) {
           interpolate_monthlyValues(shortWR_mon, interpAsBase1, allHist[yearIndex]->r_humidity_daily);
       }
 
@@ -527,7 +549,8 @@ static void rSW2_setAllWeather(
       if (weth_found) {
         numDaysYear = Time_get_lastdoy_y(year);
 
-        if (nrows(yrWData) != numDaysYear || ncols(yrWData) != MAX_INPUT_COLUMNS + 1) {
+        if (nrows(yrWData) != numDaysYear ||
+            (ncols(yrWData) > MAX_INPUT_COLUMNS + 1 || ncols(yrWData) < 4)) {
           LogError(
             logfp,
             LOGFATAL,
@@ -599,13 +622,14 @@ static void rSW2_setAllWeather(
 
             j = day + numDaysYear * 5;
 
-            has_sfcWind = GET_SLOT(SW_WTH, install(cSW_WTH_names[13]));
-            has_windComp = GET_SLOT(SW_WTH, install(cSW_WTH_names[14]));
+            has_sfcWind = GET_SLOT(SW_WTH, install(cSW_WTH_names[14]));
+            has_windEast = GET_SLOT(SW_WTH, install(cSW_WTH_names[15]));
+            has_windNorth = GET_SLOT(SW_WTH, install(cSW_WTH_names[16]));
 
-            if(!((Bool) *INTEGER(use_windSpeedMonthly))) {
+            if(!use_windSpeedMonthly) {
                 if((Bool) *INTEGER(has_sfcWind)) {
                     allHist[yearIndex]->windspeed_daily[day] = p_yrWData[j];
-                } else if((Bool) *INTEGER(has_windComp)) {
+                } else if((Bool) *INTEGER(has_windEast) && (Bool) *INTEGER(has_windNorth)) {
                     j = day + numDaysYear * 6;
                     k = day + numDaysYear * 7;
                     allHist[yearIndex]->windspeed_daily[day] = sqrt(squared(p_yrWData[j]) +
@@ -615,25 +639,26 @@ static void rSW2_setAllWeather(
 
             j = day + numDaysYear * 8;
 
-            has_hurs = GET_SLOT(SW_WTH, install(cSW_WTH_names[15]));
-            has_hurs2 = GET_SLOT(SW_WTH, install(cSW_WTH_names[16]));
-            has_huss = GET_SLOT(SW_WTH, install(cSW_WTH_names[17]));
-            has_vp = GET_SLOT(SW_WTH, install(cSW_WTH_names[19]));
+            has_hurs = (Bool) *INTEGER(GET_SLOT(SW_WTH, install(cSW_WTH_names[17])));
+            has_hursMax = (Bool) *INTEGER(GET_SLOT(SW_WTH, install(cSW_WTH_names[18])));
+            has_hursMin = (Bool) *INTEGER(GET_SLOT(SW_WTH, install(cSW_WTH_names[19])));
+            has_huss = (Bool) *INTEGER(GET_SLOT(SW_WTH, install(cSW_WTH_names[20])));
+            has_vp = (Bool) *INTEGER(GET_SLOT(SW_WTH, install(cSW_WTH_names[22])));
 
-            if(!((Bool) *INTEGER(use_relHumidityMonthly))) {
-                if((Bool) has_hurs) {
+            if(!use_humidityMonthly) {
+                if(has_hurs) {
                     allHist[yearIndex]->r_humidity_daily[day] = p_yrWData[j];
-                } else if((Bool) *INTEGER(has_vp)){
+                } else if(has_vp){
                     j = day + numDaysYear * 13;
                     svpVal = svp(allHist[yearIndex]->temp_avg[day], &tempSlope);
 
                     allHist[yearIndex]->r_humidity_daily[day] = p_yrWData[j] / svpVal;
-                } else if((Bool) *INTEGER(has_hurs2)) {
+                } else if(has_hursMax && has_hursMin) {
                     j = day + numDaysYear * 9;
                     k = day + numDaysYear * 10;
 
                     allHist[yearIndex]->r_humidity_daily[day] = (p_yrWData[j] + p_yrWData[k]) / 2.;
-                } else if((Bool) *INTEGER(has_huss)) {
+                } else if(has_huss) {
                     j = day + numDaysYear * 11;
                     es = (6.112 * exp((17.67 * allHist[yearIndex]->temp_avg[day])) /
                           (allHist[yearIndex]->temp_avg[day] + 243.5));
@@ -653,21 +678,22 @@ static void rSW2_setAllWeather(
             p_yrWData[j] :
             SW_MISSING;
 
-            has_temp2 = GET_SLOT(SW_WTH, install(cSW_WTH_names[10]));
-            has_tdps = GET_SLOT(SW_WTH, install(cSW_WTH_names[18]));
+            has_tempMax = (Bool) *INTEGER(GET_SLOT(SW_WTH, install(cSW_WTH_names[10])));
+            has_tempMin = (Bool) *INTEGER(GET_SLOT(SW_WTH, install(cSW_WTH_names[11])));
+            has_tdps = GET_SLOT(SW_WTH, install(cSW_WTH_names[21]));
 
             j = day + numDaysYear * 13;
-            if(!((Bool) *INTEGER(has_vp))) {
-                if((Bool) has_tdps) {
+            if(!has_vp) {
+                if(has_tdps) {
                     allHist[yearIndex]->actualVaporPressure[day] =
                                         actualVaporPressure3(p_yrWData[j]);
 
-                    if(!((Bool) use_relHumidityMonthly) && !has_hurs) {
+                    if(!use_humidityMonthly && !has_hurs) {
                         svpVal = svp(allHist[yearIndex]->temp_avg[day], &tempSlope);
 
                         allHist[yearIndex]->r_humidity_daily[day] = p_yrWData[j] / svpVal;
                     }
-                } else if(has_hurs2 && has_temp2) {
+                } else if((has_hursMax && has_hursMin) && (has_tempMax && has_tempMin)) {
                     j = day + numDaysYear * 9;
                     k = day + numDaysYear * 10;
                     allHist[yearIndex]->actualVaporPressure[day] =
