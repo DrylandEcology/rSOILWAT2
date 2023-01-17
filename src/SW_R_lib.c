@@ -488,7 +488,7 @@ SEXP sw_consts(void) {
   #endif
 
   const int nret = 9; // length of cret
-  const int nINT = 13; // length of vINT and cINT
+  const int nINT = 14; // length of vINT and cINT
   const int nNUM = 1; // length of vNUM and cNUM
 
   #ifdef RSWDEBUG
