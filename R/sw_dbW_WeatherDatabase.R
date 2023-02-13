@@ -2291,16 +2291,12 @@ dbW_dataframe_to_weatherData <- function(
   round = 2
 ) {
 
-  if (
-    !(length(weatherDF_dataColumns) == 4) ||
-    !all(weatherDF_dataColumns %in% colnames(weatherDF))
-  ) {
+  if (!all(weatherDF_dataColumns %in% colnames(weatherDF))) {
     stop(
       "Not every required weatherDF_dataColumns is available in the ",
       "'weatherDF' object"
     )
   }
-
   ylist <- get_years_from_weatherDF(weatherDF, years, weatherDF_dataColumns)
 
   if (isTRUE(is.logical(round) && round || is.numeric(round))) {
@@ -2313,7 +2309,7 @@ dbW_dataframe_to_weatherData <- function(
       weatherDF[ylist$year_ts == ylist$years[i],
       weatherDF_dataColumns]
     )
-    colnames(ydata) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+    colnames(ydata) <- weatherDF_dataColumns
     weatherData[[i]] <- swWeatherData(
       year = ylist$years[i],
       data = ydata
