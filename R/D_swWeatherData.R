@@ -121,10 +121,7 @@ swWeatherData <- function(...) {
 
   # Guarantee names
   if ("data" %in% dns) {
-    dots_data_cols <- colnames(dots[["data"]])
-    def@data[, dots_data_cols] <- 1
-    newWeatherObject <- strip_weather_data_NA_columns(def)
-    dimnames(dots[["data"]]) <- dimnames(slot(newWeatherObject, "data"))
+    dimnames(dots[["data"]]) <- dimnames(slot(def, "data"))
   }
 
   if ("year" %in% dns) {

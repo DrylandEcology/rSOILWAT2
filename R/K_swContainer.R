@@ -250,8 +250,6 @@ setMethod(
         }
       }
 
-      object <- strip_weather_data_NA_columns(object)
-
       if (length(msg_upgrades) > 1) {
         if (verbose) {
           message(
