@@ -67,11 +67,10 @@ setClass(
   prototype = list(
     # NOTE: 999 should be rSW2_glovars[["kSOILWAT2"]][["kNUM"]][["SW_MISSING"]]
     data = array(
-      data = c(1:366, rep(999, 366 * 3)),
-      dim = c(366, 15),
-      dimnames = list(NULL, c("DOY", "Tmax_C", "Tmin_C", "PPT_cm", "cloudCov", "windSpeed",
-      "windSpeed_east", "windSpeed_north", "rel_H", "rel_H_max", "rel_H_min",
-      "spec_H", "dewpointTemp_C", "actVP", "shortWR"))
+      data = c(1:366, rep(NA, 366 * 10)),
+      dim = c(366, 10),
+      dimnames = list(NULL, c("DOY", "Tmax_C", "Tmin_C", "PPT_cm",
+      "cloudCov_pct", "sfcWind_mPERs", "hurs_pct", "vp_kPa", "rsds_WPERm2"))
     ),
     year = NA_integer_
   )
@@ -89,10 +88,11 @@ setValidity(
     }
 
     tmp <- dim(object@data)
-    if (tmp[2] != rSW2_glovars[["kSOILWAT2"]][["kINT"]][["MAX_INPUT_COLUMNS"]] + 1) {
+    if (tmp[2] != 9) {
       msg <- paste(
-        "@data must have exactly 4 columns corresponding to",
-        "DOY, Tmax_C, Tmin_C, PPT_cm"
+        "@data must have exactly 9 columns corresponding to",
+        "DOY, Tmax_C, Tmin_C, PPT_cm, cloudCov_pct, sfcWind_mPERs, hurs_pct
+        vp_kPa, rsds_WPERm2"
       )
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
