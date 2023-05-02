@@ -25,14 +25,15 @@ get_transpiration <- function(x, timestep = c("Day", "Week", "Month", "Year")) {
 
   tmp <- slot(slot(x, "AET"), timestep)
 
-  if (all(dim(tmp) > 0)) {
+  if (all(dim(tmp) > 0) && "tran_cm" %in% colnames(tmp)) {
+    # "tran_cm" output was added with SOILWAT2 v6.2.0 and rSOILWAT2 v5.0.0
     res <- tmp[, "tran_cm"]
 
   } else {
     tmp <- slot(slot(x, "TRANSP"), timestep)
+    ids <- grep("transp_total_Lyr", colnames(tmp), fixed = TRUE)
 
-    if (all(dim(tmp) > 0)) {
-      ids <- grep("transp_total_Lyr", colnames(tmp), fixed = TRUE)
+    if (all(dim(tmp) > 0) && length(ids) > 0) {
       res <- apply(tmp[, ids, drop = FALSE], MARGIN = 1, FUN = sum)
 
     } else {
@@ -65,16 +66,28 @@ get_evaporation <- function(x, timestep = c("Day", "Week", "Month", "Year")) {
 
   tmp <- slot(slot(x, "AET"), timestep)
 
-  if (all(dim(tmp) > 0)) {
+  if (
+    all(dim(tmp) > 0) && all(c("evapotr_cm", "tran_cm") %in% colnames(tmp))
+  ) {
+    # "tran_cm" output was added with SOILWAT2 v6.2.0 and rSOILWAT2 v5.0.0
     res <- tmp[, "evapotr_cm"] - tmp[, "tran_cm"]
 
   } else {
     tmp1 <- slot(slot(x, "EVAPSURFACE"), timestep)
     tmp2 <- slot(slot(x, "EVAPSOIL"), timestep)
     tmp3 <- slot(slot(x, "PRECIP"), timestep)
+    ids <- grep("Lyr", colnames(tmp2), fixed = TRUE)
 
-    if (all(dim(tmp1) > 0, dim(tmp2) > 0, dim(tmp3) > 0)) {
-      ids <- grep("Lyr", colnames(tmp2), fixed = TRUE)
+    if (
+      all(
+        dim(tmp1) > 0,
+        dim(tmp2) > 0,
+        dim(tmp3) > 0,
+        length(ids) > 0,
+        "evap_total" %in% colnames(tmp1),
+        "snowloss" %in% colnames(tmp3)
+      )
+    ) {
       res <-
         # evaporation from surface water (canopy, litter, ponded)
         tmp1[, "evap_total"] +

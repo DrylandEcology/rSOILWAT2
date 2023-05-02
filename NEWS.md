@@ -1,3 +1,8 @@
+# rSOILWAT2 v5.4.1
+* This version produces identical simulation output as the previous release.
+* `get_transpiration()` and `get_evaporation()` now also work with
+  `rSOILWAT2` output objects produced before `v5.0.0`.
+
 # rSOILWAT2 v5.4.0
 * `SOILWAT2` is updated to v6.7.0 which fixed vegetation establishment.
 * This version produces identical simulation output
