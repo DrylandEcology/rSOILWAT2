@@ -1438,7 +1438,7 @@ swrc_conversion <- function(
   }
 
   if (!is.null(swrc[["swrcp"]]) && nrow(swrc[["swrcp"]]) != nsoils) {
-    stop("Dimensions of `swrcp` and lenght of soil variables disagree.")
+    stop("Dimensions of `swrcp` and length of soil variables disagree.")
   }
 
 
