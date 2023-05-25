@@ -78,6 +78,8 @@ if (FALSE) {
 #--- Tests
 test_that("Use SWRC to convert between VWC/SWP", {
   # 1a. x [len = 1] + soils [len = 1] --> res [len = 1]
+  fcoarse <- rep(0., 1)
+
   for (ifix in names(swp_fix)) {
     for (itext in row.names(texture)) {
       expect_equal(
@@ -85,6 +87,25 @@ test_that("Use SWRC to convert between VWC/SWP", {
           vwcBulk = vwc_fix[itext, ifix],
           sand = texture[itext, "sand"],
           clay = texture[itext, "clay"]
+        ),
+        swp_fix[ifix],
+        ignore_attr = c("names", "dimnames")
+      )
+
+      expect_equal(
+        swrc_vwc_to_swp(
+          vwcBulk = vwc_fix[itext, ifix],
+          fcoarse = fcoarse,
+          swrc = list(
+            swrc_name = "Campbell1974",
+            swrcp = ptf_estimate(
+              sand = texture[itext, "sand"],
+              clay = texture[itext, "clay"],
+              fcoarse = fcoarse,
+              swrc_name = "Campbell1974",
+              ptf_name = "Cosby1984AndOthers"
+            )
+          )
         ),
         swp_fix[ifix],
         ignore_attr = c("names", "dimnames")
@@ -103,6 +124,8 @@ test_that("Use SWRC to convert between VWC/SWP", {
   }
 
   # 1b. x [len = l] + soils [len = d] -> res [dim = l = d] where l = d
+  fcoarse <- rep(0., nrow(texture))
+
   for (ifix in names(swp_fix)) {
     expect_equal(
       swrc_vwc_to_swp(
@@ -113,10 +136,31 @@ test_that("Use SWRC to convert between VWC/SWP", {
       diag(swp_vals[, ifix, ]),
       ignore_attr = c("names", "dimnames")
     )
+
+    expect_equal(
+      swrc_vwc_to_swp(
+        vwcBulk = vwc_fix[, ifix],
+        fcoarse = fcoarse,
+        swrc = list(
+          swrc_name = "Campbell1974",
+          swrcp = ptf_estimate(
+            sand = texture[, "sand"],
+            clay = texture[, "clay"],
+            fcoarse = fcoarse,
+            swrc_name = "Campbell1974",
+            ptf_name = "Cosby1984AndOthers"
+          )
+        )
+      ),
+      diag(swp_vals[, ifix, ]),
+      ignore_attr = c("names", "dimnames")
+    )
   }
 
 
   # 2. x [len = 1] + soils [len = d] --> res [len = d]
+  fcoarse <- rep(0., nrow(texture))
+
   for (ifix in names(swp_fix)) {
     for (itext in row.names(texture)) {
       expect_equal(
@@ -124,6 +168,25 @@ test_that("Use SWRC to convert between VWC/SWP", {
           vwcBulk = vwc_fix[itext, ifix],
           sand = texture[, "sand"],
           clay = texture[, "clay"]
+        ),
+        swp_vals[itext, ifix, ],
+        ignore_attr = c("names", "dimnames")
+      )
+
+      expect_equal(
+        swrc_vwc_to_swp(
+          vwcBulk = vwc_fix[itext, ifix],
+          fcoarse = fcoarse,
+          swrc = list(
+            swrc_name = "Campbell1974",
+            swrcp = ptf_estimate(
+              sand = texture[, "sand"],
+              clay = texture[, "clay"],
+              fcoarse = fcoarse,
+              swrc_name = "Campbell1974",
+              ptf_name = "Cosby1984AndOthers"
+            )
+          )
         ),
         swp_vals[itext, ifix, ],
         ignore_attr = c("names", "dimnames")
@@ -142,6 +205,8 @@ test_that("Use SWRC to convert between VWC/SWP", {
 
 
   # 3. x [len = l] + soils [len = 1] --> res [len = l]
+  fcoarse <- rep(0., 1)
+
   for (ifix in names(swp_fix)) {
     for (itext in row.names(texture)) {
       expect_equal(
@@ -149,6 +214,25 @@ test_that("Use SWRC to convert between VWC/SWP", {
           vwcBulk = vwc_fix[, ifix],
           sand = texture[itext, "sand"],
           clay = texture[itext, "clay"]
+        ),
+        swp_vals[, ifix, itext],
+        ignore_attr = c("names", "dimnames")
+      )
+
+      expect_equal(
+        swrc_vwc_to_swp(
+          vwcBulk = vwc_fix[, ifix],
+          fcoarse = fcoarse,
+          swrc = list(
+            swrc_name = "Campbell1974",
+            swrcp = ptf_estimate(
+              sand = texture[itext, "sand"],
+              clay = texture[itext, "clay"],
+              fcoarse = fcoarse,
+              swrc_name = "Campbell1974",
+              ptf_name = "Cosby1984AndOthers"
+            )
+          )
         ),
         swp_vals[, ifix, itext],
         ignore_attr = c("names", "dimnames")
@@ -165,8 +249,11 @@ test_that("Use SWRC to convert between VWC/SWP", {
     }
   }
 
+
   # 4a. x [len = l] + soils [len = d] -> res [dim = l x d] where l != d
   # (x vector repeated for each soil): probably not used
+  fcoarse <- rep(0., nrow(texture) - 1L)
+
   for (ifix in names(swp_fix)) {
     expect_equal(
       swrc_vwc_to_swp(
@@ -176,10 +263,31 @@ test_that("Use SWRC to convert between VWC/SWP", {
       ),
       unname(swp_vals[, ifix, -1])
     )
+
+    expect_equal(
+      swrc_vwc_to_swp(
+        vwcBulk = vwc_fix[, ifix],
+        fcoarse = fcoarse,
+        swrc = list(
+          swrc_name = "Campbell1974",
+          swrcp = ptf_estimate(
+            sand = texture[-1, "sand"],
+            clay = texture[-1, "clay"],
+            fcoarse = fcoarse,
+            swrc_name = "Campbell1974",
+            ptf_name = "Cosby1984AndOthers"
+          )
+        )
+      ),
+      swp_vals[, ifix, -1],
+      ignore_attr = c("names", "dimnames")
+    )
   }
 
   # 4b. x [len = l] + soils [len = d] -> res [dim = l x d] where l = d
   # (x vector repeated for each soil): probably not used
+  fcoarse <- rep(0., nrow(texture))
+
   for (ifix in names(swp_fix)) {
     expect_equal(
       swrc_vwc_to_swp(
@@ -190,9 +298,31 @@ test_that("Use SWRC to convert between VWC/SWP", {
       ),
       unname(swp_vals[, ifix, ])
     )
+
+    expect_equal(
+      swrc_vwc_to_swp(
+        vwcBulk = vwc_fix[, ifix],
+        fcoarse = fcoarse,
+        swrc = list(
+          swrc_name = "Campbell1974",
+          swrcp = ptf_estimate(
+            sand = texture[, "sand"],
+            clay = texture[, "clay"],
+            fcoarse = fcoarse,
+            swrc_name = "Campbell1974",
+            ptf_name = "Cosby1984AndOthers"
+          )
+        ),
+        outer_if_equalsize = TRUE
+      ),
+      swp_vals[, ifix, ],
+      ignore_attr = c("names", "dimnames")
+    )
   }
 
   # 5. x [dim = l x d] + soils [len = 1] --> res [dim = l x d]
+  fcoarse <- rep(0., 1)
+
   for (itext in row.names(texture)) {
     expect_equal(
       swrc_vwc_to_swp(
@@ -202,27 +332,70 @@ test_that("Use SWRC to convert between VWC/SWP", {
       ),
       unname(swp_vals[, , itext])
     )
+
+    expect_equal(
+      swrc_vwc_to_swp(
+        vwcBulk = vwc_fix,
+        fcoarse = fcoarse,
+        swrc = list(
+          swrc_name = "Campbell1974",
+          swrcp = ptf_estimate(
+            sand = texture[itext, "sand"],
+            clay = texture[itext, "clay"],
+            fcoarse = fcoarse,
+            swrc_name = "Campbell1974",
+            ptf_name = "Cosby1984AndOthers"
+          )
+        )
+      ),
+      swp_vals[, , itext],
+      ignore_attr = c("names", "dimnames")
+    )
   }
 
   # 6. x [dim = l x d] + soils [len = d] --> res [dim = l x d]
   # (soils vectors repeated for each row of x)
+  fcoarse <- rep(0., nrow(texture))
+
   for (ifix in names(swp_fix)) {
+    vwc <- matrix(
+      vwc_fix[, ifix],
+      nrow = nrow(vwc_fix) - 1,
+      ncol = nrow(texture),
+      byrow = TRUE
+    )
+    res_expected <- matrix(
+      swp_fix[ifix],
+      nrow = nrow(vwc_fix) - 1,
+      ncol = nrow(texture)
+    )
+
     expect_equal(
       swrc_vwc_to_swp(
-        vwcBulk = matrix(
-          vwc_fix[, ifix],
-          nrow = nrow(vwc_fix) - 1,
-          ncol = nrow(texture),
-          byrow = TRUE
-        ),
+        vwcBulk = vwc,
         sand = texture[, "sand"],
         clay = texture[, "clay"]
       ),
-      matrix(
-        swp_fix[ifix],
-        nrow = nrow(vwc_fix) - 1,
-        ncol = nrow(texture)
-      )
+      res_expected
+    )
+
+    expect_equal(
+      swrc_vwc_to_swp(
+        vwcBulk = vwc,
+        fcoarse = fcoarse,
+        swrc = list(
+          swrc_name = "Campbell1974",
+          swrcp = ptf_estimate(
+            sand = texture[, "sand"],
+            clay = texture[, "clay"],
+            fcoarse = fcoarse,
+            swrc_name = "Campbell1974",
+            ptf_name = "Cosby1984AndOthers"
+          )
+        )
+      ),
+      res_expected,
+      ignore_attr = c("names", "dimnames")
     )
   }
 })
