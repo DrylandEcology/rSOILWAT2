@@ -43,8 +43,8 @@ test_that("Upgrade old rSOILWAT2 weather objects", {
     full.names = TRUE
   )
 
-  tmp <- gsub("Ex1_weather_v", "", basename(fnames_vdata))
-  tmp <- gsub(".rds", "", tmp)
+  tmp <- gsub("Ex1_weather_v", "", basename(fnames_vdata), fixed = TRUE)
+  tmp <- gsub(".rds", "", tmp, fixed = TRUE)
   vs <- as.numeric_version(tmp)
 
   expect_gt(length(fnames_vdata), 0L)

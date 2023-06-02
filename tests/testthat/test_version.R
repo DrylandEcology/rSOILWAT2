@@ -104,7 +104,10 @@ test_that("rSOILWAT2 object versions", {
   expect_identical(get_version(NULL), NA_character_)
   expect_identical(get_version(1), NA_character_)
   expect_identical(get_version(list()), NA_character_)
-  expect_identical(get_version(try(stop("error"), silent = TRUE)), NA_character_)
+  expect_identical(
+    get_version(try(stop("error"), silent = TRUE)),
+    NA_character_
+  )
   expect_identical(get_version(swSoils_Layers(sw_in)), NA_character_)
 
   expect_false(check_version(NA))
