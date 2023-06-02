@@ -183,6 +183,7 @@ setMethod(
   "swReadLines",
   signature = c(object = "swWeatherData", file = "character"),
   function(object, file) {
+    .Deprecated("C_rSW2_readAllWeatherFromDisk")
     warning("swReadLines works only with traditional weather data.")
 
     object@year <- as.integer(

@@ -1175,3 +1175,83 @@ estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
     Grasses = c3c4ann
   )
 }
+
+
+
+## ------ Scanning of SOILWAT input text files ------
+readCharacter <- function(text, showWarnings = FALSE) {
+  .Deprecated("SOILWAT2's read functionality")
+  tmp <- strsplit(x = text, split = "\t")[[1]][1]
+  unlist(strsplit(x = tmp, split = " "))[1]
+}
+
+readInteger <- function(text,showWarnings=FALSE) {
+  .Deprecated("SOILWAT2's read functionality")
+  tmp <- suppressWarnings(as.integer(strsplit(x=text,split="\t")[[1]][1]))
+  if(is.na(tmp)) {
+    if(showWarnings) print(paste("Line: ",text,sep=""))
+    if(showWarnings) print("Not formatted with \t. Going to try [space].")
+    tmp <- suppressWarnings(as.integer(strsplit(x=text,split=" ")[[1]][1]))
+    if(is.na(tmp)) {
+      stop("Bad Line. Or Bad line numbers.")
+    }
+  }
+  return(tmp)
+}
+
+readLogical <- function(text,showWarnings=FALSE) {
+  .Deprecated("SOILWAT2's read functionality")
+  tmp <- suppressWarnings(as.logical(as.integer(strsplit(x=text,split="\t")[[1]][1])))
+  if(is.na(tmp)) {
+    if(showWarnings) print(paste("Line: ",text,sep=""))
+    if(showWarnings) print("Not formatted with \t. Going to try [space].")
+    tmp <- suppressWarnings(as.logical(as.integer(strsplit(x=text,split=" ")[[1]][1])))
+    if(is.na(tmp)) {
+      stop("Bad Line. Or Bad line numbers.")
+    }
+  }
+  return(tmp)
+}
+
+readNumeric <- function(text,showWarnings=FALSE) {
+  .Deprecated("SOILWAT2's read functionality")
+  tmp <- suppressWarnings(as.numeric(strsplit(x=text,split="\t")[[1]][1]))
+  if(is.na(tmp)) {
+    if(showWarnings) print(paste("Line: ",text,sep=""))
+    if(showWarnings) print("Not formatted with \t. Going to try [space].")
+    tmp <- suppressWarnings(as.numeric(strsplit(x=text,split=" ")[[1]][1]))
+    if(is.na(tmp)) {
+      stop("Bad Line. Or Bad line numbers.")
+    }
+  }
+  return(tmp)
+}
+
+readNumerics <- function(text,expectedArgs,showWarnings=FALSE) {
+  .Deprecated("SOILWAT2's read functionality")
+  tmp <- strsplit(x=text,split="\t")[[1]]
+  tmp <- tmp[tmp != ""] #get rid of extra spaces
+  if(length(tmp) > expectedArgs) tmp <- tmp[1:expectedArgs] #get rid of comment?
+  tmp <- suppressWarnings(as.numeric(tmp))
+  if(any(is.na(tmp))) {
+    if(showWarnings & any(is.na(tmp))) print(paste("Line: ",text,sep=""))
+    if(showWarnings & any(is.na(tmp))) print("Not formatted with \t. Going to try [space].")
+    tmp <- strsplit(x=text,split="\t")[[1]][1] #remove comment
+    tmp <- strsplit(x=tmp,split=" ")[[1]]
+    tmp <- tmp[tmp!=""] #remove extra spaces
+    tmp <- suppressWarnings(as.numeric(tmp[1:expectedArgs]))
+    if(any(is.na(tmp))) {
+      #last try. tried set by \t then by space. Now try both
+      tmp <- strsplit(x=text,split=" ",fixed=T)[[1]]
+      tmp <- unlist(strsplit(x=tmp,split="\t",fixed=T))
+      tmp <- tmp[tmp!=""] #remove extra spaces
+      tmp <- suppressWarnings(as.numeric(tmp[1:expectedArgs]))
+      if(any(is.na(tmp))) stop("Bad Line. Or Bad line numbers.")
+    }
+  }
+  if(length(tmp) != expectedArgs) {
+    if(showWarnings) print(paste("Line: ",text,sep=""))
+    stop(paste("Expected ",expectedArgs," Got ",length(tmp),sep=""))
+  }
+  return(tmp)
+}

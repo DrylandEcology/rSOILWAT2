@@ -2002,23 +2002,54 @@ getWeatherData_folders <- function(
     }
   )
 
-  if (!endsWith(filebasename, ".")) {
-    filebasename <- paste0(filebasename, ".")
+  if (endsWith(filebasename, ".")) {
+    # remove trailing "."
+    filebasename <- sub("\\.$", "", filebasename)
   }
-  years <- as.numeric(sub(pattern = filebasename, replacement = "", fweath))
+
+  years <- as.integer(
+    sub(pattern = paste0(filebasename, "."), replacement = "", fweath)
+  )
   stopifnot(!anyNA(years))
-  index <- select_years(years, startYear, endYear)
+  ids <- select_years(years, startYear, endYear)
+  used_years <- years[ids]
 
-  weathDataList <- list()
-  for (k in seq_along(index)) {
-    weathDataList[[k]] <- swReadLines(
-      swWeatherData(year = years[index[k]]),
-      file.path(dir_weather, fweath[index[k]])
+  if (method == "C") {
+    .Call(
+      C_rSW2_readAllWeatherFromDisk,
+      dir_weather,
+      filebasename,
+      used_years[[1L]],
+      used_years[[length(used_years)]],
+      dailyInputFlags
     )
-  }
-  names(weathDataList) <- as.character(years[index])
 
-  weathDataList
+  } else if (method == "R") {
+    ids_cols <- c(1L, 1L + which(dailyInputFlags))
+
+    res <- mapply(
+      function(fname, yr) {
+        object <- new("swWeatherData")
+        object@year <- yr
+        data <- utils::read.table(
+          fname,
+          header = FALSE,
+          comment.char = "#",
+          blank.lines.skip = TRUE,
+          sep = "\t"
+        )
+        stopifnot(ncol(data) %in% (0:1 + sum(dailyInputFlags)))
+        object@data <- object@data[seq_len(nrow(data)), , drop = FALSE]
+        object@data[, ids_cols] <- as.matrix(data)
+        object
+      },
+      file.path(dir_weather, fweath[ids]),
+      used_years,
+      SIMPLIFY = FALSE
+    )
+
+    stats::setNames(res, as.character(used_years))
+  }
 }
 
 
@@ -2593,77 +2624,12 @@ dbW_check_weatherData <- function(x) {
 }
 
 
-# nolint start
-## ------ Scanning of SOILWAT input text files ------
-readCharacter <- function(text, showWarnings = FALSE) {
-  tmp <- strsplit(x = text, split = "\t")[[1]][1]
-  unlist(strsplit(x = tmp, split = " "))[1]
-}
 
-readInteger <- function(text,showWarnings=FALSE) {
-  tmp <- suppressWarnings(as.integer(strsplit(x=text,split="\t")[[1]][1]))
-  if(is.na(tmp)) {
-    if(showWarnings) print(paste("Line: ",text,sep=""))
-    if(showWarnings) print("Not formatted with \t. Going to try [space].")
-    tmp <- suppressWarnings(as.integer(strsplit(x=text,split=" ")[[1]][1]))
-    if(is.na(tmp)) {
-      stop("Bad Line. Or Bad line numbers.")
+
+
     }
   }
-  return(tmp)
 }
 
-readLogical <- function(text,showWarnings=FALSE) {
-  tmp <- suppressWarnings(as.logical(as.integer(strsplit(x=text,split="\t")[[1]][1])))
-  if(is.na(tmp)) {
-    if(showWarnings) print(paste("Line: ",text,sep=""))
-    if(showWarnings) print("Not formatted with \t. Going to try [space].")
-    tmp <- suppressWarnings(as.logical(as.integer(strsplit(x=text,split=" ")[[1]][1])))
-    if(is.na(tmp)) {
-      stop("Bad Line. Or Bad line numbers.")
-    }
   }
-  return(tmp)
 }
-
-readNumeric <- function(text,showWarnings=FALSE) {
-  tmp <- suppressWarnings(as.numeric(strsplit(x=text,split="\t")[[1]][1]))
-  if(is.na(tmp)) {
-    if(showWarnings) print(paste("Line: ",text,sep=""))
-    if(showWarnings) print("Not formatted with \t. Going to try [space].")
-    tmp <- suppressWarnings(as.numeric(strsplit(x=text,split=" ")[[1]][1]))
-    if(is.na(tmp)) {
-      stop("Bad Line. Or Bad line numbers.")
-    }
-  }
-  return(tmp)
-}
-
-readNumerics <- function(text,expectedArgs,showWarnings=FALSE) {
-  tmp <- strsplit(x=text,split="\t")[[1]]
-  tmp <- tmp[tmp != ""] #get rid of extra spaces
-  if(length(tmp) > expectedArgs) tmp <- tmp[1:expectedArgs] #get rid of comment?
-  tmp <- suppressWarnings(as.numeric(tmp))
-  if(any(is.na(tmp))) {
-    if(showWarnings & any(is.na(tmp))) print(paste("Line: ",text,sep=""))
-    if(showWarnings & any(is.na(tmp))) print("Not formatted with \t. Going to try [space].")
-    tmp <- strsplit(x=text,split="\t")[[1]][1] #remove comment
-    tmp <- strsplit(x=tmp,split=" ")[[1]]
-    tmp <- tmp[tmp!=""] #remove extra spaces
-    tmp <- suppressWarnings(as.numeric(tmp[1:expectedArgs]))
-    if(any(is.na(tmp))) {
-      #last try. tried set by \t then by space. Now try both
-      tmp <- strsplit(x=text,split=" ",fixed=T)[[1]]
-      tmp <- unlist(strsplit(x=tmp,split="\t",fixed=T))
-      tmp <- tmp[tmp!=""] #remove extra spaces
-      tmp <- suppressWarnings(as.numeric(tmp[1:expectedArgs]))
-      if(any(is.na(tmp))) stop("Bad Line. Or Bad line numbers.")
-    }
-  }
-  if(length(tmp) != expectedArgs) {
-    if(showWarnings) print(paste("Line: ",text,sep=""))
-      stop(paste("Expected ",expectedArgs," Got ",length(tmp),sep=""))
-  }
-  return(tmp)
-}
-# nolint end
