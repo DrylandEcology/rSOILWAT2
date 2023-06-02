@@ -114,28 +114,15 @@ test_that("Weather generator: generate weather", {
 
     #--- Expectations
     for (ke in seq_along(wout)) {
-      iyrs <- seq_along(wout[[ke]])
 
-      for (i in iyrs) {
-        # It is a valid object of class "swWeatherData"
-        expect_true(validObject(wout[[ke]][[i]]))
+      # Expect valid weather history object
+      expect_true(dbW_check_weatherData(wout[[ke]]))
 
-        # Prepare weather data.frame
-        wdf <- set_missing_weather(slot(wout[[ke]][[i]], "data"))
+      wdf <- dbW_weatherData_to_dataframe(wout[[ke]])
+      wdf <- wdf[, weatherGenerator_dataColumns(), drop = FALSE]
 
-        # It meets weather data requirements
-        expect_silent(
-          check_weather(
-            weather = wdf,
-            required_variables = c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
-          )
-        )
-
-        # There are no missing data
-        expect_false(
-          anyNA(wdf[, weatherGenerator_dataColumns(), drop = FALSE])
-        )
-      }
+      #--- Expect no missing data in implemented variables
+      expect_false(any(is_missing_weather(wdf)))
     }
 
 
