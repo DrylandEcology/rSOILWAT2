@@ -93,9 +93,9 @@ test_that("rSOILWAT2 object versions", {
 
   #--- Check that numeric versions are passed through
   v <- as.numeric_version(getNamespaceVersion("rSOILWAT2"))
-  expect_identical(get_version(v), v)
+  expect_identical(get_version(v), as.character(v))
   v <- packageVersion("base")
-  expect_identical(get_version(v), v)
+  expect_identical(get_version(v), as.character(v))
 
 
   #--- Check for other object classes (ANY-method): return `NA_character_`

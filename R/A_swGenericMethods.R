@@ -68,7 +68,7 @@ setMethod(
         as.character(as.numeric_version(tmp))
       }
     } else {
-      object # numeric version
+      as.character(object) # numeric version
     }
   }
 )
