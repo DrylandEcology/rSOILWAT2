@@ -102,9 +102,9 @@ for (k in seq_along(list_backups)) {
 
 
 #------ Helper functions -----
-compare_objects <- function(new, old) {
+compare_objects <- function(new, old, tolerance = 1e-9) {
   # Compare to previous version
-  res_cmp <- waldo::compare(old, new)
+  res_cmp <- waldo::compare(old, new, tolerance = tolerance)
 
   # Ignore "timestamp"
   has_timestamp_diff <- grepl("timestamp", res_cmp, fixed = TRUE)
@@ -338,6 +338,8 @@ for (it in seq_along(tests)) {
   } else {
     slot(sw_input, "weatherHistory")
   }
+
+  stopifnot(rSOILWAT2::dbW_check_weatherData(sw_weather))
 
   #--- Compare weather to previous version
   res_cmp <- waldo::compare(
