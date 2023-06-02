@@ -257,12 +257,24 @@ sw_exec <- function(
   # Upgrade essential slots if input object is from an older version
   inputData <- sw_upgrade(inputData, verbose = !quiet)
 
-
   if (!check_version(inputData, level = "minor")) {
     warning(
       "Object `inputData is outdated; ",
       "SOILWAT2 may fail or produce unexpected outcomes."
     )
+  }
+
+
+  # Upgrade weather data if object is from an outdated version
+  if (!is.null(weatherList)) {
+    weatherList <- upgrade_weatherHistory(weatherList, verbose = !quiet)
+
+    if (!dbW_check_weatherData(weatherList)) {
+      warning(
+        "Object `weatherList is outdated; ",
+        "SOILWAT2 may fail or produce unexpected outcomes."
+      )
+    }
   }
 
 

@@ -120,6 +120,52 @@ swMonthlyScalingParams <- function(...) {
   do.call("new", args = c("swMonthlyScalingParams", tmp))
 }
 
+sw_upgrade_MonthlyScalingParams <- function( # nolint: object_length_linter.
+  MonthlyScalingParams,
+  verbose = FALSE
+) {
+  if (verbose) {
+    message("Upgrading object `MonthlyScalingParams`.")
+  }
+
+  #--- Add new columns (use default values)
+  default <- swMonthlyScalingParams()
+  vars_exp <- colnames(default@MonthlyScalingParams)
+  vars_has <- colnames(MonthlyScalingParams)
+
+  if (!all(vars_exp %in% vars_has)) {
+    res <- default@MonthlyScalingParams
+    res[, vars_has] <- MonthlyScalingParams[, vars_has]
+    res
+  } else {
+    MonthlyScalingParams
+  }
+}
+
+
+#' @rdname sw_upgrade
+setMethod(
+  "sw_upgrade",
+  signature = "swMonthlyScalingParams",
+  definition = function(object, verbose = FALSE) {
+    tmp <- try(validObject(object), silent = TRUE)
+    if (inherits(tmp, "try-error")) {
+      if (verbose) {
+        message("Upgrading object of class `swMonthlyScalingParams`.")
+      }
+
+      object@MonthlyScalingParams <- suppressWarnings(
+        sw_upgrade_MonthlyScalingParams(object@MonthlyScalingParams)
+      )
+
+      #--- Check validity and return
+      validObject(object)
+    }
+
+    object
+  }
+)
+
 
 
 #####################WEATHERSETUP.IN###################################
@@ -253,6 +299,36 @@ swWeather <- function(...) {
     )
   )
 }
+
+
+
+
+#' @rdname sw_upgrade
+setMethod(
+  "sw_upgrade",
+  signature = "swWeather",
+  definition = function(object, verbose = FALSE) {
+    tmp <- try(validObject(object), silent = TRUE)
+    if (inherits(tmp, "try-error")) {
+      # Upgrade `MonthlyScalingParams` with dedicated upgrade method first;
+      # `swMonthlyScalingParams()` via `swWeather()` cannot handle
+      # an increased number of columns in `MonthlyScalingParams` otherwise
+      object@MonthlyScalingParams <- suppressWarnings(
+        sw_upgrade_MonthlyScalingParams(
+          object@MonthlyScalingParams,
+          verbose = verbose
+        )
+      )
+
+      if (verbose) {
+        message("Upgrading object of class `swWeather`.")
+      }
+      object <- suppressWarnings(swWeather(object))
+    }
+
+    object
+  }
+)
 
 
 #' @rdname swWeather-class

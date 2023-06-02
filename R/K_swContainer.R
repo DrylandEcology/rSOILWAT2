@@ -240,17 +240,26 @@ setMethod(
     if (!suppressWarnings(check_version(object))) {
 
       for (sn in slotNames(object)) {
-        tmp <- try(validObject(slot(object, sn)), silent = TRUE)
-        if (inherits(tmp, "try-error")) {
-          slot(object, sn) <- suppressWarnings(
-            sw_upgrade(slot(object, sn), verbose = FALSE)
-          )
+        if (identical(sn, "weatherHistory")) {
+          if (!dbW_check_weatherData(slot(object, sn), check_all = FALSE)) {
+            slot(object, sn) <- suppressWarnings(
+              upgrade_weatherHistory(slot(object, sn))
+            )
+            msg_upgrades <- c(msg_upgrades, sn)
+          }
 
-          msg_upgrades <- c(msg_upgrades, sn)
+        } else {
+          tmp <- try(validObject(slot(object, sn)), silent = TRUE)
+          if (inherits(tmp, "try-error")) {
+            slot(object, sn) <- suppressWarnings(
+              sw_upgrade(slot(object, sn), verbose = FALSE)
+            )
+            msg_upgrades <- c(msg_upgrades, sn)
+          }
         }
       }
 
-      if (length(msg_upgrades) > 1) {
+      if (length(msg_upgrades) > 0) {
         if (verbose) {
           message(
             "Upgrading object of class `swInputData`: ",

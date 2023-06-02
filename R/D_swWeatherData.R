@@ -166,6 +166,33 @@ swWeatherData <- function(...) {
 }
 
 
+#' @rdname sw_upgrade
+#' @export
+upgrade_weatherHistory <- function(object, verbose = FALSE) {
+  tmp <- try(dbW_check_weatherData(object, check_all = FALSE), silent = TRUE)
+  if (inherits(tmp, "try-error") || !isTRUE(tmp)) {
+    if (verbose) {
+      message("Upgrading `weatherHistory` object.")
+    }
+
+    ref <- new("swWeatherData")
+
+    object <- lapply(
+      object,
+      function(old) {
+        new <- ref
+        new@year <- old@year
+        new@data <- new@data[seq_len(nrow(old@data)), , drop = FALSE]
+        new@data[, colnames(old@data)] <- old@data
+        new
+      }
+    )
+  }
+
+  object
+}
+
+
 #' @rdname swWeatherData-class
 #' @export
 weatherHistory <- function(weatherList = NULL) {
