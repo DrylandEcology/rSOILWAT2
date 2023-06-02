@@ -60,7 +60,7 @@ setClass(
       dim = c(12, 8),
       dimnames = list(
         NULL,
-        c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "actVP", "shortWR")
+        c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "ActVP", "ShortWR")
       )
     )
   )
@@ -74,7 +74,7 @@ setValidity(
 
     if (temp[2] != 8) {
       msg <- paste(
-        "@MonthlyScalingParams must have exactly 6 columns ",
+        "@MonthlyScalingParams must have exactly 8 columns ",
         "corresponding to PPT, MaxT, MinT, SkyCover, Wind, rH, ActVP, ShortWR"
       )
       val <- if (isTRUE(val)) msg else c(val, msg)

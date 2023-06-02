@@ -177,8 +177,8 @@ SEXP onGet_SW_WTH_setup(void) {
 		p_MonthlyValues[i + 12 * 3] = w->scale_skyCover[i];
 		p_MonthlyValues[i + 12 * 4] = w->scale_wind[i];
 		p_MonthlyValues[i + 12 * 5] = w->scale_rH[i];
-        p_MonthlyValues[i + 12 * 6] = w->scale_shortWaveRad[i];
-        p_MonthlyValues[i + 12 * 7] = w->scale_actVapPress[i];
+		p_MonthlyValues[i + 12 * 6] = w->scale_actVapPress[i];
+		p_MonthlyValues[i + 12 * 7] = w->scale_shortWaveRad[i];
 	}
 	PROTECT(MonthlyScalingParams_names = allocVector(VECSXP, 2));
 	PROTECT(MonthlyScalingParams_names_x = allocVector(STRSXP, 12));
@@ -308,8 +308,8 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 		w->scale_skyCover[i] = p_MonthlyValues[i + 12 * 3];
 		w->scale_wind[i] = p_MonthlyValues[i + 12 * 4];
 		w->scale_rH[i] = p_MonthlyValues[i + 12 * 5];
-        w->scale_actVapPress[i] = p_MonthlyValues[i + 12 * 6];
-        w->scale_shortWaveRad[i] = p_MonthlyValues[i + 12 * 7];
+		w->scale_actVapPress[i] = p_MonthlyValues[i + 12 * 6];
+		w->scale_shortWaveRad[i] = p_MonthlyValues[i + 12 * 7];
 	}
 
 	SW_WeatherPrefix(w->name_prefix);
