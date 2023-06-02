@@ -22,6 +22,8 @@ Retrieve version of \pkg{rSOILWAT2} that was used to create object
 \examples{
 get_version(rSOILWAT2::sw_exampleData)
 get_version(sw_exec(rSOILWAT2::sw_exampleData))
+get_version(as.numeric_version("4.1.3"))
+get_version(packageVersion("rSOILWAT2"))
 
 }
 \seealso{
