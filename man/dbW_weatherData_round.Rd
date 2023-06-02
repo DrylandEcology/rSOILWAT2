@@ -7,7 +7,7 @@
 dbW_weatherData_round(
   weatherData,
   digits = 4L,
-  weatherDF_dataColumns = c("Tmax_C", "Tmin_C", "PPT_cm")
+  weatherDF_dataColumns = weather_dataColumns()
 )
 }
 \arguments{
@@ -18,10 +18,9 @@ that each hold daily weather data for one calendar year.}
 weather values.}
 
 \item{weatherDF_dataColumns}{A vector of character strings. The column
-names of \code{weatherDF} in the correct order for \code{SOILWAT2} that are
-representing calendar year \code{year} (optional), day of year \code{DOY},
-daily maximum air temperature \code{Tmax_C}, daily minimum air temperature
-\code{Tmin_C}, and daily precipitation amount \code{PPT_cm}.}
+names of \code{weatherDF} in the correct order for \code{SOILWAT2} including
+calendar year \code{year} (optional) and day of year \code{DOY}, see
+\code{\link[=weather_dataColumns]{weather_dataColumns()}}.}
 }
 \value{
 A list with \code{\linkS4class{swWeatherData}} elements.

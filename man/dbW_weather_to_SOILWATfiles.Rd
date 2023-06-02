@@ -11,7 +11,8 @@ dbW_weather_to_SOILWATfiles(
   weatherData = NULL,
   weatherDF = NULL,
   years = NULL,
-  weatherDF_dataColumns = c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+  weatherDF_dataColumns = c("DOY", weather_dataColumns()),
+  digits = 4L
 )
 }
 \arguments{
@@ -28,10 +29,12 @@ that each hold daily weather data for one calendar year.}
 \item{years}{A numeric vector. The calendar years.}
 
 \item{weatherDF_dataColumns}{A vector of character strings. The column
-names of \code{weatherDF} in the correct order for \code{SOILWAT2} that are
-representing calendar year \code{year} (optional), day of year \code{DOY},
-daily maximum air temperature \code{Tmax_C}, daily minimum air temperature
-\code{Tmin_C}, and daily precipitation amount \code{PPT_cm}.}
+names of \code{weatherDF} in the correct order for \code{SOILWAT2} including
+calendar year \code{year} (optional) and day of year \code{DOY}, see
+\code{\link[=weather_dataColumns]{weather_dataColumns()}}.}
+
+\item{digits}{An integer value. The number of decimal places for rounding
+weather values.}
 }
 \description{
 Conversion: object of class \code{\linkS4class{swWeatherData}} or

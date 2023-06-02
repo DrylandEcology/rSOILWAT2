@@ -11,7 +11,7 @@ dbW_convert_to_GregorianYears(
   type = c("asis", "sequential"),
   name_year = "Year",
   name_DOY = "DOY",
-  name_data = c("Tmax_C", "Tmin_C", "PPT_cm"),
+  name_data = weather_dataColumns(),
   valNA = NULL
 )
 }

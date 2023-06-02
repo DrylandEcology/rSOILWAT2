@@ -54,6 +54,16 @@ A list of elements of class \code{\linkS4class{swWeatherData}}.
 This function is a convenience wrapper for
 \code{\link{dbW_estimate_WGen_coefs}}.
 }
+\section{Details}{
+
+The current implementation of the weather generator produces values
+only for variables in \code{\link[=weatherGenerator_dataColumns]{weatherGenerator_dataColumns()}}.
+Values are generated for those days where at least one of the implemented
+variables is missing; if any value is missing, then values for that day of
+all implemented variables will be replaced by those produced
+by the weather generator.
+}
+
 \examples{
 # Load data for 1949-2010
 wdata <- data.frame(dbW_weatherData_to_dataframe(rSOILWAT2::weatherData))
