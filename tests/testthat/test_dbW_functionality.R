@@ -56,8 +56,6 @@ site_data3 <- data.frame(
   stringsAsFactors = FALSE
 )
 
-weatherDF_dataColumns <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
-
 
 
 # This function is needed for appveyor: for some reason 'dbW_createDatabase'
@@ -845,7 +843,7 @@ test_that("Manipulate weather data: years", {
   datA_DF_result_con1 <- get_years_from_weatherDF(
     weatherDF = datA_DF,
     years = datA_yrs_ts,
-    weatherDF_dataColumns = weatherDF_dataColumns
+    weatherDF_dataColumns = "DOY"
   )
   expect_equal(datA_DF_result_con1[["years"]], datA_yrs)
   expect_equal(datA_DF_result_con1[["year_ts"]], datA_yrs_ts)
@@ -853,19 +851,19 @@ test_that("Manipulate weather data: years", {
   datA_DF_result_con2 <- get_years_from_weatherDF(
     weatherDF = datA_DF,
     years = datA_yrs,
-    weatherDF_dataColumns = weatherDF_dataColumns
+    weatherDF_dataColumns = "DOY"
   )
   expect_equal(datA_DF_result_con2[["years"]], datA_yrs)
   expect_equal(datA_DF_result_con2[["year_ts"]], datA_yrs_ts)
 
   expect_error(
-    get_years_from_weatherDF(datA_DF, datA_yrs[2:20], weatherDF_dataColumns)
+    get_years_from_weatherDF(datA_DF, datA_yrs[2:20], "DOY")
   ) #con 3
 
   datA_DF_result_con4 <- get_years_from_weatherDF(
     weatherDF = datA_DF,
     years = NULL,
-    weatherDF_dataColumns = weatherDF_dataColumns
+    weatherDF_dataColumns = "DOY"
   )
   expect_equal(datA_DF_result_con4[["years"]], datA_yrs)
   expect_equal(datA_DF_result_con4[["year_ts"]], datA_yrs_ts)
@@ -874,7 +872,7 @@ test_that("Manipulate weather data: years", {
     get_years_from_weatherDF(
       weatherDF = datA_DF_noyrs,
       years = NULL,
-      weatherDF_dataColumns = weatherDF_dataColumns
+      weatherDF_dataColumns = "DOY"
     )
   ) #con 5
 
@@ -888,9 +886,20 @@ test_that("Manipulate weather data: years", {
       datB <- sw_weather[[k]]
       datB_yrs <- get_years_from_weatherData(datB)
       yrs_joint <- intersect(datA_yrs, datB_yrs)
+
+      # exclude calculated variables from comparison
+      ids <- c(
+        1:2,
+        2L + which(slot(slot(sw_input, "weather"), "dailyInputFlags"))
+      )
+
       expect_equal(
-        datA[select_years(datA_yrs, min(yrs_joint), max(yrs_joint))],
-        datB[select_years(datB_yrs, min(yrs_joint), max(yrs_joint))],
+        dbW_weatherData_to_dataframe(
+          datA[select_years(datA_yrs, min(yrs_joint), max(yrs_joint))]
+        )[, ids, drop = FALSE],
+        dbW_weatherData_to_dataframe(
+          datB[select_years(datB_yrs, min(yrs_joint), max(yrs_joint))]
+        )[, ids, drop = FALSE],
         tolerance = 1e-3
       )
     }
@@ -901,6 +910,10 @@ test_that("Manipulate weather data: years", {
 test_that("Convert calendar years", {
   wdata <- rSOILWAT2::weatherData
 
+  dailyInputFlags <- calc_dailyInputFlags(wdata)
+  ids_vars <- 2L + which(dailyInputFlags)
+  ids_cols <- c(1:2, ids_vars)
+
   ## Transfer to different years (partially overlapping)
   wnew <- dbW_convert_to_GregorianYears(
     wdata,
@@ -908,8 +921,8 @@ test_that("Convert calendar years", {
     new_endYear = 2020
   )
   expect_equal(unique(wnew[, "Year"]), 2000:2020)
-  expect_false(anyNA(wnew[wnew[, "Year"] %in% names(wdata), ]))
-  expect_true(anyNA(wnew))
+  expect_false(anyNA(wnew[wnew[, "Year"] %in% names(wdata), ids_cols]))
+  expect_true(anyNA(wnew[, ids_cols]))
 
   ## Transfer to a subset of years (i.e., subset)
   wnew <- dbW_convert_to_GregorianYears(
@@ -918,7 +931,7 @@ test_that("Convert calendar years", {
     new_endYear = 2005
   )
   expect_equal(unique(wnew[, "Year"]), 2000:2005)
-  expect_false(anyNA(wnew))
+  expect_false(anyNA(wnew[, ids_cols]))
 
   ## Correct/convert from a non-leap to a Gregorian calendar
   wempty <- dbW_weatherData_to_dataframe(weatherHistory())[1:365, ]
@@ -930,7 +943,7 @@ test_that("Convert calendar years", {
   )
   expect_equal(unique(wnew[, "Year"]), 2016:2016)
   expect_equal(nrow(wnew), 366) # leap year
-  expect_true(anyNA(wnew))
+  expect_true(anyNA(wnew[, ids_cols]))
 
 
   wnew <- dbW_convert_to_GregorianYears(
@@ -941,5 +954,6 @@ test_that("Convert calendar years", {
   )
   expect_equal(unique(wnew[, "Year"]), 2016:2016)
   expect_equal(nrow(wnew), 366) # leap year
-  expect_equal(sum(is.na(wnew)), 3) # 3 variables on leap day are missing
+  # variables on leap day are missing
+  expect_equal(sum(is.na(wnew[, ids_cols])), length(ids_vars))
 })

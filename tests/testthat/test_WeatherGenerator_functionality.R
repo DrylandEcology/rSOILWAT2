@@ -12,6 +12,9 @@ test_that("Test data availability", {
 
 #---TESTS
 test_that("Weather generator: estimate input parameters", {
+
+  weatherGenerator_dataColumns <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+
   for (k in seq_along(tests)) {
     test_dat <- readRDS(
       file.path(dir_test_data, paste0(tests[k], "_weather.rds"))
@@ -19,7 +22,7 @@ test_that("Weather generator: estimate input parameters", {
 
     test_df <- data.frame(dbW_weatherData_to_dataframe(test_dat, valNA = NULL))
 
-    if (anyNA(test_df)) {
+    if (anyNA(test_df[, weatherGenerator_dataColumns(), drop = FALSE])) {
       # We have NAs that propagate
       # --> warnings: "Insufficient weather data to estimate values [...]"
       res <- suppressWarnings(
@@ -62,6 +65,8 @@ test_that("Weather generator: estimate input parameters", {
 
 
 test_that("Weather generator: generate weather", {
+  digits <- 9L
+
   for (k in seq_along(tests)) {
     test_dat <- readRDS(
       file.path(dir_test_data, paste0(tests[k], "_weather.rds"))
@@ -76,7 +81,8 @@ test_that("Weather generator: generate weather", {
       dbW_generateWeather(
         test_dat,
         imputation_type = "mean",
-        imputation_span = 5
+        imputation_span = 5,
+        digits = digits
       )
     )
 
@@ -105,18 +111,17 @@ test_that("Weather generator: generate weather", {
       wgen_coeffs = wgen_coeffs
     )
 
-    # Expectations
-    for (k in seq_along(wout)) {
-      x <- wout[[k]]
-      iyrs <- seq_along(x)
+
+    #--- Expectations
+    for (ke in seq_along(wout)) {
+      iyrs <- seq_along(wout[[ke]])
 
       for (i in iyrs) {
         # It is a valid object of class "swWeatherData"
-        expect_true(validObject(x[[i]]))
+        expect_true(validObject(wout[[ke]][[i]]))
 
         # Prepare weather data.frame
-        wdf <- slot(x[[i]], "data")
-        wdf <- set_missing_weather(wdf)
+        wdf <- set_missing_weather(slot(wout[[ke]][[i]], "data"))
 
         # It meets weather data requirements
         expect_silent(
@@ -127,9 +132,50 @@ test_that("Weather generator: generate weather", {
         )
 
         # There are no missing data
-        expect_false(anyNA(wdf))
+        expect_false(
+          anyNA(wdf[, weatherGenerator_dataColumns(), drop = FALSE])
+        )
       }
     }
+
+
+    #--- Expect that values remain unchanged
+    # wgen-variables: on days where all wgen-variables are non-missing
+    # Non-wgen variables: any non-missing value remain unchanged
+
+    wout1_df <- rSOILWAT2::dbW_weatherData_to_dataframe(wout[[1L]])
+    test_dat1_df <- rSOILWAT2::dbW_weatherData_to_dataframe(test_dat)
+
+    ids_wgen <- which(
+      colnames(test_dat1_df) %in% rSOILWAT2::weatherGenerator_dataColumns()
+    )
+    tmp <- apply(
+      !is_missing_weather(test_dat1_df[, ids_wgen, drop = FALSE]),
+      MARGIN = 1L,
+      FUN = all
+    )
+    isnot_missing_wgen <- as.matrix(data.frame(
+      row = rep(which(tmp), times = length(ids_wgen)),
+      col = rep(ids_wgen, each = sum(tmp))
+    ))
+
+    ids_nowgen <- which(
+      !colnames(test_dat1_df) %in% rSOILWAT2::weatherGenerator_dataColumns()
+    )
+    isnot_missing_nowgen <- which(
+      !is_missing_weather(test_dat1_df[, ids_nowgen, drop = FALSE]),
+      arr.ind = TRUE
+    )
+    isnot_missing_nowgen[, "col"] <- ids_nowgen[isnot_missing_nowgen[, "col"]]
+
+    isnot_missing <- rbind(isnot_missing_wgen, isnot_missing_nowgen)
+
+
+    expect_equal(
+      test_dat1_df[isnot_missing],
+      wout1_df[isnot_missing],
+      tolerance = 10 ^ (-digits)
+    )
   }
 })
 

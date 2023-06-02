@@ -17,25 +17,31 @@ test_that("Check example data", {
 
   for (it in tests) {
     sw_input <- readRDS(file.path(dir_test_data, paste0(it, "_input.rds")))
+    dailyInputFlags <- slot(slot(sw_input, "weather"), "dailyInputFlags")
     sw_weather <- readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
     sw_weather_df <- dbW_weatherData_to_dataframe(sw_weather)
+    sw_wactive_df <- sw_weather_df[
+      ,
+      c(1:2, 2L + which(dailyInputFlags)),
+      drop = FALSE
+    ]
 
     yrs_sim <- seq(swYears_StartYear(sw_input), swYears_EndYear(sw_input))
     yrs_wth <- get_years_from_weatherData(sw_weather)
 
 
-    #--- Check that weather is (not) missing ------
+    #--- Check that weather is (not) missing (for 'active' inputs) ------
     if (it != "Ex2") {
       # not missing: no NAs, no SW_MISSING, all years
-      expect_identical(sum(is.na(sw_weather_df)), 0L)
-      expect_identical(sum(sw_weather_df == swmiss), 0L)
+      expect_identical(sum(is.na(sw_wactive_df)), 0L)
+      expect_identical(sum(sw_wactive_df == swmiss), 0L)
       expect_true(all(yrs_sim %in% yrs_wth))
 
     } else {
       # missing: NAs, SW_MISSING, or not all years
       expect_true(
-        sum(is.na(sw_weather_df)) > 0 ||
-          sum(sw_weather_df == swmiss) > 0 ||
+        sum(is.na(sw_wactive_df)) > 0 ||
+          sum(sw_wactive_df == swmiss) > 0 ||
           !all(yrs_sim %in% yrs_wth)
       )
     }
