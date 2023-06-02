@@ -42,9 +42,17 @@ The methods listed below work on this class and the proper slot of the class
 \item{\code{year}}{An integer value. The calendar year of the weather \code{data}
 object.}
 
-\item{\code{data}}{A 365 x 4 or 366 x 4 matrix representing daily weather data for
-one calendar \code{year} with columns \var{DOY}, \var{Tmax_C},
-\var{Tmin_C}, and \var{PPT_cm}.}
+\item{\code{data}}{A 365 x 15 or 366 x 15 matrix representing daily weather data for
+one calendar \code{year} with columns
+\var{DOY},
+\var{Tmax_C}, \var{Tmin_C}, \var{PPT_cm},
+\var{cloudCov_pct},
+\var{windSpeed_mPERs},
+\var{windSpeed_east_mPERs}, \var{windSpeed_north_mPERs},
+\var{rHavg_pct}, \var{rHmax_pct}, \var{rHmin_pct},
+\var{specHavg_pct}, \var{Tdewpoint_C},
+\var{actVP_kPa}, and
+\var{shortWR}.}
 }}
 
 \examples{

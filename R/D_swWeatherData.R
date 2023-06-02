@@ -23,6 +23,21 @@
 
 ##############################################################################
 
+
+#' List names of currently implemented daily weather variables
+#' @return A vector of daily weather variable names.
+#' @export
+weather_dataColumns <- function() {
+  c(
+    "Tmax_C", "Tmin_C", "PPT_cm",
+    "cloudCov_pct",
+    "windSpeed_mPERs", "windSpeed_east_mPERs", "windSpeed_north_mPERs",
+    "rHavg_pct", "rHmax_pct", "rHmin_pct", "specHavg_pct", "Tdewpoint_C",
+    "actVP_kPa",
+    "shortWR"
+  )
+}
+
 #' Class \code{"swWeatherData"}
 #'
 #' The methods listed below work on this class and the proper slot of the class
@@ -43,9 +58,17 @@
 #'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #' @slot year An integer value. The calendar year of the weather \code{data}
 #'   object.
-#' @slot data A 365 x 4 or 366 x 4 matrix representing daily weather data for
-#'   one calendar \code{year} with columns \var{DOY}, \var{Tmax_C},
-#'   \var{Tmin_C}, and \var{PPT_cm}.
+#' @slot data A 365 x 15 or 366 x 15 matrix representing daily weather data for
+#'   one calendar \code{year} with columns
+#'   \var{DOY},
+#'   \var{Tmax_C}, \var{Tmin_C}, \var{PPT_cm},
+#'   \var{cloudCov_pct},
+#'   \var{windSpeed_mPERs},
+#'   \var{windSpeed_east_mPERs}, \var{windSpeed_north_mPERs},
+#'   \var{rHavg_pct}, \var{rHmax_pct}, \var{rHmin_pct},
+#'   \var{specHavg_pct}, \var{Tdewpoint_C},
+#'   \var{actVP_kPa}, and
+#'   \var{shortWR}.
 #'
 #' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
 #' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
@@ -66,11 +89,15 @@ setClass(
   slots = c(data = "matrix", year = "integer"),
   prototype = list(
     # NOTE: 999 should be rSW2_glovars[["kSOILWAT2"]][["kNUM"]][["SW_MISSING"]]
+    # NOTE: 15 must be
+    # equal to 1 + rSW2_glovars[["kSOILWAT2"]][["kINT"]][["MAX_INPUT_COLUMNS"]]
     data = array(
-      data = c(1:366, rep(NA, 366 * 10)),
-      dim = c(366, 10),
-      dimnames = list(NULL, c("DOY", "Tmax_C", "Tmin_C", "PPT_cm",
-      "cloudCov_pct", "sfcWind_mPERs", "hurs_pct", "vp_kPa", "rsds_WPERm2"))
+      data = c(1:366, rep(NA, 366 * 15L)),
+      dim = c(366, 15L),
+      dimnames = list(
+        NULL,
+        c("DOY", weather_dataColumns())
+      )
     ),
     year = NA_integer_
   )
@@ -80,19 +107,26 @@ setValidity(
   "swWeatherData",
   function(object) {
     val <- TRUE
+    ref <- new("swWeatherData")
 
-    if (!(length(object@year) == 1 && isTRUE(is.finite(object@year)) &&
-        isTRUE(object@year >= 0))) {
-      msg <- "@year must be exactly one positive finite value."
+    if (
+      !(
+        length(object@year) == 1 &&
+          (
+            isTRUE(is.finite(object@year) && object@year >= 0) ||
+              isTRUE(is.na(object@year))
+          )
+      )
+    ) {
+      msg <- "@year must be exactly one positive value or NA."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
     tmp <- dim(object@data)
-    if (tmp[2] != 9) {
+    if (tmp[2] != ncol(ref@data)) {
       msg <- paste(
-        "@data must have exactly 9 columns corresponding to",
-        "DOY, Tmax_C, Tmin_C, PPT_cm, cloudCov_pct, sfcWind_mPERs, hurs_pct
-        vp_kPa, rsds_WPERm2"
+        "@data must have exactly", ncol(ref@data), "columns corresponding to",
+        toString(colnames(ref@data))
       )
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
@@ -149,6 +183,8 @@ setMethod(
   "swReadLines",
   signature = c(object = "swWeatherData", file = "character"),
   function(object, file) {
+    warning("swReadLines works only with traditional weather data.")
+
     object@year <- as.integer(
       strsplit(
         x = basename(file),
@@ -163,8 +199,10 @@ setMethod(
       blank.lines.skip = TRUE,
       sep = "\t"
     )
+    stopifnot(ncol(data) != 4L)
     colnames(data) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
-    object@data <- as.matrix(data)
+    object@data[] <- NA
+    object@data[, colnames(data)] <- as.matrix(data)
 
     object
 })

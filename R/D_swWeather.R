@@ -167,20 +167,8 @@ setClass(
     use_cloudCoverMonthly = "logical",
     use_windSpeedMonthly = "logical",
     use_humidityMonthly = "logical",
-    has_tempMax = "logical",
-    has_tempMin = "logical",
-    has_ppt = "logical",
-    has_cloudCover = "logical",
-    has_sfcWind = "logical",
-    has_windEast = "logical",
-    has_windNorth = "logical",
-    has_hurs = "logical",
-    has_hursMax = "logical",
-    has_hursMin = "logical",
-    has_huss = "logical",
-    has_tdps = "logical",
-    has_vp = "logical",
-    has_rsds = "logical"
+    desc_rsds = "integer",
+    dailyInputFlags = "logical"
   ),
   # TODO: this class should not contain `swMonthlyScalingParams` but
   # instead be a composition, i.e., have a slot of that class
@@ -195,20 +183,10 @@ setClass(
     use_cloudCoverMonthly = NA,
     use_windSpeedMonthly = NA,
     use_humidityMonthly = NA,
-    has_tempMax = NA,
-    has_tempMin = NA,
-    has_ppt = NA,
-    has_cloudCover = NA,
-    has_sfcWind = NA,
-    has_windEast = NA,
-    has_windNorth = NA,
-    has_hurs = NA,
-    has_hursMax = NA,
-    has_hursMin = NA,
-    has_huss = NA,
-    has_tdps = NA,
-    has_vp = NA,
-    has_rsds = NA
+    desc_rsds = NA_integer_,
+    # NOTE: 14 must be
+    # equal to rSW2_glovars[["kSOILWAT2"]][["kINT"]][["MAX_INPUT_COLUMNS"]]
+    dailyInputFlags = rep(NA, 14L)
   )
 )
 
@@ -219,8 +197,18 @@ setValidity(
     sns <- setdiff(slotNames("swWeather"), inheritedSlotNames("swWeather"))
 
     for (sn in sns) {
-      if (length(slot(object, sn)) != 1) {
-        msg <- paste0("@", sn, " must have exactly one value.")
+      n_exp <- if (sn %in% "dailyInputFlags") {
+        rSW2_glovars[["kSOILWAT2"]][["kINT"]][["MAX_INPUT_COLUMNS"]]
+      } else {
+        1L
+      }
+
+      n_has <- length(slot(object, sn))
+
+      if (n_has != n_exp) {
+        msg <- paste0(
+          "@", sn, " has n = ", n_has, " instead of n = ", n_exp, " value(s)."
+        )
         val <- if (isTRUE(val)) msg else c(val, msg)
       }
     }
@@ -464,25 +452,19 @@ setMethod(
     object@use_cloudCoverMonthly <- readLogical(infiletext[9])
     object@use_windSpeedMonthly <- readLogical(infiletext[10])
     object@use_relHumidityMonthly <- readLogical(infiletext[11])
-    object@has_temp2 <- readLogical(infiletext[12])
-    object@has_ppt <- readLogical(infiletext[13])
-    object@has_cloudCover <- readLogical(infiletext[14])
-    object@has_sfcWind <- readLogical(infiletext[15])
-    object@has_windComp <- readLogical(infiletext[16])
-    object@has_hurs <- readLogical(infiletext[17])
-    object@has_hurs2 <- readLogical(infiletext[18])
-    object@has_huss <- readLogical(infiletext[19])
-    object@has_tdps <- readLogical(infiletext[20])
-    object@has_vp <- readLogical(infiletext[21])
-    object@has_rsds <- readLogical(infiletext[22])
+    object@desc_rsds <- readLogical(infiletext[12])
+
+    for (i in seq_len(14)) {
+      object@dailyInputFlags[i] <- readLogical(infiletext[12 + 1])
+    }
 
     data <- matrix(data = c(rep(1, 12), rep(NA, 12 * 5)), nrow = 12, ncol = 8)
     colnames(data) <- c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "actVP", "shortWR")
     rownames(data) <- c("January", "February", "March", "April", "May",
       "June", "July", "August", "September", "October", "November", "December")
 
-    for (i in 21:32) {
-      data[i - 20, ] <- readNumerics(infiletext[i], 8)[2:8]
+    for (i in 1:12) {
+      data[i, ] <- readNumerics(infiletext[12 + 14 + i], 8)[2:8]
     }
     object@MonthlyScalingParams <- data
 
