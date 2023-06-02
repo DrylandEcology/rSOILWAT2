@@ -1383,14 +1383,6 @@ swrc_conversion <- function(
     }
   }
 
-  # If we have one set of `swrcp` but many `x` -> repeat `swrcp` for each `x`
-  if (
-    !is.null(swrc[["swrcp"]]) &&
-    nrow(swrc[["swrcp"]]) == 1 &&
-    length(x) > 0
-  ) {
-    swrc[["swrcp"]] <- swrc[["swrcp"]][rep(1, length(x)), , drop = FALSE]
-  }
 
   # Do we have sufficient soil parameters?
   if (missing(fcoarse) && missing(layer_width)) {
@@ -1438,7 +1430,7 @@ swrc_conversion <- function(
   }
 
   if (!is.null(swrc[["swrcp"]]) && nrow(swrc[["swrcp"]]) != nsoils) {
-    stop("Dimensions of `swrcp` and lenght of soil variables disagree.")
+    stop("Dimensions of `swrcp` and length of soil variables disagree.")
   }
 
 
@@ -1466,6 +1458,9 @@ swrc_conversion <- function(
     } else if (nx > 1 && nx1d && nsoils == 1) {
       # 3. x [len = l] + soils [len = 1] --> res [len = l, dim = l x 1]
       soils <- lapply(soils, rep_len, length.out = nx)
+      if (!is.null(swrc[["swrcp"]])) {
+        swrc[["swrcp"]] <- swrc[["swrcp"]][rep(1, nx), , drop = FALSE]
+      }
 
     } else if (nx == nsoils && !outer_if_equalsize) {
       # 1b. x [len = l] + soils [len = l] --> res [len = l, dim = l x 1]
@@ -1521,6 +1516,8 @@ swrc_conversion <- function(
         swrc_name = swrc[["swrc_name"]],
         ptf_name = swrc[["ptf_name"]]
       )
+    } else {
+      swrc[["swrcp"]] <- swrc[["swrcp"]][rep(1, nrx), , drop = FALSE]
     }
 
     res <- vapply(
