@@ -82,7 +82,8 @@ test_that("Weather generator: generate weather", {
         test_dat,
         imputation_type = "mean",
         imputation_span = 5,
-        digits = digits
+        digits = digits,
+        seed = 123
       )
     )
 
