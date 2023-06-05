@@ -33,6 +33,13 @@ SEXP tempError(void);
 SEXP onGetInputDataFromFiles(SEXP input, SEXP quiet);
 SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet);
 SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData);
+SEXP rSW2_readAllWeatherFromDisk(
+  SEXP path,
+  SEXP name_prefix,
+  SEXP startYear,
+  SEXP endYear,
+  SEXP dailyInputFlags
+);
 SEXP sw_consts(void);
 
 SEXP rSW2_SWRC_PTF_estimate_parameters(

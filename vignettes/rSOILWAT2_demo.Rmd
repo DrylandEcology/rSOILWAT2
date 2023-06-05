@@ -239,6 +239,8 @@ You may organize weather data in a variety of ways:
 
 ### Access external data sets: for example, `DayMet`
 ```{r, weather_daymetr, results = "hide", message = FALSE, warning = FALSE}
+  has_daymet <- FALSE
+
   if (
     requireNamespace("daymetr") &&
     requireNamespace("curl") &&
@@ -258,26 +260,95 @@ You may organize weather data in a variety of ways:
 
     if (!inherits(dm_Laramie, "try-error")) {
       # Convert data to a `rSOILWAT2`-formatted weather object
-      vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
+      dif <- c(rep(TRUE, 3L), rep(FALSE, 11L)) # Tmax, Tmin, PPT
+      dif[13L] <- TRUE # ACTUAL_VP
+      dif[14L] <- TRUE # SHORT_WR, desc_rsds = 2
+
+      vars <- c(
+        "year", "yday",
+        "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.",
+        "vp..Pa.",
+        "srad..W.m.2."
+      )
       xdf <- dm_Laramie[["data"]][, vars]
       xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
-      colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+      xdf[, "vp..Pa."] <- xdf[, "vp..Pa."] / 1000 # convert Pa -> kPa
+      colnames(xdf) <- c(
+        "Year", "DOY",
+        "Tmax_C", "Tmin_C", "PPT_cm", "actVP_kPa", "shortWR"
+      )
 
-      wdata_dm <- rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf)
+      xdf2 <- array(
+        dim = c(nrow(xdf), 2L + length(rSOILWAT2::weather_dataColumns())),
+        dimnames = list(
+          NULL,
+          c("Year", "DOY", rSOILWAT2::weather_dataColumns())
+        )
+      )
+
+      xdf2[, colnames(xdf)] <- as.matrix(xdf)
+
 
       # Convert `DayMet`'s `noleap` calendar to proleptic Gregorian calendar
-      xdf2 <- rSOILWAT2::dbW_convert_to_GregorianYears(weatherData = wdata_dm)
-
-      wdata <- rSOILWAT2::dbW_generateWeather(
-        weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf2),
-        seed = 123
+      xdf3 <- rSOILWAT2::dbW_convert_to_GregorianYears(
+        weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(
+          weatherDF = xdf2[, -1L, drop = FALSE],
+          years = unique(xdf2[, "Year"]),
+          weatherDF_dataColumns = colnames(xdf2)[-1L],
+          round = 4L
+        )
       )
+
+      # Impute values for added leap days
+      # Use weather generator for available variables, use LOCF otherwise
+      xdf4 <- xdf3
+
+      vars_wgen <- rSOILWAT2::weatherGenerator_dataColumns()
+      needs_wgen <- which(
+        !is.finite(as.matrix(xdf4[, vars_wgen, drop = FALSE])),
+        arr.ind = TRUE
+      )
+      if (NROW(needs_wgen) > 0) {
+        tmp1 <- rSOILWAT2::dbW_generateWeather(
+          weatherData = xdf4,
+          seed = 123
+        )
+        tmp2 <- rSOILWAT2::dbW_weatherData_to_dataframe(tmp1)
+
+        xdf4[, vars_wgen][needs_wgen] <- tmp2[, vars_wgen][needs_wgen]
+      }
+
+      ids_dif <- 2L + which(dif)
+      needs_locf <- which(
+        !is.finite(as.matrix(xdf4[, ids_dif, drop = FALSE])),
+        arr.ind = TRUE
+      )
+      if (NROW(needs_locf) > 0) {
+        tmp1 <- rSW2utils::impute_df(
+          xdf4[, ids_dif, drop = FALSE],
+          imputation_type = "locf"
+        )
+
+        xdf4[, ids_dif][needs_locf] <- tmp1[needs_locf]
+      }
+
+      wdata <- rSOILWAT2::dbW_dataframe_to_weatherData(xdf4, round = 4L)
 
       # Check that weather data is well-formed
       stopifnot(rSOILWAT2::dbW_check_weatherData(wdata))
-    }
 
-  } else {
+      # Set use flags
+      sw_in@weather@desc_rsds <- 2L # flux density over the daylight period
+      sw_in@weather@use_cloudCoverMonthly <- FALSE # use radiation instead
+      sw_in@weather@use_windSpeedMonthly <- TRUE
+      sw_in@weather@use_humidityMonthly <- FALSE # use vapor pressure instead
+      sw_in@weather@dailyInputFlags <- dif
+
+      has_daymet <- TRUE
+    }
+  }
+
+  if (!has_daymet) {
     # We don't have live internet and
     # were not able to obtain weather data for requested years
     # --> instead, use data we have locally and adjust years
@@ -285,6 +356,13 @@ You may organize weather data in a variety of ways:
     rSOILWAT2::swYears_StartYear(sw_in) <- 0
     rSOILWAT2::swYears_EndYear(sw_in) <- max(years)
     rSOILWAT2::swYears_StartYear(sw_in) <- min(years)
+
+    # Set use flags
+    sw_in@weather@desc_rsds <- 0L
+    sw_in@weather@use_cloudCoverMonthly <- TRUE
+    sw_in@weather@use_windSpeedMonthly <- TRUE
+    sw_in@weather@use_humidityMonthly <- TRUE
+    sw_in@weather@dailyInputFlags <- c(rep(TRUE, 3L), rep(FALSE, 11L))
   }
 ```
 

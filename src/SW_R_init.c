@@ -10,6 +10,7 @@ extern SEXP tempError(void);
 extern SEXP onGetInputDataFromFiles(SEXP, SEXP);
 extern SEXP onGetOutput(SEXP);
 extern SEXP rSW2_processAllWeather(SEXP, SEXP);
+extern SEXP rSW2_readAllWeatherFromDisk(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP sw_consts(void);
 extern SEXP sw_quiet(SEXP);
 extern SEXP rSW2_SWRC_PTF_estimate_parameters(SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -27,6 +28,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"onGetInputDataFromFiles",    (DL_FUNC) &onGetInputDataFromFiles,    2},
   {"onGetOutput",                (DL_FUNC) &onGetOutput,                1},
   {"rSW2_processAllWeather",     (DL_FUNC) &rSW2_processAllWeather,     2},
+  {"rSW2_readAllWeatherFromDisk",(DL_FUNC) &rSW2_readAllWeatherFromDisk,5},
   {"sw_consts",                  (DL_FUNC) &sw_consts,                  0},
   {"sw_quiet",                   (DL_FUNC) &sw_quiet,                   1},
   {"rSW2_SWRC_PTF_estimate_parameters", (DL_FUNC) &rSW2_SWRC_PTF_estimate_parameters, 5},

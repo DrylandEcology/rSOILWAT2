@@ -13,6 +13,9 @@
 
 #include "SOILWAT2/include/SW_Files.h"
 #include "SOILWAT2/include/SW_Carbon.h" // externs `SW_Carbon`
+#include "SOILWAT2/include/SW_Model.h" // externs `SW_Model`
+#include "SOILWAT2/include/SW_Weather.h" // externs `SW_Weather`
+#include "SOILWAT2/include/SW_Sky.h" // externs `SW_Sky`
 #include "SOILWAT2/include/SW_SoilWater.h" // externs `SW_Soilwat`
 #include "SOILWAT2/include/SW_VegEstab.h" // externs `SW_VegEstab`
 #include "SOILWAT2/include/SW_Output.h"
@@ -473,6 +476,116 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
 
 
 
+
+/**
+  @brief Read daily driving (weather) variables from disk using SOILWAT2 code
+
+  Applies additive/multiplicative scaling parameters and
+  uses imputation/weather generator to fill missing values
+*/
+SEXP rSW2_readAllWeatherFromDisk(
+  SEXP path,
+  SEXP name_prefix,
+  SEXP startYear,
+  SEXP endYear,
+  SEXP dailyInputFlags
+) {
+  SEXP res;
+  int i;
+
+  #ifdef RSWDEBUG
+  int debug = 0;
+  #endif
+
+  /* Convert inputs to correct type */
+  path = PROTECT(AS_CHARACTER(path));
+  name_prefix = PROTECT(AS_CHARACTER(name_prefix));
+  startYear = PROTECT(coerceVector(startYear, INTSXP));
+  endYear = PROTECT(coerceVector(endYear, INTSXP));
+  dailyInputFlags = PROTECT(coerceVector(dailyInputFlags, LGLSXP));
+
+  /* Create convenience pointers */
+  int *xdif = LOGICAL(dailyInputFlags); /* LGLSXP are internally coded as int */
+
+
+  #ifdef RSWDEBUG
+  if (debug) swprintf("\n'rSW2_readAllWeatherFromDisk': data preparation: ");
+  #endif
+  SW_Model.startyr = INTEGER(startYear)[0];
+  SW_Model.endyr = INTEGER(endYear)[0];
+
+  strcpy(SW_Weather.name_prefix, CHAR(STRING_ELT(path, 0)));
+  strcat(SW_Weather.name_prefix, "/");
+  strcat(SW_Weather.name_prefix, CHAR(STRING_ELT(name_prefix, 0)));
+
+  // read only from files
+  SW_Weather.use_weathergenerator_only = FALSE; // no weather generator
+  SW_Weather.generateWeatherMethod = 0;
+
+  SW_Weather.use_cloudCoverMonthly = FALSE; // don't interpolate monthly values
+  SW_Weather.use_windSpeedMonthly = FALSE; // don't interpolate monthly values
+  SW_Weather.use_humidityMonthly = FALSE; // don't interpolate monthly values
+  for (i = 0; i < MAX_MONTHS; i++) {
+    SW_Sky.cloudcov[i] = SW_MISSING;
+    SW_Sky.windspeed[i] = SW_MISSING;
+    SW_Sky.r_humidity[i] = SW_MISSING;
+  }
+
+  for (i = 0; i < MAX_INPUT_COLUMNS; i++) {
+    SW_Weather.dailyInputFlags[i] = xdif[i] ? swTRUE : swFALSE;
+  };
+
+  set_dailyInputIndices(
+    SW_Weather.dailyInputFlags,
+    SW_Weather.dailyInputIndices,
+    &SW_Weather.n_input_forcings
+  );
+
+  check_and_update_dailyInputFlags(
+    SW_Weather.use_cloudCoverMonthly,
+    SW_Weather.use_humidityMonthly,
+    SW_Weather.use_windSpeedMonthly,
+    SW_Weather.dailyInputFlags
+  );
+
+  // no monthly scaling
+  for (i = 0; i < MAX_MONTHS; i++) {
+    SW_Weather.scale_precip[i] = 1;
+    SW_Weather.scale_temp_max[i] = 0;
+    SW_Weather.scale_temp_min[i] = 0;
+    SW_Weather.scale_skyCover[i] = 0;
+    SW_Weather.scale_wind[i] = 1;
+    SW_Weather.scale_rH[i] = 0;
+    SW_Weather.scale_actVapPress[i] = 1;
+    SW_Weather.scale_shortWaveRad[i] = 1;
+  }
+
+
+  // Process weather data
+  #ifdef RSWDEBUG
+  if (debug) swprintf("'rSW2_readAllWeatherFromDisk': process weather data");
+  #endif
+  // using global variables: SW_Weather, SW_Model, SW_Sky
+  SW_WTH_read();
+
+  // Finalize daily weather (weather generator & monthly scaling)
+  #ifdef RSWDEBUG
+  if (debug) swprintf(" > finalize daily weather.\n");
+  #endif
+  SW_WTH_finalize_all_weather();
+
+
+  // Return processed weather data
+  // using global variables: SW_Weather
+  res = PROTECT(onGet_WTH_DATA());
+
+  UNPROTECT(6);
+  return res;
+}
+
+
+
+
 /** Expose SOILWAT2 constants and defines to internal R code of rSOILWAT2
   @return A list with six elements:
     one element `kINT` for integer constants;
@@ -488,7 +601,7 @@ SEXP sw_consts(void) {
   #endif
 
   const int nret = 9; // length of cret
-  const int nINT = 13; // length of vINT and cINT
+  const int nINT = 14; // length of vINT and cINT
   const int nNUM = 1; // length of vNUM and cNUM
 
   #ifdef RSWDEBUG
@@ -528,14 +641,14 @@ SEXP sw_consts(void) {
     SWRC_PARAM_NMAX,
     eSW_NoTime, SW_OUTNPERIODS, SW_OUTNKEYS, SW_NSUMTYPES, NVEGTYPES,
     OUT_DIGITS,
-    N_SWRCs, N_PTFs
+    N_SWRCs, N_PTFs, MAX_INPUT_COLUMNS
   };
   char *cINT[] = {
     "SW_NFILES", "MAX_LAYERS", "MAX_TRANSP_REGIONS", "MAX_NYEAR",
     "SWRC_PARAM_NMAX",
     "eSW_NoTime", "SW_OUTNPERIODS", "SW_OUTNKEYS", "SW_NSUMTYPES", "NVEGTYPES",
     "OUT_DIGITS",
-    "N_SWRCs", "N_PTFs"
+    "N_SWRCs", "N_PTFs", "MAX_INPUT_COLUMNS"
   };
 
   // Vegetation types

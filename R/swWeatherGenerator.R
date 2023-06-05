@@ -18,6 +18,13 @@
 ###############################################################################
 
 
+#' List daily weather variables incorporated in the weather generator
+#' @export
+weatherGenerator_dataColumns <- function() {
+  c("Tmax_C", "Tmin_C", "PPT_cm")
+}
+
+
 #' Estimate coefficients for use by \var{SOILWAT2} weather generator
 #'
 #' Estimates coefficients for the two site-specific files
@@ -1025,6 +1032,14 @@ compare_weather <- function(
 #'
 #' @return A list of elements of class \code{\linkS4class{swWeatherData}}.
 #'
+#' @section Details:
+#' The current implementation of the weather generator produces values
+#' only for variables in [weatherGenerator_dataColumns()].
+#' Values are generated for those days where at least one of the implemented
+#' variables is missing; if any value is missing, then values for that day of
+#' all implemented variables will be replaced by those produced
+#' by the weather generator.
+#'
 #' @examples
 #' # Load data for 1949-2010
 #' wdata <- data.frame(dbW_weatherData_to_dataframe(rSOILWAT2::weatherData))
@@ -1078,6 +1093,7 @@ compare_weather <- function(
 #' )
 #' unlink(list.files(path), force = TRUE)
 #'
+#' @md
 #' @export
 dbW_generateWeather <- function(
   weatherData,
@@ -1117,12 +1133,24 @@ dbW_generateWeather <- function(
   swYears_EndYear(sw_in) <- max(years)
   swYears_StartYear(sw_in) <- min(years)
 
-  # Turn on weather generator
+  # Turn on weather generator (to fill in missing values)
   swWeather_UseMarkov(sw_in) <- TRUE
+  swWeather_UseMarkovOnly(sw_in) <- FALSE
 
   # Set weather generator coefficients
   swMarkov_Prob(sw_in) <- wgen_coeffs[["mkv_doy"]]
   swMarkov_Conv(sw_in) <- wgen_coeffs[["mkv_woy"]]
+
+  # Turn off monthly use flags
+  sw_in@weather@use_cloudCoverMonthly <- FALSE
+  sw_in@weather@use_humidityMonthly <- FALSE
+  sw_in@weather@use_windSpeedMonthly <- FALSE
+
+  # Specify available daily input variables
+  # and prescribe Tmax, Tmin, PPT
+  dif <- calc_dailyInputFlags(weatherData)
+  dif[weatherGenerator_dataColumns()] <- TRUE
+  sw_in@weather@dailyInputFlags <- dif
 
 
   #--- Process weather in SOILWAT2

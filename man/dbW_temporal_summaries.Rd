@@ -7,12 +7,18 @@
 \alias{dbW_dataframe_to_monthly}
 \title{Summarize daily weather to weekly, monthly, or yearly values}
 \usage{
-dbW_weatherData_to_monthly(dailySW, na.rm = FALSE, valNA = NULL)
+dbW_weatherData_to_monthly(
+  dailySW,
+  na.rm = FALSE,
+  valNA = NULL,
+  funs = weather_dataAggFun()
+)
 
 dbW_dataframe_aggregate(
   dailySW,
   time_step = c("Year", "Month", "Week", "Day"),
-  na.rm = FALSE
+  na.rm = FALSE,
+  funs = weather_dataAggFun()
 )
 
 dbW_dataframe_to_monthly(dailySW, na.rm = FALSE)
@@ -26,6 +32,9 @@ calculating monthly temperature and precipitation.}
 
 \item{valNA}{The (numerical) value of missing weather data.
 If \code{NULL}, then default values are interpreted as missing.}
+
+\item{funs}{A named vector of functions. The names must match column names
+in \code{dailySW} and the function are used to summarize daily weather values.}
 
 \item{time_step}{A character string.}
 }

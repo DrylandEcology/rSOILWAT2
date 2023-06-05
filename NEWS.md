@@ -4,12 +4,16 @@
 * `SOILWAT2` updated to v7.0.0
 * This version produces nearly identical simulation output
   as the previous release under default values.
-  Small deviations arise due to a fix in the handling of soil moisture values
-  between field capacity and saturation.
+  Small deviations arise due to
+    1. a fix in the handling of soil moisture values
+       between field capacity and saturation;
+    2. a fix in the calculation of potential natural vegetation; and
+    3. a fix in the calculation of climate variables (if used).
 
 ## New features
 * New method `sw_upgrade()` upgrades objects with
-  outdated `rSOILWAT2` S4 classes to the current version.
+  outdated `rSOILWAT2` S4 classes to the current version;
+  new `upgrade_weatherHistory()` upgrades outdated weather history objects.
 * New `get_soilmoisture()` to consistently extract soil moisture content,
   volumetric water content (bulk soil), or
   volumetric water content for the matric component.
@@ -21,6 +25,21 @@
 * New `time_columns()` returns the output column indices with time information.
 * New `nrow_output()` returns the number of time steps in output.
 
+* Daily weather inputs, in addition to the previous variables
+  maximum air temperature, minimum air temperature, and precipitation amount,
+  can now process the following variables (issue #229; @dschlaep, @N1ckP3rsl3y):
+    * Cloud cover (can be replaced by shortwave radiation)
+    * Wind speed (can be replaced by wind components)
+    * Wind speed eastward component (optional)
+    * Wind speed northward component (optional)
+    * Relative humidity (can be replaced by max/min humidity, specific humidity
+      dew point temperature, or vapor pressure)
+    * Maximum relative humidity (optional)
+    * Minimum relative humidity (optional)
+    * Specific humidity (optional)
+    * Dew point temperature (optional)
+    * Actual vapor pressure (optional)
+    * Downward surface shortwave radiation (optional)
 
 * This version now handles a variety of soil water retention curves `SWRC`
   and pedotransfer functions `PTF` (issue #207, @dschlaep).
@@ -94,7 +113,15 @@
   as inputs (value 0, as previously).
 * `SWPtoVWC()` and `VWCtoSWP()` are deprecated in favor of
   `swrc_swp_to_vwc()` and `swrc_vwc_to_swp()` respectively.
-
+* Class `swWeather` gains new slots (issue #229)
+    * `"use_cloudCoverMonthly"`, `"use_windSpeedMonthly"`, and
+      `"use_humidityMonthly"` which determine whether mean monthly values
+      (from `swCloud`) or daily values (from `swWeatherData`) are utilized;
+    * `"dailyInputFlags"` which indicates which of the 14 possible daily
+      weather variables are present in the inputs;
+    * `"desc_rsds"` which describes units of input shortwave radiation.
+* Class `swWeatherData` gains new columns in slot `"data"` that accommodate
+  all 14 possible daily weather variables (issue #229).
 
 # rSOILWAT2 v5.4.1
 * This version produces identical simulation output as the previous release.

@@ -15,6 +15,43 @@
 7			# Seed random number generator for weather generator (only used if SOILWAT2)
 			# (seed with 0 to use current time)
 
+#--- Flags describing mean monthly climate input usage:
+# 0 = Don't use mean monthly input
+# 1 = Use mean monthly input (climate.in) and override respective flag for daily input, if flags conflict
+1            # Sky cover
+1            # Wind speed
+1            # Relative humidity
+
+
+#--- Flags describing daily weather input files "weath.YYYY":
+# 0 = Variable is absent
+# 1 = Daily variable present
+# Note: The order of input values within input files must match the order of flags below (e.g., cloud cover cannot precede minimum temperature)
+# Note: If maximum/minimum temperature or precipitation is set to 0 or a flag is set to 1, and the input data is not complete, the program will crash
+1			# Maximum daily temperature [C]
+1			# Minimum daily temperature [C]
+1			# Precipitation [cm]
+0			# Cloud cover [%]
+0			# Wind speed [m/s]
+0			# Wind speed eastward component [m/s]
+0			# Wind speed northward component [m/s]
+0			# Relative humidity [%]
+0			# Maximum relative humidity [%]
+0			# Minimum relative humidity [%]
+0			# Specific humidity [%]
+0			# Dew point temperature [C]
+0			# Actual vapor pressure [kPa]
+0			# Downward surface shortwave radiation (see `Daily weather input descriptions`)
+
+
+#--- Daily weather input descriptions
+0			# Description of downward surface shortwave radiation
+			#   * 0: `rsds` represents daily global horizontal irradiation [MJ / m2]
+			#   * 1: `rsds` represents flux density [W / m2] for a
+			#        (hypothetical) flat horizon averaged over an entire day (24 hour period)
+			#   * 2: `rsds` represents flux density [W / m2] for a
+			#        (hypothetical) flat horizon averaged over the daylight period of the day
+
 
 #--- Monthly scaling parameters:
 # Month 1 = January, Month 2 = February, etc.
@@ -24,16 +61,18 @@
 # SkyCover = additive for mean monthly sky cover [%]; min(100, max(0, scale + sky cover))
 # Wind = multiplicative for mean monthly wind speed; max(0, scale * wind speed)
 # rH = additive for mean monthly relative humidity [%]; min(100, max(0, scale + rel. Humidity))
-#Mon   PPT    MaxT    MinT  SkyCover   Wind    rH
-1    1.000    0.00    0.00       0.0    1.0   0.0
-2    1.000    0.00    0.00       0.0    1.0   0.0
-3    1.000    0.00    0.00       0.0    1.0   0.0
-4    1.000    0.00    0.00       0.0    1.0   0.0
-5    1.000    0.00    0.00       0.0    1.0   0.0
-6    1.000    0.00    0.00       0.0    1.0   0.0
-7    1.000    0.00    0.00       0.0    1.0   0.0
-8    1.000    0.00    0.00       0.0    1.0   0.0
-9    1.000    0.00    0.00       0.0    1.0   0.0
-10   1.000    0.00    0.00       0.0    1.0   0.0
-11   1.000    0.00    0.00       0.0    1.0   0.0
-12   1.000    0.00    0.00       0.0    1.0   0.0
+# ActVP = multiplicative for actual vapor pressure [kPa]; max(0, scale * actual vapor pressure)
+# ShortWR = multiplicative for shortwave radiation [W/m2]; max(0, scale * shortwave radiation)
+#Mon   PPT    MaxT    MinT  SkyCover   Wind    rH    ActVP    ShortWR
+1    1.000    0.00    0.00       0.0    1.0   0.0      1.0        1.0
+2    1.000    0.00    0.00       0.0    1.0   0.0      1.0        1.0
+3    1.000    0.00    0.00       0.0    1.0   0.0      1.0        1.0
+4    1.000    0.00    0.00       0.0    1.0   0.0      1.0        1.0
+5    1.000    0.00    0.00       0.0    1.0   0.0      1.0        1.0
+6    1.000    0.00    0.00       0.0    1.0   0.0      1.0        1.0
+7    1.000    0.00    0.00       0.0    1.0   0.0      1.0        1.0
+8    1.000    0.00    0.00       0.0    1.0   0.0      1.0        1.0
+9    1.000    0.00    0.00       0.0    1.0   0.0      1.0        1.0
+10   1.000    0.00    0.00       0.0    1.0   0.0      1.0        1.0
+11   1.000    0.00    0.00       0.0    1.0   0.0      1.0        1.0
+12   1.000    0.00    0.00       0.0    1.0   0.0      1.0        1.0

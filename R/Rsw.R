@@ -73,7 +73,8 @@ sw_verbosity <- function(verbose = TRUE) {
 #' built-in Markov weather generator (see examples section). If you use the
 #' weather generator, then you have to provide appropriate values for the input
 #' (files) \var{mkv_covar.in} and \var{mkv_prob.in} for your simulation run -
-#' currently, \pkg{rSOILWAT2} does not contain code to estimate these values.
+#' see \code{\link{dbW_estimate_WGen_coefs}} or
+#' \code{\link{dbW_generateWeather}}.
 #'
 #' @param inputData an object of the \var{S4} class
 #'   \code{\linkS4class{swInputData}} which is generated from
@@ -257,12 +258,24 @@ sw_exec <- function(
   # Upgrade essential slots if input object is from an older version
   inputData <- sw_upgrade(inputData, verbose = !quiet)
 
-
   if (!check_version(inputData, level = "minor")) {
     warning(
       "Object `inputData is outdated; ",
       "SOILWAT2 may fail or produce unexpected outcomes."
     )
+  }
+
+
+  # Upgrade weather data if object is from an outdated version
+  if (!is.null(weatherList)) {
+    weatherList <- upgrade_weatherHistory(weatherList, verbose = !quiet)
+
+    if (!dbW_check_weatherData(weatherList)) {
+      warning(
+        "Object `weatherList is outdated; ",
+        "SOILWAT2 may fail or produce unexpected outcomes."
+      )
+    }
   }
 
 

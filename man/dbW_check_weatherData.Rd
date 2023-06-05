@@ -4,10 +4,12 @@
 \alias{dbW_check_weatherData}
 \title{Check that weather data is well-formed}
 \usage{
-dbW_check_weatherData(x)
+dbW_check_weatherData(x, check_all = TRUE)
 }
 \arguments{
 \item{x}{An object.}
+
+\item{check_all}{A logical value}
 }
 \value{
 A logical value.
@@ -16,4 +18,11 @@ A logical value.
 Check that weather data is organized in a list
 where each element is of class \code{\linkS4class{swWeatherData}}, and
 represents daily data for one Gregorian year
+}
+\examples{
+dbW_check_weatherData(rSOILWAT2::weatherData)
+dbW_check_weatherData(weatherHistory())
+dbW_check_weatherData(weatherHistory(), check_all = FALSE)
+
+
 }

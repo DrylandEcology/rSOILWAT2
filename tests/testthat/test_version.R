@@ -91,14 +91,24 @@ test_that("rSOILWAT2 object versions", {
   )
 
 
+  #--- Check that numeric versions are passed through
+  v <- as.numeric_version(getNamespaceVersion("rSOILWAT2"))
+  expect_identical(get_version(v), as.character(v))
+  v <- packageVersion("base")
+  expect_identical(get_version(v), as.character(v))
+
+
   #--- Check for other object classes (ANY-method): return `NA_character_`
-  expect_equal(get_version(), NA_character_)
-  expect_equal(get_version(NA), NA_character_)
-  expect_equal(get_version(NULL), NA_character_)
-  expect_equal(get_version(1), NA_character_)
-  expect_equal(get_version(list()), NA_character_)
-  expect_equal(get_version(try(stop("error"), silent = TRUE)), NA_character_)
-  expect_equal(get_version(swSoils_Layers(sw_in)), NA_character_)
+  expect_identical(get_version(), NA_character_)
+  expect_identical(get_version(NA), NA_character_)
+  expect_identical(get_version(NULL), NA_character_)
+  expect_identical(get_version(1), NA_character_)
+  expect_identical(get_version(list()), NA_character_)
+  expect_identical(
+    get_version(try(stop("error"), silent = TRUE)),
+    NA_character_
+  )
+  expect_identical(get_version(swSoils_Layers(sw_in)), NA_character_)
 
   expect_false(check_version(NA))
 })

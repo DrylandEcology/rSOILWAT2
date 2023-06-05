@@ -57,10 +57,10 @@ setClass(
   prototype = list(
     MonthlyScalingParams = array(
       NA_real_,
-      dim = c(12, 6),
+      dim = c(12, 8),
       dimnames = list(
         NULL,
-        c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH")
+        c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "ActVP", "ShortWR")
       )
     )
   )
@@ -72,10 +72,10 @@ setValidity(
     val <- TRUE
     temp <- dim(object@MonthlyScalingParams)
 
-    if (temp[2] != 6) {
+    if (temp[2] != 8) {
       msg <- paste(
-        "@MonthlyScalingParams must have exactly 6 columns ",
-        "corresponding to PPT, MaxT, MinT, SkyCover, Wind, rH"
+        "@MonthlyScalingParams must have exactly 8 columns ",
+        "corresponding to PPT, MaxT, MinT, SkyCover, Wind, rH, ActVP, ShortWR"
       )
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
@@ -120,6 +120,52 @@ swMonthlyScalingParams <- function(...) {
   do.call("new", args = c("swMonthlyScalingParams", tmp))
 }
 
+sw_upgrade_MonthlyScalingParams <- function( # nolint: object_length_linter.
+  MonthlyScalingParams,
+  verbose = FALSE
+) {
+  if (verbose) {
+    message("Upgrading object `MonthlyScalingParams`.")
+  }
+
+  #--- Add new columns (use default values)
+  default <- swMonthlyScalingParams()
+  vars_exp <- colnames(default@MonthlyScalingParams)
+  vars_has <- colnames(MonthlyScalingParams)
+
+  if (!all(vars_exp %in% vars_has)) {
+    res <- default@MonthlyScalingParams
+    res[, vars_has] <- MonthlyScalingParams[, vars_has]
+    res
+  } else {
+    MonthlyScalingParams
+  }
+}
+
+
+#' @rdname sw_upgrade
+setMethod(
+  "sw_upgrade",
+  signature = "swMonthlyScalingParams",
+  definition = function(object, verbose = FALSE) {
+    tmp <- try(validObject(object), silent = TRUE)
+    if (inherits(tmp, "try-error")) {
+      if (verbose) {
+        message("Upgrading object of class `swMonthlyScalingParams`.")
+      }
+
+      object@MonthlyScalingParams <- suppressWarnings(
+        sw_upgrade_MonthlyScalingParams(object@MonthlyScalingParams)
+      )
+
+      #--- Check validity and return
+      validObject(object)
+    }
+
+    object
+  }
+)
+
 
 
 #####################WEATHERSETUP.IN###################################
@@ -163,7 +209,12 @@ setClass(
     pct_SnowRunoff = "numeric",
     use_weathergenerator = "logical",
     use_weathergenerator_only = "logical",
-    FirstYear_Historical = "integer"
+    FirstYear_Historical = "integer",
+    use_cloudCoverMonthly = "logical",
+    use_windSpeedMonthly = "logical",
+    use_humidityMonthly = "logical",
+    desc_rsds = "integer",
+    dailyInputFlags = "logical"
   ),
   # TODO: this class should not contain `swMonthlyScalingParams` but
   # instead be a composition, i.e., have a slot of that class
@@ -174,7 +225,14 @@ setClass(
     pct_SnowRunoff = NA_real_,
     use_weathergenerator = NA,
     use_weathergenerator_only = NA,
-    FirstYear_Historical = NA_integer_
+    FirstYear_Historical = NA_integer_,
+    use_cloudCoverMonthly = NA,
+    use_windSpeedMonthly = NA,
+    use_humidityMonthly = NA,
+    desc_rsds = NA_integer_,
+    # NOTE: 14 must be
+    # equal to rSW2_glovars[["kSOILWAT2"]][["kINT"]][["MAX_INPUT_COLUMNS"]]
+    dailyInputFlags = rep(NA, 14L)
   )
 )
 
@@ -185,8 +243,18 @@ setValidity(
     sns <- setdiff(slotNames("swWeather"), inheritedSlotNames("swWeather"))
 
     for (sn in sns) {
-      if (length(slot(object, sn)) != 1) {
-        msg <- paste0("@", sn, " must have exactly one value.")
+      n_exp <- if (sn %in% "dailyInputFlags") {
+        rSW2_glovars[["kSOILWAT2"]][["kINT"]][["MAX_INPUT_COLUMNS"]]
+      } else {
+        1L
+      }
+
+      n_has <- length(slot(object, sn))
+
+      if (n_has != n_exp) {
+        msg <- paste0(
+          "@", sn, " has n = ", n_has, " instead of n = ", n_exp, " value(s)."
+        )
         val <- if (isTRUE(val)) msg else c(val, msg)
       }
     }
@@ -231,6 +299,36 @@ swWeather <- function(...) {
     )
   )
 }
+
+
+
+
+#' @rdname sw_upgrade
+setMethod(
+  "sw_upgrade",
+  signature = "swWeather",
+  definition = function(object, verbose = FALSE) {
+    tmp <- try(validObject(object), silent = TRUE)
+    if (inherits(tmp, "try-error")) {
+      # Upgrade `MonthlyScalingParams` with dedicated upgrade method first;
+      # `swMonthlyScalingParams()` via `swWeather()` cannot handle
+      # an increased number of columns in `MonthlyScalingParams` otherwise
+      object@MonthlyScalingParams <- suppressWarnings(
+        sw_upgrade_MonthlyScalingParams(
+          object@MonthlyScalingParams,
+          verbose = verbose
+        )
+      )
+
+      if (verbose) {
+        message("Upgrading object of class `swWeather`.")
+      }
+      object <- suppressWarnings(swWeather(object))
+    }
+
+    object
+  }
+)
 
 
 #' @rdname swWeather-class
@@ -427,14 +525,22 @@ setMethod(
     object@pct_SnowRunoff <- readNumeric(infiletext[6])
     object@use_weathergenerator <- readLogical(infiletext[7])
     object@FirstYear_Historical <- readInteger(infiletext[8])
+    object@use_cloudCoverMonthly <- readLogical(infiletext[9])
+    object@use_windSpeedMonthly <- readLogical(infiletext[10])
+    object@use_relHumidityMonthly <- readLogical(infiletext[11])
+    object@desc_rsds <- readLogical(infiletext[12])
 
-    data <- matrix(data = c(rep(1, 12), rep(NA, 12 * 5)), nrow = 12, ncol = 6)
-    colnames(data) <- c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH")
+    for (i in seq_len(14)) {
+      object@dailyInputFlags[i] <- readLogical(infiletext[12 + 1])
+    }
+
+    data <- matrix(data = c(rep(1, 12), rep(NA, 12 * 5)), nrow = 12, ncol = 8)
+    colnames(data) <- c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "actVP", "shortWR")
     rownames(data) <- c("January", "February", "March", "April", "May",
       "June", "July", "August", "September", "October", "November", "December")
 
-    for (i in 21:32) {
-      data[i - 20, ] <- readNumerics(infiletext[i], 8)[2:8]
+    for (i in 1:12) {
+      data[i, ] <- readNumerics(infiletext[12 + 14 + i], 8)[2:8]
     }
     object@MonthlyScalingParams <- data
 

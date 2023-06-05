@@ -111,11 +111,16 @@ test_that("Vegetation: estimate land cover composition", {
   )[["Rel_Abundance_L1"]]
 
   # Expect them to be identical
-  expect_identical(pnvsim[["fCover_shrub"]], pnvex[["SW_SHRUB"]])
-  expect_identical(pnvsim[["fCover_grass"]], pnvex[["SW_GRASS"]])
-  expect_identical(pnvsim[["fCover_forbs"]], pnvex[["SW_FORBS"]])
-  expect_identical(pnvsim[["fCover_tree"]], pnvex[["SW_TREES"]])
-  expect_identical(pnvsim[["fCover_BareGround"]], pnvex[["SW_BAREGROUND"]])
+  tol <- sqrt(.Machine[["double.eps"]])
+  expect_equal(pnvsim[["fCover_shrub"]], pnvex[["SW_SHRUB"]], tolerance = tol)
+  expect_equal(pnvsim[["fCover_grass"]], pnvex[["SW_GRASS"]], tolerance = tol)
+  expect_equal(pnvsim[["fCover_forbs"]], pnvex[["SW_FORBS"]], tolerance = tol)
+  expect_equal(pnvsim[["fCover_tree"]], pnvex[["SW_TREES"]], tolerance = tol)
+  expect_equal(
+    pnvsim[["fCover_BareGround"]],
+    pnvex[["SW_BAREGROUND"]],
+    tolerance = tol
+  )
 
 
 

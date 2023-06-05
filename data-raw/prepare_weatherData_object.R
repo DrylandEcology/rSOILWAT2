@@ -23,4 +23,6 @@ weatherData <- rSOILWAT2::getWeatherData_folders(
   filebasename = "weath"
 )
 
+stopifnot(rSOILWAT2::dbW_check_weatherData(weatherData))
+
 usethis::use_data(weatherData, internal = FALSE) # nolint: namespace_linter.

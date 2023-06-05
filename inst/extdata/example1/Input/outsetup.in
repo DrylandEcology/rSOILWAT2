@@ -72,3 +72,4 @@ TIMESTEP dy wk mo yr # must be lowercase
        ESTABL     OFF       YR       1     end          estabs      /* yearly establishment results */
    CO2EFFECTS     AVG       DY       1     end      co2effects      /* vegetation CO2-effect (multiplier) for trees, shrubs, forbs, grasses; WUE CO2-effect (multiplier) for trees, shrubs, forbs, grasses */
       BIOMASS     AVG       DY       1     end      vegetation      /* vegetation: cover (%) for trees, shrubs, forbs, grasses; biomass (g/m2 as component of total) for total, trees, shrubs, forbs, grasses, and litter; live biomass (g/m2 as component of total) total, trees, shrubs, forbs, grasses; leaf area index LAI (m2/m2) */
+

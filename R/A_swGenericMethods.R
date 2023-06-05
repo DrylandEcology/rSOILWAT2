@@ -48,6 +48,8 @@ rSW2_version <- function() {
 #' @examples
 #' get_version(rSOILWAT2::sw_exampleData)
 #' get_version(sw_exec(rSOILWAT2::sw_exampleData))
+#' get_version(as.numeric_version("4.1.3"))
+#' get_version(packageVersion("rSOILWAT2"))
 #'
 #' @export
 setGeneric("get_version", function(object) standardGeneric("get_version"))
@@ -57,11 +59,16 @@ setMethod(
   "get_version",
   signature = "ANY",
   definition = function(object) {
-    tmp <- try(object@version, silent = TRUE)
-    if (inherits(tmp, "try-error")) {
-      NA_character_
+    tmp <- try(inherits(object, "numeric_version"), silent = TRUE)
+    if (inherits(tmp, "try-error") || !isTRUE(tmp)) {
+      tmp <- try(object@version, silent = TRUE)
+      if (inherits(tmp, "try-error")) {
+        NA_character_
+      } else {
+        as.character(as.numeric_version(tmp))
+      }
     } else {
-      as.character(as.numeric_version(tmp))
+      as.character(object) # numeric version
     }
   }
 )

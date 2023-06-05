@@ -62,7 +62,8 @@ If you have missing weather data, then you have to impute yourself or use the
 built-in Markov weather generator (see examples section). If you use the
 weather generator, then you have to provide appropriate values for the input
 (files) \var{mkv_covar.in} and \var{mkv_prob.in} for your simulation run -
-currently, \pkg{rSOILWAT2} does not contain code to estimate these values.
+see \code{\link{dbW_estimate_WGen_coefs}} or
+\code{\link{dbW_generateWeather}}.
 }
 \examples{
 
