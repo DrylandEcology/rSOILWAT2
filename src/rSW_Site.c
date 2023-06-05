@@ -178,7 +178,7 @@ static void onSet_SW_LYR(SEXP SW_LYR) {
 
 
 /* Copy SWRC parameters into "SWRCp" matrix */
-static SEXP onGet_SW_SWRCp() {
+static SEXP onGet_SW_SWRCp(void) {
 	int i, k;
 	SW_SITE *v = &SW_Site;
 	SEXP SWRCp, SWRCp_names, SWRCp_names_y;
