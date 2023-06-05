@@ -56,9 +56,9 @@ void onSet_SW_OUT(SEXP OUT) {
 	int i, msg_type;
 	OutKey k;
 	SEXP sep, outfile, tp_convert;
-	int *use, *timePeriods, *sumtype, *first_orig, *last_orig;
-	// mykey and myobj are currently unused:
-	// int *mykey, *myobj;
+	int *timePeriods, *sumtype, *first_orig, *last_orig;
+	// mykey, myobj and use are currently unused:
+	// int *use, *mykey, *myobj;
 	char msg[200]; // message to print
 	#ifdef RSWDEBUG
 	int debug = 0;
@@ -78,11 +78,11 @@ void onSet_SW_OUT(SEXP OUT) {
 	timePeriods = INTEGER(tp_convert);
 	used_OUTNPERIODS = INTEGER(GET_DIM(GET_SLOT(OUT, install("timeSteps"))))[1]; // number of columns
 
-	// mykey and myobj are currently unused:
+	// mykey, myobj and use are currently unused:
 	// mykey = INTEGER(GET_SLOT(OUT, install("mykey")));
 	// myobj = INTEGER(GET_SLOT(OUT, install("myobj")));
+	// use = LOGICAL(GET_SLOT(OUT, install("use")));
 	sumtype = INTEGER(GET_SLOT(OUT, install("sumtype")));
-	use = LOGICAL(GET_SLOT(OUT, install("use")));
 	first_orig = INTEGER(GET_SLOT(OUT, install("first_orig")));
 	last_orig = INTEGER(GET_SLOT(OUT, install("last_orig")));
 	PROTECT(outfile = GET_SLOT(OUT, install("outfile")));
