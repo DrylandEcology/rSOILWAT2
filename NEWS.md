@@ -1,4 +1,4 @@
-# rSOILWAT2 v6.0.0-9000
+# rSOILWAT2 v6.0.0
 
 ## Breaking changes
 * `SOILWAT2` updated to v7.0.0

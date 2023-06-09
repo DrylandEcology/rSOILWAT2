@@ -1,4 +1,4 @@
 [submodule "src/SOILWAT2"]
 	path = src/SOILWAT2
 	url = https://github.com/DrylandEcology/SOILWAT2
-	branch = release/devel_v7.0.0
+	branch = master
