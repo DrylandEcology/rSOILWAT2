@@ -2,14 +2,16 @@
 % Please edit documentation in R/A_swGenericMethods.R
 \name{set_swFiles}
 \alias{set_swFiles}
-\title{\code{set_swFiles}
-Need to define and export this generic method -- otherwise,
-\code{\link{set_swFiles<-}} doesn't work.}
+\title{\code{set_swFiles}}
 \usage{
 set_swFiles(object, value)
 }
+\arguments{
+\item{object}{An object of class \code{\linkS4class{swFiles}} or
+\code{\linkS4class{swInputData}}.}
+
+\item{value}{A value to assign to a specific slot of the \code{object}.}
+}
 \description{
 \code{set_swFiles}
-Need to define and export this generic method -- otherwise,
-\code{\link{set_swFiles<-}} doesn't work.
 }

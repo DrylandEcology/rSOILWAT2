@@ -2,29 +2,38 @@
 % Please edit documentation in R/sw_dbW_WeatherDatabase.R
 \name{get_years_from_weatherDF}
 \alias{get_years_from_weatherDF}
-\title{Assign years to weather data.frame}
+\title{Extract years to weather data.frame}
 \usage{
 get_years_from_weatherDF(weatherDF, years, weatherDF_dataColumns)
 }
 \arguments{
-\item{weatherDF}{A data.frame. data.frame containing weather information for
-site.}
+\item{weatherDF}{A \code{data.frame}. Daily weather data where rows represent
+days and columns represent the weather variables
+(see \code{weatherDF_dataColumns}).}
 
 \item{years}{A numeric or integer vector or \code{NULL}. Vector of year data
 where length is equal to either the number of years in the weather data.frame
 or the number of rows in the data.frame.}
 
-\item{weatherDF_dataColumns}{A vector of string values. Column names of the
-weather data.frame.}
+\item{weatherDF_dataColumns}{A vector of character strings. The column
+names of \code{weatherDF} in the correct order for \code{SOILWAT2} including
+calendar year \code{year} (optional) and day of year \code{DOY}, see
+\code{\link[=weather_dataColumns]{weather_dataColumns()}}.}
 }
 \value{
 A named list of length 2.
 \itemize{
- \item \code{years} a vector of unique year values.
- \item \code{year_ts} a vector of time series values for each row/day of the
+\item \code{years} a vector of unique year values.
+\item \code{year_ts} a vector of time series values for each row/day of the
 data.frame.
 }
 }
 \description{
-Assign years to weather data.frame
+Extract years to weather data.frame
 }
+\section{Notes}{
+
+The first element of \code{weatherDF_dataColumns} (only the first is used) must
+contain the column name for day of year.
+}
+

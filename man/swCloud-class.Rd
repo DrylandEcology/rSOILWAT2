@@ -3,7 +3,7 @@
 \docType{class}
 \name{swCloud-class}
 \alias{swCloud-class}
-\alias{initialize,swCloud-method}
+\alias{swCloud}
 \alias{get_swCloud,swCloud-method}
 \alias{swCloud_SkyCover,swCloud-method}
 \alias{swCloud_WindSpeed,swCloud-method}
@@ -19,7 +19,7 @@
 \alias{swReadLines,swCloud,character-method}
 \title{Class \code{"swCloud"}}
 \usage{
-\S4method{initialize}{swCloud}(.Object, ...)
+swCloud(...)
 
 \S4method{get_swCloud}{swCloud}(object)
 
@@ -48,9 +48,14 @@
 \S4method{swReadLines}{swCloud,character}(object, file)
 }
 \arguments{
-\item{.Object}{An object of class \code{\linkS4class{swCloud}}.}
-
-\item{...}{Further arguments to methods.}
+\item{...}{Arguments to the helper constructor function.
+Dots can either contain objects to copy into slots of that class
+(must be named identical to the corresponding slot) or
+be one object of that class (in which case it will be copied and
+any missing slots will take their default values).
+If dots are missing, then corresponding values of
+\code{rSOILWAT2::sw_exampleData}
+(i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
 
 \item{object}{An object of class \code{\linkS4class{swCloud}}.}
 
@@ -65,6 +70,7 @@ The methods listed below work on this class and the proper slot of the class
 \examples{
 showClass("swCloud")
 x <- new("swCloud")
+x <- swCloud()
 
 }
 \seealso{

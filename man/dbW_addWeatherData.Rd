@@ -21,22 +21,40 @@ dbW_addWeatherData(
 )
 }
 \arguments{
-\item{Site_id}{Numeric. Used to identify site and extract weather data.}
+\item{Site_id}{An integer value. The IDs/database key of the queried site.}
 
-\item{lat}{Numeric. Latitude used with longitude to identify site id if
-\code{Site_id} is missing.}
+\item{lat}{A numeric vector or \code{NULL}. The latitude in decimal degrees
+of \code{WGS84}. Northern latitude are positive, sites on the southern
+hemisphere have negative values.}
 
-\item{long}{Numeric. Longitude and Latitude are used to identify site if
-\code{Site_id} is missing.}
+\item{long}{A numeric vector or \code{NULL}. The longitude in decimal degrees
+of \code{WGS84}. Eastern longitudes are positive, sites on the western
+hemisphere have negative values.}
 
 \item{tol_xy}{A numeric value. The tolerance used to match requested
 longitude and latitude values.}
 
-\item{Label}{A character string. A site label.}
+\item{weatherFolderPath}{A character string. The path to the parent folder.}
 
-\item{Scenario}{A character string.}
+\item{weatherData}{A list of elements of class \code{\linkS4class{swWeatherData}}
+that each hold daily weather data for one calendar year.}
+
+\item{Label}{A character string. The name/label of the queried site.}
+
+\item{Scenario_id}{An integer value The ID/database key of the queried
+scenario.}
+
+\item{Scenario}{A character string. The name/label of a climate scenario.}
+
+\item{weather_tag}{A character string. The base file name without extension
+for \code{SOILWAT2}-formatted input files; default is \code{"weath"}}
 
 \item{ignore.case}{A logical value.}
+
+\item{overwrite}{A logical value. Should weather data that already exists
+in the data base be overwritten?}
+
+\item{verbose}{A logical value.}
 }
 \value{
 An invisible logical value indicating success with \code{TRUE} and

@@ -19,12 +19,13 @@
 #include <math.h>
 #include <string.h>
 
-#include "SOILWAT2/generic.h"
-#include "SOILWAT2/filefuncs.h"
-#include "SOILWAT2/Times.h"
+#include "SOILWAT2/include/generic.h"
+#include "SOILWAT2/include/filefuncs.h"
+#include "SOILWAT2/include/Times.h"
 
-#include "SOILWAT2/SW_Files.h"
-#include "SOILWAT2/SW_Markov.h"
+#include "SOILWAT2/include/SW_Files.h"
+#include "SOILWAT2/include/SW_Weather.h"
+#include "SOILWAT2/include/SW_Markov.h"
 
 #include "rSW_Markov.h" // externs `SW_Markov`
 
@@ -67,14 +68,22 @@ void onSet_MKV(SEXP MKV) {
   PROTECT(MKV_prob = GET_SLOT(MKV, install(cSW_MKV[0])));
   PROTECT(MKV_conv = GET_SLOT(MKV, install(cSW_MKV[1])));
 
-  if (!onSet_MKV_prob(MKV_prob)) {
-    LogError(logfp, LOGFATAL, "Markov weather generator: rSOILWAT2 failed to "
-      "pass `MKV_prob` values to SOILWAT2.\n");
+  if (!onSet_MKV_prob(MKV_prob) && SW_Weather.generateWeatherMethod == 2) {
+    LogError(
+      logfp,
+      LOGFATAL,
+      "Markov weather generator: "
+      "rSOILWAT2 failed to pass `MKV_prob` values to SOILWAT2.\n"
+    );
   }
 
-  if (!onSet_MKV_conv(MKV_conv)) {
-    LogError(logfp, LOGFATAL, "Markov weather generator: rSOILWAT2 failed to "
-      "pass `MKV_conv` values to SOILWAT2.\n");
+  if (!onSet_MKV_conv(MKV_conv) && SW_Weather.generateWeatherMethod == 2) {
+    LogError(
+      logfp,
+      LOGFATAL,
+      "Markov weather generator: "
+      "rSOILWAT2 failed to pass `MKV_conv` values to SOILWAT2.\n"
+    );
   }
 
   UNPROTECT(2);

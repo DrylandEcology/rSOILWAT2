@@ -10,6 +10,7 @@ dbW_generateWeather(
   wgen_coeffs = NULL,
   imputation_type = "mean",
   imputation_span = 5L,
+  digits = 4L,
   seed = NULL
 )
 }
@@ -41,6 +42,9 @@ based on \code{weatherData}.}
 \item{imputation_span}{An integer value. The number of non-missing values
 considered if \code{imputation_type = "mean"}.}
 
+\item{digits}{An integer value. The returned values will be rounded to
+the specified number of decimal places.}
+
 \item{seed}{An integer value or \code{NULL}. See \code{\link{set.seed}}.}
 }
 \value{
@@ -50,6 +54,16 @@ A list of elements of class \code{\linkS4class{swWeatherData}}.
 This function is a convenience wrapper for
 \code{\link{dbW_estimate_WGen_coefs}}.
 }
+\section{Details}{
+
+The current implementation of the weather generator produces values
+only for variables in \code{\link[=weatherGenerator_dataColumns]{weatherGenerator_dataColumns()}}.
+Values are generated for those days where at least one of the implemented
+variables is missing; if any value is missing, then values for that day of
+all implemented variables will be replaced by those produced
+by the weather generator.
+}
+
 \examples{
 # Load data for 1949-2010
 wdata <- data.frame(dbW_weatherData_to_dataframe(rSOILWAT2::weatherData))
@@ -84,7 +98,7 @@ wout2 <- dbW_generateWeather(
 
 ## Example 3: generate weather based only on estimated weather generator
 ## coefficients from a different dataset
-x_empty <- list(new("swWeatherData"))
+x_empty <- weatherHistory()
 wout3 <- dbW_generateWeather(
   x_empty,
   years = 2050:2055,

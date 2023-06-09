@@ -29,7 +29,7 @@
 #'
 #' \code{\linkS4class{swInputData}} consists of slots for each file that is
 #' read in. These slots can be accessed via the following functions: \itemize{
-#'   \item \code{\link{get_Markov}}
+#'   \item \code{\link{get_swMarkov}}
 #'   \item \code{\link{get_swCloud}}
 #'   \item \code{\link{get_swFiles}}
 #'   \item \code{\link{get_swOUT}}
@@ -51,10 +51,16 @@
 #' }
 #'
 #' @param object An object of class \code{\linkS4class{swInputData}}.
-#' @param .Object An object of class \code{\linkS4class{swInputData}}.
 #' @param value A value to assign to a specific slot of the object.
 #' @param file A character string. The file name from which to read.
-#' @param ... Further arguments to methods.
+#' @param ... Arguments to the helper constructor function.
+#'  Dots can either contain objects to copy into slots of that class
+#'  (must be named identical to the corresponding slot) or
+#'  be one object of that class (in which case it will be copied and
+#'  any missing slots will take their default values).
+#'  If dots are missing, then corresponding values of
+#'  \code{rSOILWAT2::sw_exampleData}
+#'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #' @param year An integer value. The calendar year of the weather or
 #'   \var{SWC} \code{data} object.
 #' @param vegtype The name or index of the vegetation type.
@@ -69,7 +75,8 @@
 #'
 #' @examples
 #' showClass("swInputData")
-#' x <- new("swInputData")
+#' x <- new("swInputData") # prototype
+#' x <- swInputData() # constructor helper
 #'
 #' @name swInputData-class
 #' @export
@@ -93,60 +100,187 @@ setClass(
     swc = "swSWC",
     log = "swLog"
   )
+  # Note: we cannot set prototypes for `swInputData` because
+  # that calls each slot's class constructor; the constructors call eventually
+  # `new()` which in turn calls setValidity()` which use `rSW2_glovars`.
+  # However, this all occurs before `rSW2_glovars` is defined, i.e.,
+  # validity functions are erroring out if they utilize `rSW2_glovars`.
+  # Calling `validObject()` at run time is not a problem because
+  # `rSW2_glovars` will be defined by then (see `.onLoad()`).
 )
 
 
 #' @rdname swInputData-class
 #' @export
-setMethod(
-  "initialize",
-  signature = "swInputData",
-  function(.Object) {
-    sns <- slotNames("swInputData")
-    scl <- getSlots("swInputData")
+swInputData <- function(...) {
+  # Call helper constructor for each slot class
+  dots <- list(...)
 
-    for (i in seq_along(sns)) {
-      slot(.Object, sns[i]) <- new(scl[i])
-    }
-
-    slot(.Object, "version") <- rSW2_version()
-    slot(.Object, "timestamp") <- rSW2_timestamp()
-
-    validObject(.Object)
-
-    .Object
+  if (length(dots) == 1 && inherits(dots[[1]], "swInputData")) {
+    # If dots are one object of this class, then convert to list of its slots
+    dots <- attributes(unclass(dots[[1]]))
   }
-)
+
+  dns <- names(dots)
+
+  object <- new("swInputData")
+  object@version <- rSW2_version()
+  object@timestamp <- rSW2_timestamp()
+
+
+  object@files <- if ("files" %in% dns) {
+    swFiles(dots[["files"]])
+  } else {
+    do.call(swFiles, dots)
+  }
+
+  object@years <- if ("years" %in% dns) {
+    swYears(dots[["years"]])
+  } else {
+    do.call(swYears, dots)
+  }
+
+  object@weather <- if ("weather" %in% dns) {
+    swWeather(dots[["weather"]])
+  } else {
+    do.call(swWeather, dots)
+  }
+
+  object@cloud <- if ("cloud" %in% dns) {
+    swCloud(dots[["cloud"]])
+  } else {
+    do.call(swCloud, dots)
+  }
+
+  object@weatherHistory <- weatherHistory(dots[["weatherHistory"]])
+
+  object@markov <- if ("markov" %in% dns) {
+    swMarkov(dots[["markov"]])
+  } else {
+    do.call(swMarkov, dots)
+  }
+
+  object@prod <- if ("prod" %in% dns) {
+    swProd(dots[["prod"]])
+  } else {
+    do.call(swProd, dots)
+  }
+
+  object@site <- if ("site" %in% dns) {
+    swSite(dots[["site"]])
+  } else {
+    do.call(swSite, dots)
+  }
+
+  object@soils <- if ("soils" %in% dns) {
+    swSoils(dots[["soils"]])
+  } else {
+    do.call(swSoils, dots)
+  }
+
+  object@estab <- if ("estab" %in% dns) {
+    swEstab(dots[["estab"]])
+  } else {
+    do.call(swEstab, dots)
+  }
+
+  object@carbon <- if ("carbon" %in% dns) {
+    swCarbon(dots[["carbon"]])
+  } else {
+    do.call(swCarbon, dots)
+  }
+
+  object@output <- if ("output" %in% dns) {
+    swOUT(dots[["output"]])
+  } else {
+    do.call(swOUT, dots)
+  }
+
+  object@swc <- if ("swc" %in% dns) {
+    swSWC(dots[["swc"]])
+  } else {
+    do.call(swSWC, dots)
+  }
+
+  object@log <- if ("log" %in% dns) {
+    swLog(dots[["log"]])
+  } else {
+    do.call(swLog, dots)
+  }
+
+  object
+}
+
+
 
 setValidity(
   "swInputData",
   function(object) {
-    TRUE
+    res <- lapply(slotNames(object), function(sn) validObject(slot(object, sn)))
+    has_msg <- sapply(res, is.character)
+    if (any(has_msg)) {
+      unlist(res[has_msg])
+    } else {
+      TRUE
+    }
   }
 )
 
 
-
-
-#' @rdname get_version
+#' @rdname sw_upgrade
+#' @export
 setMethod(
-  f = "get_version",
+  "sw_upgrade",
   signature = "swInputData",
-  definition = function(object) {
-    tmp <- try(object@version, silent = TRUE)
-    if (inherits(tmp, "try-error")) NA else tmp
+  definition = function(object, verbose = FALSE) {
+
+    msg_upgrades <- NULL
+
+    # Suppress warnings in case `object` is indeed invalid (outdated)
+    if (!suppressWarnings(check_version(object))) {
+
+      for (sn in slotNames(object)) {
+        if (identical(sn, "weatherHistory")) {
+          if (!dbW_check_weatherData(slot(object, sn), check_all = FALSE)) {
+            slot(object, sn) <- suppressWarnings(
+              upgrade_weatherHistory(slot(object, sn))
+            )
+            msg_upgrades <- c(msg_upgrades, sn)
+          }
+
+        } else {
+          tmp <- try(validObject(slot(object, sn)), silent = TRUE)
+          if (inherits(tmp, "try-error")) {
+            slot(object, sn) <- suppressWarnings(
+              sw_upgrade(slot(object, sn), verbose = FALSE)
+            )
+            msg_upgrades <- c(msg_upgrades, sn)
+          }
+        }
+      }
+
+      if (length(msg_upgrades) > 0) {
+        if (verbose) {
+          message(
+            "Upgrading object of class `swInputData`: ",
+            toString(shQuote(msg_upgrades))
+          )
+        }
+
+        #--- Update version/timestamp
+        object@version <- rSW2_version()
+        object@timestamp <- rSW2_timestamp()
+
+        #--- Check validity and return
+        validObject(object)
+      }
+    }
+
+    object
   }
 )
 
-#' @rdname get_timestamp
-setMethod(
-  f = "get_timestamp",
-  signature = "swInputData",
-  definition = function(object) {
-    tmp <- try(object@timestamp, silent = TRUE)
-    if (inherits(tmp, "try-error")) NA else tmp
-  }
-)
+
 
 
 # Methods for slot \code{files}
@@ -200,6 +334,14 @@ setMethod(
   "swFiles_Soils",
   signature = "swInputData",
   function(object) swFiles_Soils(object@files)
+)
+
+#' @rdname swInputData-class
+#' @export
+setMethod(
+  "swFiles_SWRCp",
+  signature = "swInputData",
+  function(object) swFiles_SWRCp(object@files)
 )
 
 #' @rdname swInputData-class
@@ -365,6 +507,17 @@ setReplaceMethod(
   signature = "swInputData",
   function(object, value) {
     swFiles_Soils(object@files) <- value
+    object
+  }
+)
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "swFiles_SWRCp",
+  signature = "swInputData",
+  function(object, value) {
+    swFiles_SWRCp(object@files) <- value
     object
   }
 )
@@ -905,9 +1058,14 @@ setReplaceMethod(
 
 
 # Methods for slot \code{markov}
+# use `get_swMarkov()`, `get_Markov()` is a legacy name
 #' @rdname swInputData-class
 #' @export
 setMethod("get_Markov", "swInputData", function(object) object@markov)
+
+#' @rdname swInputData-class
+#' @export
+setMethod("get_swMarkov", "swInputData", function(object) object@markov)
 
 #' @rdname swInputData-class
 #' @export
@@ -926,13 +1084,25 @@ setMethod(
 )
 
 
+# use `set_swMarkov()`; `set_Markov()` is a legacy name
 #' @rdname swInputData-class
 #' @export
 setReplaceMethod(
   "set_Markov",
   signature = "swInputData",
   function(object, value) {
-    set_Markov(object@markov) <- value
+    set_swMarkov(object@markov) <- value
+    object
+  }
+)
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "set_swMarkov",
+  signature = "swInputData",
+  function(object, value) {
+    set_swMarkov(object@markov) <- value
     object
   }
 )
@@ -1418,10 +1588,31 @@ setReplaceMethod(
 )
 
 
+# Methods for slot \code{estab}
+#' @rdname swInputData-class
+#' @export
+setMethod("get_swEstab", "swInputData", function(object) object@estab)
+
+
 # Methods for slot \code{site}
 #' @rdname swInputData-class
 #' @export
 setMethod("get_swSite", "swInputData", function(object) slot(object, "site"))
+
+#' @rdname swSite_SWRCflags
+setMethod(
+  "swSite_SWRCflags",
+  signature = "swInputData",
+  function(object) swSite_SWRCflags(object@site)
+)
+
+#' @rdname swSite_hasSWRCp
+setMethod(
+  "swSite_hasSWRCp",
+  signature = "swInputData",
+  function(object) swSite_hasSWRCp(object@site)
+)
+
 
 #' @rdname swInputData-class
 #' @export
@@ -1506,6 +1697,14 @@ setMethod(
 #' @rdname swInputData-class
 #' @export
 setMethod(
+  "swSite_SoilDensityInputType",
+  signature = "swInputData",
+  function(object) swSite_SoilDensityInputType(object@site)
+)
+
+#' @rdname swInputData-class
+#' @export
+setMethod(
   "swSite_TranspirationRegions",
   signature = "swInputData",
   function(object) swSite_TranspirationRegions(object@site)
@@ -1523,6 +1722,45 @@ setReplaceMethod(
   }
 )
 
+#' @rdname swSite_SWRCflags
+#'
+#' @section Details:
+#' The replacement method [swSite_SWRCflags()] for class [swInputData-class]
+#' resets `has_swrcp` to `FALSE` if `"swrc_name"` or `"ptf_name"` are updated.
+#' This is to avoid inconsistency between
+#' `SWRCp`, `has_swrcp`, and `swrc_flags`.
+#'
+#' @section Details:
+#' The correct sequence for setting values is
+#'   1. [swSoils_Layers()],
+#'   2. [swSite_SWRCflags()], and
+#'   3. [swSoils_SWRCp()] and [swSite_hasSWRCp()]
+#'
+#' @md
+setReplaceMethod(
+  "swSite_SWRCflags",
+  signature = "swInputData",
+  function(object, value) {
+    prev <- as.character(swSite_SWRCflags(object@site))
+    value <- as.character(value)
+    if (!identical(prev, value)) {
+      swSite_SWRCflags(object@site) <- value
+      # Reset has_swrcp -- avoid inconsistency between SWRCp and swrc_flags
+      swSite_hasSWRCp(object) <- FALSE
+    }
+    object
+  }
+)
+
+#' @rdname swSite_hasSWRCp
+setReplaceMethod(
+  "swSite_hasSWRCp",
+  signature = "swInputData",
+  function(object, value) {
+    swSite_hasSWRCp(object@site) <- value
+    object
+  }
+)
 #' @rdname swInputData-class
 #' @export
 setReplaceMethod(
@@ -1636,6 +1874,17 @@ setReplaceMethod(
 #' @rdname swInputData-class
 #' @export
 setReplaceMethod(
+  "swSite_SoilDensityInputType",
+  signature = "swInputData",
+  function(object, value) {
+    swSite_SoilDensityInputType(object@site) <- value
+    object
+  }
+)
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
   "swSite_TranspirationRegions",
   signature = "swInputData",
   function(object, value) {
@@ -1650,12 +1899,18 @@ setReplaceMethod(
 #' @export
 setMethod("get_swSoils", "swInputData", function(object) object@soils)
 
-#' @rdname swInputData-class
-#' @export
+#' @rdname swSoils_Layers
 setMethod(
   "swSoils_Layers",
   signature = "swInputData",
   function(object) swSoils_Layers(object@soils)
+)
+
+#' @rdname swSoils_SWRCp
+setMethod(
+ "swSoils_SWRCp",
+ signature = "swInputData",
+ function(object) swSoils_SWRCp(object@soils)
 )
 
 #' @rdname swInputData-class
@@ -1672,13 +1927,69 @@ setReplaceMethod(
 #' @rdname swInputData-class
 #' @export
 setReplaceMethod(
-  "swSoils_Layers",
-  signature = c(object = "swInputData", value = "matrix"),
+  "set_swSoils",
+  signature = c(object = "swInputData", value = "list"),
   function(object, value) {
+    set_swSoils(object@soils) <- value
+    object
+  }
+)
+
+#' @rdname swSoils_Layers
+#'
+#' @section Details:
+#' The replacement method `swSoils_Layers<-` for class [swInputData-class]
+#' resizes `SWRCp` to match number of new soil layers
+#' (and reset `SWRCp` values to `NA`) if `"has_swrcp"` is `FALSE`.
+#' This is to avoid inconsistency between
+#' soil properties and `SWRCp`.
+
+#'
+#' @section Details:
+#' The correct sequence for setting values is
+#'   1. [swSoils_Layers()],
+#'   2. [swSite_SWRCflags()], and
+#'   3. [swSoils_SWRCp()] and [swSite_hasSWRCp()]
+#'
+#' @md
+setReplaceMethod(
+  "swSoils_Layers",
+  signature = "swInputData",
+  function(object, value) {
+
+    if (!swSite_hasSWRCp(object@site)) {
+      # --> assigning new soil layers fails `swSoils` validity checks
+      # if number of soil layers disagrees with the SWRC parameter object.
+      object@soils@SWRCp <- reset_SWRCp(
+        SWRCp = object@soils@SWRCp,
+        new_nrow = nrow(value)
+      )
+    }
+
     swSoils_Layers(object@soils) <- value
     object
   }
 )
+
+
+#' @rdname swSoils_SWRCp
+#'
+#' @section Details:
+#' The correct sequence for setting values is
+#'   1. [swSoils_Layers()],
+#'   2. [swSite_SWRCflags()], and
+#'   3. [swSoils_SWRCp()] and [swSite_hasSWRCp()]
+#'
+#' @md
+setReplaceMethod(
+  "swSoils_SWRCp",
+  signature = "swInputData",
+  function(object, value) {
+    swSoils_SWRCp(object@soils) <- value
+    object
+  }
+)
+
 
 
 # Methods for slot \code{swc}
@@ -2041,45 +2352,49 @@ setReplaceMethod(
       object@log@LogData[object@log@UsedLines] <- value
       object@log@UsedLines <- object@log@UsedLines + 1
     }
-
+    validObject(object)
     object
   }
 )
-##
+
 
 
 #' @rdname swInputData-class
 #' @export
 # nolint start
-setMethod(f="swReadLines", signature = c(object="swInputData",file="character"), function(object,file) {
-  print("TODO: method 'swReadLines' for class 'swInputData' is not up-to-date; hard-coded indices are incorrect")
+setMethod(
+  "swReadLines",
+  signature = c(object="swInputData",file="character"),
+  function(object,file) {
+    print("TODO: method 'swReadLines' for class 'swInputData' is not up-to-date; hard-coded indices are incorrect")
 
-			object@files <- swReadLines(object@files,file)
-			object@files@ProjDir <- dirname(file)
-			object@years <- swReadLines(object@years,file.path(object@files@ProjDir, object@files@InFiles[2]))
-			object@weather <- swReadLines(object@weather,file.path(object@files@ProjDir, object@files@InFiles[6]))
-			weatherFiles <- list.files(path=file.path(object@files@ProjDir,dirname(object@files@WeatherPrefix)), pattern=basename(object@files@WeatherPrefix), include.dirs=F, recursive=F, full.names=T)
-			object@weatherHistory <- list()
-			if(length(weatherFiles) > 0) {
-				for(i in 1:length(weatherFiles)) {
-					wd <- new("swWeatherData",year=0)
-					wd <- swReadLines(wd, weatherFiles[i])
-					object@weatherHistory[[i]] <- wd
-				}
-			}
+    object@files <- swReadLines(object@files,file)
+    object@files@ProjDir <- dirname(file)
+    object@years <- swReadLines(object@years,file.path(object@files@ProjDir, object@files@InFiles[2]))
+    object@weather <- swReadLines(object@weather,file.path(object@files@ProjDir, object@files@InFiles[6]))
+    weatherFiles <- list.files(path=file.path(object@files@ProjDir,dirname(object@files@WeatherPrefix)), pattern=basename(object@files@WeatherPrefix), include.dirs=F, recursive=F, full.names=T)
+    object@weatherHistory <- list()
+    if(length(weatherFiles) > 0) {
+      for(i in 1:length(weatherFiles)) {
+        wd <- new("swWeatherData",year=0)
+        wd <- swReadLines(wd, weatherFiles[i])
+        object@weatherHistory[[i]] <- wd
+      }
+    }
 
-			object@cloud <- swReadLines(object@cloud,file.path(object@files@ProjDir, object@files@InFiles[9]))
-			if(all(file.exists(file.path(object@files@ProjDir, object@files@InFiles[7:8]))))
-				object@markov <- swReadLines(object@markov,file.path(object@files@ProjDir, object@files@InFiles[7:8]))
-			object@prod <- swReadLines(object@prod,file.path(object@files@ProjDir, object@files@InFiles[10]))
-			object@site <- swReadLines(object@site,file.path(object@files@ProjDir, object@files@InFiles[4]))
-			object@soils <- swReadLines(object@soils,file.path(object@files@ProjDir, object@files@InFiles[5]))
-			if(file.exists(file.path(object@files@ProjDir, object@files@InFiles[11]))) {#Optional File
-				object@estab <- swReadLines(object@estab,c(file.path(object@files@ProjDir, object@files@InFiles[11]),object@files@ProjDir))
-			}
-			object@output <- swReadLines(object@output,file.path(object@files@ProjDir, object@files@InFiles[14]))
-			object@swc <- swReadLines(object@swc,file.path(object@files@ProjDir, object@files@InFiles[13]))
-			object@carbon <- swReadLines(object@carbon, file.path(object@files@ProjDir, object@files@InFiles[12]))
-			return(object)
-		})
+    object@cloud <- swReadLines(object@cloud,file.path(object@files@ProjDir, object@files@InFiles[9]))
+    if(all(file.exists(file.path(object@files@ProjDir, object@files@InFiles[7:8]))))
+      object@markov <- swReadLines(object@markov,file.path(object@files@ProjDir, object@files@InFiles[7:8]))
+    object@prod <- swReadLines(object@prod,file.path(object@files@ProjDir, object@files@InFiles[10]))
+    object@site <- swReadLines(object@site,file.path(object@files@ProjDir, object@files@InFiles[4]))
+    object@soils <- swReadLines(object@soils,file.path(object@files@ProjDir, object@files@InFiles[5]))
+    if(file.exists(file.path(object@files@ProjDir, object@files@InFiles[11]))) {#Optional File
+      object@estab <- swReadLines(object@estab,c(file.path(object@files@ProjDir, object@files@InFiles[11]),object@files@ProjDir))
+    }
+    object@output <- swReadLines(object@output,file.path(object@files@ProjDir, object@files@InFiles[14]))
+    object@swc <- swReadLines(object@swc,file.path(object@files@ProjDir, object@files@InFiles[13]))
+    object@carbon <- swReadLines(object@carbon, file.path(object@files@ProjDir, object@files@InFiles[12]))
+    return(object)
+  }
+)
 # nolint end

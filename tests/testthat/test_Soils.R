@@ -1,4 +1,3 @@
-context("Manipulate soil")
 
 
 test_that("Manipulate soils", {

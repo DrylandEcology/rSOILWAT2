@@ -20,6 +20,9 @@ estimate_PotNatVeg_biomass(
 temperature values in degree Celsius of a target site / condition
 for which \code{x} is to be adjusted.}
 
+\item{target_MAP_mm}{A numeric value. Mean annual precipitation
+in millimeter of the location.}
+
 \item{ref_temp}{A numeric vector of length 12. Reference mean monthly
 temperature values in degree Celsius under which \code{x} was
 determined / is valid.}
@@ -39,16 +42,13 @@ phenology is adjusted by temperature.}
 is adjusted by precipitation.}
 
 \item{fgrass_c3c4ann}{A numeric vector of length 3. Relative contribution
-[0-1] of the C3-grasses, C4-grasses, and annuals functional groups. The sum
-of \code{fgrass_c3c4ann} is 1.}
-
-\item{MAP_mm}{A numeric value. Mean annual precipitation in millimeter of the
-location.}
+\verb{[0-1]} of the C3-grasses, C4-grasses, and annuals functional groups.
+The sum of \code{fgrass_c3c4ann} is 1.}
 }
 \value{
 A list with two elements \code{grass}, \code{shrub}. Each element is
-  a matrix with 12 rows (one for each month) and columns \code{Biomass},
-  \code{Amount.Live}, \code{Perc.Live}, and \code{Litter}.
+a matrix with 12 rows (one for each month) and columns \code{Biomass},
+\code{Amount.Live}, \code{Perc.Live}, and \code{Litter}.
 }
 \description{
 Adjust mean monthly biomass values of grass and shrub functional groups by
@@ -56,18 +56,27 @@ climate relationships
 }
 \section{Default inputs}{
  \itemize{
-  \item Shrubs are based on location \var{\sQuote{IM_USC00107648_Reynolds}}
-    which resulted in a vegetation composition of 70 \% shrubs and 30 \%
-    C3-grasses. Default monthly biomass values were estimated for
-    MAP = 450 mm yr-1.
-  \item Grasses are based on location \var{\sQuote{GP_SGSLTER}}
-    (shortgrass steppe) which resulted in 12 \% shrubs, 22 \% C3-grasses,
-    and 66 \% C4-grasses. Default biomass values were estimated for
-    MAP = 340 mm yr-1.
- \item Mean monthly reference temperature are the median values across
-   898 big sagebrush sites
-   (see \url{https://github.com/DrylandEcology/rSFSTEP2/issues/195})
+\item Shrubs are based on location \var{\sQuote{IM_USC00107648_Reynolds}}
+which resulted in a vegetation composition of 70 \% shrubs and 30 \%
+C3-grasses. Default monthly biomass values were estimated for
+MAP = 450 mm yr-1.
+\item Grasses are based on location \var{\sQuote{GP_SGSLTER}}
+(shortgrass steppe) which resulted in 12 \% shrubs, 22 \% C3-grasses,
+and 66 \% C4-grasses. Default biomass values were estimated for
+MAP = 340 mm yr-1.
+\item Mean monthly reference temperature are the median values across
+898 big sagebrush sites
+(see \url{https://github.com/DrylandEcology/rSFSTEP2/issues/195})
 }
+}
+
+\section{Details}{
+
+If \code{do_adjust_biomass}, then the internal function \code{adjBiom_by_ppt()} is
+used to adjust biomass by annual precipitation amount.
+If \code{do_adjust_phenology}, then the exported function
+\code{\link[=adj_phenology_by_temp]{adj_phenology_by_temp()}} is used to adjust the seasonal pattern of biomass
+(phenology) by monthly temperature.
 }
 
 \examples{
@@ -92,13 +101,7 @@ rSOILWAT2::estimate_PotNatVeg_biomass(
 }
 \references{
 Bradford, J.B., Schlaepfer, D.R., Lauenroth, W.K. & Burke, I.C.
-  (2014). Shifts in plant functional types have time-dependent and regionally
-  variable impacts on dryland ecosystem water balance. J Ecol, 102,
-  1408-1418.
-}
-\seealso{
-Function \code{\link{adjBiom_by_ppt}} is called
-  if \code{do_adjust_biomass};
-  function \code{\link{adj_phenology_by_temp}} is called
-  if \code{do_adjust_phenology}.
+(2014). Shifts in plant functional types have time-dependent and regionally
+variable impacts on dryland ecosystem water balance. J Ecol, 102,
+1408-1418.
 }

@@ -3,7 +3,7 @@
 \docType{class}
 \name{swCarbon-class}
 \alias{swCarbon-class}
-\alias{initialize,swCarbon-method}
+\alias{swCarbon}
 \alias{get_swCarbon,swCarbon-method}
 \alias{swCarbon_Use_Bio,swCarbon-method}
 \alias{swCarbon_Use_WUE,swCarbon-method}
@@ -18,7 +18,7 @@
 \alias{swCarbon_CO2ppm<-,swCarbon-method}
 \title{Class \code{"swCarbon"}}
 \usage{
-\S4method{initialize}{swCarbon}(.Object, ...)
+swCarbon(...)
 
 \S4method{get_swCarbon}{swCarbon}(object)
 
@@ -45,9 +45,14 @@
 \S4method{swCarbon_CO2ppm}{swCarbon}(object) <- value
 }
 \arguments{
-\item{.Object}{An object of class \code{\linkS4class{swCarbon}}.}
-
-\item{...}{Further arguments to methods.}
+\item{...}{Arguments to the helper constructor function.
+Dots can either contain objects to copy into slots of that class
+(must be named identical to the corresponding slot) or
+be one object of that class (in which case it will be copied and
+any missing slots will take their default values).
+If dots are missing, then corresponding values of
+\code{rSOILWAT2::sw_exampleData}
+(i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
 
 \item{object}{An object of class \code{\linkS4class{swCarbon}}.}
 
@@ -81,6 +86,7 @@ column and CO2 ppm concentrations in the second column.}
 \examples{
 showClass("swCarbon")
 x <- new("swCarbon")
+x <- swCarbon()
 
 }
 \seealso{

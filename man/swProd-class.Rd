@@ -3,7 +3,7 @@
 \docType{class}
 \name{swProd-class}
 \alias{swProd-class}
-\alias{initialize,swProd-method}
+\alias{swProd}
 \alias{get_swProd,swProd-method}
 \alias{swProd_Composition,swProd-method}
 \alias{swProd_Albedo,swProd-method}
@@ -45,7 +45,7 @@
 \alias{swReadLines,swProd,character-method}
 \title{Class \code{"swProd"}}
 \usage{
-\S4method{initialize}{swProd}(.Object, ...)
+swProd(...)
 
 \S4method{get_swProd}{swProd}(object)
 
@@ -126,9 +126,14 @@
 \S4method{swReadLines}{swProd,character}(object, file)
 }
 \arguments{
-\item{.Object}{An object of class \code{\linkS4class{swProd}}.}
-
-\item{...}{Further arguments to methods.}
+\item{...}{Arguments to the helper constructor function.
+Dots can either contain objects to copy into slots of that class
+(must be named identical to the corresponding slot) or
+be one object of that class (in which case it will be copied and
+any missing slots will take their default values).
+If dots are missing, then corresponding values of
+\code{rSOILWAT2::sw_exampleData}
+(i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
 
 \item{object}{An object of class \code{\linkS4class{swProd}}.}
 
@@ -145,6 +150,7 @@ The methods listed below work on this class and the proper slot of the class
 \examples{
 showClass("swProd")
 x <- new("swProd")
+x <- swProd()
 
 }
 \seealso{

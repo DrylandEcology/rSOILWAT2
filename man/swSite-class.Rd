@@ -3,7 +3,7 @@
 \docType{class}
 \name{swSite-class}
 \alias{swSite-class}
-\alias{initialize,swSite-method}
+\alias{swSite}
 \alias{get_swSite,swSite-method}
 \alias{swSite_SWClimits,swSite-method}
 \alias{swSite_ModelFlags,swSite-method}
@@ -16,6 +16,7 @@
 \alias{swSite_SoilTemperatureFlag,swSite-method}
 \alias{swSite_SoilTemperatureConsts,swSite-method}
 \alias{swSite_TranspirationRegions,swSite-method}
+\alias{swSite_SoilDensityInputType,swSite-method}
 \alias{set_swSite<-,swSite-method}
 \alias{swSite_SWClimits<-,swSite-method}
 \alias{swSite_ModelFlags<-,swSite-method}
@@ -27,11 +28,12 @@
 \alias{swSite_IntrinsicSiteParams<-,swSite-method}
 \alias{swSite_SoilTemperatureFlag<-,swSite-method}
 \alias{swSite_SoilTemperatureConsts<-,swSite-method}
+\alias{swSite_SoilDensityInputType<-,swSite-method}
 \alias{swSite_TranspirationRegions<-,swSite-method}
 \alias{swReadLines,swSite,character-method}
 \title{Class \code{"swSite"}}
 \usage{
-\S4method{initialize}{swSite}(.Object, ...)
+swSite(...)
 
 \S4method{get_swSite}{swSite}(object)
 
@@ -57,6 +59,8 @@
 
 \S4method{swSite_TranspirationRegions}{swSite}(object)
 
+\S4method{swSite_SoilDensityInputType}{swSite}(object)
+
 \S4method{set_swSite}{swSite}(object) <- value
 
 \S4method{swSite_SWClimits}{swSite}(object) <- value
@@ -79,14 +83,21 @@
 
 \S4method{swSite_SoilTemperatureConsts}{swSite}(object) <- value
 
+\S4method{swSite_SoilDensityInputType}{swSite}(object) <- value
+
 \S4method{swSite_TranspirationRegions}{swSite}(object) <- value
 
 \S4method{swReadLines}{swSite,character}(object, file)
 }
 \arguments{
-\item{.Object}{An object of class \code{\linkS4class{swSite}}.}
-
-\item{...}{Further arguments to methods.}
+\item{...}{Arguments to the helper constructor function.
+Dots can either contain objects to copy into slots of that class
+(must be named identical to the corresponding slot) or
+be one object of that class (in which case it will be copied and
+any missing slots will take their default values).
+If dots are missing, then corresponding values of
+\code{rSOILWAT2::sw_exampleData}
+(i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
 
 \item{object}{An object of class \code{\linkS4class{swSite}}.}
 
@@ -101,6 +112,7 @@ The methods listed below work on this class and the proper slot of the class
 \examples{
 showClass("swSite")
 x <- new("swSite")
+x <- swSite()
 
 }
 \seealso{

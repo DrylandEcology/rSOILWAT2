@@ -18,18 +18,32 @@ dbW_getIDs(
 )
 }
 \arguments{
+\item{site_id}{An integer value. The IDs/database key of the queried site.}
+
+\item{site_label}{A character string. The name/label of the queried site.}
+
 \item{long}{A numeric vector or \code{NULL}. The longitude in decimal degrees
-of \var{WGS84}. Eastern longitudes are positive, sites on the western
+of \code{WGS84}. Eastern longitudes are positive, sites on the western
 hemisphere have negative values.}
 
 \item{lat}{A numeric vector or \code{NULL}. The latitude in decimal degrees
-of \var{WGS84}. Northern latitude are positive, sites on the southern
+of \code{WGS84}. Northern latitude are positive, sites on the southern
 hemisphere have negative values.}
 
 \item{tol_xy}{A numeric value. The tolerance used to match requested
 longitude and latitude values.}
 
+\item{scenario}{A character string. The name/label of a climate scenario.}
+
+\item{scenario_id}{An integer value The ID/database key of the queried
+scenario.}
+
+\item{add_if_missing}{A logical value. Should site entries in the data base
+be created if they are queried and do not exist in the data base?}
+
 \item{ignore.case}{A logical value.}
+
+\item{verbose}{A logical value.}
 }
 \value{
 A list with two elements \code{site_id} and \code{scenario_id}.

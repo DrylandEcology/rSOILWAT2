@@ -22,14 +22,14 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "SOILWAT2/generic.h"
-#include "SOILWAT2/filefuncs.h"
-#include "SOILWAT2/Times.h"
+#include "SOILWAT2/include/generic.h"
+#include "SOILWAT2/include/filefuncs.h"
+#include "SOILWAT2/include/Times.h"
 
-#include "SOILWAT2/SW_Defines.h"
-#include "SOILWAT2/SW_Times.h"
-#include "SOILWAT2/SW_Files.h"
-#include "SOILWAT2/SW_Model.h" // externs `SW_Model`
+#include "SOILWAT2/include/SW_Defines.h"
+#include "SOILWAT2/include/SW_Times.h"
+#include "SOILWAT2/include/SW_Files.h"
+#include "SOILWAT2/include/SW_Model.h" // externs `SW_Model`
 
 #include "rSW_Model.h"
 
@@ -49,7 +49,7 @@ static char *MyFileName;
 /*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
-SEXP onGet_SW_MDL() {
+SEXP onGet_SW_MDL(void) {
 	SW_MODEL *m = &SW_Model;
 
 	SEXP swYears;
@@ -140,7 +140,7 @@ void onSet_SW_MDL(SEXP SW_MDL) {
 	fhemi = TRUE;
 
 	if (!(fstartdy && fenddy && fhemi)) {
-		sprintf(errstr, "\nNot found in %s:\n", MyFileName);
+		snprintf(errstr, MAX_ERROR, "\nNot found in %s:\n", MyFileName);
 		if (!fstartdy) {
 			strcat(errstr, "\tStart Day  - using 1\n");
 			m->startstart = 1;

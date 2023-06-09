@@ -24,6 +24,9 @@ editor_options:
 ---
 \pagebreak
 
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
 
 # General setup, installation, and R recap
 
@@ -187,8 +190,8 @@ editor_options:
 ## Create base rSOILWAT2 input object
 ```{r, input_object}
   # Preferred option:
-  # All relevant site-specific paramaters and variables are set to NA
-  sw_in <- new("swInputData")
+  # All relevant site-specific parameters and variables are set to NA
+  sw_in <- rSOILWAT2::swInputData()
 
   # Quick option:
   # This approach is discouraged because it is very easy to miss to
@@ -236,6 +239,8 @@ You may organize weather data in a variety of ways:
 
 ### Access external data sets: for example, `DayMet`
 ```{r, weather_daymetr, results = "hide", message = FALSE, warning = FALSE}
+  has_daymet <- FALSE
+
   if (
     requireNamespace("daymetr") &&
     requireNamespace("curl") &&
@@ -255,38 +260,140 @@ You may organize weather data in a variety of ways:
 
     if (!inherits(dm_Laramie, "try-error")) {
       # Convert data to a `rSOILWAT2`-formatted weather object
-      vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
+      dif <- c(rep(TRUE, 3L), rep(FALSE, 11L)) # Tmax, Tmin, PPT
+      dif[13L] <- TRUE # ACTUAL_VP
+      dif[14L] <- TRUE # SHORT_WR, desc_rsds = 2
+
+      vars <- c(
+        "year", "yday",
+        "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.",
+        "vp..Pa.",
+        "srad..W.m.2."
+      )
       xdf <- dm_Laramie[["data"]][, vars]
       xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
-      colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+      xdf[, "vp..Pa."] <- xdf[, "vp..Pa."] / 1000 # convert Pa -> kPa
+      colnames(xdf) <- c(
+        "Year", "DOY",
+        "Tmax_C", "Tmin_C", "PPT_cm", "actVP_kPa", "shortWR"
+      )
 
-      wdata_dm <- rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf)
+      xdf2 <- array(
+        dim = c(nrow(xdf), 2L + length(rSOILWAT2::weather_dataColumns())),
+        dimnames = list(
+          NULL,
+          c("Year", "DOY", rSOILWAT2::weather_dataColumns())
+        )
+      )
+
+      xdf2[, colnames(xdf)] <- as.matrix(xdf)
+
 
       # Convert `DayMet`'s `noleap` calendar to proleptic Gregorian calendar
-      xdf2 <- rSOILWAT2::dbW_convert_to_GregorianYears(weatherData = wdata_dm)
-
-      wdata <- rSOILWAT2::dbW_generateWeather(
-        weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf2),
-        seed = 123
+      xdf3 <- rSOILWAT2::dbW_convert_to_GregorianYears(
+        weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(
+          weatherDF = xdf2[, -1L, drop = FALSE],
+          years = unique(xdf2[, "Year"]),
+          weatherDF_dataColumns = colnames(xdf2)[-1L],
+          round = 4L
+        )
       )
+
+      # Impute values for added leap days
+      # Use weather generator for available variables, use LOCF otherwise
+      xdf4 <- xdf3
+
+      vars_wgen <- rSOILWAT2::weatherGenerator_dataColumns()
+      needs_wgen <- which(
+        !is.finite(as.matrix(xdf4[, vars_wgen, drop = FALSE])),
+        arr.ind = TRUE
+      )
+      if (NROW(needs_wgen) > 0) {
+        tmp1 <- rSOILWAT2::dbW_generateWeather(
+          weatherData = xdf4,
+          seed = 123
+        )
+        tmp2 <- rSOILWAT2::dbW_weatherData_to_dataframe(tmp1)
+
+        xdf4[, vars_wgen][needs_wgen] <- tmp2[, vars_wgen][needs_wgen]
+      }
+
+      ids_dif <- 2L + which(dif)
+      needs_locf <- which(
+        !is.finite(as.matrix(xdf4[, ids_dif, drop = FALSE])),
+        arr.ind = TRUE
+      )
+      if (NROW(needs_locf) > 0) {
+        tmp1 <- rSW2utils::impute_df(
+          xdf4[, ids_dif, drop = FALSE],
+          imputation_type = "locf"
+        )
+
+        xdf4[, ids_dif][needs_locf] <- tmp1[needs_locf]
+      }
+
+      wdata <- rSOILWAT2::dbW_dataframe_to_weatherData(xdf4, round = 4L)
 
       # Check that weather data is well-formed
       stopifnot(rSOILWAT2::dbW_check_weatherData(wdata))
+
+      # Set use flags
+      sw_in@weather@desc_rsds <- 2L # flux density over the daylight period
+      sw_in@weather@use_cloudCoverMonthly <- FALSE # use radiation instead
+      sw_in@weather@use_windSpeedMonthly <- TRUE
+      sw_in@weather@use_humidityMonthly <- FALSE # use vapor pressure instead
+      sw_in@weather@dailyInputFlags <- dif
+
+      has_daymet <- TRUE
     }
+  }
+
+  if (!has_daymet) {
+    # We don't have live internet and
+    # were not able to obtain weather data for requested years
+    # --> instead, use data we have locally and adjust years
+    years <- sapply(wdata, function(x) slot(x, "year"))
+    rSOILWAT2::swYears_StartYear(sw_in) <- 0
+    rSOILWAT2::swYears_EndYear(sw_in) <- max(years)
+    rSOILWAT2::swYears_StartYear(sw_in) <- min(years)
+
+    # Set use flags
+    sw_in@weather@desc_rsds <- 0L
+    sw_in@weather@use_cloudCoverMonthly <- TRUE
+    sw_in@weather@use_windSpeedMonthly <- TRUE
+    sw_in@weather@use_humidityMonthly <- TRUE
+    sw_in@weather@dailyInputFlags <- c(rep(TRUE, 3L), rep(FALSE, 11L))
   }
 ```
 
+### Adjust requested simulation period to available inputs
+This may not be the case if there was no internet connection to download
+data from `DayMet`
+```{r, weather_years}
+  yrs <- rSOILWAT2::get_years_from_weatherData(wdata)
 
-### Specify first year of observed weather data
-```{r, wyr}
-  # `FirstYearHistorical` can be set to a negative value (the default),
-  # then the code will use the first simulation year.
-  # That is, the two lines below will produce identical simulations:
-  rSOILWAT2::swWeather_FirstYearHistorical(sw_in) <-
-    rSOILWAT2::swYears_StartYear(sw_in)
-  rSOILWAT2::swWeather_FirstYearHistorical(sw_in) <- -1
+  if (rSOILWAT2::swYears_EndYear(sw_in) > max(yrs)) {
+    message(
+      "Insufficient weather data to end simulations in year ",
+      rSOILWAT2::swYears_EndYear(sw_in),
+      ":\nAdjust end of simulation period to year ",
+      max(yrs),
+      "."
+    )
+    rSOILWAT2::swYears_EndYear(sw_in) <- max(yrs)
+  }
+
+  if (rSOILWAT2::swYears_StartYear(sw_in) < min(yrs)) {
+    message(
+      "Insufficient weather data to start simulations in year ",
+      rSOILWAT2::swYears_StartYear(sw_in),
+      ":\nadjust start of simulation period to year ",
+      min(yrs),
+      "."
+    )
+    rSOILWAT2::swYears_StartYear(sw_in) <- min(yrs)
+  }
 ```
-
 
 ### Calculate site climate from daily values
 ```{r, siteclim}
@@ -308,7 +415,7 @@ You may organize weather data in a variety of ways:
 
   # Assign CO2 values to rSOILWAT2 input object
   rSOILWAT2::swCarbon_Scenario(sw_in) <- co2_nametag
-  rSOILWAT2::swCarbon_CO2ppm(sw_in) <- data.matrix(co2_data)
+  rSOILWAT2::swCarbon_CO2ppm(sw_in) <- co2_data
 ```
 
 
@@ -463,8 +570,11 @@ You may organize weather data in a variety of ways:
 
 ## Assign new soil data to rSOILWAT2 input object
 ```{r, soils_final1}
+  # NRCS SSURGO `dbovendry` represents the soil density of the matric component
+  rSOILWAT2::swSite_SoilDensityInputType(sw_in) <- 0L
+
   # This fails because rooting profile values are still missing
-  try(rSOILWAT2::swSoils_Layers(sw_in) <- data.matrix(soil_new))
+  try(rSOILWAT2::swSoils_Layers(sw_in) <- soil_new)
 ```
 
 
@@ -576,7 +686,36 @@ You may organize weather data in a variety of ways:
 
 ## Assign new soil data to rSOILWAT2 input object
 ```{r, soils_final2, results = "hide"}
-  rSOILWAT2::swSoils_Layers(sw_in) <- data.matrix(soil_new)
+  rSOILWAT2::swSoils_Layers(sw_in) <- soil_new
+```
+
+
+## Estimate parameters of Soil Water Retention Curve before simulation
+Note: This step is usually not necessarily;
+instead, the default setup is that parameters are estimated automatically
+by `SOILWAT2` with the selected pedotransfer function.
+```{r, soils_swrc}
+  tmp <- rSOILWAT2::swSite_SWRCflags(sw_in)
+  swrcp <- rSOILWAT2::ptf_estimate(
+    sand = soil_new[, "sand_frac"],
+    clay = soil_new[, "clay_frac"],
+    fcoarse = soil_new[, "gravel_content"],
+    bdensity = soil_new[, "bulkDensity_g.cm.3"],
+    swrc_name = tmp["swrc_name"],
+    ptf_name = tmp["ptf_name"]
+  )
+
+
+  # Set estimated `SWRC` parameter values
+  rSOILWAT2::swSoils_SWRCp(sw_in) <- swrcp
+
+  # Declare that parameter values are already estimated
+  rSOILWAT2::swSite_hasSWRCp(sw_in) <- TRUE
+
+  if (FALSE) {
+    # Alternatively, set soil properties and SWRC parameters at once
+    rSOILWAT2::set_swSoils(sw_in) <- list(Layers = soil_new, SWRCp = swrcp)
+  }
 ```
 
 
@@ -591,7 +730,7 @@ You may organize weather data in a variety of ways:
   tr_lyrs_10cm <- c(1, 1, 1, 2, 2, 2, 2, 3, 3, 3)
 
   tr <- rSOILWAT2::prepare_TranspirationRegions(tr_lyrs = tr_lyrs_10cm)
-  rSOILWAT2::swSite_TranspirationRegions(sw_in) <- data.matrix(tr)
+  rSOILWAT2::swSite_TranspirationRegions(sw_in) <- tr
 
   # Make necessary adjustments based on soil depth and rooting profiles
   rSOILWAT2::swSite_TranspirationRegions(sw_in) <-
@@ -617,9 +756,18 @@ You may organize weather data in a variety of ways:
 
 
 ## Run SOILWAT2 for prepared site
+Note: Knitting vignette crashes with C-level messages -> run quietly
 ```{r, run_site}
-  sw_out <- rSOILWAT2::sw_exec(inputData = sw_in, weatherList = wdata)
-  sw_out2 <- rSOILWAT2::sw_exec(inputData = sw_in2, weatherList = wdata)
+  sw_out <- rSOILWAT2::sw_exec(
+    inputData = sw_in,
+    weatherList = wdata,
+    quiet = TRUE
+  )
+  sw_out2 <- rSOILWAT2::sw_exec(
+    inputData = sw_in2,
+    weatherList = wdata,
+    quiet = TRUE
+  )
 ```
 
 
@@ -665,7 +813,10 @@ You may organize weather data in a variety of ways:
   (iii) run SOILWAT2 with filled-in data
 
 ```{r, weather3}
-  wgen_coeffs <- rSOILWAT2::dbW_estimate_WGen_coefs(weatherData = wdata)
+  wgen_coeffs <- rSOILWAT2::dbW_estimate_WGen_coefs(
+    weatherData = wdata,
+    imputation_type = "locf"
+  )
 
   wdata_filled <- rSOILWAT2::dbW_generateWeather(
     weatherData = wdata_gaps,

@@ -3,6 +3,7 @@
 \docType{class}
 \name{swOutput_KEY-class}
 \alias{swOutput_KEY-class}
+\alias{swOutput_KEY}
 \alias{swOutput_KEY_Period,swOutput_KEY-method}
 \alias{swOutput_KEY_TimeStep,swOutput_KEY-method}
 \alias{swOutput_KEY_Columns,swOutput_KEY-method}

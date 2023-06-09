@@ -23,20 +23,75 @@
 
 ##############################################################################
 
+
+#' List names of currently implemented daily weather variables
+#' @return A vector of daily weather variable names.
+#' @export
+weather_dataColumns <- function() {
+  c(
+    "Tmax_C", "Tmin_C", "PPT_cm",
+    "cloudCov_pct",
+    "windSpeed_mPERs", "windSpeed_east_mPERs", "windSpeed_north_mPERs",
+    "rHavg_pct", "rHmax_pct", "rHmin_pct", "specHavg_pct", "Tdewpoint_C",
+    "actVP_kPa",
+    "shortWR"
+  )
+}
+
+#' Functions to summarize currently implemented daily weather variables
+#' @return A named vector of functions that summarize
+#' daily weather variables across time.
+#' @export
+weather_dataAggFun <- function() {
+  c(
+    "Tmax_C" = mean,
+    "Tmin_C" = mean,
+    "PPT_cm" = sum,
+    "cloudCov_pct" = mean,
+    "windSpeed_mPERs" = mean,
+    "windSpeed_east_mPERs" = mean,
+    "windSpeed_north_mPERs" = mean,
+    "rHavg_pct" = mean,
+    "rHmax_pct" = mean,
+    "rHmin_pct" = mean,
+    "specHavg_pct" = mean,
+    "Tdewpoint_C" = mean,
+    "actVP_kPa" = mean,
+    "shortWR" = mean
+  )
+}
+
 #' Class \code{"swWeatherData"}
 #'
 #' The methods listed below work on this class and the proper slot of the class
 #'   \code{\linkS4class{swInputData}}.
 #'
 #' @param object An object of class \code{\linkS4class{swWeatherData}}.
-#' @param .Object An object of class \code{\linkS4class{swWeatherData}}.
 #' @param file A character string. The file name from which to read.
-#' @param ... Further arguments to methods.
-#' @param year An integer value. The calendar year of the weather \code{data}
+#' @param weatherList A list or \code{NULL}. Each element is an object of class
+#'   \code{\link[rSOILWAT2:swWeatherData-class]{rSOILWAT2::swWeatherData}}
+#'   containing daily weather data of a specific year.
+#' @param ... Arguments to the helper constructor function.
+#'  Dots can either contain objects to copy into slots of that class
+#'  (must be named identical to the corresponding slot) or
+#'  be one object of that class (in which case it will be copied and
+#'  any missing slots will take their default values).
+#'  If dots are missing, then corresponding values of
+#'  \code{rSOILWAT2::sw_exampleData}
+#'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
+#' @slot year An integer value. The calendar year of the weather \code{data}
 #'   object.
-#' @param data A 365 x 4 or 366 x 4 matrix representing daily weather data for
-#'   one calendar \code{year} with columns \var{DOY}, \var{Tmax_C},
-#'   \var{Tmin_C}, and \var{PPT_cm}.
+#' @slot data A 365 x 15 or 366 x 15 matrix representing daily weather data for
+#'   one calendar \code{year} with columns
+#'   \var{DOY},
+#'   \var{Tmax_C}, \var{Tmin_C}, \var{PPT_cm},
+#'   \var{cloudCov_pct},
+#'   \var{windSpeed_mPERs},
+#'   \var{windSpeed_east_mPERs}, \var{windSpeed_north_mPERs},
+#'   \var{rHavg_pct}, \var{rHmax_pct}, \var{rHmin_pct},
+#'   \var{specHavg_pct}, \var{Tdewpoint_C},
+#'   \var{actVP_kPa}, and
+#'   \var{shortWR}.
 #'
 #' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
 #' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
@@ -48,75 +103,157 @@
 #' @examples
 #' showClass("swWeatherData")
 #' x <- new("swWeatherData")
+#' x <- swWeatherData()
 #'
 #' @name swWeatherData-class
 #' @export
-setClass("swWeatherData", slots = c(data = "matrix", year = "integer"))
+setClass(
+  "swWeatherData",
+  slots = c(data = "matrix", year = "integer"),
+  prototype = list(
+    # NOTE: 999 should be rSW2_glovars[["kSOILWAT2"]][["kNUM"]][["SW_MISSING"]]
+    # NOTE: 15 must be
+    # equal to 1 + rSW2_glovars[["kSOILWAT2"]][["kINT"]][["MAX_INPUT_COLUMNS"]]
+    data = array(
+      data = c(1:366, rep(NA, 366 * 15L)),
+      dim = c(366, 15L),
+      dimnames = list(
+        NULL,
+        c("DOY", weather_dataColumns())
+      )
+    ),
+    year = NA_integer_
+  )
+)
 
-swWeatherData_validity <- function(object) {
-  val <- TRUE
+setValidity(
+  "swWeatherData",
+  function(object) {
+    val <- TRUE
+    ref <- new("swWeatherData")
 
-  if (!(length(object@year) == 1 && isTRUE(is.finite(object@year)) &&
-      isTRUE(object@year >= 0))) {
-    msg <- "@year must be exactly one positive finite value."
-    val <- if (isTRUE(val)) msg else c(val, msg)
+    if (
+      !(
+        length(object@year) == 1 &&
+          (
+            isTRUE(is.finite(object@year) && object@year >= 0) ||
+              isTRUE(is.na(object@year))
+          )
+      )
+    ) {
+      msg <- "@year must be exactly one positive value or NA."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    tmp <- dim(object@data)
+    if (tmp[2] != ncol(ref@data)) {
+      msg <- paste(
+        "@data must have exactly", ncol(ref@data), "columns corresponding to",
+        toString(colnames(ref@data))
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    if (!(tmp[1] %in% c(365, 366))) {
+      msg <- "@data must 365 or 366 rows corresponding to day of year."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    val
   }
-
-  temp <- dim(object@data)
-  if (temp[2] != 4) {
-    msg <- paste("@data must have exactly 4 columns corresponding to",
-      "DOY, Tmax_C, Tmin_C, PPT_cm")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-  if (!(temp[1] %in% c(365, 366))) {
-    msg <- paste("@data must 365 or 366 rows corresponding to day of year.")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
-
-  val
-}
-setValidity("swWeatherData", swWeatherData_validity)
+)
 
 #' @rdname swWeatherData-class
 #' @export
-setMethod("initialize", signature = "swWeatherData", function(.Object, ...,
-  year = 0L, data = NULL) {
-
-  # first year of weather data
-  def <- slot(rSOILWAT2::sw_exampleData, "weatherHistory")[[1]]
-  # We don't set values for slots `year` and `data`; this is to prevent
+swWeatherData <- function(...) {
+  # We don't use default values for slots `year` and `data`; this is to prevent
   # simulation runs with accidentally incorrect values
-
-  if (is.null(data)) {
-    temp <- c(1:366,
-      rep(rSW2_glovars[["kSOILWAT2"]][["kNUM"]][["SW_MISSING"]], 366 * 3))
-    data <- matrix(temp, nrow = 366, ncol = 4)
+  def <- new("swWeatherData")
+  sns <- slotNames(def)
+  dots <- list(...)
+  if (length(dots) == 1 && inherits(dots[[1]], "swWeatherData")) {
+    # If dots are one object of this class, then convert to list of its slots
+    dots <- attributes(unclass(dots[[1]]))
   }
-  colnames(data) <- colnames(slot(def, "data"))
-  .Object@data <- data
+  dns <- names(dots)
 
-  .Object@year <- as.integer(year)
-
-  if (FALSE) {
-    # not needed because no relevant inheritance
-    .Object <- callNextMethod(.Object, ...)
+  # Guarantee names
+  if ("data" %in% dns) {
+    dimnames(dots[["data"]]) <- dimnames(slot(def, "data"))
   }
 
-  validObject(.Object)
-  .Object
-})
+  if ("year" %in% dns) {
+    dots[["year"]] <- as.integer(dots[["year"]])
+  }
+
+  do.call("new", args = c("swWeatherData", dots[dns %in% sns]))
+}
+
+
+#' @rdname sw_upgrade
+#' @export
+upgrade_weatherHistory <- function(object, verbose = FALSE) {
+  tmp <- try(dbW_check_weatherData(object, check_all = FALSE), silent = TRUE)
+  if (inherits(tmp, "try-error") || !isTRUE(tmp)) {
+    if (verbose) {
+      message("Upgrading `weatherHistory` object.")
+    }
+
+    ref <- new("swWeatherData")
+
+    object <- lapply(
+      object,
+      function(old) {
+        new <- ref
+        new@year <- old@year
+        new@data <- new@data[seq_len(nrow(old@data)), , drop = FALSE]
+        new@data[, colnames(old@data)] <- old@data
+        new
+      }
+    )
+  }
+
+  object
+}
+
 
 #' @rdname swWeatherData-class
 #' @export
-setMethod("swReadLines",
+weatherHistory <- function(weatherList = NULL) {
+  if (isTRUE(dbW_check_weatherData(weatherList))) {
+    weatherList
+  } else {
+    list(swWeatherData())
+  }
+}
+
+
+#' @rdname swWeatherData-class
+#' @export
+setMethod(
+  "swReadLines",
   signature = c(object = "swWeatherData", file = "character"),
   function(object, file) {
-    object@year <- as.integer(strsplit(x = basename(file), split = ".",
-      fixed = TRUE)[[1]][2])
-    data <- utils::read.table(file, header = FALSE, comment.char = "#",
-      blank.lines.skip = TRUE, sep = "\t")
+    .Deprecated("C_rSW2_readAllWeatherFromDisk")
+    warning("swReadLines works only with traditional weather data.")
+
+    object@year <- as.integer(
+      strsplit(
+        x = basename(file),
+        split = ".",
+      fixed = TRUE
+      )[[1]][2]
+    )
+    data <- utils::read.table(
+      file,
+      header = FALSE,
+      comment.char = "#",
+      blank.lines.skip = TRUE,
+      sep = "\t"
+    )
+    stopifnot(ncol(data) != 4L)
     colnames(data) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
-    object@data <- as.matrix(data)
+    object@data[] <- NA
+    object@data[, colnames(data)] <- as.matrix(data)
 
     object
 })

@@ -7,10 +7,10 @@
 dbW_updateSites(Site_ids, site_data, ignore.case = FALSE, verbose = FALSE)
 }
 \arguments{
-\item{Site_ids}{An integer vector. The IDs/database keys of the queried site.}
+\item{Site_ids}{An integer vector. The IDs/database keys of the queried sites}
 
 \item{site_data}{A data.frame. The site data with column names
-\var{Latitude}, \var{Longitude}, and \var{Label}.}
+\code{Longitude}, \code{Latitude}, and \code{Label}.}
 
 \item{ignore.case}{A logical value.}
 

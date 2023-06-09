@@ -1,4 +1,3 @@
-context("iOUT macros")
 # Consider moving these unit tests to the SOILWAT2-repository once we can
 # run unit tests that include `SW_Output.h`
 

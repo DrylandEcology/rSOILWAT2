@@ -3,25 +3,31 @@
 \docType{class}
 \name{swMarkov-class}
 \alias{swMarkov-class}
-\alias{initialize,swMarkov-method}
+\alias{swMarkov}
 \alias{get_Markov,swMarkov-method}
+\alias{get_swMarkov,swMarkov-method}
 \alias{swMarkov_Prob,swMarkov-method}
 \alias{swMarkov_Conv,swMarkov-method}
 \alias{set_Markov<-,swMarkov-method}
+\alias{set_swMarkov<-,swMarkov-method}
 \alias{swMarkov_Prob<-,swMarkov-method}
 \alias{swMarkov_Conv<-,swMarkov-method}
 \alias{swReadLines,swMarkov,character-method}
 \title{Class \code{"swMarkov"}}
 \usage{
-\S4method{initialize}{swMarkov}(.Object, ...)
+swMarkov(...)
 
 \S4method{get_Markov}{swMarkov}(object)
+
+\S4method{get_swMarkov}{swMarkov}(object)
 
 \S4method{swMarkov_Prob}{swMarkov}(object)
 
 \S4method{swMarkov_Conv}{swMarkov}(object)
 
 \S4method{set_Markov}{swMarkov}(object) <- value
+
+\S4method{set_swMarkov}{swMarkov}(object) <- value
 
 \S4method{swMarkov_Prob}{swMarkov}(object) <- value
 
@@ -30,9 +36,14 @@
 \S4method{swReadLines}{swMarkov,character}(object, file)
 }
 \arguments{
-\item{.Object}{An object of class \code{\linkS4class{swMarkov}}.}
-
-\item{...}{Further arguments to methods.}
+\item{...}{Arguments to the helper constructor function.
+Dots can either contain objects to copy into slots of that class
+(must be named identical to the corresponding slot) or
+be one object of that class (in which case it will be copied and
+any missing slots will take their default values).
+If dots are missing, then corresponding values of
+\code{rSOILWAT2::sw_exampleData}
+(i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
 
 \item{object}{An object of class \code{\linkS4class{swMarkov}}.}
 
@@ -47,6 +58,7 @@ The methods listed below work on this class and the proper slot of the class
 \examples{
 showClass("swMarkov")
 x <- new("swMarkov")
+x <- swMarkov()
 
 }
 \seealso{

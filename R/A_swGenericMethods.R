@@ -26,6 +26,7 @@
 ##########################GENERIC METHODS/FUNCTIONS############################
 #' \code{swReadLines}
 #' @param object An object of a class such \code{\linkS4class{swInputData}}.
+#' @param file A character string. The file path.
 #' @seealso \code{\linkS4class{swInputData}}
 setGeneric("swReadLines", function(object, file) standardGeneric("swReadLines"))
 
@@ -40,21 +41,35 @@ rSW2_version <- function() {
 #' @param object An object of class \code{\linkS4class{swInputData}} or
 #'   \code{\linkS4class{swOutput}}.
 #'
+#' @return A character string representing the version number (or \code{NA}).
+#'
 #' @seealso \code{\link{check_version}}
 #'
 #' @examples
 #' get_version(rSOILWAT2::sw_exampleData)
 #' get_version(sw_exec(rSOILWAT2::sw_exampleData))
+#' get_version(as.numeric_version("4.1.3"))
+#' get_version(packageVersion("rSOILWAT2"))
 #'
 #' @export
 setGeneric("get_version", function(object) standardGeneric("get_version"))
 
 #' @rdname get_version
 setMethod(
-  f = "get_version",
+  "get_version",
   signature = "ANY",
   definition = function(object) {
-    NA
+    tmp <- try(inherits(object, "numeric_version"), silent = TRUE)
+    if (inherits(tmp, "try-error") || !isTRUE(tmp)) {
+      tmp <- try(object@version, silent = TRUE)
+      if (inherits(tmp, "try-error")) {
+        NA_character_
+      } else {
+        as.character(as.numeric_version(tmp))
+      }
+    } else {
+      as.character(object) # numeric version
+    }
   }
 )
 
@@ -153,10 +168,11 @@ setGeneric("get_timestamp", function(object) standardGeneric("get_timestamp"))
 
 #' @rdname get_timestamp
 setMethod(
-  f = "get_timestamp",
+  "get_timestamp",
   signature = "ANY",
   definition = function(object) {
-    NA
+    tmp <- try(object@timestamp, silent = TRUE)
+    if (inherits(tmp, "try-error")) NA_real_ else tmp
   }
 )
 
@@ -175,6 +191,63 @@ setMethod(
 format_timestamp <- function(object) {
   as.POSIXct(get_timestamp(object), origin = "1970-01-01 00:00.00 UTC")
 }
+
+
+#------ Upgrade sw objects to newer rSOILWAT2 versions ------
+
+#' Upgrade a `rSOILWAT2`-classed object from an older package version
+#'
+#' Missing slots and elements are added and
+#' take the new default values from `SOILWAT2`.
+#'
+#' @param object An object of a `rSOILWAT2` class.
+#' @param verbose A logical value.
+#'
+#' @return The upgraded `object`, if needed, to match the current version
+#'   with missing slots and elements filled with default values.
+#'
+#' @section Details:
+#' List of changes:
+#'   * Changes with `v6.0.0`:
+#'       * class [`swSite-class`]:
+#'         new slots `"swrc_flags"`, `"has_swrcp"`, and
+#'         `"SoilDensityInputType"`
+#'       * class [`swSoils-class`]: new slot `"SWRCp"`
+#'       * class [`swFiles-class`]:
+#'         `SWRC` parameter input file added as file 6 for a new total of 23
+#'       * class [`swProd-class`]: new slot `"veg_method"`
+#'   * Changes with `v5.4.0`:
+#'       * classes [`swEstabSpecies-class`] and [`swEstab-class`]:
+#'         new slot `"vegType"`
+#'   * Changes with `v5.2.0`:
+#'       * class [`swOUT-class`]:
+#'         `"FROZEN"` added as `outkey` 28 for a new total of 32
+#'   * Changes with `v3.1.0`:
+#'       * class [`swOUT-class`]:
+#'         `"BIOMASS"` added as `outkey` 31 for a new total of 31
+#'   * Changes with `v2.3.0`:
+#'       * class [`swOUT-class`]:
+#'         `"SWA"` added as `outkey` 8 for a new total of 30
+#'
+#' @examples
+#'   x <- sw_upgrade(rSOILWAT2::sw_exampleData, verbose = TRUE)
+#'
+#' @md
+#' @exportMethod sw_upgrade
+setGeneric(
+  "sw_upgrade",
+  function(object, verbose = FALSE) standardGeneric("sw_upgrade")
+)
+
+#' @rdname sw_upgrade
+setMethod(
+  "sw_upgrade",
+  signature = "ANY",
+  definition = function(object, verbose = FALSE) {
+    object
+  }
+)
+
 
 
 #########FILES##########
@@ -206,7 +279,10 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swFiles}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}
-setGeneric("swFiles_Years", function(object) standardGeneric("swFiles_Years"))
+setGeneric(
+  "swFiles_Years",
+  function(object) standardGeneric("swFiles_Years")
+)
 
 #' \code{swFiles_LogFile}
 #' @param object An object of class \code{\linkS4class{swFiles}} or
@@ -230,7 +306,19 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swFiles}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}
-setGeneric("swFiles_Soils", function(object) standardGeneric("swFiles_Soils"))
+setGeneric(
+  "swFiles_Soils",
+  function(object) standardGeneric("swFiles_Soils")
+)
+
+#' \code{swFiles_SWRCp}
+#' @param object An object of class \code{\linkS4class{swFiles}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swFiles_SWRCp",
+  function(object) standardGeneric("swFiles_SWRCp")
+)
 
 #' \code{swFiles_WeatherSetup}
 #' @param object An object of class \code{\linkS4class{swFiles}} or
@@ -263,25 +351,37 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swFiles}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}
-setGeneric("swFiles_Cloud", function(object) standardGeneric("swFiles_Cloud"))
+setGeneric(
+  "swFiles_Cloud",
+  function(object) standardGeneric("swFiles_Cloud")
+)
 
 #' \code{swFiles_Prod}
 #' @param object An object of class \code{\linkS4class{swFiles}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}
-setGeneric("swFiles_Prod", function(object) standardGeneric("swFiles_Prod"))
+setGeneric(
+  "swFiles_Prod",
+  function(object) standardGeneric("swFiles_Prod")
+)
 
 #' \code{swFiles_Estab}
 #' @param object An object of class \code{\linkS4class{swFiles}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}
-setGeneric("swFiles_Estab", function(object) standardGeneric("swFiles_Estab"))
+setGeneric(
+  "swFiles_Estab",
+  function(object) standardGeneric("swFiles_Estab")
+)
 
 #' \code{swFiles_Carbon}
 #' @param object An object of class \code{\linkS4class{swFiles}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}
-setGeneric("swFiles_Carbon", function(object) standardGeneric("swFiles_Carbon"))
+setGeneric(
+  "swFiles_Carbon",
+  function(object) standardGeneric("swFiles_Carbon")
+)
 
 #' \code{swFiles_SWCsetup}
 #' @param object An object of class \code{\linkS4class{swFiles}} or
@@ -296,7 +396,10 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swFiles}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}
-setGeneric("swFiles_Output", function(object) standardGeneric("swFiles_Output"))
+setGeneric(
+  "swFiles_Output",
+  function(object) standardGeneric("swFiles_Output")
+)
 
 #' \code{swFiles_WeatherPrefix}
 #' @param object An object of class \code{\linkS4class{swFiles}} or
@@ -316,9 +419,12 @@ setGeneric(
   function(object) standardGeneric("swFiles_OutputPrefix")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swFiles<-}} doesn't work.
 #' \code{set_swFiles}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swFiles<-}} doesn't work.
+#' @param object An object of class \code{\linkS4class{swFiles}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
 #' @export
 setGeneric(
   "set_swFiles",
@@ -326,9 +432,7 @@ setGeneric(
 )
 
 #' \code{set_swFiles<-}
-#' @param object An object of class \code{\linkS4class{swFiles}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
+#' @inheritParams set_swFiles
 #' @seealso \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "set_swFiles<-",
@@ -393,6 +497,16 @@ setGeneric(
 setGeneric(
   "swFiles_Soils<-",
   function(object, value) standardGeneric("swFiles_Soils<-")
+)
+
+#' \code{swFiles_SWRCp<-}
+#' @param object An object of class \code{\linkS4class{swFiles}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swFiles}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swFiles_SWRCp<-",
+  function(object, value) standardGeneric("swFiles_SWRCp<-")
 )
 
 #' \code{swFiles_WeatherSetup<-}
@@ -511,7 +625,10 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swYears}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swYears}} and \code{\linkS4class{swInputData}}
-setGeneric("get_swYears", function(object) standardGeneric("get_swYears"))
+setGeneric(
+  "get_swYears",
+  function(object) standardGeneric("get_swYears")
+)
 
 #' \code{swYears_StartYear}
 #' @param object An object of class \code{\linkS4class{swYears}} or
@@ -544,7 +661,10 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swYears}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swYears}} and \code{\linkS4class{swInputData}}
-setGeneric("swYears_EDOEY", function(object) standardGeneric("swYears_EDOEY"))
+setGeneric(
+  "swYears_EDOEY",
+  function(object) standardGeneric("swYears_EDOEY")
+)
 
 #' \code{swYears_isNorth}
 #' @param object An object of class \code{\linkS4class{swYears}} or
@@ -555,9 +675,14 @@ setGeneric(
   function(object) standardGeneric("swYears_isNorth")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swYears<-}} doesn't work.
 #' \code{set_swYears}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swYears<-}} doesn't work.
+#'
+#' @param object An object of class \code{\linkS4class{swYears}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#'
 #' @export
 setGeneric(
   "set_swYears",
@@ -565,9 +690,7 @@ setGeneric(
 )
 
 #' \code{set_swYears<-}
-#' @param object An object of class \code{\linkS4class{swYears}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
+#' @inheritParams set_swYears
 #' @seealso \code{\linkS4class{swYears}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "set_swYears<-",
@@ -629,7 +752,10 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swWeather}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swWeather}} and \code{\linkS4class{swInputData}}
-setGeneric("get_swWeather", function(object) standardGeneric("get_swWeather"))
+setGeneric(
+  "get_swWeather",
+  function(object) standardGeneric("get_swWeather")
+)
 
 #' \code{swWeather_DaysRunningAverage}
 #' @param object An object of class \code{\linkS4class{swWeather}} or
@@ -703,9 +829,12 @@ setGeneric(
   function(object) standardGeneric("swWeather_MonScalingParams")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swWeather<-}} doesn't work.
 #' \code{set_swWeather}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swWeather<-}} doesn't work.
+#' @param object An object of class \code{\linkS4class{swWeather}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
 #' @export
 setGeneric(
   "set_swWeather",
@@ -713,9 +842,7 @@ setGeneric(
 )
 
 #' \code{set_swWeather<-}
-#' @param object An object of class \code{\linkS4class{swWeather}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
+#' @inheritParams set_swWeather
 #' @seealso \code{\linkS4class{swWeather}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "set_swWeather<-",
@@ -809,35 +936,75 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swMarkov}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swMarkov}} and \code{\linkS4class{swInputData}}
-setGeneric("get_Markov", function(object) standardGeneric("get_Markov"))
+setGeneric(
+  "get_Markov",
+  function(object) standardGeneric("get_Markov")
+)
+
+#' \code{get_swMarkov}
+#' @param object An object of class \code{\linkS4class{swMarkov}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swMarkov}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "get_swMarkov",
+  function(object) standardGeneric("get_swMarkov")
+)
 
 #' \code{swMarkov_Prob}
 #' @param object An object of class \code{\linkS4class{swMarkov}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swMarkov}} and \code{\linkS4class{swInputData}}
-setGeneric("swMarkov_Prob", function(object) standardGeneric("swMarkov_Prob"))
+setGeneric(
+  "swMarkov_Prob",
+  function(object) standardGeneric("swMarkov_Prob")
+)
 
 #' \code{swMarkov_Conv}
 #' @param object An object of class \code{\linkS4class{swMarkov}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swMarkov}} and \code{\linkS4class{swInputData}}
-setGeneric("swMarkov_Conv", function(object) standardGeneric("swMarkov_Conv"))
+setGeneric(
+  "swMarkov_Conv",
+  function(object) standardGeneric("swMarkov_Conv")
+)
 
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_Markov<-}} doesn't work.
 #' \code{set_Markov}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_Markov<-}} doesn't work.
-#' @export
-setGeneric("set_Markov", function(object, value) standardGeneric("set_Markov"))
-
-#' \code{set_Markov<-}
 #' @param object An object of class \code{\linkS4class{swMarkov}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @param value A value to assign to a specific slot of the \code{object}.
+#' @export
+setGeneric(
+  "set_Markov",
+  function(object, value) standardGeneric("set_Markov")
+)
+
+#' \code{set_Markov<-}
+#' @inheritParams set_Markov
 #' @seealso \code{\linkS4class{swMarkov}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "set_Markov<-",
   function(object, value) standardGeneric("set_Markov<-")
+)
+
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swMarkov<-}} doesn't work.
+#' \code{set_swMarkov}
+#' @inheritParams set_Markov
+#' @export
+setGeneric(
+  "set_swMarkov",
+  function(object, value) standardGeneric("set_swMarkov")
+)
+
+#' \code{set_swMarkov<-}
+#' @inheritParams set_Markov
+#' @seealso \code{\linkS4class{swMarkov}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "set_swMarkov<-",
+  function(object, value) standardGeneric("set_swMarkov<-")
 )
 
 #' \code{swMarkov_Prob<-}
@@ -874,6 +1041,7 @@ setGeneric(
 #' \code{get_swWeatherData}
 #' @param object An object of class \code{\linkS4class{swWeatherData}} or
 #'   \code{\linkS4class{swInputData}}.
+#' @param year An numeric value. The calendar year.
 #' @seealso \code{\linkS4class{swWeatherData}} and
 #'   \code{\linkS4class{swInputData}}
 setGeneric(
@@ -881,9 +1049,11 @@ setGeneric(
   function(object, year) standardGeneric("get_swWeatherData")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_WeatherHistory<-}} doesn't work.
 #' \code{set_WeatherHistory}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_WeatherHistory<-}} doesn't work.
+#' @param object An object of class \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
 #' @export
 setGeneric(
   "set_WeatherHistory",
@@ -891,17 +1061,19 @@ setGeneric(
 )
 
 #' \code{set_WeatherHistory<-}
-#' @param object An object of class \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
+#' @inheritParams set_WeatherHistory
 #' @seealso \code{\linkS4class{swInputData}}
 setGeneric(
   "set_WeatherHistory<-",
   function(object, value) standardGeneric("set_WeatherHistory<-")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swWeatherData<-}} doesn't work.
 #' \code{set_swWeatherData}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swWeatherData<-}} doesn't work.
+#' @param object An object of class \code{\linkS4class{swWeatherData}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
 #' @export
 setGeneric(
   "set_swWeatherData",
@@ -909,9 +1081,7 @@ setGeneric(
 )
 
 #' \code{set_swWeatherData<-}
-#' @param object An object of class \code{\linkS4class{swWeatherData}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
+#' @inheritParams set_swWeatherData
 #' @seealso \code{\linkS4class{swWeatherData}} and
 #'   \code{\linkS4class{swInputData}}
 setGeneric(
@@ -925,7 +1095,10 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swCloud}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swCloud}} and \code{\linkS4class{swInputData}}
-setGeneric("get_swCloud", function(object) standardGeneric("get_swCloud"))
+setGeneric(
+  "get_swCloud",
+  function(object) standardGeneric("get_swCloud")
+)
 
 #' \code{swCloud_SkyCover}
 #' @param object An object of class \code{\linkS4class{swCloud}} or
@@ -972,9 +1145,12 @@ setGeneric(
   function(object) standardGeneric("swCloud_RainEvents")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swCloud<-}} doesn't work.
 #' \code{set_swCloud}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swCloud<-}} doesn't work.
+#' @param object An object of class \code{\linkS4class{swCloud}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
 #' @export
 setGeneric(
   "set_swCloud",
@@ -982,9 +1158,7 @@ setGeneric(
 )
 
 #' \code{set_swCloud<-}
-#' @param object An object of class \code{\linkS4class{swCloud}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
+#' @inheritParams set_swCloud
 #' @seealso \code{\linkS4class{swCloud}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "set_swCloud<-",
@@ -1047,7 +1221,10 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swProd}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
-setGeneric("get_swProd", function(object) standardGeneric("get_swProd"))
+setGeneric(
+  "get_swProd",
+  function(object) standardGeneric("get_swProd")
+)
 
 #' \code{swProd_Composition}
 #' @param object An object of class \code{\linkS4class{swProd}} or
@@ -1062,7 +1239,10 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swProd}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
-setGeneric("swProd_Albedo", function(object) standardGeneric("swProd_Albedo"))
+setGeneric(
+  "swProd_Albedo",
+  function(object) standardGeneric("swProd_Albedo")
+)
 
 #' \code{swProd_CanopyHeight}
 #' @param object An object of class \code{\linkS4class{swProd}} or
@@ -1113,7 +1293,10 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swProd}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
-setGeneric("swProd_Shade", function(object) standardGeneric("swProd_Shade"))
+setGeneric(
+  "swProd_Shade",
+  function(object) standardGeneric("swProd_Shade")
+)
 
 #' \code{swProd_HydrRedstro_use}
 #' @param object An object of class \code{\linkS4class{swProd}} or
@@ -1197,16 +1380,20 @@ setGeneric(
   function(object) standardGeneric("swProd_MonProd_forb")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swProd<-}} doesn't work.
 #' \code{set_swProd}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swProd<-}} doesn't work.
-#' @export
-setGeneric("set_swProd", function(object, value) standardGeneric("set_swProd"))
-
-#' \code{set_swProd<-}
 #' @param object An object of class \code{\linkS4class{swProd}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @param value A value to assign to a specific slot of the \code{object}.
+#' @export
+setGeneric(
+  "set_swProd",
+  function(object, value) standardGeneric("set_swProd")
+)
+
+#' \code{set_swProd<-}
+#' @inheritParams set_swProd
 #' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "set_swProd<-",
@@ -1390,8 +1577,43 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swSite}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
-setGeneric("get_swSite", function(object) standardGeneric("get_swSite")
+setGeneric(
+  "get_swSite",
+  function(object) standardGeneric("get_swSite")
 )
+
+#' Names of `SWRC` and `PTF`
+#'
+#' @param object An object of class [swSite-class] or [swInputData-class].
+#'
+#' @return A character vector with two elements `"swrc_name"` and `"ptf_name"`.
+#'
+#' @md
+#' @exportMethod swSite_SWRCflags
+setGeneric(
+  "swSite_SWRCflags",
+  function(object) standardGeneric("swSite_SWRCflags")
+)
+
+#' Are `SWRC` parameters provided in `SWRCp`?
+#'
+#' Set to `TRUE` once `SWRCp` are set.
+#'
+#' @param object An object of class [swSite-class] or [swInputData-class].
+#'
+#' @return A logical value.
+#' `TRUE` if `SWRC` parameters are provided in `SWRCp`;
+#' `FALSE` if `SWRCp` should be estimated during a simulation run
+#' via specified pedotransfer function
+#' (see `"ptf_name"` of [swSite_SWRCflags()]).
+#'
+#' @md
+#' @exportMethod swSite_hasSWRCp
+setGeneric(
+  "swSite_hasSWRCp",
+  function(object) standardGeneric("swSite_hasSWRCp")
+)
+
 
 #' \code{swSite_SWClimits}
 #' @param object An object of class \code{\linkS4class{swSite}} or
@@ -1483,6 +1705,16 @@ setGeneric(
   function(object) standardGeneric("swSite_SoilTemperatureConsts")
 )
 
+#' \code{swSite_SoilTemperatureFlag}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_SoilDensityInputType",
+  function(object) standardGeneric("swSite_SoilDensityInputType")
+)
+
+
 #' \code{swSite_TranspirationRegions}
 #' @param object An object of class \code{\linkS4class{swSite}} or
 #'   \code{\linkS4class{swInputData}}.
@@ -1492,20 +1724,46 @@ setGeneric(
   function(object) standardGeneric("swSite_TranspirationRegions")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swSite<-}} doesn't work.
 #' \code{set_swSite}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swSite<-}} doesn't work.
-#' @export
-setGeneric("set_swSite", function(object, value) standardGeneric("set_swSite"))
-
-#' \code{set_swSite<-}
 #' @param object An object of class \code{\linkS4class{swSite}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @param value A value to assign to a specific slot of the \code{object}.
+#' @export
+setGeneric(
+  "set_swSite",
+  function(object, value) standardGeneric("set_swSite")
+)
+
+#' \code{set_swSite<-}
+#' @inheritParams set_swSite
 #' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "set_swSite<-",
   function(object, value) standardGeneric("set_swSite<-")
+)
+
+#' @rdname swSite_SWRCflags
+#'
+#' @param value A character vector with two elements for
+#' `"swrc_name"` and `"ptf_name"`.
+#'
+#' @exportMethod swSite_SWRCflags<-
+#' @md
+setGeneric(
+  "swSite_SWRCflags<-",
+  function(object, value) standardGeneric("swSite_SWRCflags<-")
+)
+
+#' @rdname swSite_hasSWRCp
+#'
+#' @param value A logical value.
+#'
+#' @exportMethod swSite_hasSWRCp<-
+setGeneric(
+  "swSite_hasSWRCp<-",
+  function(object, value) standardGeneric("swSite_hasSWRCp<-")
 )
 
 #' \code{swSite_SWClimits<-}
@@ -1608,6 +1866,16 @@ setGeneric(
   function(object, value) standardGeneric("swSite_SoilTemperatureConsts<-")
 )
 
+#' \code{swSite_SoilDensityInputType<-}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_SoilDensityInputType<-",
+  function(object, value) standardGeneric("swSite_SoilDensityInputType<-")
+)
+
 #' \code{swSite_TranspirationRegions<-}
 #' @param object An object of class \code{\linkS4class{swSite}} or
 #'   \code{\linkS4class{swInputData}}.
@@ -1624,17 +1892,41 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swSoils}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swSoils}} and \code{\linkS4class{swInputData}}
-setGeneric("get_swSoils", function(object) standardGeneric("get_swSoils"))
+setGeneric(
+  "get_swSoils",
+  function(object) standardGeneric("get_swSoils")
+)
 
-#' \code{swSoils_Layers}
+#' Interact with the soil layer data frame
+#'
+#' @param object An object of class [`swSoils`] or [swInputData-class].
+#'
+#' @md
+#' @exportMethod swSoils_Layers
+setGeneric(
+  "swSoils_Layers",
+  function(object) standardGeneric("swSoils_Layers")
+)
+
+#' `SWRC` parameters
+#'
+#' @param object An object of class [`swSoils`] or [swInputData-class].
+#'
+#' @return A data matrix.
+#'
+#' @md
+#' @exportMethod swSoils_SWRCp
+setGeneric(
+  "swSoils_SWRCp",
+  function(object) standardGeneric("swSoils_SWRCp")
+)
+
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swSoils<-}} doesn't work.
+#' \code{set_swSoils}
 #' @param object An object of class \code{\linkS4class{swSoils}} or
 #'   \code{\linkS4class{swInputData}}.
-#' @seealso \code{\linkS4class{swSoils}} and \code{\linkS4class{swInputData}}
-setGeneric("swSoils_Layers", function(object) standardGeneric("swSoils_Layers"))
-
-#' \code{set_swSoils}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swSoils<-}} doesn't work.
+#' @param value A value to assign to a specific slot of the \code{object}.
 #' @export
 setGeneric(
   "set_swSoils",
@@ -1642,24 +1934,35 @@ setGeneric(
 )
 
 #' \code{set_swSoils<-}
-#' @param object An object of class \code{\linkS4class{swSoils}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
+#' @inheritParams set_swSoils
 #' @seealso \code{\linkS4class{swSoils}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "set_swSoils<-",
   function(object, value) standardGeneric("set_swSoils<-")
 )
 
-#' \code{swSoils_Layers<-}
-#' @param object An object of class \code{\linkS4class{swSoils}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
-#' @seealso \code{\linkS4class{swSoils}} and \code{\linkS4class{swInputData}}
+#' @rdname swSoils_Layers
+#'
+#' @param value An object that can be converted to a data matrix and represents
+#' required soil layer information.
+#'
+#' @exportMethod swSoils_Layers<-
 setGeneric(
   "swSoils_Layers<-",
   function(object, value) standardGeneric("swSoils_Layers<-")
 )
+
+#' @rdname swSoils_SWRCp
+#'
+#' @param value An object that can be converted to a data matrix and represents
+#' required `SWRC` parameters.
+#'
+#' @exportMethod swSoils_SWRCp<-
+setGeneric(
+  "swSoils_SWRCp<-",
+  function(object, value) standardGeneric("swSoils_SWRCp<-")
+)
+
 ########################
 
 #########ESTAB##########
@@ -1667,7 +1970,10 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swEstab}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swEstab}} and \code{\linkS4class{swInputData}}
-setGeneric("get_swEstab", function(object) standardGeneric("get_swEstab"))
+setGeneric(
+  "get_swEstab",
+  function(object) standardGeneric("get_swEstab")
+)
 
 #' \code{swEstab_useEstab}
 #' @param object An object of class \code{\linkS4class{swEstab}} or
@@ -1706,7 +2012,10 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swCarbon}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swCarbon}} and \code{\linkS4class{swInputData}}
-setGeneric("get_swCarbon", function(object) standardGeneric("get_swCarbon"))
+setGeneric(
+  "get_swCarbon",
+  function(object) standardGeneric("get_swCarbon")
+)
 
 #' \code{swCarbon_Use_Bio}
 #' @param object An object of class \code{\linkS4class{swCarbon}} or
@@ -1753,9 +2062,12 @@ setGeneric(
   function(object) standardGeneric("swCarbon_CO2ppm")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swCarbon<-}} doesn't work.
 #' \code{set_swCarbon}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swCarbon<-}} doesn't work.
+#' @param object An object of class \code{\linkS4class{swCarbon}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
 #' @export
 setGeneric(
   "set_swCarbon",
@@ -1763,9 +2075,7 @@ setGeneric(
 )
 
 #' \code{set_swCarbon<-}
-#' @param object An object of class \code{\linkS4class{swCarbon}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
+#' @inheritParams set_swCarbon
 #' @seealso \code{\linkS4class{swCarbon}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "set_swCarbon<-",
@@ -1828,19 +2138,28 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swSWC}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swSWC}} and \code{\linkS4class{swInputData}}
-setGeneric("get_swSWC", function(object) standardGeneric("get_swSWC"))
+setGeneric(
+  "get_swSWC",
+  function(object) standardGeneric("get_swSWC")
+)
 
 #' \code{swSWC_use}
 #' @param object An object of class \code{\linkS4class{swSWC}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swSWC}} and \code{\linkS4class{swInputData}}
-setGeneric("swSWC_use", function(object) standardGeneric("swSWC_use"))
+setGeneric(
+  "swSWC_use",
+  function(object) standardGeneric("swSWC_use")
+)
 
 #' \code{swSWC_prefix}
 #' @param object An object of class \code{\linkS4class{swSWC}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swSWC}} and \code{\linkS4class{swInputData}}
-setGeneric("swSWC_prefix", function(object) standardGeneric("swSWC_prefix"))
+setGeneric(
+  "swSWC_prefix",
+  function(object) standardGeneric("swSWC_prefix")
+)
 
 #' \code{swSWC_FirstYear}
 #' @param object An object of class \code{\linkS4class{swSWC}} or
@@ -1855,7 +2174,10 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swSWC}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swSWC}} and \code{\linkS4class{swInputData}}
-setGeneric("swSWC_Method", function(object) standardGeneric("swSWC_Method"))
+setGeneric(
+  "swSWC_Method",
+  function(object) standardGeneric("swSWC_Method")
+)
 
 #' \code{swSWC_HistoricList}
 #' @param object An object of class \code{\linkS4class{swSWC}} or
@@ -1869,22 +2191,27 @@ setGeneric(
 #' \code{swSWC_HistoricData}
 #' @param object An object of class \code{\linkS4class{swSWC}} or
 #'   \code{\linkS4class{swInputData}}.
+#' @param year An numeric value. The calendar year.
 #' @seealso \code{\linkS4class{swSWC}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "swSWC_HistoricData",
   function(object, year) standardGeneric("swSWC_HistoricData")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swSWC<-}} doesn't work.
 #' \code{set_swSWC}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swSWC<-}} doesn't work.
-#' @export
-setGeneric("set_swSWC", function(object, value) standardGeneric("set_swSWC"))
-
-#' \code{set_swSWC<-}
 #' @param object An object of class \code{\linkS4class{swSWC}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @param value A value to assign to a specific slot of the \code{object}.
+#' @export
+setGeneric(
+  "set_swSWC",
+  function(object, value) standardGeneric("set_swSWC")
+)
+
+#' \code{set_swSWC<-}
+#' @inheritParams set_swSWC
 #' @seealso \code{\linkS4class{swSWC}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "set_swSWC<-",
@@ -1957,13 +2284,19 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swOUT}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swOUT}} and \code{\linkS4class{swInputData}}
-setGeneric("get_swOUT", function(object) standardGeneric("get_swOUT"))
+setGeneric(
+  "get_swOUT",
+  function(object) standardGeneric("get_swOUT")
+)
 
 #' \code{swOUT_TimeStep}
 #' @param object An object of class \code{\linkS4class{swOUT}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swOUT}} and \code{\linkS4class{swInputData}}
-setGeneric("swOUT_TimeStep", function(object) standardGeneric("swOUT_TimeStep"))
+setGeneric(
+  "swOUT_TimeStep",
+  function(object) standardGeneric("swOUT_TimeStep")
+)
 
 #' \code{swOUT_OutputSeparator}
 #' @param object An object of class \code{\linkS4class{swOUT}} or
@@ -1974,16 +2307,20 @@ setGeneric(
   function(object) standardGeneric("swOUT_OutputSeparator")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swOUT<-}} doesn't work.
 #' \code{set_swOUT}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{set_swOUT<-}} doesn't work.
-#' @export
-setGeneric("set_swOUT", function(object, value) standardGeneric("set_swOUT"))
-
-#' \code{set_swOUT<-}
 #' @param object An object of class \code{\linkS4class{swOUT}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @param value A value to assign to a specific slot of the \code{object}.
+#' @export
+setGeneric(
+  "set_swOUT",
+  function(object, value) standardGeneric("set_swOUT")
+)
+
+#' \code{set_swOUT<-}
+#' @inheritParams set_swOUT
 #' @seealso \code{\linkS4class{swOUT}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "set_swOUT<-",
@@ -2000,9 +2337,14 @@ setGeneric(
   function(object, value) standardGeneric("swOUT_TimeStep<-")
 )
 
+# Need to define and export this generic method -- otherwise,
+# \code{\link{swOUT_TimeStepsForEveryKey<-}} doesn't work.
 #' \code{swOUT_TimeStepsForEveryKey}
-#' Need to define and export this generic method -- otherwise,
-#' \code{\link{swOUT_TimeStepsForEveryKey<-}} doesn't work.
+#'
+#' @param object An object of class \code{\linkS4class{swOUT}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#'
 #' @export
 setGeneric(
   "swOUT_TimeStepsForEveryKey",
@@ -2010,9 +2352,7 @@ setGeneric(
 )
 
 #' \code{swOUT_TimeStepsForEveryKey<-}
-#' @param object An object of class \code{\linkS4class{swOUT}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
+#' @inheritParams swOUT_TimeStepsForEveryKey
 #' @seealso \code{\linkS4class{swOUT}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "swOUT_TimeStepsForEveryKey<-",
@@ -2030,20 +2370,27 @@ setGeneric(
 )
 
 #' Activate/deactivate an output slot (\var{swOUT_OutKey})
+#'
 #' @param object An object of class \code{\linkS4class{swOUT}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @param value A value to assign to a specific slot of the \code{object}.
+#'
 #' @seealso
 #'   \code{\linkS4class{swOUT}}, \code{\linkS4class{swInputData}}, and
 #'   \code{\link{sw_exec}}
-#' @aliases activate_swOUT_OutKey, deactivate_swOUT_OutKey
-#' @name activate_swOUT_OutKey
+#'
+#' @aliases activate_swOUT_OutKey
+#'   deactivate_swOUT_OutKey deactivate_swOUT_OutKey-set
+#' @name activate_swOUT_OutKey-set
+NULL
+
+#' @rdname activate_swOUT_OutKey-set
 setGeneric(
   "activate_swOUT_OutKey<-",
   function(object, value) standardGeneric("activate_swOUT_OutKey<-")
 )
 
-#' @rdname activate_swOUT_OutKey
+#' @rdname activate_swOUT_OutKey-set
 setGeneric(
   "deactivate_swOUT_OutKey<-",
   function(object, value) standardGeneric("deactivate_swOUT_OutKey<-")
@@ -2067,6 +2414,8 @@ setGeneric(
 #' \code{swOutput_getKEY}
 #' @param object An object of class \code{\linkS4class{swOutput}} or
 #'   \code{\linkS4class{swInputData}}.
+#' @param index An integer value. The "key" (slot) position.
+#'
 #' @seealso \code{\linkS4class{swOutput}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "swOutput_getKEY",
@@ -2074,8 +2423,7 @@ setGeneric(
 )
 
 #' \code{swOutput_KEY_Period}
-#' @param object An object of class \code{\linkS4class{swOutput}} or
-#'   \code{\linkS4class{swInputData}}.
+#' @inheritParams swOutput_getKEY
 #' @seealso \code{\linkS4class{swOutput}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "swOutput_KEY_Period",
@@ -2083,8 +2431,7 @@ setGeneric(
 )
 
 #' \code{swOutput_KEY_TimeStep}
-#' @param object An object of class \code{\linkS4class{swOutput}} or
-#'   \code{\linkS4class{swInputData}}.
+#' @inheritParams swOutput_getKEY
 #' @seealso \code{\linkS4class{swOutput}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "swOutput_KEY_TimeStep",
@@ -2092,8 +2439,7 @@ setGeneric(
 )
 
 #' \code{swOutput_KEY_Columns}
-#' @param object An object of class \code{\linkS4class{swOutput}} or
-#'   \code{\linkS4class{swInputData}}.
+#' @inheritParams swOutput_getKEY
 #' @seealso \code{\linkS4class{swOutput}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "swOutput_KEY_Columns",
@@ -2101,8 +2447,7 @@ setGeneric(
 )
 
 #' \code{swOutput_setKEY<-}
-#' @param object An object of class \code{\linkS4class{swOutput}} or
-#'   \code{\linkS4class{swInputData}}.
+#' @inheritParams swOutput_getKEY
 #' @param value A value to assign to a specific slot of the \code{object}.
 #' @seealso \code{\linkS4class{swOutput}} and \code{\linkS4class{swInputData}}
 setGeneric(
@@ -2111,9 +2456,7 @@ setGeneric(
 )
 
 #' \code{swOutput_KEY_Period<-}
-#' @param object An object of class \code{\linkS4class{swOutput}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
+#' @inheritParams swOutput_setKEY<-
 #' @seealso \code{\linkS4class{swOutput}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "swOutput_KEY_Period<-",
@@ -2121,9 +2464,7 @@ setGeneric(
 )
 
 #' \code{swOutput_KEY_TimeStep<-}
-#' @param object An object of class \code{\linkS4class{swOutput}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
+#' @inheritParams swOutput_setKEY<-
 #' @seealso \code{\linkS4class{swOutput}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "swOutput_KEY_TimeStep<-",
@@ -2131,9 +2472,7 @@ setGeneric(
 )
 
 #' \code{swOutput_KEY_Columns<-}
-#' @param object An object of class \code{\linkS4class{swOutput}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
+#' @inheritParams swOutput_setKEY<-
 #' @seealso \code{\linkS4class{swOutput}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "swOutput_KEY_Columns<-",

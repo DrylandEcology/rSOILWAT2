@@ -13,6 +13,20 @@ TranspCoeffByVegType(
   adjustType = c("positive", "inverse", "allToLast")
 )
 }
+\arguments{
+\item{tr_input_code}{The \code{"desc"} component of \code{\link{sw2_trco_table}}.}
+
+\item{tr_input_coeff}{The \code{"data"} component of \code{\link{sw2_trco_table}}.}
+
+\item{soillayer_no}{An integer value. The number of soil layers.}
+
+\item{trco_type}{A character string. A column name of \code{tr_input_code}.}
+
+\item{layers_depth}{An integer vector. The lower depths of soil layers \code{\link{cm}}}
+
+\item{adjustType}{A character string. The method to adjust prescribed
+coefficient profile onto provided depth profile \code{layers_depth}.}
+}
 \description{
 Lookup transpiration coefficients for grasses, shrubs, and trees per soil
 layer or per soil depth increment of 1 cm per distribution type for
@@ -20,15 +34,13 @@ each simulation run and copy values to \var{\sQuote{datafile.soils}}
 }
 \details{
 \itemize{
-   \item first row of datafile is label for per soil layer
-     \var{\dQuote{Layer}} or per soil depth increment of 1 cm
-     \var{\dQuote{DepthCM}}
-   \item second row of datafile is source of data
-   \item the other rows contain the data for each distribution type = columns
+\item first row of datafile is label for per soil layer
+\var{\dQuote{Layer}} or per soil depth increment of 1 cm
+\var{\dQuote{DepthCM}}
+\item second row of datafile is source of data
+\item the other rows contain the data for each distribution type = columns
 }
 }
-\section{Note}{
- cannot write data from \var{\sQuote{sw_input_soils}} to
-  \var{\sQuote{datafile.soils}}
+\seealso{
+\code{\link[=estimate_PotNatVeg_roots]{estimate_PotNatVeg_roots()}} with example code
 }
-

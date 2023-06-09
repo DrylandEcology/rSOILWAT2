@@ -3,30 +3,32 @@
 \docType{class}
 \name{swSoils-class}
 \alias{swSoils-class}
-\alias{initialize,swSoils-method}
+\alias{swSoils}
 \alias{get_swSoils,swSoils-method}
-\alias{swSoils_Layers,swSoils-method}
 \alias{set_swSoils<-,swSoils,swSoils-method}
-\alias{swSoils_Layers<-,swSoils,matrix-method}
+\alias{set_swSoils<-,swSoils,list-method}
 \alias{swReadLines,swSoils,character-method}
 \title{Class \code{"swSoils"}}
 \usage{
-\S4method{initialize}{swSoils}(.Object, ...)
+swSoils(...)
 
 \S4method{get_swSoils}{swSoils}(object)
 
-\S4method{swSoils_Layers}{swSoils}(object)
-
 \S4method{set_swSoils}{swSoils,swSoils}(object) <- value
 
-\S4method{swSoils_Layers}{swSoils,matrix}(object) <- value
+\S4method{set_swSoils}{swSoils,list}(object) <- value
 
 \S4method{swReadLines}{swSoils,character}(object, file)
 }
 \arguments{
-\item{.Object}{An object of class \code{\linkS4class{swSoils}}.}
-
-\item{...}{Further arguments to methods.}
+\item{...}{Arguments to the helper constructor function.
+Dots can either contain objects to copy into slots of that class
+(must be named identical to the corresponding slot) or
+be one object of that class (in which case it will be copied and
+any missing slots will take their default values).
+If dots are missing, then corresponding values of
+\code{rSOILWAT2::sw_exampleData}
+(i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
 
 \item{object}{An object of class \code{\linkS4class{swSoils}}.}
 
@@ -41,6 +43,7 @@ The methods listed below work on this class and the proper slot of the class
 \examples{
 showClass("swSoils")
 x <- new("swSoils")
+x <- swSoils()
 
 }
 \seealso{

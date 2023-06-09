@@ -10,6 +10,7 @@ get_soiltemp(
   levels = c("min", "avg", "max"),
   surface = TRUE,
   soillayers = NULL,
+  keep_time = FALSE,
   verbose = FALSE
 )
 }
@@ -29,6 +30,9 @@ equivalent to requesting a \code{0} via \code{soillayers}.}
 \code{NULL} returns soil temperature from all available soil layers;
 \code{NA} does not return soil temperature;
 including a \code{0} is equivalent to setting \code{surface} to \code{TRUE}.}
+
+\item{keep_time}{A logical value. Include time information in the returned
+object.}
 
 \item{verbose}{A logical value. Issue warnings if requested \code{levels} are
 not available.}

@@ -20,24 +20,29 @@ dbW_getWeatherData(
 )
 }
 \arguments{
-\item{Site_id}{Numeric. Used to identify site and extract weather data.}
+\item{Site_id}{An integer value. The IDs/database key of the queried site.}
 
-\item{lat}{Numeric. Latitude used with longitude to identify site id if
-\code{Site_id} is missing.}
+\item{lat}{A numeric vector or \code{NULL}. The latitude in decimal degrees
+of \code{WGS84}. Northern latitude are positive, sites on the southern
+hemisphere have negative values.}
 
-\item{long}{Numeric. Longitude and Latitude are used to identify site if
-\code{Site_id} is missing.}
+\item{long}{A numeric vector or \code{NULL}. The longitude in decimal degrees
+of \code{WGS84}. Eastern longitudes are positive, sites on the western
+hemisphere have negative values.}
 
 \item{tol_xy}{A numeric value. The tolerance used to match requested
 longitude and latitude values.}
 
-\item{Label}{A character string. A site label.}
+\item{Label}{A character string. The name/label of the queried site.}
 
-\item{startYear}{Numeric. Extracted weather data will start with this year.}
+\item{startYear}{A numeric value. First calendar year of the weather data.}
 
-\item{endYear}{Numeric. Extracted weather data will end with this year.}
+\item{endYear}{A numeric value. Last calendar year of the weather data.}
 
-\item{Scenario}{A character string.}
+\item{Scenario}{A character string. The name/label of a climate scenario.}
+
+\item{Scenario_id}{An integer value The ID/database key of the queried
+scenario.}
 
 \item{ignore.case}{A logical value.}
 
@@ -45,16 +50,18 @@ longitude and latitude values.}
 error if at least one requested weather data object is not available
 in the current weather database. If \code{FALSE}, then returns \code{NULL}
 for those requested site scenario combinations.}
+
+\item{verbose}{A logical value.}
 }
 \value{
 If one site and one scenario were requested, then returns
- weather data as list. Each element is an object of class
- \code{\linkS4class{swWeatherData}} and contains data for one year.
- If more than one site or more than scenario were requested, then returns
- a list of such weather data lists.
- Elements of the returned list may be \code{NULL} if there is no
- weather data object for the requested site scenario combination and if
- \code{stop_if_missing} is \code{FALSE}.
+weather data as list. Each element is an object of class
+\code{\linkS4class{swWeatherData}} and contains data for one year.
+If more than one site or more than scenario were requested, then returns
+a list of such weather data lists.
+Elements of the returned list may be \code{NULL} if there is no
+weather data object for the requested site scenario combination and if
+\code{stop_if_missing} is \code{FALSE}.
 }
 \description{
 Weather data for the soil water simulation run can be stored in the input
@@ -69,8 +76,8 @@ weather generator (see examples for \code{\link{sw_exec}}).
 }
 \section{Notes}{
 
-  This function returns the first record of weather data for a
-  site x scenario combination even if duplicate entries match the query.
+This function returns the first record of weather data for a
+site x scenario combination even if duplicate entries match the query.
 }
 
 \seealso{

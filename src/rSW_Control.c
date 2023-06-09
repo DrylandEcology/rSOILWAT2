@@ -16,9 +16,9 @@
 /*                INCLUDES / DEFINES                   */
 /* --------------------------------------------------- */
 
-#include "SOILWAT2/generic.h"  // for `swprintf`
-#include "SOILWAT2/SW_Carbon.h"  // for `calculate_CO2_multipliers`
-#include "SOILWAT2/SW_Control.h"  // for `SW_CTL_read_inputs_from_disk`
+#include "SOILWAT2/include/generic.h"  // for `swprintf`
+#include "SOILWAT2/include/SW_Carbon.h"  // for `calculate_CO2_multipliers`
+#include "SOILWAT2/include/SW_Control.h"  // for `SW_CTL_read_inputs_from_disk`
 
 #include "rSW_Files.h"
 #include "rSW_Model.h"
@@ -63,8 +63,12 @@ void rSW_CTL_obtain_inputs(Bool from_files) {
 
   } else { //Use R data to set the data
     #ifdef RSWDEBUG
-    if (debug) swprintf("'rSW_CTL_obtain_inputs': Copy data from rSOILWAT2 S4 "
-      "'InputData' object to SOILWAT2 variables:");
+    if (debug) {
+      swprintf(
+        "\n'rSW_CTL_obtain_inputs()': "
+        "Copy data from rSOILWAT2 S4 'InputData' object to SOILWAT2 variables:"
+      );
+    }
     #endif
 
     onSet_SW_F(GET_SLOT(InputData, install("files")));
@@ -77,7 +81,7 @@ void rSW_CTL_obtain_inputs(Bool from_files) {
     if (debug) swprintf(" > 'model'");
     #endif
 
-    onSet_SW_WTH(GET_SLOT(InputData, install("weather")));
+    onSet_SW_WTH_setup(GET_SLOT(InputData, install("weather")));
     #ifdef RSWDEBUG
     if (debug) swprintf(" > 'weather-setup'");
     #endif
@@ -92,9 +96,14 @@ void rSW_CTL_obtain_inputs(Bool from_files) {
     ) {
       onSet_MKV(GET_SLOT(InputData, install("markov")));
       #ifdef RSWDEBUG
-      if (debug) swprintf(" > 'mwgen'");
+      if (debug) swprintf(" > 'weather generator'");
       #endif
     }
+
+    onSet_WTH_DATA();
+    #ifdef RSWDEBUG
+    if (debug) swprintf(" > 'weather-history'");
+    #endif
 
     onSet_SW_VPD(GET_SLOT(InputData, install("prod")));
     #ifdef RSWDEBUG
@@ -106,9 +115,9 @@ void rSW_CTL_obtain_inputs(Bool from_files) {
     if (debug) swprintf(" > 'site'");
     #endif
 
-    onSet_SW_LYR(GET_SLOT(InputData, install("soils")));
+    onSet_SW_SOILS(GET_SLOT(InputData, install("soils")));
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'soils'");
+    if (debug) swprintf(" > 'soils' + 'swrc parameters'");
     #endif
 
     onSet_SW_VES(GET_SLOT(InputData, install("estab")));

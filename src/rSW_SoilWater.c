@@ -21,17 +21,17 @@
 #include <string.h>
 #include <math.h>
 
-#include "SOILWAT2/generic.h"
-#include "SOILWAT2/filefuncs.h"
-#include "SOILWAT2/Times.h"
-#include "SOILWAT2/myMemory.h"
+#include "SOILWAT2/include/generic.h"
+#include "SOILWAT2/include/filefuncs.h"
+#include "SOILWAT2/include/Times.h"
+#include "SOILWAT2/include/myMemory.h"
 
-#include "SOILWAT2/SW_Defines.h"
-#include "SOILWAT2/SW_Files.h"
-#include "SOILWAT2/SW_Model.h" // externs `SW_Model`
-#include "SOILWAT2/SW_Site.h" // externs `SW_Site`
+#include "SOILWAT2/include/SW_Defines.h"
+#include "SOILWAT2/include/SW_Files.h"
+#include "SOILWAT2/include/SW_Model.h" // externs `SW_Model`
+#include "SOILWAT2/include/SW_Site.h" // externs `SW_Site`
 
-#include "SOILWAT2/SW_SoilWater.h" // externs `SW_Soilwat`
+#include "SOILWAT2/include/SW_SoilWater.h" // externs `SW_Soilwat`
 #include "rSW_SoilWater.h"
 #include "SW_R_lib.h" // externs `InputData`
 
@@ -57,7 +57,7 @@ void rSW_SWC_construct(void) {
 }
 
 
-SEXP onGet_SW_SWC() {
+SEXP onGet_SW_SWC(void) {
 	SW_SOILWAT *v = &SW_Soilwat;
 	SEXP swSWC;
 	SEXP SWC;
@@ -129,7 +129,7 @@ void onSet_SW_SWC(SEXP SWC) {
 }
 
 
-SEXP onGet_SW_SWC_hists() {
+SEXP onGet_SW_SWC_hists(void) {
 	TimeInt year;
 	SEXP SWC_hists, SWC_hists_names;
 	int years = ((SW_Model.endyr + 1) - SW_Model.startyr), i = 0;
@@ -142,7 +142,7 @@ SEXP onGet_SW_SWC_hists() {
 		if (SW_Soilwat.hist_use && year >= SW_Soilwat.hist.yr.first) {
 			_read_swc_hist(year);
 			SET_VECTOR_ELT(SWC_hists, i, onGet_SW_SWC_hist(year));
-			sprintf(cYear, "%4d", year);
+			snprintf(cYear, sizeof cYear, "%4d", year);
 			SET_STRING_ELT(SWC_hists_names, i, mkChar(cYear));
 		}
 		i++;

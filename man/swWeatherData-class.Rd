@@ -3,25 +3,30 @@
 \docType{class}
 \name{swWeatherData-class}
 \alias{swWeatherData-class}
-\alias{initialize,swWeatherData-method}
+\alias{swWeatherData}
+\alias{weatherHistory}
 \alias{swReadLines,swWeatherData,character-method}
 \title{Class \code{"swWeatherData"}}
 \usage{
-\S4method{initialize}{swWeatherData}(.Object, ..., year = 0L, data = NULL)
+swWeatherData(...)
+
+weatherHistory(weatherList = NULL)
 
 \S4method{swReadLines}{swWeatherData,character}(object, file)
 }
 \arguments{
-\item{.Object}{An object of class \code{\linkS4class{swWeatherData}}.}
+\item{...}{Arguments to the helper constructor function.
+Dots can either contain objects to copy into slots of that class
+(must be named identical to the corresponding slot) or
+be one object of that class (in which case it will be copied and
+any missing slots will take their default values).
+If dots are missing, then corresponding values of
+\code{rSOILWAT2::sw_exampleData}
+(i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
 
-\item{...}{Further arguments to methods.}
-
-\item{year}{An integer value. The calendar year of the weather \code{data}
-object.}
-
-\item{data}{A 365 x 4 or 366 x 4 matrix representing daily weather data for
-one calendar \code{year} with columns \var{DOY}, \var{Tmax_C},
-\var{Tmin_C}, and \var{PPT_cm}.}
+\item{weatherList}{A list or \code{NULL}. Each element is an object of class
+\code{\link[rSOILWAT2:swWeatherData-class]{rSOILWAT2::swWeatherData}}
+containing daily weather data of a specific year.}
 
 \item{object}{An object of class \code{\linkS4class{swWeatherData}}.}
 
@@ -31,9 +36,29 @@ one calendar \code{year} with columns \var{DOY}, \var{Tmax_C},
 The methods listed below work on this class and the proper slot of the class
   \code{\linkS4class{swInputData}}.
 }
+\section{Slots}{
+
+\describe{
+\item{\code{year}}{An integer value. The calendar year of the weather \code{data}
+object.}
+
+\item{\code{data}}{A 365 x 15 or 366 x 15 matrix representing daily weather data for
+one calendar \code{year} with columns
+\var{DOY},
+\var{Tmax_C}, \var{Tmin_C}, \var{PPT_cm},
+\var{cloudCov_pct},
+\var{windSpeed_mPERs},
+\var{windSpeed_east_mPERs}, \var{windSpeed_north_mPERs},
+\var{rHavg_pct}, \var{rHmax_pct}, \var{rHmin_pct},
+\var{specHavg_pct}, \var{Tdewpoint_C},
+\var{actVP_kPa}, and
+\var{shortWR}.}
+}}
+
 \examples{
 showClass("swWeatherData")
 x <- new("swWeatherData")
+x <- swWeatherData()
 
 }
 \seealso{

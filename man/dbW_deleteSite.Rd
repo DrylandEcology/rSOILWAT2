@@ -8,7 +8,7 @@ database}
 dbW_deleteSite(Site_ids)
 }
 \arguments{
-\item{Site_ids}{An integer vector. The IDs/database keys of the queried site.}
+\item{Site_ids}{An integer vector. The IDs/database keys of the queried sites}
 }
 \value{
 An invisible logical value indicating success with \code{TRUE} and

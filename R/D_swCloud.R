@@ -31,10 +31,16 @@
 #'   \code{\linkS4class{swInputData}}.
 #'
 #' @param object An object of class \code{\linkS4class{swCloud}}.
-#' @param .Object An object of class \code{\linkS4class{swCloud}}.
 #' @param value A value to assign to a specific slot of the object.
 #' @param file A character string. The file name from which to read.
-#' @param ... Further arguments to methods.
+#' @param ... Arguments to the helper constructor function.
+#'  Dots can either contain objects to copy into slots of that class
+#'  (must be named identical to the corresponding slot) or
+#'  be one object of that class (in which case it will be copied and
+#'  any missing slots will take their default values).
+#'  If dots are missing, then corresponding values of
+#'  \code{rSOILWAT2::sw_exampleData}
+#'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
 #' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
 #' \code{\linkS4class{swWeather}} \code{\linkS4class{swInputData}}
@@ -46,93 +52,115 @@
 #' @examples
 #' showClass("swCloud")
 #' x <- new("swCloud")
+#' x <- swCloud()
 #'
 #' @name swCloud-class
 #' @export
-setClass("swCloud", slots = c(Cloud = "matrix"))
-
-
-swCloud_validity <- function(object) {
-  val <- TRUE
-  temp <- dim(object@Cloud)
-
-  if (temp[1] != 5) {
-    msg <- paste(
-      "@Cloud must have exactly 5 rows corresponding to",
-      "SkyCoverPCT, WindSpeed_m/s, HumidityPCT,",
-      "SnowDensity_kg/m^3, and RainEvents_per_day"
+setClass(
+  "swCloud",
+  slots = c(Cloud = "matrix"),
+  prototype = list(
+    Cloud = array(
+      NA_real_,
+      dim = c(5, 12),
+      dimnames = list(
+        c(
+          "SkyCoverPCT", "WindSpeed_m/s", "HumidityPCT", "SnowDensity_kg/m^3",
+          "RainEvents_per_day"
+        ),
+        c(
+          "January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December"
+        )
+      )
     )
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
+  )
+)
 
-  if (temp[2] != 12) {
-    msg <- paste("@Cloud must have exactly 12 columns corresponding months.")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
 
-  if (!all(is.na(object@Cloud[1, ])) && (any(object@Cloud[1, ] < 0) ||
-      any(object@Cloud[1, ] > 100))) {
-    msg <- paste("@Cloud['SkyCoverPCT', ] must be values between 0 and 100%.")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
+setValidity(
+  "swCloud",
+  function(object) {
+    val <- TRUE
+    temp <- dim(object@Cloud)
 
-  if (!all(is.na(object@Cloud[2, ])) && (any(object@Cloud[2, ] < 0))) {
-    msg <- paste("@Cloud['WindSpeed_m/s', ] must be values >= 0.")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
+    if (temp[1] != 5) {
+      msg <- paste(
+        "@Cloud must have exactly 5 rows corresponding to",
+        "SkyCoverPCT, WindSpeed_m/s, HumidityPCT,",
+        "SnowDensity_kg/m^3, and RainEvents_per_day"
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
 
-  if (!all(is.na(object@Cloud[3, ])) && (any(object@Cloud[3, ] < 0) ||
-      any(object@Cloud[3, ] > 100))) {
-    msg <- paste("@Cloud['HumidityPCT', ] must be values between 0 and 100%.")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
+    if (temp[2] != 12) {
+      msg <- "@Cloud must have exactly 12 columns corresponding months."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
 
-  if (!all(is.na(object@Cloud[4, ])) && any(object@Cloud[4, ] < 0)) {
-    msg <- paste("@Cloud['SnowDensity_kg/m^3', ] must be values >= 0.")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
+    if (!all(is.na(object@Cloud[1, ])) && (any(object@Cloud[1, ] < 0) ||
+        any(object@Cloud[1, ] > 100))) {
+      msg <- "@Cloud['SkyCoverPCT', ] must be values between 0 and 100%."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
 
-  if (!all(is.na(object@Cloud[5, ])) && any(object@Cloud[5, ] < 1)) {
-    msg <- paste("@Cloud['RainEvents_per_day', ] must be values >= 1.")
-    val <- if (isTRUE(val)) msg else c(val, msg)
-  }
+    if (!all(is.na(object@Cloud[2, ])) && (any(object@Cloud[2, ] < 0))) {
+      msg <- "@Cloud['WindSpeed_m/s', ] must be values >= 0."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
 
-  val
-}
-setValidity("swCloud", swCloud_validity)
+    if (!all(is.na(object@Cloud[3, ])) && (any(object@Cloud[3, ] < 0) ||
+        any(object@Cloud[3, ] > 100))) {
+      msg <- "@Cloud['HumidityPCT', ] must be values between 0 and 100%."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (!all(is.na(object@Cloud[4, ])) && any(object@Cloud[4, ] < 0)) {
+      msg <- "@Cloud['SnowDensity_kg/m^3', ] must be values >= 0."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (!all(is.na(object@Cloud[5, ])) && any(object@Cloud[5, ] < 1)) {
+      msg <- "@Cloud['RainEvents_per_day', ] must be values >= 1."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    val
+  }
+)
 
 #' @rdname swCloud-class
 #' @export
-setMethod("initialize", signature = "swCloud", function(.Object, ...) {
+swCloud <- function(...) {
+  # Copy from SOILWAT2 "testing", but dot arguments take precedence
   def <- slot(rSOILWAT2::sw_exampleData, "cloud")
-  sns <- slotNames(def)
+  sns <- slotNames("swCloud")
   dots <- list(...)
+  if (length(dots) == 1 && inherits(dots[[1]], "swCloud")) {
+    # If dots are one object of this class, then convert to list of its slots
+    dots <- attributes(unclass(dots[[1]]))
+  }
   dns <- names(dots)
 
   # We don't set values for slot `Cloud` (except SnowDensity and RainEvents)
-  # if not passed via ...; this is to prevent simulation runs with accidentally
-  # incorrect values
+  # if not passed via ...; this is to prevent simulation runs with
+  # accidentally incorrect values
   if (!("Cloud" %in% dns)) {
     ids <- 4:5
     def@Cloud[- ids, ] <- NA_real_
   } else {
-    # Guarantee dimnames
+    # Guarantee names
     dimnames(dots[["Cloud"]]) <- dimnames(def@Cloud)
   }
 
-  for (sn in sns) {
-    slot(.Object, sn) <- if (sn %in% dns) dots[[sn]] else slot(def, sn)
-  }
+  tmp <- lapply(
+    sns,
+    function(sn) if (sn %in% dns) dots[[sn]] else slot(def, sn)
+  )
+  names(tmp) <- sns
 
-  if (FALSE) {
-    # not needed because no relevant inheritance
-    .Object <- callNextMethod(.Object, ...)
-  }
-
-  validObject(.Object)
-  .Object
-})
-
+  do.call("new", args = c("swCloud", tmp))
+}
 
 
 #' @rdname swCloud-class
@@ -156,58 +184,85 @@ setMethod("swCloud_RainEvents", "swCloud", function(object) object@Cloud[5, ])
 
 #' @rdname swCloud-class
 #' @export
-setReplaceMethod("set_swCloud", signature = "swCloud", function(object, value) {
-  dimnames(value@Cloud) <- dimnames(object@Cloud)
-  object <- value
-  validObject(object)
-  object
-})
+setReplaceMethod(
+  "set_swCloud",
+  signature = "swCloud",
+  function(object, value) {
+    dimnames(value@Cloud) <- dimnames(object@Cloud)
+    object <- value
+    validObject(object)
+    object
+  }
+)
+
 #' @rdname swCloud-class
 #' @export
-setReplaceMethod("swCloud_SkyCover", signature = "swCloud",
+setReplaceMethod(
+  "swCloud_SkyCover",
+  signature = "swCloud",
   function(object, value) {
     object@Cloud[1, ] <- value
     validObject(object)
     object
-})
+  }
+)
+
 #' @rdname swCloud-class
 #' @export
-setReplaceMethod("swCloud_WindSpeed", signature = "swCloud",
+setReplaceMethod(
+  "swCloud_WindSpeed",
+  signature = "swCloud",
   function(object, value) {
     object@Cloud[2, ] <- value
     validObject(object)
     object
-})
+  }
+)
+
 #' @rdname swCloud-class
 #' @export
-setReplaceMethod("swCloud_Humidity", signature = "swCloud",
+setReplaceMethod(
+  "swCloud_Humidity",
+  signature = "swCloud",
   function(object, value) {
     object@Cloud[3, ] <- value
     validObject(object)
     object
-})
+  }
+)
+
 #' @rdname swCloud-class
 #' @export
-setReplaceMethod("swCloud_SnowDensity", signature = "swCloud",
+setReplaceMethod(
+  "swCloud_SnowDensity",
+  signature = "swCloud",
   function(object, value) {
     object@Cloud[4, ] <- value
     validObject(object)
     object
-})
+  }
+)
+
 #' @rdname swCloud-class
 #' @export
-setReplaceMethod("swCloud_RainEvents", signature = "swCloud",
+setReplaceMethod(
+  "swCloud_RainEvents",
+  signature = "swCloud",
   function(object, value) {
     object@Cloud[5, ] <- value
     validObject(object)
     object
-})
-
+  }
+)
 
 #' @rdname swCloud-class
 #' @export
-setMethod("swReadLines", signature = c(object = "swCloud", file = "character"),
+# nolint start
+setMethod(
+  "swReadLines",
+  signature = c(object = "swCloud", file = "character"),
   function(object, file) {
+    stop("swReadLines is defunct")
     infiletext <- readLines(con = file)
     #should be no empty lines
     infiletext <- infiletext[infiletext != ""]
@@ -225,3 +280,4 @@ setMethod("swReadLines", signature = c(object = "swCloud", file = "character"),
 
     object
 })
+# nolint end

@@ -1,4 +1,3 @@
-context("rSOILWAT2 runs")
 
 #---CONSTANTS
 tols <- list(
@@ -13,15 +12,24 @@ temp <- list.files(dir_test_data, pattern = "Ex")
 temp <- sapply(strsplit(temp, "_", fixed = TRUE), function(x) x[[1]])
 tests <- unique(temp)
 
-test_that("Test data availability", expect_gt(length(tests), 0))
+test_that("Test data availability", {
+  expect_gt(length(tests), 0)
+})
+
 
 var_maybeZero <- c("ESTABL", "RUNOFF", "SOILTEMP", "SURFACEWATER", "LOG")
 var_SumNotZero <- sw_out_flags()
 var_SumNotZero <- var_SumNotZero[!(var_SumNotZero %in% var_maybeZero)]
 
 
-expect_within <- function(object, expected, ..., info = NULL,
-  tol = tols[["ranges"]], digits_N = 4L) {
+expect_within <- function(
+  object,
+  expected,
+  ...,
+  info = NULL,
+  tol = tols[["ranges"]],
+  digits_N = 4L
+) {
 
   robj <- range(object)
   rexp <- range(expected)
@@ -32,7 +40,8 @@ expect_within <- function(object, expected, ..., info = NULL,
   lte <- rexp[2] - robj[2] >= -tol
   within <- gte & lte
 
-  expect_equivalent(within, TRUE,
+  expect_true(
+    within,
     info = paste(
       info,
       if (!gte) {
@@ -137,14 +146,14 @@ for (it in tests) {
 
   dbW_df_day <- dbW_weatherData_to_dataframe(sw_weather)
   test_that("Check weather", {
-    expect_equivalent(
+    expect_equal(
       dbW_dataframe_to_monthly(dbW_df_day),
       dbW_weatherData_to_monthly(sw_weather),
       info = info1
     )
 
     if (anyNA(dbW_df_day)) {
-      expect_equivalent(
+      expect_equal(
         dbW_dataframe_to_monthly(dbW_df_day, na.rm = TRUE),
         dbW_weatherData_to_monthly(sw_weather, na.rm = TRUE),
         info = info1
@@ -166,6 +175,7 @@ for (it in tests) {
     expect_true(check_version(rd, level = "minor"))
     expect_s4_class(rd, "swOutput")
     expect_false(has_soilTemp_failed())
+    expect_true(all(sw_out_flags() %in% slotNames(rd)))
 
     # Run silently/verbosely
     expect_silent(sw_exec(
@@ -185,24 +195,30 @@ for (it in tests) {
     }
 
 
-    # Check that input weather is identical to output weather (unless weather
-    # generator is turned on)
-    if (!swWeather_UseMarkov(sw_input)) {
-      # Precipitation
-      sim <- slot(slot(rd, "PRECIP"), "Day")[, "ppt"]
-      obs <- dbW_df_day[, "PPT_cm"]
-      expect_equal(sim, obs, info = info1)
+    # Check that input weather is identical to output weather
+    # (don't check missing days that the weather generator filled in)
+    is_obs <- complete.cases(dbW_df_day)
 
-      # Tmin
-      sim <- slot(slot(rd, "TEMP"), "Day")[, "min_C"]
-      obs <- dbW_df_day[, "Tmin_C"]
-      expect_equal(sim, obs, info = info1)
+    # Precipitation
+    expect_equal(
+      slot(slot(rd, "PRECIP"), "Day")[is_obs, "ppt"],
+      dbW_df_day[is_obs, "PPT_cm"],
+      info = info1
+    )
 
-      # Tmax
-      sim <- slot(slot(rd, "TEMP"), "Day")[, "max_C"]
-      obs <- dbW_df_day[, "Tmax_C"]
-      expect_equal(sim, obs, info = info1)
-    }
+    # Tmin
+    expect_equal(
+      slot(slot(rd, "TEMP"), "Day")[is_obs, "min_C"],
+      dbW_df_day[is_obs, "Tmin_C"],
+      info = info1
+    )
+
+    # Tmax
+    expect_equal(
+      slot(slot(rd, "TEMP"), "Day")[is_obs, "max_C"],
+      dbW_df_day[is_obs, "Tmax_C"],
+      info = info1
+    )
 
 
     # Loop through output
@@ -278,24 +294,25 @@ for (it in tests) {
       #--- Test: Compare aggregated daily against yearly output
       # Exclusions:
       #   * "ESTABL" produces only yearly output
-      #   * SWP is not additive; SOILWAT uses pedotransfer functions
+      #   * SWP is not additive; SOILWAT uses soil water release curves
       if (all(unlist(has_times))) {
         if (fun_agg[k] %in% c("mean", "sum") &&
             !(vars[k] %in% c("SWPMATRIC", "ESTABL"))
         ) {
 
-          res_true <- matrix(TRUE, nrow = rd@yr_nrow, ncol = x1@Columns)
-          expect_equivalent({
-              nid <- 1:2
-              temp1d <- aggregate(
-                x1@Day[, -nid],
-                by = list(x1@Day[, 1]),
-                FUN = fun_agg[k]
-              )
-              diff1d <- data.matrix(x1@Year[, -1]) - data.matrix(temp1d[, -1])
-              abs(diff1d) < tols[["aggregations"]]
-            },
-            res_true,
+          # Aggregate daily to yearly values
+          nid <- 1:2
+          temp1d <- aggregate(
+            x1@Day[, -nid],
+            by = list(x1@Day[, 1]),
+            FUN = fun_agg[k]
+          )
+
+          # Expect that aggregated daily are equal to SOILWAT2 yearly output
+          expect_equal(
+            data.matrix(temp1d[, -1]),
+            data.matrix(x1@Year[, -1]),
+            tolerance =  tols[["aggregations"]],
             info = info2
           )
         }

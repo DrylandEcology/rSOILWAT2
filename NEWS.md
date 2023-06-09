@@ -1,7 +1,133 @@
+# rSOILWAT2 v6.0.0
+
+## Breaking changes
+* `SOILWAT2` updated to v7.0.0
+* This version produces nearly identical simulation output
+  as the previous release under default values.
+  Small deviations arise due to
+    1. a fix in the handling of soil moisture values
+       between field capacity and saturation;
+    2. a fix in the calculation of potential natural vegetation; and
+    3. a fix in the calculation of climate variables (if used).
+
+## New features
+* New method `sw_upgrade()` upgrades objects with
+  outdated `rSOILWAT2` S4 classes to the current version;
+  new `upgrade_weatherHistory()` upgrades outdated weather history objects.
+* New `get_soilmoisture()` to consistently extract soil moisture content,
+  volumetric water content (bulk soil), or
+  volumetric water content for the matric component.
+  The function calculates the requested type if not stored in the output
+  from those that are available.
+* Derived output functions `get_XXX()` gain new argument `keep_time`;
+  if `keep_time` is requested (`TRUE`), then year and sub-year time step values
+  are added as first one or two columns to the returned matrix.
+* New `time_columns()` returns the output column indices with time information.
+* New `nrow_output()` returns the number of time steps in output.
+
+* Daily weather inputs, in addition to the previous variables
+  maximum air temperature, minimum air temperature, and precipitation amount,
+  can now process the following variables (issue #229; @dschlaep, @N1ckP3rsl3y):
+    * Cloud cover (can be replaced by shortwave radiation)
+    * Wind speed (can be replaced by wind components)
+    * Wind speed eastward component (optional)
+    * Wind speed northward component (optional)
+    * Relative humidity (can be replaced by max/min humidity, specific humidity
+      dew point temperature, or vapor pressure)
+    * Maximum relative humidity (optional)
+    * Minimum relative humidity (optional)
+    * Specific humidity (optional)
+    * Dew point temperature (optional)
+    * Actual vapor pressure (optional)
+    * Downward surface shortwave radiation (optional)
+
+* This version now handles a variety of soil water retention curves `SWRC`
+  and pedotransfer functions `PTF` (issue #207, @dschlaep).
+    * New inputs are required to select a `SWRC` and `PTF` as well as to provide
+      parameter values of the selected `SWRC` for each soil layer.
+      Default values are backwards compatible, i.e.,
+      default `SWRC` is `"Campbell1974"` and
+      default `PTF` is `"Cosby1984AndOthers"`.
+    * If these new inputs are missing in an `rSOILWAT2` `swInputData` object,
+      then they are automatically set to their default values.
+    * New functionality for working with `SWRCs` and `PTFs` include
+        * `check_SWRC_vs_PTF()`
+          checks if `PTF` and `SWRC` are compatible and implemented.
+        * `check_ptf_availability()` checks availability of `PTFs`.
+        * `list_matched_swrcs_ptfs()` lists matching pairs of
+          implemented `SWRCs` and `PTFs`.
+        * `ptf_estimate()` estimates `SWRC` parameters from soil texture
+          with a pedotransfer function.
+        * `ptf_names()` lists pedotransfer functions `PTFs`.
+        * `swrc_conversion()`, `swrc_swp_to_vwc()`, and `swrc_vwc_to_swp()`
+          convert between bulk soil water content and soil water potential.
+        * `swrc_names()` lists soil water retention curves `SWRCs`.
+    * Documentation for code developers can be found in comment sections
+      `"Notes for implementing a new PTF"` and
+      `"Notes for implementing a new SWRC"`.
+
+* Soil density inputs can now represent either matric or bulk density
+  (issue #280; @dschlaep).
+    * Automatic conversion by `SOILWAT2` between matric and bulk density
+      as needed using the new slot `"SoilDensityInputType"`.
+* `calc_SiteClimate()` is now implemented via `SOILWAT2`
+  (issue #205; @N1ckP3rsl3y, @dschlaep).
+  The old implementation in R is still available as non-exported and deprecated
+  `calc_SiteClimate_old()`.
+    * This version fixes issues from the previous R version:
+       * Mean annual temperature is now the mean across years of
+         means across days within year of mean daily temperature.
+       * Years at locations in the southern hemisphere are now adjusted to start
+         on July 1 of the previous calendar year.
+       * The cheatgrass-related variables, i.e., `Month7th_PPT_mm`,
+         `MeanTemp_ofDriestQuarter_C`, and `MinTemp_of2ndMonth_C`,
+         are now adjusted for location by hemisphere.
+* `estimate_PotNatVeg_composition()` is now implemented via `SOILWAT2`
+  (issues #206, #218, #219; @N1ckP3rsl3y, @dschlaep).
+  The old implementation in R is still available as non-exported and deprecated
+  `estimate_PotNatVeg_composition_old()`.
+    * This version fixes issues from the previous R version:
+       * The `C4` grass correction based on Teeri & Stowe 1976 is now applied
+         as documented (issue #218).
+       * The sum of all grass components, if fixed, is now incorporated into
+         the total sum of all fixed components (issue #219).
+
+
+## Changes to interface
+* Class `swSite` gains new slots `"swrc_flags"` and `"has_swrcp"` and associated
+  methods `swSite_SWRCflags()` and `swSite_hasSWRCp()`
+  for names of selected `SWRC` and `PTF` as well as indicating
+  whether `SWRC` parameters are provided as inputs or to be calculated
+  at run time (issue #207, @dschlaep).
+* Class `swSoils` gains new slot `"SWRCp"` and associated methods
+  `swSoils_SWRCp()` for `SWRC` parameters by soil layer (issue #207, @dschlaep).
+* Class `swFiles` gains a new file name for the `SWRC` parameter input file and
+  associated methods `swFiles_SWRCp()` (issue #207, @dschlaep).
+* Class `swSite` gains new slot `"SoilDensityInputType"` and associated
+  methods `swSite_SoilDensityInputType()` (issue #209, @dschlaep).
+  This encodes whether soil density inputs represent
+  matric soil or bulk soil values.
+* Class `swProd` gains new slot `"veg_method"` (issue #206, @N1ckP3rsl3y).
+  This encodes if land cover is estimated at run-time by `SOILWAT2` via
+  `estimatePotNatVegComposition()` (value 1) or if land cover values are passed
+  as inputs (value 0, as previously).
+* `SWPtoVWC()` and `VWCtoSWP()` are deprecated in favor of
+  `swrc_swp_to_vwc()` and `swrc_vwc_to_swp()` respectively.
+* Class `swWeather` gains new slots (issue #229)
+    * `"use_cloudCoverMonthly"`, `"use_windSpeedMonthly"`, and
+      `"use_humidityMonthly"` which determine whether mean monthly values
+      (from `swCloud`) or daily values (from `swWeatherData`) are utilized;
+    * `"dailyInputFlags"` which indicates which of the 14 possible daily
+      weather variables are present in the inputs;
+    * `"desc_rsds"` which describes units of input shortwave radiation.
+* Class `swWeatherData` gains new columns in slot `"data"` that accommodate
+  all 14 possible daily weather variables (issue #229).
+
 # rSOILWAT2 v5.4.1
 * This version produces identical simulation output as the previous release.
 * `get_transpiration()` and `get_evaporation()` now also work with
-  `rSOILWAT2` output objects produced before `v5.0.0`.
+  `rSOILWAT2` output objects produced before `v5.0.0` (#230; @dschlaep).
+
 
 # rSOILWAT2 v5.4.0
 * `SOILWAT2` is updated to v6.7.0 which fixed vegetation establishment.
@@ -29,7 +155,7 @@
   `soillayers` is specified; issue #221, @dschlaep).
 * `r-lib` Github Actions updated to `v2`;
   separate workflows for `R-CMD-check` and `test-coverage`
-  (issue #202, @dschlaep).
+  (issue #202; @dschlaep).
 
 
 # rSOILWAT2 v5.3.2
@@ -37,6 +163,7 @@
 * `SOILWAT2` is updated to `v6.6.0` which updated random number functionality;
   however, none of those updates affect `rSOILWAT2` because `rSOILWAT2` utilizes
   R API random number functionality which has not changed.
+
 
 
 # rSOILWAT2 v5.3.1
@@ -53,10 +180,10 @@
 * `SOILWAT2` is updated to `v6.5.0` which provides
   the estimated minimum/maximum soil temperature for every layer and
   at the surface.
-* Surface temperature is provided in slot "TEMP" in columns
+* Surface temperature is provided in slot `"TEMP"` in columns
   `surfaceTemp_min_C`, `surfaceTemp_avg_C` (previously `surfaceTemp_C`),
   and `surfaceTemp_max_C`.
-* Soil temperature at depths of soil layers is provided in slot "SOILTEMP"
+* Soil temperature at depths of soil layers is provided in slot `"SOILTEMP"`
   in columns `Lyr_X_min_C`, `Lyr_X_avg_C` (previously `Lyr_X`),
   and `Lyr_X_max_C` where `X` stands for layer number 1, 2, ...
 * Package linting updated to `lintr` >= 3 and
@@ -68,13 +195,14 @@
 * This version adds new output to otherwise identical simulation output.
 * `SOILWAT2` is updated to `v6.4.0` which provides
   the phase of soil moisture (frozen or not) in each soil layer.
-* The new output is provided in slot "FROZEN" of class `swOutput` (#101).
+* The new output is provided in slot `"FROZEN"` of class `swOutput` (#101).
 
 
 # rSOILWAT2 v5.1.3
 * This version produces identical simulation output as the previous release.
 * `.dbW_setConnection()` is a bare-bones version of `dbW_setConnection()` that
   quickly and without any error checking connects to a weather database.
+
 
 # rSOILWAT2 v5.1.2
 * This version produces identical simulation output as the previous release.
@@ -108,7 +236,7 @@
     * Unsaturated percolation rate is now adjusted for `swc_min`,
       i.e., percolation rate is smaller at very low moisture levels.
     * Bare-soil evaporation, transpiration, and hydraulic redistribution
-      no longer remove soil moisture held below swc_min.
+      no longer remove soil moisture held below `swc_min`.
     * Lower limit of `swc_min` is now set at -30 MPa.
 
 
@@ -176,4 +304,4 @@
 * `SOILWAT2` updated to v6.2.1
 * Many improvements in documentation and unit tests.
 * Closed issues and bug reports, including #58, #164, #170, #171, #176.
-* Moved CI from travis and appveyor to Github Actions.
+* Moved CI from `travis` and `appveyor` to Github Actions.

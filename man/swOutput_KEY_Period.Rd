@@ -9,6 +9,8 @@ swOutput_KEY_Period(object, index)
 \arguments{
 \item{object}{An object of class \code{\linkS4class{swOutput}} or
 \code{\linkS4class{swInputData}}.}
+
+\item{index}{An integer value. The "key" (slot) position.}
 }
 \description{
 \code{swOutput_KEY_Period}

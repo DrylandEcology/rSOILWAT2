@@ -1,5 +1,3 @@
-context("rSOILWAT2 data access functions")
-
 
 #--- Tests
 test_that("set_requested_flags:", {

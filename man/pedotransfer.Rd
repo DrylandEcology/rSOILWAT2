@@ -6,8 +6,8 @@
 \alias{pdf_to_swp}
 \alias{SWPtoVWC}
 \alias{VWCtoSWP}
-\title{Pedotransfer functions to convert between soil moisture (volumetric water
-content, \var{VWC}) and soil water potential (\var{SWP})}
+\title{Deprecated pedotransfer functions to convert between soil moisture
+(volumetric water content, \var{VWC}) and soil water potential (\var{SWP})}
 \usage{
 pdf_to_vwc(
   swp,
@@ -31,9 +31,9 @@ pdf_to_swp(
   bar_conversion = 1024
 )
 
-SWPtoVWC(swp, sand, clay)
+SWPtoVWC(swp, sand, clay, ...)
 
-VWCtoSWP(vwc, sand, clay)
+VWCtoSWP(vwc, sand, clay, ...)
 }
 \arguments{
 \item{swp}{A numeric value, vector, or 2-dimensional object
@@ -46,9 +46,23 @@ fractional value in \code{[0,1]}.}
 \item{clay}{A numeric value or vector. Clay content of the soil layer(s) as
 fractional value in \code{[0,1]}.}
 
+\item{thetas}{Soon obsolete ... (see \code{feature_swrc})}
+
+\item{psis}{Soon obsolete ... (see \code{feature_swrc})}
+
+\item{b}{Soon obsolete ... (see \code{feature_swrc})}
+
+\item{MPa_toBar}{Soon obsolete ... (see \code{feature_swrc})}
+
+\item{bar_conversion}{Soon obsolete ... (see \code{feature_swrc})}
+
 \item{vwc}{A numeric value, vector, or 2-dimensional object
 (matrix or data.frame). The matric soil moisture, i.e., reduced by the
 volume of rock and gravel.}
+
+\item{bar_toMPa}{Soon obsolete ... (see \code{feature_swrc})}
+
+\item{...}{Additional arguments.}
 }
 \value{
 Volumetric water content in units of m^3 (of water) / m^3 (of soil)
@@ -112,8 +126,8 @@ Soil water potential in units of \var{MPa} \code{[-Inf, 0]}.
  }
 }
 \description{
-Pedotransfer functions to convert between soil moisture (volumetric water
-content, \var{VWC}) and soil water potential (\var{SWP})
+Deprecated pedotransfer functions to convert between soil moisture
+(volumetric water content, \var{VWC}) and soil water potential (\var{SWP})
 
 Calculate volumetric water content from soil water potential and soil texture
 
@@ -132,4 +146,8 @@ Cosby, B. J., G. M. Hornberger, R. B. Clapp, and T. R. Ginn.
 1984. A statistical exploration of the relationships of soil moisture
 characteristics to the physical properties of soils. Water Resources Research
 20:682-690.
+}
+\seealso{
+The use of these functions is deprecated;
+please use \code{ptf_estimate()} and \code{swrc_conversion()} instead.
 }

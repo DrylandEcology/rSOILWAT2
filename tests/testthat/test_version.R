@@ -1,4 +1,3 @@
-context("rSOILWAT2 object version tags")
 
 #---TESTS
 test_that("rSOILWAT2 object versions", {
@@ -92,14 +91,24 @@ test_that("rSOILWAT2 object versions", {
   )
 
 
-  #--- Check for other object classes (ANY-method): return `NA`
-  expect_equal(get_version(), NA)
-  expect_equal(get_version(NA), NA)
-  expect_equal(get_version(NULL), NA)
-  expect_equal(get_version(1), NA)
-  expect_equal(get_version(list()), NA)
-  expect_equal(get_version(try(stop("error"), silent = TRUE)), NA)
-  expect_equal(get_version(swSoils_Layers(sw_in)), NA)
+  #--- Check that numeric versions are passed through
+  v <- as.numeric_version(getNamespaceVersion("rSOILWAT2"))
+  expect_identical(get_version(v), as.character(v))
+  v <- packageVersion("base")
+  expect_identical(get_version(v), as.character(v))
+
+
+  #--- Check for other object classes (ANY-method): return `NA_character_`
+  expect_identical(get_version(), NA_character_)
+  expect_identical(get_version(NA), NA_character_)
+  expect_identical(get_version(NULL), NA_character_)
+  expect_identical(get_version(1), NA_character_)
+  expect_identical(get_version(list()), NA_character_)
+  expect_identical(
+    get_version(try(stop("error"), silent = TRUE)),
+    NA_character_
+  )
+  expect_identical(get_version(swSoils_Layers(sw_in)), NA_character_)
 
   expect_false(check_version(NA))
 })
@@ -120,14 +129,14 @@ test_that("rSOILWAT2 object timestamps", {
   expect_gt(format_timestamp(sw_out), t)
 
 
-  #--- Check for other object classes (ANY-method): return `NA`
-  expect_equal(get_timestamp(), NA)
-  expect_equal(get_timestamp(NA), NA)
-  expect_equal(get_timestamp(NULL), NA)
-  expect_equal(get_timestamp(1), NA)
-  expect_equal(get_timestamp(list()), NA)
-  expect_equal(get_timestamp(try(stop("error"), silent = TRUE)), NA)
-  expect_equal(get_timestamp(swSoils_Layers(sw_in)), NA)
+  #--- Check for other object classes (ANY-method): return `NA_real_`
+  expect_equal(get_timestamp(), NA_real_)
+  expect_equal(get_timestamp(NA), NA_real_)
+  expect_equal(get_timestamp(NULL), NA_real_)
+  expect_equal(get_timestamp(1), NA_real_)
+  expect_equal(get_timestamp(list()), NA_real_)
+  expect_equal(get_timestamp(try(stop("error"), silent = TRUE)), NA_real_)
+  expect_equal(get_timestamp(swSoils_Layers(sw_in)), NA_real_)
 
   expect_equal(format_timestamp(NA), as.POSIXct(NA))
 })

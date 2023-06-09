@@ -12,6 +12,12 @@ print_mkv_files(mkv_doy, mkv_woy, path, digits = 5)
 
 \item{mkv_woy}{A data.frame. The same named output element of
 \code{\link{dbW_estimate_WGen_coefs}}.}
+
+\item{path}{A character string. The path on disk to the location
+where output files should be created.}
+
+\item{digits}{An integer value. The number of digits with which to write
+the values to disk.}
 }
 \value{
 This function is called for its side effect, i.e., writing values

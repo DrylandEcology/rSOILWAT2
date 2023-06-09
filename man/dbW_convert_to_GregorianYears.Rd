@@ -11,14 +11,13 @@ dbW_convert_to_GregorianYears(
   type = c("asis", "sequential"),
   name_year = "Year",
   name_DOY = "DOY",
-  name_data = c("Tmax_C", "Tmin_C", "PPT_cm"),
+  name_data = weather_dataColumns(),
   valNA = NULL
 )
 }
 \arguments{
-\item{weatherData}{A list of elements of class
-\code{\linkS4class{swWeatherData}} or a \code{data.frame} as returned by
-\code{\link{dbW_weatherData_to_dataframe}}.}
+\item{weatherData}{A list of elements of class \code{\linkS4class{swWeatherData}}
+that each hold daily weather data for one calendar year.}
 
 \item{new_startYear}{An integer value. The first Calendar year of the new
 time period. If \code{NULL}, then the first year of \code{weatherData}.}
@@ -62,25 +61,32 @@ can convert from a non-leap to a Gregorian calendar.
 wdata <- rSOILWAT2::weatherData
 
 ## Transfer to different years (partially overlapping)
-wnew <- dbW_convert_to_GregorianYears(wdata,
-  new_startYear = 2000, new_endYear = 2020
+wnew <- dbW_convert_to_GregorianYears(
+  wdata,
+  new_startYear = 2000,
+  new_endYear = 2020
 )
 all.equal(unique(wnew[, "Year"]), 2000:2020)
 anyNA(wnew) # --> use `dbW_generateWeather`
 
 ## Transfer to a subset of years (i.e., subset)
-wnew <- dbW_convert_to_GregorianYears(wdata,
-  new_startYear = 2000, new_endYear = 2005
+wnew <- dbW_convert_to_GregorianYears(
+  wdata,
+  new_startYear = 2000,
+  new_endYear = 2005
 )
 all.equal(unique(wnew[, "Year"]), 2000:2005)
 anyNA(wnew)
 
 ## Correct/convert from a non-leap to a Gregorian calendar
-wempty <- data.frame(dbW_weatherData_to_dataframe(
-  list(new("swWeatherData"))))[1:365, ]
+wempty <- data.frame(
+  dbW_weatherData_to_dataframe(weatherHistory())
+)[1:365, ]
 
-wnew <- dbW_convert_to_GregorianYears(wempty,
-  new_startYear = 2016, new_endYear = 2016
+wnew <- dbW_convert_to_GregorianYears(
+  wempty,
+  new_startYear = 2016,
+  new_endYear = 2016
 )
 all.equal(unique(wnew[, "Year"]), 2016:2016)
 all.equal(nrow(wnew), 366) # leap year

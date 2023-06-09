@@ -18,6 +18,90 @@
 ###############################################################################
 
 
+#--- Topic: weather data ------
+#' `rSOILWAT2` weather data functionality
+#'
+#' @param wd A list of elements of class [`swWeatherData-class`]
+#'   that each hold daily weather data for one calendar year.
+#' @param weatherData A list of elements of class [`swWeatherData-class`]
+#'   that each hold daily weather data for one calendar year.
+#' @param dailySW A list of elements of class [`swWeatherData-class`]
+#'   that each hold daily weather data for one calendar year.
+#'
+#' @param weatherDF A `data.frame`. Daily weather data where rows represent
+#'   days and columns represent the weather variables
+#'   (see `weatherDF_dataColumns`).
+#' @param weatherDF_dataColumns A vector of character strings. The column
+#'   names of `weatherDF` in the correct order for `SOILWAT2` including
+#'   calendar year `year` (optional) and day of year `DOY`, see
+#'   [weather_dataColumns()].
+#'
+#'
+#' @param years A numeric vector. The calendar years.
+#' @param digits An integer value. The number of decimal places for rounding
+#'   weather values.
+#' @param round An integer value. The number of decimal places for rounding
+#'   weather values.
+#'
+#' @param weather_tag A character string. The base file name without extension
+#' for `SOILWAT2`-formatted input files; default is `"weath"`
+#'
+#' @name sw_weather_data
+#' @md
+NULL
+
+
+
+#--- Topic: weather data base ------
+#' Weather data base structure
+#'
+#' @param dbFilePath A character string. The file path of the weather database.
+#'  This will be a file of type `sqlite3`. In-memory databases are not
+#'  supported.
+#' @param site_data A data.frame. The site data with column names
+#'  `Longitude`, `Latitude`, and `Label`.
+#' @param Site_id An integer value. The IDs/database key of the queried site.
+#' @param site_id An integer value. The IDs/database key of the queried site.
+#' @param Site_ids An integer vector. The IDs/database keys of the queried sites
+#' @param site_ids An integer vector. The IDs/database keys of the queried sites
+#' @param Labels A vector of character strings. The names/labels of
+#'   queried sites.
+#' @param Label A character string. The name/label of the queried site.
+#' @param site_labels A vector of character string. The names/labels of
+#'   queried sites.
+#' @param site_label A character string. The name/label of the queried site.
+#' @param lat A numeric vector or `NULL`. The latitude in decimal degrees
+#'   of `WGS84`. Northern latitude are positive, sites on the southern
+#'   hemisphere have negative values.
+#' @param long A numeric vector or `NULL`. The longitude in decimal degrees
+#'   of `WGS84`. Eastern longitudes are positive, sites on the western
+#'   hemisphere have negative values.
+#' @param Scenario_ids An integer vector. The IDs/database keys of the queried
+#'   scenario.
+#' @param scen_ids An integer vector. The IDs/database keys of the queried
+#'   scenario.
+#' @param Scenario_id An integer value The ID/database key of the queried
+#'   scenario.
+#' @param scenario_id An integer value The ID/database key of the queried
+#'   scenario.
+#' @param Scenarios A vector of character strings. The climate scenarios of
+#'  which the first one is enforced to be `scen_ambient`.
+#' @param scen_labels A vector of character strings. The climate scenarios of
+#'  which the first one is enforced to be `scen_ambient`.
+#' @param Scenario A character string. The name/label of a climate scenario.
+#' @param scenario A character string. The name/label of a climate scenario.
+#' @param scen_ambient A character string. The first/default climate scenario.
+#' @param startYear A numeric value. First calendar year of the weather data.
+#' @param endYear A numeric value. Last calendar year of the weather data.
+#' @param ignore.case A logical value.
+#' @param verbose A logical value.
+#'
+#' @name sw_weather_database
+#' @md
+NULL
+
+
+
 ## ------SQLite weather database functions
 # Daily weather data is stored in database as SQL-blob of a list of R objects
 # of class \code{\linkS4class{swWeatherData}}
@@ -25,7 +109,7 @@
 
 #' Insistently interacting with the weather database
 #'
-#' This is particularly suitable for `DBI::dbGetQuery()` and `DBI::dbExecute()`.
+#' This is particularly suitable for [DBI::dbGetQuery()] and [DBI::dbExecute()].
 #'
 #' @param fun A function.
 #'   The function must have arguments `conn`, `statement`, and `params` or
@@ -99,6 +183,7 @@ dbW_version <- function() {
 }
 
 #' Check that version of registered weather database is up-to-date
+#' @param dbW_min_version A numeric version number.
 #' @return A logical value.
 #' @export
 dbW_check_version <- function(dbW_min_version = NULL) {
@@ -135,20 +220,16 @@ dbW_compression <- function() {
 }
 
 
+#--- Topic: check_content ------
 #' Check availability of content in registered weather database
 #'
-#' @param Site_ids An integer vector. The IDs/database keys of the queried site.
-#' @param Labels A vector of character strings. The names/labels of the queried
-#'   sites.
-#' @param Scenario_ids An integer vector. The IDs/database keys of the queried
-#'   scenario.
-#' @param Scenarios A vector of character strings. The names/labels of the
-#'   queried scenarios.
-#' @param ignore.case A logical value.
 #' @name check_content
 NULL
 
 #' @rdname check_content
+#'
+#' @inheritParams sw_weather_database
+#'
 #' @section Details: \code{dbW_has_siteIDs} checks whether sites are available.
 #' @return \code{dbW_has_siteIDs} returns a logical vector of the length of
 #'   queried sites.
@@ -167,6 +248,9 @@ dbW_has_sites <- function(Labels, ignore.case = FALSE) {
 }
 
 #' @rdname check_content
+#'
+#' @inheritParams sw_weather_database
+#'
 #' @section Details: \code{dbW_has_siteIDs} checks whether sites are available.
 #' @return \code{dbW_has_siteIDs} returns a logical vector of the length of
 #'   queried sites.
@@ -182,6 +266,9 @@ dbW_has_siteIDs <- function(Site_ids) {
 }
 
 #' @rdname check_content
+#'
+#' @inheritParams sw_weather_database
+#'
 #' @section Details: \code{dbW_has_scenarioIDs} checks whether scenarios are
 #'   available.
 #' @return \code{dbW_has_scenarios} returns a logical vector of the length of
@@ -198,6 +285,9 @@ dbW_has_scenarioIDs <- function(Scenario_ids) {
 }
 
 #' @rdname check_content
+#'
+#' @inheritParams sw_weather_database
+#'
 #' @section Details: \code{dbW_has_scenarios} checks whether scenarios are
 #'   available.
 #' @return \code{dbW_has_scenarios} returns a logical vector of the length of
@@ -219,6 +309,9 @@ dbW_has_scenarios <- function(Scenarios, ignore.case = FALSE) {
 }
 
 #' @rdname check_content
+#'
+#' @inheritParams sw_weather_database
+#'
 #' @section Details: \code{dbW_has_weatherData} checks whether weather data are
 #'   available but ignores \code{start_year} and \code{end_year}.
 #'
@@ -285,6 +378,9 @@ dbW_has_weatherData <- function(Site_ids, Scenario_ids) {
 
 
 #' @rdname check_content
+#'
+#' @inheritParams sw_weather_database
+#'
 #' @section Details:
 #'   \code{dbW_have_sites_all_weatherData} checks whether weather data are
 #'   available but ignores \code{start_year} and \code{end_year}.
@@ -301,7 +397,6 @@ dbW_have_sites_all_weatherData <- function(
   site_ids = NULL,
   scen_labels = NULL,
   scen_ids = NULL,
-  chunk_size = 1500L,
   verbose = FALSE
 ) {
 
@@ -359,6 +454,7 @@ dbW_have_sites_all_weatherData <- function(
 }
 
 
+#--- Topic: extract data from weather data base ------
 
 #' Extract table keys to connect sites with weather data in the registered
 #' weather database
@@ -367,15 +463,9 @@ dbW_have_sites_all_weatherData <- function(
 #'   \code{Labels} or by providing \code{lat} and \code{long} of the requested
 #'   site(s).
 #'
-#' @param lat A numeric vector or \code{NULL}. The latitude in decimal degrees
-#'   of \var{WGS84}. Northern latitude are positive, sites on the southern
-#'   hemisphere have negative values.
-#' @param long A numeric vector or \code{NULL}. The longitude in decimal degrees
-#'   of \var{WGS84}. Eastern longitudes are positive, sites on the western
-#'   hemisphere have negative values.
+#' @inheritParams sw_weather_database
 #' @param tol_xy A numeric value. The tolerance used to match requested
 #'   longitude and latitude values.
-#' @inheritParams check_content
 #'
 #' @return An integer vector with the values of the keys or \code{NA} if not
 #'   located.
@@ -469,7 +559,7 @@ dbW_getSiteId <- function(
 #' Extract table keys to connect scenario(s) with weather data in the registered
 #' weather database
 #'
-#' @inheritParams check_content
+#' @inheritParams sw_weather_database
 #'
 #' @return An integer vector with the values of the keys or \code{NA} if not
 #'   located.
@@ -514,7 +604,10 @@ dbW_getScenarioId <- function(Scenario, ignore.case = FALSE, verbose = FALSE) {
 #' }
 #'
 #'
+#' @inheritParams sw_weather_database
 #' @inheritParams dbW_getSiteId
+#' @param add_if_missing A logical value. Should site entries in the data base
+#'   be created if they are queried and do not exist in the data base?
 #'
 #' @return A list with two elements \code{site_id} and \code{scenario_id}.
 #'
@@ -681,55 +774,6 @@ dbW_getScenariosTable <- function() {
 }
 
 
-# Index along years to narrow the start and/or end year if not NULL
-select_years <- function(years, start_year = NULL, end_year = NULL) {
-
-  if (!is.null(start_year) || !is.null(end_year)) {
-    start_year <- as.integer(start_year)
-    use_start <- !is.na(start_year)
-    end_year <- as.integer(end_year)
-    use_end <- !is.na(end_year)
-
-    if (
-      use_start && use_end &&
-      (start_year >= end_year || start_year < 0 || end_year < 0)
-    ) {
-      warning(
-        "'select_years': wrong value for argument 'start_year' ",
-        "and/or 'end_year'"
-      )
-    }
-
-  } else {
-    use_start <- use_end <- FALSE
-  }
-
-  idx_start_year <- 1L
-  if (use_start) {
-    tmp <- match(start_year, years)
-    if (!is.na(tmp)) {
-      idx_start_year <- tmp
-    }
-  }
-
-  idx_end_year <- length(years)
-  if (use_end) {
-    tmp <- match(end_year, years)
-    if (!is.na(tmp)) {
-      idx_end_year <- tmp
-    }
-  }
-
-  idx_start_year:idx_end_year
-}
-
-#' Extract years from a \var{weatherData} object
-#' @param wd A list of elements of class \code{\linkS4class{swWeatherData}}
-#' @export
-get_years_from_weatherData <- function(wd) {
-  as.integer(unlist(lapply(wd, FUN = slot, "year")))
-}
-
 
 #' Extracts daily weather data from a registered weather database
 #'
@@ -742,20 +786,12 @@ get_years_from_weatherData <- function(wd) {
 #' If there is missing data, then impute or use the built-in Markov
 #' weather generator (see examples for \code{\link{sw_exec}}).
 #'
-#' @param Site_id Numeric. Used to identify site and extract weather data.
-#' @param lat Numeric. Latitude used with longitude to identify site id if
-#'   \code{Site_id} is missing.
-#' @param long Numeric. Longitude and Latitude are used to identify site if
-#'   \code{Site_id} is missing.
-#' @param Label A character string. A site label.
-#' @param startYear Numeric. Extracted weather data will start with this year.
-#' @param endYear Numeric. Extracted weather data will end with this year.
-#' @param Scenario A character string.
+#' @inheritParams sw_weather_database
+#' @inheritParams dbW_getSiteId
 #' @param stop_if_missing A logical value. If \code{TRUE}, then throws an
 #'   error if at least one requested weather data object is not available
 #'   in the current weather database. If \code{FALSE}, then returns \code{NULL}
 #'   for those requested site scenario combinations.
-#' @inheritParams dbW_getSiteId
 #'
 #' @return
 #'  If one site and one scenario were requested, then returns
@@ -774,6 +810,7 @@ get_years_from_weatherData <- function(wd) {
 #' @seealso \code{\link{getWeatherData_folders}}
 #'
 #' @export
+#' @md
 dbW_getWeatherData <- function(
   Site_id = NULL,
   lat = NULL,
@@ -900,12 +937,11 @@ dbW_getWeatherData <- function(
 
 #' Registers/connects a SQLite weather database with the package
 #'
-#' @param dbFilePath A character string. The weather database file path.
-#' @param create_if_missing A logical value. If \code{TRUE} and now file
-#'   \code{dbFilePath} exists then create a new file.
+#' @inheritParams sw_weather_database
+#' @param create_if_missing A logical value. If \code{TRUE} and file
+#'   \code{dbFilePath} does not exist then create a new database file.
 #' @param check_version A logical value. If \code{TRUE} then check database
 #'   version against currently implemented version by the package.
-#' @param verbose A logical value.
 #'
 #' @return An invisible logical value indicating success/failure.
 #'
@@ -1003,7 +1039,7 @@ dbW_setConnection <- function(
 #' @rdname dbW_setConnection
 #'
 #' @section Details:
-#' `.dbW_setConnection()` is a bare-bones version of `dbW_setConnection()`.
+#' [.dbW_setConnection()] is a bare-bones version of [dbW_setConnection()].
 #'  It doesn't carry out any checks that make sure the database works
 #'  correctly.
 #'
@@ -1030,13 +1066,21 @@ dbW_disconnectConnection <- function() {
   invisible(!inherits(res, "try-error"))
 }
 
+
+#--- Topic: Add data to database ------
+
 #' Adds new sites to a registered weather database
 #'
-#' @inheritParams check_content
-#' @inheritParams dbW_createDatabase
+#' @inheritParams sw_weather_database
+#'
 #' @return An invisible logical value indicating success with \code{TRUE} and
 #'  failure with \code{FALSE}.
+#'
+#' @section Details:
+#' `site_data` requires columns `Longitude`, `Latitude`, and `Label`.
+#'
 #' @export
+#' @md
 dbW_addSites <- function(site_data, ignore.case = FALSE, verbose = FALSE) {
   req_cols <- c("Latitude", "Longitude", "Label")
   if (!all(req_cols %in% colnames(site_data))) {
@@ -1067,8 +1111,8 @@ dbW_addSites <- function(site_data, ignore.case = FALSE, verbose = FALSE) {
 
 #' Updates existing sites or adds new sites to a registered weather database
 #'
-#' @inheritParams check_content
-#' @inheritParams dbW_createDatabase
+#' @inheritParams sw_weather_database
+#'
 #' @return An invisible logical value indicating success with \code{TRUE} and
 #'  failure with \code{FALSE}.
 #' @export
@@ -1110,8 +1154,8 @@ dbW_updateSites <- function(
 
 #' Adds new Scenarios to a registered weather database
 #'
-#' @inheritParams check_content
-#' @inheritParams dbW_createDatabase
+#' @inheritParams sw_weather_database
+#'
 #' @return An invisible logical value indicating success with \code{TRUE} and
 #'  failure with \code{FALSE}.
 #' @export
@@ -1169,8 +1213,13 @@ dbW_addWeatherDataNoCheck <- function(
 }
 
 #' Adds daily weather data to a registered weather database
-#' @inheritParams check_content
-#' @inheritParams dbW_getWeatherData
+#'
+#' @inheritParams sw_weather_data
+#' @inheritParams sw_weather_database
+#' @inheritParams dbW_getSiteId
+#' @param weatherFolderPath A character string. The path to the parent folder.
+#' @param overwrite A logical value. Should weather data that already exists
+#' in the data base be overwritten?
 #'
 #' @return An invisible logical value indicating success with \code{TRUE} and
 #'  failure with \code{FALSE}.
@@ -1409,23 +1458,19 @@ dbW_addWeatherData <- function(
 #'      \var{Scenario} (i.e., the scenario name)}
 #' }
 #'
-#' @param dbFilePath A character string. The file path of the weather database.
-#'  This will be a file of type \code{sqlite3}. In-memory databases are not
-#'  supported.
-#' @param site_data A data.frame. The site data with column names
-#'  \var{Latitude}, \var{Longitude}, and \var{Label}.
-#' @param Scenarios A vector of character strings. The climate scenarios of
-#'  which the first one is enforced to be \code{scen_ambient}.
-#' @param scen_ambient A character string. The first/default climate scenario.
+#' @inheritParams sw_weather_database
 #' @param compression_type A character string. The type of compression for
 #'  the weather blob. See \code{\link[base]{memCompress}} for the available
 #'  choices.
-#' @param verbose A logical value.
 #' @param ... Additional/deprecated arguments which are currently ignored.
 #'
 #' @return \code{TRUE} on success; \code{FALSE} otherwise. If the file
 #'   \code{dbFilePath} didn't already exist, but creating it failed, then the
 #'   attempt will be disconnected and removed.
+#'
+#' @section Details:
+#' `site_data` requires columns `Longitude`, `Latitude`, and `Label`.
+#'
 #' @export
 dbW_createDatabase <- function(
   dbFilePath = "dbWeatherData.sqlite3",
@@ -1554,8 +1599,23 @@ dbW_createDatabase <- function(
 }
 
 
-#dataframe of columns folder, lat, long, label where label can equal folderName
+#' Read `SOILWAT2`-style weather data from disk and store in weather database
+#'
+#' @param MetaData A data frame. If not missing, then must contain columns
+#'   (in that order) (name of site weather data) `folder`,
+#'   `lat` (site latitude),
+#'   `long` (site longitude),
+#'   `label` (name of site).
+#' @param FoldersPath A character string. The path to the folder that contains
+#'   the site weather data folders.
+#' @param ScenarioName A character string. The scenario name represented by
+#'   the data.
+#' @param weather_tag A character string. The file name tag that identifies
+#'   the individual weather data files inside the site weather data folders.
+#'
+#'
 #' @export
+#' @md
 dbW_addFromFolders <- function(
   MetaData = NULL,
   FoldersPath = ".",
@@ -1602,9 +1662,14 @@ dbW_addFromFolders <- function(
   invisible(TRUE)
 }
 
+
+#--- Topic: Delete/remove data from database ------
+
 #' Delete a site and all associated weather data from a registered weather
 #' database
-#' @inheritParams check_content
+#'
+#' @inheritParams sw_weather_database
+#'
 #' @return An invisible logical value indicating success with \code{TRUE} and
 #'   failure with \code{FALSE}.
 #' @export
@@ -1624,7 +1689,9 @@ dbW_deleteSite <- function(Site_ids) {
 }
 
 #' Delete a weather data record from a registered weather database
-#' @inheritParams check_content
+#'
+#' @inheritParams sw_weather_database
+#'
 #' @return An invisible logical value indicating success with \code{TRUE} and
 #'   failure with \code{FALSE}.
 #' @export
@@ -1764,7 +1831,49 @@ dbW_delete_duplicated_weatherData <- function( # nolint: object_length_linter.
 }
 
 
-## ------ Conversion of weather data formats
+#--- Topic: manipulate weather data objects ------
+
+# Index along years to narrow the start and/or end year if not NULL
+select_years <- function(years, start_year = NULL, end_year = NULL) {
+
+  if (!is.null(start_year) || !is.null(end_year)) {
+    start_year <- as.integer(start_year)
+    use_start <- !is.na(start_year)
+    end_year <- as.integer(end_year)
+    use_end <- !is.na(end_year)
+
+    if (
+      use_start && use_end &&
+        (start_year >= end_year || start_year < 0 || end_year < 0)
+    ) {
+      warning(
+        "'select_years': wrong value for argument 'start_year' ",
+        "and/or 'end_year'"
+      )
+    }
+
+  } else {
+    use_start <- use_end <- FALSE
+  }
+
+  idx_start_year <- 1L
+  if (use_start) {
+    tmp <- match(start_year, years)
+    if (!is.na(tmp)) {
+      idx_start_year <- tmp
+    }
+  }
+
+  idx_end_year <- length(years)
+  if (use_end) {
+    tmp <- match(end_year, years)
+    if (!is.na(tmp)) {
+      idx_end_year <- tmp
+    }
+  }
+
+  idx_start_year:idx_end_year
+}
 
 #' Conversion: (Compressed) raw vector (e.g., SQL-retrieved blob) to
 #' (uncompressed) object
@@ -1802,10 +1911,8 @@ dbW_blob_to_weatherData <- function(data_blob, type = "gzip") {
 #' weather data used by \pkg{rSOILWAT2}'s simulation functions to a blob object
 #' which can be inserted into a SQLite DB.
 #'
-#' @param weatherData A list of elements of class
-#'   \code{\linkS4class{swWeatherData}} or any suitable object.
-#' @param type A character string. One of
-#'   \code{c("gzip", "bzip2", "xz", "none")}.
+#' @inheritParams sw_weather_data
+#' @inheritParams dbW_blob_to_weatherData
 #'
 #' @seealso \code{\link[base]{memCompress}}, \code{\link{serialize}}
 #' @export
@@ -1835,8 +1942,16 @@ dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
 #'   \var{weath}.
 #' @param startYear Numeric. Extracted weather data will start with this year.
 #' @param endYear Numeric. Extracted weather data will end with this year.
+#' @param dailyInputFlags A logical vector of length `MAX_INPUT_COLUMNS`,
+#'   see `"weathsetup.in"`.
+#' @param method A character string. `"R"` uses code in `R` to read files as-is
+#'   whereas `"C"` uses `"SOILWAT2"` code to read and process files.
 #'
 #' @return A list of elements of class \code{\linkS4class{swWeatherData}}.
+#'
+#' @section Details:
+#' [dbW_weather_to_SOILWATfiles()] offers the inverse operation, i.e.,
+#' writing weather data to disk files.
 #'
 #' @seealso \code{\link{dbW_getWeatherData}}
 #'
@@ -1845,25 +1960,62 @@ dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
 #' path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 #'
 #' ## ------ Simulation with data prepared beforehand and separate weather data
-#' ## Read inputs from files on disk
+#' ## Read inputs from files on disk (via SOILWAT2)
 #' sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
 #'
-#' ## Read forcing weather data from files on disk (there are also functions
-#' ##   to set up a SQLite database for the weather data)
-#' sw_weath3 <- getWeatherData_folders(
-#'    LookupWeatherFolder = file.path(path_demo, "Input"),
-#'    weatherDirName = "data_weather", filebasename = "weath",
-#'    startYear = 1979, endYear = 2010)
+#' ## Read forcing weather data from files on disk (via SOILWAT2)
+#' sw_weath3c <- getWeatherData_folders(
+#'   LookupWeatherFolder = file.path(path_demo, "Input"),
+#'   weatherDirName = "data_weather",
+#'   filebasename = "weath",
+#'   startYear = 1979,
+#'   endYear = 2010,
+#'   method = "C"
+#' )
+#'
+#' ## Read forcing weather data from files on disk (via R)
+#' sw_weath3r <- getWeatherData_folders(
+#'   LookupWeatherFolder = file.path(path_demo, "Input"),
+#'   weatherDirName = "data_weather",
+#'   filebasename = "weath",
+#'   startYear = 1979,
+#'   endYear = 2010,
+#'   method = "R"
+#' )
+#'
+#' ## Weather data (for the non-calculated variables) should be identical
+#' identical(
+#'   sw_weath3c[[1L]]@data[, 1:4],
+#'   rSOILWAT2::get_WeatherHistory(sw_in3)[[1L]]@data[, 1:4]
+#' )
+#' identical(
+#'   sw_weath3r[[1L]]@data[, 1:4],
+#'   rSOILWAT2::get_WeatherHistory(sw_in3)[[1L]]@data[, 1:4]
+#' )
 #'
 #' ## List of the slots of the input objects of class 'swWeatherData'
-#' utils::str(sw_weath3, max.level=1)
+#' utils::str(sw_weath3c, max.level = 1)
+#' utils::str(sw_weath3r, max.level = 1)
 #'
 #' ## Execute the simulation run
-#' sw_out3 <- sw_exec(inputData = sw_in3, weatherList = sw_weath3)
+#' sw_out3c <- sw_exec(inputData = sw_in3, weatherList = sw_weath3c)
+#' sw_out3r <- sw_exec(inputData = sw_in3, weatherList = sw_weath3r)
+#'
+#' all.equal(sw_out3c, sw_out3r)
 #'
 #' @export
-getWeatherData_folders <- function(LookupWeatherFolder, weatherDirName = NULL,
-  filebasename = "weath", startYear = NULL, endYear = NULL) {
+#' @md
+getWeatherData_folders <- function(
+  LookupWeatherFolder,
+  weatherDirName = NULL,
+  filebasename = "weath",
+  startYear = NULL,
+  endYear = NULL,
+  dailyInputFlags = c(rep(TRUE, 3L), rep(FALSE, 11L)),
+  method = c("R", "C")
+) {
+
+  method <- match.arg(method)
 
   if (is.null(LookupWeatherFolder) || is.null(filebasename)) {
     stop(
@@ -1871,6 +2023,13 @@ getWeatherData_folders <- function(LookupWeatherFolder, weatherDirName = NULL,
       "to locate weather data"
     )
   }
+
+  stopifnot(
+    identical(
+      length(dailyInputFlags),
+      rSW2_glovars[["kSOILWAT2"]][["kINT"]][["MAX_INPUT_COLUMNS"]]
+    )
+  )
 
   dir_weather <- if (is.null(weatherDirName)) {
     LookupWeatherFolder
@@ -1884,23 +2043,54 @@ getWeatherData_folders <- function(LookupWeatherFolder, weatherDirName = NULL,
     }
   )
 
-  if (!endsWith(filebasename, ".")) {
-    filebasename <- paste0(filebasename, ".")
+  if (endsWith(filebasename, ".")) {
+    # remove trailing "."
+    filebasename <- sub("\\.$", "", filebasename)
   }
-  years <- as.numeric(sub(pattern = filebasename, replacement = "", fweath))
+
+  years <- as.integer(
+    sub(pattern = paste0(filebasename, "."), replacement = "", fweath)
+  )
   stopifnot(!anyNA(years))
-  index <- select_years(years, startYear, endYear)
+  ids <- select_years(years, startYear, endYear)
+  used_years <- years[ids]
 
-  weathDataList <- list()
-  for (k in seq_along(index)) {
-    weathDataList[[k]] <- swReadLines(
-      new("swWeatherData", year = years[index[k]]),
-      file.path(dir_weather, fweath[index[k]])
+  if (method == "C") {
+    .Call(
+      C_rSW2_readAllWeatherFromDisk,
+      dir_weather,
+      filebasename,
+      used_years[[1L]],
+      used_years[[length(used_years)]],
+      dailyInputFlags
     )
-  }
-  names(weathDataList) <- as.character(years[index])
 
-  weathDataList
+  } else if (method == "R") {
+    ids_cols <- c(1L, 1L + which(dailyInputFlags))
+
+    res <- mapply(
+      function(fname, yr) {
+        object <- new("swWeatherData")
+        object@year <- yr
+        data <- utils::read.table(
+          fname,
+          header = FALSE,
+          comment.char = "#",
+          blank.lines.skip = TRUE,
+          sep = "\t"
+        )
+        stopifnot(ncol(data) %in% (0:1 + sum(dailyInputFlags)))
+        object@data <- object@data[seq_len(nrow(data)), , drop = FALSE]
+        object@data[, ids_cols] <- as.matrix(data)
+        object
+      },
+      file.path(dir_weather, fweath[ids]),
+      used_years,
+      SIMPLIFY = FALSE
+    )
+
+    stats::setNames(res, as.character(used_years))
+  }
 }
 
 
@@ -1931,9 +2121,41 @@ set_missing_weather <- function(data, valNA = NULL) {
   data
 }
 
+#' Check which weather values are missing
+#'
+#' @param x A two-dimensional numeric object.
+#'
+#' @return A logical object with same dimensions as `x`
+#'
+#' @examples
+#' x <- data.frame(
+#'   Tmax = c(-1.5, 2, NA, 999),
+#'   Tmin = c(-5, NaN, 999, -5)
+#' )
+#'
+#' is_missing_weather(x)
+#'
+#' @md
+#' @export
+is_missing_weather <- function(x) {
+  x <- as.matrix(x)
+
+  vals_missing <- c(
+    NA,
+    NaN,
+    rSW2_glovars[["kSOILWAT2"]][["kNUM"]][["SW_MISSING"]]
+  )
+
+  array(
+    data = x %in% vals_missing,
+    dim = dim(x),
+    dimnames = dimnames(x)
+  )
+}
 
 #' Convert an object of class \code{\linkS4class{swWeatherData}} to a data.frame
 #'
+#' @inheritParams sw_weather_data
 #' @inheritParams set_missing_weather
 #'
 #' @export
@@ -1951,17 +2173,63 @@ dbW_weatherData_to_dataframe <- function(weatherData, valNA = NULL) {
   )
 }
 
-#' Conversion: object of class \code{\linkS4class{swWeatherData}} to
-#' matrix of monthly values (\var{mean Tmax}, \var{mean Tmin}, \var{sum PPT})
+#' Round weather data in a list class \code{\linkS4class{swWeatherData}}
 #'
-#' @inheritParams set_missing_weather
+#' @inheritParams sw_weather_data
+#'
+#' @section Notes:
+#' `weatherDF_dataColumns` lists the columns of `weatherData` to be rounded.
+#'
+#' @return A list with \code{\linkS4class{swWeatherData}} elements.
 #'
 #' @export
-dbW_weatherData_to_monthly <- function(dailySW, na.rm = FALSE, valNA = NULL) {
+#' @md
+dbW_weatherData_round <- function(
+  weatherData,
+  digits = 4L,
+  weatherDF_dataColumns = weather_dataColumns()
+) {
+  lapply(
+    weatherData,
+    function(x) {
+      slot(x, "data")[, weatherDF_dataColumns] <- round(
+        slot(x, "data")[, weatherDF_dataColumns],
+        digits = digits
+      )
+      x
+    }
+  )
+}
+
+
+#' Summarize daily weather to weekly, monthly, or yearly values
+#'
+#' @inheritParams sw_weather_data
+#' @inheritParams set_missing_weather
+#' @param time_step A character string.
+#' @param na.rm A logical value. Should missing daily values be removed before
+#'   calculating monthly temperature and precipitation.
+#' @param funs A named vector of functions. The names must match column names
+#' in `dailySW` and the function are used to summarize daily weather values.
+#'
+#' @md
+#' @name dbW_temporal_summaries
+NULL
+
+#' @rdname dbW_temporal_summaries
+#' @export
+dbW_weatherData_to_monthly <- function(
+  dailySW,
+  na.rm = FALSE,
+  valNA = NULL,
+  funs = weather_dataAggFun()
+) {
+  vars <- names(funs)
+
   monthly <- matrix(
     nrow = length(dailySW) * 12,
-    ncol = 5,
-    dimnames = list(NULL, c("Year", "Month", "Tmax_C", "Tmin_C", "PPT_cm"))
+    ncol = 2 + length(vars),
+    dimnames = list(NULL, c("Year", "Month", vars))
   )
 
   for (y in seq_along(dailySW)) {
@@ -1971,31 +2239,29 @@ dbW_weatherData_to_monthly <- function(dailySW, na.rm = FALSE, valNA = NULL) {
       format = "%Y-%j", tz = "UTC"
     )$mon + 1
     tmp <- set_missing_weather(weath@data, valNA = valNA)
-    monthly[1:12 + 12 * (y - 1), ] <- data.matrix(cbind(
-      Year = weath@year,
-        Month = 1:12,
-      aggregate(
-        tmp[, c("Tmax_C", "Tmin_C")],
-        by = list(month),
-        FUN = mean,
-        na.rm = na.rm
-      )[, 2:3],
-      PPT_cm = as.vector(
-        tapply(tmp[, "PPT_cm"], month, FUN = sum, na.rm = na.rm)
+
+    ids <- 1:12 + 12 * (y - 1)
+    monthly[ids, "Year"] <- weath@year
+    monthly[ids, "Month"] <- seq_len(12L)
+
+    for (var in vars) {
+      monthly[ids, var] <- as.vector(
+        tapply(tmp[, var], month, FUN = funs[[var]], na.rm = na.rm)
       )
-    ))
+    }
   }
 
   monthly
 }
 
 
-#' Aggregate daily weather data.frame to weekly, monthly, or yearly values
+#' @rdname dbW_temporal_summaries
 #' @export
 dbW_dataframe_aggregate <- function(
   dailySW,
   time_step = c("Year", "Month", "Week", "Day"),
-  na.rm = FALSE
+  na.rm = FALSE,
+  funs = weather_dataAggFun()
 ) {
 
   time_step <- match.arg(time_step)
@@ -2034,22 +2300,25 @@ dbW_dataframe_aggregate <- function(
     )
   }
 
-  as.matrix(cbind(
-    hout,
-    Tmax_C = as.vector(
-      tapply(dailySW[, "Tmax_C"], INDEX = idaggs, FUN = mean, na.rm = na.rm)
-    ),
-    Tmin_C = as.vector(
-      tapply(dailySW[, "Tmin_C"], INDEX = idaggs, FUN = mean, na.rm = na.rm)
-    ),
-    PPT_cm = as.vector(
-      tapply(dailySW[, "PPT_cm"], INDEX = idaggs, FUN = sum, na.rm = na.rm)
+  vars <- names(funs)
+
+  res <- as.matrix(
+    cbind(
+      hout,
+      matrix(ncol = length(vars), dimnames = list(NULL, vars))
     )
-  ))
+  )
+
+  for (var in vars) {
+    res[, var] <- as.vector(
+      tapply(dailySW[, var], INDEX = idaggs, FUN = funs[[var]], na.rm = na.rm)
+    )
+  }
+
+  res
 }
 
-#' Conversion: object of daily weather data.frame to matrix of monthly values
-#' (\var{mean Tmax}, \var{mean Tmin}, \var{sum PPT})
+#' @rdname dbW_temporal_summaries
 #' @export
 dbW_dataframe_to_monthly <- function(dailySW, na.rm = FALSE) {
   dbW_dataframe_aggregate(dailySW, time_step = "Month", na.rm = na.rm)
@@ -2058,22 +2327,34 @@ dbW_dataframe_to_monthly <- function(dailySW, na.rm = FALSE) {
 
 
 
-#' Assign years to weather data.frame
-#' @param weatherDF A data.frame. data.frame containing weather information for
-#' site.
+#' Extract years from a \var{weatherData} object
+#' @inheritParams sw_weather_data
+#' @export
+get_years_from_weatherData <- function(wd) {
+  as.integer(unlist(lapply(wd, FUN = slot, "year")))
+}
+
+
+#' Extract years to weather data.frame
+#'
+#' @inheritParams sw_weather_data
 #' @param years A numeric or integer vector or \code{NULL}. Vector of year data
 #' where length is equal to either the number of years in the weather data.frame
 #' or the number of rows in the data.frame.
-#' @param weatherDF_dataColumns A vector of string values. Column names of the
-#' weather data.frame.
+#'
+#' @section Notes:
+#' The first element of `weatherDF_dataColumns` (only the first is used) must
+#' contain the column name for day of year.
+#'
 #' @return A named list of length 2.
 #' \itemize{
 #'  \item \code{years} a vector of unique year values.
 #'  \item \code{year_ts} a vector of time series values for each row/day of the
 #' data.frame.
 #' }
+#'
 #' @export
-
+#' @md
 get_years_from_weatherDF <- function(weatherDF, years, weatherDF_dataColumns) {
   if (!is.null(years)) {
     if (length(years) == nrow(weatherDF)) {
@@ -2108,24 +2389,30 @@ get_years_from_weatherDF <- function(weatherDF, years, weatherDF_dataColumns) {
 
 
 #' Conversion: data.frame to object of class \code{\linkS4class{swWeatherData}}
+#'
+#' @inheritParams sw_weather_data
+#'
+#' @section Notes:
+#' `weatherDF_dataColumns` must exactly contain entries for day of year and
+#' the three weather variables.
+#'
 #' @export
+#' @md
 dbW_dataframe_to_weatherData <- function(
   weatherDF,
   years = NULL,
-  weatherDF_dataColumns = c("DOY", "Tmax_C", "Tmin_C", "PPT_cm"),
+  weatherDF_dataColumns = c("DOY", weather_dataColumns()),
   round = 2
 ) {
 
   if (
-    !(length(weatherDF_dataColumns) == 4) ||
-    !all(weatherDF_dataColumns %in% colnames(weatherDF))
+     !all(weatherDF_dataColumns %in% colnames(weatherDF))
   ) {
     stop(
-      "Not every required weatherDF_dataColumns is available in the ",
+      "Not every weatherDF_dataColumns is available in the ",
       "'weatherDF' object"
     )
   }
-
   ylist <- get_years_from_weatherDF(weatherDF, years, weatherDF_dataColumns)
 
   if (isTRUE(is.logical(round) && round || is.numeric(round))) {
@@ -2135,12 +2422,13 @@ dbW_dataframe_to_weatherData <- function(
   weatherData <- list()
   for (i in seq_along(ylist$years)) {
     ydata <- as.matrix(
-      weatherDF[ylist$year_ts == ylist$years[i],
-      weatherDF_dataColumns]
+      weatherDF[
+        ylist$year_ts == ylist$years[i],
+        weatherDF_dataColumns
+      ]
     )
-    colnames(ydata) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
-    weatherData[[i]] <- new(
-      "swWeatherData",
+    colnames(ydata) <- c("DOY", weather_dataColumns())
+    weatherData[[i]] <- swWeatherData(
       year = ylist$years[i],
       data = ydata
     )
@@ -2153,14 +2441,36 @@ dbW_dataframe_to_weatherData <- function(
 
 #' Conversion: object of class \code{\linkS4class{swWeatherData}} or
 #' data.frame to \pkg{SOILWAT} input text files
+#'
+#' @param path A character string. Path on disk to where to write files.
+#' @param site.label A character string. Site identification name added to
+#'   comment on first line of each file.
+#' @inheritParams sw_weather_data
+#' @param weatherDF A data.frame. Weather data, see details.
+#'
+#' @section Notes:
+#' `weatherDF_dataColumns` must exactly contain entries for day of year and
+#' the three weather variables.
+#'
+#' @section Details:
+#' The weather data must be provided either via `weatherData` or `weatherDF`.
+#' See [dbW_weatherData_to_dataframe()] and [dbW_weatherData_to_dataframe()]
+#' for conversions between formats of `weatherData` and `weatherDF`.
+#'
+#' @section Details:
+#' [getWeatherData_folders()] offers the inverse operation, i.e.,
+#' reading weather data from disk files.
+#'
 #' @export
+#' @md
 dbW_weather_to_SOILWATfiles <- function(
   path,
   site.label,
   weatherData = NULL,
   weatherDF = NULL,
   years = NULL,
-  weatherDF_dataColumns = c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+  weatherDF_dataColumns = c("DOY", weather_dataColumns()),
+  digits = 4L
 ) {
 
   stopifnot(is.null(weatherData) || is.null(weatherDF))
@@ -2171,11 +2481,10 @@ dbW_weather_to_SOILWATfiles <- function(
 
   } else if (!is.null(weatherDF)) {
     if (
-      !(length(weatherDF_dataColumns) == 4) ||
       !all(weatherDF_dataColumns %in% colnames(weatherDF))
     ) {
       stop(
-        "Not every required weatherDF_dataColumns is available in the ",
+        "Not every weatherDF_dataColumns is available in the ",
         "'weatherDF' object"
       )
     }
@@ -2200,7 +2509,7 @@ dbW_weather_to_SOILWATfiles <- function(
     sw.filename <- file.path(path, paste0("weath.", years[y]))
     sw.comments <- c(
       paste("# weather for site", site.label, "year = ", years[y]),
-      "# DOY Tmax(C) Tmin(C) PPT(cm)"
+      paste0("# ", toString(weatherDF_dataColumns))
     )
 
     utils::write.table(
@@ -2213,14 +2522,21 @@ dbW_weather_to_SOILWATfiles <- function(
       col.names = FALSE
     )
 
-    utils::write.table(
-      data.frame(
-        data.sw[, 1],
-        formatC(data.sw[, 2], digits = 2, format = "f"),
-        formatC(data.sw[, 3], digits = 2, format = "f"),
-        formatC(data.sw[, 4], digits = 2, format = "f"),
-        stringsAsFactors = FALSE
+    tmp <- data.frame(
+      data.sw[, 1],
+      matrix(
+        data = NA_character_,
+        ncol = length(weatherDF_dataColumns) - 1L
       ),
+      stringsAsFactors = FALSE
+    )
+
+    for (kv in seq_along(weatherDF_dataColumns)[-1]) {
+      tmp[, kv] <- formatC(data.sw[, kv], digits = digits, format = "f")
+    }
+
+    utils::write.table(
+      tmp,
       file = sw.filename,
       append = TRUE,
       sep = "\t",
@@ -2241,6 +2557,7 @@ dbW_weather_to_SOILWATfiles <- function(
 #' different years / a subset of years (partially overlapping or not), or
 #' can convert from a non-leap to a Gregorian calendar.
 #'
+#' @inheritParams sw_weather_data
 #' @inheritParams dbW_estimate_WGen_coefs
 #' @param new_startYear An integer value. The first Calendar year of the new
 #'   time period. If \code{NULL}, then the first year of \code{weatherData}.
@@ -2269,25 +2586,32 @@ dbW_weather_to_SOILWATfiles <- function(
 #' wdata <- rSOILWAT2::weatherData
 #'
 #' ## Transfer to different years (partially overlapping)
-#' wnew <- dbW_convert_to_GregorianYears(wdata,
-#'   new_startYear = 2000, new_endYear = 2020
+#' wnew <- dbW_convert_to_GregorianYears(
+#'   wdata,
+#'   new_startYear = 2000,
+#'   new_endYear = 2020
 #' )
 #' all.equal(unique(wnew[, "Year"]), 2000:2020)
 #' anyNA(wnew) # --> use `dbW_generateWeather`
 #'
 #' ## Transfer to a subset of years (i.e., subset)
-#' wnew <- dbW_convert_to_GregorianYears(wdata,
-#'   new_startYear = 2000, new_endYear = 2005
+#' wnew <- dbW_convert_to_GregorianYears(
+#'   wdata,
+#'   new_startYear = 2000,
+#'   new_endYear = 2005
 #' )
 #' all.equal(unique(wnew[, "Year"]), 2000:2005)
 #' anyNA(wnew)
 #'
 #' ## Correct/convert from a non-leap to a Gregorian calendar
-#' wempty <- data.frame(dbW_weatherData_to_dataframe(
-#'   list(new("swWeatherData"))))[1:365, ]
+#' wempty <- data.frame(
+#'   dbW_weatherData_to_dataframe(weatherHistory())
+#' )[1:365, ]
 #'
-#' wnew <- dbW_convert_to_GregorianYears(wempty,
-#'   new_startYear = 2016, new_endYear = 2016
+#' wnew <- dbW_convert_to_GregorianYears(
+#'   wempty,
+#'   new_startYear = 2016,
+#'   new_endYear = 2016
 #' )
 #' all.equal(unique(wnew[, "Year"]), 2016:2016)
 #' all.equal(nrow(wnew), 366) # leap year
@@ -2300,7 +2624,7 @@ dbW_convert_to_GregorianYears <- function(
   type = c("asis", "sequential"),
   name_year = "Year",
   name_DOY = "DOY",
-  name_data = c("Tmax_C", "Tmin_C", "PPT_cm"),
+  name_data = weather_dataColumns(),
   valNA = NULL
 ) {
 
@@ -2348,19 +2672,23 @@ dbW_convert_to_GregorianYears <- function(
   wdata2 <- data.frame(
     Year = 1900 + tdays1$year,
     DOY = 1 + tdays1$yday,
-    var1 = NA,
-    var2 = NA,
-    var3 = NA
+    matrix(ncol = length(name_data)),
+    stringsAsFactors = FALSE
   )
   colnames(wdata2) <- c(name_year, name_DOY, name_data)
 
   # Transfer existing values
-  tmp <- apply(wdata[, c(name_year, name_DOY)], 1, paste, collapse = "/")
+  tmp <- apply(
+    wdata[, c(name_year, name_DOY), drop = FALSE],
+    MARGIN = 1,
+    FUN = paste,
+    collapse = "/"
+  )
   id_xdf <- format(as.Date(tmp, format = "%Y/%j"))
   id_xdf2 <- format(as.Date(tdays))
   id_match <- match(id_xdf2, id_xdf, nomatch = 0)
 
-  wdata2[id_match > 0, name_data] <- wdata[id_match, name_data]
+  wdata2[id_match > 0, name_data] <- wdata[id_match, name_data, drop = FALSE]
 
   wdata2
 }
@@ -2374,94 +2702,83 @@ dbW_convert_to_GregorianYears <- function(
 #' represents daily data for one Gregorian year
 #'
 #' @param x An object.
+#' @param check_all A logical value
 #'
 #' @return A logical value.
 #'
+#' @examples
+#' dbW_check_weatherData(rSOILWAT2::weatherData)
+#' dbW_check_weatherData(weatherHistory())
+#' dbW_check_weatherData(weatherHistory(), check_all = FALSE)
+#'
+#'
 #' @export
-dbW_check_weatherData <- function(x) {
-  length(x) > 0 &&
-  inherits(x, "list") &&
-  all(sapply(x, inherits, what = "swWeatherData")) &&
-  isTRUE(all.equal(
-    unname(sapply(x, function(xyr) nrow(slot(xyr, "data")))),
-    365 + as.integer(
-      rSW2utils::isLeapYear(sapply(x, slot, name = "year"))
+dbW_check_weatherData <- function(x, check_all = TRUE) {
+  res <-
+    length(x) > 0 &&
+    inherits(x, "list") &&
+    all(vapply(x, inherits, what = "swWeatherData", FUN.VALUE = NA)) &&
+    all(
+      vapply(
+        x,
+        FUN = function(object) {
+          isTRUE(is.logical(validObject(object, test = TRUE)))
+        },
+        FUN.VALUE = NA
+      )
     )
-  ))
-}
 
 
-# nolint start
-## ------ Scanning of SOILWAT input text files
-readCharacter <- function(text, showWarnings = FALSE) {
-  tmp <- strsplit(x = text, split = "\t")[[1]][1]
-  unlist(strsplit(x = tmp, split = " "))[1]
-}
+  if (res) {
+    yrs <- vapply(x, slot, name = "year", FUN.VALUE = NA_integer_)
+    ids_check <- !is.na(yrs)
 
-readInteger <- function(text,showWarnings=FALSE) {
-  tmp <- suppressWarnings(as.integer(strsplit(x=text,split="\t")[[1]][1]))
-  if(is.na(tmp)) {
-    if(showWarnings) print(paste("Line: ",text,sep=""))
-    if(showWarnings) print("Not formatted with \t. Going to try [space].")
-    tmp <- suppressWarnings(as.integer(strsplit(x=text,split=" ")[[1]][1]))
-    if(is.na(tmp)) {
-      stop("Bad Line. Or Bad line numbers.")
+    if (isTRUE(check_all) || sum(ids_check) > 0) {
+      if (isTRUE(check_all)) {
+        ids_check <- seq_along(x)
+      }
+
+      has_days <- vapply(
+        x[ids_check],
+        function(xyr) nrow(slot(xyr, "data")),
+        FUN.VALUE = NA_integer_
+      )
+      expected_days <- 365L + as.integer(rSW2utils::isLeapYear(yrs[ids_check]))
+
+      res <- res && identical(unname(has_days), expected_days)
     }
   }
-  return(tmp)
+
+  res
 }
 
-readLogical <- function(text,showWarnings=FALSE) {
-  tmp <- suppressWarnings(as.logical(as.integer(strsplit(x=text,split="\t")[[1]][1])))
-  if(is.na(tmp)) {
-    if(showWarnings) print(paste("Line: ",text,sep=""))
-    if(showWarnings) print("Not formatted with \t. Going to try [space].")
-    tmp <- suppressWarnings(as.logical(as.integer(strsplit(x=text,split=" ")[[1]][1])))
-    if(is.na(tmp)) {
-      stop("Bad Line. Or Bad line numbers.")
-    }
-  }
-  return(tmp)
-}
 
-readNumeric <- function(text,showWarnings=FALSE) {
-  tmp <- suppressWarnings(as.numeric(strsplit(x=text,split="\t")[[1]][1]))
-  if(is.na(tmp)) {
-    if(showWarnings) print(paste("Line: ",text,sep=""))
-    if(showWarnings) print("Not formatted with \t. Going to try [space].")
-    tmp <- suppressWarnings(as.numeric(strsplit(x=text,split=" ")[[1]][1]))
-    if(is.na(tmp)) {
-      stop("Bad Line. Or Bad line numbers.")
-    }
+#' Determine used weather variables based on values
+#'
+#' @param x Weather data, i.e.,
+#' a list where each element is of class [`swWeatherData`], or
+#' a data frame with appropriate columns (see [dbW_weatherData_to_dataframe()]).
+#' @param name_data A vector of character strings. The column names of `x`
+#' with weather variables.
+#'
+#' @return A logical vector for each of the possible input variables with
+#' `TRUE` if at least one value is not missing.
+#'
+#' @examples
+#' calc_dailyInputFlags(rSOILWAT2::weatherData)
+#' calc_dailyInputFlags(dbW_weatherData_to_dataframe(rSOILWAT2::weatherData))
+#'
+#'
+#' @md
+#' @export
+calc_dailyInputFlags <- function(x, name_data = weather_dataColumns()) {
+  if (isTRUE(dbW_check_weatherData(x, check_all = FALSE))) {
+    x <- dbW_weatherData_to_dataframe(x)
   }
-  return(tmp)
-}
 
-readNumerics <- function(text,expectedArgs,showWarnings=FALSE) {
-  tmp <- strsplit(x=text,split="\t")[[1]]
-  tmp <- tmp[tmp != ""] #get rid of extra spaces
-  if(length(tmp) > expectedArgs) tmp <- tmp[1:expectedArgs] #get rid of comment?
-  tmp <- suppressWarnings(as.numeric(tmp))
-  if(any(is.na(tmp))) {
-    if(showWarnings & any(is.na(tmp))) print(paste("Line: ",text,sep=""))
-    if(showWarnings & any(is.na(tmp))) print("Not formatted with \t. Going to try [space].")
-    tmp <- strsplit(x=text,split="\t")[[1]][1] #remove comment
-    tmp <- strsplit(x=tmp,split=" ")[[1]]
-    tmp <- tmp[tmp!=""] #remove extra spaces
-    tmp <- suppressWarnings(as.numeric(tmp[1:expectedArgs]))
-    if(any(is.na(tmp))) {
-      #last try. tried set by \t then by space. Now try both
-      tmp <- strsplit(x=text,split=" ",fixed=T)[[1]]
-      tmp <- unlist(strsplit(x=tmp,split="\t",fixed=T))
-      tmp <- tmp[tmp!=""] #remove extra spaces
-      tmp <- suppressWarnings(as.numeric(tmp[1:expectedArgs]))
-      if(any(is.na(tmp))) stop("Bad Line. Or Bad line numbers.")
-    }
-  }
-  if(length(tmp) != expectedArgs) {
-    if(showWarnings) print(paste("Line: ",text,sep=""))
-      stop(paste("Expected ",expectedArgs," Got ",length(tmp),sep=""))
-  }
-  return(tmp)
+  apply(
+    !is_missing_weather(x[, name_data, drop = FALSE]),
+    MARGIN = 2L,
+    FUN = any
+  )
 }
-# nolint end

@@ -17,13 +17,13 @@
 #include <stdio.h>  // for `FILENAME_MAX`
 #include <stdlib.h>
 
-#include "SOILWAT2/generic.h"
-#include "SOILWAT2/filefuncs.h"
-#include "SOILWAT2/myMemory.h"
-#include "SOILWAT2/SW_Defines.h"
+#include "SOILWAT2/include/generic.h"
+#include "SOILWAT2/include/filefuncs.h"
+#include "SOILWAT2/include/myMemory.h"
+#include "SOILWAT2/include/SW_Defines.h"
 
 // externs `*InFiles`, `_ProjDir`, `weather_prefix`, `output_prefix`
-#include "SOILWAT2/SW_Files.h"
+#include "SOILWAT2/include/SW_Files.h"
 #include "rSW_Files.h"
 
 #include <R.h>
@@ -35,7 +35,7 @@
 /*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
-SEXP onGet_SW_F() {
+SEXP onGet_SW_F(void) {
 	int i = 0;
 
 	SEXP swFiles;

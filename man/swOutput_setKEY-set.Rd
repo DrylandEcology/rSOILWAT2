@@ -10,6 +10,8 @@ swOutput_setKEY(object, index) <- value
 \item{object}{An object of class \code{\linkS4class{swOutput}} or
 \code{\linkS4class{swInputData}}.}
 
+\item{index}{An integer value. The "key" (slot) position.}
+
 \item{value}{A value to assign to a specific slot of the \code{object}.}
 }
 \description{

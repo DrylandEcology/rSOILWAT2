@@ -3,14 +3,12 @@
 \docType{class}
 \name{swOutput-class}
 \alias{swOutput-class}
-\alias{initialize,swOutput-method}
+\alias{swOutput}
 \alias{$,swOutput-method}
 \alias{swOutput_getKEY,swOutput-method}
 \alias{swOutput_setKEY<-,swOutput,ANY,swOutput_KEY-method}
 \title{Class \code{"swOutput"}}
 \usage{
-\S4method{initialize}{swOutput}(.Object)
-
 \S4method{$}{swOutput}(x, name)
 
 \S4method{swOutput_getKEY}{swOutput}(object, index)

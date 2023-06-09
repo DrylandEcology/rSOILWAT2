@@ -9,6 +9,8 @@ get_swWeatherData(object, year)
 \arguments{
 \item{object}{An object of class \code{\linkS4class{swWeatherData}} or
 \code{\linkS4class{swInputData}}.}
+
+\item{year}{An numeric value. The calendar year.}
 }
 \description{
 \code{get_swWeatherData}
