@@ -93,7 +93,7 @@ void onSet_MKV(SEXP MKV) {
 SEXP onGet_MKV_prob(void) {
 	int i;
 	const int nitems = 5;
-	SW_MARKOV *v = &SW_Markov;
+	SW_MARKOV *v = &SoilWatAll.Markov;
 	SEXP MKV_prob, MKV_prob_names, MKV_prob_names_y;
 	RealD *p_MKV_prob;
 	char *cMKC_prob[] = { "DOY", "p_wet_wet", "p_wet_dry", "avg_ppt", "std_ppt" };
@@ -124,7 +124,7 @@ SEXP onGet_MKV_prob(void) {
 }
 
 Bool onSet_MKV_prob(SEXP MKV_prob) {
-	SW_MARKOV *v = &SW_Markov;
+	SW_MARKOV *v = &SoilWatAll.Markov;
 	const int nitems = 5;
 	int i;
 	RealD *p_MKV_prob;
@@ -148,7 +148,7 @@ Bool onSet_MKV_prob(SEXP MKV_prob) {
 SEXP onGet_MKV_conv(void) {
 	int i;
 	const int nitems = 11;
-	SW_MARKOV *v = &SW_Markov;
+	SW_MARKOV *v = &SoilWatAll.Markov;
 	SEXP MKV_conv, MKV_conv_names, MKV_conv_names_y;
 	RealD *p_MKV_conv;
 	char *cMKV_conv[] = { "WEEK", "wTmax_C", "wTmin_C", "var_wTmax",
@@ -184,7 +184,7 @@ SEXP onGet_MKV_conv(void) {
 }
 
 Bool onSet_MKV_conv(SEXP MKV_conv) {
-	SW_MARKOV *v = &SW_Markov;
+	SW_MARKOV *v = &SoilWatAll.Markov;
 	const int nitems = 11;
 	int i;
 	RealD *p_MKV_conv;
