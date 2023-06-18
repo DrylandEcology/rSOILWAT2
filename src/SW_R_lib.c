@@ -111,7 +111,7 @@ SEXP sw_quiet(SEXP quiet) {
 SEXP tempError(void) {
 	SEXP swR_temp_error;
 	PROTECT(swR_temp_error = NEW_LOGICAL(1));
-	LOGICAL_POINTER(swR_temp_error)[0] = SW_Soilwat.soiltempError;
+	LOGICAL_POINTER(swR_temp_error)[0] = SoilWatAll.SoilWat.soiltempError;
 	UNPROTECT(1);
 	return swR_temp_error;
 }

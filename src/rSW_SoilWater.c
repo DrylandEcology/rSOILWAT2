@@ -58,7 +58,7 @@ void rSW_SWC_construct(void) {
 
 
 SEXP onGet_SW_SWC(void) {
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT *v = &SoilWatAll.SoilWat;
 	SEXP swSWC;
 	SEXP SWC;
 	char *cSWC[] = { "UseSWCHistoricData", "DataFilePrefix", "FirstYear", "Method", "History" };
@@ -96,7 +96,7 @@ SEXP onGet_SW_SWC(void) {
 }
 
 void onSet_SW_SWC(SEXP SWC) {
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT *v = &SoilWatAll.SoilWat;
 	SEXP swcUseData;
 	SEXP swcFilePrefix;
 	SEXP swcFirstYear;
@@ -138,8 +138,8 @@ SEXP onGet_SW_SWC_hists(void) {
 	PROTECT(SWC_hists_names = allocVector(STRSXP, years));
 	PROTECT(SWC_hists = allocVector(VECSXP,years));
 
-		if (SW_Soilwat.hist_use && year >= SW_Soilwat.hist.yr.first) {
 	for (year = SoilWatAll.Model.startyr; year <= SoilWatAll.Model.endyr; year++) {
+		if (SoilWatAll.SoilWat.hist_use && year >= SoilWatAll.SoilWat.hist.yr.first) {
 			_read_swc_hist(year);
 			SET_VECTOR_ELT(SWC_hists, i, onGet_SW_SWC_hist(year));
 			snprintf(cYear, sizeof cYear, "%4d", year);
@@ -156,7 +156,7 @@ SEXP onGet_SW_SWC_hist(TimeInt year) {
   sw_error(-1, "'onGet_SW_SWC_hist' is currently not functional.\n");
 
 	int i, j = 0;
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT *v = &SoilWatAll.SoilWat;
 	SEXP swSWC_hist;
 	SEXP hist;
 	char *cSWC_hist[] = { "doy", "lyr", "swc", "st_err" };
@@ -193,7 +193,7 @@ void onSet_SW_SWC_hist(void) {
   sw_error(-1, "'onSet_SW_SWC_hist' is currently not functional.\n");
 
 	int i, j = 0;
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT *v = &SoilWatAll.SoilWat;
 	RealD *p_lyrs;
 	SEXP lyrs = VECTOR_ELT(VECTOR_ELT(VECTOR_ELT(InputData,7),4),swcdataIndex);
 	swcdataIndex++;
