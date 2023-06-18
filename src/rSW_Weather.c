@@ -452,17 +452,17 @@ void onSet_WTH_DATA(void) {
   // fill `SOILWAT2` `allHist` with values from `rSOILWAT2`
   rSW2_setAllWeather(
     listAllWeather,
-    SW_Weather.allHist,
-    SW_Weather.startYear,
-    SW_Weather.n_years,
-    SW_Weather.use_weathergenerator_only,
-    SW_Weather.use_cloudCoverMonthly,
-    SW_Weather.use_humidityMonthly,
-    SW_Weather.use_windSpeedMonthly,
-    SW_Weather.dailyInputFlags,
-    SW_Sky.cloudcov,
-    SW_Sky.windspeed,
-    SW_Sky.r_humidity
+    SoilWatAll.Weather.allHist,
+    SoilWatAll.Weather.startYear,
+    SoilWatAll.Weather.n_years,
+    SoilWatAll.Weather.use_weathergenerator_only,
+    SoilWatAll.Weather.use_cloudCoverMonthly,
+    SoilWatAll.Weather.use_humidityMonthly,
+    SoilWatAll.Weather.use_windSpeedMonthly,
+    SoilWatAll.Weather.dailyInputFlags,
+    SoilWatAll.Sky.cloudcov,
+    SoilWatAll.Sky.windspeed,
+    SoilWatAll.Sky.r_humidity
   );
 }
 

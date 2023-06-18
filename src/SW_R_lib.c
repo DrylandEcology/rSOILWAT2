@@ -521,50 +521,50 @@ SEXP rSW2_readAllWeatherFromDisk(
   SW_Model.startyr = INTEGER(startYear)[0];
   SW_Model.endyr = INTEGER(endYear)[0];
 
-  strcpy(SW_Weather.name_prefix, CHAR(STRING_ELT(path, 0)));
-  strcat(SW_Weather.name_prefix, "/");
-  strcat(SW_Weather.name_prefix, CHAR(STRING_ELT(name_prefix, 0)));
+  strcpy(SoilWatAll.Weather.name_prefix, CHAR(STRING_ELT(path, 0)));
+  strcat(SoilWatAll.Weather.name_prefix, "/");
+  strcat(SoilWatAll.Weather.name_prefix, CHAR(STRING_ELT(name_prefix, 0)));
 
   // read only from files
-  SW_Weather.use_weathergenerator_only = FALSE; // no weather generator
-  SW_Weather.generateWeatherMethod = 0;
+  SoilWatAll.Weather.use_weathergenerator_only = FALSE; // no weather generator
+  SoilWatAll.Weather.generateWeatherMethod = 0;
 
-  SW_Weather.use_cloudCoverMonthly = FALSE; // don't interpolate monthly values
-  SW_Weather.use_windSpeedMonthly = FALSE; // don't interpolate monthly values
-  SW_Weather.use_humidityMonthly = FALSE; // don't interpolate monthly values
+  SoilWatAll.Weather.use_cloudCoverMonthly = FALSE; // don't interpolate monthly values
+  SoilWatAll.Weather.use_windSpeedMonthly = FALSE; // don't interpolate monthly values
+  SoilWatAll.Weather.use_humidityMonthly = FALSE; // don't interpolate monthly values
   for (i = 0; i < MAX_MONTHS; i++) {
-    SW_Sky.cloudcov[i] = SW_MISSING;
-    SW_Sky.windspeed[i] = SW_MISSING;
-    SW_Sky.r_humidity[i] = SW_MISSING;
+    SoilWatAll.Sky.cloudcov[i] = SW_MISSING;
+    SoilWatAll.Sky.windspeed[i] = SW_MISSING;
+    SoilWatAll.Sky.r_humidity[i] = SW_MISSING;
   }
 
   for (i = 0; i < MAX_INPUT_COLUMNS; i++) {
-    SW_Weather.dailyInputFlags[i] = xdif[i] ? swTRUE : swFALSE;
+    SoilWatAll.Weather.dailyInputFlags[i] = xdif[i] ? swTRUE : swFALSE;
   };
 
   set_dailyInputIndices(
-    SW_Weather.dailyInputFlags,
-    SW_Weather.dailyInputIndices,
-    &SW_Weather.n_input_forcings
+    SoilWatAll.Weather.dailyInputFlags,
+    SoilWatAll.Weather.dailyInputIndices,
+    &SoilWatAll.Weather.n_input_forcings
   );
 
   check_and_update_dailyInputFlags(
-    SW_Weather.use_cloudCoverMonthly,
-    SW_Weather.use_humidityMonthly,
-    SW_Weather.use_windSpeedMonthly,
-    SW_Weather.dailyInputFlags
+    SoilWatAll.Weather.use_cloudCoverMonthly,
+    SoilWatAll.Weather.use_humidityMonthly,
+    SoilWatAll.Weather.use_windSpeedMonthly,
+    SoilWatAll.Weather.dailyInputFlags
   );
 
   // no monthly scaling
   for (i = 0; i < MAX_MONTHS; i++) {
-    SW_Weather.scale_precip[i] = 1;
-    SW_Weather.scale_temp_max[i] = 0;
-    SW_Weather.scale_temp_min[i] = 0;
-    SW_Weather.scale_skyCover[i] = 0;
-    SW_Weather.scale_wind[i] = 1;
-    SW_Weather.scale_rH[i] = 0;
-    SW_Weather.scale_actVapPress[i] = 1;
-    SW_Weather.scale_shortWaveRad[i] = 1;
+    SoilWatAll.Weather.scale_precip[i] = 1;
+    SoilWatAll.Weather.scale_temp_max[i] = 0;
+    SoilWatAll.Weather.scale_temp_min[i] = 0;
+    SoilWatAll.Weather.scale_skyCover[i] = 0;
+    SoilWatAll.Weather.scale_wind[i] = 1;
+    SoilWatAll.Weather.scale_rH[i] = 0;
+    SoilWatAll.Weather.scale_actVapPress[i] = 1;
+    SoilWatAll.Weather.scale_shortWaveRad[i] = 1;
   }
 
 

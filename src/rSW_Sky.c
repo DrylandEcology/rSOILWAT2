@@ -44,7 +44,7 @@ static char *MyFileName;
 SEXP onGet_SW_SKY(void) {
 	int i;
 
-	SW_SKY *v = &SW_Sky;
+	SW_SKY *v = &SoilWatAll.Sky;
 	SEXP swCloud,SW_SKY;
 	SEXP Cloud;
 	SEXP Cloud_names, Cloud_names_x, Cloud_names_y;
@@ -88,7 +88,7 @@ SEXP onGet_SW_SKY(void) {
 
 void onSet_SW_SKY(SEXP sxp_SW_SKY) {
 	int i, k = 5;
-	SW_SKY *v = &SW_Sky;
+	SW_SKY *v = &SoilWatAll.Sky;
 	RealD *p_Cloud;
 	PROTECT(sxp_SW_SKY);
 	p_Cloud = REAL(GET_SLOT(sxp_SW_SKY, install("Cloud")));
