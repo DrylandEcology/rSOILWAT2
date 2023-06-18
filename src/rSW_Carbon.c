@@ -61,7 +61,7 @@ SEXP onGet_SW_CARBON(void) {
   int i, year, n_sim;
   double *vCO2ppm;
 
-  SW_CARBON *c = &SW_Carbon;
+  SW_CARBON *c = &SoilWatAll.Carbon;
 
   // Grab our S4 carbon class as an object
   PROTECT(class  = MAKE_CLASS("swCarbon"));
@@ -120,7 +120,7 @@ SEXP onGet_SW_CARBON(void) {
  * @param object An instance of the swCarbon class.
  */
 void onSet_swCarbon(SEXP object) {
-  SW_CARBON *c = &SW_Carbon;
+  SW_CARBON *c = &SoilWatAll.Carbon;
 
   // Extract the slots from our object into our structure
   c->use_bio_mult = INTEGER(GET_SLOT(object, install("CarbonUseBio")))[0];
