@@ -102,7 +102,7 @@ SEXP onGet_SW_WTH_setup(void) {
 	int i;
 	const int nitems = 8;
 	RealD *p_MonthlyValues;
-	SW_WEATHER *w = &SW_Weather;
+	SW_WEATHER *w = &SoilWatAll.Weather;
 
 	SEXP swWeather;
 	SEXP SW_WTH;
@@ -136,7 +136,7 @@ SEXP onGet_SW_WTH_setup(void) {
 	/* `SW_weather.yr` was removed from SOILWAT2:
 	INTEGER_POINTER(yr_first)[0] = w->yr.first;
 	*/
-	INTEGER_POINTER(yr_first)[0] = SW_Weather.startYear;
+	INTEGER_POINTER(yr_first)[0] = SoilWatAll.Weather.startYear;
 
 	PROTECT(use_cloudCoverMonthly = NEW_LOGICAL(1));
 	LOGICAL_POINTER(use_cloudCoverMonthly)[0] = w->use_cloudCoverMonthly;
@@ -203,7 +203,7 @@ SEXP onGet_SW_WTH_setup(void) {
 */
 void onSet_SW_WTH_setup(SEXP SW_WTH) {
 	int i;
-	SW_WEATHER *w = &SW_Weather;
+	SW_WEATHER *w = &SoilWatAll.Weather;
 	SEXP
         use_snow, pct_snowdrift, pct_snowRunoff,
         use_weathergenerator, use_weathergenerator_only,
@@ -309,11 +309,11 @@ SEXP onGet_WTH_DATA(void) {
 	SEXP WTH_DATA, WTH_DATA_names;
 	char cYear[5];
 
-	PROTECT(WTH_DATA = allocVector(VECSXP, SW_Weather.n_years));
-	PROTECT(WTH_DATA_names = allocVector(STRSXP, SW_Weather.n_years));
+	PROTECT(WTH_DATA = allocVector(VECSXP, SoilWatAll.Weather.n_years));
+	PROTECT(WTH_DATA_names = allocVector(STRSXP, SoilWatAll.Weather.n_years));
 
-	for (yearIndex = 0; yearIndex < SW_Weather.n_years; yearIndex++) {
-		year = SW_Weather.startYear + yearIndex;
+	for (yearIndex = 0; yearIndex < SoilWatAll.Weather.n_years; yearIndex++) {
+		year = SoilWatAll.Weather.startYear + yearIndex;
 		snprintf(cYear, sizeof cYear, "%4d", year);
 		SET_STRING_ELT(WTH_DATA_names, yearIndex, mkChar(cYear));
 
@@ -356,10 +356,10 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 		"shortWR"
 	};
 	RealD *p_Year;
-	SW_WEATHER *w = &SW_Weather;
+	SW_WEATHER *w = &SoilWatAll.Weather;
 
 	days = Time_get_lastdoy_y(year);
-	yearIndex = year - SW_Weather.startYear;
+	yearIndex = year - SoilWatAll.Weather.startYear;
 
 	PROTECT(swWeatherData = MAKE_CLASS("swWeatherData"));
 	PROTECT(WeatherData = NEW_OBJECT(swWeatherData));
@@ -438,14 +438,14 @@ void onSet_WTH_DATA(void) {
   // Deallocate (previous, if any) `allHist`
   // (using value of `SW_Weather.n_years` previously used to allocate)
   // `SW_WTH_construct()` sets `n_years` to zero
-  deallocateAllWeather(&SW_Weather);
+  deallocateAllWeather(&SoilWatAll.Weather);
 
   // Update number of years and first calendar year represented
-  SW_Weather.n_years = SW_Model.endyr - SW_Model.startyr + 1;
-  SW_Weather.startYear = SW_Model.startyr;
+  SoilWatAll.Weather.n_years = SoilWatAll.Model.endyr - SoilWatAll.Model.startyr + 1;
+  SoilWatAll.Weather.startYear = SoilWatAll.Model.startyr;
 
   // Allocate new `allHist` (based on current `SW_Weather.n_years`)
-  allocateAllWeather(&SW_Weather);
+  allocateAllWeather(&SoilWatAll.Weather);
 
 
   // Equivalent to `readAllWeather()`:

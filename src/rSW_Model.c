@@ -50,7 +50,7 @@ static char *MyFileName;
 /* --------------------------------------------------- */
 
 SEXP onGet_SW_MDL(void) {
-	SW_MODEL *m = &SW_Model;
+	SW_MODEL *m = &SoilWatAll.Model;
 
 	SEXP swYears;
 	SEXP SW_MDL;//, SW_MDL_names;
@@ -90,7 +90,7 @@ SEXP onGet_SW_MDL(void) {
 }
 
 void onSet_SW_MDL(SEXP SW_MDL) {
-	SW_MODEL *m = &SW_Model;
+	SW_MODEL *m = &SoilWatAll.Model;
 
 	SEXP StartYear;
 	SEXP EndYear;

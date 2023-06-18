@@ -68,7 +68,7 @@ void onSet_MKV(SEXP MKV) {
   PROTECT(MKV_prob = GET_SLOT(MKV, install(cSW_MKV[0])));
   PROTECT(MKV_conv = GET_SLOT(MKV, install(cSW_MKV[1])));
 
-  if (!onSet_MKV_prob(MKV_prob) && SW_Weather.generateWeatherMethod == 2) {
+  if (!onSet_MKV_prob(MKV_prob) && SoilWatAll.Weather.generateWeatherMethod == 2) {
     LogError(
       logfp,
       LOGFATAL,
@@ -77,7 +77,7 @@ void onSet_MKV(SEXP MKV) {
     );
   }
 
-  if (!onSet_MKV_conv(MKV_conv) && SW_Weather.generateWeatherMethod == 2) {
+  if (!onSet_MKV_conv(MKV_conv) && SoilWatAll.Weather.generateWeatherMethod == 2) {
     LogError(
       logfp,
       LOGFATAL,

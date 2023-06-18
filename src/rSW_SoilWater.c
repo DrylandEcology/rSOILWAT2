@@ -123,7 +123,7 @@ void onSet_SW_SWC(SEXP SWC) {
 	if (v->hist.method < 1 || v->hist.method > 2) {
 		LogError(logfp, LOGFATAL, "swcsetup.in : Invalid swc adjustment method.");
 	}
-	v->hist.yr.last = SW_Model.endyr;
+	v->hist.yr.last = SoilWatAll.Model.endyr;
 	v->hist.yr.total = v->hist.yr.last - v->hist.yr.first + 1;
 	UNPROTECT(4);
 }
@@ -132,14 +132,14 @@ void onSet_SW_SWC(SEXP SWC) {
 SEXP onGet_SW_SWC_hists(void) {
 	TimeInt year;
 	SEXP SWC_hists, SWC_hists_names;
-	int years = ((SW_Model.endyr + 1) - SW_Model.startyr), i = 0;
+	int years = ((SoilWatAll.Model.endyr + 1) - SoilWatAll.Model.startyr), i = 0;
 	char cYear[5];
 
 	PROTECT(SWC_hists_names = allocVector(STRSXP, years));
 	PROTECT(SWC_hists = allocVector(VECSXP,years));
 
-	for (year = SW_Model.startyr; year <= SW_Model.endyr; year++) {
 		if (SW_Soilwat.hist_use && year >= SW_Soilwat.hist.yr.first) {
+	for (year = SoilWatAll.Model.startyr; year <= SoilWatAll.Model.endyr; year++) {
 			_read_swc_hist(year);
 			SET_VECTOR_ELT(SWC_hists, i, onGet_SW_SWC_hist(year));
 			snprintf(cYear, sizeof cYear, "%4d", year);

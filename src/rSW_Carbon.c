@@ -81,13 +81,13 @@ SEXP onGet_SW_CARBON(void) {
   SET_SLOT(object, install(cSW_CARBON[2]), Scenario);
 
   PROTECT(DeltaYear = NEW_INTEGER(1));
-  INTEGER(DeltaYear)[0] = SW_Model.addtl_yr;
+  INTEGER(DeltaYear)[0] = SoilWatAll.Model.addtl_yr;
   SET_SLOT(object, install(cSW_CARBON[3]), DeltaYear);
 
-  n_sim = SW_Model.endyr - SW_Model.startyr + 1;
+  n_sim = SoilWatAll.Model.endyr - SoilWatAll.Model.startyr + 1;
   PROTECT(CO2ppm = allocMatrix(REALSXP, n_sim, 2));
   vCO2ppm = REAL(CO2ppm);
-  for (i = 0, year = SW_Model.startyr; i < n_sim; i++, year++)
+  for (i = 0, year = SoilWatAll.Model.startyr; i < n_sim; i++, year++)
   {
     vCO2ppm[i + n_sim * 0] = year;
     vCO2ppm[i + n_sim * 1] = c->ppm[year];
@@ -144,8 +144,8 @@ void onSet_swCarbon(SEXP object) {
   SEXP CO2ppm;
   double *values;
 
-  year = SW_Model.startyr + SW_Model.addtl_yr; // real calendar year when simulation begins
-  n_sim = SW_Model.endyr - SW_Model.startyr + 1;
+  year = SoilWatAll.Model.startyr + SoilWatAll.Model.addtl_yr; // real calendar year when simulation begins
+  n_sim = SoilWatAll.Model.endyr - SoilWatAll.Model.startyr + 1;
   PROTECT(CO2ppm = GET_SLOT(object, install("CO2ppm")));
   n_input = nrows(CO2ppm);
   values = REAL(CO2ppm);
