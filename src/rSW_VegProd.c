@@ -61,7 +61,7 @@ char *cMonths[] = {
 
 SEXP onGet_SW_VPD(void) {
 	int i;
-	SW_VEGPROD *v = &SW_VegProd;
+	SW_VEGPROD *v = &SoilWatAll.VegProd;
 	SEXP swProd;
 	SEXP VegProd;
 
@@ -415,7 +415,7 @@ SEXP onGet_SW_VPD(void) {
 
 void onSet_SW_VPD(SEXP SW_VPD) {
 	int i;
-	SW_VEGPROD *v = &SW_VegProd;
+	SW_VEGPROD *v = &SoilWatAll.VegProd;
 
     SEXP veg_method;
 	SEXP VegComp;
@@ -563,10 +563,10 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 
 	// getting critSoilWater for use with SWA and get_critical_rank()
 	// critSoilWater goes tree, shrub, forb, grass
-	SW_VegProd.critSoilWater[0] = REAL(CSWP)[2];
-	SW_VegProd.critSoilWater[1] = REAL(CSWP)[1];
-	SW_VegProd.critSoilWater[2] = REAL(CSWP)[3];
-	SW_VegProd.critSoilWater[3] = REAL(CSWP)[0];
+	v->critSoilWater[0] = REAL(CSWP)[2];
+	v->critSoilWater[1] = REAL(CSWP)[1];
+	v->critSoilWater[2] = REAL(CSWP)[3];
+	v->critSoilWater[3] = REAL(CSWP)[0];
 
 	get_critical_rank();
 
