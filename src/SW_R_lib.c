@@ -51,6 +51,13 @@ SEXP WeatherList;
 Bool useFiles;
 Bool bWeatherList;
 
+SW_ALL SoilWatAll;
+SW_OUTPUT_POINTERS SoilWatOutputPtrs;
+LOG_INFO LogInfo;
+PATH_INFO PathInfo;
+Bool EchoInits;
+Bool QuietMode;
+
 
 
 /* =================================================== */
