@@ -25,6 +25,7 @@
 #include "SOILWAT2/include/SW_Weather.h"
 #include "SOILWAT2/include/SW_Sky.h"
 #include "rSW_Sky.h"
+#include "SW_R_lib.h"
 
 #include <R.h>
 #include <Rinternals.h>

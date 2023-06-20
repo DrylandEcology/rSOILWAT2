@@ -23,6 +23,7 @@
 
 #include "SOILWAT2/include/SW_Carbon.h"
 #include "rSW_Carbon.h"
+#include "SW_R_lib.h"
 
 #include <R.h>
 #include <Rinternals.h>

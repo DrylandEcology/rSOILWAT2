@@ -28,6 +28,7 @@
 #include "SOILWAT2/include/SW_Markov.h"
 
 #include "rSW_Markov.h"
+#include "SW_R_lib.h"
 
 #include <R.h>
 #include <Rinternals.h>

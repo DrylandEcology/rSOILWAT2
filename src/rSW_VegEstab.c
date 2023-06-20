@@ -26,6 +26,7 @@
 
 #include "SOILWAT2/include/SW_VegEstab.h"
 #include "rSW_VegEstab.h"
+#include "SW_R_lib.h"
 
 #include <R.h>
 #include <Rinternals.h>

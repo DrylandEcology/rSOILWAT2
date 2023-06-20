@@ -28,6 +28,7 @@ vegetation production parameter information.
 
 #include "SOILWAT2/include/SW_VegProd.h"
 #include "rSW_VegProd.h"
+#include "SW_R_lib.h"
 
 #include <R.h>
 #include <Rinternals.h>

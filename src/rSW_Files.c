@@ -24,6 +24,7 @@
 
 #include "SOILWAT2/include/SW_Files.h"
 #include "rSW_Files.h"
+#include "SW_R_lib.h"
 
 #include <R.h>
 #include <Rinternals.h>

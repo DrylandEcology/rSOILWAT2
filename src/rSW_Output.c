@@ -31,6 +31,7 @@
 #include "SOILWAT2/include/SW_Output.h" // externs many variables
 #include "SOILWAT2/include/SW_Output_outarray.h" // for function `SW_OUT_set_nrow`
 #include "rSW_Output.h"
+#include "SW_R_lib.h"
 
 #include <R.h>
 #include <Rinternals.h>

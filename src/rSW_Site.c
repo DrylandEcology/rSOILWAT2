@@ -30,6 +30,7 @@
 
 #include "SOILWAT2/include/SW_Site.h"
 #include "rSW_Site.h"
+#include "SW_R_lib.h"
 
 #include <R.h>
 #include <Rinternals.h>

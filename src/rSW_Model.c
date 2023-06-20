@@ -32,6 +32,7 @@
 #include "SOILWAT2/include/SW_Model.h"
 
 #include "rSW_Model.h"
+#include "SW_R_lib.h"
 
 #include <R.h>
 #include <Rinternals.h>
