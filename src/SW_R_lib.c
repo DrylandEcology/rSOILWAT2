@@ -518,8 +518,8 @@ SEXP rSW2_readAllWeatherFromDisk(
   #ifdef RSWDEBUG
   if (debug) swprintf("\n'rSW2_readAllWeatherFromDisk': data preparation: ");
   #endif
-  SW_Model.startyr = INTEGER(startYear)[0];
-  SW_Model.endyr = INTEGER(endYear)[0];
+  SoilWatAll.Model.startyr = INTEGER(startYear)[0];
+  SoilWatAll.Model.endyr = INTEGER(endYear)[0];
 
   strcpy(SoilWatAll.Weather.name_prefix, CHAR(STRING_ELT(path, 0)));
   strcat(SoilWatAll.Weather.name_prefix, "/");

@@ -125,7 +125,7 @@ void onSet_swCarbon(SEXP object) {
   // Extract the slots from our object into our structure
   c->use_bio_mult = INTEGER(GET_SLOT(object, install("CarbonUseBio")))[0];
   c->use_wue_mult = INTEGER(GET_SLOT(object, install("CarbonUseWUE")))[0];
-  SW_Model.addtl_yr = INTEGER(GET_SLOT(object, install("DeltaYear")))[0];  // This is needed for output 100% of the time
+  SoilWatAll.Model.addtl_yr = INTEGER(GET_SLOT(object, install("DeltaYear")))[0];  // This is needed for output 100% of the time
   strcpy(c->scenario, CHAR(STRING_ELT(GET_SLOT(object, install("Scenario")), 0)));
 
   // If CO2 is not being used, we can run without extracting ppm data
