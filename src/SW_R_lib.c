@@ -145,13 +145,14 @@ void setupSOILWAT2(SEXP inputOptions) {
 	if (debug) swprintf("Set call arguments\n");
   #endif
 
-	sw_init_args(argc, argv);
+	sw_init_args(argc, argv, &LogInfo, &QuietMode,
+               &EchoInits, PathInfo.InFiles[eFirst]);
 
   #ifdef RSWDEBUG
   if (debug) swprintf("Initialize SOILWAT ...");
 	#endif
 
-	SW_CTL_setup_model(_firstfile);
+	SW_CTL_setup_model(&SoilWatAll, &SoilWatOutputPtrs, &PathInfo, &LogInfo);
 	rSW_CTL_setup_model2();
 }
 
@@ -188,13 +189,14 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   #ifdef RSWDEBUG
   if (debug) swprintf(" finalize daily weather ...\n");
   #endif
-  SW_WTH_finalize_all_weather();
+  SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
+    SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &LogInfo);
 
   // initialize simulation run (based on user inputs)
   #ifdef RSWDEBUG
   if (debug) swprintf(" init simulation run ...\n");
   #endif
-  SW_CTL_init_run();
+  SW_CTL_init_run(&SoilWatAll, &PathInfo, &LogInfo);
 
   #ifdef RSWDEBUG
   if (debug) {
@@ -292,7 +294,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   #ifdef RSWDEBUG
   if (debug) swprintf(" > de-allocate most memory; \n");
   #endif
-  SW_CTL_clear_model(FALSE);
+  SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
 
   #ifdef RSWDEBUG
   if (debug) swprintf(" onGetInputDataFromFiles completed.\n");
@@ -357,20 +359,23 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" finalize daily weather ...\n");
 	#endif
-	SW_WTH_finalize_all_weather();
+	SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
+    SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &LogInfo);
 
 	// initialize simulation run (based on user inputs)
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" init simulation run ...");
 	#endif
-	SW_CTL_init_run();
+	SW_CTL_init_run(&SoilWatAll, &PathInfo, &LogInfo);
 
   // initialize output
   #ifdef RSWDEBUG
   if (debug) swprintf(" setup output variables ...");
   #endif
-	SW_OUT_set_ncol();
-	SW_OUT_set_colnames();
+	SW_OUT_set_ncol(SoilWatAll.Site.n_layers, SoilWatAll.Site.n_evap_lyrs,
+                SoilWatAll.VegEstab.count, SoilWatAll.GenOutput.ncol_OUT);
+	SW_OUT_set_colnames(SoilWatAll.Site.n_layers, SoilWatAll.VegEstab.parms,
+    SoilWatAll.GenOutput.ncol_OUT, SoilWatAll.GenOutput.colnames_OUT, &LogInfo);
 	PROTECT(outputData = onGetOutput(inputData));
 	setGlobalrSOILWAT2_OutputVariables(outputData);
 
@@ -378,13 +383,13 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
   #ifdef RSWDEBUG
   if (debug) swprintf(" run SOILWAT2 ...");
   #endif
-	SW_CTL_main();
+	SW_CTL_main(&SoilWatAll, &SoilWatOutputPtrs, &PathInfo, &LogInfo);
 
    // de-allocate all memory, but let R handle `p_OUT`
   #ifdef RSWDEBUG
   if (debug) swprintf(" clean up ...");
   #endif
-	SW_CTL_clear_model(FALSE);
+	SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
 
   #ifdef RSWDEBUG
   if (debug) swprintf(" completed.\n");
@@ -427,7 +432,7 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   #ifdef RSWDEBUG
   if (debug) swprintf("'setup' > ");
   #endif
-  SW_CTL_setup_model(_firstfile);
+  SW_CTL_setup_model(&SoilWatAll, &SoilWatOutputPtrs, &PathInfo, &LogInfo);
 
   // `onSet_WTH_DATA()` requires correct `endyr` and `startyr` of `SW_Model`
   #ifdef RSWDEBUG
@@ -471,7 +476,8 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   #ifdef RSWDEBUG
   if (debug) swprintf(" > finalize daily weather.\n");
   #endif
-  SW_WTH_finalize_all_weather();
+  SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
+    SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &LogInfo);
 
 
   // Return processed weather data
@@ -573,13 +579,14 @@ SEXP rSW2_readAllWeatherFromDisk(
   if (debug) swprintf("'rSW2_readAllWeatherFromDisk': process weather data");
   #endif
   // using global variables: SW_Weather, SW_Model, SW_Sky
-  SW_WTH_read();
+  SW_WTH_read(&SoilWatAll.Weather, &SoilWatAll.Sky, &SoilWatAll.Model, &LogInfo);
 
   // Finalize daily weather (weather generator & monthly scaling)
   #ifdef RSWDEBUG
   if (debug) swprintf(" > finalize daily weather.\n");
   #endif
-  SW_WTH_finalize_all_weather();
+  SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
+    SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &LogInfo);
 
 
   // Return processed weather data
