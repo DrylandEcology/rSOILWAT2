@@ -27,7 +27,7 @@
 #include "SOILWAT2/include/SW_Weather.h"
 #include "SOILWAT2/include/SW_Markov.h"
 
-#include "rSW_Markov.h" // externs `SW_Markov`
+#include "rSW_Markov.h"
 
 #include <R.h>
 #include <Rinternals.h>

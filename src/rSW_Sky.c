@@ -22,8 +22,8 @@
 #include "SOILWAT2/include/SW_Defines.h"
 #include "SOILWAT2/include/SW_Files.h"
 
-#include "SOILWAT2/include/SW_Weather.h" // externs `SW_Weather`
-#include "SOILWAT2/include/SW_Sky.h" // externs `SW_Sky`
+#include "SOILWAT2/include/SW_Weather.h"
+#include "SOILWAT2/include/SW_Sky.h"
 #include "rSW_Sky.h"
 
 #include <R.h>

@@ -28,10 +28,10 @@
 
 #include "SOILWAT2/include/SW_Defines.h"
 #include "SOILWAT2/include/SW_Files.h"
-#include "SOILWAT2/include/SW_Model.h" // externs `SW_Model`
-#include "SOILWAT2/include/SW_Site.h" // externs `SW_Site`
+#include "SOILWAT2/include/SW_Model.h"
+#include "SOILWAT2/include/SW_Site.h"
 
-#include "SOILWAT2/include/SW_SoilWater.h" // externs `SW_Soilwat`
+#include "SOILWAT2/include/SW_SoilWater.h"
 #include "rSW_SoilWater.h"
 #include "SW_R_lib.h" // externs `InputData`
 

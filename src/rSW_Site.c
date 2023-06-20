@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "SOILWAT2/include/generic.h" // externs `EchoInits`
+#include "SOILWAT2/include/generic.h"
 #include "SOILWAT2/include/filefuncs.h"
 #include "SOILWAT2/include/Times.h"
 #include "SOILWAT2/include/myMemory.h"
@@ -28,7 +28,6 @@
 #include "SOILWAT2/include/SW_Files.h"
 #include "SOILWAT2/include/SW_SoilWater.h"
 
-// externs `SW_Site`, `_TranspRgnBounds`, _SWCInitVal, _SWCWetVal, _SWCMinVal
 #include "SOILWAT2/include/SW_Site.h"
 #include "rSW_Site.h"
 

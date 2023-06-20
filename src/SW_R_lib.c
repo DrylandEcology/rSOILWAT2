@@ -12,12 +12,12 @@
 #include "SOILWAT2/include/SW_Defines.h"
 
 #include "SOILWAT2/include/SW_Files.h"
-#include "SOILWAT2/include/SW_Carbon.h" // externs `SW_Carbon`
-#include "SOILWAT2/include/SW_Model.h" // externs `SW_Model`
-#include "SOILWAT2/include/SW_Weather.h" // externs `SW_Weather`
-#include "SOILWAT2/include/SW_Sky.h" // externs `SW_Sky`
-#include "SOILWAT2/include/SW_SoilWater.h" // externs `SW_Soilwat`
-#include "SOILWAT2/include/SW_VegEstab.h" // externs `SW_VegEstab`
+#include "SOILWAT2/include/SW_Carbon.h"
+#include "SOILWAT2/include/SW_Model.h"
+#include "SOILWAT2/include/SW_Weather.h"
+#include "SOILWAT2/include/SW_Sky.h"
+#include "SOILWAT2/include/SW_SoilWater.h"
+#include "SOILWAT2/include/SW_VegEstab.h"
 #include "SOILWAT2/include/SW_Output.h"
 #include "SOILWAT2/include/SW_Main_lib.h"
 

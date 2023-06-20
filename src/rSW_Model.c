@@ -29,7 +29,7 @@
 #include "SOILWAT2/include/SW_Defines.h"
 #include "SOILWAT2/include/SW_Times.h"
 #include "SOILWAT2/include/SW_Files.h"
-#include "SOILWAT2/include/SW_Model.h" // externs `SW_Model`
+#include "SOILWAT2/include/SW_Model.h"
 
 #include "rSW_Model.h"
 

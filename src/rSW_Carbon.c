@@ -19,9 +19,9 @@
 #include "SOILWAT2/include/generic.h"
 #include "SOILWAT2/include/filefuncs.h"
 #include "SOILWAT2/include/SW_Defines.h"
-#include "SOILWAT2/include/SW_Model.h" // externs `SW_Model`
+#include "SOILWAT2/include/SW_Model.h"
 
-#include "SOILWAT2/include/SW_Carbon.h" // externs `SW_Carbon`
+#include "SOILWAT2/include/SW_Carbon.h"
 #include "rSW_Carbon.h"
 
 #include <R.h>

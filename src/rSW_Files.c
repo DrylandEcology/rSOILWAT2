@@ -22,7 +22,6 @@
 #include "SOILWAT2/include/myMemory.h"
 #include "SOILWAT2/include/SW_Defines.h"
 
-// externs `*InFiles`, `_ProjDir`, `weather_prefix`, `output_prefix`
 #include "SOILWAT2/include/SW_Files.h"
 #include "rSW_Files.h"
 

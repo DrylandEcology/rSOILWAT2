@@ -21,11 +21,11 @@
 
 #include "SOILWAT2/include/SW_Defines.h"
 #include "SOILWAT2/include/SW_Files.h"
-#include "SOILWAT2/include/SW_Model.h" // externs `SW_Model`
+#include "SOILWAT2/include/SW_Model.h"
 #include "SOILWAT2/include/SW_Markov.h"
 #include "SOILWAT2/include/SW_Sky.h"
 
-#include "SOILWAT2/include/SW_Weather.h" // externs `SW_Weather`
+#include "SOILWAT2/include/SW_Weather.h"
 #include "rSW_Weather.h"
 #include "SW_R_lib.h" // externs `InputData`, `WeatherList`, `bWeatherList`
 
