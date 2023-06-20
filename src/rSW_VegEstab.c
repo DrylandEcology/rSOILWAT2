@@ -86,7 +86,7 @@ void onSet_SW_VES(SEXP VES) {
 	} else {
 		nSPPS = INTEGER(count)[0];
 		if (nSPPS == 0) {
-			LogError(logfp, LOGWARN, "Establishment is TRUE but no data. Setting False.");
+			LogError(&LogInfo, LOGWARN, "Establishment is TRUE but no data. Setting False.");
 			SoilWatAll.VegEstab.use = FALSE;
 		} else {
 			SoilWatAll.VegEstab.use = TRUE;
@@ -96,7 +96,7 @@ void onSet_SW_VES(SEXP VES) {
 	}
 
 	if (EchoInits)
-		LogError(logfp, LOGNOTE, "Establishment not used.\n");
+		LogError(&LogInfo, LOGNOTE, "Establishment not used.\n");
 
 	SW_VegEstab_construct();
 
@@ -201,7 +201,7 @@ void onSet_SW_VES_spp(SEXP SPP, IntU i) {
 	strcpy(v->sppFileName, CHAR(STRING_ELT(fileName,i)) );
 	/* check for valid name first */
 	if (strlen(CHAR(STRING_ELT(Name,i))) > MAX_SPECIESNAMELEN) {
-		LogError(logfp, LOGFATAL, "Species name too long (> 4 chars).\n\tTry again.\n");
+		LogError(&LogInfo, LOGFATAL, "Species name too long (> 4 chars).\n\tTry again.\n");
 	} else {
 		strcpy(v->sppname, CHAR(STRING_ELT(Name,i)) );
 	}

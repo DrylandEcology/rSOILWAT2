@@ -557,7 +557,7 @@ static void rSW2_set_weather_hist(
     numDaysYear = Time_get_lastdoy_y(year);
     if (nrows(yrWData) != numDaysYear) {
       LogError(
-        logfp,
+        &LogInfo,
         LOGFATAL,
         "Weather data (year %d): "
         "expected %d rows (had %d).\n",
@@ -596,7 +596,7 @@ static void rSW2_set_weather_hist(
 
         if (doy != p_yrWData[doy + numDaysYear * 0] - 1) {
             LogError(
-                logfp,
+                &LogInfo,
                 LOGFATAL,
                 "Weather data (year %d): "
                 "day of year out of range (%d), expected: %d.\n",

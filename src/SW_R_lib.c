@@ -87,11 +87,11 @@ SEXP sw_quiet(SEXP quiet) {
 
 	if (LOGICAL(coerceVector(quiet, LGLSXP))[0]) {
 		// tell `LogError()` that R should NOT print messages to the console
-		logfp = NULL;
+		LogInfo.logfp = NULL;
 		current_sw_quiet = swTRUE;
 	} else {
 		// tell `LogError()` that R should print messages to the console
-		logfp = (FILE *) swTRUE; // any non-NULL file pointer
+		logInfo.logfp = (FILE *) swTRUE; // any non-NULL file pointer
 		current_sw_quiet = swFALSE;
 	}
 
@@ -165,7 +165,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   int debug = 0;
   #endif
 
-  logged = FALSE;
+  LogInfo.logged = FALSE;
   sw_quiet(quiet);
 
   #ifdef RSWDEBUG
@@ -316,7 +316,7 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
   int debug = 0;
   #endif
 
-	logged = FALSE;
+	LogInfo.logged = FALSE;
 	sw_quiet(quiet);
 
 	if (isNull(inputData)) {

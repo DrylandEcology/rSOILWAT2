@@ -121,7 +121,7 @@ void onSet_SW_SWC(SEXP SWC) {
 	v->hist.method = INTEGER(swcMethod)[0];
 
 	if (v->hist.method < 1 || v->hist.method > 2) {
-		LogError(logfp, LOGFATAL, "swcsetup.in : Invalid swc adjustment method.");
+		LogError(&LogInfo, LOGFATAL, "swcsetup.in : Invalid swc adjustment method.");
 	}
 	v->hist.yr.last = SoilWatAll.Model.endyr;
 	v->hist.yr.total = v->hist.yr.last - v->hist.yr.first + 1;

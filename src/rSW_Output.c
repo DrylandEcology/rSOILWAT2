@@ -98,7 +98,7 @@ void onSet_SW_OUT(SEXP OUT) {
 		);
 
 		if (msg_type > 0) {
-			LogError(logfp, msg_type, "%s", msg);
+			LogError(&LogInfo, msg_type, "%s", msg);
 			continue;
 		}
 

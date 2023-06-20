@@ -105,24 +105,24 @@ void onSet_SW_MDL(SEXP SW_MDL) {
 	MyFileName = SW_F_name(eModel);
 
 	if (!IS_S4_OBJECT(SW_MDL)) {
-		LogError(logfp, LOGFATAL, "%s: No input.", MyFileName);
+		LogError(&LogInfo, LOGFATAL, "%s: No input.", MyFileName);
 	}
 
 	PROTECT(StartYear = GET_SLOT(SW_MDL, install("StartYear")));
 	if (INTEGER(StartYear)[0] < 0) {
-		LogError(logfp, LOGFATAL, "%s: Negative start year (%d)", MyFileName, INTEGER(StartYear)[0]);
+		LogError(&LogInfo, LOGFATAL, "%s: Negative start year (%d)", MyFileName, INTEGER(StartYear)[0]);
 	}
 	m->startyr = INTEGER(StartYear)[0];
 	PROTECT(EndYear = GET_SLOT(SW_MDL, install("EndYear")));
 	if (isNull(EndYear) || INTEGER(EndYear)[0] == NA_INTEGER) {
-		LogError(logfp, LOGFATAL, "%s: Ending year not found.", MyFileName);
+		LogError(&LogInfo, LOGFATAL, "%s: Ending year not found.", MyFileName);
 	}
 	if (INTEGER(EndYear)[0] < 0) {
-		LogError(logfp, LOGFATAL, "%s: Negative ending year (%d)", MyFileName, INTEGER(EndYear)[0]);
+		LogError(&LogInfo, LOGFATAL, "%s: Negative ending year (%d)", MyFileName, INTEGER(EndYear)[0]);
 	}
 	m->endyr = INTEGER(EndYear)[0];
 	if (m->endyr < m->startyr) {
-		LogError(logfp, LOGFATAL, "%s: Start Year > End Year", MyFileName);
+		LogError(&LogInfo, LOGFATAL, "%s: Start Year > End Year", MyFileName);
 	}
 
 	PROTECT(StartStart = GET_SLOT(SW_MDL, install("FDOFY")));
@@ -154,7 +154,7 @@ void onSet_SW_MDL(SEXP SW_MDL) {
 			m->isnorth = TRUE;
 		}
 		strcat(errstr, "Continuing.\n");
-		LogError(logfp, LOGWARN, errstr);
+		LogError(&LogInfo, LOGWARN, errstr);
 	}
 
 	m->startstart += ((m->isnorth) ? DAYFIRST_NORTH : DAYFIRST_SOUTH) - 1;
