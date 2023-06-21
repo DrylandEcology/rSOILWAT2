@@ -216,7 +216,8 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 
 	MyFileName = PathInfo.InFiles[eWeather];
 
-	SW_WeatherPrefix(w->name_prefix);
+    // Copy weather prefix from PathInfo to Weather within `SoilWatAll`
+    strcpy(SoilWatAll.Weather.name_prefix, PathInfo.weather_prefix);
 
 	PROTECT(MonthlyScalingParams = GET_SLOT(SW_WTH, install(cSW_WTH_names[0])));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
