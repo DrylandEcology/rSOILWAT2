@@ -103,7 +103,7 @@ void onSet_SW_MDL(SEXP SW_MDL) {
 	TimeInt d;
 	char enddyval[6];
 
-	MyFileName = SW_F_name(eModel);
+	MyFileName = PathInfo.InFiles[eModel];
 
 	if (!IS_S4_OBJECT(SW_MDL)) {
 		LogError(&LogInfo, LOGFATAL, "%s: No input.", MyFileName);

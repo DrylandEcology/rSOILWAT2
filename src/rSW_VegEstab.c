@@ -76,7 +76,7 @@ void onSet_SW_VES(SEXP VES) {
 	int nSPPS;
 	SoilWatAll.VegEstab.use = TRUE;
 	SEXP use, count;
-	MyFileName = SW_F_name(eVegEstab);
+	MyFileName = PathInfo.InFiles[eVegEstab];
 
 	PROTECT(use = GET_SLOT(VES,install("useEstab")));
 	PROTECT(count = GET_SLOT(VES,install("count")));

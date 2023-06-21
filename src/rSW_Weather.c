@@ -214,7 +214,7 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 	RealD *p_MonthlyValues;
 	int *p_dailyInputFlags;
 
-	MyFileName = SW_F_name(eWeather);
+	MyFileName = PathInfo.InFiles[eWeather];
 
 	SW_WeatherPrefix(w->name_prefix);
 

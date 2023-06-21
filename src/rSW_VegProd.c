@@ -438,7 +438,7 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 	SEXP CO2Coefficients;
 	RealD *p_Grasslands, *p_Shrublands, *p_Forest, *p_Forb;
 
-	MyFileName = SW_F_name(eVegProd);
+	MyFileName = PathInfo.InFiles[eVegProd];
 
     PROTECT(veg_method = GET_SLOT(SW_VPD, install(cVegProd_names[0])));
     v->veg_method = INTEGER(veg_method)[0];

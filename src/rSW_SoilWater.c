@@ -102,7 +102,7 @@ void onSet_SW_SWC(SEXP SWC) {
 	SEXP swcFirstYear;
 	SEXP swcMethod;
 
-	MyFileName = SW_F_name(eSoilwat);
+	MyFileName = PathInfo.InFiles[eSoilwat];
 	LyrIndex i;
 	ForEachSoilLayer(i)
 		v->avgLyrTemp[i] = SoilWatAll.Site.avgLyrTemp[i];

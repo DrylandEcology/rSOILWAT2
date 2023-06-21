@@ -68,7 +68,7 @@ void onSet_SW_OUT(SEXP OUT) {
 	#ifdef RSWDEBUG
 	if (debug) swprintf("onSet_SW_OUT: start ...");
 	#endif
-	MyFileName = SW_F_name(eOutput);
+	MyFileName = PathInfo.InFiles[eOutput];
 
 	PROTECT(sep = GET_SLOT(OUT, install("outputSeparator")));
 	_Sep = '\t';/*TODO Make this work.*/

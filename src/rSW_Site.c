@@ -118,7 +118,7 @@ static void onSet_SW_LYR(SEXP SW_LYR) {
 	RealD *p_Layers;
 
 	/* note that Files.read() must be called prior to this. */
-	MyFileName = SW_F_name(eLayers);
+	MyFileName = PathInfo.InFiles[eLayers];
 
 	j = nrows(SW_LYR);
 	p_Layers = REAL(SW_LYR);
@@ -212,7 +212,7 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp) {
 	RealD *p_SWRCp;
 
 	/* note that Files.read() must be called prior to this. */
-	MyFileName = SW_F_name(eSWRCp);
+	MyFileName = PathInfo.InFiles[eSWRCp];
 
 	/* Check that we have n = `SWRC_PARAM_NMAX` values per layer */
 	if (ncols(SW_SWRCp) != SWRC_PARAM_NMAX) {
@@ -327,7 +327,7 @@ SEXP onGet_SW_SIT(void) {
 	char *cTranspirationRegions[] = { "ndx", "layer" };
 	int *p_transp; // ideally `LyrIndex` so that same type as `_TranspRgnBounds`, but R API INTEGER() is signed
 
-	MyFileName = SW_F_name(eSite);
+	MyFileName = PathInfo.InFiles[eSite];
 
 	PROTECT(swSite = MAKE_CLASS("swSite"));
 	PROTECT(SW_SIT = NEW_OBJECT(swSite));
@@ -500,7 +500,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
   int debug = 0;
   #endif
 
-	MyFileName = SW_F_name(eSite);
+	MyFileName = PathInfo.InFiles[eSite];
 
 	LyrIndex r; /* transp region definition number */
 	Bool too_many_regions = FALSE;

@@ -94,7 +94,7 @@ void onSet_SW_SKY(SEXP sxp_SW_SKY) {
 	PROTECT(sxp_SW_SKY);
 	p_Cloud = REAL(GET_SLOT(sxp_SW_SKY, install("Cloud")));
 
-	MyFileName = SW_F_name(eSky);
+	MyFileName = PathInfo.InFiles[eSky];
 
 	for (i = 0; i < 12; i++) { //i=columns
 		v->cloudcov[i] = p_Cloud[0 + k * i];
