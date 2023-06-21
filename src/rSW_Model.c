@@ -101,7 +101,7 @@ void onSet_SW_MDL(SEXP SW_MDL) {
 	SEXP North;
 	Bool fstartdy = FALSE, fenddy = FALSE, fhemi = FALSE;
 	TimeInt d;
-	char enddyval[6];
+	char enddyval[6], errstr[MAX_ERROR];
 
 	MyFileName = PathInfo.InFiles[eModel];
 
