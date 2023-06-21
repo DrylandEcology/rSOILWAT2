@@ -249,6 +249,8 @@ SEXP onGetOutput(SEXP inputData) {
 
 	char *cSWoutput_Names[] = {"dy_nrow", "wk_nrow", "mo_nrow", "yr_nrow"};
 
+	SW_GEN_OUT *GenOut = &SoilWatAll.GenOutput;
+
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
@@ -260,7 +262,7 @@ SEXP onGetOutput(SEXP inputData) {
 	PROTECT(swOutput = MAKE_CLASS("swOutput"));
 	PROTECT(swOutput_Object = NEW_OBJECT(swOutput));
 
-	if (SoilWatAll.GenOutput.used_OUTNPERIODS <= 0) {
+	if (GenOut->used_OUTNPERIODS <= 0) {
 		UNPROTECT(2);
 		return(swOutput_Object);
 	}
@@ -291,40 +293,41 @@ SEXP onGetOutput(SEXP inputData) {
 	ForEachOutKey(k) {
 		if (use[k]) {
 			#ifdef RSWDEBUG
-			if (debug) swprintf("%s (ncol = %d):", key2str[k], SoilWatAll.GenOutput.ncol_OUT[k]);
+			if (debug) swprintf("%s (ncol = %d):", key2str[k], GenOut->ncol_OUT[k]);
 			#endif
 
 			PROTECT(stemp_KEY = NEW_OBJECT(swOutput_KEY));
 
-			SET_SLOT(stemp_KEY, install("Columns"), ScalarInteger(SoilWatAll.GenOutput.ncol_OUT[k]));
 			SET_SLOT(stemp_KEY, install("Title"), mkString(Str_Dup(CHAR(STRING_ELT(outfile, k)), &LogInfo)));
+			SET_SLOT(stemp_KEY, install("Columns"), ScalarInteger(GenOut->ncol_OUT[k]));
 
-			PROTECT(rTimeStep = NEW_INTEGER(SoilWatAll.GenOutput.used_OUTNPERIODS));
-			for (i = 0; i < SoilWatAll.GenOutput.used_OUTNPERIODS; i++) {
-				INTEGER(rTimeStep)[i] = SoilWatAll.GenOutput.timeSteps[k][i];
+			PROTECT(rTimeStep = NEW_INTEGER(GenOut->used_OUTNPERIODS));
+			for (i = 0; i < GenOut->used_OUTNPERIODS; i++) {
+				INTEGER(rTimeStep)[i] = GenOut->timeSteps[k][i];
 			}
 			SET_SLOT(stemp_KEY, install("TimeStep"), rTimeStep);
 
-			for (i = 0; i < SoilWatAll.GenOutput.used_OUTNPERIODS; i++) {
-				if (SoilWatAll.GenOutput.timeSteps[k][i] == eSW_NoTime) {
+			for (i = 0; i < GenOut->used_OUTNPERIODS; i++) {
+				if (GenOut->timeSteps[k][i] == eSW_NoTime) {
 					continue;
 				}
 
 				#ifdef RSWDEBUG
 				if (debug) swprintf(" %s (n=%ld = %ld x (%d + %d) alloc'ed) /",
-					pd2longstr[SoilWatAll.GenOutput.timeSteps[k][i]],
-					SoilWatAll.GenOutput.nrow_OUT[SoilWatAll.GenOutput.timeSteps[k][i]] *
-					(SoilWatAll.GenOutput.ncol_OUT[k] + ncol_TimeOUT[SoilWatAll.GenOutput.timeSteps[k][i]]),
-					SoilWatAll.GenOutput.nrow_OUT[SoilWatAll.GenOutput.timeSteps[k][i]],
-					SoilWatAll.GenOutput.ncol_OUT[k], ncol_TimeOUT[SoilWatAll.GenOutput.timeSteps[k][i]]);
+					pd2longstr[GenOut->timeSteps[k][i]],
+					GenOut->nrow_OUT[GenOut->timeSteps[k][i]] *
+					(GenOut->ncol_OUT[k] + ncol_TimeOUT[GenOut->timeSteps[k][i]]),
+					GenOut->nrow_OUT[GenOut->timeSteps[k][i]],
+					GenOut->ncol_OUT[k], ncol_TimeOUT[GenOut->timeSteps[k][i]]);
 				#endif
 
-				h = ncol_TimeOUT[SoilWatAll.GenOutput.timeSteps[k][i]];
+				h = ncol_TimeOUT[GenOut->timeSteps[k][i]];
 
-				PROTECT(xKEY = allocMatrix(REALSXP, nrow_OUT[SoilWatAll.GenOutput.timeSteps[k][i]],
-					SoilWatAll.GenOutput.ncol_OUT[k] + h)); // future output data matrix
+				PROTECT(xKEY = allocMatrix(REALSXP, GenOut->nrow_OUT[GenOut->timeSteps[k][i]],
+					GenOut->ncol_OUT[k] + h)); // future output data matrix
 
-				for (l = 0; l < nrow_OUT[SoilWatAll.GenOutput.timeSteps[k][i]] * (SoilWatAll.GenOutput.ncol_OUT[k] + h); l++) {
+				for (l = 0; l < GenOut->nrow_OUT[GenOut->timeSteps[k][i]] *
+												(GenOut->ncol_OUT[k] + h); l++) {
 					// Initialize to 0:
 					// allocMatrix does not initialize and memset appears to not work on
 					// `allocMatrix` objects
@@ -332,19 +335,19 @@ SEXP onGetOutput(SEXP inputData) {
 				}
 
 				PROTECT(xKEY_names = allocVector(VECSXP, 2)); // list of dimnames
-				PROTECT(xKEY_cnames = allocVector(STRSXP, SoilWatAll.GenOutput.ncol_OUT[k] + h)); // vector of column names
+				PROTECT(xKEY_cnames = allocVector(STRSXP, GenOut->ncol_OUT[k] + h)); // vector of column names
 				SET_STRING_ELT(xKEY_cnames, 0, mkChar("Year"));
 				if (h == 2) {
-					SET_STRING_ELT(xKEY_cnames, 1, mkChar(pd2longstr[SoilWatAll.GenOutput.timeSteps[k][i]]));
+					SET_STRING_ELT(xKEY_cnames, 1, mkChar(pd2longstr[GenOut->timeSteps[k][i]]));
 				}
-				for (l = 0; l < SoilWatAll.GenOutput.ncol_OUT[k]; l++) {
+				for (l = 0; l < GenOut->ncol_OUT[k]; l++) {
 					SET_STRING_ELT(xKEY_cnames, l + h,
-							mkChar(SoilWatAll.GenOutput.colnames_OUT[k][l]));
+							mkChar(GenOut->colnames_OUT[k][l]));
 				}
 				SET_VECTOR_ELT(xKEY_names, 1, xKEY_cnames);
 				dimnamesgets(xKEY, xKEY_names);
 
-				SET_SLOT(stemp_KEY, install(pd2longstr[SoilWatAll.GenOutput.timeSteps[k][i]]), xKEY);
+				SET_SLOT(stemp_KEY, install(pd2longstr[GenOut->timeSteps[k][i]]), xKEY);
 				UNPROTECT(3);
 			}
 
