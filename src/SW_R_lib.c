@@ -5,9 +5,8 @@
  *      Author: Ryan Murphy
  */
 
-// externs `*logfp`, `errstr`, `logged`, `QuietMode`, `EchoInits`
 #include "SOILWAT2/include/generic.h"
-#include "SOILWAT2/include/filefuncs.h" // externs `_firstfile`
+#include "SOILWAT2/include/filefuncs.h"
 #include "SOILWAT2/include/Times.h"
 #include "SOILWAT2/include/SW_Defines.h"
 
@@ -20,6 +19,7 @@
 #include "SOILWAT2/include/SW_VegEstab.h"
 #include "SOILWAT2/include/SW_Output.h"
 #include "SOILWAT2/include/SW_Main_lib.h"
+#include "SOILWAT2/include/SW_Site.h"
 
 #include "rSW_Files.h"
 #include "rSW_Model.h"
@@ -91,7 +91,7 @@ SEXP sw_quiet(SEXP quiet) {
 		current_sw_quiet = swTRUE;
 	} else {
 		// tell `LogError()` that R should print messages to the console
-		logInfo.logfp = (FILE *) swTRUE; // any non-NULL file pointer
+		LogInfo.logfp = (FILE *) swTRUE; // any non-NULL file pointer
 		current_sw_quiet = swFALSE;
 	}
 
