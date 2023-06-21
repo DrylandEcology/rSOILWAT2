@@ -64,7 +64,7 @@ SEXP onGet_MKV(void) {
 void onSet_MKV(SEXP MKV) {
   SEXP MKV_prob, MKV_conv;
 
-  SW_MKV_construct();
+  SW_MKV_construct(SoilWatAll.Weather.rng_seed, &SoilWatAll.Markov, &LogInfo);
 
   PROTECT(MKV_prob = GET_SLOT(MKV, install(cSW_MKV[0])));
   PROTECT(MKV_conv = GET_SLOT(MKV, install(cSW_MKV[1])));

@@ -89,7 +89,7 @@ void onSet_SW_F(SEXP SW_F_construct) {
 			Mem_Free(PathInfo.InFiles[i]);
 		}
 	for (i = 0; i < j; i++) {
-		PathInfo.InFiles[i] = Str_Dup(CHAR(STRING_ELT(FilesIn,i)));
+		PathInfo.InFiles[i] = Str_Dup(CHAR(STRING_ELT(FilesIn,i)), &LogInfo);
 	}
 
 	PROTECT(Rweather_prefix = GET_SLOT(SW_F_construct, install("WeatherPrefix")));

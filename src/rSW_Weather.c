@@ -291,7 +291,8 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 		w->use_cloudCoverMonthly,
 		w->use_humidityMonthly,
 		w->use_windSpeedMonthly,
-		w->dailyInputFlags
+		w->dailyInputFlags,
+        &LogInfo
 	);
 
 	UNPROTECT(11);
@@ -496,18 +497,24 @@ static void rSW2_setAllWeather(
 
         // Update yearly day/month information needed when interpolating
         // cloud cover, wind speed, and relative humidity if necessary
-        Time_new_year(year);
+        Time_new_year(year, SW_Model->days_in_month, SW_Model->cum_monthdays);
 
         if(use_cloudCoverMonthly) {
-            interpolate_monthlyValues(cloudcov, interpAsBase1, allHist[yearIndex]->cloudcov_daily);
+            interpolate_monthlyValues(cloudcov, interpAsBase1,
+                    SW_Model->cum_monthdays, SW_Model->days_in_month,
+                    allHist[yearIndex]->cloudcov_daily);
         }
 
         if(use_humidityMonthly) {
-            interpolate_monthlyValues(r_humidity, interpAsBase1, allHist[yearIndex]->r_humidity_daily);
+            interpolate_monthlyValues(r_humidity, interpAsBase1,
+                    SW_Model->cum_monthdays, SW_Model->days_in_month,
+                    allHist[yearIndex]->r_humidity_daily);
         }
 
         if(use_windSpeedMonthly) {
-            interpolate_monthlyValues(windspeed, interpAsBase1, allHist[yearIndex]->windspeed_daily);
+            interpolate_monthlyValues(windspeed, interpAsBase1,
+                    SW_Model->cum_monthdays, SW_Model->days_in_month,
+                    allHist[yearIndex]->windspeed_daily);
         }
 
         // Read daily weather values from disk
@@ -830,7 +837,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
         allHist[year] = (SW_WEATHER_HIST *)malloc(sizeof(SW_WEATHER_HIST));
     }
 
-    Time_init_model();
+    Time_init_model(SoilWatAll.Model.days_in_month);
 
     // Set `dailyInputFlags`: currently, `calcSiteClimate()` use only tmax, tmin, ppt
     for (index = 0; index < MAX_INPUT_COLUMNS; index++) {
@@ -860,7 +867,8 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     allocateClimateStructs(numYears, &climateOutput, &climateAverages);
 
     // Calculate climate variables
-    calcSiteClimate(allHist, numYears, asInteger(yearStart), inNorthHem, &climateOutput);
+    calcSiteClimate(allHist, SW_Model->cum_monthdays, SW_Model->days_in_month,
+                numYears, asInteger(yearStart), inNorthHem, &climateOutput);
 
     // Average climate variables
     averageClimateAcrossYears(&climateOutput, numYears, &climateAverages);

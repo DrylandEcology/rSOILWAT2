@@ -146,7 +146,7 @@ void setupSOILWAT2(SEXP inputOptions) {
   #endif
 
 	sw_init_args(argc, argv, &LogInfo, &QuietMode,
-               &EchoInits, PathInfo.InFiles[eFirst]);
+               &EchoInits, &PathInfo.InFiles[eFirst]);
 
   #ifdef RSWDEBUG
   if (debug) swprintf("Initialize SOILWAT ...");
@@ -558,7 +558,8 @@ SEXP rSW2_readAllWeatherFromDisk(
     SoilWatAll.Weather.use_cloudCoverMonthly,
     SoilWatAll.Weather.use_humidityMonthly,
     SoilWatAll.Weather.use_windSpeedMonthly,
-    SoilWatAll.Weather.dailyInputFlags
+    SoilWatAll.Weather.dailyInputFlags,
+    &LogInfo
   );
 
   // no monthly scaling
@@ -933,7 +934,8 @@ SEXP rSW2_SWRC_PTF_estimate_parameters(
       xsand[k1],
       xclay[k1],
       xcoarse[k1],
-      xbd[k1]
+      xbd[k1],
+      &LogInfo
     );
 
     for (k2 = 0; k2 < SWRC_PARAM_NMAX; k2++) {
@@ -1051,7 +1053,7 @@ SEXP rSW2_SWRC_check_parameters(SEXP swrc_type, SEXP swrcp) {
       swrcpk[k2] = xswrcp[k1 + nlyrs * k2];
     }
 
-    xres[k1] = SWRC_check_parameters(xswrc_type[k1], swrcpk);
+    xres[k1] = SWRC_check_parameters(xswrc_type[k1], swrcpk, &LogInfo);
   }
 
   UNPROTECT(3);
@@ -1180,7 +1182,8 @@ SEXP rSW2_SWRC(
             swrcpk,
             xcoarse[k1],
             xwidth[k1],
-            LOGWARN
+            LOGWARN,
+            &LogInfo
           );
           break;
 
@@ -1192,7 +1195,8 @@ SEXP rSW2_SWRC(
             swrcpk,
             xcoarse[k1],
             xwidth[k1],
-            LOGWARN
+            LOGWARN,
+            &LogInfo
           );
           break;
       }

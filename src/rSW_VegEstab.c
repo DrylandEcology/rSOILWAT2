@@ -99,10 +99,11 @@ void onSet_SW_VES(SEXP VES) {
 	if (EchoInits)
 		LogError(&LogInfo, LOGNOTE, "Establishment not used.\n");
 
-	SW_VegEstab_construct();
+	SW_VegEstab_construct(&SoilWatAll.VegEstab, &LogInfo);
 
 	if (EchoInits)
-		_echo_VegEstab();
+		_echo_VegEstab(SoilWatAll.Site.width, SoilWatAll.VegEstab.parms,
+					   SoilWatAll.VegEstab.count, &LogInfo);
 
 	UNPROTECT(2);
 }
@@ -177,7 +178,7 @@ void onSet_SW_VES_spp(SEXP SPP, IntU i) {
 	SEXP fileName, Name;
 	unsigned int count;
 
-	count = _new_species();
+	count = _new_species(&SoilWatAll.VegEstab, &LogInfo);
 	v = SoilWatAll.VegEstab.parms[count];
 
 	v->vegType = INTEGER(GET_SLOT(SPP, install("vegType")))[i];

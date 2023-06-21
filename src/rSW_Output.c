@@ -95,7 +95,11 @@ void onSet_SW_OUT(SEXP OUT) {
 			first_orig[k],
 			last_orig[k],
 			msg,
-			sizeof msg
+			sizeof msg,
+			&SoilWatAll.VegProd.use_SWA,
+			SoilWatAll.Site.deepdrain,
+			SoilWatAll.Output,
+			PathInfo.InFiles
 		);
 
 		if (msg_type > 0) {
@@ -104,7 +108,7 @@ void onSet_SW_OUT(SEXP OUT) {
 		}
 
 		if (SoilWatAll.Output[k].use) {
-			SoilWatAll.Output[k].outfile = Str_Dup(CHAR(STRING_ELT(outfile, k)));
+			SoilWatAll.Output[k].outfile = Str_Dup(CHAR(STRING_ELT(outfile, k)), &LogInfo);
 
 			ForEachOutPeriod(i) {
 				SoilWatAll.GenOutput.timeSteps[k][i] = timePeriods[k + i * SW_OUTNKEYS];
@@ -113,7 +117,7 @@ void onSet_SW_OUT(SEXP OUT) {
 	}
 
 	if (EchoInits)
-		_echo_outputs();
+		_echo_outputs(&SoilWatAll, &LogInfo);
 
 	UNPROTECT(3);
 
@@ -265,16 +269,17 @@ SEXP onGetOutput(SEXP inputData) {
 	use = LOGICAL(GET_SLOT(GET_SLOT(inputData, install("output")), install("use")));
 
 	// Determine which output periods are turned on for at least one output key
-	find_OutPeriods_inUse();
+	find_OutPeriods_inUse(&SoilWatAll.GenOutput, SoilWatAll.Output);
 
 	// Determine number of used years/months/weeks/days in simulation period
-	SW_OUT_set_nrow();
+	SW_OUT_set_nrow(&SoilWatAll.Model, GenOut->use_OutPeriod,
+					GenOut->nrow_OUT);
 
 	ForEachOutPeriod(pd) {
 		SET_SLOT(
 			swOutput_Object,
 			install(cSWoutput_Names[pd]),
-			ScalarInteger(nrow_OUT[pd]));
+			ScalarInteger(GenOut->nrow_OUT[pd]));
 	}
 
 	// KEYS
@@ -291,8 +296,8 @@ SEXP onGetOutput(SEXP inputData) {
 
 			PROTECT(stemp_KEY = NEW_OBJECT(swOutput_KEY));
 
-			SET_SLOT(stemp_KEY, install("Title"), mkString(Str_Dup(CHAR(STRING_ELT(outfile, k)))));
 			SET_SLOT(stemp_KEY, install("Columns"), ScalarInteger(SoilWatAll.GenOutput.ncol_OUT[k]));
+			SET_SLOT(stemp_KEY, install("Title"), mkString(Str_Dup(CHAR(STRING_ELT(outfile, k)), &LogInfo)));
 
 			PROTECT(rTimeStep = NEW_INTEGER(SoilWatAll.GenOutput.used_OUTNPERIODS));
 			for (i = 0; i < SoilWatAll.GenOutput.used_OUTNPERIODS; i++) {

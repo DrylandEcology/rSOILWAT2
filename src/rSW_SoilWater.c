@@ -104,7 +104,7 @@ void onSet_SW_SWC(SEXP SWC) {
 
 	MyFileName = PathInfo.InFiles[eSoilwat];
 	LyrIndex i;
-	ForEachSoilLayer(i)
+	ForEachSoilLayer(i, SoilWatAll.Site.n_layers)
 		v->avgLyrTemp[i] = SoilWatAll.Site.avgLyrTemp[i];
 
 	PROTECT(swcUseData = GET_SLOT(SWC, install("UseSWCHistoricData")));
@@ -116,7 +116,7 @@ void onSet_SW_SWC(SEXP SWC) {
 	//if (!isnull(v->hist.file_prefix)) {//Clear memory before setting it
 	//	Mem_Free(v->hist.file_prefix);
 	//}
-	v->hist.file_prefix = (char *) Str_Dup(CHAR(STRING_ELT(swcFilePrefix,0)));
+	v->hist.file_prefix = (char *) Str_Dup(CHAR(STRING_ELT(swcFilePrefix,0)), &LogInfo);
 	v->hist.yr.first = INTEGER(swcFirstYear)[0];
 	v->hist.method = INTEGER(swcMethod)[0];
 
@@ -140,7 +140,7 @@ SEXP onGet_SW_SWC_hists(void) {
 
 	for (year = SoilWatAll.Model.startyr; year <= SoilWatAll.Model.endyr; year++) {
 		if (SoilWatAll.SoilWat.hist_use && year >= SoilWatAll.SoilWat.hist.yr.first) {
-			_read_swc_hist(year);
+			_read_swc_hist(&SoilWatAll.SoilWat.hist, year, &LogInfo);
 			SET_VECTOR_ELT(SWC_hists, i, onGet_SW_SWC_hist(year));
 			snprintf(cYear, sizeof cYear, "%4d", year);
 			SET_STRING_ELT(SWC_hists_names, i, mkChar(cYear));

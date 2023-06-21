@@ -569,7 +569,7 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 	v->critSoilWater[2] = REAL(CSWP)[3];
 	v->critSoilWater[3] = REAL(CSWP)[0];
 
-	get_critical_rank();
+	get_critical_rank(&SoilWatAll.VegProd);
 
 	PROTECT(MonthlyVeg = GET_SLOT(SW_VPD, install(cVegProd_names[12])));
 	PROTECT(Grasslands = VECTOR_ELT(MonthlyVeg, SW_GRASS));
@@ -624,10 +624,11 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 	v->veg[SW_FORBS].co2_wue_coeff2 = REAL(CO2Coefficients)[15];
 
 
-  SW_VPD_fix_cover();
+  SW_VPD_fix_cover(&SoilWatAll.VegProd, &LogInfo);
 
 	if (EchoInits)
-		_echo_VegProd();
+		_echo_VegProd(SoilWatAll.VegProd.veg, SoilWatAll.VegProd.bare_cov,
+					  &LogInfo);
 
 	UNPROTECT(18);
 }
@@ -722,7 +723,7 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
     estimatePotNatVegComposition(final_MAT_C, final_MAP_cm, final_MonTemp_C,
           final_MonPPT_cm, inputValues_D, final_shrubLimit, final_SumGrassesFraction, C4Variables,
           final_fill_empty_with_BareGround, final_isNorth, final_warn_extrapolation,
-          final_fix_bareGround, grasses, RelAbundanceL0, RelAbundanceL1);
+          final_fix_bareGround, grasses, RelAbundanceL0, RelAbundanceL1, &LogInfo);
 
     for(index = 0; index < 8; index++) {
         REAL(final_RelAbundanceL0)[index] = RelAbundanceL0[index];
