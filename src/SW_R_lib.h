@@ -8,7 +8,6 @@
 #define SW_R_LIB_H_
 
 #include "SOILWAT2/include/SW_Control.h"
-#include "SOILWAT2/include/SW_datastructs.h"
 
 #include <R.h>
 #include <Rdefines.h>
