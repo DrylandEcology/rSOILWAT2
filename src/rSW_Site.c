@@ -136,7 +136,7 @@ static void onSet_SW_LYR(SEXP SW_LYR) {
 	}
 
 	for (i = 0; i < j; i++) {
-		lyrno = _newlayer();
+		lyrno = SoilWatAll.Site.n_layers++;
 
 		dmax = p_Layers[i + j * 0];
 		soildensity = p_Layers[i + j * 1];
@@ -432,7 +432,7 @@ SEXP onGet_SW_SIT(void) {
 	p_transp = INTEGER(TranspirationRegions);
 	for (i = 0; i < (v->n_transp_rgn); i++) {
 		p_transp[i + (v->n_transp_rgn) * 0] = (i + 1);
-		p_transp[i + (v->n_transp_rgn) * 1] = (_TranspRgnBounds[i]+1);
+		p_transp[i + (v->n_transp_rgn) * 1] = (SoilWatAll.Site._TranspRgnBounds[i]+1);
 	}
 	PROTECT(TranspirationRegions_names = allocVector(VECSXP,2));
 	PROTECT(TranspirationRegions_names_y = allocVector(STRSXP,2));
@@ -626,7 +626,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 		too_many_regions = TRUE;
 	} else {
 		for (i = 0; i < v->n_transp_rgn; i++) {
-			_TranspRgnBounds[p_transp[i + v->n_transp_rgn * 0] - 1] = p_transp[i + v->n_transp_rgn * 1] - 1;
+			SoilWatAll.Site._TranspRgnBounds[p_transp[i + v->n_transp_rgn * 0] - 1] = p_transp[i + v->n_transp_rgn * 1] - 1;
 		}
 	}
 	if (too_many_regions) {
@@ -639,7 +639,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 
 	/* check for any discontinuities (reversals) in the transpiration regions */
 	for (r = 1; r < v->n_transp_rgn; r++) {
-		if (_TranspRgnBounds[r - 1] >= _TranspRgnBounds[r]) {
+		if (SoilWatAll.Site._TranspRgnBounds[r - 1] >= SoilWatAll.Site._TranspRgnBounds[r]) {
 			LogError(&LogInfo, LOGFATAL, "siteparam.in : Discontinuity/reversal in transpiration regions.\n");
 		}
 	}
