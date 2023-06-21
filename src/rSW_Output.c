@@ -71,7 +71,6 @@ void onSet_SW_OUT(SEXP OUT) {
 	MyFileName = PathInfo.InFiles[eOutput];
 
 	PROTECT(sep = GET_SLOT(OUT, install("outputSeparator")));
-	_Sep = '\t';/*TODO Make this work.*/
 
 	// TODO: I don't know why `GET_SLOT(OUT, install("timeSteps"))` is suddenly
 	// of type real and not integer any more
@@ -137,6 +136,7 @@ SEXP onGet_SW_OUT(void) {
 	SEXP swOUT, OUT, sep, timePeriods;
 	SEXP mykey, myobj, sumtype, use, first_orig, last_orig, outfile;
 	char *cKEY[] = {"mykey", "myobj", "sumtype", "use", "first_orig", "last_orig", "outfile"};
+	char _Sep = '\t';
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
