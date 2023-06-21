@@ -488,6 +488,7 @@ static void rSW2_setAllWeather(
 
     /* Interpolation is to be in base0 in `interpolate_monthlyValues()` */
     Bool interpAsBase1 = swFALSE;
+    SW_MODEL *SW_Model = &SoilWatAll.Model;
 
     for(yearIndex = 0; yearIndex < n_years; yearIndex++) {
         year = yearIndex + startYear;
@@ -796,6 +797,8 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
 
     SW_CLIMATE_YEARLY climateOutput;
     SW_CLIMATE_CLIM climateAverages;
+
+    SW_MODEL *SW_Model = &SoilWatAll.Model;
 
     int numYears = asInteger(yearEnd) - asInteger(yearStart) + 1, year, calcSiteOutputNum = 10,
     index;
