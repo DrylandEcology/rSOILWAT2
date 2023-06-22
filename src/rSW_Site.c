@@ -188,7 +188,7 @@ static SEXP onGet_SW_SWRCp(void) {
 	p_SWRCp = REAL(SWRCp);
 	for (i = 0; i < (v->n_layers); i++) {
 		for (k = 0; k < SWRC_PARAM_NMAX; k++) {
-			p_SWRCp[i + (v->n_layers) * k] = v->swrcp[k][i];
+			p_SWRCp[i + (v->n_layers) * k] = v->swrcp[i][k];
 		}
 	}
 
@@ -240,7 +240,7 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp) {
 
 	for (i = 0; i < (v->n_layers); i++) {
 		for (k = 0; k < SWRC_PARAM_NMAX; k++) {
-			v->swrcp[k][i] = p_SWRCp[i + (v->n_layers) * k];
+			v->swrcp[i][k] = p_SWRCp[i + (v->n_layers) * k];
 		}
 	}
 }
