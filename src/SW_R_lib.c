@@ -52,7 +52,7 @@ Bool useFiles;
 Bool bWeatherList;
 
 SW_ALL SoilWatAll;
-SW_OUTPUT_POINTERS SoilWatOutputPtrs;
+SW_OUTPUT_POINTERS SoilWatOutputPtrs[SW_OUTNKEYS];
 LOG_INFO LogInfo;
 PATH_INFO PathInfo;
 Bool EchoInits;
@@ -152,7 +152,7 @@ void setupSOILWAT2(SEXP inputOptions) {
   if (debug) swprintf("Initialize SOILWAT ...");
 	#endif
 
-	SW_CTL_setup_model(&SoilWatAll, &SoilWatOutputPtrs, &PathInfo, &LogInfo);
+	SW_CTL_setup_model(&SoilWatAll, SoilWatOutputPtrs, &PathInfo, &LogInfo);
 	rSW_CTL_setup_model2();
 }
 
@@ -383,7 +383,7 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
   #ifdef RSWDEBUG
   if (debug) swprintf(" run SOILWAT2 ...");
   #endif
-	SW_CTL_main(&SoilWatAll, &SoilWatOutputPtrs, &PathInfo, &LogInfo);
+	SW_CTL_main(&SoilWatAll, SoilWatOutputPtrs, &PathInfo, &LogInfo);
 
    // de-allocate all memory, but let R handle `p_OUT`
   #ifdef RSWDEBUG
@@ -432,7 +432,7 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   #ifdef RSWDEBUG
   if (debug) swprintf("'setup' > ");
   #endif
-  SW_CTL_setup_model(&SoilWatAll, &SoilWatOutputPtrs, &PathInfo, &LogInfo);
+  SW_CTL_setup_model(&SoilWatAll, SoilWatOutputPtrs, &PathInfo, &LogInfo);
 
   // `onSet_WTH_DATA()` requires correct `endyr` and `startyr` of `SW_Model`
   #ifdef RSWDEBUG
