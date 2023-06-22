@@ -333,9 +333,9 @@ SEXP onGet_SW_SIT(void) {
 	PROTECT(SW_SIT = NEW_OBJECT(swSite));
 
 	PROTECT(SWClimits = allocVector(REALSXP, 3));
-	REAL(SWClimits)[0] = SoilWatAll.Site._SWCMinVal;
-	REAL(SWClimits)[1] = SoilWatAll.Site._SWCInitVal;
-	REAL(SWClimits)[2] = SoilWatAll.Site._SWCWetVal;
+	REAL(SWClimits)[0] = v->_SWCMinVal;
+	REAL(SWClimits)[1] = v->_SWCInitVal;
+	REAL(SWClimits)[2] = v->_SWCWetVal;
 	PROTECT(SWClimits_names = allocVector(STRSXP, 3));
 	for (i = 0; i < 3; i++)
 		SET_STRING_ELT(SWClimits_names, i, mkChar(cSWClimits[i]));
@@ -432,7 +432,7 @@ SEXP onGet_SW_SIT(void) {
 	p_transp = INTEGER(TranspirationRegions);
 	for (i = 0; i < (v->n_transp_rgn); i++) {
 		p_transp[i + (v->n_transp_rgn) * 0] = (i + 1);
-		p_transp[i + (v->n_transp_rgn) * 1] = (SoilWatAll.Site._TranspRgnBounds[i]+1);
+		p_transp[i + (v->n_transp_rgn) * 1] = (v->_TranspRgnBounds[i]+1);
 	}
 	PROTECT(TranspirationRegions_names = allocVector(VECSXP,2));
 	PROTECT(TranspirationRegions_names_y = allocVector(STRSXP,2));
@@ -510,9 +510,9 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	#endif
 
 	PROTECT(SWClimits = GET_SLOT(SW_SIT, install("SWClimits")));
-	SoilWatAll.Site._SWCMinVal = REAL(SWClimits)[0];
-	SoilWatAll.Site._SWCInitVal = REAL(SWClimits)[1];
-	SoilWatAll.Site._SWCWetVal = REAL(SWClimits)[2];
+	v->_SWCMinVal = REAL(SWClimits)[0];
+	v->_SWCInitVal = REAL(SWClimits)[1];
+	v->_SWCWetVal = REAL(SWClimits)[2];
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" > 'SWClimits'");
 	#endif
@@ -626,7 +626,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 		too_many_regions = TRUE;
 	} else {
 		for (i = 0; i < v->n_transp_rgn; i++) {
-			SoilWatAll.Site._TranspRgnBounds[p_transp[i + v->n_transp_rgn * 0] - 1] = p_transp[i + v->n_transp_rgn * 1] - 1;
+			v->_TranspRgnBounds[p_transp[i + v->n_transp_rgn * 0] - 1] = p_transp[i + v->n_transp_rgn * 1] - 1;
 		}
 	}
 	if (too_many_regions) {
@@ -639,7 +639,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 
 	/* check for any discontinuities (reversals) in the transpiration regions */
 	for (r = 1; r < v->n_transp_rgn; r++) {
-		if (SoilWatAll.Site._TranspRgnBounds[r - 1] >= SoilWatAll.Site._TranspRgnBounds[r]) {
+		if (v->_TranspRgnBounds[r - 1] >= SoilWatAll.Site._TranspRgnBounds[r]) {
 			LogError(&LogInfo, LOGFATAL, "siteparam.in : Discontinuity/reversal in transpiration regions.\n");
 		}
 	}
