@@ -432,6 +432,10 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   #ifdef RSWDEBUG
   if (debug) swprintf("'setup' > ");
   #endif
+  if(PathInfo.InFiles[eFirst] == NULL) {
+    PathInfo.InFiles[eFirst] = DFLT_FIRSTFILE;
+  }
+
   SW_CTL_setup_model(&SoilWatAll, SoilWatOutputPtrs, &PathInfo, &LogInfo);
 
   // `onSet_WTH_DATA()` requires correct `endyr` and `startyr` of `SW_Model`
