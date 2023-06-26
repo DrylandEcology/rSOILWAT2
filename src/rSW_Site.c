@@ -639,7 +639,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 
 	/* check for any discontinuities (reversals) in the transpiration regions */
 	for (r = 1; r < v->n_transp_rgn; r++) {
-		if (v->_TranspRgnBounds[r - 1] >= SoilWatAll.Site._TranspRgnBounds[r]) {
+		if (v->_TranspRgnBounds[r - 1] >= v->_TranspRgnBounds[r]) {
 			LogError(&LogInfo, LOGFATAL, "siteparam.in : Discontinuity/reversal in transpiration regions.\n");
 		}
 	}
