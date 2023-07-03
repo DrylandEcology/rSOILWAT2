@@ -91,7 +91,7 @@ static SEXP onGet_SW_LYR(void) {
 		p_Layers[i + (v->n_layers) * 8] = v->fractionWeightMatric_sand[i];
 		p_Layers[i + (v->n_layers) * 9] = v->fractionWeightMatric_clay[i];
 		p_Layers[i + (v->n_layers) * 10] = v->impermeability[i];
-		p_Layers[i + (v->n_layers) * 11] = v->avgLyrTemp[i];
+		p_Layers[i + (v->n_layers) * 11] = v->avgLyrTempInit[i];
 	}
 
 	PROTECT(Layers_names = allocVector(VECSXP, 2));
@@ -162,7 +162,7 @@ static void onSet_SW_LYR(SEXP SW_LYR) {
 		v->fractionWeightMatric_sand[lyrno] = psand;
 		v->fractionWeightMatric_clay[lyrno] = pclay;
 		v->impermeability[lyrno] = imperm;
-		v->avgLyrTemp[lyrno] = soiltemp;
+		v->avgLyrTempInit[lyrno] = soiltemp;
 
 		if (lyrno >= MAX_LAYERS) {
 			LogError(

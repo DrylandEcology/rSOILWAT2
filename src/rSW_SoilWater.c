@@ -105,7 +105,7 @@ void onSet_SW_SWC(SEXP SWC) {
 	MyFileName = PathInfo.InFiles[eSoilwat];
 	LyrIndex i;
 	ForEachSoilLayer(i, SoilWatAll.Site.n_layers)
-		v->avgLyrTemp[i] = SoilWatAll.Site.avgLyrTemp[i];
+		v->avgLyrTemp[i] = SoilWatAll.Site.avgLyrTempInit[i];
 
 	PROTECT(swcUseData = GET_SLOT(SWC, install("UseSWCHistoricData")));
 	PROTECT(swcFilePrefix = GET_SLOT(SWC, install("DataFilePrefix")));
