@@ -145,8 +145,8 @@ void setupSOILWAT2(SEXP inputOptions) {
 	if (debug) swprintf("Set call arguments\n");
   #endif
 
-	sw_init_args(argc, argv, &LogInfo, &QuietMode,
-               &EchoInits, &PathInfo.InFiles[eFirst]);
+	sw_init_args(argc, argv, &QuietMode, &EchoInits,
+               &PathInfo.InFiles[eFirst], &LogInfo);
 
   #ifdef RSWDEBUG
   if (debug) swprintf("Initialize SOILWAT ...");
