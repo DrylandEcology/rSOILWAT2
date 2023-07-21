@@ -153,7 +153,7 @@ options(tinytex.verbose = TRUE)
 
   x <- slot(slot(sw_out0, "EVAPSOIL"), "Year")
   ids <- grep("Lyr", colnames(x), fixed = TRUE)
-  es <- apply(x[, ids], 1, sum)
+  es <- rowSums(x[, ids])
   plot(
     x = x[, "Year"], y = es,
     ylim = c(0, max(es)),
@@ -352,7 +352,7 @@ You may organize weather data in a variety of ways:
     # We don't have live internet and
     # were not able to obtain weather data for requested years
     # --> instead, use data we have locally and adjust years
-    years <- sapply(wdata, function(x) slot(x, "year"))
+    years <- sapply(wdata, slot, name = "year")
     rSOILWAT2::swYears_StartYear(sw_in) <- 0
     rSOILWAT2::swYears_EndYear(sw_in) <- max(years)
     rSOILWAT2::swYears_StartYear(sw_in) <- min(years)

@@ -302,9 +302,11 @@ setReplaceMethod(
     if (length(index) == 0) {
       object@History[[length(object@History) + 1]] <- value
       years <- unlist(lapply(object@History, function(x) x@year))
-      object@History <- object@History[order(years)]
-      names(object@History) <- as.character(years[order(years)])
-      if (!all(years[order(years)] == cummax(years[order(years)]))) {
+      ids_sorted <- sort.list(years, na.last = TRUE)
+      object@History <- object@History[ids_sorted]
+      years <- years[ids_sorted]
+      names(object@History) <- as.character(years)
+      if (!all(years == cummax(years))) {
         print("SWC data is Missing")
       }
 

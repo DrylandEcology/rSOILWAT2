@@ -2375,13 +2375,15 @@ get_years_from_weatherDF <- function(weatherDF, years, weatherDF_dataColumns) {
       )
     }
 
-  } else if (
-    any(tmp <- grepl("year", colnames(weatherDF), ignore.case = TRUE))) {
-
-    year_ts <- weatherDF[, which(tmp)[1]]
-
   } else {
-    stop("No year information was provided with the 'weatherDF' object")
+    tmp <- grepl("year", colnames(weatherDF), ignore.case = TRUE)
+
+    if (any(tmp)) {
+      year_ts <- weatherDF[, which(tmp)[1]]
+
+    } else {
+      stop("No year information was provided with the 'weatherDF' object")
+    }
   }
 
   return(list(years = sort(unique(year_ts)), year_ts = year_ts))

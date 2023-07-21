@@ -71,7 +71,16 @@ pedotransfer <- function(x, sand, clay, pdf) {
       } else {
         # case 4; Note: case 3 could also be calculated with the code for
         # case 4, but is much slower, unless x is a data.frame with one column
-        temp <- lapply(x, function(v) pdf(v, sand, clay, thetas, psis, b))
+        temp <- lapply(
+          x,
+          pdf,
+          sand = sand,
+          clay = clay,
+          thetas = thetas,
+          psis = psis,
+          b = b
+        )
+
         res <- matrix(unlist(temp), nrow = np_x, byrow = TRUE)
       }
 
@@ -1374,13 +1383,14 @@ swrc_conversion <- function(
   }
 
   # Do we have sufficient information to estimate swrcp?
-  if (is.null(swrc[["swrcp"]])) {
-    if (
-      !all(c("swrc_name", "ptf_name") %in% names(swrc)) ||
-        is.null(sand) || is.null(clay)
-    ) {
-      stop("Insufficient information to estimate SWRC parameters.")
-    }
+  if (
+    is.null(swrc[["swrcp"]]) &&
+      (
+        !all(c("swrc_name", "ptf_name") %in% names(swrc)) ||
+          is.null(sand) || is.null(clay)
+      )
+  ) {
+    stop("Insufficient information to estimate SWRC parameters.")
   }
 
 

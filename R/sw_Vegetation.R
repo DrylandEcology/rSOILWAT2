@@ -916,17 +916,12 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp, x_asif = NULL) {
       }
 
       # Average across continous sections (within season)
-      vadj4[, 1 + k2] <- apply(
-        vadj3[[k2]][, -1, drop = FALSE],
-        MARGIN = 1,
-        FUN = mean,
-        na.rm = TRUE
-      )
+      vadj4[, 1 + k2] <- rowMeans(vadj3[[k2]][, -1, drop = FALSE], na.rm = TRUE)
     }
   }
 
   # Average values across seasons
-  vadj4[, 4] <- apply(vadj4[, -1], 1, mean, na.rm = TRUE)
+  vadj4[, 4] <- rowMeans(vadj4[, -1], na.rm = TRUE)
   isgood <- complete.cases(vadj4[, c(1, 4)])
   vadj4 <- vadj4[isgood, , drop = FALSE]
 
@@ -1623,10 +1618,7 @@ get_min_rooted_soil_layers <- function(swInputData) {
   soils <- swSoils_Layers(swInputData)
   var_veg1 <- c("Grass", "Shrub", "Tree", "Forb")
   var_trco <- paste0("transp", var_veg1, "_frac")
-  var_comp <- sapply(
-    var_veg1,
-    function(x) grep(x, names(veg_comp), value = TRUE)
-  )
+  var_comp <- sapply(var_veg1, grep, x = names(veg_comp), value = TRUE)
 
   tmp <- apply(
     soils[, var_trco, drop = FALSE],
