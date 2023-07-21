@@ -196,7 +196,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   #ifdef RSWDEBUG
   if (debug) swprintf(" init simulation run ...\n");
   #endif
-  SW_CTL_init_run(&SoilWatAll, &PathInfo, &LogInfo);
+  SW_CTL_init_run(&SoilWatAll, &LogInfo);
 
   #ifdef RSWDEBUG
   if (debug) {
@@ -366,7 +366,7 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" init simulation run ...");
 	#endif
-	SW_CTL_init_run(&SoilWatAll, &PathInfo, &LogInfo);
+	SW_CTL_init_run(&SoilWatAll, &LogInfo);
 
   // initialize output
   #ifdef RSWDEBUG
