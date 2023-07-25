@@ -201,9 +201,11 @@ test_that("Weather data sources", {
 
 
 test_that("Weather data object conversions", {
+  # nolint start: commented_code_linter.
   #--- * Test backwards compatible behavior ------
   # see \url{https://github.com/DrylandEcology/rSOILWAT2/issues/236}:
   # "dbW_dataframe_to_weatherData() is not backwards compatible with v6.0.0"
+  # nolint end: commented_code_linter.
 
   set.seed(54)
   N <- 365
