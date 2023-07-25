@@ -1,4 +1,9 @@
 # rSOILWAT2 v6.0.1-9000
+## Bugfixes
+* `dbW_dataframe_to_weatherData()` is now compatible with data frames that
+  contain a subset of all possible weather variables, e.g.,
+  weather data frames from previous versions (#236; @dschlaep).
+
 
 
 # rSOILWAT2 v6.0.0
