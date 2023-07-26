@@ -169,3 +169,13 @@ void onSet_SW_MDL(SEXP SW_MDL) {
 
 	UNPROTECT(5);
 }
+
+/**
+ * @brief Interface between R and C to clear the simulation model
+ *
+ * @note Called to prevent memory leaks if SOILWAT2 fails when called
+ *       from a R-side function
+*/
+void rSW2_clearModel(void) {
+	SW_CTL_clear_model(swTRUE, &SoilWatAll, &PathInfo);
+}
