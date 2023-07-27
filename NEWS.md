@@ -1,3 +1,6 @@
+# rSOILWAT2 v6.0.2-9000
+
+
 # rSOILWAT2 v6.0.1
 
 ## Bugfix
