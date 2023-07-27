@@ -7,7 +7,7 @@
 dbW_dataframe_to_weatherData(
   weatherDF,
   years = NULL,
-  weatherDF_dataColumns = c("DOY", weather_dataColumns()),
+  weatherDF_dataColumns = NULL,
   round = 2
 )
 }
@@ -31,7 +31,9 @@ Conversion: data.frame to object of class \code{\linkS4class{swWeatherData}}
 }
 \section{Notes}{
 
-\code{weatherDF_dataColumns} must exactly contain entries for day of year and
-the three weather variables.
+\code{weatherDF_dataColumns} consists of a vector with
+(1) the variable name for day of year, e.g., \code{"DOY"}, and
+(2) weather variables, see \code{\link[=weather_dataColumns]{weather_dataColumns()}},
+or \code{NULL} which attempts to guess relevant columns.
 }
 

@@ -198,3 +198,61 @@ test_that("Weather data sources", {
     }
   }
 })
+
+
+test_that("Weather data object conversions", {
+  # nolint start: commented_code_linter.
+  #--- * Test backwards compatible behavior ------
+  # see \url{https://github.com/DrylandEcology/rSOILWAT2/issues/236}:
+  # "dbW_dataframe_to_weatherData() is not backwards compatible with v6.0.0"
+  # nolint end: commented_code_linter.
+
+  set.seed(54)
+  N <- 365
+  doys <- seq_len(N)
+  tmean <- -5 + 20 * sinpi(doys / N) + rnorm(n = N, sd = 2)
+
+  tmp_meteo <- cbind(
+    Year = rep(2019, times = N),
+    DOY = doys,
+    Tmax_C = tmean + 4 + rnorm(n = N, sd = 1),
+    Tmin_C = tmean - 4 + rnorm(n = N, sd = 1),
+    PPT_cm = 0.1 * rgamma(n = N, shape = 1, rate = 1)
+  )
+
+
+  expect_true(
+    rSOILWAT2::dbW_check_weatherData(
+      rSOILWAT2::dbW_dataframe_to_weatherData(
+        weatherDF = tmp_meteo,
+        weatherDF_dataColumns = c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+      )
+    )
+  )
+
+
+  expect_true(
+    rSOILWAT2::dbW_check_weatherData(
+      rSOILWAT2::dbW_dataframe_to_weatherData(
+        weatherDF = tmp_meteo
+      )
+    )
+  )
+
+
+
+  #--- * Test conversion round trip ------
+  # swWeatherHistory -> data frame -> swWeatherHistory
+
+  res <- rSOILWAT2::dbW_dataframe_to_weatherData(
+    weatherDF = rSOILWAT2::dbW_weatherData_to_dataframe(
+      rSOILWAT2::weatherData
+    ),
+    round = FALSE
+  )
+
+  expect_true(rSOILWAT2::dbW_check_weatherData(res))
+
+  expect_identical(res, rSOILWAT2::weatherData)
+
+})

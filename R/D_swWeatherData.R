@@ -189,6 +189,15 @@ swWeatherData <- function(...) {
 }
 
 
+upgrade_swWeatherData <- function(data, year, template = new("swWeatherData")) {
+  stopifnot(colnames(data) %in% colnames(template@data))
+  template@year <- as.integer(year)
+  template@data <- template@data[seq_len(nrow(data)), , drop = FALSE]
+  template@data[, colnames(data)] <- data
+  template
+}
+
+
 #' @rdname sw_upgrade
 #' @export
 upgrade_weatherHistory <- function(object, verbose = FALSE) {
@@ -198,16 +207,16 @@ upgrade_weatherHistory <- function(object, verbose = FALSE) {
       message("Upgrading `weatherHistory` object.")
     }
 
-    ref <- new("swWeatherData")
+    template <- new("swWeatherData")
 
     object <- lapply(
       object,
       function(old) {
-        new <- ref
-        new@year <- old@year
-        new@data <- new@data[seq_len(nrow(old@data)), , drop = FALSE]
-        new@data[, colnames(old@data)] <- old@data
-        new
+        upgrade_swWeatherData(
+          data = old@data,
+          year = old@year,
+          template = template
+        )
       }
     )
   }
