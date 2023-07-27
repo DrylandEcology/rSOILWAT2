@@ -2395,17 +2395,27 @@ get_years_from_weatherDF <- function(weatherDF, years, weatherDF_dataColumns) {
 #' @inheritParams sw_weather_data
 #'
 #' @section Notes:
-#' `weatherDF_dataColumns` must exactly contain entries for day of year and
-#' the three weather variables.
+#' `weatherDF_dataColumns` consists of a vector with
+#' (1) the variable name for day of year, e.g., `"DOY"`, and
+#' (2) weather variables, see [weather_dataColumns()],
+#' or `NULL` which attempts to guess relevant columns.
 #'
 #' @export
 #' @md
 dbW_dataframe_to_weatherData <- function(
   weatherDF,
   years = NULL,
-  weatherDF_dataColumns = c("DOY", weather_dataColumns()),
+  weatherDF_dataColumns = NULL,
   round = 2
 ) {
+
+  if (is.null(weatherDF_dataColumns)) {
+    weatherDF_dataColumns <- intersect(
+      colnames(weatherDF),
+      c("DOY", weather_dataColumns())
+    )
+  }
+
 
   if (
      !all(weatherDF_dataColumns %in% colnames(weatherDF))
@@ -2415,13 +2425,17 @@ dbW_dataframe_to_weatherData <- function(
       "'weatherDF' object"
     )
   }
+
   ylist <- get_years_from_weatherDF(weatherDF, years, weatherDF_dataColumns)
 
   if (isTRUE(is.logical(round) && round || is.numeric(round))) {
     weatherDF <- round(weatherDF, digits = if (is.logical(round)) 2 else round)
   }
 
+  template <- new("swWeatherData")
+
   weatherData <- list()
+
   for (i in seq_along(ylist$years)) {
     ydata <- as.matrix(
       weatherDF[
@@ -2429,12 +2443,14 @@ dbW_dataframe_to_weatherData <- function(
         weatherDF_dataColumns
       ]
     )
-    colnames(ydata) <- c("DOY", weather_dataColumns())
-    weatherData[[i]] <- swWeatherData(
+
+    weatherData[[i]] <- upgrade_swWeatherData(
+      data = ydata,
       year = ylist$years[i],
-      data = ydata
+      template = template
     )
   }
+
   names(weatherData) <- ylist$years
 
   weatherData
