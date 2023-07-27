@@ -13,6 +13,8 @@ linters: lintr::linters_with_tags(
   nonportable_path_linter = NULL,
   expect_identical_linter = NULL,
   function_argument_linter = NULL,
+  implicit_assignment_linter = NULL,
+  indentation_linter = NULL,
   yoda_test_linter = NULL)
 exclusions: list(
   "R/RcppExports.R",

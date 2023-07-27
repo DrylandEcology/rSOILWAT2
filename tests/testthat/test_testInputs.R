@@ -33,15 +33,15 @@ test_that("Check example data", {
     #--- Check that weather is (not) missing (for 'active' inputs) ------
     if (it != "Ex2") {
       # not missing: no NAs, no SW_MISSING, all years
-      expect_identical(sum(is.na(sw_wactive_df)), 0L)
-      expect_identical(sum(sw_wactive_df == swmiss), 0L)
+      expect_false(anyNA(sw_wactive_df))
+      expect_false(any(sw_wactive_df == swmiss))
       expect_true(all(yrs_sim %in% yrs_wth))
 
     } else {
       # missing: NAs, SW_MISSING, or not all years
       expect_true(
-        sum(is.na(sw_wactive_df)) > 0 ||
-          sum(sw_wactive_df == swmiss) > 0 ||
+        anyNA(sw_wactive_df) ||
+          any(sw_wactive_df == swmiss) ||
           !all(yrs_sim %in% yrs_wth)
       )
     }

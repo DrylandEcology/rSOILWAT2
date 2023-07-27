@@ -87,7 +87,7 @@ get_transpiration <- function(
     ids <- grep("transp_total_Lyr", colnames(tmp), fixed = TRUE)
 
     if (all(dim(tmp) > 0) && length(ids) > 0) {
-      res <- apply(tmp[, ids, drop = FALSE], MARGIN = 1, FUN = sum)
+      res <- rowSums(tmp[, ids, drop = FALSE])
 
       if (keep_time) {
         res_time <- tmp[, time_columns(timestep), drop = FALSE]
@@ -166,7 +166,7 @@ get_evaporation <- function(
         # evaporation from surface water (canopy, litter, ponded)
         tmp1[, "evap_total"] +
         # evaporation from bare soil
-        apply(tmp2[, ids, drop = FALSE], 1, sum) +
+        rowSums(tmp2[, ids, drop = FALSE]) +
         # evaporation from snow (sublimation)
         tmp3[, "snowloss"]
 
@@ -335,10 +335,8 @@ get_soiltemp <- function(
       cns_sl <- unlist(tmp)
       req_has_sl <- lengths(tmp) > 0
 
-      if (verbose) {
-        if (length(soillayers) != sum(req_has_sl)) {
-          warning("Some requested `soillayers` are not available.")
-        }
+      if (verbose && length(soillayers) != sum(req_has_sl)) {
+        warning("Some requested `soillayers` are not available.")
       }
 
       soillayers <- soillayers[req_has_sl]

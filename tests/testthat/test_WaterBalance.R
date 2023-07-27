@@ -157,7 +157,7 @@ for (it in tests) {
         dy_delta_swcj <- swcj[dyt[["ids2"]], ] - swcj[dyt[["ids1"]], ]
         list_delta_swcj <- aggregate_for_each_timestep(x = dy_delta_swcj, dyt)
         list_delta_swc_total <- aggregate_for_each_timestep(
-          x = apply(dy_delta_swcj, 1, sum),
+          x = rowSums(dy_delta_swcj),
           dyt = dyt
         )
 
@@ -181,13 +181,13 @@ for (it in tests) {
           Elitter <- temp[, "evap_litter"]
           Eponded <- temp[, "evap_surfaceWater"]
           Evegi <- temp[, paste0("evap_", veg_types), drop = FALSE]
-          Eveg <- apply(Evegi, 1, sum)
+          Eveg <- rowSums(Evegi)
           Etotalint <- Eveg + Elitter
 
           temp <- slot(slot(x, "EVAPSOIL"), OutPeriods[pd])
           ids <- grep("Lyr", colnames(temp), fixed = TRUE)
           Esoilj <- temp[, ids, drop = FALSE]
-          Esoil <- apply(Esoilj, 1, sum)
+          Esoil <- rowSums(Esoilj)
 
           temp <- matrix(0, nrow = nrow(Esoilj), ncol = n_soillayers)
           temp[, seq_len(ncol(Esoilj))] <- Esoilj
@@ -200,7 +200,7 @@ for (it in tests) {
           temp <- slot(slot(x, "TRANSP"), OutPeriods[pd])
           ids <- grep("transp_total_Lyr", colnames(temp), fixed = TRUE)
           Ttotalj <- temp[, ids, drop = FALSE]
-          Ttotal <- apply(Ttotalj, 1, sum)
+          Ttotal <- rowSums(Ttotalj)
           Tvegij <- lapply(
             veg_types,
             function(v) {
@@ -224,7 +224,7 @@ for (it in tests) {
           expect_equal(Eponded + Elitter, ets[, "esurf_cm"], tolerance = tol)
 
           tmp_evars2 <- c("esoil_cm", "ecnw_cm", "esurf_cm", "esnow_cm")
-          Etotal2 <- apply(ets[, tmp_evars2], 1, sum)
+          Etotal2 <- rowSums(ets[, tmp_evars2])
           expect_equal(Etotal, Etotal2, tolerance = tol)
           expect_equal(aet, ets[, "tran_cm"] + Etotal2, tolerance = tol)
 
@@ -254,9 +254,9 @@ for (it in tests) {
 
           temp <- slot(slot(x, "RUNOFF"), OutPeriods[pd])
           ctemp <- grep("runoff", colnames(temp), fixed = TRUE)
-          runoff <- apply(temp[, ctemp, drop = FALSE], 1, sum)
+          runoff <- rowSums(temp[, ctemp, drop = FALSE])
           ctemp <- grep("runon", colnames(temp), fixed = TRUE)
-          runon <- apply(temp[, ctemp, drop = FALSE], 1, sum)
+          runon <- rowSums(temp[, ctemp, drop = FALSE])
 
           temp <- slot(slot(x, "PRECIP"), OutPeriods[pd])
           snowmelt <- temp[, "snowmelt"]
@@ -281,11 +281,7 @@ for (it in tests) {
           # (3) \code{T(total) = sum of T(veg-type i from soil layer j)}
           expect_equal(
             Ttotal,
-            apply(
-              sapply(Tvegij, function(x) apply(x, 1, sum)),
-              MARGIN = 1,
-              FUN = sum
-            ),
+            rowSums(sapply(Tvegij, rowSums)),
             info = info2
           )
 

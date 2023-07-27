@@ -1196,10 +1196,14 @@ setReplaceMethod(
 
     if (length(index) == 0) {
       object@weatherHistory[[length(object@weatherHistory) + 1]] <- value
-      years <- unlist(lapply(object@weatherHistory, function(x) x@year))
-      id_order <- order(years)
-      object@weatherHistory <- object@weatherHistory[id_order]
-      years <- years[order(years)]
+      years <- vapply(
+        object@weatherHistory,
+        function(x) x@year,
+        FUN.VALUE = NA_integer_
+      )
+      ids_sorted <- sort.list(years, na.last = TRUE)
+      object@weatherHistory <- object@weatherHistory[ids_sorted]
+      years <- years[ids_sorted]
       names(object@weatherHistory) <- as.character(years)
       if (!all(years == cummax(years))) {
         print("Weather data is Missing")
@@ -1226,10 +1230,14 @@ setReplaceMethod(
 
     if (length(index) == 0) {
       object[[length(object) + 1]] <- value
-      years <- unlist(lapply(object, function(x) x@year))
-      id_order <- order(years)
-      object <- object[id_order]
-      years <- years[id_order]
+      years <- vapply(
+        object,
+        function(x) x@year,
+        FUN.VALUE = NA_integer_
+      )
+      ids_sorted <- sort.list(years, na.last = TRUE)
+      object <- object[ids_sorted]
+      years <- years[ids_sorted]
       names(object) <- as.character(years)
       if (!all(years == cummax(years))) {
         print("Weather data are missing")
@@ -2118,10 +2126,14 @@ setReplaceMethod(
 
     if (length(index) == 0) {
       object@swc@History[[length(object@swc@History) + 1]] <- value
-      years <- unlist(lapply(object@swc@History, function(x) x@year))
-      id_order <- order(years)
-      object@swc@History <- object@swc@History[id_order]
-      years <- years[order(years)]
+      years <- vapply(
+        object@swc@History,
+        function(x) x@year,
+        FUN.VALUE = NA_integer_
+      )
+      ids_sorted <- sort.list(years, na.last = TRUE)
+      object@swc@History <- object@swc@History[ids_sorted]
+      years <- years[ids_sorted]
       names(object@swc@History) <- as.character(years)
       if (!all(years == cummax(years))) {
         print("SWC data is Missing")
