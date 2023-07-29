@@ -239,8 +239,6 @@ sw_exec <- function(
   quiet = FALSE
 ) {
 
-  res <- NULL
-
   dir_prev <- getwd()
   on.exit(setwd(dir_prev), add = TRUE)
 
@@ -313,10 +311,6 @@ sw_exec <- function(
 
   # Run SOILWAT2
   res <- .Call(C_start, input, inputData, weatherList, quiet)
-
-  if (is.null(res)) {
-    .Call(C_rSW2_clearModel)
-  }
 
   slot(res, "version") <- rSW2_version()
   slot(res, "timestamp") <- rSW2_timestamp()
@@ -391,10 +385,6 @@ sw_inputDataFromFiles <- function(
 
   res <- .Call(C_onGetInputDataFromFiles, input, quiet)
 
-  if (is.null(res)) {
-    .Call(C_rSW2_clearModel)
-  }
-
   slot(res, "version") <- rSW2_version()
   slot(res, "timestamp") <- rSW2_timestamp()
 
@@ -410,16 +400,10 @@ sw_inputDataFromFiles <- function(
 #' @export
 sw_outputData <- function(inputData) {
 
-  res <- NULL
-
   dir_prev <- getwd()
   on.exit(setwd(dir_prev), add = TRUE)
 
   res <- .Call(C_onGetOutput, inputData)
-
-  if (is.null(res)) {
-    .Call(C_rSW2_clearModel)
-  }
 
   slot(res, "version") <- rSW2_version()
   slot(res, "timestamp") <- rSW2_timestamp()

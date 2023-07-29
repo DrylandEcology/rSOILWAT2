@@ -1105,8 +1105,6 @@ dbW_generateWeather <- function(
   seed = NULL
 ) {
 
-  res <- NULL
-
   #--- Obtain missing/null arguments
   if (is.null(wgen_coeffs)) {
     wgen_coeffs <- dbW_estimate_WGen_coefs(
@@ -1158,10 +1156,6 @@ dbW_generateWeather <- function(
   #--- Process weather in SOILWAT2
   set.seed(seed)
   res <- .Call(C_rSW2_processAllWeather, weatherData, sw_in)
-
-  if (is.null(res)) {
-    .Call(C_rSW2_clearModel)
-  }
 
   dbW_weatherData_round(res, digits = digits)
 }
