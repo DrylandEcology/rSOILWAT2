@@ -311,6 +311,7 @@ sw_exec <- function(
 
   # Run SOILWAT2
   res <- .Call(C_start, input, inputData, weatherList, quiet)
+
   slot(res, "version") <- rSW2_version()
   slot(res, "timestamp") <- rSW2_timestamp()
 
@@ -383,6 +384,7 @@ sw_inputDataFromFiles <- function(
   input <- sw_args(dir, files.in, echo = FALSE, quiet = quiet)
 
   res <- .Call(C_onGetInputDataFromFiles, input, quiet)
+
   slot(res, "version") <- rSW2_version()
   slot(res, "timestamp") <- rSW2_timestamp()
 
@@ -402,6 +404,7 @@ sw_outputData <- function(inputData) {
   on.exit(setwd(dir_prev), add = TRUE)
 
   res <- .Call(C_onGetOutput, inputData)
+
   slot(res, "version") <- rSW2_version()
   slot(res, "timestamp") <- rSW2_timestamp()
 

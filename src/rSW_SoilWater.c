@@ -28,10 +28,10 @@
 
 #include "SOILWAT2/include/SW_Defines.h"
 #include "SOILWAT2/include/SW_Files.h"
-#include "SOILWAT2/include/SW_Model.h" // externs `SW_Model`
-#include "SOILWAT2/include/SW_Site.h" // externs `SW_Site`
+#include "SOILWAT2/include/SW_Model.h"
+#include "SOILWAT2/include/SW_Site.h"
 
-#include "SOILWAT2/include/SW_SoilWater.h" // externs `SW_Soilwat`
+#include "SOILWAT2/include/SW_SoilWater.h"
 #include "rSW_SoilWater.h"
 #include "SW_R_lib.h" // externs `InputData`
 
@@ -58,7 +58,7 @@ void rSW_SWC_construct(void) {
 
 
 SEXP onGet_SW_SWC(void) {
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT *v = &SoilWatAll.SoilWat;
 	SEXP swSWC;
 	SEXP SWC;
 	char *cSWC[] = { "UseSWCHistoricData", "DataFilePrefix", "FirstYear", "Method", "History" };
@@ -96,16 +96,16 @@ SEXP onGet_SW_SWC(void) {
 }
 
 void onSet_SW_SWC(SEXP SWC) {
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT *v = &SoilWatAll.SoilWat;
 	SEXP swcUseData;
 	SEXP swcFilePrefix;
 	SEXP swcFirstYear;
 	SEXP swcMethod;
 
-	MyFileName = SW_F_name(eSoilwat);
+	MyFileName = PathInfo.InFiles[eSoilwat];
 	LyrIndex i;
-	ForEachSoilLayer(i)
-		v->avgLyrTemp[i] = SW_Site.lyr[i]->avgLyrTemp;
+	ForEachSoilLayer(i, SoilWatAll.Site.n_layers)
+		v->avgLyrTemp[i] = SoilWatAll.Site.avgLyrTempInit[i];
 
 	PROTECT(swcUseData = GET_SLOT(SWC, install("UseSWCHistoricData")));
 	PROTECT(swcFilePrefix = GET_SLOT(SWC, install("DataFilePrefix")));
@@ -116,14 +116,14 @@ void onSet_SW_SWC(SEXP SWC) {
 	//if (!isnull(v->hist.file_prefix)) {//Clear memory before setting it
 	//	Mem_Free(v->hist.file_prefix);
 	//}
-	v->hist.file_prefix = (char *) Str_Dup(CHAR(STRING_ELT(swcFilePrefix,0)));
+	v->hist.file_prefix = (char *) Str_Dup(CHAR(STRING_ELT(swcFilePrefix,0)), &LogInfo);
 	v->hist.yr.first = INTEGER(swcFirstYear)[0];
 	v->hist.method = INTEGER(swcMethod)[0];
 
 	if (v->hist.method < 1 || v->hist.method > 2) {
-		LogError(logfp, LOGFATAL, "swcsetup.in : Invalid swc adjustment method.");
+		LogError(&LogInfo, LOGFATAL, "swcsetup.in : Invalid swc adjustment method.");
 	}
-	v->hist.yr.last = SW_Model.endyr;
+	v->hist.yr.last = SoilWatAll.Model.endyr;
 	v->hist.yr.total = v->hist.yr.last - v->hist.yr.first + 1;
 	UNPROTECT(4);
 }
@@ -132,15 +132,15 @@ void onSet_SW_SWC(SEXP SWC) {
 SEXP onGet_SW_SWC_hists(void) {
 	TimeInt year;
 	SEXP SWC_hists, SWC_hists_names;
-	int years = ((SW_Model.endyr + 1) - SW_Model.startyr), i = 0;
+	int years = ((SoilWatAll.Model.endyr + 1) - SoilWatAll.Model.startyr), i = 0;
 	char cYear[5];
 
 	PROTECT(SWC_hists_names = allocVector(STRSXP, years));
 	PROTECT(SWC_hists = allocVector(VECSXP,years));
 
-	for (year = SW_Model.startyr; year <= SW_Model.endyr; year++) {
-		if (SW_Soilwat.hist_use && year >= SW_Soilwat.hist.yr.first) {
-			_read_swc_hist(year);
+	for (year = SoilWatAll.Model.startyr; year <= SoilWatAll.Model.endyr; year++) {
+		if (SoilWatAll.SoilWat.hist_use && year >= SoilWatAll.SoilWat.hist.yr.first) {
+			_read_swc_hist(&SoilWatAll.SoilWat.hist, year, &LogInfo);
 			SET_VECTOR_ELT(SWC_hists, i, onGet_SW_SWC_hist(year));
 			snprintf(cYear, sizeof cYear, "%4d", year);
 			SET_STRING_ELT(SWC_hists_names, i, mkChar(cYear));
@@ -156,7 +156,7 @@ SEXP onGet_SW_SWC_hist(TimeInt year) {
   sw_error(-1, "'onGet_SW_SWC_hist' is currently not functional.\n");
 
 	int i, j = 0;
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT *v = &SoilWatAll.SoilWat;
 	SEXP swSWC_hist;
 	SEXP hist;
 	char *cSWC_hist[] = { "doy", "lyr", "swc", "st_err" };
@@ -193,7 +193,7 @@ void onSet_SW_SWC_hist(void) {
   sw_error(-1, "'onSet_SW_SWC_hist' is currently not functional.\n");
 
 	int i, j = 0;
-	SW_SOILWAT *v = &SW_Soilwat;
+	SW_SOILWAT *v = &SoilWatAll.SoilWat;
 	RealD *p_lyrs;
 	SEXP lyrs = VECTOR_ELT(VECTOR_ELT(VECTOR_ELT(InputData,7),4),swcdataIndex);
 	swcdataIndex++;

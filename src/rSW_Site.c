@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "SOILWAT2/include/generic.h" // externs `EchoInits`
+#include "SOILWAT2/include/generic.h"
 #include "SOILWAT2/include/filefuncs.h"
 #include "SOILWAT2/include/Times.h"
 #include "SOILWAT2/include/myMemory.h"
@@ -28,9 +28,9 @@
 #include "SOILWAT2/include/SW_Files.h"
 #include "SOILWAT2/include/SW_SoilWater.h"
 
-// externs `SW_Site`, `_TranspRgnBounds`, _SWCInitVal, _SWCWetVal, _SWCMinVal
 #include "SOILWAT2/include/SW_Site.h"
 #include "rSW_Site.h"
+#include "SW_R_lib.h"
 
 #include <R.h>
 #include <Rinternals.h>
@@ -73,25 +73,25 @@ static char *cSWRCp[] = {
 /* Copy soil properties into "Layers" matrix */
 static SEXP onGet_SW_LYR(void) {
 	int i, dmax = 0;
-	SW_SITE *v = &SW_Site;
+	SW_SITE *v = &SoilWatAll.Site;
 	SEXP Layers, Layers_names, Layers_names_y;
 	RealD *p_Layers;
 
 	PROTECT(Layers = allocMatrix(REALSXP, v->n_layers, 12));
 	p_Layers = REAL(Layers);
 	for (i = 0; i < (v->n_layers); i++) {
-		p_Layers[i + (v->n_layers) * 0] = dmax = v->lyr[i]->width + dmax;
-		p_Layers[i + (v->n_layers) * 1] = v->lyr[i]->soilDensityInput;
-		p_Layers[i + (v->n_layers) * 2] = v->lyr[i]->fractionVolBulk_gravel;
-		p_Layers[i + (v->n_layers) * 3] = v->lyr[i]->evap_coeff;
-		p_Layers[i + (v->n_layers) * 4] = v->lyr[i]->transp_coeff[SW_GRASS];
-		p_Layers[i + (v->n_layers) * 5] = v->lyr[i]->transp_coeff[SW_SHRUB];
-		p_Layers[i + (v->n_layers) * 6] = v->lyr[i]->transp_coeff[SW_TREES];
-		p_Layers[i + (v->n_layers) * 7] = v->lyr[i]->transp_coeff[SW_FORBS];
-		p_Layers[i + (v->n_layers) * 8] = v->lyr[i]->fractionWeightMatric_sand;
-		p_Layers[i + (v->n_layers) * 9] = v->lyr[i]->fractionWeightMatric_clay;
-		p_Layers[i + (v->n_layers) * 10] = v->lyr[i]->impermeability;
-		p_Layers[i + (v->n_layers) * 11] = v->lyr[i]->avgLyrTemp;
+		p_Layers[i + (v->n_layers) * 0] = dmax = v->width[i] + dmax;
+		p_Layers[i + (v->n_layers) * 1] = v->soilDensityInput[i];
+		p_Layers[i + (v->n_layers) * 2] = v->fractionVolBulk_gravel[i];
+		p_Layers[i + (v->n_layers) * 3] = v->evap_coeff[i];
+		p_Layers[i + (v->n_layers) * 4] = v->transp_coeff[SW_GRASS][i];
+		p_Layers[i + (v->n_layers) * 5] = v->transp_coeff[SW_SHRUB][i];
+		p_Layers[i + (v->n_layers) * 6] = v->transp_coeff[SW_TREES][i];
+		p_Layers[i + (v->n_layers) * 7] = v->transp_coeff[SW_FORBS][i];
+		p_Layers[i + (v->n_layers) * 8] = v->fractionWeightMatric_sand[i];
+		p_Layers[i + (v->n_layers) * 9] = v->fractionWeightMatric_clay[i];
+		p_Layers[i + (v->n_layers) * 10] = v->impermeability[i];
+		p_Layers[i + (v->n_layers) * 11] = v->avgLyrTempInit[i];
 	}
 
 	PROTECT(Layers_names = allocVector(VECSXP, 2));
@@ -111,14 +111,14 @@ static SEXP onGet_SW_LYR(void) {
 */
 static void onSet_SW_LYR(SEXP SW_LYR) {
 
-	SW_SITE *v = &SW_Site;
+	SW_SITE *v = &SoilWatAll.Site;
 	LyrIndex lyrno;
 	int i, j, k, columns;
 	RealF dmin = 0.0, dmax, evco, trco_veg[NVEGTYPES], psand, pclay, soildensity, imperm, soiltemp, f_gravel;
 	RealD *p_Layers;
 
 	/* note that Files.read() must be called prior to this. */
-	MyFileName = SW_F_name(eLayers);
+	MyFileName = PathInfo.InFiles[eLayers];
 
 	j = nrows(SW_LYR);
 	p_Layers = REAL(SW_LYR);
@@ -128,7 +128,7 @@ static void onSet_SW_LYR(SEXP SW_LYR) {
 	/* Adjust number if new variables are added */
 	if (columns != 12) {
 		LogError(
-			logfp,
+			&LogInfo,
 			LOGFATAL,
 			"%s : Too few columns in layers specified (%d).\n",
 			MyFileName, columns
@@ -136,7 +136,7 @@ static void onSet_SW_LYR(SEXP SW_LYR) {
 	}
 
 	for (i = 0; i < j; i++) {
-		lyrno = _newlayer();
+		lyrno = SoilWatAll.Site.n_layers++;
 
 		dmax = p_Layers[i + j * 0];
 		soildensity = p_Layers[i + j * 1];
@@ -151,22 +151,22 @@ static void onSet_SW_LYR(SEXP SW_LYR) {
 		imperm = p_Layers[i + j * 10];
 		soiltemp = p_Layers[i + j * 11];
 
-		v->lyr[lyrno]->width = dmax - dmin;
+		v->width[lyrno] = dmax - dmin;
 		dmin = dmax;
-		v->lyr[lyrno]->soilDensityInput = soildensity;
-		v->lyr[lyrno]->fractionVolBulk_gravel = f_gravel;
-		v->lyr[lyrno]->evap_coeff = evco;
+		v->soilDensityInput[lyrno] = soildensity;
+		v->fractionVolBulk_gravel[lyrno] = f_gravel;
+		v->evap_coeff[lyrno] = evco;
 		ForEachVegType(k) {
-			v->lyr[lyrno]->transp_coeff[k] = trco_veg[k];
+			v->transp_coeff[k][lyrno] = trco_veg[k];
 		}
-		v->lyr[lyrno]->fractionWeightMatric_sand = psand;
-		v->lyr[lyrno]->fractionWeightMatric_clay = pclay;
-		v->lyr[lyrno]->impermeability = imperm;
-		v->lyr[lyrno]->avgLyrTemp = soiltemp;
+		v->fractionWeightMatric_sand[lyrno] = psand;
+		v->fractionWeightMatric_clay[lyrno] = pclay;
+		v->impermeability[lyrno] = imperm;
+		v->avgLyrTempInit[lyrno] = soiltemp;
 
 		if (lyrno >= MAX_LAYERS) {
 			LogError(
-				logfp,
+				&LogInfo,
 				LOGFATAL,
 				"%s : Too many layers specified (%d).\n"
 				"Maximum number of layers is %d\n",
@@ -180,7 +180,7 @@ static void onSet_SW_LYR(SEXP SW_LYR) {
 /* Copy SWRC parameters into "SWRCp" matrix */
 static SEXP onGet_SW_SWRCp(void) {
 	int i, k;
-	SW_SITE *v = &SW_Site;
+	SW_SITE *v = &SoilWatAll.Site;
 	SEXP SWRCp, SWRCp_names, SWRCp_names_y;
 	RealD *p_SWRCp;
 
@@ -188,7 +188,7 @@ static SEXP onGet_SW_SWRCp(void) {
 	p_SWRCp = REAL(SWRCp);
 	for (i = 0; i < (v->n_layers); i++) {
 		for (k = 0; k < SWRC_PARAM_NMAX; k++) {
-			p_SWRCp[i + (v->n_layers) * k] = v->lyr[i]->swrcp[k];
+			p_SWRCp[i + (v->n_layers) * k] = v->swrcp[i][k];
 		}
 	}
 
@@ -207,17 +207,17 @@ static SEXP onGet_SW_SWRCp(void) {
 /* Function `onSet_SW_SWRCp()` corresponds to SOILWAT2's `SW_SWRC_read()` */
 static void onSet_SW_SWRCp(SEXP SW_SWRCp) {
 
-	SW_SITE *v = &SW_Site;
+	SW_SITE *v = &SoilWatAll.Site;
 	int i, k;
 	RealD *p_SWRCp;
 
 	/* note that Files.read() must be called prior to this. */
-	MyFileName = SW_F_name(eSWRCp);
+	MyFileName = PathInfo.InFiles[eSWRCp];
 
 	/* Check that we have n = `SWRC_PARAM_NMAX` values per layer */
 	if (ncols(SW_SWRCp) != SWRC_PARAM_NMAX) {
 		LogError(
-			logfp,
+			&LogInfo,
 			LOGFATAL,
 			"%s : Bad number of SWRC parameters %d -- must be %d.\n",
 			MyFileName, ncols(SW_SWRCp), SWRC_PARAM_NMAX
@@ -225,13 +225,13 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp) {
 	}
 
 	/* Check that we have `SW_Site.n_layers` */
-	if (nrows(SW_SWRCp) != SW_Site.n_layers) {
+	if (nrows(SW_SWRCp) != SoilWatAll.Site.n_layers) {
 		LogError(
-			logfp,
+			&LogInfo,
 			LOGFATAL,
 			"%s : Number of layers with SWRC parameters (%d) "
 			"must match number of soil layers (%d)\n",
-			MyFileName, nrows(SW_SWRCp), SW_Site.n_layers
+			MyFileName, nrows(SW_SWRCp), SoilWatAll.Site.n_layers
 		);
 	}
 
@@ -240,7 +240,7 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp) {
 
 	for (i = 0; i < (v->n_layers); i++) {
 		for (k = 0; k < SWRC_PARAM_NMAX; k++) {
-			v->lyr[i]->swrcp[k] = p_SWRCp[i + (v->n_layers) * k];
+			v->swrcp[i][k] = p_SWRCp[i + (v->n_layers) * k];
 		}
 	}
 }
@@ -280,7 +280,7 @@ void onSet_SW_SOILS(SEXP SW_SOILS) {
 
 SEXP onGet_SW_SIT(void) {
 	int i;
-	SW_SITE *v = &SW_Site;
+	SW_SITE *v = &SoilWatAll.Site;
 
 	SEXP swSite;
 	SEXP SW_SIT;
@@ -327,15 +327,15 @@ SEXP onGet_SW_SIT(void) {
 	char *cTranspirationRegions[] = { "ndx", "layer" };
 	int *p_transp; // ideally `LyrIndex` so that same type as `_TranspRgnBounds`, but R API INTEGER() is signed
 
-	MyFileName = SW_F_name(eSite);
+	MyFileName = PathInfo.InFiles[eSite];
 
 	PROTECT(swSite = MAKE_CLASS("swSite"));
 	PROTECT(SW_SIT = NEW_OBJECT(swSite));
 
 	PROTECT(SWClimits = allocVector(REALSXP, 3));
-	REAL(SWClimits)[0] = _SWCMinVal;
-	REAL(SWClimits)[1] = _SWCInitVal;
-	REAL(SWClimits)[2] = _SWCWetVal;
+	REAL(SWClimits)[0] = v->_SWCMinVal;
+	REAL(SWClimits)[1] = v->_SWCInitVal;
+	REAL(SWClimits)[2] = v->_SWCWetVal;
 	PROTECT(SWClimits_names = allocVector(STRSXP, 3));
 	for (i = 0; i < 3; i++)
 		SET_STRING_ELT(SWClimits_names, i, mkChar(cSWClimits[i]));
@@ -432,7 +432,7 @@ SEXP onGet_SW_SIT(void) {
 	p_transp = INTEGER(TranspirationRegions);
 	for (i = 0; i < (v->n_transp_rgn); i++) {
 		p_transp[i + (v->n_transp_rgn) * 0] = (i + 1);
-		p_transp[i + (v->n_transp_rgn) * 1] = (_TranspRgnBounds[i]+1);
+		p_transp[i + (v->n_transp_rgn) * 1] = (v->_TranspRgnBounds[i]+1);
 	}
 	PROTECT(TranspirationRegions_names = allocVector(VECSXP,2));
 	PROTECT(TranspirationRegions_names_y = allocVector(STRSXP,2));
@@ -478,7 +478,7 @@ SEXP onGet_SW_SIT(void) {
 
 void onSet_SW_SIT(SEXP SW_SIT) {
 	int i;
-	SW_SITE *v = &SW_Site;
+	SW_SITE *v = &SoilWatAll.Site;
 
 	SEXP SWClimits;
 	SEXP ModelFlags;
@@ -500,7 +500,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
   int debug = 0;
   #endif
 
-	MyFileName = SW_F_name(eSite);
+	MyFileName = PathInfo.InFiles[eSite];
 
 	LyrIndex r; /* transp region definition number */
 	Bool too_many_regions = FALSE;
@@ -510,9 +510,9 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	#endif
 
 	PROTECT(SWClimits = GET_SLOT(SW_SIT, install("SWClimits")));
-	_SWCMinVal = REAL(SWClimits)[0];
-	_SWCInitVal = REAL(SWClimits)[1];
-	_SWCWetVal = REAL(SWClimits)[2];
+	v->_SWCMinVal = REAL(SWClimits)[0];
+	v->_SWCInitVal = REAL(SWClimits)[1];
+	v->_SWCWetVal = REAL(SWClimits)[2];
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" > 'SWClimits'");
 	#endif
@@ -608,7 +608,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 
 	PROTECT(swrc_flags = GET_SLOT(SW_SIT, install("swrc_flags")));
 	strcpy(v->site_swrc_name, CHAR(STRING_ELT(swrc_flags, 0)));
-	v->site_swrc_type = encode_str2swrc(v->site_swrc_name);
+	v->site_swrc_type = encode_str2swrc(v->site_swrc_name, &LogInfo);
 	strcpy(v->site_ptf_name, CHAR(STRING_ELT(swrc_flags, 1)));
 	v->site_ptf_type = encode_str2ptf(v->site_ptf_name);
 	PROTECT(has_swrcp = GET_SLOT(SW_SIT, install("has_swrcp")));
@@ -626,11 +626,11 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 		too_many_regions = TRUE;
 	} else {
 		for (i = 0; i < v->n_transp_rgn; i++) {
-			_TranspRgnBounds[p_transp[i + v->n_transp_rgn * 0] - 1] = p_transp[i + v->n_transp_rgn * 1] - 1;
+			v->_TranspRgnBounds[p_transp[i + v->n_transp_rgn * 0] - 1] = p_transp[i + v->n_transp_rgn * 1] - 1;
 		}
 	}
 	if (too_many_regions) {
-		LogError(logfp, LOGFATAL, "siteparam.in : Number of transpiration regions"
+		LogError(&LogInfo, LOGFATAL, "siteparam.in : Number of transpiration regions"
 				" exceeds maximum allowed (%d > %d)\n", v->n_transp_rgn, MAX_TRANSP_REGIONS);
 	}
 	#ifdef RSWDEBUG
@@ -639,8 +639,8 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 
 	/* check for any discontinuities (reversals) in the transpiration regions */
 	for (r = 1; r < v->n_transp_rgn; r++) {
-		if (_TranspRgnBounds[r - 1] >= _TranspRgnBounds[r]) {
-			LogError(logfp, LOGFATAL, "siteparam.in : Discontinuity/reversal in transpiration regions.\n");
+		if (v->_TranspRgnBounds[r - 1] >= v->_TranspRgnBounds[r]) {
+			LogError(&LogInfo, LOGFATAL, "siteparam.in : Discontinuity/reversal in transpiration regions.\n");
 		}
 	}
 

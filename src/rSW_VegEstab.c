@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "SOILWAT2/include/generic.h" // externs `EchoInits`
+#include "SOILWAT2/include/generic.h"
 #include "SOILWAT2/include/filefuncs.h"
 #include "SOILWAT2/include/Times.h"
 #include "SOILWAT2/include/myMemory.h"
@@ -24,8 +24,9 @@
 #include "SOILWAT2/include/SW_Defines.h"
 #include "SOILWAT2/include/SW_Files.h"
 
-#include "SOILWAT2/include/SW_VegEstab.h" // externs `SW_VegEstab`
+#include "SOILWAT2/include/SW_VegEstab.h"
 #include "rSW_VegEstab.h"
+#include "SW_R_lib.h"
 
 #include <R.h>
 #include <Rinternals.h>
@@ -54,15 +55,15 @@ SEXP onGet_SW_VES(void) {
 	PROTECT(VES = NEW_OBJECT(swEstab));
 
 	PROTECT(count = NEW_INTEGER(1));
-	INTEGER(count)[0] = SW_VegEstab.count;
+	INTEGER(count)[0] = SoilWatAll.VegEstab.count;
 
 	PROTECT(use = NEW_LOGICAL(1));
-	LOGICAL(use)[0] = SW_VegEstab.use;
+	LOGICAL(use)[0] = SoilWatAll.VegEstab.use;
 
 	SET_SLOT(VES, install("count"), count);
 	SET_SLOT(VES, install("useEstab"), use);
 
-	if (SW_VegEstab.use) {
+	if (SoilWatAll.VegEstab.use) {
 		onGet_SW_VES_spps(VES);
 	}
 
@@ -73,35 +74,36 @@ SEXP onGet_SW_VES(void) {
 void onSet_SW_VES(SEXP VES) {
 	IntU i;
 	int nSPPS;
-	SW_VegEstab.use = TRUE;
+	SoilWatAll.VegEstab.use = TRUE;
 	SEXP use, count;
-	MyFileName = SW_F_name(eVegEstab);
+	MyFileName = PathInfo.InFiles[eVegEstab];
 
 	PROTECT(use = GET_SLOT(VES,install("useEstab")));
 	PROTECT(count = GET_SLOT(VES,install("count")));
 
 	if (LOGICAL(use)[0] == FALSE) {
 		//LogError(logfp, LOGNOTE, "Establishment not used.\n");
-		SW_VegEstab.use = FALSE;
+		SoilWatAll.VegEstab.use = FALSE;
 	} else {
 		nSPPS = INTEGER(count)[0];
 		if (nSPPS == 0) {
-			LogError(logfp, LOGWARN, "Establishment is TRUE but no data. Setting False.");
-			SW_VegEstab.use = FALSE;
+			LogError(&LogInfo, LOGWARN, "Establishment is TRUE but no data. Setting False.");
+			SoilWatAll.VegEstab.use = FALSE;
 		} else {
-			SW_VegEstab.use = TRUE;
+			SoilWatAll.VegEstab.use = TRUE;
 			for (i = 0; i < nSPPS; i++)
 				onSet_SW_VES_spp(VES, i); // sets `SW_VegEstab.count` incrementally
 		}
 	}
 
 	if (EchoInits)
-		LogError(logfp, LOGNOTE, "Establishment not used.\n");
+		LogError(&LogInfo, LOGNOTE, "Establishment not used.\n");
 
-	SW_VegEstab_construct();
+	SW_VegEstab_construct(&SoilWatAll.VegEstab, &LogInfo);
 
 	if (EchoInits)
-		_echo_VegEstab();
+		_echo_VegEstab(SoilWatAll.Site.width, SoilWatAll.VegEstab.parms,
+					   SoilWatAll.VegEstab.count, &LogInfo);
 
 	UNPROTECT(2);
 }
@@ -112,26 +114,26 @@ void onGet_SW_VES_spps(SEXP SPP) {
 	SEXP fileName, name, vegType, estab_lyrs, barsGERM, barsESTAB, min_pregerm_days, max_pregerm_days, min_wetdays_for_germ, max_drydays_postgerm, min_wetdays_for_estab, min_days_germ2estab,
 			max_days_germ2estab, min_temp_germ, max_temp_germ, min_temp_estab, max_temp_estab;
 
-	PROTECT(fileName = allocVector(STRSXP,SW_VegEstab.count));
-	PROTECT(name = allocVector(STRSXP,SW_VegEstab.count));
-	PROTECT(vegType = NEW_INTEGER(SW_VegEstab.count));
-	PROTECT(estab_lyrs = NEW_INTEGER(SW_VegEstab.count));
-	PROTECT(barsGERM = allocVector(REALSXP,SW_VegEstab.count));
-	PROTECT(barsESTAB = allocVector(REALSXP,SW_VegEstab.count));
-	PROTECT(min_pregerm_days = NEW_INTEGER(SW_VegEstab.count));
-	PROTECT(max_pregerm_days = NEW_INTEGER(SW_VegEstab.count));
-	PROTECT(min_wetdays_for_germ = NEW_INTEGER(SW_VegEstab.count));
-	PROTECT(max_drydays_postgerm = NEW_INTEGER(SW_VegEstab.count));
-	PROTECT(min_wetdays_for_estab = NEW_INTEGER(SW_VegEstab.count));
-	PROTECT(min_days_germ2estab = NEW_INTEGER(SW_VegEstab.count));
-	PROTECT(max_days_germ2estab = NEW_INTEGER(SW_VegEstab.count));
-	PROTECT(min_temp_germ = NEW_NUMERIC(SW_VegEstab.count));
-	PROTECT(max_temp_germ = NEW_NUMERIC(SW_VegEstab.count));
-	PROTECT(min_temp_estab = NEW_NUMERIC(SW_VegEstab.count));
-	PROTECT(max_temp_estab = NEW_NUMERIC(SW_VegEstab.count));
+	PROTECT(fileName = allocVector(STRSXP,SoilWatAll.VegEstab.count));
+	PROTECT(name = allocVector(STRSXP,SoilWatAll.VegEstab.count));
+	PROTECT(vegType = NEW_INTEGER(SoilWatAll.VegEstab.count));
+	PROTECT(estab_lyrs = NEW_INTEGER(SoilWatAll.VegEstab.count));
+	PROTECT(barsGERM = allocVector(REALSXP,SoilWatAll.VegEstab.count));
+	PROTECT(barsESTAB = allocVector(REALSXP,SoilWatAll.VegEstab.count));
+	PROTECT(min_pregerm_days = NEW_INTEGER(SoilWatAll.VegEstab.count));
+	PROTECT(max_pregerm_days = NEW_INTEGER(SoilWatAll.VegEstab.count));
+	PROTECT(min_wetdays_for_germ = NEW_INTEGER(SoilWatAll.VegEstab.count));
+	PROTECT(max_drydays_postgerm = NEW_INTEGER(SoilWatAll.VegEstab.count));
+	PROTECT(min_wetdays_for_estab = NEW_INTEGER(SoilWatAll.VegEstab.count));
+	PROTECT(min_days_germ2estab = NEW_INTEGER(SoilWatAll.VegEstab.count));
+	PROTECT(max_days_germ2estab = NEW_INTEGER(SoilWatAll.VegEstab.count));
+	PROTECT(min_temp_germ = NEW_NUMERIC(SoilWatAll.VegEstab.count));
+	PROTECT(max_temp_germ = NEW_NUMERIC(SoilWatAll.VegEstab.count));
+	PROTECT(min_temp_estab = NEW_NUMERIC(SoilWatAll.VegEstab.count));
+	PROTECT(max_temp_estab = NEW_NUMERIC(SoilWatAll.VegEstab.count));
 
-	for (i = 0; i < SW_VegEstab.count; i++) {
-		v = SW_VegEstab.parms[i];
+	for (i = 0; i < SoilWatAll.VegEstab.count; i++) {
+		v = SoilWatAll.VegEstab.parms[i];
 		SET_STRING_ELT(fileName, i, mkChar(v->sppFileName));
 		SET_STRING_ELT(name, i, mkChar(v->sppname));
 		INTEGER(vegType)[i] = v->vegType;
@@ -176,8 +178,8 @@ void onSet_SW_VES_spp(SEXP SPP, IntU i) {
 	SEXP fileName, Name;
 	unsigned int count;
 
-	count = _new_species();
-	v = SW_VegEstab.parms[count];
+	count = _new_species(&SoilWatAll.VegEstab, &LogInfo);
+	v = SoilWatAll.VegEstab.parms[count];
 
 	v->vegType = INTEGER(GET_SLOT(SPP, install("vegType")))[i];
 	v->estab_lyrs = INTEGER(GET_SLOT(SPP, install("estab_lyrs")))[i];
@@ -201,7 +203,7 @@ void onSet_SW_VES_spp(SEXP SPP, IntU i) {
 	strcpy(v->sppFileName, CHAR(STRING_ELT(fileName,i)) );
 	/* check for valid name first */
 	if (strlen(CHAR(STRING_ELT(Name,i))) > MAX_SPECIESNAMELEN) {
-		LogError(logfp, LOGFATAL, "Species name too long (> 4 chars).\n\tTry again.\n");
+		LogError(&LogInfo, LOGFATAL, "Species name too long (> 4 chars).\n\tTry again.\n");
 	} else {
 		strcpy(v->sppname, CHAR(STRING_ELT(Name,i)) );
 	}

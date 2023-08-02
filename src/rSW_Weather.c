@@ -21,11 +21,11 @@
 
 #include "SOILWAT2/include/SW_Defines.h"
 #include "SOILWAT2/include/SW_Files.h"
-#include "SOILWAT2/include/SW_Model.h" // externs `SW_Model`
+#include "SOILWAT2/include/SW_Model.h"
 #include "SOILWAT2/include/SW_Markov.h"
 #include "SOILWAT2/include/SW_Sky.h"
 
-#include "SOILWAT2/include/SW_Weather.h" // externs `SW_Weather`
+#include "SOILWAT2/include/SW_Weather.h"
 #include "rSW_Weather.h"
 #include "SW_R_lib.h" // externs `InputData`, `WeatherList`, `bWeatherList`
 
@@ -102,7 +102,7 @@ SEXP onGet_SW_WTH_setup(void) {
 	int i;
 	const int nitems = 8;
 	RealD *p_MonthlyValues;
-	SW_WEATHER *w = &SW_Weather;
+	SW_WEATHER *w = &SoilWatAll.Weather;
 
 	SEXP swWeather;
 	SEXP SW_WTH;
@@ -136,7 +136,7 @@ SEXP onGet_SW_WTH_setup(void) {
 	/* `SW_weather.yr` was removed from SOILWAT2:
 	INTEGER_POINTER(yr_first)[0] = w->yr.first;
 	*/
-	INTEGER_POINTER(yr_first)[0] = SW_Weather.startYear;
+	INTEGER_POINTER(yr_first)[0] = SoilWatAll.Weather.startYear;
 
 	PROTECT(use_cloudCoverMonthly = NEW_LOGICAL(1));
 	LOGICAL_POINTER(use_cloudCoverMonthly)[0] = w->use_cloudCoverMonthly;
@@ -203,7 +203,7 @@ SEXP onGet_SW_WTH_setup(void) {
 */
 void onSet_SW_WTH_setup(SEXP SW_WTH) {
 	int i;
-	SW_WEATHER *w = &SW_Weather;
+	SW_WEATHER *w = &SoilWatAll.Weather;
 	SEXP
         use_snow, pct_snowdrift, pct_snowRunoff,
         use_weathergenerator, use_weathergenerator_only,
@@ -214,9 +214,10 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 	RealD *p_MonthlyValues;
 	int *p_dailyInputFlags;
 
-	MyFileName = SW_F_name(eWeather);
+	MyFileName = PathInfo.InFiles[eWeather];
 
-	SW_WeatherPrefix(w->name_prefix);
+    // Copy weather prefix from PathInfo to Weather within `SoilWatAll`
+    strcpy(SoilWatAll.Weather.name_prefix, PathInfo.weather_prefix);
 
 	PROTECT(MonthlyScalingParams = GET_SLOT(SW_WTH, install(cSW_WTH_names[0])));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
@@ -291,7 +292,8 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 		w->use_cloudCoverMonthly,
 		w->use_humidityMonthly,
 		w->use_windSpeedMonthly,
-		w->dailyInputFlags
+		w->dailyInputFlags,
+        &LogInfo
 	);
 
 	UNPROTECT(11);
@@ -309,11 +311,11 @@ SEXP onGet_WTH_DATA(void) {
 	SEXP WTH_DATA, WTH_DATA_names;
 	char cYear[5];
 
-	PROTECT(WTH_DATA = allocVector(VECSXP, SW_Weather.n_years));
-	PROTECT(WTH_DATA_names = allocVector(STRSXP, SW_Weather.n_years));
+	PROTECT(WTH_DATA = allocVector(VECSXP, SoilWatAll.Weather.n_years));
+	PROTECT(WTH_DATA_names = allocVector(STRSXP, SoilWatAll.Weather.n_years));
 
-	for (yearIndex = 0; yearIndex < SW_Weather.n_years; yearIndex++) {
-		year = SW_Weather.startYear + yearIndex;
+	for (yearIndex = 0; yearIndex < SoilWatAll.Weather.n_years; yearIndex++) {
+		year = SoilWatAll.Weather.startYear + yearIndex;
 		snprintf(cYear, sizeof cYear, "%4d", year);
 		SET_STRING_ELT(WTH_DATA_names, yearIndex, mkChar(cYear));
 
@@ -356,10 +358,10 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 		"shortWR"
 	};
 	RealD *p_Year;
-	SW_WEATHER *w = &SW_Weather;
+	SW_WEATHER *w = &SoilWatAll.Weather;
 
 	days = Time_get_lastdoy_y(year);
-	yearIndex = year - SW_Weather.startYear;
+	yearIndex = year - SoilWatAll.Weather.startYear;
 
 	PROTECT(swWeatherData = MAKE_CLASS("swWeatherData"));
 	PROTECT(WeatherData = NEW_OBJECT(swWeatherData));
@@ -438,31 +440,31 @@ void onSet_WTH_DATA(void) {
   // Deallocate (previous, if any) `allHist`
   // (using value of `SW_Weather.n_years` previously used to allocate)
   // `SW_WTH_construct()` sets `n_years` to zero
-  deallocateAllWeather(&SW_Weather);
+  deallocateAllWeather(&SoilWatAll.Weather);
 
   // Update number of years and first calendar year represented
-  SW_Weather.n_years = SW_Model.endyr - SW_Model.startyr + 1;
-  SW_Weather.startYear = SW_Model.startyr;
+  SoilWatAll.Weather.n_years = SoilWatAll.Model.endyr - SoilWatAll.Model.startyr + 1;
+  SoilWatAll.Weather.startYear = SoilWatAll.Model.startyr;
 
   // Allocate new `allHist` (based on current `SW_Weather.n_years`)
-  allocateAllWeather(&SW_Weather);
+  allocateAllWeather(&SoilWatAll.Weather);
 
 
   // Equivalent to `readAllWeather()`:
   // fill `SOILWAT2` `allHist` with values from `rSOILWAT2`
   rSW2_setAllWeather(
     listAllWeather,
-    SW_Weather.allHist,
-    SW_Weather.startYear,
-    SW_Weather.n_years,
-    SW_Weather.use_weathergenerator_only,
-    SW_Weather.use_cloudCoverMonthly,
-    SW_Weather.use_humidityMonthly,
-    SW_Weather.use_windSpeedMonthly,
-    SW_Weather.dailyInputFlags,
-    SW_Sky.cloudcov,
-    SW_Sky.windspeed,
-    SW_Sky.r_humidity
+    SoilWatAll.Weather.allHist,
+    SoilWatAll.Weather.startYear,
+    SoilWatAll.Weather.n_years,
+    SoilWatAll.Weather.use_weathergenerator_only,
+    SoilWatAll.Weather.use_cloudCoverMonthly,
+    SoilWatAll.Weather.use_humidityMonthly,
+    SoilWatAll.Weather.use_windSpeedMonthly,
+    SoilWatAll.Weather.dailyInputFlags,
+    SoilWatAll.Sky.cloudcov,
+    SoilWatAll.Sky.windspeed,
+    SoilWatAll.Sky.r_humidity
   );
 }
 
@@ -487,6 +489,7 @@ static void rSW2_setAllWeather(
 
     /* Interpolation is to be in base0 in `interpolate_monthlyValues()` */
     Bool interpAsBase1 = swFALSE;
+    SW_MODEL *SW_Model = &SoilWatAll.Model;
 
     for(yearIndex = 0; yearIndex < n_years; yearIndex++) {
         year = yearIndex + startYear;
@@ -496,18 +499,24 @@ static void rSW2_setAllWeather(
 
         // Update yearly day/month information needed when interpolating
         // cloud cover, wind speed, and relative humidity if necessary
-        Time_new_year(year);
+        Time_new_year(year, SW_Model->days_in_month, SW_Model->cum_monthdays);
 
         if(use_cloudCoverMonthly) {
-            interpolate_monthlyValues(cloudcov, interpAsBase1, allHist[yearIndex]->cloudcov_daily);
+            interpolate_monthlyValues(cloudcov, interpAsBase1,
+                    SW_Model->cum_monthdays, SW_Model->days_in_month,
+                    allHist[yearIndex]->cloudcov_daily);
         }
 
         if(use_humidityMonthly) {
-            interpolate_monthlyValues(r_humidity, interpAsBase1, allHist[yearIndex]->r_humidity_daily);
+            interpolate_monthlyValues(r_humidity, interpAsBase1,
+                    SW_Model->cum_monthdays, SW_Model->days_in_month,
+                    allHist[yearIndex]->r_humidity_daily);
         }
 
         if(use_windSpeedMonthly) {
-            interpolate_monthlyValues(windspeed, interpAsBase1, allHist[yearIndex]->windspeed_daily);
+            interpolate_monthlyValues(windspeed, interpAsBase1,
+                    SW_Model->cum_monthdays, SW_Model->days_in_month,
+                    allHist[yearIndex]->windspeed_daily);
         }
 
         // Read daily weather values from disk
@@ -557,7 +566,7 @@ static void rSW2_set_weather_hist(
     numDaysYear = Time_get_lastdoy_y(year);
     if (nrows(yrWData) != numDaysYear) {
       LogError(
-        logfp,
+        &LogInfo,
         LOGFATAL,
         "Weather data (year %d): "
         "expected %d rows (had %d).\n",
@@ -596,7 +605,7 @@ static void rSW2_set_weather_hist(
 
         if (doy != p_yrWData[doy + numDaysYear * 0] - 1) {
             LogError(
-                logfp,
+                &LogInfo,
                 LOGFATAL,
                 "Weather data (year %d): "
                 "day of year out of range (%d), expected: %d.\n",
@@ -790,6 +799,8 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     SW_CLIMATE_YEARLY climateOutput;
     SW_CLIMATE_CLIM climateAverages;
 
+    SW_MODEL *SW_Model = &SoilWatAll.Model;
+
     int numYears = asInteger(yearEnd) - asInteger(yearStart) + 1, year, calcSiteOutputNum = 10,
     index;
 
@@ -830,7 +841,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
         allHist[year] = (SW_WEATHER_HIST *)malloc(sizeof(SW_WEATHER_HIST));
     }
 
-    Time_init_model();
+    Time_init_model(SoilWatAll.Model.days_in_month);
 
     // Set `dailyInputFlags`: currently, `calcSiteClimate()` use only tmax, tmin, ppt
     for (index = 0; index < MAX_INPUT_COLUMNS; index++) {
@@ -860,7 +871,8 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     allocateClimateStructs(numYears, &climateOutput, &climateAverages);
 
     // Calculate climate variables
-    calcSiteClimate(allHist, numYears, asInteger(yearStart), inNorthHem, &climateOutput);
+    calcSiteClimate(allHist, SW_Model->cum_monthdays, SW_Model->days_in_month,
+                numYears, asInteger(yearStart), inNorthHem, &climateOutput);
 
     // Average climate variables
     averageClimateAcrossYears(&climateOutput, numYears, &climateAverages);
