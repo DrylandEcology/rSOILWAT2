@@ -1155,8 +1155,7 @@ dbW_generateWeather <- function(
 
   #--- Process weather in SOILWAT2
   set.seed(seed)
-  dbW_weatherData_round(
-    .Call(C_rSW2_processAllWeather, weatherData, sw_in),
-    digits = digits
-  )
+  res <- .Call(C_rSW2_processAllWeather, weatherData, sw_in)
+
+  dbW_weatherData_round(res, digits = digits)
 }

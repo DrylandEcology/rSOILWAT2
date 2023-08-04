@@ -29,9 +29,10 @@
 #include "SOILWAT2/include/SW_Defines.h"
 #include "SOILWAT2/include/SW_Times.h"
 #include "SOILWAT2/include/SW_Files.h"
-#include "SOILWAT2/include/SW_Model.h" // externs `SW_Model`
+#include "SOILWAT2/include/SW_Model.h"
 
 #include "rSW_Model.h"
+#include "SW_R_lib.h"
 
 #include <R.h>
 #include <Rinternals.h>
@@ -50,7 +51,7 @@ static char *MyFileName;
 /* --------------------------------------------------- */
 
 SEXP onGet_SW_MDL(void) {
-	SW_MODEL *m = &SW_Model;
+	SW_MODEL *m = &SoilWatAll.Model;
 
 	SEXP swYears;
 	SEXP SW_MDL;//, SW_MDL_names;
@@ -90,7 +91,7 @@ SEXP onGet_SW_MDL(void) {
 }
 
 void onSet_SW_MDL(SEXP SW_MDL) {
-	SW_MODEL *m = &SW_Model;
+	SW_MODEL *m = &SoilWatAll.Model;
 
 	SEXP StartYear;
 	SEXP EndYear;
@@ -100,29 +101,29 @@ void onSet_SW_MDL(SEXP SW_MDL) {
 	SEXP North;
 	Bool fstartdy = FALSE, fenddy = FALSE, fhemi = FALSE;
 	TimeInt d;
-	char enddyval[6];
+	char enddyval[6], errstr[MAX_ERROR];
 
-	MyFileName = SW_F_name(eModel);
+	MyFileName = PathInfo.InFiles[eModel];
 
 	if (!IS_S4_OBJECT(SW_MDL)) {
-		LogError(logfp, LOGFATAL, "%s: No input.", MyFileName);
+		LogError(&LogInfo, LOGFATAL, "%s: No input.", MyFileName);
 	}
 
 	PROTECT(StartYear = GET_SLOT(SW_MDL, install("StartYear")));
 	if (INTEGER(StartYear)[0] < 0) {
-		LogError(logfp, LOGFATAL, "%s: Negative start year (%d)", MyFileName, INTEGER(StartYear)[0]);
+		LogError(&LogInfo, LOGFATAL, "%s: Negative start year (%d)", MyFileName, INTEGER(StartYear)[0]);
 	}
 	m->startyr = INTEGER(StartYear)[0];
 	PROTECT(EndYear = GET_SLOT(SW_MDL, install("EndYear")));
 	if (isNull(EndYear) || INTEGER(EndYear)[0] == NA_INTEGER) {
-		LogError(logfp, LOGFATAL, "%s: Ending year not found.", MyFileName);
+		LogError(&LogInfo, LOGFATAL, "%s: Ending year not found.", MyFileName);
 	}
 	if (INTEGER(EndYear)[0] < 0) {
-		LogError(logfp, LOGFATAL, "%s: Negative ending year (%d)", MyFileName, INTEGER(EndYear)[0]);
+		LogError(&LogInfo, LOGFATAL, "%s: Negative ending year (%d)", MyFileName, INTEGER(EndYear)[0]);
 	}
 	m->endyr = INTEGER(EndYear)[0];
 	if (m->endyr < m->startyr) {
-		LogError(logfp, LOGFATAL, "%s: Start Year > End Year", MyFileName);
+		LogError(&LogInfo, LOGFATAL, "%s: Start Year > End Year", MyFileName);
 	}
 
 	PROTECT(StartStart = GET_SLOT(SW_MDL, install("FDOFY")));
@@ -154,7 +155,7 @@ void onSet_SW_MDL(SEXP SW_MDL) {
 			m->isnorth = TRUE;
 		}
 		strcat(errstr, "Continuing.\n");
-		LogError(logfp, LOGWARN, errstr);
+		LogError(&LogInfo, LOGWARN, errstr);
 	}
 
 	m->startstart += ((m->isnorth) ? DAYFIRST_NORTH : DAYFIRST_SOUTH) - 1;

@@ -40,7 +40,6 @@
 # in any order. For example: 'TIMESTEP mo wk' will output for month and week
 #
 
-OUTSEP c
 TIMESTEP dy wk mo yr # must be lowercase
 
 #         KEY     SUMTYPE   PERIOD   START END FILENAME_PREFIX      DESCRIPTION

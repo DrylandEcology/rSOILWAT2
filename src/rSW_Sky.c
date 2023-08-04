@@ -22,9 +22,10 @@
 #include "SOILWAT2/include/SW_Defines.h"
 #include "SOILWAT2/include/SW_Files.h"
 
-#include "SOILWAT2/include/SW_Weather.h" // externs `SW_Weather`
-#include "SOILWAT2/include/SW_Sky.h" // externs `SW_Sky`
+#include "SOILWAT2/include/SW_Weather.h"
+#include "SOILWAT2/include/SW_Sky.h"
 #include "rSW_Sky.h"
+#include "SW_R_lib.h"
 
 #include <R.h>
 #include <Rinternals.h>
@@ -44,7 +45,7 @@ static char *MyFileName;
 SEXP onGet_SW_SKY(void) {
 	int i;
 
-	SW_SKY *v = &SW_Sky;
+	SW_SKY *v = &SoilWatAll.Sky;
 	SEXP swCloud,SW_SKY;
 	SEXP Cloud;
 	SEXP Cloud_names, Cloud_names_x, Cloud_names_y;
@@ -88,12 +89,12 @@ SEXP onGet_SW_SKY(void) {
 
 void onSet_SW_SKY(SEXP sxp_SW_SKY) {
 	int i, k = 5;
-	SW_SKY *v = &SW_Sky;
+	SW_SKY *v = &SoilWatAll.Sky;
 	RealD *p_Cloud;
 	PROTECT(sxp_SW_SKY);
 	p_Cloud = REAL(GET_SLOT(sxp_SW_SKY, install("Cloud")));
 
-	MyFileName = SW_F_name(eSky);
+	MyFileName = PathInfo.InFiles[eSky];
 
 	for (i = 0; i < 12; i++) { //i=columns
 		v->cloudcov[i] = p_Cloud[0 + k * i];

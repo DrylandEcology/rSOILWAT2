@@ -18,7 +18,7 @@ vegetation production parameter information.
 #include <stdlib.h>
 #include <string.h>
 
-#include "SOILWAT2/include/generic.h" // externs `EchoInits`
+#include "SOILWAT2/include/generic.h"
 #include "SOILWAT2/include/filefuncs.h"
 #include "SOILWAT2/include/Times.h"
 #include "SOILWAT2/include/myMemory.h"
@@ -26,8 +26,9 @@ vegetation production parameter information.
 #include "SOILWAT2/include/SW_Defines.h"
 #include "SOILWAT2/include/SW_Files.h"
 
-#include "SOILWAT2/include/SW_VegProd.h" // externs `SW_VegProd`
+#include "SOILWAT2/include/SW_VegProd.h"
 #include "rSW_VegProd.h"
+#include "SW_R_lib.h"
 
 #include <R.h>
 #include <Rinternals.h>
@@ -61,7 +62,7 @@ char *cMonths[] = {
 
 SEXP onGet_SW_VPD(void) {
 	int i;
-	SW_VEGPROD *v = &SW_VegProd;
+	SW_VEGPROD *v = &SoilWatAll.VegProd;
 	SEXP swProd;
 	SEXP VegProd;
 
@@ -415,7 +416,7 @@ SEXP onGet_SW_VPD(void) {
 
 void onSet_SW_VPD(SEXP SW_VPD) {
 	int i;
-	SW_VEGPROD *v = &SW_VegProd;
+	SW_VEGPROD *v = &SoilWatAll.VegProd;
 
     SEXP veg_method;
 	SEXP VegComp;
@@ -437,7 +438,7 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 	SEXP CO2Coefficients;
 	RealD *p_Grasslands, *p_Shrublands, *p_Forest, *p_Forb;
 
-	MyFileName = SW_F_name(eVegProd);
+	MyFileName = PathInfo.InFiles[eVegProd];
 
     PROTECT(veg_method = GET_SLOT(SW_VPD, install(cVegProd_names[0])));
     v->veg_method = INTEGER(veg_method)[0];
@@ -563,12 +564,12 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 
 	// getting critSoilWater for use with SWA and get_critical_rank()
 	// critSoilWater goes tree, shrub, forb, grass
-	SW_VegProd.critSoilWater[0] = REAL(CSWP)[2];
-	SW_VegProd.critSoilWater[1] = REAL(CSWP)[1];
-	SW_VegProd.critSoilWater[2] = REAL(CSWP)[3];
-	SW_VegProd.critSoilWater[3] = REAL(CSWP)[0];
+	v->critSoilWater[0] = REAL(CSWP)[2];
+	v->critSoilWater[1] = REAL(CSWP)[1];
+	v->critSoilWater[2] = REAL(CSWP)[3];
+	v->critSoilWater[3] = REAL(CSWP)[0];
 
-	get_critical_rank();
+	get_critical_rank(&SoilWatAll.VegProd);
 
 	PROTECT(MonthlyVeg = GET_SLOT(SW_VPD, install(cVegProd_names[12])));
 	PROTECT(Grasslands = VECTOR_ELT(MonthlyVeg, SW_GRASS));
@@ -623,10 +624,11 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 	v->veg[SW_FORBS].co2_wue_coeff2 = REAL(CO2Coefficients)[15];
 
 
-  SW_VPD_fix_cover();
+  SW_VPD_fix_cover(&SoilWatAll.VegProd, &LogInfo);
 
 	if (EchoInits)
-		_echo_VegProd();
+		_echo_VegProd(SoilWatAll.VegProd.veg, SoilWatAll.VegProd.bare_cov,
+					  &LogInfo);
 
 	UNPROTECT(18);
 }
@@ -721,7 +723,7 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
     estimatePotNatVegComposition(final_MAT_C, final_MAP_cm, final_MonTemp_C,
           final_MonPPT_cm, inputValues_D, final_shrubLimit, final_SumGrassesFraction, C4Variables,
           final_fill_empty_with_BareGround, final_isNorth, final_warn_extrapolation,
-          final_fix_bareGround, grasses, RelAbundanceL0, RelAbundanceL1);
+          final_fix_bareGround, grasses, RelAbundanceL0, RelAbundanceL1, &LogInfo);
 
     for(index = 0; index < 8; index++) {
         REAL(final_RelAbundanceL0)[index] = RelAbundanceL0[index];
