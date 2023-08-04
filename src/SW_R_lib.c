@@ -383,7 +383,7 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
   #ifdef RSWDEBUG
   if (debug) swprintf(" run SOILWAT2 ...");
   #endif
-	SW_CTL_main(&SoilWatAll, SoilWatOutputPtrs, &PathInfo, &LogInfo);
+	SW_CTL_main(&SoilWatAll, SoilWatOutputPtrs, &LogInfo);
 
    // de-allocate all memory, but let R handle `p_OUT`
   #ifdef RSWDEBUG
