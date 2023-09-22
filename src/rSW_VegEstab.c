@@ -82,7 +82,7 @@ void onSet_SW_VES(SEXP VES) {
 	PROTECT(count = GET_SLOT(VES,install("count")));
 
 	if (LOGICAL(use)[0] == FALSE) {
-		//LogError(logfp, LOGNOTE, "Establishment not used.\n");
+		//LogError(logfp, LOGWARN, "Establishment not used.\n");
 		SoilWatAll.VegEstab.use = FALSE;
 	} else {
 		nSPPS = INTEGER(count)[0];
@@ -97,13 +97,13 @@ void onSet_SW_VES(SEXP VES) {
 	}
 
 	if (EchoInits)
-		LogError(&LogInfo, LOGNOTE, "Establishment not used.\n");
+		LogError(&LogInfo, LOGWARN, "Establishment not used.\n");
 
 	SW_VegEstab_construct(&SoilWatAll.VegEstab, &LogInfo);
 
 	if (EchoInits)
 		_echo_VegEstab(SoilWatAll.Site.width, SoilWatAll.VegEstab.parms,
-					   SoilWatAll.VegEstab.count, &LogInfo);
+					   SoilWatAll.VegEstab.count);
 
 	UNPROTECT(2);
 }
@@ -203,7 +203,7 @@ void onSet_SW_VES_spp(SEXP SPP, IntU i) {
 	strcpy(v->sppFileName, CHAR(STRING_ELT(fileName,i)) );
 	/* check for valid name first */
 	if (strlen(CHAR(STRING_ELT(Name,i))) > MAX_SPECIESNAMELEN) {
-		LogError(&LogInfo, LOGFATAL, "Species name too long (> 4 chars).\n\tTry again.\n");
+		LogError(&LogInfo, LOGERROR, "Species name too long (> 4 chars).\n\tTry again.\n");
 	} else {
 		strcpy(v->sppname, CHAR(STRING_ELT(Name,i)) );
 	}

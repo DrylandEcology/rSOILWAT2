@@ -121,7 +121,7 @@ void onSet_SW_SWC(SEXP SWC) {
 	v->hist.method = INTEGER(swcMethod)[0];
 
 	if (v->hist.method < 1 || v->hist.method > 2) {
-		LogError(&LogInfo, LOGFATAL, "swcsetup.in : Invalid swc adjustment method.");
+		LogError(&LogInfo, LOGERROR, "swcsetup.in : Invalid swc adjustment method.");
 	}
 	v->hist.yr.last = SoilWatAll.Model.endyr;
 	v->hist.yr.total = v->hist.yr.last - v->hist.yr.first + 1;
@@ -153,7 +153,8 @@ SEXP onGet_SW_SWC_hists(void) {
 }
 
 SEXP onGet_SW_SWC_hist(TimeInt year) {
-  sw_error(-1, "'onGet_SW_SWC_hist' is currently not functional.\n");
+    LogError(&LogInfo, LOGERROR,
+             "'onGet_SW_SWC_hist' is currently not functional.\n");
 
 	int i, j = 0;
 	SW_SOILWAT *v = &SoilWatAll.SoilWat;
@@ -190,7 +191,8 @@ SEXP onGet_SW_SWC_hist(TimeInt year) {
 }
 
 void onSet_SW_SWC_hist(void) {
-  sw_error(-1, "'onSet_SW_SWC_hist' is currently not functional.\n");
+    LogError(&LogInfo, LOGERROR,
+             "'onSet_SW_SWC_hist' is currently not functional.\n");
 
 	int i, j = 0;
 	SW_SOILWAT *v = &SoilWatAll.SoilWat;

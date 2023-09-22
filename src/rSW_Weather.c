@@ -24,6 +24,7 @@
 #include "SOILWAT2/include/SW_Model.h"
 #include "SOILWAT2/include/SW_Markov.h"
 #include "SOILWAT2/include/SW_Sky.h"
+#include "SOILWAT2/include/SW_Main_lib.h"
 
 #include "SOILWAT2/include/SW_Weather.h"
 #include "rSW_Weather.h"
@@ -279,7 +280,7 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 	if (SW_Weather.generateWeatherMethod != 2 && SW_Model.startyr < w->yr.first) {
 		LogError(
 			logfp,
-			LOGFATAL,
+			LOGERROR,
 			"%s : Model year (%d) starts before weather files (%d)"
 				" and weather generator turned off.\n"
 				" Please synchronize the years or set up the weather generator files",
@@ -447,7 +448,7 @@ void onSet_WTH_DATA(void) {
   SoilWatAll.Weather.startYear = SoilWatAll.Model.startyr;
 
   // Allocate new `allHist` (based on current `SW_Weather.n_years`)
-  allocateAllWeather(&SoilWatAll.Weather);
+  allocateAllWeather(&SoilWatAll.Weather, &LogInfo);
 
 
   // Equivalent to `readAllWeather()`:
@@ -567,7 +568,7 @@ static void rSW2_set_weather_hist(
     if (nrows(yrWData) != numDaysYear) {
       LogError(
         &LogInfo,
-        LOGFATAL,
+        LOGERROR,
         "Weather data (year %d): "
         "expected %d rows (had %d).\n",
         year,
@@ -606,7 +607,7 @@ static void rSW2_set_weather_hist(
         if (doy != p_yrWData[doy + numDaysYear * 0] - 1) {
             LogError(
                 &LogInfo,
-                LOGFATAL,
+                LOGERROR,
                 "Weather data (year %d): "
                 "day of year out of range (%d), expected: %d.\n",
                 year,
@@ -868,7 +869,8 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     );
 
     // Allocate memory of structs for climate on SOILWAT side
-    allocateClimateStructs(numYears, &climateOutput, &climateAverages);
+    allocateClimateStructs(numYears, &climateOutput, &climateAverages,
+                           &LogInfo);
 
     // Calculate climate variables
     calcSiteClimate(allHist, SW_Model->cum_monthdays, SW_Model->days_in_month,
@@ -956,6 +958,8 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
         free(allHist[year]);
     }
     free(allHist);
+
+    sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
 
     return res;
 

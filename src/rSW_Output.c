@@ -27,6 +27,7 @@
 #include "SOILWAT2/include/SW_Defines.h"
 #include "SOILWAT2/include/SW_Files.h"
 #include "SOILWAT2/include/SW_Site.h"
+#include "SOILWAT2/include/SW_Main_lib.h"
 
 #include "SOILWAT2/include/SW_Output.h" // externs many variables
 #include "SOILWAT2/include/SW_Output_outarray.h" // for function `SW_OUT_set_nrow`
@@ -116,7 +117,7 @@ void onSet_SW_OUT(SEXP OUT) {
 	}
 
 	if (EchoInits)
-		_echo_outputs(&SoilWatAll, &LogInfo);
+		_echo_outputs(&SoilWatAll);
 
 	UNPROTECT(3);
 
@@ -366,6 +367,12 @@ SEXP onGetOutput(SEXP inputData) {
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" ... done. \n");
 	#endif
+
+    if(LogInfo.stopRun) {
+        // The only message could be an error from this function,
+        // so no need to use `sw_write_logs()`
+        sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
+    }
 
 	return swOutput_Object;
 }

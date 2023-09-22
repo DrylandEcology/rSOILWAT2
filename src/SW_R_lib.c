@@ -135,7 +135,7 @@ void setupSOILWAT2(SEXP inputOptions) {
 	if (argc > 7) {
 		// fatal condition because argv is hard-coded to be of length 7; increase size of
 		// argv if more command-line options are added to SOILWAT2 in the future
-		sw_error(-1, "length(inputOptions) must be <= 7.");
+		LogError(&LogInfo, LOGERROR, "length(inputOptions) must be <= 7.");
 	}
 	for (i = 0; i < argc; i++) {
 		argv[i] = (char *) CHAR(STRING_ELT(inputOptions, i));
@@ -145,6 +145,7 @@ void setupSOILWAT2(SEXP inputOptions) {
 	if (debug) swprintf("Set call arguments\n");
   #endif
 
+    SW_CTL_init_ptrs(&SoilWatAll, PathInfo.InFiles);
 	sw_init_args(argc, argv, &QuietMode, &EchoInits,
                &PathInfo.InFiles[eFirst], &LogInfo);
 
@@ -166,7 +167,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   int debug = 0;
   #endif
 
-  LogInfo.logged = FALSE;
+  sw_init_logs(NULL, &LogInfo);
   sw_quiet(quiet);
 
   #ifdef RSWDEBUG
@@ -301,6 +302,12 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   #endif
 
   UNPROTECT(5);
+
+  if(LogInfo.logged) {
+    sw_write_logs(FALSE, &LogInfo); // Note: `FALSE` is not used
+    sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
+  }
+
   return SW_DataList;
 }
 
@@ -318,7 +325,7 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
   int debug = 0;
   #endif
 
-	LogInfo.logged = FALSE;
+	sw_init_logs(NULL, &LogInfo);
 	sw_quiet(quiet);
 
 	if (isNull(inputData)) {
@@ -390,6 +397,11 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
   if (debug) swprintf(" clean up ...");
   #endif
 	SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
+
+    if(LogInfo.logged) {
+        sw_write_logs(current_sw_quiet, &LogInfo); // Note: `FALSE` is not used
+        sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
+    }
 
   #ifdef RSWDEBUG
   if (debug) swprintf(" completed.\n");
@@ -488,6 +500,11 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   PROTECT(res = onGet_WTH_DATA());
 
   UNPROTECT(1);
+
+  if(LogInfo.logged) {
+    sw_write_logs(FALSE, &LogInfo); // Note: `FALSE` is not used
+    sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
+  }
   return res;
 }
 

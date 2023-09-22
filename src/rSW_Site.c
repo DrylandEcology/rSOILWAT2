@@ -129,7 +129,7 @@ static void onSet_SW_LYR(SEXP SW_LYR) {
 	if (columns != 12) {
 		LogError(
 			&LogInfo,
-			LOGFATAL,
+			LOGERROR,
 			"%s : Too few columns in layers specified (%d).\n",
 			MyFileName, columns
 		);
@@ -167,7 +167,7 @@ static void onSet_SW_LYR(SEXP SW_LYR) {
 		if (lyrno >= MAX_LAYERS) {
 			LogError(
 				&LogInfo,
-				LOGFATAL,
+				LOGERROR,
 				"%s : Too many layers specified (%d).\n"
 				"Maximum number of layers is %d\n",
 				MyFileName, lyrno + 1, MAX_LAYERS
@@ -218,7 +218,7 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp) {
 	if (ncols(SW_SWRCp) != SWRC_PARAM_NMAX) {
 		LogError(
 			&LogInfo,
-			LOGFATAL,
+			LOGERROR,
 			"%s : Bad number of SWRC parameters %d -- must be %d.\n",
 			MyFileName, ncols(SW_SWRCp), SWRC_PARAM_NMAX
 		);
@@ -228,7 +228,7 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp) {
 	if (nrows(SW_SWRCp) != SoilWatAll.Site.n_layers) {
 		LogError(
 			&LogInfo,
-			LOGFATAL,
+			LOGERROR,
 			"%s : Number of layers with SWRC parameters (%d) "
 			"must match number of soil layers (%d)\n",
 			MyFileName, nrows(SW_SWRCp), SoilWatAll.Site.n_layers
@@ -630,7 +630,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 		}
 	}
 	if (too_many_regions) {
-		LogError(&LogInfo, LOGFATAL, "siteparam.in : Number of transpiration regions"
+		LogError(&LogInfo, LOGERROR, "siteparam.in : Number of transpiration regions"
 				" exceeds maximum allowed (%d > %d)\n", v->n_transp_rgn, MAX_TRANSP_REGIONS);
 	}
 	#ifdef RSWDEBUG
@@ -640,7 +640,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	/* check for any discontinuities (reversals) in the transpiration regions */
 	for (r = 1; r < v->n_transp_rgn; r++) {
 		if (v->_TranspRgnBounds[r - 1] >= v->_TranspRgnBounds[r]) {
-			LogError(&LogInfo, LOGFATAL, "siteparam.in : Discontinuity/reversal in transpiration regions.\n");
+			LogError(&LogInfo, LOGERROR, "siteparam.in : Discontinuity/reversal in transpiration regions.\n");
 		}
 	}
 

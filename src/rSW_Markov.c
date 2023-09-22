@@ -72,7 +72,7 @@ void onSet_MKV(SEXP MKV) {
   if (!onSet_MKV_prob(MKV_prob) && SoilWatAll.Weather.generateWeatherMethod == 2) {
     LogError(
       &LogInfo,
-      LOGFATAL,
+      LOGERROR,
       "Markov weather generator: "
       "rSOILWAT2 failed to pass `MKV_prob` values to SOILWAT2.\n"
     );
@@ -81,7 +81,7 @@ void onSet_MKV(SEXP MKV) {
   if (!onSet_MKV_conv(MKV_conv) && SoilWatAll.Weather.generateWeatherMethod == 2) {
     LogError(
       &LogInfo,
-      LOGFATAL,
+      LOGERROR,
       "Markov weather generator: "
       "rSOILWAT2 failed to pass `MKV_conv` values to SOILWAT2.\n"
     );

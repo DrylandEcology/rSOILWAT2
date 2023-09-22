@@ -164,7 +164,7 @@ void onSet_swCarbon(SEXP object) {
   // Check that we have enough data
   if (i - 1 + n_sim > n_input)
   {
-    LogError(&LogInfo, LOGFATAL, "CO2ppm object does not contain data for every year");
+    LogError(&LogInfo, LOGERROR, "CO2ppm object does not contain data for every year");
   }
 
   // Copy CO2 concentration values to SOILWAT variable
