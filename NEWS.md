@@ -1,3 +1,6 @@
+# rSOILWAT2 v6.0.3
+
+
 # rSOILWAT2 v6.0.2
 * This version produces the same output as the previous version.
 * Update `SOILWAT2` to v7.1.0 which prepares for thread-safety and reentrancy
