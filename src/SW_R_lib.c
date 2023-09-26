@@ -303,8 +303,11 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
 
   UNPROTECT(5);
 
-  if(LogInfo.logged) {
+  if(LogInfo.numWarnings > 0) {
     sw_write_logs(FALSE, &LogInfo); // Note: `FALSE` is not used
+  }
+
+  if(LogInfo.stopRun) {
     sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
   }
 
@@ -398,8 +401,11 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
   #endif
 	SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
 
-    if(LogInfo.logged) {
-        sw_write_logs(current_sw_quiet, &LogInfo); // Note: `FALSE` is not used
+    if(LogInfo.numWarnings > 0) {
+        sw_write_logs(FALSE, &LogInfo); // Note: `FALSE` is not used
+    }
+
+    if(LogInfo.stopRun) {
         sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
     }
 
@@ -501,8 +507,11 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
 
   UNPROTECT(1);
 
-  if(LogInfo.logged) {
+  if(LogInfo.numWarnings > 0) {
     sw_write_logs(FALSE, &LogInfo); // Note: `FALSE` is not used
+  }
+
+  if(LogInfo.stopRun) {
     sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
   }
   return res;
