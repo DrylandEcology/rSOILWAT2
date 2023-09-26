@@ -424,7 +424,7 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
-
+  sw_init_logs(NULL, &LogInfo);
 
   #ifdef RSWDEBUG
   if (debug) swprintf("\n'rSW2_processAllWeather': data preparation: ");
