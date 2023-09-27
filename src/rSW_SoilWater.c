@@ -117,11 +117,16 @@ void onSet_SW_SWC(SEXP SWC) {
 	//	Mem_Free(v->hist.file_prefix);
 	//}
 	v->hist.file_prefix = (char *) Str_Dup(CHAR(STRING_ELT(swcFilePrefix,0)), &LogInfo);
+    if(LogInfo.stopRun) {
+        return; // Exit function prematurely due to error
+    }
+
 	v->hist.yr.first = INTEGER(swcFirstYear)[0];
 	v->hist.method = INTEGER(swcMethod)[0];
 
 	if (v->hist.method < 1 || v->hist.method > 2) {
 		LogError(&LogInfo, LOGERROR, "swcsetup.in : Invalid swc adjustment method.");
+        return; // Exit function prematurely due to error
 	}
 	v->hist.yr.last = SoilWatAll.Model.endyr;
 	v->hist.yr.total = v->hist.yr.last - v->hist.yr.first + 1;
@@ -141,6 +146,10 @@ SEXP onGet_SW_SWC_hists(void) {
 	for (year = SoilWatAll.Model.startyr; year <= SoilWatAll.Model.endyr; year++) {
 		if (SoilWatAll.SoilWat.hist_use && year >= SoilWatAll.SoilWat.hist.yr.first) {
 			_read_swc_hist(&SoilWatAll.SoilWat.hist, year, &LogInfo);
+            if(LogInfo.stopRun) {
+                return NULL; // Exit function prematurely due to error
+            }
+
 			SET_VECTOR_ELT(SWC_hists, i, onGet_SW_SWC_hist(year));
 			snprintf(cYear, sizeof cYear, "%4d", year);
 			SET_STRING_ELT(SWC_hists_names, i, mkChar(cYear));
@@ -155,6 +164,7 @@ SEXP onGet_SW_SWC_hists(void) {
 SEXP onGet_SW_SWC_hist(TimeInt year) {
     LogError(&LogInfo, LOGERROR,
              "'onGet_SW_SWC_hist' is currently not functional.\n");
+    return NULL; // Exit function prematurely due to error
 
 	int i, j = 0;
 	SW_SOILWAT *v = &SoilWatAll.SoilWat;
@@ -193,6 +203,7 @@ SEXP onGet_SW_SWC_hist(TimeInt year) {
 void onSet_SW_SWC_hist(void) {
     LogError(&LogInfo, LOGERROR,
              "'onSet_SW_SWC_hist' is currently not functional.\n");
+    return; // Exit function prematurely due to error
 
 	int i, j = 0;
 	SW_SOILWAT *v = &SoilWatAll.SoilWat;

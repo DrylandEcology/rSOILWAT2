@@ -136,6 +136,7 @@ void setupSOILWAT2(SEXP inputOptions) {
 		// fatal condition because argv is hard-coded to be of length 7; increase size of
 		// argv if more command-line options are added to SOILWAT2 in the future
 		LogError(&LogInfo, LOGERROR, "length(inputOptions) must be <= 7.");
+        return; // Exit function prematurely due to error
 	}
 	for (i = 0; i < argc; i++) {
 		argv[i] = (char *) CHAR(STRING_ELT(inputOptions, i));
@@ -148,12 +149,19 @@ void setupSOILWAT2(SEXP inputOptions) {
     SW_CTL_init_ptrs(&SoilWatAll, PathInfo.InFiles);
 	sw_init_args(argc, argv, &QuietMode, &EchoInits,
                &PathInfo.InFiles[eFirst], &LogInfo);
+    if(LogInfo.stopRun) {
+        return; // Exit function prematurely due to error
+    }
 
   #ifdef RSWDEBUG
   if (debug) swprintf("Initialize SOILWAT ...");
 	#endif
 
 	SW_CTL_setup_model(&SoilWatAll, SoilWatOutputPtrs, &PathInfo, &LogInfo);
+    if(LogInfo.stopRun) {
+        return; // Exit function prematurely due to error
+    }
+
 	rSW_CTL_setup_model2();
 }
 
@@ -192,12 +200,18 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   #endif
   SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
     SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &LogInfo);
+  if(LogInfo.stopRun) {
+    goto report;
+  }
 
   // initialize simulation run (based on user inputs)
   #ifdef RSWDEBUG
   if (debug) swprintf(" init simulation run ...\n");
   #endif
   SW_CTL_init_run(&SoilWatAll, &LogInfo);
+  if(LogInfo.stopRun) {
+    goto report;
+  }
 
   #ifdef RSWDEBUG
   if (debug) {
@@ -295,21 +309,24 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   #ifdef RSWDEBUG
   if (debug) swprintf(" > de-allocate most memory; \n");
   #endif
-  SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
+
+  report: {
+    SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
+
+    if(LogInfo.numWarnings > 0) {
+        sw_write_logs(FALSE, &LogInfo); // Note: `FALSE` is not used
+    }
+
+    if(LogInfo.stopRun) {
+        sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
+    }
+  }
 
   #ifdef RSWDEBUG
   if (debug) swprintf(" onGetInputDataFromFiles completed.\n");
   #endif
 
   UNPROTECT(5);
-
-  if(LogInfo.numWarnings > 0) {
-    sw_write_logs(FALSE, &LogInfo); // Note: `FALSE` is not used
-  }
-
-  if(LogInfo.stopRun) {
-    sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
-  }
 
   return SW_DataList;
 }
@@ -371,12 +388,18 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 	#endif
 	SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
     SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &LogInfo);
+    if(LogInfo.stopRun) {
+        goto report;
+    }
 
 	// initialize simulation run (based on user inputs)
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" init simulation run ...");
 	#endif
 	SW_CTL_init_run(&SoilWatAll, &LogInfo);
+    if(LogInfo.stopRun) {
+        goto report;
+    }
 
   // initialize output
   #ifdef RSWDEBUG
@@ -386,6 +409,10 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
                 SoilWatAll.VegEstab.count, SoilWatAll.GenOutput.ncol_OUT);
 	SW_OUT_set_colnames(SoilWatAll.Site.n_layers, SoilWatAll.VegEstab.parms,
     SoilWatAll.GenOutput.ncol_OUT, SoilWatAll.GenOutput.colnames_OUT, &LogInfo);
+    if(LogInfo.stopRun) {
+        goto report;
+    }
+
 	PROTECT(outputData = onGetOutput(inputData));
 	setGlobalrSOILWAT2_OutputVariables(outputData);
 
@@ -399,6 +426,8 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
   #ifdef RSWDEBUG
   if (debug) swprintf(" clean up ...");
   #endif
+
+  report: {
 	SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
 
     if(LogInfo.numWarnings > 0) {
@@ -408,6 +437,7 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
     if(LogInfo.stopRun) {
         sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
     }
+  }
 
   #ifdef RSWDEBUG
   if (debug) swprintf(" completed.\n");
@@ -455,6 +485,9 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   }
 
   SW_CTL_setup_model(&SoilWatAll, SoilWatOutputPtrs, &PathInfo, &LogInfo);
+  if(LogInfo.stopRun) {
+    goto report;
+  }
 
   // `onSet_WTH_DATA()` requires correct `endyr` and `startyr` of `SW_Model`
   #ifdef RSWDEBUG
@@ -501,19 +534,23 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
     SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &LogInfo);
 
+  report: {
+    if(LogInfo.numWarnings > 0) {
+        sw_write_logs(FALSE, &LogInfo); // Note: `FALSE` is not used
+    }
+
+    if(LogInfo.stopRun) {
+        SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
+        sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
+    }
+  }
 
   // Return processed weather data
   PROTECT(res = onGet_WTH_DATA());
 
   UNPROTECT(1);
 
-  if(LogInfo.numWarnings > 0) {
-    sw_write_logs(FALSE, &LogInfo); // Note: `FALSE` is not used
-  }
 
-  if(LogInfo.stopRun) {
-    sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
-  }
   return res;
 }
 
@@ -591,6 +628,9 @@ SEXP rSW2_readAllWeatherFromDisk(
     SoilWatAll.Weather.dailyInputFlags,
     &LogInfo
   );
+  if(LogInfo.stopRun) {
+    return NULL; // Exit function prematurely due to error
+  }
 
   // no monthly scaling
   for (i = 0; i < MAX_MONTHS; i++) {
@@ -611,6 +651,9 @@ SEXP rSW2_readAllWeatherFromDisk(
   #endif
   // using global variables: SW_Weather, SW_Model, SW_Sky
   SW_WTH_read(&SoilWatAll.Weather, &SoilWatAll.Sky, &SoilWatAll.Model, &LogInfo);
+  if(LogInfo.stopRun) {
+    return NULL; // Exit function prematurely due to error
+  }
 
   // Finalize daily weather (weather generator & monthly scaling)
   #ifdef RSWDEBUG
@@ -618,6 +661,9 @@ SEXP rSW2_readAllWeatherFromDisk(
   #endif
   SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
     SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &LogInfo);
+  if(LogInfo.stopRun) {
+    return NULL; // Exit function prematurely due to error
+  }
 
 
   // Return processed weather data

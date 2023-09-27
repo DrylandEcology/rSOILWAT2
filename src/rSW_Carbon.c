@@ -165,6 +165,7 @@ void onSet_swCarbon(SEXP object) {
   if (i - 1 + n_sim > n_input)
   {
     LogError(&LogInfo, LOGERROR, "CO2ppm object does not contain data for every year");
+    return; // Exit function prematurely due to error
   }
 
   // Copy CO2 concentration values to SOILWAT variable

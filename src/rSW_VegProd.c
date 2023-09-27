@@ -626,6 +626,9 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 
 
   SW_VPD_fix_cover(&SoilWatAll.VegProd, &LogInfo);
+  if(LogInfo.stopRun) {
+    return; // Exit function prematurely due to error
+  }
 
 	if (EchoInits)
 		_echo_VegProd(SoilWatAll.VegProd.veg, SoilWatAll.VegProd.bare_cov);
@@ -726,6 +729,9 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
           final_MonPPT_cm, inputValues_D, final_shrubLimit, final_SumGrassesFraction, C4Variables,
           final_fill_empty_with_BareGround, final_isNorth, final_warn_extrapolation,
           final_fix_bareGround, grasses, RelAbundanceL0, RelAbundanceL1, &local_LogInfo);
+    if(local_LogInfo.stopRun) {
+        goto report;
+    }
 
     for(index = 0; index < 8; index++) {
         REAL(final_RelAbundanceL0)[index] = RelAbundanceL0[index];
@@ -743,12 +749,15 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
 
     UNPROTECT(8);
 
-    if(local_LogInfo.numWarnings > 0) {
-        sw_write_logs(FALSE, &local_LogInfo); // Note: `FALSE` is not used
-    }
+    report: {
+        if(local_LogInfo.numWarnings > 0) {
+            sw_write_logs(FALSE, &local_LogInfo); // Note: `FALSE` is not used
+        }
 
-    if(local_LogInfo.stopRun) {
-        sw_check_exit(FALSE, &local_LogInfo); // Note: `FALSE` is not used
+        if(local_LogInfo.stopRun) {
+            SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
+            sw_check_exit(FALSE, &local_LogInfo); // Note: `FALSE` is not used
+        }
     }
 
     return res;

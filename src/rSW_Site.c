@@ -133,6 +133,7 @@ static void onSet_SW_LYR(SEXP SW_LYR) {
 			"%s : Too few columns in layers specified (%d).\n",
 			MyFileName, columns
 		);
+        return; // Exit function prematurely due to error
 	}
 
 	for (i = 0; i < j; i++) {
@@ -172,6 +173,7 @@ static void onSet_SW_LYR(SEXP SW_LYR) {
 				"Maximum number of layers is %d\n",
 				MyFileName, lyrno + 1, MAX_LAYERS
 			);
+            return; // Exit function prematurely due to error
 		}
 	}
 }
@@ -222,6 +224,7 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp) {
 			"%s : Bad number of SWRC parameters %d -- must be %d.\n",
 			MyFileName, ncols(SW_SWRCp), SWRC_PARAM_NMAX
 		);
+        return; // Exit function prematurely due to error
 	}
 
 	/* Check that we have `SW_Site.n_layers` */
@@ -233,6 +236,7 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp) {
 			"must match number of soil layers (%d)\n",
 			MyFileName, nrows(SW_SWRCp), SoilWatAll.Site.n_layers
 		);
+        return; // Exit function prematurely due to error
 	}
 
 	/* Copy values */
@@ -609,6 +613,9 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	PROTECT(swrc_flags = GET_SLOT(SW_SIT, install("swrc_flags")));
 	strcpy(v->site_swrc_name, CHAR(STRING_ELT(swrc_flags, 0)));
 	v->site_swrc_type = encode_str2swrc(v->site_swrc_name, &LogInfo);
+    if(LogInfo.stopRun) {
+        return; // Exit function prematurely due to error
+    }
 	strcpy(v->site_ptf_name, CHAR(STRING_ELT(swrc_flags, 1)));
 	v->site_ptf_type = encode_str2ptf(v->site_ptf_name);
 	PROTECT(has_swrcp = GET_SLOT(SW_SIT, install("has_swrcp")));
@@ -632,6 +639,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	if (too_many_regions) {
 		LogError(&LogInfo, LOGERROR, "siteparam.in : Number of transpiration regions"
 				" exceeds maximum allowed (%d > %d)\n", v->n_transp_rgn, MAX_TRANSP_REGIONS);
+        return; // Exit function prematurely due to error
 	}
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" > 'transp-regions'");
@@ -641,6 +649,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	for (r = 1; r < v->n_transp_rgn; r++) {
 		if (v->_TranspRgnBounds[r - 1] >= v->_TranspRgnBounds[r]) {
 			LogError(&LogInfo, LOGERROR, "siteparam.in : Discontinuity/reversal in transpiration regions.\n");
+            return; // Exit function prematurely due to error
 		}
 	}
 

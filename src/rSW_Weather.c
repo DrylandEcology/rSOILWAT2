@@ -449,6 +449,9 @@ void onSet_WTH_DATA(void) {
 
   // Allocate new `allHist` (based on current `SW_Weather.n_years`)
   allocateAllWeather(&SoilWatAll.Weather, &LogInfo);
+  if(LogInfo.stopRun) {
+    return; // Exit function prematurely due to error
+  }
 
 
   // Equivalent to `readAllWeather()`:
@@ -575,7 +578,7 @@ static void rSW2_set_weather_hist(
         numDaysYear,
         nrows(yrWData)
       );
-      return;
+      return; // Exit function prematurely due to error
     }
 
     // Suitable year among rSOILWAT2 weather list located
@@ -614,6 +617,7 @@ static void rSW2_set_weather_hist(
                 p_yrWData[doy + numDaysYear * 0],
                 doy + 1
             );
+            return; // Exit function prematurely due to error
         }
 
         // Maximum daily temperature [C]
@@ -871,6 +875,9 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     // Allocate memory of structs for climate on SOILWAT side
     allocateClimateStructs(numYears, &climateOutput, &climateAverages,
                            &LogInfo);
+    if(LogInfo.stopRun) {
+        goto report;
+    }
 
     // Calculate climate variables
     calcSiteClimate(allHist, SW_Model->cum_monthdays, SW_Model->days_in_month,
@@ -959,7 +966,12 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     }
     free(allHist);
 
-    sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
+    report: {
+        if(LogInfo.stopRun) {
+            SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
+            sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
+        }
+    }
 
     return res;
 

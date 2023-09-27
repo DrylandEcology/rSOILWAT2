@@ -60,6 +60,7 @@ void rSW_CTL_obtain_inputs(Bool from_files) {
 
   if (from_files) {
     SW_CTL_read_inputs_from_disk(&SoilWatAll, &PathInfo, &LogInfo);
+    return; // Exit function prematurely due to error
 
   } else { //Use R data to set the data
     #ifdef RSWDEBUG

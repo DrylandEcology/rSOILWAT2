@@ -104,11 +104,17 @@ void onSet_SW_OUT(SEXP OUT) {
 
 		if (msg_type > 0) {
 			LogError(&LogInfo, msg_type, "%s", msg);
+            if(LogInfo.stopRun) {
+                return; // Exit function prematurely due to error
+            }
 			continue;
 		}
 
 		if (SoilWatAll.Output[k].use) {
 			SoilWatAll.Output[k].outfile = Str_Dup(CHAR(STRING_ELT(outfile, k)), &LogInfo);
+            if(LogInfo.stopRun) {
+                return; // Exit function prematurely due to error
+            }
 
 			ForEachOutPeriod(i) {
 				SoilWatAll.GenOutput.timeSteps[k][i] = timePeriods[k + i * SW_OUTNKEYS];
@@ -300,6 +306,10 @@ SEXP onGetOutput(SEXP inputData) {
 			PROTECT(stemp_KEY = NEW_OBJECT(swOutput_KEY));
 
 			SET_SLOT(stemp_KEY, install("Title"), mkString(Str_Dup(CHAR(STRING_ELT(outfile, k)), &LogInfo)));
+            if(LogInfo.stopRun) {
+                goto report;
+            }
+
 			SET_SLOT(stemp_KEY, install("Columns"), ScalarInteger(GenOut->ncol_OUT[k]));
 
 			PROTECT(rTimeStep = NEW_INTEGER(GenOut->used_OUTNPERIODS));
@@ -368,10 +378,14 @@ SEXP onGetOutput(SEXP inputData) {
 	if (debug) swprintf(" ... done. \n");
 	#endif
 
-    if(LogInfo.stopRun) {
-        // The only message could be an error from this function,
-        // so no need to use `sw_write_logs()`
-        sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
+    report: {
+        if(LogInfo.stopRun) {
+            SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
+
+            // The only message could be an error from this function,
+            // so no need to use `sw_write_logs()`
+            sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
+        }
     }
 
 	return swOutput_Object;

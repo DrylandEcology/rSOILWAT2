@@ -100,6 +100,9 @@ void onSet_SW_VES(SEXP VES) {
 		LogError(&LogInfo, LOGWARN, "Establishment not used.\n");
 
 	SW_VegEstab_construct(&SoilWatAll.VegEstab, &LogInfo);
+    if(LogInfo.stopRun) {
+        return; // Exit function prematurely due to error
+    }
 
 	if (EchoInits)
 		_echo_VegEstab(SoilWatAll.Site.width, SoilWatAll.VegEstab.parms,
@@ -179,6 +182,10 @@ void onSet_SW_VES_spp(SEXP SPP, IntU i) {
 	unsigned int count;
 
 	count = _new_species(&SoilWatAll.VegEstab, &LogInfo);
+    if(LogInfo.stopRun) {
+        return; // Exit function prematurely due to error
+    }
+
 	v = SoilWatAll.VegEstab.parms[count];
 
 	v->vegType = INTEGER(GET_SLOT(SPP, install("vegType")))[i];
