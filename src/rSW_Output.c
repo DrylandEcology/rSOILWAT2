@@ -368,11 +368,9 @@ SEXP onGetOutput(SEXP inputData) {
 	if (debug) swprintf(" ... done. \n");
 	#endif
 
-    if(LogInfo.stopRun) {
-        // The only message could be an error from this function,
-        // so no need to use `sw_write_logs()`
-        sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
-    }
+    // The only message could be an error from this function,
+    // so no need to use `sw_write_logs()`
+    sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
 
 	return swOutput_Object;
 }
