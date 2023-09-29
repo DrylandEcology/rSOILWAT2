@@ -812,7 +812,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     Bool dailyInputFlags[MAX_INPUT_COLUMNS];
     double cloudcov[MAX_MONTHS], windspeed[MAX_MONTHS], r_humidity[MAX_MONTHS];
 
-    SEXP res, monthlyMean, monthlyMax, monthlyMin, monthlyPPT, MAT_C, MAP_cm, vectorNames,
+    SEXP res = NULL, monthlyMean, monthlyMax, monthlyMin, monthlyPPT, MAT_C, MAP_cm, vectorNames,
     C4Variables, Cheatgrass, cnamesC4SEXP, cnamesCheatgrassSEXP;
 
     char *cnames[] = {"meanMonthlyTempC","minMonthlyTempC","maxMonthlyTempC",

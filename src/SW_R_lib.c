@@ -170,7 +170,7 @@ void setupSOILWAT2(SEXP inputOptions) {
   @brief Read inputs from SOILWAT2 input files on disk using SOILWAT2 code
 */
 SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
-  SEXP swInputData, SW_DataList, swLog, oRlogfile;
+  SEXP swInputData, SW_DataList = NULL, swLog, oRlogfile;
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
@@ -335,7 +335,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   - Copies output to R output variable
 */
 SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
-	SEXP outputData, swLog, oRlogfile;
+	SEXP outputData = NULL, swLog, oRlogfile;
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
