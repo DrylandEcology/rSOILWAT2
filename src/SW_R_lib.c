@@ -171,6 +171,7 @@ void setupSOILWAT2(SEXP inputOptions) {
 */
 SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   SEXP swInputData, SW_DataList = NULL, swLog, oRlogfile;
+  int numUnprotects = 5;
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
@@ -201,6 +202,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
     SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &LogInfo);
   if(LogInfo.stopRun) {
+    numUnprotects = 3;
     goto report;
   }
 
@@ -210,6 +212,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   #endif
   SW_CTL_init_run(&SoilWatAll, &LogInfo);
   if(LogInfo.stopRun) {
+    numUnprotects = 3;
     goto report;
   }
 
@@ -311,6 +314,8 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   #endif
 
   report: {
+    UNPROTECT(numUnprotects);
+
     SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
 
     sw_write_logs(FALSE, &LogInfo); // Note: `FALSE` is not used
@@ -320,8 +325,6 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   #ifdef RSWDEBUG
   if (debug) swprintf(" onGetInputDataFromFiles completed.\n");
   #endif
-
-  UNPROTECT(5);
 
   return SW_DataList;
 }
@@ -423,6 +426,8 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
   #endif
 
   report: {
+    UNPROTECT(3);
+
 	SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
 
     if(LogInfo.numWarnings > 0) {
@@ -436,8 +441,6 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
   if (debug) swprintf(" completed.\n");
   #endif
 
-	UNPROTECT(4);
-
 	return(outputData);
 }
 
@@ -449,7 +452,7 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
   uses imputation/weather generator to fill missing values
 */
 SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
-  SEXP res;
+  SEXP res = NULL;
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
@@ -527,6 +530,15 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
     SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &LogInfo);
 
+  if(LogInfo.stopRun) {
+    goto report;
+  }
+
+  // Return processed weather data
+  PROTECT(res = onGet_WTH_DATA());
+
+  UNPROTECT(1);
+
   report: {
     sw_write_logs(FALSE, &LogInfo); // Note: `FALSE` is not used
 
@@ -536,11 +548,6 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
 
     sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
   }
-
-  // Return processed weather data
-  PROTECT(res = onGet_WTH_DATA());
-
-  UNPROTECT(1);
 
 
   return res;
@@ -562,7 +569,7 @@ SEXP rSW2_readAllWeatherFromDisk(
   SEXP endYear,
   SEXP dailyInputFlags
 ) {
-  SEXP res;
+  SEXP res = NULL;
   int i;
 
   #ifdef RSWDEBUG
@@ -621,6 +628,7 @@ SEXP rSW2_readAllWeatherFromDisk(
     &LogInfo
   );
   if(LogInfo.stopRun) {
+    UNPROTECT(5); // Unprotect the five protected variables before exiting
     return NULL; // Exit function prematurely due to error
   }
 
@@ -644,6 +652,7 @@ SEXP rSW2_readAllWeatherFromDisk(
   // using global variables: SW_Weather, SW_Model, SW_Sky
   SW_WTH_read(&SoilWatAll.Weather, &SoilWatAll.Sky, &SoilWatAll.Model, &LogInfo);
   if(LogInfo.stopRun) {
+    UNPROTECT(5); // Unprotect the five protected variables before exiting
     return NULL; // Exit function prematurely due to error
   }
 
@@ -654,6 +663,7 @@ SEXP rSW2_readAllWeatherFromDisk(
   SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
     SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &LogInfo);
   if(LogInfo.stopRun) {
+    UNPROTECT(5); // Unprotect the five protected variables before exiting
     return NULL; // Exit function prematurely due to error
   }
 

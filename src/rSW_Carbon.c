@@ -164,6 +164,8 @@ void onSet_swCarbon(SEXP object) {
   // Check that we have enough data
   if (i - 1 + n_sim > n_input)
   {
+    UNPROTECT(1);
+
     LogError(&LogInfo, LOGERROR, "CO2ppm object does not contain data for every year");
     return; // Exit function prematurely due to error
   }

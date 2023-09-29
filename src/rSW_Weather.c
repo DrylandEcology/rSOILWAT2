@@ -807,7 +807,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     SW_MODEL *SW_Model = &SoilWatAll.Model;
 
     int numYears = asInteger(yearEnd) - asInteger(yearStart) + 1, year, calcSiteOutputNum = 10,
-    index;
+    index, numUnprotects = 12;
 
     Bool dailyInputFlags[MAX_INPUT_COLUMNS];
     double cloudcov[MAX_MONTHS], windspeed[MAX_MONTHS], r_humidity[MAX_MONTHS];
@@ -876,6 +876,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     allocateClimateStructs(numYears, &climateOutput, &climateAverages,
                            &LogInfo);
     if(LogInfo.stopRun) {
+        numUnprotects = 11;
         goto report;
     }
 
@@ -959,14 +960,14 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
 
     deallocateClimateStructs(&climateOutput, &climateAverages);
 
-    UNPROTECT(12);
-
     for(year = 0; year < numYears; year++) {
         free(allHist[year]);
     }
     free(allHist);
 
     report: {
+        UNPROTECT(numUnprotects);
+
         if(LogInfo.stopRun) {
             SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
             sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used

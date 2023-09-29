@@ -105,6 +105,7 @@ void onSet_SW_OUT(SEXP OUT) {
 		if (msg_type > 0) {
 			LogError(&LogInfo, msg_type, "%s", msg);
             if(LogInfo.stopRun) {
+                UNPROTECT(3); // Unprotect the three protected variables before exiting
                 return; // Exit function prematurely due to error
             }
 			continue;
@@ -113,6 +114,7 @@ void onSet_SW_OUT(SEXP OUT) {
 		if (SoilWatAll.Output[k].use) {
 			SoilWatAll.Output[k].outfile = Str_Dup(CHAR(STRING_ELT(outfile, k)), &LogInfo);
             if(LogInfo.stopRun) {
+                UNPROTECT(3); // Unprotect the three protected variables before exiting
                 return; // Exit function prematurely due to error
             }
 
@@ -247,7 +249,7 @@ void setGlobalrSOILWAT2_OutputVariables(SEXP outputData) {
 /* Experience has shown that generating the Output Data structure in R is slow compared to C
  * This will generate the OUTPUT data Structure and Names*/
 SEXP onGetOutput(SEXP inputData) {
-	int i, l, h;
+	int i, l, h, numUnprotects = 0;
 	OutKey k;
 	OutPeriod pd;
 	int *use;
@@ -298,6 +300,7 @@ SEXP onGetOutput(SEXP inputData) {
 		install("outfile")));
 
 	ForEachOutKey(k) {
+        numUnprotects = 4;
 		if (use[k]) {
 			#ifdef RSWDEBUG
 			if (debug) swprintf("%s (ncol = %d):", key2str[k], GenOut->ncol_OUT[k]);
@@ -306,6 +309,7 @@ SEXP onGetOutput(SEXP inputData) {
 			PROTECT(stemp_KEY = NEW_OBJECT(swOutput_KEY));
 
 			SET_SLOT(stemp_KEY, install("Title"), mkString(Str_Dup(CHAR(STRING_ELT(outfile, k)), &LogInfo)));
+            numUnprotects++;
             if(LogInfo.stopRun) {
                 goto report;
             }
@@ -372,13 +376,13 @@ SEXP onGetOutput(SEXP inputData) {
 		}
 	}
 
-	UNPROTECT(4);
-
-	#ifdef RSWDEBUG
-	if (debug) swprintf(" ... done. \n");
-	#endif
-
     report: {
+        UNPROTECT(numUnprotects);
+
+        #ifdef RSWDEBUG
+        if (debug) swprintf(" ... done. \n");
+        #endif
+
         if(LogInfo.stopRun) {
             SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
         }

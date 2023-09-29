@@ -101,6 +101,7 @@ void onSet_SW_VES(SEXP VES) {
 
 	SW_VegEstab_construct(&SoilWatAll.VegEstab, &LogInfo);
     if(LogInfo.stopRun) {
+        UNPROTECT(2); // Unprotect the two protected variables before exiting
         return; // Exit function prematurely due to error
     }
 

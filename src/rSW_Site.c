@@ -614,6 +614,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	strcpy(v->site_swrc_name, CHAR(STRING_ELT(swrc_flags, 0)));
 	v->site_swrc_type = encode_str2swrc(v->site_swrc_name, &LogInfo);
     if(LogInfo.stopRun) {
+        UNPROTECT(12); // Unprotect the twelve protected variables before exiting
         return; // Exit function prematurely due to error
     }
 	strcpy(v->site_ptf_name, CHAR(STRING_ELT(swrc_flags, 1)));
@@ -639,6 +640,8 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	if (too_many_regions) {
 		LogError(&LogInfo, LOGERROR, "siteparam.in : Number of transpiration regions"
 				" exceeds maximum allowed (%d > %d)\n", v->n_transp_rgn, MAX_TRANSP_REGIONS);
+
+        UNPROTECT(14); // Unprotect the fourteen protected variables before exiting
         return; // Exit function prematurely due to error
 	}
 	#ifdef RSWDEBUG
@@ -649,6 +652,8 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	for (r = 1; r < v->n_transp_rgn; r++) {
 		if (v->_TranspRgnBounds[r - 1] >= v->_TranspRgnBounds[r]) {
 			LogError(&LogInfo, LOGERROR, "siteparam.in : Discontinuity/reversal in transpiration regions.\n");
+
+            UNPROTECT(14); // Unprotect the fourteen protected variables before exiting
             return; // Exit function prematurely due to error
 		}
 	}

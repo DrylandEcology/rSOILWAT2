@@ -118,6 +118,7 @@ void onSet_SW_SWC(SEXP SWC) {
 	//}
 	v->hist.file_prefix = (char *) Str_Dup(CHAR(STRING_ELT(swcFilePrefix,0)), &LogInfo);
     if(LogInfo.stopRun) {
+        UNPROTECT(4); // Unprotect the four protected variables before exiting
         return; // Exit function prematurely due to error
     }
 
@@ -126,6 +127,8 @@ void onSet_SW_SWC(SEXP SWC) {
 
 	if (v->hist.method < 1 || v->hist.method > 2) {
 		LogError(&LogInfo, LOGERROR, "swcsetup.in : Invalid swc adjustment method.");
+
+        UNPROTECT(4); // Unprotect the four protected variables before exiting
         return; // Exit function prematurely due to error
 	}
 	v->hist.yr.last = SoilWatAll.Model.endyr;
@@ -147,6 +150,7 @@ SEXP onGet_SW_SWC_hists(void) {
 		if (SoilWatAll.SoilWat.hist_use && year >= SoilWatAll.SoilWat.hist.yr.first) {
 			_read_swc_hist(&SoilWatAll.SoilWat.hist, year, &LogInfo);
             if(LogInfo.stopRun) {
+                UNPROTECT(2); // Unprotect the two protected variables before exiting
                 return NULL; // Exit function prematurely due to error
             }
 

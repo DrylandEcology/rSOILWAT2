@@ -65,6 +65,9 @@ void onSet_MKV(SEXP MKV) {
   SEXP MKV_prob, MKV_conv;
 
   SW_MKV_construct(SoilWatAll.Weather.rng_seed, &SoilWatAll.Markov, &LogInfo);
+  if(LogInfo.stopRun) {
+    return; // Exit function prematurely due to error
+  }
 
   PROTECT(MKV_prob = GET_SLOT(MKV, install(cSW_MKV[0])));
   PROTECT(MKV_conv = GET_SLOT(MKV, install(cSW_MKV[1])));
@@ -76,6 +79,8 @@ void onSet_MKV(SEXP MKV) {
       "Markov weather generator: "
       "rSOILWAT2 failed to pass `MKV_prob` values to SOILWAT2.\n"
     );
+
+    UNPROTECT(2); // Unprotect the two protected variables before exiting
     return; // Exit function prematurely due to error
   }
 
@@ -86,7 +91,6 @@ void onSet_MKV(SEXP MKV) {
       "Markov weather generator: "
       "rSOILWAT2 failed to pass `MKV_conv` values to SOILWAT2.\n"
     );
-    return; // Exit function prematurely due to error
   }
 
   UNPROTECT(2);

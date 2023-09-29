@@ -627,6 +627,7 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 
   SW_VPD_fix_cover(&SoilWatAll.VegProd, &LogInfo);
   if(LogInfo.stopRun) {
+    UNPROTECT(18); // Unprotect the eighteen protected variables before exiting
     return; // Exit function prematurely due to error
   }
 
@@ -747,9 +748,9 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
     SET_VECTOR_ELT(res, 1, final_RelAbundanceL1);
     SET_VECTOR_ELT(res, 2, final_grasses);
 
-    UNPROTECT(8);
-
     report: {
+        UNPROTECT(8);
+
         if(local_LogInfo.numWarnings > 0) {
             sw_write_logs(FALSE, &local_LogInfo); // Note: `FALSE` is not used
         }

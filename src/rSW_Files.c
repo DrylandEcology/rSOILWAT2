@@ -91,6 +91,7 @@ void onSet_SW_F(SEXP SW_F_construct) {
 	for (i = 0; i < j; i++) {
 		PathInfo.InFiles[i] = Str_Dup(CHAR(STRING_ELT(FilesIn,i)), &LogInfo);
         if(LogInfo.stopRun) {
+            UNPROTECT(2); // Unprotect the two protected variables before exiting
             return; // Exit function prematurely
         }
 	}
