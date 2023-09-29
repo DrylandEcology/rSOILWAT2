@@ -313,13 +313,8 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   report: {
     SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
 
-    if(LogInfo.numWarnings > 0) {
-        sw_write_logs(FALSE, &LogInfo); // Note: `FALSE` is not used
-    }
-
-    if(LogInfo.stopRun) {
-        sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
-    }
+    sw_write_logs(FALSE, &LogInfo); // Note: `FALSE` is not used
+    sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
   }
 
   #ifdef RSWDEBUG
@@ -434,9 +429,7 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
         sw_write_logs(FALSE, &LogInfo); // Note: `FALSE` is not used
     }
 
-    if(LogInfo.stopRun) {
-        sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
-    }
+    sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
   }
 
   #ifdef RSWDEBUG
@@ -535,14 +528,13 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
     SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &LogInfo);
 
   report: {
-    if(LogInfo.numWarnings > 0) {
-        sw_write_logs(FALSE, &LogInfo); // Note: `FALSE` is not used
-    }
+    sw_write_logs(FALSE, &LogInfo); // Note: `FALSE` is not used
 
     if(LogInfo.stopRun) {
         SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
-        sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
     }
+
+    sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
   }
 
   // Return processed weather data

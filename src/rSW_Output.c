@@ -381,11 +381,11 @@ SEXP onGetOutput(SEXP inputData) {
     report: {
         if(LogInfo.stopRun) {
             SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
-
-            // The only message could be an error from this function,
-            // so no need to use `sw_write_logs()`
-            sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
         }
+
+        // The only message could be an error from this function,
+        // so no need to use `sw_write_logs()`
+        sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
     }
 
 	return swOutput_Object;
