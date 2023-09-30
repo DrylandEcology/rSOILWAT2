@@ -843,6 +843,9 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     allHist = (SW_WEATHER_HIST **)Mem_Malloc(sizeof(SW_WEATHER_HIST *) * numYears,
                                             "rSW2_calc_SiteClimate",
                                             &LogInfo);
+    if(LogInfo.stopRun) {
+        goto report;
+    }
 
     init_allHist_years(allHist, numYears);
 
@@ -850,6 +853,9 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
         allHist[year] = (SW_WEATHER_HIST *)Mem_Malloc(sizeof(SW_WEATHER_HIST),
                                                       "rSW2_calc_SiteClimate",
                                                       &LogInfo);
+        if(LogInfo.stopRun) {
+            goto report;
+        }
     }
 
     Time_init_model(SoilWatAll.Model.days_in_month);
@@ -966,12 +972,10 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
 
     deallocateClimateStructs(&climateOutput, &climateAverages);
 
-    UNPROTECT(12);
-
-    free_allHist(allHist, numYears);
-
     report: {
         UNPROTECT(numUnprotects);
+
+        free_allHist(allHist, numYears);
 
         if(LogInfo.stopRun) {
             SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
