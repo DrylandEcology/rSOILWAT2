@@ -795,7 +795,7 @@ static void rSW2_set_weather_hist(
 SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
                            SEXP do_C4vars, SEXP do_Cheatgrass_ClimVars, SEXP latitude) {
 
-    SW_WEATHER_HIST **allHist;
+    SW_WEATHER_HIST **allHist = NULL;
 
     SW_CLIMATE_YEARLY climateOutput;
     SW_CLIMATE_CLIM climateAverages;
@@ -839,6 +839,8 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     allHist = (SW_WEATHER_HIST **)Mem_Malloc(sizeof(SW_WEATHER_HIST *) * numYears,
                                             "rSW2_calc_SiteClimate",
                                             &LogInfo);
+
+    init_allHist_years(allHist, numYears);
 
     for(year = 0; year < numYears; year++) {
         allHist[year] = (SW_WEATHER_HIST *)Mem_Malloc(sizeof(SW_WEATHER_HIST),
@@ -958,13 +960,32 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
 
     UNPROTECT(12);
 
-    for(year = 0; year < numYears; year++) {
-        free(allHist[year]);
-    }
-    free(allHist);
+    free_allHist(allHist, numYears);
 
     sw_check_exit(FALSE, &LogInfo); // Note: `FALSE` is not used
 
     return res;
 
+}
+
+void init_allHist_years(SW_WEATHER_HIST **allHist, int numYears) {
+    int year;
+
+    for(year = 0; year < numYears; year++) {
+        allHist[year] = NULL;
+    }
+}
+
+void free_allHist(SW_WEATHER_HIST **allHist, int numYears) {
+    int year;
+
+    for(year = 0; year < numYears; year++) {
+        if(!isnull(allHist[year])) {
+            free(allHist[year]);
+        }
+    }
+
+    if(!isnull(allHist)) {
+        free(allHist);
+    }
 }

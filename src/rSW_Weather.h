@@ -12,3 +12,5 @@ SEXP onGet_WTH_DATA(void);
 void onSet_WTH_DATA(void);
 SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
                            SEXP do_C4vars, SEXP do_Cheatgrass_ClimVars, SEXP latitude);
+void init_allHist_years(SW_WEATHER_HIST **allHist, int numYears);
+void free_allHist(SW_WEATHER_HIST **allHist, int numYears);
