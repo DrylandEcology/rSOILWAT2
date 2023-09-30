@@ -307,9 +307,9 @@ SEXP onGetOutput(SEXP inputData) {
 			#endif
 
 			PROTECT(stemp_KEY = NEW_OBJECT(swOutput_KEY));
+            numUnprotects++;
 
 			SET_SLOT(stemp_KEY, install("Title"), mkString(Str_Dup(CHAR(STRING_ELT(outfile, k)), &LogInfo)));
-            numUnprotects++;
             if(LogInfo.stopRun) {
                 goto report;
             }

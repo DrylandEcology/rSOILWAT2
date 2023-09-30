@@ -807,7 +807,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     SW_MODEL *SW_Model = &SoilWatAll.Model;
 
     int numYears = asInteger(yearEnd) - asInteger(yearStart) + 1, year, calcSiteOutputNum = 10,
-    index, numUnprotects = 12;
+    index, numUnprotects = 11;
 
     Bool dailyInputFlags[MAX_INPUT_COLUMNS];
     double cloudcov[MAX_MONTHS], windspeed[MAX_MONTHS], r_humidity[MAX_MONTHS];
@@ -888,7 +888,6 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     allocateClimateStructs(numYears, &climateOutput, &climateAverages,
                            &LogInfo);
     if(LogInfo.stopRun) {
-        numUnprotects = 11;
         goto report;
     }
 
@@ -900,6 +899,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     averageClimateAcrossYears(&climateOutput, numYears, &climateAverages);
 
     res = PROTECT(allocVector(VECSXP, calcSiteOutputNum));
+    numUnprotects++;
 
     double *xmonthlyMean = REAL(monthlyMean), *xmonthlyMax = REAL(monthlyMax),
     *xmonthlyMin = REAL(monthlyMin), *xmontlyPPT = REAL(monthlyPPT);

@@ -171,7 +171,7 @@ void setupSOILWAT2(SEXP inputOptions) {
 */
 SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   SEXP swInputData, SW_DataList = NULL, swLog, oRlogfile;
-  int numUnprotects = 5;
+  int numUnprotects = 3;
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
@@ -202,7 +202,6 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
     SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &LogInfo);
   if(LogInfo.stopRun) {
-    numUnprotects = 3;
     goto report;
   }
 
@@ -212,7 +211,6 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   #endif
   SW_CTL_init_run(&SoilWatAll, &LogInfo);
   if(LogInfo.stopRun) {
-    numUnprotects = 3;
     goto report;
   }
 
@@ -227,6 +225,9 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
 
   PROTECT(swInputData = MAKE_CLASS("swInputData"));
   PROTECT(SW_DataList = NEW_OBJECT(swInputData));
+
+  // Include the above protects in the number of variables to unprotect
+  numUnprotects += 2;
 
 
   SET_SLOT(SW_DataList, install("files"), onGet_SW_F());
