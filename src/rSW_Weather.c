@@ -799,7 +799,7 @@ static void rSW2_set_weather_hist(
 SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
                            SEXP do_C4vars, SEXP do_Cheatgrass_ClimVars, SEXP latitude) {
 
-    SW_WEATHER_HIST **allHist;
+    SW_WEATHER_HIST **allHist = NULL;
 
     SW_CLIMATE_YEARLY climateOutput;
     SW_CLIMATE_CLIM climateAverages;
@@ -840,10 +840,16 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     C4Variables = PROTECT(allocVector(REALSXP, 6));
     Cheatgrass = PROTECT(allocVector(REALSXP, 6));
 
-    allHist = (SW_WEATHER_HIST **)malloc(sizeof(SW_WEATHER_HIST *) * numYears);
+    allHist = (SW_WEATHER_HIST **)Mem_Malloc(sizeof(SW_WEATHER_HIST *) * numYears,
+                                            "rSW2_calc_SiteClimate",
+                                            &LogInfo);
+
+    init_allHist_years(allHist, numYears);
 
     for(year = 0; year < numYears; year++) {
-        allHist[year] = (SW_WEATHER_HIST *)malloc(sizeof(SW_WEATHER_HIST));
+        allHist[year] = (SW_WEATHER_HIST *)Mem_Malloc(sizeof(SW_WEATHER_HIST),
+                                                      "rSW2_calc_SiteClimate",
+                                                      &LogInfo);
     }
 
     Time_init_model(SoilWatAll.Model.days_in_month);
@@ -960,10 +966,9 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
 
     deallocateClimateStructs(&climateOutput, &climateAverages);
 
-    for(year = 0; year < numYears; year++) {
-        free(allHist[year]);
-    }
-    free(allHist);
+    UNPROTECT(12);
+
+    free_allHist(allHist, numYears);
 
     report: {
         UNPROTECT(numUnprotects);
@@ -976,4 +981,26 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
 
     return res;
 
+}
+
+void init_allHist_years(SW_WEATHER_HIST **allHist, int numYears) {
+    int year;
+
+    for(year = 0; year < numYears; year++) {
+        allHist[year] = NULL;
+    }
+}
+
+void free_allHist(SW_WEATHER_HIST **allHist, int numYears) {
+    int year;
+
+    for(year = 0; year < numYears; year++) {
+        if(!isnull(allHist[year])) {
+            free(allHist[year]);
+        }
+    }
+
+    if(!isnull(allHist)) {
+        free(allHist);
+    }
 }
