@@ -836,10 +836,14 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     C4Variables = PROTECT(allocVector(REALSXP, 6));
     Cheatgrass = PROTECT(allocVector(REALSXP, 6));
 
-    allHist = (SW_WEATHER_HIST **)malloc(sizeof(SW_WEATHER_HIST *) * numYears);
+    allHist = (SW_WEATHER_HIST **)Mem_Malloc(sizeof(SW_WEATHER_HIST *) * numYears,
+                                            "rSW2_calc_SiteClimate",
+                                            &LogInfo);
 
     for(year = 0; year < numYears; year++) {
-        allHist[year] = (SW_WEATHER_HIST *)malloc(sizeof(SW_WEATHER_HIST));
+        allHist[year] = (SW_WEATHER_HIST *)Mem_Malloc(sizeof(SW_WEATHER_HIST),
+                                                      "rSW2_calc_SiteClimate",
+                                                      &LogInfo);
     }
 
     Time_init_model(SoilWatAll.Model.days_in_month);
