@@ -72,7 +72,7 @@ SEXP onGet_SW_F(void) {
 	return SW_F_construct;
 }
 
-void onSet_SW_F(SEXP SW_F_construct) {
+void onSet_SW_F(SEXP SW_F_construct, LOG_INFO* LogInfo) {
 	int i, j;
 	SEXP ProjDir;
 	SEXP FilesIn;
@@ -89,8 +89,8 @@ void onSet_SW_F(SEXP SW_F_construct) {
 			Mem_Free(PathInfo.InFiles[i]);
 		}
 	for (i = 0; i < j; i++) {
-		PathInfo.InFiles[i] = Str_Dup(CHAR(STRING_ELT(FilesIn,i)), &LogInfo);
-        if(LogInfo.stopRun) {
+		PathInfo.InFiles[i] = Str_Dup(CHAR(STRING_ELT(FilesIn,i)), LogInfo);
+        if(LogInfo->stopRun) {
             UNPROTECT(2); // Unprotect the two protected variables before exiting
             return; // Exit function prematurely
         }

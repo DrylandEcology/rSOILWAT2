@@ -109,7 +109,7 @@ static SEXP onGet_SW_LYR(void) {
 /* Function `onSet_SW_LYR()` corresponds to SOILWAT2's `SW_LYR_read()`,
    previously named `_read_layers()`
 */
-static void onSet_SW_LYR(SEXP SW_LYR) {
+static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 
 	SW_SITE *v = &SoilWatAll.Site;
 	LyrIndex lyrno;
@@ -128,7 +128,7 @@ static void onSet_SW_LYR(SEXP SW_LYR) {
 	/* Adjust number if new variables are added */
 	if (columns != 12) {
 		LogError(
-			&LogInfo,
+			LogInfo,
 			LOGERROR,
 			"%s : Too few columns in layers specified (%d).\n",
 			MyFileName, columns
@@ -167,7 +167,7 @@ static void onSet_SW_LYR(SEXP SW_LYR) {
 
 		if (lyrno >= MAX_LAYERS) {
 			LogError(
-				&LogInfo,
+				LogInfo,
 				LOGERROR,
 				"%s : Too many layers specified (%d).\n"
 				"Maximum number of layers is %d\n",
@@ -207,7 +207,7 @@ static SEXP onGet_SW_SWRCp(void) {
 }
 
 /* Function `onSet_SW_SWRCp()` corresponds to SOILWAT2's `SW_SWRC_read()` */
-static void onSet_SW_SWRCp(SEXP SW_SWRCp) {
+static void onSet_SW_SWRCp(SEXP SW_SWRCp, LOG_INFO* LogInfo) {
 
 	SW_SITE *v = &SoilWatAll.Site;
 	int i, k;
@@ -219,7 +219,7 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp) {
 	/* Check that we have n = `SWRC_PARAM_NMAX` values per layer */
 	if (ncols(SW_SWRCp) != SWRC_PARAM_NMAX) {
 		LogError(
-			&LogInfo,
+			LogInfo,
 			LOGERROR,
 			"%s : Bad number of SWRC parameters %d -- must be %d.\n",
 			MyFileName, ncols(SW_SWRCp), SWRC_PARAM_NMAX
@@ -230,7 +230,7 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp) {
 	/* Check that we have `SW_Site.n_layers` */
 	if (nrows(SW_SWRCp) != SoilWatAll.Site.n_layers) {
 		LogError(
-			&LogInfo,
+			LogInfo,
 			LOGERROR,
 			"%s : Number of layers with SWRC parameters (%d) "
 			"must match number of soil layers (%d)\n",
@@ -269,14 +269,14 @@ SEXP onGet_SW_SOILS(void) {
 }
 
 /* Copy S4 class "swSoils" into SOILWAT2 soil properties and SWRC parameters */
-void onSet_SW_SOILS(SEXP SW_SOILS) {
+void onSet_SW_SOILS(SEXP SW_SOILS, LOG_INFO* LogInfo) {
 	SEXP SW_LYR, SW_SWRCp;
 
 	PROTECT(SW_LYR = GET_SLOT(SW_SOILS, install("Layers")));
-	onSet_SW_LYR(SW_LYR);
+	onSet_SW_LYR(SW_LYR, LogInfo);
 
 	PROTECT(SW_SWRCp = GET_SLOT(SW_SOILS, install("SWRCp")));
-	onSet_SW_SWRCp(SW_SWRCp);
+	onSet_SW_SWRCp(SW_SWRCp, LogInfo);
 
 	UNPROTECT(2);
 }
@@ -480,7 +480,7 @@ SEXP onGet_SW_SIT(void) {
 	return SW_SIT;
 }
 
-void onSet_SW_SIT(SEXP SW_SIT) {
+void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	int i;
 	SW_SITE *v = &SoilWatAll.Site;
 
@@ -612,8 +612,8 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 
 	PROTECT(swrc_flags = GET_SLOT(SW_SIT, install("swrc_flags")));
 	strcpy(v->site_swrc_name, CHAR(STRING_ELT(swrc_flags, 0)));
-	v->site_swrc_type = encode_str2swrc(v->site_swrc_name, &LogInfo);
-    if(LogInfo.stopRun) {
+	v->site_swrc_type = encode_str2swrc(v->site_swrc_name, LogInfo);
+    if(LogInfo->stopRun) {
         UNPROTECT(12); // Unprotect the twelve protected variables before exiting
         return; // Exit function prematurely due to error
     }
@@ -638,7 +638,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 		}
 	}
 	if (too_many_regions) {
-		LogError(&LogInfo, LOGERROR, "siteparam.in : Number of transpiration regions"
+		LogError(LogInfo, LOGERROR, "siteparam.in : Number of transpiration regions"
 				" exceeds maximum allowed (%d > %d)\n", v->n_transp_rgn, MAX_TRANSP_REGIONS);
 
         UNPROTECT(14); // Unprotect the fourteen protected variables before exiting
@@ -651,7 +651,7 @@ void onSet_SW_SIT(SEXP SW_SIT) {
 	/* check for any discontinuities (reversals) in the transpiration regions */
 	for (r = 1; r < v->n_transp_rgn; r++) {
 		if (v->_TranspRgnBounds[r - 1] >= v->_TranspRgnBounds[r]) {
-			LogError(&LogInfo, LOGERROR, "siteparam.in : Discontinuity/reversal in transpiration regions.\n");
+			LogError(LogInfo, LOGERROR, "siteparam.in : Discontinuity/reversal in transpiration regions.\n");
 
             UNPROTECT(14); // Unprotect the fourteen protected variables before exiting
             return; // Exit function prematurely due to error

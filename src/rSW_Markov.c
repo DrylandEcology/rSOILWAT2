@@ -61,11 +61,11 @@ SEXP onGet_MKV(void) {
 	return MKV;
 }
 
-void onSet_MKV(SEXP MKV) {
+void onSet_MKV(SEXP MKV, LOG_INFO* LogInfo) {
   SEXP MKV_prob, MKV_conv;
 
-  SW_MKV_construct(SoilWatAll.Weather.rng_seed, &SoilWatAll.Markov, &LogInfo);
-  if(LogInfo.stopRun) {
+  SW_MKV_construct(SoilWatAll.Weather.rng_seed, &SoilWatAll.Markov, LogInfo);
+  if(LogInfo->stopRun) {
     return; // Exit function prematurely due to error
   }
 
@@ -74,7 +74,7 @@ void onSet_MKV(SEXP MKV) {
 
   if (!onSet_MKV_prob(MKV_prob) && SoilWatAll.Weather.generateWeatherMethod == 2) {
     LogError(
-      &LogInfo,
+      LogInfo,
       LOGERROR,
       "Markov weather generator: "
       "rSOILWAT2 failed to pass `MKV_prob` values to SOILWAT2.\n"
@@ -86,7 +86,7 @@ void onSet_MKV(SEXP MKV) {
 
   if (!onSet_MKV_conv(MKV_conv) && SoilWatAll.Weather.generateWeatherMethod == 2) {
     LogError(
-      &LogInfo,
+      LogInfo,
       LOGERROR,
       "Markov weather generator: "
       "rSOILWAT2 failed to pass `MKV_conv` values to SOILWAT2.\n"
