@@ -27,6 +27,7 @@
 #include "SOILWAT2/include/SW_Defines.h"
 #include "SOILWAT2/include/SW_Files.h"
 #include "SOILWAT2/include/SW_Site.h"
+#include "SOILWAT2/include/SW_Main_lib.h"
 
 #include "SOILWAT2/include/SW_Output.h" // externs many variables
 #include "SOILWAT2/include/SW_Output_outarray.h" // for function `SW_OUT_set_nrow`
@@ -53,7 +54,7 @@ static char *MyFileName;
 	"Output": Updated global variables SW_Output, used_OUTNPERIODS, and timeSteps which are
 		defined in SW_Output.c
 	*/
-void onSet_SW_OUT(SEXP OUT) {
+void onSet_SW_OUT(SEXP OUT, LOG_INFO* LogInfo) {
 	int i, msg_type;
 	OutKey k;
 	SEXP sep, outfile, tp_convert;
@@ -102,12 +103,20 @@ void onSet_SW_OUT(SEXP OUT) {
 		);
 
 		if (msg_type > 0) {
-			LogError(&LogInfo, msg_type, "%s", msg);
+			LogError(LogInfo, msg_type, "%s", msg);
+            if(LogInfo->stopRun) {
+                UNPROTECT(3); // Unprotect the three protected variables before exiting
+                return; // Exit function prematurely due to error
+            }
 			continue;
 		}
 
 		if (SoilWatAll.Output[k].use) {
-			SoilWatAll.Output[k].outfile = Str_Dup(CHAR(STRING_ELT(outfile, k)), &LogInfo);
+			SoilWatAll.Output[k].outfile = Str_Dup(CHAR(STRING_ELT(outfile, k)), LogInfo);
+            if(LogInfo->stopRun) {
+                UNPROTECT(3); // Unprotect the three protected variables before exiting
+                return; // Exit function prematurely due to error
+            }
 
 			ForEachOutPeriod(i) {
 				SoilWatAll.GenOutput.timeSteps[k][i] = timePeriods[k + i * SW_OUTNKEYS];
@@ -116,7 +125,7 @@ void onSet_SW_OUT(SEXP OUT) {
 	}
 
 	if (EchoInits)
-		_echo_outputs(&SoilWatAll, &LogInfo);
+		_echo_outputs(&SoilWatAll);
 
 	UNPROTECT(3);
 
@@ -239,8 +248,8 @@ void setGlobalrSOILWAT2_OutputVariables(SEXP outputData) {
 
 /* Experience has shown that generating the Output Data structure in R is slow compared to C
  * This will generate the OUTPUT data Structure and Names*/
-SEXP onGetOutput(SEXP inputData) {
-	int i, l, h;
+SEXP onGetOutput(SEXP inputData, LOG_INFO* LogInfo) {
+	int i, l, h, numUnprotects = 0;
 	OutKey k;
 	OutPeriod pd;
 	int *use;
@@ -291,14 +300,20 @@ SEXP onGetOutput(SEXP inputData) {
 		install("outfile")));
 
 	ForEachOutKey(k) {
+        numUnprotects = 4;
 		if (use[k]) {
 			#ifdef RSWDEBUG
 			if (debug) swprintf("%s (ncol = %d):", key2str[k], GenOut->ncol_OUT[k]);
 			#endif
 
 			PROTECT(stemp_KEY = NEW_OBJECT(swOutput_KEY));
+            numUnprotects++;
 
-			SET_SLOT(stemp_KEY, install("Title"), mkString(Str_Dup(CHAR(STRING_ELT(outfile, k)), &LogInfo)));
+			SET_SLOT(stemp_KEY, install("Title"), mkString(Str_Dup(CHAR(STRING_ELT(outfile, k)), LogInfo)));
+            if(LogInfo->stopRun) {
+                goto report;
+            }
+
 			SET_SLOT(stemp_KEY, install("Columns"), ScalarInteger(GenOut->ncol_OUT[k]));
 
 			PROTECT(rTimeStep = NEW_INTEGER(GenOut->used_OUTNPERIODS));
@@ -361,11 +376,13 @@ SEXP onGetOutput(SEXP inputData) {
 		}
 	}
 
-	UNPROTECT(4);
+    report: {
+        UNPROTECT(numUnprotects);
+    }
 
-	#ifdef RSWDEBUG
-	if (debug) swprintf(" ... done. \n");
-	#endif
+        #ifdef RSWDEBUG
+        if (debug) swprintf(" ... done. \n");
+        #endif
 
 	return swOutput_Object;
 }

@@ -24,10 +24,11 @@
 #include "SOILWAT2/include/SW_Model.h"
 #include "SOILWAT2/include/SW_Markov.h"
 #include "SOILWAT2/include/SW_Sky.h"
+#include "SOILWAT2/include/SW_Main_lib.h"
 
 #include "SOILWAT2/include/SW_Weather.h"
 #include "rSW_Weather.h"
-#include "SW_R_lib.h" // externs `InputData`, `WeatherList`, `bWeatherList`
+#include "SW_R_lib.h" // externs `SoilWatAll`
 
 #include <R.h>
 #include <Rinternals.h>
@@ -73,14 +74,16 @@ static void rSW2_setAllWeather(
   Bool *dailyInputFlags,
   RealD *cloudcov,
   RealD *windspeed,
-  RealD *r_humidity
+  RealD *r_humidity,
+  LOG_INFO* LogInfo
 );
 
 static void rSW2_set_weather_hist(
   SEXP listAllW,
   TimeInt year,
   SW_WEATHER_HIST *yearWeather,
-  Bool *dailyInputFlags
+  Bool *dailyInputFlags,
+  LOG_INFO* LogInfo
 );
 
 static double value_or_missing(double x) {
@@ -201,7 +204,7 @@ SEXP onGet_SW_WTH_setup(void) {
 
   Called by `rSW_CTL_obtain_inputs()` if `from_files` is `FALSE`.
 */
-void onSet_SW_WTH_setup(SEXP SW_WTH) {
+void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo) {
 	int i;
 	SW_WEATHER *w = &SoilWatAll.Weather;
 	SEXP
@@ -279,7 +282,7 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 	if (SW_Weather.generateWeatherMethod != 2 && SW_Model.startyr < w->yr.first) {
 		LogError(
 			logfp,
-			LOGFATAL,
+			LOGERROR,
 			"%s : Model year (%d) starts before weather files (%d)"
 				" and weather generator turned off.\n"
 				" Please synchronize the years or set up the weather generator files",
@@ -293,7 +296,7 @@ void onSet_SW_WTH_setup(SEXP SW_WTH) {
 		w->use_humidityMonthly,
 		w->use_windSpeedMonthly,
 		w->dailyInputFlags,
-        &LogInfo
+    LogInfo
 	);
 
 	UNPROTECT(11);
@@ -427,33 +430,29 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
     `SW_Sky` (via `onSet_SW_SKY()`) must be set/updated
     before this function is called.
 */
-void onSet_WTH_DATA(void) {
-
-  SEXP listAllWeather;
-
-  // Determine which `rSOILWAT2` list of `swWeatherData` we are using
-  listAllWeather = bWeatherList ?
-    WeatherList :
-    GET_SLOT(InputData, install("weatherHistory"));
+void onSet_WTH_DATA(SEXP weatherList, LOG_INFO* LogInfo) {
 
 
   // Deallocate (previous, if any) `allHist`
   // (using value of `SW_Weather.n_years` previously used to allocate)
   // `SW_WTH_construct()` sets `n_years` to zero
-  deallocateAllWeather(&SoilWatAll.Weather);
+  deallocateAllWeather(SoilWatAll.Weather.allHist, SoilWatAll.Weather.n_years);
 
   // Update number of years and first calendar year represented
   SoilWatAll.Weather.n_years = SoilWatAll.Model.endyr - SoilWatAll.Model.startyr + 1;
   SoilWatAll.Weather.startYear = SoilWatAll.Model.startyr;
 
   // Allocate new `allHist` (based on current `SW_Weather.n_years`)
-  allocateAllWeather(&SoilWatAll.Weather);
+  allocateAllWeather(&SoilWatAll.Weather.allHist, SoilWatAll.Weather.n_years, LogInfo);
+  if(LogInfo->stopRun) {
+    return; // Exit function prematurely due to error
+  }
 
 
   // Equivalent to `readAllWeather()`:
   // fill `SOILWAT2` `allHist` with values from `rSOILWAT2`
   rSW2_setAllWeather(
-    listAllWeather,
+    weatherList,
     SoilWatAll.Weather.allHist,
     SoilWatAll.Weather.startYear,
     SoilWatAll.Weather.n_years,
@@ -464,7 +463,8 @@ void onSet_WTH_DATA(void) {
     SoilWatAll.Weather.dailyInputFlags,
     SoilWatAll.Sky.cloudcov,
     SoilWatAll.Sky.windspeed,
-    SoilWatAll.Sky.r_humidity
+    SoilWatAll.Sky.r_humidity,
+    LogInfo
   );
 }
 
@@ -483,7 +483,8 @@ static void rSW2_setAllWeather(
   Bool *dailyInputFlags,
   RealD *cloudcov,
   RealD *windspeed,
-  RealD *r_humidity
+  RealD *r_humidity,
+  LOG_INFO* LogInfo
 ) {
     unsigned int yearIndex, year;
 
@@ -526,8 +527,13 @@ static void rSW2_setAllWeather(
               listAllW,
               year,
               allHist[yearIndex],
-              dailyInputFlags
+              dailyInputFlags,
+              LogInfo
             );
+
+            if(LogInfo->stopRun) {
+                return; // Exit function prematurely due to error
+            }
         }
     }
 }
@@ -539,7 +545,8 @@ static void rSW2_set_weather_hist(
   SEXP listAllW,
   TimeInt year,
   SW_WEATHER_HIST *yearWeather,
-  Bool *dailyInputFlags
+  Bool *dailyInputFlags,
+  LOG_INFO* LogInfo
 ) {
 
     // Locate suitable year among rSOILWAT2 list of `swWeatherData`
@@ -566,15 +573,15 @@ static void rSW2_set_weather_hist(
     numDaysYear = Time_get_lastdoy_y(year);
     if (nrows(yrWData) != numDaysYear) {
       LogError(
-        &LogInfo,
-        LOGFATAL,
+        LogInfo,
+        LOGERROR,
         "Weather data (year %d): "
         "expected %d rows (had %d).\n",
         year,
         numDaysYear,
         nrows(yrWData)
       );
-      return;
+      return; // Exit function prematurely due to error
     }
 
     // Suitable year among rSOILWAT2 weather list located
@@ -605,14 +612,15 @@ static void rSW2_set_weather_hist(
 
         if (doy != p_yrWData[doy + numDaysYear * 0] - 1) {
             LogError(
-                &LogInfo,
-                LOGFATAL,
+                LogInfo,
+                LOGERROR,
                 "Weather data (year %d): "
                 "day of year out of range (%d), expected: %d.\n",
                 year,
                 p_yrWData[doy + numDaysYear * 0],
                 doy + 1
             );
+            return; // Exit function prematurely due to error
         }
 
         // Maximum daily temperature [C]
@@ -791,23 +799,30 @@ static void rSW2_set_weather_hist(
     }
 }
 
+// `calc_SiteClimate()` is R interface to rSW2_calc_SiteClimate()
 SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
                            SEXP do_C4vars, SEXP do_Cheatgrass_ClimVars, SEXP latitude) {
 
-    SW_WEATHER_HIST **allHist;
+    SW_WEATHER_HIST **allHist = NULL;
 
     SW_CLIMATE_YEARLY climateOutput;
     SW_CLIMATE_CLIM climateAverages;
 
-    SW_MODEL *SW_Model = &SoilWatAll.Model;
+    LOG_INFO local_LogInfo;
+    sw_init_logs(current_sw_verbosity, &local_LogInfo);
 
-    int numYears = asInteger(yearEnd) - asInteger(yearStart) + 1, year, calcSiteOutputNum = 10,
-    index;
+    TimeInt
+      days_in_month[MAX_MONTHS],
+      cum_monthdays[MAX_MONTHS];
+
+
+    int numYears = asInteger(yearEnd) - asInteger(yearStart) + 1, calcSiteOutputNum = 10,
+    index, numUnprotects = 11;
 
     Bool dailyInputFlags[MAX_INPUT_COLUMNS];
     double cloudcov[MAX_MONTHS], windspeed[MAX_MONTHS], r_humidity[MAX_MONTHS];
 
-    SEXP res, monthlyMean, monthlyMax, monthlyMin, monthlyPPT, MAT_C, MAP_cm, vectorNames,
+    SEXP res = NULL, monthlyMean, monthlyMax, monthlyMin, monthlyPPT, MAT_C, MAP_cm, vectorNames,
     C4Variables, Cheatgrass, cnamesC4SEXP, cnamesCheatgrassSEXP;
 
     char *cnames[] = {"meanMonthlyTempC","minMonthlyTempC","maxMonthlyTempC",
@@ -835,13 +850,12 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     C4Variables = PROTECT(allocVector(REALSXP, 6));
     Cheatgrass = PROTECT(allocVector(REALSXP, 6));
 
-    allHist = (SW_WEATHER_HIST **)malloc(sizeof(SW_WEATHER_HIST *) * numYears);
-
-    for(year = 0; year < numYears; year++) {
-        allHist[year] = (SW_WEATHER_HIST *)malloc(sizeof(SW_WEATHER_HIST));
+    allocateAllWeather(&allHist, numYears, &local_LogInfo);
+    if(local_LogInfo.stopRun) {
+        goto report;
     }
 
-    Time_init_model(SoilWatAll.Model.days_in_month);
+    Time_init_model(days_in_month);
 
     // Set `dailyInputFlags`: currently, `calcSiteClimate()` use only tmax, tmin, ppt
     for (index = 0; index < MAX_INPUT_COLUMNS; index++) {
@@ -864,20 +878,29 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
       dailyInputFlags,
       cloudcov,
       windspeed,
-      r_humidity
+      r_humidity,
+      &local_LogInfo
     );
+    if(local_LogInfo.stopRun) {
+        goto report;
+    }
 
     // Allocate memory of structs for climate on SOILWAT side
-    allocateClimateStructs(numYears, &climateOutput, &climateAverages);
+    allocateClimateStructs(numYears, &climateOutput, &climateAverages,
+                           &local_LogInfo);
+    if(local_LogInfo.stopRun) {
+        goto report;
+    }
 
     // Calculate climate variables
-    calcSiteClimate(allHist, SW_Model->cum_monthdays, SW_Model->days_in_month,
+    calcSiteClimate(allHist, cum_monthdays, days_in_month,
                 numYears, asInteger(yearStart), inNorthHem, &climateOutput);
 
     // Average climate variables
     averageClimateAcrossYears(&climateOutput, numYears, &climateAverages);
 
     res = PROTECT(allocVector(VECSXP, calcSiteOutputNum));
+    numUnprotects++;
 
     double *xmonthlyMean = REAL(monthlyMean), *xmonthlyMax = REAL(monthlyMax),
     *xmonthlyMin = REAL(monthlyMin), *xmontlyPPT = REAL(monthlyPPT);
@@ -948,14 +971,15 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     SET_VECTOR_ELT(res, 8, C4Variables);
     SET_VECTOR_ELT(res, 9, Cheatgrass);
 
-    deallocateClimateStructs(&climateOutput, &climateAverages);
+    report: {
+        // Note: no SOILWAT2 memory was allocated
+        UNPROTECT(numUnprotects);
+        deallocateClimateStructs(&climateOutput, &climateAverages);
+        deallocateAllWeather(allHist, numYears);
 
-    UNPROTECT(12);
-
-    for(year = 0; year < numYears; year++) {
-        free(allHist[year]);
+        sw_write_warnings(&local_LogInfo);
+        sw_fail_on_error(&local_LogInfo);
     }
-    free(allHist);
 
     return res;
 

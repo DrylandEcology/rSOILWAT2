@@ -1255,3 +1255,28 @@ readNumerics <- function(text,expectedArgs,showWarnings=FALSE) {
   }
   return(tmp)
 }
+
+
+
+#------ Other deprecated functions ------
+
+
+#' Return output data
+#'
+#' @inheritParams sw_exec
+#'
+#' @return An object of class \code{\linkS4class{swOutput}}.
+#' @export
+sw_outputData <- function(inputData) {
+  .Deprecated("Store return value of `rSOILWAT2::sw_exec()`.")
+
+  dir_prev <- getwd()
+  on.exit(setwd(dir_prev), add = TRUE)
+
+  res <- .Call(C_onGetOutputDeprecated, inputData)
+
+  slot(res, "version") <- rSW2_version()
+  slot(res, "timestamp") <- rSW2_timestamp()
+
+  res
+}

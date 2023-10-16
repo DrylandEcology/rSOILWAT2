@@ -44,7 +44,7 @@ sw_args <- function(dir, files.in, echo, quiet) {
 #'
 #' @export
 sw_verbosity <- function(verbose = TRUE) {
-  invisible(!.Call(C_sw_quiet, !as.logical(verbose)))
+  invisible(.Call(C_sw_verbose, as.logical(verbose)))
 }
 
 
@@ -243,6 +243,8 @@ sw_exec <- function(
   on.exit(setwd(dir_prev), add = TRUE)
 
   quiet <- as.logical(quiet)
+  prev_verbosity <- sw_verbosity(!quiet)
+  on.exit(sw_verbosity(prev_verbosity), add = TRUE)
 
   input <- sw_args(dir, files.in, echo, quiet)
 
@@ -310,7 +312,7 @@ sw_exec <- function(
 
 
   # Run SOILWAT2
-  res <- .Call(C_start, input, inputData, weatherList, quiet)
+  res <- .Call(C_sw_start, input, inputData, weatherList)
 
   slot(res, "version") <- rSW2_version()
   slot(res, "timestamp") <- rSW2_timestamp()
@@ -380,30 +382,12 @@ sw_inputDataFromFiles <- function(
   on.exit(setwd(dir_prev), add = TRUE)
 
   quiet <- as.logical(quiet)
+  prev_verbosity <- sw_verbosity(!quiet)
+  on.exit(sw_verbosity(prev_verbosity), add = TRUE)
 
   input <- sw_args(dir, files.in, echo = FALSE, quiet = quiet)
 
-  res <- .Call(C_onGetInputDataFromFiles, input, quiet)
-
-  slot(res, "version") <- rSW2_version()
-  slot(res, "timestamp") <- rSW2_timestamp()
-
-  res
-}
-
-
-#' Return output data
-#'
-#' @inheritParams sw_exec
-#'
-#' @return An object of class \code{\linkS4class{swOutput}}.
-#' @export
-sw_outputData <- function(inputData) {
-
-  dir_prev <- getwd()
-  on.exit(setwd(dir_prev), add = TRUE)
-
-  res <- .Call(C_onGetOutput, inputData)
+  res <- .Call(C_onGetInputDataFromFiles, input)
 
   slot(res, "version") <- rSW2_version()
   slot(res, "timestamp") <- rSW2_timestamp()
@@ -439,9 +423,6 @@ sw_outputData <- function(inputData) {
 #'
 #' @export
 sw_inputData <- function() {
-  dir_prev <- getwd()
-  on.exit(setwd(dir_prev), add = TRUE)
-
   tmp <- swInputData() # default values (minus some deleted slots)
   utils::data(package = "rSOILWAT2", "weatherData", envir = environment())
   slot(tmp, "weatherHistory") <- get("weatherData", envir = environment())
@@ -455,7 +436,7 @@ sw_inputData <- function() {
 #' @return A logical value
 #' @export
 has_soilTemp_failed <- function() {
-  .Call(C_tempError)
+  isTRUE(.Call(C_tempError))
 }
 
 

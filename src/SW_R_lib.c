@@ -46,26 +46,19 @@
 /*                  Global Variables                   */
 /* --------------------------------------------------- */
 
-SEXP InputData;
-SEXP WeatherList;
-Bool useFiles;
-Bool bWeatherList;
-
 SW_ALL SoilWatAll;
 SW_OUTPUT_POINTERS SoilWatOutputPtrs[SW_OUTNKEYS];
-LOG_INFO LogInfo;
 PATH_INFO PathInfo;
+
 Bool EchoInits;
-Bool QuietMode;
+FILE *current_sw_verbosity = (FILE *) TRUE; // quiet = FALSE; verbose = TRUE (show SOILWAT2 warnings)
 
 
 
 /* =================================================== */
 /*                  Local Variables                    */
 /* --------------------------------------------------- */
-static SEXP Rlogfile;
-static Bool current_sw_quiet = swFALSE;
-
+static SEXP sw_has_soiltemp_error = FALSE;
 
 
 /* =================================================== */
@@ -74,52 +67,58 @@ static Bool current_sw_quiet = swFALSE;
 
 
 /**
- * Turn on/off `SOILWAT2` messages including errors, notes, and warnings
- *
- * @param verbose A logical value.
- * @return The previous logical value.
- */
-SEXP sw_quiet(SEXP quiet) {
-	SEXP prev_quiet;
+ Turn on/off `SOILWAT2` messages including errors, notes, and warnings
 
-	PROTECT(prev_quiet = NEW_LOGICAL(1));
-	LOGICAL_POINTER(prev_quiet)[0] = current_sw_quiet;
+  `sw_verbosity()` is R interface to sw_verbose().
 
-	if (LOGICAL(coerceVector(quiet, LGLSXP))[0]) {
-		// tell `LogError()` that R should NOT print messages to the console
-		LogInfo.logfp = NULL;
-		current_sw_quiet = swTRUE;
+ @param verbose A logical value.
+ @return The previous logical value.
+*/
+SEXP sw_verbose(SEXP verbose) {
+	SEXP prev_verbose;
+
+	PROTECT(prev_verbose = NEW_LOGICAL(1));
+	LOGICAL_POINTER(prev_verbose)[0] = !isnull(current_sw_verbosity);
+
+	if (LOGICAL(coerceVector(verbose, LGLSXP))[0]) {
+		// verbose: tell `LogError()` that R should print messages to the console
+		current_sw_verbosity = (FILE *) TRUE; // any non-NULL file pointer
 	} else {
-		// tell `LogError()` that R should print messages to the console
-		LogInfo.logfp = (FILE *) swTRUE; // any non-NULL file pointer
-		current_sw_quiet = swFALSE;
+		// quiet: tell `LogError()` that R should NOT print messages to the console
+		current_sw_verbosity = NULL;
 	}
 
 	UNPROTECT(1);
-	return prev_quiet;
+	return prev_verbose;
 }
 
 
 /**
- * Determines if a constant in the Parton equation 2.21 is invalid and would
- * thus cause extreme soil temperature values (see SW_Flow_lib.c ~1770)
+ * Queries error status of soil temperature from the most previous simulation run (`sw_start()`)
+ *
+ * `has_soilTemp_failed()` is R interface to tempError()
  *
  * @param  none
  * @return an R boolean that denotes an error (TRUE) or lack of (FALSE)
  *
  */
 SEXP tempError(void) {
-	SEXP swR_temp_error;
-	PROTECT(swR_temp_error = NEW_LOGICAL(1));
-	LOGICAL_POINTER(swR_temp_error)[0] = SoilWatAll.SoilWat.soiltempError;
+	return sw_has_soiltemp_error;
+}
+
+static void setGlobal_soiltempError(Bool soiltempError) {
+	PROTECT(sw_has_soiltemp_error = NEW_LOGICAL(1));
+	LOGICAL_POINTER(sw_has_soiltemp_error)[0] = soiltempError;
 	UNPROTECT(1);
-	return swR_temp_error;
 }
 
 
-/** Setup and construct model (independent of inputs)
+
+/** Setup and construct global variables for SOILWAT2
+
+  Global variables managed by rSOILWAT2: SoilWatAll, SoilWatOutputPtrs, PathInfo.
 */
-void setupSOILWAT2(SEXP inputOptions) {
+void setupSOILWAT2(SEXP inputOptions, LOG_INFO* LogInfo) {
 	int i, argc;
 	char *argv[7];
   #ifdef RSWDEBUG
@@ -135,7 +134,8 @@ void setupSOILWAT2(SEXP inputOptions) {
 	if (argc > 7) {
 		// fatal condition because argv is hard-coded to be of length 7; increase size of
 		// argv if more command-line options are added to SOILWAT2 in the future
-		sw_error(-1, "length(inputOptions) must be <= 7.");
+		LogError(LogInfo, LOGERROR, "length(inputOptions) must be <= 7.");
+        return; // Exit function prematurely due to error
 	}
 	for (i = 0; i < argc; i++) {
 		argv[i] = (char *) CHAR(STRING_ELT(inputOptions, i));
@@ -145,58 +145,79 @@ void setupSOILWAT2(SEXP inputOptions) {
 	if (debug) swprintf("Set call arguments\n");
   #endif
 
-	sw_init_args(argc, argv, &QuietMode, &EchoInits,
-               &PathInfo.InFiles[eFirst], &LogInfo);
+    SW_CTL_init_ptrs(&SoilWatAll, PathInfo.InFiles);
+    sw_init_args(argc, argv, &EchoInits, &PathInfo.InFiles[eFirst], LogInfo);
+    if(LogInfo->stopRun) {
+        return; // Exit function prematurely due to error
+    }
 
   #ifdef RSWDEBUG
   if (debug) swprintf("Initialize SOILWAT ...");
-	#endif
+  #endif
 
-	SW_CTL_setup_model(&SoilWatAll, SoilWatOutputPtrs, &PathInfo, &LogInfo);
+    SW_CTL_setup_model(&SoilWatAll, SoilWatOutputPtrs, &PathInfo, LogInfo);
+    if(LogInfo->stopRun) {
+        return; // Exit function prematurely due to error
+    }
+
 	rSW_CTL_setup_model2();
 }
 
 
 /**
   @brief Read inputs from SOILWAT2 input files on disk using SOILWAT2 code
+
+  `sw_inputDataFromFiles()` is R interface to onGetInputDataFromFiles()
 */
-SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
-  SEXP swInputData, SW_DataList, swLog, oRlogfile;
+SEXP onGetInputDataFromFiles(SEXP inputOptions) {
+  SEXP swInputData, SW_DataList = NULL, swLog, oRlogfile;
+  int numUnprotects = 2;
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
 
-  LogInfo.logged = FALSE;
-  sw_quiet(quiet);
+  LOG_INFO local_LogInfo;
+  sw_init_logs(current_sw_verbosity, &local_LogInfo);
 
   #ifdef RSWDEBUG
   if (debug) swprintf("Set log\n");
   #endif
   PROTECT(swLog = MAKE_CLASS("swLog"));
   PROTECT(oRlogfile = NEW_OBJECT(swLog));
-  PROTECT(Rlogfile = GET_SLOT(oRlogfile,install("LogData")));
 
   // setup and construct model (independent of inputs)
-  setupSOILWAT2(inputOptions);
+  setupSOILWAT2(inputOptions, &local_LogInfo);
+  if(local_LogInfo.stopRun) {
+    goto report;
+  }
 
   // read user inputs: from files
   #ifdef RSWDEBUG
   if (debug) swprintf("Read input from disk files into SOILWAT2 variables\n");
   #endif
-  rSW_CTL_obtain_inputs(TRUE);
+  rSW_CTL_obtain_inputs(TRUE, NULL, NULL, &local_LogInfo);
+  if(local_LogInfo.stopRun) {
+    goto report;
+  }
 
   // finalize daily weather
   #ifdef RSWDEBUG
   if (debug) swprintf(" finalize daily weather ...\n");
   #endif
   SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
-    SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &LogInfo);
+    SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &local_LogInfo);
+  if(local_LogInfo.stopRun) {
+    goto report;
+  }
 
   // initialize simulation run (based on user inputs)
   #ifdef RSWDEBUG
   if (debug) swprintf(" init simulation run ...\n");
   #endif
-  SW_CTL_init_run(&SoilWatAll, &LogInfo);
+  SW_CTL_init_run(&SoilWatAll, &local_LogInfo);
+  if(local_LogInfo.stopRun) {
+    goto report;
+  }
 
   #ifdef RSWDEBUG
   if (debug) {
@@ -209,6 +230,9 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
 
   PROTECT(swInputData = MAKE_CLASS("swInputData"));
   PROTECT(SW_DataList = NEW_OBJECT(swInputData));
+
+  // Include the above protects in the number of variables to unprotect
+  numUnprotects += 2;
 
 
   SET_SLOT(SW_DataList, install("files"), onGet_SW_F());
@@ -283,24 +307,34 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   if (debug) swprintf(" > 'CO2'");
   #endif
 
-  SET_SLOT(SW_DataList, install("swc"), onGet_SW_SWC());
+  SET_SLOT(SW_DataList, install("swc"), onGet_SW_SWC(&local_LogInfo));
   #ifdef RSWDEBUG
   if (debug) swprintf(" > 'swc'");
   #endif
+  if(local_LogInfo.stopRun) {
+    goto report;
+  }
 
   SET_SLOT(SW_DataList, install("log"), oRlogfile);
 
-  // de-allocate all memory, but `p_OUT`
   #ifdef RSWDEBUG
   if (debug) swprintf(" > de-allocate most memory; \n");
   #endif
-  SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
+
+  report: {
+    UNPROTECT(numUnprotects);
+
+   // de-allocate SOILWAT2 memory, but let R handle `p_OUT`
+    SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
+
+    sw_write_warnings(&local_LogInfo);
+    sw_fail_on_error(&local_LogInfo);
+  }
 
   #ifdef RSWDEBUG
   if (debug) swprintf(" onGetInputDataFromFiles completed.\n");
   #endif
 
-  UNPROTECT(5);
   return SW_DataList;
 }
 
@@ -311,62 +345,64 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions, SEXP quiet) {
   - Copies R inputs to C variables
   - Executes a SOILWAT2 simulation
   - Copies output to R output variable
+
+  `sw_exec()` is R interface to sw_start()
 */
-SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
-	SEXP outputData, swLog, oRlogfile;
+SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
+	SEXP outputData = NULL, swLog, oRlogfile;
+  Bool useFiles;
+
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
 
-	LogInfo.logged = FALSE;
-	sw_quiet(quiet);
+  LOG_INFO local_LogInfo;
+  sw_init_logs(current_sw_verbosity, &local_LogInfo);
 
-	if (isNull(inputData)) {
-		useFiles = TRUE;
-	} else {
-		useFiles = FALSE;
-		InputData = inputData;
-	}
-
-	//This is used to minimize copying weather data between similiar runs.
-	if (isNull(weatherList)) {
-		bWeatherList = FALSE;
-	} else {
-		bWeatherList = TRUE;
-		WeatherList = weatherList;
-	}
 
   #ifdef RSWDEBUG
   if (debug) swprintf("'start': create log ...");
   #endif
 	PROTECT(swLog = MAKE_CLASS("swLog"));
 	PROTECT(oRlogfile = NEW_OBJECT(swLog));
-	PROTECT(Rlogfile = GET_SLOT(oRlogfile,install("LogData")));
 
   // setup and construct model (independent of inputs)
   #ifdef RSWDEBUG
   if (debug) swprintf(" input arguments & setup model ...");
   #endif
-	setupSOILWAT2(inputOptions);
+	setupSOILWAT2(inputOptions, &local_LogInfo);
+  if(local_LogInfo.stopRun) {
+    goto report;
+  }
 
 	// read user inputs: either from files or from memory (depending on useFiles)
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" obtain inputs ...");
 	#endif
-	rSW_CTL_obtain_inputs(useFiles);
+	useFiles = isNull(inputData) ? swTRUE : swFALSE;
+	rSW_CTL_obtain_inputs(useFiles, inputData, weatherList, &local_LogInfo);
+  if(local_LogInfo.stopRun) {
+    goto report;
+  }
 
 	// finalize daily weather
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" finalize daily weather ...\n");
 	#endif
 	SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
-    SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &LogInfo);
+    SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &local_LogInfo);
+    if(local_LogInfo.stopRun) {
+        goto report;
+    }
 
 	// initialize simulation run (based on user inputs)
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" init simulation run ...");
 	#endif
-	SW_CTL_init_run(&SoilWatAll, &LogInfo);
+	SW_CTL_init_run(&SoilWatAll, &local_LogInfo);
+    if(local_LogInfo.stopRun) {
+        goto report;
+    }
 
   // initialize output
   #ifdef RSWDEBUG
@@ -375,30 +411,93 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 	SW_OUT_set_ncol(SoilWatAll.Site.n_layers, SoilWatAll.Site.n_evap_lyrs,
                 SoilWatAll.VegEstab.count, SoilWatAll.GenOutput.ncol_OUT);
 	SW_OUT_set_colnames(SoilWatAll.Site.n_layers, SoilWatAll.VegEstab.parms,
-    SoilWatAll.GenOutput.ncol_OUT, SoilWatAll.GenOutput.colnames_OUT, &LogInfo);
-	PROTECT(outputData = onGetOutput(inputData));
+    SoilWatAll.GenOutput.ncol_OUT, SoilWatAll.GenOutput.colnames_OUT, &local_LogInfo);
+    if(local_LogInfo.stopRun) {
+        goto report;
+    }
+
+	PROTECT(outputData = onGetOutput(inputData, &local_LogInfo));
+  if(local_LogInfo.stopRun) {
+      goto report;
+  }
 	setGlobalrSOILWAT2_OutputVariables(outputData);
 
   // run simulation: loop through each year
   #ifdef RSWDEBUG
   if (debug) swprintf(" run SOILWAT2 ...");
   #endif
-	SW_CTL_main(&SoilWatAll, SoilWatOutputPtrs, &LogInfo);
+  SW_CTL_main(&SoilWatAll, SoilWatOutputPtrs, &local_LogInfo);
 
-   // de-allocate all memory, but let R handle `p_OUT`
+
   #ifdef RSWDEBUG
   if (debug) swprintf(" clean up ...");
   #endif
-	SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
+
+  report: {
+    UNPROTECT(2);
+
+    if (local_LogInfo.stopRun) {
+        setGlobal_soiltempError(TRUE);
+    } else {
+        setGlobal_soiltempError(SoilWatAll.SoilWat.soiltempError);
+    }
+
+   // de-allocate SOILWAT2 memory, but let R handle `p_OUT`
+    SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
+
+    sw_write_warnings(&local_LogInfo);
+    sw_fail_on_error(&local_LogInfo);
+  }
 
   #ifdef RSWDEBUG
   if (debug) swprintf(" completed.\n");
   #endif
 
-	UNPROTECT(4);
-
 	return(outputData);
 }
+
+
+
+
+// `sw_outputData()` is R interface to onGetOutputDeprecated()
+SEXP onGetOutputDeprecated(SEXP inputData) {
+  SEXP inputOptions, swOutput_Object = NULL;
+  int numUnprotects = 0;
+
+  LOG_INFO local_LogInfo;
+  sw_init_logs(current_sw_verbosity, &local_LogInfo);
+  if(local_LogInfo.stopRun) {
+    goto report;
+  }
+
+  /* Setup global variables including SoilWatAll */
+  PROTECT(inputOptions = allocVector(STRSXP, 1));
+  numUnprotects++;
+  SET_STRING_ELT(inputOptions, 0, mkChar("SOILWAT2"));
+
+  setupSOILWAT2(inputOptions, &local_LogInfo);
+  if(local_LogInfo.stopRun) {
+    goto report;
+  }
+
+  // Create output object
+  swOutput_Object = onGetOutput(inputData, &local_LogInfo);
+
+
+  report: {
+    UNPROTECT(numUnprotects);
+
+    // de-allocate SOILWAT2 memory
+    SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
+
+    sw_write_warnings(&local_LogInfo);
+    sw_fail_on_error(&local_LogInfo);
+  }
+
+  return swOutput_Object;
+}
+
+
 
 
 /**
@@ -406,49 +505,62 @@ SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet) {
 
   Applies additive/multiplicative scaling parameters and
   uses imputation/weather generator to fill missing values
+
+  `dbW_generateWeather()` is R interface to rSW2_processAllWeather()
 */
 SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
-  SEXP res;
+  SEXP res = NULL, inputOptions;
+  int numUnprotects = 0;
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
-
 
   #ifdef RSWDEBUG
   if (debug) swprintf("\n'rSW2_processAllWeather': data preparation: ");
   #endif
 
-  // Copy `swInputData` to global variable `InputData` which is used
-  // by `onSet_XXX()` functions
-  InputData = inputData;
+  if (isNull(weatherList)) {
+    error("'weatherList' is NULL.");
+  }
 
-  // Copy `weatherList` to global variable `WeatherList` which is used
-  // by `onSet_WTH_DATA()` if `bWeatherList`
-  bWeatherList = TRUE;
-  WeatherList = weatherList;
+  LOG_INFO local_LogInfo;
+  sw_init_logs(current_sw_verbosity, &local_LogInfo);
 
 
-  // setup and construct model (independent of inputs)
+  // setup and construct model
   #ifdef RSWDEBUG
   if (debug) swprintf("'setup' > ");
   #endif
-  if(PathInfo.InFiles[eFirst] == NULL) {
-    PathInfo.InFiles[eFirst] = DFLT_FIRSTFILE;
+
+  // values of `inputOptions` are not used
+  PROTECT(inputOptions = allocVector(STRSXP, 1));
+  numUnprotects++;
+  SET_STRING_ELT(inputOptions, 0, mkChar("SOILWAT2"));
+
+  setupSOILWAT2(inputOptions, &local_LogInfo);
+  if(local_LogInfo.stopRun) {
+    goto report;
   }
 
-  SW_CTL_setup_model(&SoilWatAll, SoilWatOutputPtrs, &PathInfo, &LogInfo);
 
+  // rSW_CTL_obtain_inputs():
   // `onSet_WTH_DATA()` requires correct `endyr` and `startyr` of `SW_Model`
   #ifdef RSWDEBUG
   if (debug) swprintf("'model' > ");
   #endif
-  onSet_SW_MDL(GET_SLOT(inputData, install("years")));
+  onSet_SW_MDL(GET_SLOT(inputData, install("years")), &local_LogInfo);
+  if (local_LogInfo.stopRun) {
+    goto report;
+  }
 
   // `onSet_WTH_DATA()` requires additive/multiplicative scaling parameters
   #ifdef RSWDEBUG
   if (debug) swprintf(" > 'weather-setup'");
   #endif
-  onSet_SW_WTH_setup(GET_SLOT(inputData, install("weather")));
+  onSet_SW_WTH_setup(GET_SLOT(inputData, install("weather")), &local_LogInfo);
+  if(local_LogInfo.stopRun) {
+    goto report;
+  }
 
   // `onSet_WTH_DATA()` requires ready-to-go weather generator
   if (
@@ -462,10 +574,13 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
       )
     )[0]
   ) {
-    onSet_MKV(GET_SLOT(inputData, install("markov")));
+    onSet_MKV(GET_SLOT(inputData, install("markov")), &local_LogInfo);
     #ifdef RSWDEBUG
     if (debug) swprintf(" > 'weather generator'.\n");
     #endif
+    if(local_LogInfo.stopRun) {
+      goto report;
+    }
   }
 
 
@@ -473,21 +588,38 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   #ifdef RSWDEBUG
   if (debug) swprintf("'rSW2_processAllWeather': process weather data");
   #endif
-  onSet_WTH_DATA();
-
+  onSet_WTH_DATA(weatherList, &local_LogInfo);
+  if(local_LogInfo.stopRun) {
+    goto report;
+  }
 
   // Finalize daily weather (weather generator & monthly scaling)
   #ifdef RSWDEBUG
   if (debug) swprintf(" > finalize daily weather.\n");
   #endif
   SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
-    SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &LogInfo);
+    SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &local_LogInfo);
 
+  if(local_LogInfo.stopRun) {
+    goto report;
+  }
 
   // Return processed weather data
   PROTECT(res = onGet_WTH_DATA());
+  numUnprotects++;
 
-  UNPROTECT(1);
+
+  report: {
+    UNPROTECT(numUnprotects);
+
+    // de-allocate SOILWAT2 memory
+    SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
+
+    sw_write_warnings(&local_LogInfo);
+    sw_fail_on_error(&local_LogInfo);
+  }
+
+
   return res;
 }
 
@@ -499,6 +631,8 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
 
   Applies additive/multiplicative scaling parameters and
   uses imputation/weather generator to fill missing values
+
+  `getWeatherData_folders()` is R interface to rSW2_readAllWeatherFromDisk()
 */
 SEXP rSW2_readAllWeatherFromDisk(
   SEXP path,
@@ -507,12 +641,19 @@ SEXP rSW2_readAllWeatherFromDisk(
   SEXP endYear,
   SEXP dailyInputFlags
 ) {
-  SEXP res;
-  int i;
+  SEXP res = NULL, inputOptions;
+  int i, numUnprotects = 0;
 
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
+
+  #ifdef RSWDEBUG
+  if (debug) swprintf("\n'rSW2_readAllWeatherFromDisk': data preparation: ");
+  #endif
+
+  LOG_INFO local_LogInfo;
+  sw_init_logs(current_sw_verbosity, &local_LogInfo);
 
   /* Convert inputs to correct type */
   path = PROTECT(AS_CHARACTER(path));
@@ -520,14 +661,24 @@ SEXP rSW2_readAllWeatherFromDisk(
   startYear = PROTECT(coerceVector(startYear, INTSXP));
   endYear = PROTECT(coerceVector(endYear, INTSXP));
   dailyInputFlags = PROTECT(coerceVector(dailyInputFlags, LGLSXP));
+  numUnprotects += 5;
+
 
   /* Create convenience pointers */
   int *xdif = LOGICAL(dailyInputFlags); /* LGLSXP are internally coded as int */
 
 
-  #ifdef RSWDEBUG
-  if (debug) swprintf("\n'rSW2_readAllWeatherFromDisk': data preparation: ");
-  #endif
+  /* Setup global variables including SoilWatAll */
+  PROTECT(inputOptions = allocVector(STRSXP, 1));
+  numUnprotects++;
+  SET_STRING_ELT(inputOptions, 0, mkChar("SOILWAT2"));
+
+  setupSOILWAT2(inputOptions, &local_LogInfo);
+  if(local_LogInfo.stopRun) {
+    goto report;
+  }
+
+  /* Copy relevant data to global variable SoilWatAll */
   SoilWatAll.Model.startyr = INTEGER(startYear)[0];
   SoilWatAll.Model.endyr = INTEGER(endYear)[0];
 
@@ -563,8 +714,11 @@ SEXP rSW2_readAllWeatherFromDisk(
     SoilWatAll.Weather.use_humidityMonthly,
     SoilWatAll.Weather.use_windSpeedMonthly,
     SoilWatAll.Weather.dailyInputFlags,
-    &LogInfo
+    &local_LogInfo
   );
+  if(local_LogInfo.stopRun) {
+    goto report; // Exit function prematurely due to error
+  }
 
   // no monthly scaling
   for (i = 0; i < MAX_MONTHS; i++) {
@@ -579,26 +733,42 @@ SEXP rSW2_readAllWeatherFromDisk(
   }
 
 
-  // Process weather data
+  // Read weather data
   #ifdef RSWDEBUG
-  if (debug) swprintf("'rSW2_readAllWeatherFromDisk': process weather data");
+  if (debug) swprintf("'rSW2_readAllWeatherFromDisk': read weather data");
   #endif
-  // using global variables: SW_Weather, SW_Model, SW_Sky
-  SW_WTH_read(&SoilWatAll.Weather, &SoilWatAll.Sky, &SoilWatAll.Model, &LogInfo);
+  SW_WTH_read(&SoilWatAll.Weather, &SoilWatAll.Sky, &SoilWatAll.Model, &local_LogInfo);
+  if(local_LogInfo.stopRun) {
+    goto report; // Exit function prematurely due to error
+  }
 
   // Finalize daily weather (weather generator & monthly scaling)
   #ifdef RSWDEBUG
   if (debug) swprintf(" > finalize daily weather.\n");
   #endif
   SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
-    SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &LogInfo);
+    SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &local_LogInfo);
+  if(local_LogInfo.stopRun) {
+    goto report; // Exit function prematurely due to error
+  }
 
 
   // Return processed weather data
-  // using global variables: SW_Weather
+  // using global variable SoilWatAll.Weather
   res = PROTECT(onGet_WTH_DATA());
+  numUnprotects++;
 
-  UNPROTECT(6);
+
+  report: {
+    UNPROTECT(numUnprotects);
+
+    // de-allocate SOILWAT2 memory
+    SW_CTL_clear_model(FALSE, &SoilWatAll, &PathInfo);
+
+    sw_write_warnings(&local_LogInfo);
+    sw_fail_on_error(&local_LogInfo);
+  }
+
   return res;
 }
 
@@ -606,6 +776,9 @@ SEXP rSW2_readAllWeatherFromDisk(
 
 
 /** Expose SOILWAT2 constants and defines to internal R code of rSOILWAT2
+
+  `C_sw_consts()` is R interface to sw_consts()
+
   @return A list with six elements:
     one element `kINT` for integer constants;
     other elements contain vegetation keys, `VegTypes`;
@@ -860,6 +1033,8 @@ SEXP sw_consts(void) {
 
   See SOILWAT2's `SWRC_PTF_estimate_parameters()`, `swrc2str[]` and `ptf2str[]`.
 
+  `ptf_estimate()` is R interface to rSW2_SWRC_PTF_estimate_parameters().
+
   @param[in] ptf_type Identification number of selected PTF
   @param[in] sand Sand content of the matric soil (< 2 mm fraction) [g/g]
   @param[in] clay Clay content of the matric soil (< 2 mm fraction) [g/g]
@@ -878,6 +1053,9 @@ SEXP rSW2_SWRC_PTF_estimate_parameters(
   SEXP fcoarse,
   SEXP bdensity
 ) {
+  LOG_INFO local_LogInfo;
+  sw_init_logs(current_sw_verbosity, &local_LogInfo);
+
   int nlyrs = length(sand);
   Rboolean has_bd = !isNull(bdensity);
 
@@ -939,15 +1117,26 @@ SEXP rSW2_SWRC_PTF_estimate_parameters(
       xclay[k1],
       xcoarse[k1],
       xbd[k1],
-      &LogInfo
+      &local_LogInfo
     );
+
+    if (local_LogInfo.stopRun) {
+        goto report;
+    }
+
 
     for (k2 = 0; k2 < SWRC_PARAM_NMAX; k2++) {
       xres[k1 + nlyrs * k2] = REAL(swrcpk)[k2];
     }
   }
 
-  UNPROTECT(7);
+  report: {
+      // Note: no SOILWAT2 memory was allocated
+      UNPROTECT(7);
+
+      sw_write_warnings(&local_LogInfo);
+      sw_fail_on_error(&local_LogInfo);
+  }
 
   return res_swrcp;
 }
@@ -955,6 +1144,8 @@ SEXP rSW2_SWRC_PTF_estimate_parameters(
 
 /**
   @brief Check whether PTF and SWRC are compatible and implemented in `SOILWAT2`
+
+  `check_SWRC_vs_PTF()` is R interface to sw_check_SWRC_vs_PTF().
 
   @param[in] swrc_name Name of SWRC
   @param[in] ptf_name Name of PTF
@@ -995,6 +1186,8 @@ SEXP sw_check_SWRC_vs_PTF(SEXP swrc_name, SEXP ptf_name) {
 
   See SOILWAT2 function `SWRC_check_parameters()`.
 
+  `check_swrcp()` is R interface to rSW2_SWRC_check_parameters().
+
   @param[in] swrc_type Identification number of selected SWRC
   @param[in] *swrcp SWRC parameters;
     matrix (one row per set of parameters) or vector (treated as one set)
@@ -1002,10 +1195,14 @@ SEXP sw_check_SWRC_vs_PTF(SEXP swrc_name, SEXP ptf_name) {
   @return A logical vector indicating if parameters passed the checks.
 */
 SEXP rSW2_SWRC_check_parameters(SEXP swrc_type, SEXP swrcp) {
+  int numUnprotects = 0;
+  LOG_INFO local_LogInfo;
+  sw_init_logs(current_sw_verbosity, &local_LogInfo);
+
   /* Convert inputs to correct type */
   swrcp = PROTECT(coerceVector(swrcp, REALSXP));
   swrc_type = PROTECT(coerceVector(swrc_type, INTSXP));
-
+  numUnprotects += 2;
 
   /* Check SWRC parameters */
   int
@@ -1024,19 +1221,19 @@ SEXP rSW2_SWRC_check_parameters(SEXP swrc_type, SEXP swrcp) {
   }
 
   if (nlyrs != nrp) {
-    UNPROTECT(2); /* unprotect: swrcp, swrc_type */
+    UNPROTECT(numUnprotects); /* unprotect: swrcp, swrc_type */
     error("`nrows(swrcp)` disagrees with length of `swrc_type`.");
   }
 
   if (ncp != SWRC_PARAM_NMAX) {
-    UNPROTECT(2); /* unprotect: swrcp, swrc_type */
+    UNPROTECT(numUnprotects); /* unprotect: swrcp, swrc_type */
     error("`ncols(swrcp)` disagrees with required number of SWRC parameters.");
   }
 
 
   /* Allocate memory for result */
   SEXP res = PROTECT(allocVector(LGLSXP, nlyrs));
-
+  numUnprotects++;
 
   /* Create convenience pointers */
   unsigned int *xswrc_type = (unsigned int *) INTEGER(swrc_type);
@@ -1057,10 +1254,20 @@ SEXP rSW2_SWRC_check_parameters(SEXP swrc_type, SEXP swrcp) {
       swrcpk[k2] = xswrcp[k1 + nlyrs * k2];
     }
 
-    xres[k1] = SWRC_check_parameters(xswrc_type[k1], swrcpk, &LogInfo);
+    xres[k1] = SWRC_check_parameters(xswrc_type[k1], swrcpk, &local_LogInfo);
+
+    if (local_LogInfo.stopRun) {
+        goto report;
+    }
   }
 
-  UNPROTECT(3);
+  report: {
+      // Note: no SOILWAT2 memory was allocated
+      UNPROTECT(numUnprotects);
+
+      sw_write_warnings(&local_LogInfo);
+      sw_fail_on_error(&local_LogInfo);
+  }
 
   return res;
 }
@@ -1072,6 +1279,8 @@ SEXP rSW2_SWRC_check_parameters(SEXP swrc_type, SEXP swrcp) {
       specified soil water retention curve (SWRC)
 
   See SOILWAT2 function `SWRC_SWCtoSWP()` and `SWRC_SWPtoSWC()`.
+
+  `swrc_conversion()` via `swrc_conversion_1d()` is R interface to rSW2_SWRC().
 
   @param[in] x
     Soil water content in the layer [cm] or soil water potential [-bar]\
@@ -1092,7 +1301,12 @@ SEXP rSW2_SWRC(
   SEXP fcoarse,
   SEXP width
 ) {
-  int xdirection = asInteger(direction);
+  LOG_INFO local_LogInfo;
+  sw_init_logs(current_sw_verbosity, &local_LogInfo);
+
+  int
+    xdirection = asInteger(direction),
+    numUnprotects = 0;
 
   if (xdirection != 1 && xdirection != 2) {
     error("`direction` must be either SWP->SWC(1) or SWC->SWP(2).");
@@ -1120,7 +1334,7 @@ SEXP rSW2_SWRC(
   width = PROTECT(coerceVector(width, REALSXP));
   swrcp = PROTECT(coerceVector(swrcp, REALSXP));
   swrc_type = PROTECT(coerceVector(swrc_type, INTSXP));
-
+  numUnprotects += 5;
 
   /* Check SWRC parameters */
   int nrp, ncp;
@@ -1137,19 +1351,19 @@ SEXP rSW2_SWRC(
   }
 
   if (nlyrs != nrp) {
-    UNPROTECT(5); /* unprotect: swrcp, width, fcoarse, x, swrc_type */
+    UNPROTECT(numUnprotects); /* unprotect: swrcp, width, fcoarse, x, swrc_type */
     error("`nrows(swrcp)` disagrees with number of soil layers.");
   }
 
   if (ncp != SWRC_PARAM_NMAX) {
-    UNPROTECT(5); /* unprotect: swrcp, width, fcoarse, x, swrc_type */
+    UNPROTECT(numUnprotects); /* unprotect: swrcp, width, fcoarse, x, swrc_type */
     error("`ncols(swrcp)` disagrees with required number of SWRC parameters.");
   }
 
 
   /* Allocate memory for result */
   SEXP res = PROTECT(allocVector(REALSXP, nlyrs));
-
+  numUnprotects++;
 
   /* Create convenience pointers */
   unsigned int
@@ -1187,7 +1401,7 @@ SEXP rSW2_SWRC(
             xcoarse[k1],
             xwidth[k1],
             LOGWARN,
-            &LogInfo
+            &local_LogInfo
           );
           break;
 
@@ -1200,7 +1414,7 @@ SEXP rSW2_SWRC(
             xcoarse[k1],
             xwidth[k1],
             LOGWARN,
-            &LogInfo
+            &local_LogInfo
           );
           break;
       }
@@ -1214,9 +1428,20 @@ SEXP rSW2_SWRC(
       // Input values are not finite
       xres[k1] = NA_REAL;
     }
+
+    if (local_LogInfo.stopRun) {
+        goto report; // Exit function prematurely due to error
+    }
   }
 
-  UNPROTECT(6);
+
+  report: {
+      // Note: no SOILWAT2 memory was allocated
+      UNPROTECT(numUnprotects);
+
+      sw_write_warnings(&local_LogInfo);
+      sw_fail_on_error(&local_LogInfo);
+  }
 
   return res;
 }
