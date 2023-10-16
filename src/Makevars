@@ -1,5 +1,5 @@
 target = SOILWAT2
-lib_target = lib$(target).a
+lib_target = libr$(target).a
 path_target = SOILWAT2
 path_lib = $(path_target)/bin
 sw_sources = src/SW_Output_outarray.c
@@ -21,7 +21,7 @@ $(path_lib)/$(lib_target):
 # Note: `-I..` is required for rSOILWAT2 headers that are included by
 # SOILWAT2 headers (such as `#include "rSW_SoilWater.h"`)
 #	-@(cd $(path_target) && $(MAKE) compiler_version)
-	cd $(path_target) && $(MAKE) lib \
+	cd $(path_target) && $(MAKE) libr \
 		CC="$(CC)" CPPFLAGS="$(ALL_CPPFLAGS) -I.." CFLAGS="$(ALL_CFLAGS)" \
 		AR="$(AR)" sw_sources="$(sw_sources)"
 
