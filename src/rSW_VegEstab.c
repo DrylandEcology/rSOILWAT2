@@ -91,12 +91,13 @@ void onSet_SW_VES(SEXP VES, LOG_INFO* LogInfo) {
 			SoilWatAll.VegEstab.use = FALSE;
 		} else {
 			SoilWatAll.VegEstab.use = TRUE;
-			for (i = 0; i < nSPPS; i++)
+			for (i = 0; i < nSPPS; i++) {
 				onSet_SW_VES_spp(VES, i, LogInfo); // sets `SW_VegEstab.count` incrementally
 
             if (LogInfo->stopRun) {
                 goto report; // Exit function prematurely due to error
             }
+      }
 		}
 	}
 
