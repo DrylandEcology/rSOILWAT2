@@ -1,12 +1,18 @@
-# rSOILWAT2 v6.0.3
+# rSOILWAT2 v6.0.3-9000
+* This version produces the same output as the previous version.
+* Update `SOILWAT2` to v7.2.0 which improves error handling and fixes
+  memory leaks on error (#239; @dschlaep, @N1ckP3rsl3y).
+* Code no longer requires (unused) `pcg` header (@dschlaep).
 
 
 # rSOILWAT2 v6.0.2
 * This version produces the same output as the previous version.
 * Update `SOILWAT2` to v7.1.0 which prepares for thread-safety and reentrancy
+  (@N1ckP3rsl3y, @dschlaep).
 * C-side of `rSOILWAT2` gains new globals of the four main abstract types in
   `SOILWAT2` - SW_ALL, SW_OUTPUT_POINTERS, LOG_INFO, and PATH_INFO -
-  to interact with `SOILWAT2`.
+  to interact with `SOILWAT2`(@N1ckP3rsl3y, @dschlaep).
+
 
 # rSOILWAT2 v6.0.1
 
