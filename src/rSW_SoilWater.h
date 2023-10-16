@@ -5,8 +5,8 @@
 /*             Global Function Declarations            */
 /* --------------------------------------------------- */
 void rSW_SWC_construct(void);
-SEXP onGet_SW_SWC(void);
-void onSet_SW_SWC(SEXP SWC);
-SEXP onGet_SW_SWC_hists(void);
-SEXP onGet_SW_SWC_hist(TimeInt year);
-void onSet_SW_SWC_hist(void);
+SEXP onGet_SW_SWC(LOG_INFO* LogInfo);
+void onSet_SW_SWC(SEXP SWC, LOG_INFO* LogInfo);
+SEXP onGet_SW_SWC_hists(LOG_INFO* LogInfo);
+SEXP onGet_SW_SWC_hist(TimeInt year, LOG_INFO* LogInfo);
+void onSet_SW_SWC_hist(LOG_INFO* LogInfo);

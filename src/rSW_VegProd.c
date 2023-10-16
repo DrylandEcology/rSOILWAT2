@@ -415,7 +415,7 @@ SEXP onGet_SW_VPD(void) {
 	return VegProd;
 }
 
-void onSet_SW_VPD(SEXP SW_VPD) {
+void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 	int i;
 	SW_VEGPROD *v = &SoilWatAll.VegProd;
 
@@ -625,7 +625,11 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 	v->veg[SW_FORBS].co2_wue_coeff2 = REAL(CO2Coefficients)[15];
 
 
-  SW_VPD_fix_cover(&SoilWatAll.VegProd, &LogInfo);
+  SW_VPD_fix_cover(&SoilWatAll.VegProd, LogInfo);
+  if(LogInfo->stopRun) {
+    UNPROTECT(18); // Unprotect the eighteen protected variables before exiting
+    return; // Exit function prematurely due to error
+  }
 
 	if (EchoInits)
 		_echo_VegProd(SoilWatAll.VegProd.veg, SoilWatAll.VegProd.bare_cov);
@@ -633,6 +637,7 @@ void onSet_SW_VPD(SEXP SW_VPD) {
 	UNPROTECT(18);
 }
 
+// `estimate_PotNatVeg_composition()` is R interface to rSW2_estimate_PotNatVeg_composition()
 SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_monthly_ppt_mm,
                                          SEXP mean_monthly_Temp_C, SEXP shrub_limit, SEXP SumGrasses_Fraction,
                                          SEXP fill_empty_with_BareGround, SEXP warn_extrapolation, SEXP dailyC4vars,
@@ -641,8 +646,10 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
                                          SEXP Trees_Fraction, SEXP BareGround_Fraction) {
 
     double RelAbundanceL0[8], RelAbundanceL1[5], grasses[3];
+
     LOG_INFO local_LogInfo;
-    sw_init_logs(LogInfo.logfp, &local_LogInfo);
+    sw_init_logs(current_sw_verbosity, &local_LogInfo);
+
 
     // "final_" in the beginning meaning it's the final R -> conversion
     double final_MAP_cm = asReal(MAP_mm) / 10, final_MAT_C = asReal(MAT_C), final_MonPPT_cm[MAX_MONTHS],
@@ -726,6 +733,9 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
           final_MonPPT_cm, inputValues_D, final_shrubLimit, final_SumGrassesFraction, C4Variables,
           final_fill_empty_with_BareGround, final_isNorth, final_warn_extrapolation,
           final_fix_bareGround, grasses, RelAbundanceL0, RelAbundanceL1, &local_LogInfo);
+    if(local_LogInfo.stopRun) {
+        goto report;
+    }
 
     for(index = 0; index < 8; index++) {
         REAL(final_RelAbundanceL0)[index] = RelAbundanceL0[index];
@@ -741,14 +751,12 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
     SET_VECTOR_ELT(res, 1, final_RelAbundanceL1);
     SET_VECTOR_ELT(res, 2, final_grasses);
 
-    UNPROTECT(8);
+    report: {
+        // Note: no SOILWAT2 memory was allocated, nothing to deallocate
+        UNPROTECT(8);
 
-    if(local_LogInfo.numWarnings > 0) {
-        sw_write_logs(FALSE, &local_LogInfo); // Note: `FALSE` is not used
-    }
-
-    if(local_LogInfo.stopRun) {
-        sw_check_exit(FALSE, &local_LogInfo); // Note: `FALSE` is not used
+        sw_write_warnings(&local_LogInfo);
+        sw_fail_on_error(&local_LogInfo);
     }
 
     return res;

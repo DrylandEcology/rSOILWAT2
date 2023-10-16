@@ -120,7 +120,7 @@ SEXP onGet_SW_CARBON(void) {
  *
  * @param object An instance of the swCarbon class.
  */
-void onSet_swCarbon(SEXP object) {
+void onSet_swCarbon(SEXP object, LOG_INFO* LogInfo) {
   SW_CARBON *c = &SoilWatAll.Carbon;
 
   // Extract the slots from our object into our structure
@@ -164,7 +164,10 @@ void onSet_swCarbon(SEXP object) {
   // Check that we have enough data
   if (i - 1 + n_sim > n_input)
   {
-    LogError(&LogInfo, LOGERROR, "CO2ppm object does not contain data for every year");
+    UNPROTECT(1);
+
+    LogError(LogInfo, LOGERROR, "CO2ppm object does not contain data for every year");
+    return; // Exit function prematurely due to error
   }
 
   // Copy CO2 concentration values to SOILWAT variable

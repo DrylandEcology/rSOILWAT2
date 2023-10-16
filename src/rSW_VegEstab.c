@@ -71,7 +71,7 @@ SEXP onGet_SW_VES(void) {
 	return VES;
 }
 
-void onSet_SW_VES(SEXP VES) {
+void onSet_SW_VES(SEXP VES, LOG_INFO* LogInfo) {
 	IntU i;
 	int nSPPS;
 	SoilWatAll.VegEstab.use = TRUE;
@@ -87,25 +87,32 @@ void onSet_SW_VES(SEXP VES) {
 	} else {
 		nSPPS = INTEGER(count)[0];
 		if (nSPPS == 0) {
-			LogError(&LogInfo, LOGWARN, "Establishment is TRUE but no data. Setting False.");
+			LogError(LogInfo, LOGWARN, "Establishment is TRUE but no data. Setting False.");
 			SoilWatAll.VegEstab.use = FALSE;
 		} else {
 			SoilWatAll.VegEstab.use = TRUE;
-			for (i = 0; i < nSPPS; i++)
-				onSet_SW_VES_spp(VES, i); // sets `SW_VegEstab.count` incrementally
+			for (i = 0; i < nSPPS; i++) {
+				onSet_SW_VES_spp(VES, i, LogInfo); // sets `SW_VegEstab.count` incrementally
+
+            if (LogInfo->stopRun) {
+                goto report; // Exit function prematurely due to error
+            }
+      }
 		}
 	}
 
-	if (EchoInits)
-		LogError(&LogInfo, LOGWARN, "Establishment not used.\n");
-
-	SW_VegEstab_construct(&SoilWatAll.VegEstab, &LogInfo);
+	SW_VegEstab_construct(&SoilWatAll.VegEstab, LogInfo);
+    if(LogInfo->stopRun) {
+        goto report; // Exit function prematurely due to error
+    }
 
 	if (EchoInits)
 		_echo_VegEstab(SoilWatAll.Site.width, SoilWatAll.VegEstab.parms,
 					   SoilWatAll.VegEstab.count);
 
-	UNPROTECT(2);
+  report: {
+    UNPROTECT(2);
+  }
 }
 
 void onGet_SW_VES_spps(SEXP SPP) {
@@ -173,12 +180,16 @@ void onGet_SW_VES_spps(SEXP SPP) {
 	UNPROTECT(17);
 }
 
-void onSet_SW_VES_spp(SEXP SPP, IntU i) {
+void onSet_SW_VES_spp(SEXP SPP, IntU i, LOG_INFO* LogInfo) {
 	SW_VEGESTAB_INFO *v;
 	SEXP fileName, Name;
 	unsigned int count;
 
-	count = _new_species(&SoilWatAll.VegEstab, &LogInfo);
+	count = _new_species(&SoilWatAll.VegEstab, LogInfo);
+    if(LogInfo->stopRun) {
+        return; // Exit function prematurely due to error
+    }
+
 	v = SoilWatAll.VegEstab.parms[count];
 
 	v->vegType = INTEGER(GET_SLOT(SPP, install("vegType")))[i];
@@ -203,7 +214,7 @@ void onSet_SW_VES_spp(SEXP SPP, IntU i) {
 	strcpy(v->sppFileName, CHAR(STRING_ELT(fileName,i)) );
 	/* check for valid name first */
 	if (strlen(CHAR(STRING_ELT(Name,i))) > MAX_SPECIESNAMELEN) {
-		LogError(&LogInfo, LOGERROR, "Species name too long (> 4 chars).\n\tTry again.\n");
+		LogError(LogInfo, LOGERROR, "Species name too long (> 4 chars).\n\tTry again.\n");
 	} else {
 		strcpy(v->sppname, CHAR(STRING_ELT(Name,i)) );
 	}

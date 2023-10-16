@@ -51,3 +51,5 @@ doc
 vignettes/*.pdf
 vignettes/*.html
 vignettes/*.log
+/doc/
+/Meta/

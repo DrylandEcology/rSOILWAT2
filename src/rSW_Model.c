@@ -90,7 +90,7 @@ SEXP onGet_SW_MDL(void) {
 	return SW_MDL;
 }
 
-void onSet_SW_MDL(SEXP SW_MDL) {
+void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 	SW_MODEL *m = &SoilWatAll.Model;
 
 	SEXP StartYear;
@@ -106,24 +106,37 @@ void onSet_SW_MDL(SEXP SW_MDL) {
 	MyFileName = PathInfo.InFiles[eModel];
 
 	if (!IS_S4_OBJECT(SW_MDL)) {
-		LogError(&LogInfo, LOGERROR, "%s: No input.", MyFileName);
+		LogError(LogInfo, LOGERROR, "%s: No input.", MyFileName);
+        return; // Exit function prematurely due to error
 	}
 
 	PROTECT(StartYear = GET_SLOT(SW_MDL, install("StartYear")));
 	if (INTEGER(StartYear)[0] < 0) {
-		LogError(&LogInfo, LOGERROR, "%s: Negative start year (%d)", MyFileName, INTEGER(StartYear)[0]);
+		LogError(LogInfo, LOGERROR, "%s: Negative start year (%d)", MyFileName, INTEGER(StartYear)[0]);
+
+        UNPROTECT(1);
+        return; // Exit function prematurely due to error
 	}
 	m->startyr = INTEGER(StartYear)[0];
 	PROTECT(EndYear = GET_SLOT(SW_MDL, install("EndYear")));
 	if (isNull(EndYear) || INTEGER(EndYear)[0] == NA_INTEGER) {
-		LogError(&LogInfo, LOGERROR, "%s: Ending year not found.", MyFileName);
+		LogError(LogInfo, LOGERROR, "%s: Ending year not found.", MyFileName);
+
+        UNPROTECT(2);
+        return; // Exit function prematurely due to error
 	}
 	if (INTEGER(EndYear)[0] < 0) {
-		LogError(&LogInfo, LOGERROR, "%s: Negative ending year (%d)", MyFileName, INTEGER(EndYear)[0]);
+		LogError(LogInfo, LOGERROR, "%s: Negative ending year (%d)", MyFileName, INTEGER(EndYear)[0]);
+
+        UNPROTECT(2);
+        return; // Exit function prematurely due to error
 	}
 	m->endyr = INTEGER(EndYear)[0];
 	if (m->endyr < m->startyr) {
-		LogError(&LogInfo, LOGERROR, "%s: Start Year > End Year", MyFileName);
+		LogError(LogInfo, LOGERROR, "%s: Start Year > End Year", MyFileName);
+
+        UNPROTECT(2);
+        return; // Exit function prematurely due to error
 	}
 
 	PROTECT(StartStart = GET_SLOT(SW_MDL, install("FDOFY")));
@@ -155,7 +168,7 @@ void onSet_SW_MDL(SEXP SW_MDL) {
 			m->isnorth = TRUE;
 		}
 		strcat(errstr, "Continuing.\n");
-		LogError(&LogInfo, LOGWARN, errstr);
+		LogError(LogInfo, LOGWARN, errstr);
 	}
 
 	m->startstart += ((m->isnorth) ? DAYFIRST_NORTH : DAYFIRST_SOUTH) - 1;

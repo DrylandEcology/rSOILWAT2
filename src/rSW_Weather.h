@@ -7,10 +7,8 @@
 /*             Global Function Declarations            */
 /* --------------------------------------------------- */
 SEXP onGet_SW_WTH_setup(void);
-void onSet_SW_WTH_setup(SEXP SW_WTH);
+void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo);
 SEXP onGet_WTH_DATA(void);
-void onSet_WTH_DATA(void);
+void onSet_WTH_DATA(SEXP weatherList, LOG_INFO* LogInfo);
 SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
                            SEXP do_C4vars, SEXP do_Cheatgrass_ClimVars, SEXP latitude);
-void init_allHist_years(SW_WEATHER_HIST **allHist, int numYears);
-void free_allHist(SW_WEATHER_HIST **allHist, int numYears);

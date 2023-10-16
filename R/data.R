@@ -39,7 +39,8 @@
 #' utils::data(sw_exampleData)
 #' path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
 #' x <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
-#' identical(x, sw_exampleData) ## TRUE
+#' ## expect differences in slots "timestamp" and possibly "version"
+#' all.equal(x, sw_exampleData)
 "sw_exampleData"
 
 
