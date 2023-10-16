@@ -436,14 +436,14 @@ void onSet_WTH_DATA(SEXP weatherList, LOG_INFO* LogInfo) {
   // Deallocate (previous, if any) `allHist`
   // (using value of `SW_Weather.n_years` previously used to allocate)
   // `SW_WTH_construct()` sets `n_years` to zero
-  deallocateAllWeather(&SoilWatAll.Weather);
+  deallocateAllWeather(SoilWatAll.Weather.allHist, SoilWatAll.Weather.n_years);
 
   // Update number of years and first calendar year represented
   SoilWatAll.Weather.n_years = SoilWatAll.Model.endyr - SoilWatAll.Model.startyr + 1;
   SoilWatAll.Weather.startYear = SoilWatAll.Model.startyr;
 
   // Allocate new `allHist` (based on current `SW_Weather.n_years`)
-  allocateAllWeather(&SoilWatAll.Weather, LogInfo);
+  allocateAllWeather(&SoilWatAll.Weather.allHist, SoilWatAll.Weather.n_years, LogInfo);
   if(LogInfo->stopRun) {
     return; // Exit function prematurely due to error
   }
@@ -816,7 +816,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
       cum_monthdays[MAX_MONTHS];
 
 
-    int numYears = asInteger(yearEnd) - asInteger(yearStart) + 1, year, calcSiteOutputNum = 10,
+    int numYears = asInteger(yearEnd) - asInteger(yearStart) + 1, calcSiteOutputNum = 10,
     index, numUnprotects = 11;
 
     Bool dailyInputFlags[MAX_INPUT_COLUMNS];
@@ -850,22 +850,9 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     C4Variables = PROTECT(allocVector(REALSXP, 6));
     Cheatgrass = PROTECT(allocVector(REALSXP, 6));
 
-    allHist = (SW_WEATHER_HIST **)Mem_Malloc(sizeof(SW_WEATHER_HIST *) * numYears,
-                                            "rSW2_calc_SiteClimate",
-                                            &local_LogInfo);
+    allocateAllWeather(&allHist, numYears, &local_LogInfo);
     if(local_LogInfo.stopRun) {
         goto report;
-    }
-
-    init_allHist_years(allHist, numYears);
-
-    for(year = 0; year < numYears; year++) {
-        allHist[year] = (SW_WEATHER_HIST *)Mem_Malloc(sizeof(SW_WEATHER_HIST),
-                                                      "rSW2_calc_SiteClimate",
-                                                      &local_LogInfo);
-        if(local_LogInfo.stopRun) {
-            goto report;
-        }
     }
 
     Time_init_model(days_in_month);
@@ -988,7 +975,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
         // Note: no SOILWAT2 memory was allocated
         UNPROTECT(numUnprotects);
         deallocateClimateStructs(&climateOutput, &climateAverages);
-        free_allHist(allHist, numYears);
+        deallocateAllWeather(allHist, numYears);
 
         sw_write_warnings(&local_LogInfo);
         sw_fail_on_error(&local_LogInfo);
@@ -996,28 +983,4 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
 
     return res;
 
-}
-
-void init_allHist_years(SW_WEATHER_HIST **allHist, int numYears) {
-    int year;
-
-    for(year = 0; year < numYears; year++) {
-        allHist[year] = NULL;
-    }
-}
-
-void free_allHist(SW_WEATHER_HIST **allHist, int numYears) {
-    int year;
-
-    if(!isnull(allHist)) {
-
-        for(year = 0; year < numYears; year++) {
-            if(!isnull(allHist[year])) {
-                free(allHist[year]);
-            }
-        }
-
-        free(allHist);
-        allHist = NULL;
-    }
 }
