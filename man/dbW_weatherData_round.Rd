@@ -2,7 +2,7 @@
 % Please edit documentation in R/sw_dbW_WeatherDatabase.R
 \name{dbW_weatherData_round}
 \alias{dbW_weatherData_round}
-\title{Round weather data in a list class \code{\linkS4class{swWeatherData}}}
+\title{Round weather data}
 \usage{
 dbW_weatherData_round(
   weatherData,
@@ -15,7 +15,7 @@ dbW_weatherData_round(
 that each hold daily weather data for one calendar year.}
 
 \item{digits}{An integer value. The number of decimal places for rounding
-weather values.}
+weather values (or \code{TRUE} but no rounding if \code{FALSE} or not finite).}
 
 \item{weatherDF_dataColumns}{A vector of character strings. The column
 names of \code{weatherDF} in the correct order for \code{SOILWAT2} including
@@ -23,10 +23,12 @@ calendar year \code{year} (optional) and day of year \code{DOY}, see
 \code{\link[=weather_dataColumns]{weather_dataColumns()}}.}
 }
 \value{
-A list with \code{\linkS4class{swWeatherData}} elements.
+A list with class \code{\link{swWeatherData}} elements or
+a data frame where columns represent weather variables
+(depending on \code{weatherData}).
 }
 \description{
-Round weather data in a list class \code{\linkS4class{swWeatherData}}
+Round weather data
 }
 \section{Notes}{
 

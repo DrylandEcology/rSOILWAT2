@@ -25,10 +25,10 @@ calendar year \code{year} (optional) and day of year \code{DOY}, see
 \item{years}{A numeric vector. The calendar years.}
 
 \item{digits}{An integer value. The number of decimal places for rounding
-weather values.}
+weather values (or \code{TRUE} but no rounding if \code{FALSE} or not finite).}
 
 \item{round}{An integer value. The number of decimal places for rounding
-weather values.}
+weather values (or \code{TRUE} but no rounding if \code{FALSE} or not finite).}
 
 \item{weather_tag}{A character string. The base file name without extension
 for \code{SOILWAT2}-formatted input files; default is \code{"weath"}}

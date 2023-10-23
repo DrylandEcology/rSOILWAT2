@@ -5,10 +5,22 @@
 * This version produces the same output as the previous version.
 * Update `SOILWAT2` to v7.2.0 which improves error handling and fixes
   memory leaks on error (#239; @dschlaep, @N1ckP3rsl3y).
+
+## Bugfix
 * Code no longer requires (unused) `pcg` header (@dschlaep).
 
 ## New features
 * New `upgrade_weatherDF()` adds requested weather columns to a data frame.
+* User control for rounding of weather values
+    * `dbW_weatherData_round()` now rounds both `"weatherList"` and
+      `"weatherDF"` objects; argument `"digits"` can now also be logical
+      (if `TRUE`, then digits takes the default value of 4) or not finite
+      (e.g., `NA`; not finite values return the input without rounding).
+    * Argument `"round"` of `dbW_dataframe_to_weatherData()` is deprecated and
+      changed the default value from rounding to 2 digits to no rounding (`NA`);
+      recommended replacement is a separate call to `dbW_weatherData_round()`.
+    * Argument `"digits"` of `dbW_generateWeather()` changed the default value
+      from rounding to 4 digits to no rounding (`NA`).
 
 
 # rSOILWAT2 v6.0.2

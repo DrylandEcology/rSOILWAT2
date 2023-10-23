@@ -1019,10 +1019,9 @@ compare_weather <- function(
 #' \code{\link{dbW_estimate_WGen_coefs}}.
 #'
 #' @inheritParams dbW_estimate_WGen_coefs
+#' @inheritParams sw_weather_data
 #' @param years An integer vector. The calendar years for which to generate
 #'   daily weather. If \code{NULL}, then extracted from \code{weatherData}.
-#' @param digits An integer value. The returned values will be rounded to
-#'   the specified number of decimal places.
 #' @param wgen_coeffs A list with two named elements \var{mkv_doy} and
 #'   \var{mkv_woy}, i.e., the return value of
 #'   \code{\link{dbW_estimate_WGen_coefs}}. If \code{NULL}, then determined
@@ -1101,10 +1100,9 @@ dbW_generateWeather <- function(
   wgen_coeffs = NULL,
   imputation_type = "mean",
   imputation_span = 5L,
-  digits = 4L,
+  digits = NA,
   seed = NULL
 ) {
-
   #--- Obtain missing/null arguments
   if (is.null(wgen_coeffs)) {
     wgen_coeffs <- dbW_estimate_WGen_coefs(
@@ -1116,10 +1114,7 @@ dbW_generateWeather <- function(
   }
 
   if (is.data.frame(weatherData)) {
-    weatherData <- dbW_dataframe_to_weatherData(
-      weatherData,
-      round = digits + 2L
-    )
+    weatherData <- dbW_dataframe_to_weatherData(weatherData)
   }
 
   if (is.null(years)) {

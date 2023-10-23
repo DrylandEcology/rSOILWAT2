@@ -294,8 +294,7 @@ You may organize weather data in a variety of ways:
         weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(
           weatherDF = xdf2[, -1L, drop = FALSE],
           years = unique(xdf2[, "Year"]),
-          weatherDF_dataColumns = colnames(xdf2)[-1L],
-          round = 4L
+          weatherDF_dataColumns = colnames(xdf2)[-1L]
         )
       )
 

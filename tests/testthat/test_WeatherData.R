@@ -247,8 +247,7 @@ test_that("Weather data object conversions", {
   res <- rSOILWAT2::dbW_dataframe_to_weatherData(
     weatherDF = rSOILWAT2::dbW_weatherData_to_dataframe(
       rSOILWAT2::weatherData
-    ),
-    round = FALSE
+    )
   )
 
   expect_true(rSOILWAT2::dbW_check_weatherData(res))

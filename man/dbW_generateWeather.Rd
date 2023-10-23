@@ -10,7 +10,7 @@ dbW_generateWeather(
   wgen_coeffs = NULL,
   imputation_type = "mean",
   imputation_span = 5L,
-  digits = 4L,
+  digits = NA,
   seed = NULL
 )
 }
@@ -42,8 +42,8 @@ based on \code{weatherData}.}
 \item{imputation_span}{An integer value. The number of non-missing values
 considered if \code{imputation_type = "mean"}.}
 
-\item{digits}{An integer value. The returned values will be rounded to
-the specified number of decimal places.}
+\item{digits}{An integer value. The number of decimal places for rounding
+weather values (or \code{TRUE} but no rounding if \code{FALSE} or not finite).}
 
 \item{seed}{An integer value or \code{NULL}. See \code{\link{set.seed}}.}
 }

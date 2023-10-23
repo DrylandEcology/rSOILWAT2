@@ -8,7 +8,7 @@ dbW_dataframe_to_weatherData(
   weatherDF,
   years = NULL,
   weatherDF_dataColumns = NULL,
-  round = 2
+  round = NA
 )
 }
 \arguments{
@@ -24,7 +24,7 @@ calendar year \code{year} (optional) and day of year \code{DOY}, see
 \code{\link[=weather_dataColumns]{weather_dataColumns()}}.}
 
 \item{round}{An integer value. The number of decimal places for rounding
-weather values.}
+weather values (or \code{TRUE} but no rounding if \code{FALSE} or not finite).}
 }
 \description{
 Conversion: data.frame to object of class \code{\linkS4class{swWeatherData}}
