@@ -230,7 +230,7 @@ format_timestamp <- function(object) {
 #'         `"SWA"` added as `outkey` 8 for a new total of 30
 #'
 #' @examples
-#'   x <- sw_upgrade(rSOILWAT2::sw_exampleData, verbose = TRUE)
+#' x <- sw_upgrade(rSOILWAT2::sw_exampleData, verbose = TRUE)
 #'
 #' @md
 #' @exportMethod sw_upgrade

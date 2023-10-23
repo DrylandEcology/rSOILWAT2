@@ -188,12 +188,42 @@ swWeatherData <- function(...) {
   do.call("new", args = c("swWeatherData", dots[dns %in% sns]))
 }
 
+#' @param weatherDF A data frame with weather variables.
+#' @param template_weatherColumns A vector with requested weather variables.
+#'
+#' @return For [upgrade_weatherDF()]:
+#' an updated `weatherDF` with requested columns.
+#'
+#' @examples
+#' upgrade_weatherDF(
+#'   data.frame(DOY = 1:2, Tmax_C = runif(2), dummy = runif(2))
+#' )
+#'
+#' @md
+#' @rdname sw_upgrade
+#' @export
+upgrade_weatherDF <- function(
+  weatherDF,
+  template_weatherColumns = c("Year", "DOY", weather_dataColumns())
+) {
+  template_data <- as.data.frame(
+    array(
+      dim = c(nrow(weatherDF), length(template_weatherColumns)),
+      dimnames = list(NULL, template_weatherColumns)
+    )
+  )
+
+  cns <- intersect(template_weatherColumns, colnames(weatherDF))
+  if (length(cns) < 1L) stop("Required weather variables not found.")
+  template_data[, cns] <- weatherDF[, cns]
+  template_data
+}
 
 upgrade_swWeatherData <- function(data, year, template = new("swWeatherData")) {
-  stopifnot(colnames(data) %in% colnames(template@data))
   template@year <- as.integer(year)
-  template@data <- template@data[seq_len(nrow(data)), , drop = FALSE]
-  template@data[, colnames(data)] <- data
+  template@data <- data.matrix(
+    upgrade_weatherDF(data, c("DOY", weather_dataColumns()))
+  )
   template
 }
 

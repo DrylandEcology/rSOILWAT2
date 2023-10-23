@@ -7,6 +7,9 @@
   memory leaks on error (#239; @dschlaep, @N1ckP3rsl3y).
 * Code no longer requires (unused) `pcg` header (@dschlaep).
 
+## New features
+* New `upgrade_weatherDF()` adds requested weather columns to a data frame.
+
 
 # rSOILWAT2 v6.0.2
 * This version produces the same output as the previous version.
