@@ -310,11 +310,11 @@ You may organize weather data in a variety of ways:
       if (NROW(needs_wgen) > 0) {
         tmp1 <- rSOILWAT2::dbW_generateWeather(
           weatherData = xdf4,
+          return_weatherDF = TRUE,
           seed = 123
         )
-        tmp2 <- rSOILWAT2::dbW_weatherData_to_dataframe(tmp1)
-
-        xdf4[, vars_wgen][needs_wgen] <- tmp2[, vars_wgen][needs_wgen]
+        
+        xdf4[, vars_wgen][needs_wgen] <- tmp1[, vars_wgen][needs_wgen]
       }
 
       ids_dif <- 2L + which(dif)
@@ -323,12 +323,12 @@ You may organize weather data in a variety of ways:
         arr.ind = TRUE
       )
       if (NROW(needs_locf) > 0) {
-        tmp1 <- rSW2utils::impute_df(
+        tmp2 <- rSW2utils::impute_df(
           xdf4[, ids_dif, drop = FALSE],
           imputation_type = "locf"
         )
 
-        xdf4[, ids_dif][needs_locf] <- tmp1[needs_locf]
+        xdf4[, ids_dif][needs_locf] <- tmp2[needs_locf]
       }
 
       wdata <- rSOILWAT2::dbW_dataframe_to_weatherData(xdf4, round = 4L)

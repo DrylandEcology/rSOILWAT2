@@ -11,7 +11,7 @@
 
 ## New features
 * New `upgrade_weatherDF()` adds requested weather columns to a data frame.
-* User control for rounding of weather values
+* Improved usability of weather functionality
     * `dbW_weatherData_round()` now rounds both `"weatherList"` and
       `"weatherDF"` objects; argument `"digits"` can now also be logical
       (if `TRUE`, then digits takes the default value of 4) or not finite
@@ -21,6 +21,11 @@
       recommended replacement is a separate call to `dbW_weatherData_round()`.
     * Argument `"digits"` of `dbW_generateWeather()` changed the default value
       from rounding to 4 digits to no rounding (`NA`).
+    * `dbW_generateWeather()` gained `"return_weatherDF"` and now returns a
+      user requested weather object type. If `return_weatherDF` is `TRUE`,
+      then the result is converted to a data frame where columns represent
+      weather variables; otherwise, a list of elements of class `swWeatherData`
+      is returned (as previously).
 
 
 # rSOILWAT2 v6.0.2

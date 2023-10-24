@@ -25,94 +25,91 @@ weatherGenerator_dataColumns <- function() {
 }
 
 
-#' Estimate coefficients for use by \var{SOILWAT2} weather generator
+#' Estimate coefficients of the `SOILWAT2` weather generator
 #'
-#' Estimates coefficients for the two site-specific files
-#' \var{mkv_covar.in} and \var{mkv_prob.in} required by the first-order
-#' Markov weather generator in \var{SOILWAT2} \var{> v4.2.5}.
+#' Estimated coefficients correspond to what is required by the two files
+#' `"mkv_covar.in"` and `"mkv_prob.in"` for the first-order
+#' Markov weather generator in `SOILWAT2` `> v4.2.5`.
 #'
 #' @section Notes: This code is a complete overhaul compared to the version
-#'   from \var{rSFSTEP2} on \code{2019-Feb-10}
-#'   commit \var{cd9e161971136e1e56d427a4f76062bbb0f3d03a}
-#'   \url{https://github.com/DrylandEcology/rSFSTEP2}.
+# nolint start: line_length_linter.
+#' from [`rSFSTEP2` on `2019-Feb-10`](https://github.com/DrylandEcology/rSFSTEP2/commit/cd9e161971136e1e56d427a4f76062bbb0f3d03a).
+# nolint end: line_length_linter.
 #'
-#' @section Notes: This function will produce \code{NA}s in the output if there
-#'   are insufficient weather observation in the input data \code{weatherData}
-#'   for a specific day or week of the year. Such \code{NA}s will cause a
-#'   \var{SOILWAT2} run to fail (potentially non-graciously and
-#'   with non-obvious error messages). To avoid that, this function offers
-#'   imputation approaches in order to fill in those failed coefficient
-#'   estimates; see \code{\link[rSW2utils]{impute_df}}, but please note that
-#'   any such imputation likely introduces biases in the generated weather.
+#' @section Notes: This function will produce `NA`s in the output if there
+#' are insufficient weather observation in the input data `weatherData`
+#' for a specific day or week of the year. Such `NA`s will cause a
+#' `SOILWAT2` run to fail (potentially non-graciously and
+#' with non-obvious error messages). To avoid that, this function offers
+#' imputation approaches in order to fill in those failed coefficient
+#' estimates; see [rSW2utils::impute_df()], but please note that
+#' any such imputation likely introduces biases in the generated weather.
 #'
-#' @section Details: Most users will likely want to set \code{propagate_NAs} to
-#'   \code{FALSE}. Note: \code{propagate_NAs} corresponds to \code{!na.rm}
-#'   from previous versions of this function with a different default value.
-#'   Consider an example: a the 30-year long input \code{weatherData} is
-#'   complete except for missing values on Jan 1, 2018.
-#'   \itemize{
-#'     \item If \code{propagate_NAs} is set to \code{TRUE}, then the
-#'     coefficients for day 1 and week 1 of year will be \code{NA} --
+#' @section Details:
+#' Most users will likely want to set `propagate_NAs` to `FALSE`.
+#' Note: `propagate_NAs` corresponds to `!na.rm`
+#' from previous versions of this function with a different default value.
+#' Consider an example: a the 30-year long input `weatherData` is
+#' complete except for missing values on Jan 1, 2018.
+#'   * If `propagate_NAs` is set to `TRUE`, then the
+#'     coefficients for day 1 and week 1 of year will be `NA` --
 #'     despite all the available data. In this case, the missing coefficients
 #'     for day 1 and week 1 of year will be imputed.
-#'   \item If \code{propagate_NAs} is set to \code{FALSE}, then the coefficients
+#'   * If `propagate_NAs` is set to `FALSE`, then the coefficients
 #'     for day 1 and week 1 of year will be calculated based on the non-missing
 #'     values for that day respectively that week of year. No imputation occurs.
-#'   }
 #'
-#' @param weatherData A list of elements of class
-#'   \code{\linkS4class{swWeatherData}} or a \code{data.frame} as returned by
-#'   \code{\link{dbW_weatherData_to_dataframe}}.
+#'
+#' @param weatherData A list of elements of class [`swWeatherData`]
+#' or a data frame as returned by [dbW_weatherData_to_dataframe()].
 #' @param WET_limit_cm A numeric value. A day with more precipitation than
-#'   this value is considered \var{wet} instead of \var{dry}. Default is 0.
-#'   This values should be equal to the corresponding value used in
-#'   \var{SOILWAT2}'s function \code{SW_MKV_today}.
-#' @param propagate_NAs A logical value. If \code{TRUE}, then missing weather
-#'   values in the input \code{weatherData} are excluded; if \code{FALSE}, then
-#'   missing values are propagated to the estimation. See Details.
+#' this value is considered `wet` instead of `dry`. Default is 0.
+#' This values should be equal to the corresponding value used in
+#' `SOILWAT2`'s function `SW_MKV_today()`.
+#' @param propagate_NAs A logical value. If `TRUE`, then missing weather
+#' values in the input `weatherData` are excluded; if `FALSE`, then
+#' missing values are propagated to the estimation. See Details.
+#' @param imputation_type A text string. Passed to [rSW2utils::impute_df()]
+#' for imputation of missing values in estimated weather generator coefficients.
+#' @param imputation_span An integer value. Passed to [rSW2utils::impute_df()]
+#' for imputation of missing values in estimated weather generator coefficients.
 #' @inheritParams set_missing_weather
-#' @inheritParams rSW2utils::impute_df
 #'
 #' @return A list with two named elements:
-#'   \describe{
-#'     \item{\code{mkv_doy}}{A data.frame with 366 rows (day of year) and
-#'        5 columns: \describe{
-#'          \item{DOY}{Day of year.}
-#'          \item{p_W_W}{Probability that doy is wet if the previous day
-#'            (doy - 1) was wet.}
-#'          \item{p_W_D}{Probability that doy is wet if the previous day
-#'            (doy - 1) was dry.}
-#'          \item{PPT_avg}{Average amount of precipitation (centimeters)
-#'            on doy if it is wet.}
-#'          \item{PPT_sd}{Standard deviation of amount of precipitation
-#'            (centimeters) on doy if it is wet.}
-#'        }}
-#'     \item{\code{mkv_woy}}{A data.frame with 53 rows (\var{SOILWAT2}
-#'       weeks of year, i.e., counted as consecutive \var{heptads} of days) and
-#'       11 columns: \describe{
-#'         \item{WEEK}{Week of year.}
-#'         \item{wTmax_C}{Average daily maximum temperature (C) for week.}
-#'         \item{wTmin_C}{Average daily minimum temperature (C) for week.}
-#'         \item{var_MAX}{Variance of daily maximum temperature for week.}
-#'         \item{cov_MAXMIN}{Covariance of daily maximum and minimum
-#'           temperatures for week.}
-#'         \item{cov_MINMAX}{Identical to \code{cov_MAXMIN}.}
-#'         \item{var_MIN}{Variance of daily minimum temperature for week.}
-#'         \item{CF_Tmax_wet}{Difference between average daily maximum
-#'           temperature (C) for wet days of week and \code{wTmax_C}.}
-#'         \item{CF_Tmax_dry}{Difference between average daily maximum
-#'           temperature (C) for dry days of week and \code{wTmax_C}.}
-#'         \item{CF_Tmin_wet}{Same as \code{CF_Tmax_wet} but for daily
-#'           minimum temperature.}
-#'         \item{CF_Tmin_dry}{Same as \code{CF_Tmax_dry} but for daily
-#'           minimum temperature.}
-#'       }}
-#'   }
+#'   * `"mkv_doy"`: A data frame with 366 rows (day of year) and 5 columns:
+#'      * `"DOY"`: Rows represent day of year.
+#'      * `"p_W_W"`: Probability that `DOY` is wet if the previous day
+#'        `(doy - 1)` was wet.
+#'      * `"p_W_D"`: Probability that `DOY` is wet if the previous day
+#'         `(doy - 1)` was dry.
+#'      * `"PPT_avg"`: Average amount of precipitation `[cm]` on `DOY` if wet.
+#'      * `"PPT_sd"`: Standard deviation of amount of precipitation `[cm]`
+#'        on `DOY` if wet.
 #'
-#' @seealso \code{\link{print_mkv_files}} to print values to \var{SOILWAT2}
-#'   compatible files. \code{\link{swMarkov_Prob}} and
-#'   \code{\link{swMarkov_Conv}} to extract/replace values in a \pkg{rSOILWAT2}
-#'   input object of class \code{\linkS4class{swInputData}}.
+#'   * `"mkv_woy"`: A data frame with 53 rows `SOILWAT2` weeks of year
+#'     (i.e., consecutive `heptads` of days) and 11 columns
+#'       * `"WEEK"`: Rows represent week of year.
+#'       * `"wTmax_C"`: Average daily maximum temperature `[C]` for week.
+#'       * `"wTmin_C"`: Average daily minimum temperature `[C]` for week.
+#'       * `"var_MAX"`: Variance of daily maximum temperature for week.
+#'       * `"cov_MAXMIN"`: Covariance of daily maximum and minimum
+#'           temperatures for week.
+#'       * `"cov_MINMAX"`: Identical to `"cov_MAXMIN"`.
+#'       * `"var_MIN"`: Variance of daily minimum temperature for week.
+#'       * `"CF_Tmax_wet"`: Difference between average daily maximum
+#'           temperature `[C]` for wet days of week and `"wTmax_C"`.
+#'       * `"CF_Tmax_dry"`: Difference between average daily maximum
+#'           temperature `[C]` for dry days of week and `"wTmax_C"`.
+#'       * `"CF_Tmin_wet"`: Same as `"CF_Tmax_wet"` but for daily
+#'           minimum temperature.
+#'       * `"CF_Tmin_dry"`: Same as `"CF_Tmax_dry"` but for daily
+#'           minimum temperature.
+#'
+#'
+#' @seealso [print_mkv_files()] to print values to `SOILWAT2`
+#' compatible files. [swMarkov_Prob()] and
+#' [swMarkov_Conv()] to extract/replace values in a `rSOILWAT2`
+#' input object of class [`swInputData`].
 #'
 #' @examples
 #' res1 <- dbW_estimate_WGen_coefs(rSOILWAT2::weatherData)
@@ -123,6 +120,7 @@ weatherGenerator_dataColumns <- function() {
 #' swMarkov_Prob(sw_in) <- res2[["mkv_doy"]]
 #' swMarkov_Conv(sw_in) <- res2[["mkv_woy"]]
 #'
+#' @md
 #' @export
 dbW_estimate_WGen_coefs <- function(
   weatherData,
@@ -1015,21 +1013,24 @@ compare_weather <- function(
 
 #' Generate daily weather data using SOILWAT2's weather generator
 #'
-#' This function is a convenience wrapper for
-#' \code{\link{dbW_estimate_WGen_coefs}}.
+#' This function is a convenience wrapper for [dbW_estimate_WGen_coefs()].
 #'
 #' @inheritParams dbW_estimate_WGen_coefs
 #' @inheritParams sw_weather_data
 #' @param years An integer vector. The calendar years for which to generate
-#'   daily weather. If \code{NULL}, then extracted from \code{weatherData}.
-#' @param wgen_coeffs A list with two named elements \var{mkv_doy} and
-#'   \var{mkv_woy}, i.e., the return value of
-#'   \code{\link{dbW_estimate_WGen_coefs}}. If \code{NULL}, then determined
-#'   based on \code{weatherData}.
-#' @inheritParams rSW2utils::impute_df
-#' @param seed An integer value or \code{NULL}. See \code{\link{set.seed}}.
+#' daily weather. If `NULL`, then extracted from `weatherData`.
+#' @param wgen_coeffs A list with two named elements `"mkv_doy"` and
+#' `"mkv_woy"`, i.e., the return value of [dbW_estimate_WGen_coefs()].
+#' If `NULL`, then [dbW_estimate_WGen_coefs()] is called on `weatherData`.
+#' @param seed An integer value or `NULL`. See [base::set.seed()].
+#' @param return_weatherDF A logical value. See section "Value".
 #'
-#' @return A list of elements of class \code{\linkS4class{swWeatherData}}.
+#' @return An updated copy of `weatherData` where missing values are imputed
+#' by the weather generator.
+#' If `return_weatherDF` is `TRUE`, then the result is converted to a
+#' data frame where columns represent weather variables.
+#' If `return_weatherDF` is `FALSE`, then the result is
+#' a list of elements of class [`swWeatherData`].
 #'
 #' @section Details:
 #' The current implementation of the weather generator produces values
@@ -1052,7 +1053,7 @@ compare_weather <- function(
 #' x[ids, -(1:2)] <- NA
 #'
 #' ## Example 1: generate weather for any missing values in our 'dataset'
-#' wout1 <- dbW_generateWeather(x)
+#' wout1 <- dbW_generateWeather(x, return_weatherDF = TRUE)
 #'
 #' ## Example 2: generate weather based on our 'dataset' but for
 #' ## years 2005-2015 and use estimated weather generator coefficients from
@@ -1085,7 +1086,7 @@ compare_weather <- function(
 #' path <- tempdir()
 #' compare_weather(
 #'   ref_weather = x,
-#'   weather = dbW_weatherData_to_dataframe(wout1),
+#'   weather = wout1,
 #'   N = 1,
 #'   path = path,
 #'   tag = "Example1-WeatherGenerator"
@@ -1100,6 +1101,7 @@ dbW_generateWeather <- function(
   wgen_coeffs = NULL,
   imputation_type = "mean",
   imputation_span = 5L,
+  return_weatherDF = FALSE,
   digits = NA,
   seed = NULL
 ) {
@@ -1113,9 +1115,10 @@ dbW_generateWeather <- function(
     )
   }
 
-  if (is.data.frame(weatherData)) {
+  if (!dbW_check_weatherData(weatherData, check_all = FALSE)) {
     weatherData <- dbW_dataframe_to_weatherData(weatherData)
   }
+
 
   if (is.null(years)) {
     years <- get_years_from_weatherData(weatherData)
@@ -1151,6 +1154,10 @@ dbW_generateWeather <- function(
   #--- Process weather in SOILWAT2
   set.seed(seed)
   res <- .Call(C_rSW2_processAllWeather, weatherData, sw_in)
+
+  if (isTRUE(as.logical(return_weatherDF[[1L]]))) {
+    res <- dbW_weatherData_to_dataframe(res)
+  }
 
   dbW_weatherData_round(res, digits = digits)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/swWeatherGenerator.R
 \name{dbW_estimate_WGen_coefs}
 \alias{dbW_estimate_WGen_coefs}
-\title{Estimate coefficients for use by \var{SOILWAT2} weather generator}
+\title{Estimate coefficients of the \code{SOILWAT2} weather generator}
 \usage{
 dbW_estimate_WGen_coefs(
   weatherData,
@@ -14,14 +14,13 @@ dbW_estimate_WGen_coefs(
 )
 }
 \arguments{
-\item{weatherData}{A list of elements of class
-\code{\linkS4class{swWeatherData}} or a \code{data.frame} as returned by
-\code{\link{dbW_weatherData_to_dataframe}}.}
+\item{weatherData}{A list of elements of class \code{\link{swWeatherData}}
+or a data frame as returned by \code{\link[=dbW_weatherData_to_dataframe]{dbW_weatherData_to_dataframe()}}.}
 
 \item{WET_limit_cm}{A numeric value. A day with more precipitation than
-this value is considered \var{wet} instead of \var{dry}. Default is 0.
+this value is considered \code{wet} instead of \code{dry}. Default is 0.
 This values should be equal to the corresponding value used in
-\var{SOILWAT2}'s function \code{SW_MKV_today}.}
+\code{SOILWAT2}'s function \code{SW_MKV_today()}.}
 
 \item{propagate_NAs}{A logical value. If \code{TRUE}, then missing weather
 values in the input \code{weatherData} are excluded; if \code{FALSE}, then
@@ -30,94 +29,83 @@ missing values are propagated to the estimation. See Details.}
 \item{valNA}{The (numerical) value of missing weather data.
 If \code{NULL}, then default values are interpreted as missing.}
 
-\item{imputation_type}{A character string describing the imputation method;
- currently, one of three values: \describe{
-   \item{\var{"none"}}{no imputation is carried out;}
-   \item{\var{"mean"}}{missing values will be replaced by the average
-     of \code{imputation_span} non-missing values before and
-     \code{imputation_span} non-missing values after; note:
-     this may fail if there are less than \code{2 * imputation_span}
-     non-missing values;}
-   \item{\var{"locf"}}{missing values will be replaced by the
-     \var{"last-observation-carried-forward"} imputation method.}
-}}
+\item{imputation_type}{A text string. Passed to \code{\link[rSW2utils:impute_df]{rSW2utils::impute_df()}}
+for imputation of missing values in estimated weather generator coefficients.}
 
-\item{imputation_span}{An integer value. The number of non-missing values
-considered if \code{imputation_type = "mean"}.}
+\item{imputation_span}{An integer value. Passed to \code{\link[rSW2utils:impute_df]{rSW2utils::impute_df()}}
+for imputation of missing values in estimated weather generator coefficients.}
 }
 \value{
 A list with two named elements:
-  \describe{
-    \item{\code{mkv_doy}}{A data.frame with 366 rows (day of year) and
-       5 columns: \describe{
-         \item{DOY}{Day of year.}
-         \item{p_W_W}{Probability that doy is wet if the previous day
-           (doy - 1) was wet.}
-         \item{p_W_D}{Probability that doy is wet if the previous day
-           (doy - 1) was dry.}
-         \item{PPT_avg}{Average amount of precipitation (centimeters)
-           on doy if it is wet.}
-         \item{PPT_sd}{Standard deviation of amount of precipitation
-           (centimeters) on doy if it is wet.}
-       }}
-    \item{\code{mkv_woy}}{A data.frame with 53 rows (\var{SOILWAT2}
-      weeks of year, i.e., counted as consecutive \var{heptads} of days) and
-      11 columns: \describe{
-        \item{WEEK}{Week of year.}
-        \item{wTmax_C}{Average daily maximum temperature (C) for week.}
-        \item{wTmin_C}{Average daily minimum temperature (C) for week.}
-        \item{var_MAX}{Variance of daily maximum temperature for week.}
-        \item{cov_MAXMIN}{Covariance of daily maximum and minimum
-          temperatures for week.}
-        \item{cov_MINMAX}{Identical to \code{cov_MAXMIN}.}
-        \item{var_MIN}{Variance of daily minimum temperature for week.}
-        \item{CF_Tmax_wet}{Difference between average daily maximum
-          temperature (C) for wet days of week and \code{wTmax_C}.}
-        \item{CF_Tmax_dry}{Difference between average daily maximum
-          temperature (C) for dry days of week and \code{wTmax_C}.}
-        \item{CF_Tmin_wet}{Same as \code{CF_Tmax_wet} but for daily
-          minimum temperature.}
-        \item{CF_Tmin_dry}{Same as \code{CF_Tmax_dry} but for daily
-          minimum temperature.}
-      }}
-  }
+\itemize{
+\item \code{"mkv_doy"}: A data frame with 366 rows (day of year) and 5 columns:
+\itemize{
+\item \code{"DOY"}: Rows represent day of year.
+\item \code{"p_W_W"}: Probability that \code{DOY} is wet if the previous day
+\code{(doy - 1)} was wet.
+\item \code{"p_W_D"}: Probability that \code{DOY} is wet if the previous day
+\code{(doy - 1)} was dry.
+\item \code{"PPT_avg"}: Average amount of precipitation \verb{[cm]} on \code{DOY} if wet.
+\item \code{"PPT_sd"}: Standard deviation of amount of precipitation \verb{[cm]}
+on \code{DOY} if wet.
+}
+\item \code{"mkv_woy"}: A data frame with 53 rows \code{SOILWAT2} weeks of year
+(i.e., consecutive \code{heptads} of days) and 11 columns
+\itemize{
+\item \code{"WEEK"}: Rows represent week of year.
+\item \code{"wTmax_C"}: Average daily maximum temperature \verb{[C]} for week.
+\item \code{"wTmin_C"}: Average daily minimum temperature \verb{[C]} for week.
+\item \code{"var_MAX"}: Variance of daily maximum temperature for week.
+\item \code{"cov_MAXMIN"}: Covariance of daily maximum and minimum
+temperatures for week.
+\item \code{"cov_MINMAX"}: Identical to \code{"cov_MAXMIN"}.
+\item \code{"var_MIN"}: Variance of daily minimum temperature for week.
+\item \code{"CF_Tmax_wet"}: Difference between average daily maximum
+temperature \verb{[C]} for wet days of week and \code{"wTmax_C"}.
+\item \code{"CF_Tmax_dry"}: Difference between average daily maximum
+temperature \verb{[C]} for dry days of week and \code{"wTmax_C"}.
+\item \code{"CF_Tmin_wet"}: Same as \code{"CF_Tmax_wet"} but for daily
+minimum temperature.
+\item \code{"CF_Tmin_dry"}: Same as \code{"CF_Tmax_dry"} but for daily
+minimum temperature.
+}
+}
 }
 \description{
-Estimates coefficients for the two site-specific files
-\var{mkv_covar.in} and \var{mkv_prob.in} required by the first-order
-Markov weather generator in \var{SOILWAT2} \var{> v4.2.5}.
+Estimated coefficients correspond to what is required by the two files
+\code{"mkv_covar.in"} and \code{"mkv_prob.in"} for the first-order
+Markov weather generator in \code{SOILWAT2} \verb{> v4.2.5}.
 }
 \section{Notes}{
  This code is a complete overhaul compared to the version
-  from \var{rSFSTEP2} on \code{2019-Feb-10}
-  commit \var{cd9e161971136e1e56d427a4f76062bbb0f3d03a}
-  \url{https://github.com/DrylandEcology/rSFSTEP2}.
+from \href{https://github.com/DrylandEcology/rSFSTEP2/commit/cd9e161971136e1e56d427a4f76062bbb0f3d03a}{\code{rSFSTEP2} on \code{2019-Feb-10}}.
 
  This function will produce \code{NA}s in the output if there
-  are insufficient weather observation in the input data \code{weatherData}
-  for a specific day or week of the year. Such \code{NA}s will cause a
-  \var{SOILWAT2} run to fail (potentially non-graciously and
-  with non-obvious error messages). To avoid that, this function offers
-  imputation approaches in order to fill in those failed coefficient
-  estimates; see \code{\link[rSW2utils]{impute_df}}, but please note that
-  any such imputation likely introduces biases in the generated weather.
+are insufficient weather observation in the input data \code{weatherData}
+for a specific day or week of the year. Such \code{NA}s will cause a
+\code{SOILWAT2} run to fail (potentially non-graciously and
+with non-obvious error messages). To avoid that, this function offers
+imputation approaches in order to fill in those failed coefficient
+estimates; see \code{\link[rSW2utils:impute_df]{rSW2utils::impute_df()}}, but please note that
+any such imputation likely introduces biases in the generated weather.
 }
 
 \section{Details}{
- Most users will likely want to set \code{propagate_NAs} to
-  \code{FALSE}. Note: \code{propagate_NAs} corresponds to \code{!na.rm}
-  from previous versions of this function with a different default value.
-  Consider an example: a the 30-year long input \code{weatherData} is
-  complete except for missing values on Jan 1, 2018.
-  \itemize{
-    \item If \code{propagate_NAs} is set to \code{TRUE}, then the
-    coefficients for day 1 and week 1 of year will be \code{NA} --
-    despite all the available data. In this case, the missing coefficients
-    for day 1 and week 1 of year will be imputed.
-  \item If \code{propagate_NAs} is set to \code{FALSE}, then the coefficients
-    for day 1 and week 1 of year will be calculated based on the non-missing
-    values for that day respectively that week of year. No imputation occurs.
-  }
+
+Most users will likely want to set \code{propagate_NAs} to \code{FALSE}.
+Note: \code{propagate_NAs} corresponds to \code{!na.rm}
+from previous versions of this function with a different default value.
+Consider an example: a the 30-year long input \code{weatherData} is
+complete except for missing values on Jan 1, 2018.
+\itemize{
+\item If \code{propagate_NAs} is set to \code{TRUE}, then the
+coefficients for day 1 and week 1 of year will be \code{NA} --
+despite all the available data. In this case, the missing coefficients
+for day 1 and week 1 of year will be imputed.
+\item If \code{propagate_NAs} is set to \code{FALSE}, then the coefficients
+for day 1 and week 1 of year will be calculated based on the non-missing
+values for that day respectively that week of year. No imputation occurs.
+}
 }
 
 \examples{
@@ -131,8 +119,8 @@ swMarkov_Conv(sw_in) <- res2[["mkv_woy"]]
 
 }
 \seealso{
-\code{\link{print_mkv_files}} to print values to \var{SOILWAT2}
-  compatible files. \code{\link{swMarkov_Prob}} and
-  \code{\link{swMarkov_Conv}} to extract/replace values in a \pkg{rSOILWAT2}
-  input object of class \code{\linkS4class{swInputData}}.
+\code{\link[=print_mkv_files]{print_mkv_files()}} to print values to \code{SOILWAT2}
+compatible files. \code{\link[=swMarkov_Prob]{swMarkov_Prob()}} and
+\code{\link[=swMarkov_Conv]{swMarkov_Conv()}} to extract/replace values in a \code{rSOILWAT2}
+input object of class \code{\link{swInputData}}.
 }
