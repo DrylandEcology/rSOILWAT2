@@ -6,6 +6,6 @@
 /*             Global Function Declarations            */
 /* --------------------------------------------------- */
 SEXP onGet_SW_VES(void);
-void onSet_SW_VES(SEXP VES);
+void onSet_SW_VES(SEXP VES, LOG_INFO* LogInfo);
 void onGet_SW_VES_spps(SEXP SPP);
-void onSet_SW_VES_spp(SEXP SPP, IntU i);
+void onSet_SW_VES_spp(SEXP SPP, IntU i, LOG_INFO* LogInfo);

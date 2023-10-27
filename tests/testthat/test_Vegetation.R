@@ -284,7 +284,8 @@ test_that("Vegetation: estimate land cover composition", {
       mean_monthly_ppt_mm = rep(0, 12),
       mean_monthly_Temp_C = rep(0, 12),
       fix_succulents = TRUE, Succulents_Fraction = 10
-    )
+    ),
+    regexp = "relative abundance values sum to more than 1 = full land cover"
   )
 
   # issue 219: output incorrectly contained negative cover
@@ -301,7 +302,8 @@ test_that("Vegetation: estimate land cover composition", {
       Shrubs_Fraction = 0.5,
       fix_sumgrasses = TRUE,
       SumGrasses_Fraction = 0.7
-    )
+    ),
+    regexp = "relative abundance values sum to more than 1 = full land cover"
   )
 
   # (ii) all fixed but sum is less than 1 and !fill_empty_with_BareGround
@@ -320,7 +322,8 @@ test_that("Vegetation: estimate land cover composition", {
       fix_trees = TRUE, Trees_Fraction = 0,
       fix_BareGround = TRUE, BareGround_Fraction = 0,
       fill_empty_with_BareGround = FALSE
-    )
+    ),
+    regexp = "all fixed, but their sum is smaller than 1"
   )
 
   # The last errors are avoided if `fill_empty_with_BareGround = TRUE`
@@ -345,9 +348,8 @@ test_that("Vegetation: estimate land cover composition", {
   expect_pnv(pnv[1:2])
   expect_equal(pnv[["Rel_Abundance_L0"]][ibar], 1, ignore_attr = "names")
 
-  # Make sure `SOILWAT2` throws a warning that R, we use `sw_verbosity()`
-  # to do that
-  prev_quiet <- sw_verbosity(TRUE)
+  # Make sure `SOILWAT2` throws a warning
+  prev_verbosity <- sw_verbosity(TRUE)
 
   # Expecting warning because MAT_C is outside of formulas domain
   expect_warning(
@@ -357,11 +359,12 @@ test_that("Vegetation: estimate land cover composition", {
       mean_monthly_ppt_mm = c(0, 0, rep(100, 9), 0),
       mean_monthly_Temp_C = rep(-10, 12),
       fill_empty_with_BareGround = FALSE
-    )
+    ),
+    regexp = "Equations used outside supported range"
   )
 
   # Undo what the previous call to `sw_verbosity()` did
-  sw_verbosity(prev_quiet)
+  sw_verbosity(prev_verbosity)
 })
 
 

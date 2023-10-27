@@ -19,25 +19,21 @@
 /* =================================================== */
 /*            Externed Global Variables                */
 /* --------------------------------------------------- */
-extern SEXP InputData;
-extern SEXP WeatherList;
-extern Bool useFiles;
-extern Bool bWeatherList;
-
 extern SW_ALL SoilWatAll;
 extern SW_OUTPUT_POINTERS SoilWatOutputPtrs[SW_OUTNKEYS];
-extern LOG_INFO LogInfo;
 extern PATH_INFO PathInfo;
+
 extern Bool EchoInits;
+extern FILE *current_sw_verbosity;
 
 
 /* =================================================== */
 /*             Global Function Declarations            */
 /* --------------------------------------------------- */
-SEXP sw_quiet(SEXP quiet);
+SEXP sw_verbose(SEXP verbose);
 SEXP tempError(void);
-SEXP onGetInputDataFromFiles(SEXP input, SEXP quiet);
-SEXP start(SEXP inputOptions, SEXP inputData, SEXP weatherList, SEXP quiet);
+SEXP onGetInputDataFromFiles(SEXP input);
+SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList);
 SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData);
 SEXP rSW2_readAllWeatherFromDisk(
   SEXP path,
