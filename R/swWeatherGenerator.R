@@ -1040,6 +1040,8 @@ compare_weather <- function(
 #' all implemented variables will be replaced by those produced
 #' by the weather generator.
 #'
+#' @seealso [dbW_imputeWeather()]
+#'
 #' @examples
 #' # Load data for 1949-2010
 #' wdata <- data.frame(dbW_weatherData_to_dataframe(rSOILWAT2::weatherData))
@@ -1160,4 +1162,180 @@ dbW_generateWeather <- function(
   }
 
   dbW_weatherData_round(res, digits = digits)
+}
+
+
+
+
+
+#' Impute missing weather values
+#'
+#' Impute missing weather values first by the weather generator
+#' (for supported variables, see [weatherGenerator_dataColumns()]) and
+#' second, if any missing values remain, using one of the imputation types
+#' provided by [rSW2utils::impute_df()] for each variable separately.
+#'
+#' @inheritParams dbW_generateWeather
+#' @param use_wg A logical value. Should the weather generator be used first?
+#' @param method_after_wg A string. The imputation type passed
+#' to [rSW2utils::impute_df()], if any missing values remain after the
+#' weather generator.
+#' @param nmax_run An integer value. Runs (sets of consecutive missing values)
+#' that are equal or shorter to `nmax_run` are imputed;
+#' longer runs remain unchanged. Passed to [rSW2utils::impute_df()].
+#'
+#' @return An updated copy of `weatherData` where missing values are imputed.
+#' If `return_weatherDF` is `TRUE`, then a
+#' data frame where columns represent weather variables is returned.
+#' If `return_weatherDF` is `FALSE`, then the result is converted to a
+#' a list of elements of class [`swWeatherData`].
+#'
+#' @section Details:
+#' The weather generator (see [dbW_generateWeather()]) produces new values
+#' for all implemented variables [weatherGenerator_dataColumns()] on days
+#' where at least one of these variables is missing; this is to maintain
+#' physical consistency among those variables.
+#' This differs from the approach employed by `method_after_wg`
+#' which imputes missing variables for each variable separately
+#' (see [rSW2utils::impute_df()]).
+#'
+#' @seealso [rSW2utils::impute_df()], [dbW_generateWeather()]
+#'
+#' @examples
+#' # Load example data
+#' path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
+#' dif <- c(rep(TRUE, 3L), rep(FALSE, 11L))
+#' dif[13L] <- TRUE # ACTUAL_VP
+#' dif[14L] <- TRUE # SHORT_WR, desc_rsds = 2
+#' wdata <- getWeatherData_folders(
+#'   LookupWeatherFolder = file.path(path_demo, "Input"),
+#'   weatherDirName = "data_weather_daymet",
+#'   filebasename = "weath",
+#'   startYear = 1980,
+#'   endYear = 1981,
+#'   dailyInputFlags = dif,
+#'   method = "C"
+#' )
+#' x0 <- x <- dbW_weatherData_to_dataframe(wdata)
+#' dif0 <- calc_dailyInputFlags(x0)
+#'
+#' # Set June-August of 1980 as missing
+#' ids_missing <- x[, "Year"] == 1980 & x[, "DOY"] >= 153 & x[, "DOY"] <= 244
+#' x[ids_missing, -(1:2)] <- NA
+#'
+#' x1 <- dbW_imputeWeather(x, return_weatherDF = TRUE)
+#' x2 <- dbW_imputeWeather(x, method_after_wg = "none", return_weatherDF = TRUE)
+#' x3 <- dbW_imputeWeather(
+#'   x,
+#'   use_wg = FALSE,
+#'   method_after_wg = "locf",
+#'   return_weatherDF = TRUE
+#' )
+#'
+#' if (requireNamespace("graphics")) {
+#'   ## Compare original vs imputed values for May-Sep of 1980
+#'   ip <- x[, "Year"] == 1980 & x[, "DOY"] >= 123 & x[, "DOY"] <= 274
+#'   doy <- x[ip, "DOY"]
+#'
+#'   vars <- names(dif0)[dif0]
+#'   nr <- ceiling(sqrt(length(vars)))
+#'
+#'   par_prev <- graphics::par(mfrow = c(nr, ceiling(length(vars) / nr)))
+#'
+#'   for (k in seq_along(vars)) {
+#'     graphics::plot(doy, x0[ip, vars[[k]]], ylab = vars[[k]], type = "l")
+#'     graphics::lines(doy, x1[ip, vars[[k]]], col = "red", lty = 2L)
+#'     graphics::lines(doy, x2[ip, vars[[k]]], col = "purple", lty = 3L)
+#'     graphics::lines(doy, x3[ip, vars[[k]]], col = "darkgreen", lty = 3L)
+#'     graphics::lines(doy, x0[ip, vars[[k]]], col = "gray")
+#'   }
+#'
+#'   graphics::par(par_prev)
+#' }
+#'
+#' @md
+#' @export
+dbW_imputeWeather <- function(
+  weatherData,
+  use_wg = TRUE,
+  seed = NULL,
+  method_after_wg = c("interp", "locf", "mean", "none", "fail"),
+  nmax_run = Inf,
+  return_weatherDF = FALSE
+) {
+
+  method_after_wg <- match.arg(method_after_wg)
+
+  if (method_after_wg == "interp" || isTRUE(is.finite(nmax_run))) {
+    stopifnot(
+      # `rSW2utils::impute_df()` v0.2.1 required for
+      # type "interp" and argument "nmax_run"
+      check_version(
+        as.numeric_version(getNamespaceVersion("rSW2utils")),
+        expected_version = "0.2.1",
+        level = "patch"
+      )
+    )
+  }
+
+  if (dbW_check_weatherData(weatherData, check_all = FALSE)) {
+    weatherData <- dbW_weatherData_to_dataframe(weatherData)
+  }
+
+
+  vars_wgen <- weatherGenerator_dataColumns()
+
+  if (
+    isTRUE(as.logical(use_wg)[[1L]]) &&
+      any(is_missing_weather(weatherData[, vars_wgen, drop = FALSE]))
+  ) {
+    #--- Use weather generator for available variables
+    tmp <- dbW_generateWeather(
+      weatherData = weatherData,
+      return_weatherDF = TRUE,
+      seed = seed
+    )
+
+    weatherData[, vars_wgen] <- tmp[, vars_wgen]
+  }
+
+  #--- Imputation after first pass of weather generator
+  vars_meteo <- intersect(weather_dataColumns(), colnames(weatherData))
+
+  # see `calc_dailyInputFlags(weatherData, vars_meteo)`
+  tmp_miss <- is_missing_weather(weatherData[, vars_meteo, drop = FALSE])
+  tmp <- apply(!tmp_miss, MARGIN = 2L, FUN = any)
+  vars_wv <- names(tmp)[tmp] # variables with values
+
+  needs_im <- which(
+    tmp_miss[, vars_wv, drop = FALSE],
+    arr.ind = TRUE
+  )
+
+  if (NROW(needs_im) > 0) {
+    if (method_after_wg == "fail") {
+      stop(
+        "Missing values in variables ",
+        if (use_wg) "after weather generator ",
+        "(method_after_wg = 'fail'): ",
+        toString(vars_wv[unique(needs_im[, "col"])])
+      )
+    }
+
+    weatherData[, vars_wv][needs_im] <- NA # set all types of missingness to NA
+
+    tmp <- rSW2utils::impute_df(
+      weatherData[, vars_wv, drop = FALSE],
+      imputation_type = method_after_wg,
+      nmax_run = nmax_run
+    )
+
+    weatherData[, vars_wv][needs_im] <- tmp[needs_im]
+  }
+
+  if (isTRUE(as.logical(return_weatherDF[[1L]]))) {
+    weatherData
+  } else {
+    dbW_dataframe_to_weatherData(weatherData)
+  }
 }

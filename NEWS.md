@@ -6,12 +6,13 @@
 * Update `SOILWAT2` to v7.2.0 which improves error handling and fixes
   memory leaks on error (#239; @dschlaep, @N1ckP3rsl3y).
 
-## Bugfix
+## Bug fixes
 * Code no longer requires (unused) `pcg` header (@dschlaep).
 
 ## New features
-* New `upgrade_weatherDF()` adds requested weather columns to a data frame.
-* Improved usability of weather functionality
+* New `upgrade_weatherDF()` adds requested weather columns to a data frame
+  (@dschlaep).
+* Improved rounding of weather functionality (@dschlaep):
     * `dbW_weatherData_round()` now rounds both `"weatherList"` and
       `"weatherDF"` objects; argument `"digits"` can now also be logical
       (if `TRUE`, then digits takes the default value of 4) or not finite
@@ -21,11 +22,14 @@
       recommended replacement is a separate call to `dbW_weatherData_round()`.
     * Argument `"digits"` of `dbW_generateWeather()` changed the default value
       from rounding to 4 digits to no rounding (`NA`).
-    * `dbW_generateWeather()` gained `"return_weatherDF"` and now returns a
-      user requested weather object type. If `return_weatherDF` is `TRUE`,
-      then the result is converted to a data frame where columns represent
-      weather variables; otherwise, a list of elements of class `swWeatherData`
-      is returned (as previously).
+* `dbW_generateWeather()` gained `"return_weatherDF"` and now returns a
+  user requested weather object type (@dschlaep).
+  If `return_weatherDF` is `TRUE`, then the result is converted to a
+  data frame where columns represent weather variables; otherwise,
+  a list of elements of class `swWeatherData` is returned (as previously).
+* New `dbW_imputeWeather()` replaces missing weather values using
+  using the weather generator and
+  using functionality by `rSW2utils::impute_df()` (@dschlaep).
 
 
 # rSOILWAT2 v6.0.2

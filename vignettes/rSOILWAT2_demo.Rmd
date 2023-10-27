@@ -290,48 +290,16 @@ You may organize weather data in a variety of ways:
 
 
       # Convert `DayMet`'s `noleap` calendar to proleptic Gregorian calendar
-      xdf3 <- rSOILWAT2::dbW_convert_to_GregorianYears(
-        weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(
-          weatherDF = xdf2[, -1L, drop = FALSE],
-          years = unique(xdf2[, "Year"]),
-          weatherDF_dataColumns = colnames(xdf2)[-1L]
-        )
-      )
+      xdf3 <- rSOILWAT2::dbW_convert_to_GregorianYears(xdf2, type = "asis")
 
       # Impute values for added leap days
-      # Use weather generator for available variables, use LOCF otherwise
-      xdf4 <- xdf3
-
-      vars_wgen <- rSOILWAT2::weatherGenerator_dataColumns()
-      needs_wgen <- which(
-        !is.finite(as.matrix(xdf4[, vars_wgen, drop = FALSE])),
-        arr.ind = TRUE
+      # Use weather generator for available variables, otherwise interpolate
+      wdata <- rSOILWAT2::dbW_imputeWeather(
+        weatherData = xdf3,
+        use_wg = TRUE,
+        method_after_wg = "interp",
+        seed = 123L
       )
-      if (NROW(needs_wgen) > 0) {
-        tmp1 <- rSOILWAT2::dbW_generateWeather(
-          weatherData = xdf4,
-          return_weatherDF = TRUE,
-          seed = 123
-        )
-        
-        xdf4[, vars_wgen][needs_wgen] <- tmp1[, vars_wgen][needs_wgen]
-      }
-
-      ids_dif <- 2L + which(dif)
-      needs_locf <- which(
-        !is.finite(as.matrix(xdf4[, ids_dif, drop = FALSE])),
-        arr.ind = TRUE
-      )
-      if (NROW(needs_locf) > 0) {
-        tmp2 <- rSW2utils::impute_df(
-          xdf4[, ids_dif, drop = FALSE],
-          imputation_type = "locf"
-        )
-
-        xdf4[, ids_dif][needs_locf] <- tmp2[needs_locf]
-      }
-
-      wdata <- rSOILWAT2::dbW_dataframe_to_weatherData(xdf4, round = 4L)
 
       # Check that weather data is well-formed
       stopifnot(rSOILWAT2::dbW_check_weatherData(wdata))

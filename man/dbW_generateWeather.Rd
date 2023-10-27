@@ -114,3 +114,6 @@ compare_weather(
 unlink(list.files(path), force = TRUE)
 
 }
+\seealso{
+\code{\link[=dbW_imputeWeather]{dbW_imputeWeather()}}
+}
