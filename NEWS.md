@@ -1,4 +1,4 @@
-# rSOILWAT2 v6.0.3-9000
+# rSOILWAT2 v6.0.3
 * This version produces the same output as the previous version.
 * Update `SOILWAT2` to v7.2.0 which improves error handling and fixes
   memory leaks on error (#239; @dschlaep, @N1ckP3rsl3y).
