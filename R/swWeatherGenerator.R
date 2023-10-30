@@ -1339,3 +1339,145 @@ dbW_imputeWeather <- function(
     dbW_dataframe_to_weatherData(weatherData)
   }
 }
+
+
+#' Replace missing values with values from another weather data set
+#'
+#' @inheritParams dbW_generateWeather
+#' @param subData A weather data object.
+#' @param vars_substitute Names of variables for which missing values
+#' in `weatherData` should be replaced by values from `subData`.
+#' If `NULL`, then all weather variables (i.e., [weather_dataColumns()]).
+#' @param by Names of variables used to match days (rows) between
+#' `weatherData` and `subData`. If `NULL`, then all variables occurring both
+#' in `weatherData` and `subData` that are not weather variables.
+#' @param by_weatherData See `by`.
+#' @param by_subData See `by`.
+#' @param return_weatherDF A logical value. See section "Value".
+#'
+#' @return An updated copy of `weatherData` where missing values have been
+#' replaced by corresponding values from `subData`.
+#' If `return_weatherDF` is `TRUE`, then the result is converted to a
+#' data frame where columns represent weather variables.
+#' If `return_weatherDF` is `FALSE`, then the result is
+#' a list of elements of class [`swWeatherData`].
+#'
+#' @seealso [dbW_generateWeather()], [dbW_imputeWeather()]
+#'
+#' @examples
+#' # Load example data
+#' path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
+#' dif <- c(rep(TRUE, 3L), rep(FALSE, 11L))
+#' dif[13L] <- TRUE # ACTUAL_VP
+#' dif[14L] <- TRUE # SHORT_WR, desc_rsds = 2
+#' wdata <- getWeatherData_folders(
+#'   LookupWeatherFolder = file.path(path_demo, "Input"),
+#'   weatherDirName = "data_weather_daymet",
+#'   filebasename = "weath",
+#'   startYear = 1980,
+#'   endYear = 1981,
+#'   dailyInputFlags = dif,
+#'   method = "C"
+#' )
+#' x0 <- x <- dbW_weatherData_to_dataframe(wdata)
+#' dif0 <- calc_dailyInputFlags(x0)
+#'
+#' # Set June-August of 1980 as missing
+#' ids_1980 <- x[, "Year"] == 1980
+#' ids_missing <- ids_1980 & x[, "DOY"] >= 153 & x[, "DOY"] <= 244
+#' x[ids_missing, -(1:2)] <- NA
+#'
+#' # Substitute missing values
+#' all.equal(
+#'   dbW_substituteWeather(x, x0[ids_1980, ], return_weatherDF = TRUE),
+#'   x0
+#' )
+#'
+#'
+#' @md
+#' @export
+dbW_substituteWeather <- function(
+  weatherData,
+  subData,
+  vars_substitute = NULL,
+  by = NULL,
+  by_weatherData = by,
+  by_subData = by,
+  return_weatherDF = FALSE
+) {
+  #--- Convert to data frames
+  if (dbW_check_weatherData(weatherData, check_all = FALSE)) {
+    weatherData <- dbW_weatherData_to_dataframe(weatherData)
+  }
+
+  if (dbW_check_weatherData(subData, check_all = FALSE)) {
+    subData <- dbW_weatherData_to_dataframe(subData)
+  }
+
+  #--- Align days (rows) and variables (columns)
+  vars_both <- intersect(colnames(weatherData), colnames(subData))
+
+  if (is.null(vars_substitute)) {
+    vars_req <- vars_both
+  } else {
+    vars_req <- intersect(vars_both, vars_substitute)
+    if (length(vars_req) != length(vars_substitute)) {
+      warning(
+        "Not all requested variables present in both datasets."
+      )
+    }
+  }
+
+  vars_meteo <- intersect(vars_req, weather_dataColumns())
+
+  if (is.null(by_weatherData)) {
+    by_weatherData <- by_subData
+  }
+
+  if (is.null(by_subData)) {
+    by_subData <- by_weatherData
+  }
+
+  if (is.null(by_weatherData) && is.null(by_subData)) {
+    by_weatherData <- by_subData <- setdiff(vars_both, weather_dataColumns())
+  }
+
+  if (
+    any(
+      length(by_weatherData) == 0L,
+      length(by_weatherData) != length(by_subData),
+      !all(by_weatherData %in% colnames(weatherData)),
+      !all(by_subData %in% colnames(subData))
+    )
+  ) {
+    stop("Insufficient/bad information to match days.")
+  }
+
+  wdids <- do.call(
+    paste,
+    args = c(as.list(as.data.frame(weatherData)[by_weatherData]), sep = "-")
+  )
+  sdids <- do.call(
+    paste,
+    args = c(as.list(as.data.frame(subData)[by_subData]), sep = "-")
+  )
+
+  ids <- match(wdids, sdids, nomatch = 0L)
+  idsnn <- ids > 0L
+
+  if (!any(idsnn)) {
+    warning("No matching days found.")
+  }
+
+  needsSub <- is_missing_weather(weatherData[idsnn, vars_meteo, drop = FALSE])
+
+  weatherData[idsnn, vars_meteo][needsSub] <- subData[ids, vars_meteo][needsSub]
+
+
+  #--- Return
+  if (isTRUE(as.logical(return_weatherDF[[1L]]))) {
+    weatherData
+  } else {
+    dbW_dataframe_to_weatherData(weatherData)
+  }
+}

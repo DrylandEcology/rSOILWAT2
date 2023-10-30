@@ -30,6 +30,8 @@
 * New `dbW_imputeWeather()` replaces missing weather values using
   using the weather generator and
   using functionality by `rSW2utils::impute_df()` (@dschlaep).
+* New `dbW_substituteWeather()` replaces missing weather values in one
+  weather data object with values from a second weather data object (@dschlaep).
 
 
 # rSOILWAT2 v6.0.2

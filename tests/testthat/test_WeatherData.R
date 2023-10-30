@@ -255,3 +255,92 @@ test_that("Weather data object conversions", {
   expect_identical(res, rSOILWAT2::weatherData)
 
 })
+
+
+
+
+test_that("Weather data substitution", {
+  # Load example data
+  path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
+  dif <- c(rep(TRUE, 3L), rep(FALSE, 11L))
+  dif[13L] <- TRUE # ACTUAL_VP
+  dif[14L] <- TRUE # SHORT_WR, desc_rsds = 2
+  wdata <- rSOILWAT2::getWeatherData_folders(
+    LookupWeatherFolder = file.path(path_example1, "Input"),
+    weatherDirName = grep(
+      "data_weather_daymet",
+      x = dir_weather,
+      value = TRUE,
+      fixed = TRUE
+    ),
+    filebasename = "weath",
+    startYear = 1980,
+    endYear = 1981,
+    dailyInputFlags = dif
+  )
+
+  # Prepare example data
+  x0 <- x <- dbW_weatherData_to_dataframe(wdata)
+  dif0 <- calc_dailyInputFlags(x0)
+
+  # Set June-August of 1980 as missing
+  ids_1980 <- x[, "Year"] == 1980
+  ids_missing <- ids_1980 & x[, "DOY"] >= 153 & x[, "DOY"] <= 244
+  x[ids_missing, -(1:2)] <- NA
+
+  # Test: substitute missing values of all variables
+  expect_identical(
+    dbW_substituteWeather(x, x0[ids_1980, ], return_weatherDF = TRUE),
+    x0
+  )
+
+  # Test: substitute missing values of some variables
+  var_test <- "shortWR"
+  expect_identical(
+    dbW_substituteWeather(
+      x,
+      subData = x0[ids_1980, ],
+      vars_substitute = var_test,
+      return_weatherDF = TRUE
+    )[, var_test],
+    x0[, var_test]
+  )
+
+  # Test: substitute missing values if only some variables are available
+  vars_has <- c("Year", "DOY", "Tmax_C", "shortWR")
+  expect_identical(
+    dbW_substituteWeather(
+      x,
+      subData = x0[ids_1980, vars_has],
+      return_weatherDF = TRUE
+    )[, vars_has],
+    x0[, vars_has]
+  )
+
+  expect_warning(
+    dbW_substituteWeather(
+      x,
+      subData = x0[ids_1980, vars_has],
+      vars_substitute = weather_dataColumns(),
+      return_weatherDF = TRUE
+    ),
+    regexp = "Not all requested variables present"
+  )
+
+  # Test: match rows if "by" variables differ
+  expect_identical(
+    dbW_substituteWeather(
+      x,
+      subData = data.frame(
+        annus = x0[, "Year"],
+        dies = x0[, "DOY"],
+        x0[, setdiff(colnames(x0), c("Year", "DOY"))]
+      )[ids_1980, ],
+      by_weatherData = c("Year", "DOY"),
+      by_subData = c("annus", "dies"),
+      return_weatherDF = TRUE
+    ),
+    x0
+  )
+
+})
