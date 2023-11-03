@@ -344,3 +344,66 @@ test_that("Weather data substitution", {
   )
 
 })
+
+
+test_that("Weather data fixing", {
+  x0 <- x <- as.data.frame(dbW_weatherData_to_dataframe(rSOILWAT2::weatherData))
+  dif <- calc_dailyInputFlags(x0)
+  vars <- names(dif)[dif]
+
+
+  #--- * Check no change to no missing values ------
+  xf <- dbW_fixWeather(x0, return_weatherDF = TRUE)
+  expect_identical(xf[["weatherData"]], x0)
+  expect_true(all(is.na(xf[["meta"]])))
+
+
+  #--- * Check interpolation and substitution ------
+  # * Expect short missing spell to interpolate (except precipitation)
+  # Set May 23-24 of 1981 as missing
+  tmp <- x[, "Year"] == 1981
+  ids_to_interp <- tmp & x[, "DOY"] >= 144 & x[, "DOY"] <= 145
+  x[ids_to_interp, -(1:2)] <- NA
+
+  # * Expect long missing spell to substitute
+  # Set June-August of 1980 as missing
+  tmp <- x[, "Year"] == 1980
+  ids_to_sub <- tmp & x[, "DOY"] >= 153 & x[, "DOY"] <= 244
+  x[ids_to_sub, -(1:2)] <- NA
+
+
+  xf <- dbW_fixWeather(
+    weatherData = x,
+    subData = x0,
+    new_endYear = max(x[["Year"]]) + 1L, # expect long term daily mean
+    nmax_interp = 5L,
+    return_weatherDF = TRUE
+  )
+
+  expect_false(anyNA(xf[["weatherData"]][, vars]))
+
+  ids_has <- seq_len(nrow(x0))
+  expect_identical(
+    xf[["weatherData"]][ids_has[!ids_to_interp], vars],
+    x0[!ids_to_interp, vars]
+  )
+
+  tmpc <- table(xf[["meta"]])
+  expect_identical(
+    tmpc[["interpolateLinear (<= 5 days)"]],
+    sum(ids_to_interp) * length(setdiff(vars, "PPT_cm"))
+  )
+  expect_identical(
+    tmpc[["fixedValue"]],
+    sum(ids_to_interp) # precipitation
+  )
+  expect_identical(
+    tmpc[["substituteData"]],
+    sum(ids_to_sub) * length(vars)
+  )
+  expect_identical(
+    tmpc[["longTermDailyMean"]],
+    365L * length(vars)
+  )
+
+})

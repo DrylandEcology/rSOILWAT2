@@ -1481,3 +1481,308 @@ dbW_substituteWeather <- function(
     dbW_dataframe_to_weatherData(weatherData)
   }
 }
+
+
+
+#' Fix weather data
+#'
+#' Missing values are `"fixed"` with the following approach:
+#'   1. `weatherData` is formatted for `rSOILWAT2`, i.e., converted to a
+#'      Gregorian calendar and required but missing variables added.
+#'   2. Short spells of missing values
+#'      (consecutive days shorter than `nmax_interp`) are linearly interpolated
+#'      from adjacent non-missing values
+#'      (meta data tag `"interpolateLinear (<= X days)"`)
+#'   3. Short spells of missing precipitation values are
+#'      * Linearly interpolated if `precip_lt_nmax` is `NA`
+#'      * Set to a fixed numeric value of `precip_lt_nmax`
+#'        (meta data tag `"fixedValue"`)
+#'      * Substituted with values from `subData` if `precip_lt_nmax` is `Inf`
+#'        (see next point)
+#'   4. Values from a second weather data object `subData` are used to replace
+#'      (meta data tag `substituteData"`):
+#'      * Missing precipitation values (if `precip_lt_nmax` is `Inf`)
+#'      * Values before first day with any non-missing values
+#'      * Variables absent in `weatherData` and present in `subData`
+#'   5. Long-term daily means are used to replace any remaining missing values
+#'      (meta data tag `"longTermDailyMean"`);
+#'      for instance, this approach may be applied for
+#'      * Values of variables that are present in `weatherData` and
+#'        absent in `subData`, before first day with any non-missing values
+#'      * Values after end of available values in both `weatherData` and
+#'        `subData`
+#'
+#' @inheritParams dbW_substituteWeather
+#' @inheritParams dbW_convert_to_GregorianYears
+#' @param nmax_interp An integer value. Maximum spell length of missing values
+#' for which linear interpolation is applied.
+#' @param precip_lt_nmax A numeric value. Should short spells of
+#' missing precipitation values be
+#' linearly interpolated (if `NA`),
+#' substituted with values from `subData` (if `Inf`), or
+#' replaced by a fixed numeric value (default is 0)?
+#'
+#' @return A list with two named elements
+#'   * `"weatherData"`: An updated copy of the input `weatherData`
+#'     where missing values have been replaced.
+#'     If `return_weatherDF` is `TRUE`, then the result is converted to a
+#'     data frame where columns represent weather variables.
+#'     If `return_weatherDF` is `FALSE`, then the result is
+#'     a list of elements of class [`swWeatherData`].
+#'   * `"meta"`: a data frame with the same dimensions as `"weatherData"`
+#'     with tags indicating which approach was used to replaced missing values
+#'     in corresponding cells of `weatherData` (see section `Details`)
+#'
+#' @seealso [dbW_imputeWeather()], [dbW_substituteWeather()],
+#' [dbW_generateWeather()]
+#'
+#' @examples
+#' x0 <- x <- dbW_weatherData_to_dataframe(rSOILWAT2::weatherData)
+#'
+#' tmp <- x[, "Year"] == 1981
+#' ids_to_interp <- tmp & x[, "DOY"] >= 144 & x[, "DOY"] <= 145
+#' x[ids_to_interp, -(1:2)] <- NA
+#'
+#' tmp <- x[, "Year"] == 1980
+#' ids_to_sub <- tmp & x[, "DOY"] >= 153 & x[, "DOY"] <= 244
+#' x[ids_to_sub, -(1:2)] <- NA
+#'
+#' xf <- dbW_fixWeather(x, x0, return_weatherDF = TRUE)
+#' all.equal(
+#'   xf[["weatherData"]][!ids_to_interp, ],
+#'   as.data.frame(x0)[!ids_to_interp, ]
+#' )
+#' table(xf[["meta"]])
+#'
+#' @md
+#' @export
+dbW_fixWeather <- function(
+  weatherData,
+  subData = NULL,
+  new_startYear = NULL,
+  new_endYear = NULL,
+  nmax_interp = 7L,
+  precip_lt_nmax = 0,
+  return_weatherDF = FALSE
+) {
+  nmax_interp <- as.integer(nmax_interp)
+  vars_time <- c("Year", "DOY")
+
+  #--- Convert to data frames and add missing variables (if any)
+  weatherData <- if (dbW_check_weatherData(weatherData, check_all = FALSE)) {
+    dbW_weatherData_to_dataframe(weatherData)
+  } else {
+    upgrade_weatherDF(weatherData)
+  }
+
+  stopifnot(
+    c(vars_time, weather_dataColumns()) %in% colnames(weatherData)
+  )
+
+  #--- Locate years
+  if (is.null(new_startYear) || is.null(new_endYear)) {
+    years <- get_years_from_weatherDF(
+      weatherDF = weatherData,
+      years = NULL
+    )[["years"]]
+
+    if (is.null(new_startYear)) new_startYear <- years[[1L]]
+    if (is.null(new_endYear)) new_endYear <- years[[length(years)]]
+  }
+
+
+  #--- Add missing days to complete full requested calendar years
+  weatherData1 <- dbW_convert_to_GregorianYears(
+    weatherData = weatherData,
+    new_startYear = new_startYear,
+    new_endYear = new_endYear,
+    type = "asis"
+  )
+
+  is_miss1 <- is_missing_weather(weatherData1[, weather_dataColumns()])
+  meta <- array(dim = dim(is_miss1), dimnames = dimnames(is_miss1))
+
+
+  #--- Determine first and last day with at least one observation
+  tmp <- which(rowSums(!is_miss1) > 0L)
+  ids <- tmp[c(1L, length(tmp))]
+
+  ids_startend <-
+    # before start
+    (weatherData1[["Year"]] < weatherData1[ids[[1L]], "Year"]) |
+    (weatherData1[["Year"]] == weatherData1[ids[[1L]], "Year"] &
+        weatherData1[["DOY"]] < weatherData1[ids[[1L]], "DOY"]) |
+    # after end
+    (weatherData1[["Year"]] == weatherData1[ids[[2L]], "Year"] &
+        weatherData1[["DOY"]] > weatherData1[ids[[2L]], "DOY"]) |
+    (weatherData1[["Year"]] > weatherData1[ids[[2L]], "Year"])
+
+
+
+  #--- Interpolate short missing runs
+  weatherData2 <- suppressWarnings(
+    dbW_imputeWeather(
+      weatherData1,
+      use_wg = FALSE,
+      method_after_wg = "interp",
+      nmax_run = nmax_interp,
+      return_weatherDF = TRUE
+    )
+  )
+
+  # special treatment of precipitation
+  #   (NA = interpolate; x = fixedValue; Inf = subData)
+  is_pptFixedValue <- NULL
+
+  if (!isTRUE(is.na(precip_lt_nmax[[1L]]))) {
+
+    if (isTRUE(is.finite(precip_lt_nmax[[1L]]))) {
+      # Find linear interpolated precip values and replace with fixed value
+      ppt_miss2a <- is_missing_weather(weatherData2[, "PPT_cm"])
+      is_pptFixedValue <- which(!ppt_miss2a[, 1L] & is_miss1[, "PPT_cm"])
+      weatherData2[["PPT_cm"]][is_pptFixedValue] <- precip_lt_nmax[[1L]]
+
+    } else {
+      # Reset for replacement by subData in following step
+      weatherData2[["PPT_cm"]] <- weatherData1[["PPT_cm"]]
+    }
+  }
+
+  # Set values outside original time periods to missing
+  weatherData2[ids_startend, weather_dataColumns()] <- NA
+
+  is_miss2 <- is_missing_weather(weatherData2[, weather_dataColumns()])
+  meta[!is_miss2 & is_miss1] <- sprintf(
+    "interpolateLinear (<= %d days)",
+    nmax_interp
+  )
+
+  if (length(is_pptFixedValue) > 0L) {
+    meta[is_pptFixedValue, "PPT_cm"] <- "fixedValue"
+  }
+
+
+  #--- Use subData
+  # * for missing values before first observation day
+  # * for variables missing weatherData but available in subData
+  # * for missing precipitation
+  if (is.null(subData)) {
+    weatherData3 <- weatherData2
+    is_miss3 <- is_miss2
+
+  } else {
+    subData <- if (dbW_check_weatherData(subData, check_all = FALSE)) {
+      dbW_weatherData_to_dataframe(subData)
+    } else {
+      upgrade_weatherDF(subData)
+    }
+
+    stopifnot(
+      c(vars_time, weather_dataColumns()) %in% colnames(subData)
+    )
+
+    subData1 <- dbW_convert_to_GregorianYears(
+      weatherData = subData,
+      new_startYear = new_startYear,
+      new_endYear = new_endYear,
+      type = "asis"
+    )
+
+    weatherData3 <- dbW_substituteWeather(
+      weatherData = weatherData2,
+      subData = subData1,
+      return_weatherDF = TRUE
+    )
+
+    is_miss3 <- is_missing_weather(weatherData3[, weather_dataColumns()])
+    meta[!is_miss3 & is_miss2] <- "substituteData"
+  }
+
+
+  #--- Use long-term daily means to impute the rest
+  # - for variables not in subData before first observed value in weatherData
+  # - values after end of observed values in weatherData
+  dif_wd3 <- rSOILWAT2::calc_dailyInputFlags(weatherData3)
+  vars_wd3 <- names(dif_wd3)[dif_wd3]
+
+  if (!any(is_missing_weather(weatherData3[, vars_wd3]))) {
+    weatherData4 <- weatherData3
+
+  } else {
+    daymeans <- data.frame(
+      Year = NA,
+      aggregate(
+        weatherData1[, weather_dataColumns()],
+        by = weatherData1["DOY"],
+        FUN = mean,
+        na.rm = TRUE
+      )
+    )
+
+
+    if (!is.null(subData)) {
+      dif_wd <- rSOILWAT2::calc_dailyInputFlags(weatherData1)
+      dif_sd <- rSOILWAT2::calc_dailyInputFlags(subData)
+
+      tmp_vars <- setdiff(names(dif_sd)[dif_sd], names(dif_wd)[dif_wd])
+
+      if (length(tmp_vars) > 0L) {
+        sd_daymeans <- data.frame(
+          Year = NA,
+          aggregate(
+            subData[, weather_dataColumns()],
+            by = subData["DOY"],
+            FUN = mean,
+            na.rm = TRUE
+          )
+        )
+
+        daymeans[, tmp_vars] <- sd_daymeans[, tmp_vars]
+      }
+    }
+
+    # Linear interpolate any missing long-term daily means
+    daymeans2 <- suppressWarnings(
+      dbW_imputeWeather(
+        daymeans,
+        use_wg = FALSE,
+        method_after_wg = "interp",
+        nmax_run = Inf,
+        return_weatherDF = TRUE
+      )
+    )
+
+    # Create object with long-term daily means repeated for each requested year
+    daymeans_years <- do.call(
+      rbind,
+      args = lapply(
+        seq(new_startYear, new_endYear),
+        function(year) {
+          tmp <- daymeans2
+          tmp[["Year"]] <- year
+          tmp
+        }
+      )
+    )
+
+    weatherData4 <- dbW_substituteWeather(
+      weatherData = weatherData3,
+      subData = daymeans_years,
+      return_weatherDF = TRUE
+    )
+
+    is_miss4 <- is_missing_weather(weatherData4[, weather_dataColumns()])
+    meta[!is_miss4 & is_miss3] <- "longTermDailyMean"
+  }
+
+
+  #--- Return
+  list(
+    weatherData = if (isTRUE(as.logical(return_weatherDF[[1L]]))) {
+      weatherData4
+    } else {
+      dbW_dataframe_to_weatherData(weatherData4)
+    },
+    meta = meta
+  )
+}

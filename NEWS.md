@@ -32,6 +32,11 @@
   using functionality by `rSW2utils::impute_df()` (@dschlaep).
 * New `dbW_substituteWeather()` replaces missing weather values in one
   weather data object with values from a second weather data object (@dschlaep).
+* New `dbW_fixWeather()` fixes missing weather values using a sequence of
+  approaches including linear interpolation for short missing spells,
+  a fixed value for short spells of missing precipitation (optionally),
+  substitution from a second weather data object, and
+  replacement with long term daily mean values (@dschlaep).
 
 
 # rSOILWAT2 v6.0.2
