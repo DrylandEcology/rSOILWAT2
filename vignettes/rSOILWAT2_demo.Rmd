@@ -247,55 +247,20 @@ You may organize weather data in a variety of ways:
     curl::has_internet()
   ) {
 
-    # Download from `DayMet`
-    dm_Laramie <- try(daymetr::download_daymet(
-      site = "testsite_name",
-      lat = 41.3167,
-      lon = -105.6833,
-      start = rSOILWAT2::swYears_StartYear(sw_in),
-      end = rSOILWAT2::swYears_EndYear(sw_in),
-      internal = TRUE,
-      simplify = FALSE
-    ))
-
-    if (!inherits(dm_Laramie, "try-error")) {
-      # Convert data to a `rSOILWAT2`-formatted weather object
-      dif <- c(rep(TRUE, 3L), rep(FALSE, 11L)) # Tmax, Tmin, PPT
-      dif[13L] <- TRUE # ACTUAL_VP
-      dif[14L] <- TRUE # SHORT_WR, desc_rsds = 2
-
-      vars <- c(
-        "year", "yday",
-        "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.",
-        "vp..Pa.",
-        "srad..W.m.2."
+    mm_dm <- try(
+      rSOILWAT2::sw_meteo_obtain_DayMet(
+        x = c(longitude = -105.6833, latitude = 41.3167), # Laramie WY
+        start_year = rSOILWAT2::swYears_StartYear(sw_in),
+        end_year = rSOILWAT2::swYears_EndYear(sw_in)
       )
-      xdf <- dm_Laramie[["data"]][, vars]
-      xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
-      xdf[, "vp..Pa."] <- xdf[, "vp..Pa."] / 1000 # convert Pa -> kPa
-      colnames(xdf) <- c(
-        "Year", "DOY",
-        "Tmax_C", "Tmin_C", "PPT_cm", "actVP_kPa", "shortWR"
-      )
-
-      xdf2 <- array(
-        dim = c(nrow(xdf), 2L + length(rSOILWAT2::weather_dataColumns())),
-        dimnames = list(
-          NULL,
-          c("Year", "DOY", rSOILWAT2::weather_dataColumns())
-        )
-      )
-
-      xdf2[, colnames(xdf)] <- as.matrix(xdf)
+    )
 
 
-      # Convert `DayMet`'s `noleap` calendar to proleptic Gregorian calendar
-      xdf3 <- rSOILWAT2::dbW_convert_to_GregorianYears(xdf2, type = "asis")
-
+    if (!inherits(mm_dm, "try-error")) {
       # Impute values for added leap days
       # Use weather generator for available variables, otherwise interpolate
       wdata <- rSOILWAT2::dbW_imputeWeather(
-        weatherData = xdf3,
+        weatherData = mm_dm[["weatherDF"]],
         use_wg = TRUE,
         method_after_wg = "interp",
         seed = 123L
@@ -305,11 +270,11 @@ You may organize weather data in a variety of ways:
       stopifnot(rSOILWAT2::dbW_check_weatherData(wdata))
 
       # Set use flags
-      sw_in@weather@desc_rsds <- 2L # flux density over the daylight period
-      sw_in@weather@use_cloudCoverMonthly <- FALSE # use radiation instead
-      sw_in@weather@use_windSpeedMonthly <- TRUE
-      sw_in@weather@use_humidityMonthly <- FALSE # use vapor pressure instead
-      sw_in@weather@dailyInputFlags <- dif
+      sw_in@weather@desc_rsds <- mm_dm[["desc_rsds"]]
+      sw_in@weather@use_cloudCoverMonthly <- mm_dm[["use_cloudCoverMonthly"]]
+      sw_in@weather@use_windSpeedMonthly <- mm_dm[["use_windSpeedMonthly"]]
+      sw_in@weather@use_humidityMonthly <- mm_dm[["use_humidityMonthly"]]
+      sw_in@weather@dailyInputFlags <- mm_dm[["dailyInputFlags"]]
 
       has_daymet <- TRUE
     }

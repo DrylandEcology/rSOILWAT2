@@ -1,13 +1,5 @@
 # rSOILWAT2 v6.0.4-9000
-
-
-# rSOILWAT2 v6.0.3
 * This version produces the same output as the previous version.
-* Update `SOILWAT2` to v7.2.0 which improves error handling and fixes
-  memory leaks on error (#239; @dschlaep, @N1ckP3rsl3y).
-
-## Bug fixes
-* Code no longer requires (unused) `pcg` header (@dschlaep).
 
 ## New features
 * New `upgrade_weatherDF()` adds requested weather columns to a data frame
@@ -37,6 +29,17 @@
   a fixed value for short spells of missing precipitation (optionally),
   substitution from a second weather data object, and
   replacement with long term daily mean values (@dschlaep).
+* New family of functions `sw_meteo_obtain` that obtain (download) weather
+  data from external sources and prepare for use by `"rSOILWAT2"` (@dschlaep):
+      * New `sw_meteo_obtain_DayMet()` obtains and formats data from `"Daymet"`
+      * New `sw_meteo_obtain_SCAN()` obtains and formats data from `"SCAN"`
+
+
+# rSOILWAT2 v6.0.3
+* This version produces the same output as the previous version.
+* Update `SOILWAT2` to v7.2.0 which improves error handling and fixes
+  memory leaks on error (#239; @dschlaep, @N1ckP3rsl3y).
+* Code no longer requires (unused) `pcg` header (@dschlaep).
 
 
 # rSOILWAT2 v6.0.2
