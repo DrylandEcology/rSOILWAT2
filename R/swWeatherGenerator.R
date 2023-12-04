@@ -25,94 +25,91 @@ weatherGenerator_dataColumns <- function() {
 }
 
 
-#' Estimate coefficients for use by \var{SOILWAT2} weather generator
+#' Estimate coefficients of the `SOILWAT2` weather generator
 #'
-#' Estimates coefficients for the two site-specific files
-#' \var{mkv_covar.in} and \var{mkv_prob.in} required by the first-order
-#' Markov weather generator in \var{SOILWAT2} \var{> v4.2.5}.
+#' Estimated coefficients correspond to what is required by the two files
+#' `"mkv_covar.in"` and `"mkv_prob.in"` for the first-order
+#' Markov weather generator in `SOILWAT2` `> v4.2.5`.
 #'
 #' @section Notes: This code is a complete overhaul compared to the version
-#'   from \var{rSFSTEP2} on \code{2019-Feb-10}
-#'   commit \var{cd9e161971136e1e56d427a4f76062bbb0f3d03a}
-#'   \url{https://github.com/DrylandEcology/rSFSTEP2}.
+# nolint start: line_length_linter.
+#' from [`rSFSTEP2` on `2019-Feb-10`](https://github.com/DrylandEcology/rSFSTEP2/commit/cd9e161971136e1e56d427a4f76062bbb0f3d03a).
+# nolint end: line_length_linter.
 #'
-#' @section Notes: This function will produce \code{NA}s in the output if there
-#'   are insufficient weather observation in the input data \code{weatherData}
-#'   for a specific day or week of the year. Such \code{NA}s will cause a
-#'   \var{SOILWAT2} run to fail (potentially non-graciously and
-#'   with non-obvious error messages). To avoid that, this function offers
-#'   imputation approaches in order to fill in those failed coefficient
-#'   estimates; see \code{\link[rSW2utils]{impute_df}}, but please note that
-#'   any such imputation likely introduces biases in the generated weather.
+#' @section Notes: This function will produce `NA`s in the output if there
+#' are insufficient weather observation in the input data `weatherData`
+#' for a specific day or week of the year. Such `NA`s will cause a
+#' `SOILWAT2` run to fail (potentially non-graciously and
+#' with non-obvious error messages). To avoid that, this function offers
+#' imputation approaches in order to fill in those failed coefficient
+#' estimates; see [rSW2utils::impute_df()], but please note that
+#' any such imputation likely introduces biases in the generated weather.
 #'
-#' @section Details: Most users will likely want to set \code{propagate_NAs} to
-#'   \code{FALSE}. Note: \code{propagate_NAs} corresponds to \code{!na.rm}
-#'   from previous versions of this function with a different default value.
-#'   Consider an example: a the 30-year long input \code{weatherData} is
-#'   complete except for missing values on Jan 1, 2018.
-#'   \itemize{
-#'     \item If \code{propagate_NAs} is set to \code{TRUE}, then the
-#'     coefficients for day 1 and week 1 of year will be \code{NA} --
+#' @section Details:
+#' Most users will likely want to set `propagate_NAs` to `FALSE`.
+#' Note: `propagate_NAs` corresponds to `!na.rm`
+#' from previous versions of this function with a different default value.
+#' Consider an example: a the 30-year long input `weatherData` is
+#' complete except for missing values on Jan 1, 2018.
+#'   * If `propagate_NAs` is set to `TRUE`, then the
+#'     coefficients for day 1 and week 1 of year will be `NA` --
 #'     despite all the available data. In this case, the missing coefficients
 #'     for day 1 and week 1 of year will be imputed.
-#'   \item If \code{propagate_NAs} is set to \code{FALSE}, then the coefficients
+#'   * If `propagate_NAs` is set to `FALSE`, then the coefficients
 #'     for day 1 and week 1 of year will be calculated based on the non-missing
 #'     values for that day respectively that week of year. No imputation occurs.
-#'   }
 #'
-#' @param weatherData A list of elements of class
-#'   \code{\linkS4class{swWeatherData}} or a \code{data.frame} as returned by
-#'   \code{\link{dbW_weatherData_to_dataframe}}.
+#'
+#' @param weatherData A list of elements of class [`swWeatherData`]
+#' or a data frame as returned by [dbW_weatherData_to_dataframe()].
 #' @param WET_limit_cm A numeric value. A day with more precipitation than
-#'   this value is considered \var{wet} instead of \var{dry}. Default is 0.
-#'   This values should be equal to the corresponding value used in
-#'   \var{SOILWAT2}'s function \code{SW_MKV_today}.
-#' @param propagate_NAs A logical value. If \code{TRUE}, then missing weather
-#'   values in the input \code{weatherData} are excluded; if \code{FALSE}, then
-#'   missing values are propagated to the estimation. See Details.
+#' this value is considered `wet` instead of `dry`. Default is 0.
+#' This values should be equal to the corresponding value used in
+#' `SOILWAT2`'s function `SW_MKV_today()`.
+#' @param propagate_NAs A logical value. If `TRUE`, then missing weather
+#' values in the input `weatherData` are excluded; if `FALSE`, then
+#' missing values are propagated to the estimation. See Details.
+#' @param imputation_type A text string. Passed to [rSW2utils::impute_df()]
+#' for imputation of missing values in estimated weather generator coefficients.
+#' @param imputation_span An integer value. Passed to [rSW2utils::impute_df()]
+#' for imputation of missing values in estimated weather generator coefficients.
 #' @inheritParams set_missing_weather
-#' @inheritParams rSW2utils::impute_df
 #'
 #' @return A list with two named elements:
-#'   \describe{
-#'     \item{\code{mkv_doy}}{A data.frame with 366 rows (day of year) and
-#'        5 columns: \describe{
-#'          \item{DOY}{Day of year.}
-#'          \item{p_W_W}{Probability that doy is wet if the previous day
-#'            (doy - 1) was wet.}
-#'          \item{p_W_D}{Probability that doy is wet if the previous day
-#'            (doy - 1) was dry.}
-#'          \item{PPT_avg}{Average amount of precipitation (centimeters)
-#'            on doy if it is wet.}
-#'          \item{PPT_sd}{Standard deviation of amount of precipitation
-#'            (centimeters) on doy if it is wet.}
-#'        }}
-#'     \item{\code{mkv_woy}}{A data.frame with 53 rows (\var{SOILWAT2}
-#'       weeks of year, i.e., counted as consecutive \var{heptads} of days) and
-#'       11 columns: \describe{
-#'         \item{WEEK}{Week of year.}
-#'         \item{wTmax_C}{Average daily maximum temperature (C) for week.}
-#'         \item{wTmin_C}{Average daily minimum temperature (C) for week.}
-#'         \item{var_MAX}{Variance of daily maximum temperature for week.}
-#'         \item{cov_MAXMIN}{Covariance of daily maximum and minimum
-#'           temperatures for week.}
-#'         \item{cov_MINMAX}{Identical to \code{cov_MAXMIN}.}
-#'         \item{var_MIN}{Variance of daily minimum temperature for week.}
-#'         \item{CF_Tmax_wet}{Difference between average daily maximum
-#'           temperature (C) for wet days of week and \code{wTmax_C}.}
-#'         \item{CF_Tmax_dry}{Difference between average daily maximum
-#'           temperature (C) for dry days of week and \code{wTmax_C}.}
-#'         \item{CF_Tmin_wet}{Same as \code{CF_Tmax_wet} but for daily
-#'           minimum temperature.}
-#'         \item{CF_Tmin_dry}{Same as \code{CF_Tmax_dry} but for daily
-#'           minimum temperature.}
-#'       }}
-#'   }
+#'   * `"mkv_doy"`: A data frame with 366 rows (day of year) and 5 columns:
+#'      * `"DOY"`: Rows represent day of year.
+#'      * `"p_W_W"`: Probability that `DOY` is wet if the previous day
+#'        `(doy - 1)` was wet.
+#'      * `"p_W_D"`: Probability that `DOY` is wet if the previous day
+#'         `(doy - 1)` was dry.
+#'      * `"PPT_avg"`: Average amount of precipitation `[cm]` on `DOY` if wet.
+#'      * `"PPT_sd"`: Standard deviation of amount of precipitation `[cm]`
+#'        on `DOY` if wet.
 #'
-#' @seealso \code{\link{print_mkv_files}} to print values to \var{SOILWAT2}
-#'   compatible files. \code{\link{swMarkov_Prob}} and
-#'   \code{\link{swMarkov_Conv}} to extract/replace values in a \pkg{rSOILWAT2}
-#'   input object of class \code{\linkS4class{swInputData}}.
+#'   * `"mkv_woy"`: A data frame with 53 rows `SOILWAT2` weeks of year
+#'     (i.e., consecutive `heptads` of days) and 11 columns
+#'       * `"WEEK"`: Rows represent week of year.
+#'       * `"wTmax_C"`: Average daily maximum temperature `[C]` for week.
+#'       * `"wTmin_C"`: Average daily minimum temperature `[C]` for week.
+#'       * `"var_MAX"`: Variance of daily maximum temperature for week.
+#'       * `"cov_MAXMIN"`: Covariance of daily maximum and minimum
+#'           temperatures for week.
+#'       * `"cov_MINMAX"`: Identical to `"cov_MAXMIN"`.
+#'       * `"var_MIN"`: Variance of daily minimum temperature for week.
+#'       * `"CF_Tmax_wet"`: Difference between average daily maximum
+#'           temperature `[C]` for wet days of week and `"wTmax_C"`.
+#'       * `"CF_Tmax_dry"`: Difference between average daily maximum
+#'           temperature `[C]` for dry days of week and `"wTmax_C"`.
+#'       * `"CF_Tmin_wet"`: Same as `"CF_Tmax_wet"` but for daily
+#'           minimum temperature.
+#'       * `"CF_Tmin_dry"`: Same as `"CF_Tmax_dry"` but for daily
+#'           minimum temperature.
+#'
+#'
+#' @seealso [print_mkv_files()] to print values to `SOILWAT2`
+#' compatible files. [swMarkov_Prob()] and
+#' [swMarkov_Conv()] to extract/replace values in a `rSOILWAT2`
+#' input object of class [`swInputData`].
 #'
 #' @examples
 #' res1 <- dbW_estimate_WGen_coefs(rSOILWAT2::weatherData)
@@ -123,6 +120,7 @@ weatherGenerator_dataColumns <- function() {
 #' swMarkov_Prob(sw_in) <- res2[["mkv_doy"]]
 #' swMarkov_Conv(sw_in) <- res2[["mkv_woy"]]
 #'
+#' @md
 #' @export
 dbW_estimate_WGen_coefs <- function(
   weatherData,
@@ -1015,22 +1013,24 @@ compare_weather <- function(
 
 #' Generate daily weather data using SOILWAT2's weather generator
 #'
-#' This function is a convenience wrapper for
-#' \code{\link{dbW_estimate_WGen_coefs}}.
+#' This function is a convenience wrapper for [dbW_estimate_WGen_coefs()].
 #'
 #' @inheritParams dbW_estimate_WGen_coefs
+#' @inheritParams sw_weather_data
 #' @param years An integer vector. The calendar years for which to generate
-#'   daily weather. If \code{NULL}, then extracted from \code{weatherData}.
-#' @param digits An integer value. The returned values will be rounded to
-#'   the specified number of decimal places.
-#' @param wgen_coeffs A list with two named elements \var{mkv_doy} and
-#'   \var{mkv_woy}, i.e., the return value of
-#'   \code{\link{dbW_estimate_WGen_coefs}}. If \code{NULL}, then determined
-#'   based on \code{weatherData}.
-#' @inheritParams rSW2utils::impute_df
-#' @param seed An integer value or \code{NULL}. See \code{\link{set.seed}}.
+#' daily weather. If `NULL`, then extracted from `weatherData`.
+#' @param wgen_coeffs A list with two named elements `"mkv_doy"` and
+#' `"mkv_woy"`, i.e., the return value of [dbW_estimate_WGen_coefs()].
+#' If `NULL`, then [dbW_estimate_WGen_coefs()] is called on `weatherData`.
+#' @param seed An integer value or `NULL`. See [base::set.seed()].
+#' @param return_weatherDF A logical value. See section "Value".
 #'
-#' @return A list of elements of class \code{\linkS4class{swWeatherData}}.
+#' @return An updated copy of `weatherData` where missing values are imputed
+#' by the weather generator.
+#' If `return_weatherDF` is `TRUE`, then the result is converted to a
+#' data frame where columns represent weather variables.
+#' If `return_weatherDF` is `FALSE`, then the result is
+#' a list of elements of class [`swWeatherData`].
 #'
 #' @section Details:
 #' The current implementation of the weather generator produces values
@@ -1039,6 +1039,8 @@ compare_weather <- function(
 #' variables is missing; if any value is missing, then values for that day of
 #' all implemented variables will be replaced by those produced
 #' by the weather generator.
+#'
+#' @seealso [dbW_imputeWeather()]
 #'
 #' @examples
 #' # Load data for 1949-2010
@@ -1053,7 +1055,7 @@ compare_weather <- function(
 #' x[ids, -(1:2)] <- NA
 #'
 #' ## Example 1: generate weather for any missing values in our 'dataset'
-#' wout1 <- dbW_generateWeather(x)
+#' wout1 <- dbW_generateWeather(x, return_weatherDF = TRUE)
 #'
 #' ## Example 2: generate weather based on our 'dataset' but for
 #' ## years 2005-2015 and use estimated weather generator coefficients from
@@ -1086,7 +1088,7 @@ compare_weather <- function(
 #' path <- tempdir()
 #' compare_weather(
 #'   ref_weather = x,
-#'   weather = dbW_weatherData_to_dataframe(wout1),
+#'   weather = wout1,
 #'   N = 1,
 #'   path = path,
 #'   tag = "Example1-WeatherGenerator"
@@ -1101,10 +1103,10 @@ dbW_generateWeather <- function(
   wgen_coeffs = NULL,
   imputation_type = "mean",
   imputation_span = 5L,
-  digits = 4L,
+  return_weatherDF = FALSE,
+  digits = NA,
   seed = NULL
 ) {
-
   #--- Obtain missing/null arguments
   if (is.null(wgen_coeffs)) {
     wgen_coeffs <- dbW_estimate_WGen_coefs(
@@ -1115,12 +1117,10 @@ dbW_generateWeather <- function(
     )
   }
 
-  if (is.data.frame(weatherData)) {
-    weatherData <- dbW_dataframe_to_weatherData(
-      weatherData,
-      round = digits + 2L
-    )
+  if (!dbW_check_weatherData(weatherData, check_all = FALSE)) {
+    weatherData <- dbW_dataframe_to_weatherData(weatherData)
   }
+
 
   if (is.null(years)) {
     years <- get_years_from_weatherData(weatherData)
@@ -1157,5 +1157,632 @@ dbW_generateWeather <- function(
   set.seed(seed)
   res <- .Call(C_rSW2_processAllWeather, weatherData, sw_in)
 
+  if (isTRUE(as.logical(return_weatherDF[[1L]]))) {
+    res <- dbW_weatherData_to_dataframe(res)
+  }
+
   dbW_weatherData_round(res, digits = digits)
+}
+
+
+
+
+
+#' Impute missing weather values
+#'
+#' Impute missing weather values first by the weather generator
+#' (for supported variables, see [weatherGenerator_dataColumns()]) and
+#' second, if any missing values remain, using one of the imputation types
+#' provided by [rSW2utils::impute_df()] for each variable separately.
+#'
+#' @inheritParams dbW_generateWeather
+#' @param use_wg A logical value. Should the weather generator be used first?
+#' @param method_after_wg A string. The imputation type passed
+#' to [rSW2utils::impute_df()], if any missing values remain after the
+#' weather generator.
+#' @param nmax_run An integer value. Runs (sets of consecutive missing values)
+#' that are equal or shorter to `nmax_run` are imputed;
+#' longer runs remain unchanged. Passed to [rSW2utils::impute_df()].
+#'
+#' @return An updated copy of `weatherData` where missing values are imputed.
+#' If `return_weatherDF` is `TRUE`, then a
+#' data frame where columns represent weather variables is returned.
+#' If `return_weatherDF` is `FALSE`, then the result is converted to a
+#' a list of elements of class [`swWeatherData`].
+#'
+#' @section Details:
+#' The weather generator (see [dbW_generateWeather()]) produces new values
+#' for all implemented variables [weatherGenerator_dataColumns()] on days
+#' where at least one of these variables is missing; this is to maintain
+#' physical consistency among those variables.
+#' This differs from the approach employed by `method_after_wg`
+#' which imputes missing variables for each variable separately
+#' (see [rSW2utils::impute_df()]).
+#'
+#' @seealso [rSW2utils::impute_df()], [dbW_generateWeather()]
+#'
+#' @examples
+#' # Load example data
+#' path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
+#' dif <- c(rep(TRUE, 3L), rep(FALSE, 11L))
+#' dif[13L] <- TRUE # ACTUAL_VP
+#' dif[14L] <- TRUE # SHORT_WR, desc_rsds = 2
+#' wdata <- getWeatherData_folders(
+#'   LookupWeatherFolder = file.path(path_demo, "Input"),
+#'   weatherDirName = "data_weather_daymet",
+#'   filebasename = "weath",
+#'   startYear = 1980,
+#'   endYear = 1981,
+#'   dailyInputFlags = dif,
+#'   method = "C"
+#' )
+#' x0 <- x <- dbW_weatherData_to_dataframe(wdata)
+#' dif0 <- calc_dailyInputFlags(x0)
+#'
+#' # Set June-August of 1980 as missing
+#' ids_missing <- x[, "Year"] == 1980 & x[, "DOY"] >= 153 & x[, "DOY"] <= 244
+#' x[ids_missing, -(1:2)] <- NA
+#'
+#' x1 <- dbW_imputeWeather(x, return_weatherDF = TRUE)
+#' x2 <- dbW_imputeWeather(x, method_after_wg = "none", return_weatherDF = TRUE)
+#' x3 <- dbW_imputeWeather(
+#'   x,
+#'   use_wg = FALSE,
+#'   method_after_wg = "locf",
+#'   return_weatherDF = TRUE
+#' )
+#'
+#' if (requireNamespace("graphics")) {
+#'   ## Compare original vs imputed values for May-Sep of 1980
+#'   ip <- x[, "Year"] == 1980 & x[, "DOY"] >= 123 & x[, "DOY"] <= 274
+#'   doy <- x[ip, "DOY"]
+#'
+#'   vars <- names(dif0)[dif0]
+#'   nr <- ceiling(sqrt(length(vars)))
+#'
+#'   par_prev <- graphics::par(mfrow = c(nr, ceiling(length(vars) / nr)))
+#'
+#'   for (k in seq_along(vars)) {
+#'     graphics::plot(doy, x0[ip, vars[[k]]], ylab = vars[[k]], type = "l")
+#'     graphics::lines(doy, x1[ip, vars[[k]]], col = "red", lty = 2L)
+#'     graphics::lines(doy, x2[ip, vars[[k]]], col = "purple", lty = 3L)
+#'     graphics::lines(doy, x3[ip, vars[[k]]], col = "darkgreen", lty = 3L)
+#'     graphics::lines(doy, x0[ip, vars[[k]]], col = "gray")
+#'   }
+#'
+#'   graphics::par(par_prev)
+#' }
+#'
+#' @md
+#' @export
+dbW_imputeWeather <- function(
+  weatherData,
+  use_wg = TRUE,
+  seed = NULL,
+  method_after_wg = c("interp", "locf", "mean", "none", "fail"),
+  nmax_run = Inf,
+  return_weatherDF = FALSE
+) {
+
+  method_after_wg <- match.arg(method_after_wg)
+
+  if (method_after_wg == "interp" || isTRUE(is.finite(nmax_run))) {
+    stopifnot(
+      # `rSW2utils::impute_df()` v0.2.1 required for
+      # type "interp" and argument "nmax_run"
+      check_version(
+        as.numeric_version(getNamespaceVersion("rSW2utils")),
+        expected_version = "0.2.1",
+        level = "patch"
+      )
+    )
+  }
+
+  if (dbW_check_weatherData(weatherData, check_all = FALSE)) {
+    weatherData <- dbW_weatherData_to_dataframe(weatherData)
+  }
+
+
+  vars_wgen <- weatherGenerator_dataColumns()
+
+  if (
+    isTRUE(as.logical(use_wg)[[1L]]) &&
+      any(is_missing_weather(weatherData[, vars_wgen, drop = FALSE]))
+  ) {
+    #--- Use weather generator for available variables
+    tmp <- dbW_generateWeather(
+      weatherData = weatherData,
+      return_weatherDF = TRUE,
+      seed = seed
+    )
+
+    weatherData[, vars_wgen] <- tmp[, vars_wgen]
+  }
+
+  #--- Imputation after first pass of weather generator
+  vars_meteo <- intersect(weather_dataColumns(), colnames(weatherData))
+
+  # see `calc_dailyInputFlags(weatherData, vars_meteo)`
+  tmp_miss <- is_missing_weather(weatherData[, vars_meteo, drop = FALSE])
+  tmp <- apply(!tmp_miss, MARGIN = 2L, FUN = any)
+  vars_wv <- names(tmp)[tmp] # variables with values
+
+  needs_im <- which(
+    tmp_miss[, vars_wv, drop = FALSE],
+    arr.ind = TRUE
+  )
+
+  if (NROW(needs_im) > 0) {
+    if (method_after_wg == "fail") {
+      stop(
+        "Missing values in variables ",
+        if (use_wg) "after weather generator ",
+        "(method_after_wg = 'fail'): ",
+        toString(vars_wv[unique(needs_im[, "col"])])
+      )
+    }
+
+    weatherData[, vars_wv][needs_im] <- NA # set all types of missingness to NA
+
+    tmp <- rSW2utils::impute_df(
+      weatherData[, vars_wv, drop = FALSE],
+      imputation_type = method_after_wg,
+      nmax_run = nmax_run
+    )
+
+    weatherData[, vars_wv][needs_im] <- tmp[needs_im]
+  }
+
+  if (isTRUE(as.logical(return_weatherDF[[1L]]))) {
+    weatherData
+  } else {
+    dbW_dataframe_to_weatherData(weatherData)
+  }
+}
+
+
+#' Replace missing values with values from another weather data set
+#'
+#' @inheritParams dbW_generateWeather
+#' @param subData A weather data object.
+#' @param vars_substitute Names of variables for which missing values
+#' in `weatherData` should be replaced by values from `subData`.
+#' If `NULL`, then all weather variables (i.e., [weather_dataColumns()]).
+#' @param by Names of variables used to match days (rows) between
+#' `weatherData` and `subData`. If `NULL`, then all variables occurring both
+#' in `weatherData` and `subData` that are not weather variables.
+#' @param by_weatherData See `by`.
+#' @param by_subData See `by`.
+#' @param return_weatherDF A logical value. See section "Value".
+#'
+#' @return An updated copy of `weatherData` where missing values have been
+#' replaced by corresponding values from `subData`.
+#' If `return_weatherDF` is `TRUE`, then the result is converted to a
+#' data frame where columns represent weather variables.
+#' If `return_weatherDF` is `FALSE`, then the result is
+#' a list of elements of class [`swWeatherData`].
+#'
+#' @seealso [dbW_generateWeather()], [dbW_imputeWeather()]
+#'
+#' @examples
+#' # Load example data
+#' path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
+#' dif <- c(rep(TRUE, 3L), rep(FALSE, 11L))
+#' dif[13L] <- TRUE # ACTUAL_VP
+#' dif[14L] <- TRUE # SHORT_WR, desc_rsds = 2
+#' wdata <- getWeatherData_folders(
+#'   LookupWeatherFolder = file.path(path_demo, "Input"),
+#'   weatherDirName = "data_weather_daymet",
+#'   filebasename = "weath",
+#'   startYear = 1980,
+#'   endYear = 1981,
+#'   dailyInputFlags = dif,
+#'   method = "C"
+#' )
+#' x0 <- x <- dbW_weatherData_to_dataframe(wdata)
+#' dif0 <- calc_dailyInputFlags(x0)
+#'
+#' # Set June-August of 1980 as missing
+#' ids_1980 <- x[, "Year"] == 1980
+#' ids_missing <- ids_1980 & x[, "DOY"] >= 153 & x[, "DOY"] <= 244
+#' x[ids_missing, -(1:2)] <- NA
+#'
+#' # Substitute missing values
+#' all.equal(
+#'   dbW_substituteWeather(x, x0[ids_1980, ], return_weatherDF = TRUE),
+#'   x0
+#' )
+#'
+#'
+#' @md
+#' @export
+dbW_substituteWeather <- function(
+  weatherData,
+  subData,
+  vars_substitute = NULL,
+  by = NULL,
+  by_weatherData = by,
+  by_subData = by,
+  return_weatherDF = FALSE
+) {
+  #--- Convert to data frames
+  if (dbW_check_weatherData(weatherData, check_all = FALSE)) {
+    weatherData <- dbW_weatherData_to_dataframe(weatherData)
+  }
+
+  if (dbW_check_weatherData(subData, check_all = FALSE)) {
+    subData <- dbW_weatherData_to_dataframe(subData)
+  }
+
+  #--- Align days (rows) and variables (columns)
+  vars_both <- intersect(colnames(weatherData), colnames(subData))
+
+  if (is.null(vars_substitute)) {
+    vars_req <- vars_both
+  } else {
+    vars_req <- intersect(vars_both, vars_substitute)
+    if (length(vars_req) != length(vars_substitute)) {
+      warning(
+        "Not all requested variables present in both datasets."
+      )
+    }
+  }
+
+  vars_meteo <- intersect(vars_req, weather_dataColumns())
+
+  if (is.null(by_weatherData)) {
+    by_weatherData <- by_subData
+  }
+
+  if (is.null(by_subData)) {
+    by_subData <- by_weatherData
+  }
+
+  if (is.null(by_weatherData) && is.null(by_subData)) {
+    by_weatherData <- by_subData <- setdiff(vars_both, weather_dataColumns())
+  }
+
+  if (
+    any(
+      length(by_weatherData) == 0L,
+      length(by_weatherData) != length(by_subData),
+      !all(by_weatherData %in% colnames(weatherData)),
+      !all(by_subData %in% colnames(subData))
+    )
+  ) {
+    stop("Insufficient/bad information to match days.")
+  }
+
+  wdids <- do.call(
+    paste,
+    args = c(as.list(as.data.frame(weatherData)[by_weatherData]), sep = "-")
+  )
+  sdids <- do.call(
+    paste,
+    args = c(as.list(as.data.frame(subData)[by_subData]), sep = "-")
+  )
+
+  ids <- match(wdids, sdids, nomatch = 0L)
+  idsnn <- ids > 0L
+
+  if (!any(idsnn)) {
+    warning("No matching days found.")
+  }
+
+  needsSub <- is_missing_weather(weatherData[idsnn, vars_meteo, drop = FALSE])
+
+  weatherData[idsnn, vars_meteo][needsSub] <- subData[ids, vars_meteo][needsSub]
+
+
+  #--- Return
+  if (isTRUE(as.logical(return_weatherDF[[1L]]))) {
+    weatherData
+  } else {
+    dbW_dataframe_to_weatherData(weatherData)
+  }
+}
+
+
+
+#' Fix weather data
+#'
+#' Missing values are `"fixed"` with the following approach:
+#'   1. `weatherData` is formatted for `rSOILWAT2`, i.e., converted to a
+#'      Gregorian calendar and required but missing variables added.
+#'   2. Short spells of missing values
+#'      (consecutive days shorter than `nmax_interp`) are linearly interpolated
+#'      from adjacent non-missing values
+#'      (meta data tag `"interpolateLinear (<= X days)"`)
+#'   3. Short spells of missing precipitation values are
+#'      * Linearly interpolated if `precip_lt_nmax` is `NA`
+#'      * Set to a fixed numeric value of `precip_lt_nmax`
+#'        (meta data tag `"fixedValue"`)
+#'      * Substituted with values from `subData` if `precip_lt_nmax` is `Inf`
+#'        (see next point)
+#'   4. Values from a second weather data object `subData` are used to replace
+#'      (meta data tag `substituteData"`):
+#'      * Missing precipitation values (if `precip_lt_nmax` is `Inf`)
+#'      * Values before first day with any non-missing values
+#'      * Variables absent in `weatherData` and present in `subData`
+#'   5. Long-term daily means are used to replace any remaining missing values
+#'      (meta data tag `"longTermDailyMean"`);
+#'      for instance, this approach may be applied for
+#'      * Values of variables that are present in `weatherData` and
+#'        absent in `subData`, before first day with any non-missing values
+#'      * Values after end of available values in both `weatherData` and
+#'        `subData`
+#'
+#' @inheritParams dbW_substituteWeather
+#' @inheritParams dbW_convert_to_GregorianYears
+#' @param nmax_interp An integer value. Maximum spell length of missing values
+#' for which linear interpolation is applied.
+#' @param precip_lt_nmax A numeric value. Should short spells of
+#' missing precipitation values be
+#' linearly interpolated (if `NA`),
+#' substituted with values from `subData` (if `Inf`), or
+#' replaced by a fixed numeric value (default is 0)?
+#'
+#' @return A list with two named elements
+#'   * `"weatherData"`: An updated copy of the input `weatherData`
+#'     where missing values have been replaced.
+#'     If `return_weatherDF` is `TRUE`, then the result is converted to a
+#'     data frame where columns represent weather variables.
+#'     If `return_weatherDF` is `FALSE`, then the result is
+#'     a list of elements of class [`swWeatherData`].
+#'   * `"meta"`: a data frame with the same dimensions as `"weatherData"`
+#'     with tags indicating which approach was used to replaced missing values
+#'     in corresponding cells of `weatherData` (see section `Details`)
+#'
+#' @seealso [dbW_imputeWeather()], [dbW_substituteWeather()],
+#' [dbW_generateWeather()]
+#'
+#' @examples
+#' x0 <- x <- dbW_weatherData_to_dataframe(rSOILWAT2::weatherData)
+#'
+#' tmp <- x[, "Year"] == 1981
+#' ids_to_interp <- tmp & x[, "DOY"] >= 144 & x[, "DOY"] <= 145
+#' x[ids_to_interp, -(1:2)] <- NA
+#'
+#' tmp <- x[, "Year"] == 1980
+#' ids_to_sub <- tmp & x[, "DOY"] >= 153 & x[, "DOY"] <= 244
+#' x[ids_to_sub, -(1:2)] <- NA
+#'
+#' xf <- dbW_fixWeather(x, x0, return_weatherDF = TRUE)
+#' all.equal(
+#'   xf[["weatherData"]][!ids_to_interp, ],
+#'   as.data.frame(x0)[!ids_to_interp, ]
+#' )
+#' table(xf[["meta"]])
+#'
+#' @md
+#' @export
+dbW_fixWeather <- function(
+  weatherData,
+  subData = NULL,
+  new_startYear = NULL,
+  new_endYear = NULL,
+  nmax_interp = 7L,
+  precip_lt_nmax = 0,
+  return_weatherDF = FALSE
+) {
+  nmax_interp <- as.integer(nmax_interp)
+  vars_time <- c("Year", "DOY")
+
+  #--- Convert to data frames and add missing variables (if any)
+  weatherData <- if (dbW_check_weatherData(weatherData, check_all = FALSE)) {
+    dbW_weatherData_to_dataframe(weatherData)
+  } else {
+    upgrade_weatherDF(weatherData)
+  }
+
+  stopifnot(
+    c(vars_time, weather_dataColumns()) %in% colnames(weatherData)
+  )
+
+  #--- Locate years
+  if (is.null(new_startYear) || is.null(new_endYear)) {
+    years <- get_years_from_weatherDF(
+      weatherDF = weatherData,
+      years = NULL
+    )[["years"]]
+
+    if (is.null(new_startYear)) new_startYear <- years[[1L]]
+    if (is.null(new_endYear)) new_endYear <- years[[length(years)]]
+  }
+
+
+  #--- Add missing days to complete full requested calendar years
+  weatherData1 <- dbW_convert_to_GregorianYears(
+    weatherData = weatherData,
+    new_startYear = new_startYear,
+    new_endYear = new_endYear,
+    type = "asis"
+  )
+
+  is_miss1 <- is_missing_weather(weatherData1[, weather_dataColumns()])
+  meta <- array(dim = dim(is_miss1), dimnames = dimnames(is_miss1))
+
+
+  #--- Determine first and last day with at least one observation
+  tmp <- which(rowSums(!is_miss1) > 0L)
+  ids <- tmp[c(1L, length(tmp))]
+
+  ids_startend <-
+    # before start
+    (weatherData1[["Year"]] < weatherData1[ids[[1L]], "Year"]) |
+    (weatherData1[["Year"]] == weatherData1[ids[[1L]], "Year"] &
+        weatherData1[["DOY"]] < weatherData1[ids[[1L]], "DOY"]) |
+    # after end
+    (weatherData1[["Year"]] == weatherData1[ids[[2L]], "Year"] &
+        weatherData1[["DOY"]] > weatherData1[ids[[2L]], "DOY"]) |
+    (weatherData1[["Year"]] > weatherData1[ids[[2L]], "Year"])
+
+
+
+  #--- Interpolate short missing runs
+  weatherData2 <- suppressWarnings(
+    dbW_imputeWeather(
+      weatherData1,
+      use_wg = FALSE,
+      method_after_wg = "interp",
+      nmax_run = nmax_interp,
+      return_weatherDF = TRUE
+    )
+  )
+
+  # special treatment of precipitation
+  #   (NA = interpolate; x = fixedValue; Inf = subData)
+  is_pptFixedValue <- NULL
+
+  if (!isTRUE(is.na(precip_lt_nmax[[1L]]))) {
+
+    if (isTRUE(is.finite(precip_lt_nmax[[1L]]))) {
+      # Find linear interpolated precip values and replace with fixed value
+      ppt_miss2a <- is_missing_weather(weatherData2[, "PPT_cm"])
+      is_pptFixedValue <- which(!ppt_miss2a[, 1L] & is_miss1[, "PPT_cm"])
+      weatherData2[["PPT_cm"]][is_pptFixedValue] <- precip_lt_nmax[[1L]]
+
+    } else {
+      # Reset for replacement by subData in following step
+      weatherData2[["PPT_cm"]] <- weatherData1[["PPT_cm"]]
+    }
+  }
+
+  # Set values outside original time periods to missing
+  weatherData2[ids_startend, weather_dataColumns()] <- NA
+
+  is_miss2 <- is_missing_weather(weatherData2[, weather_dataColumns()])
+  meta[!is_miss2 & is_miss1] <- sprintf(
+    "interpolateLinear (<= %d days)",
+    nmax_interp
+  )
+
+  if (length(is_pptFixedValue) > 0L) {
+    meta[is_pptFixedValue, "PPT_cm"] <- "fixedValue"
+  }
+
+
+  #--- Use subData
+  # * for missing values before first observation day
+  # * for variables missing weatherData but available in subData
+  # * for missing precipitation
+  if (is.null(subData)) {
+    weatherData3 <- weatherData2
+    is_miss3 <- is_miss2
+
+  } else {
+    subData <- if (dbW_check_weatherData(subData, check_all = FALSE)) {
+      dbW_weatherData_to_dataframe(subData)
+    } else {
+      upgrade_weatherDF(subData)
+    }
+
+    stopifnot(
+      c(vars_time, weather_dataColumns()) %in% colnames(subData)
+    )
+
+    subData1 <- dbW_convert_to_GregorianYears(
+      weatherData = subData,
+      new_startYear = new_startYear,
+      new_endYear = new_endYear,
+      type = "asis"
+    )
+
+    weatherData3 <- dbW_substituteWeather(
+      weatherData = weatherData2,
+      subData = subData1,
+      return_weatherDF = TRUE
+    )
+
+    is_miss3 <- is_missing_weather(weatherData3[, weather_dataColumns()])
+    meta[!is_miss3 & is_miss2] <- "substituteData"
+  }
+
+
+  #--- Use long-term daily means to impute the rest
+  # - for variables not in subData before first observed value in weatherData
+  # - values after end of observed values in weatherData
+  dif_wd3 <- rSOILWAT2::calc_dailyInputFlags(weatherData3)
+  vars_wd3 <- names(dif_wd3)[dif_wd3]
+
+  if (!any(is_missing_weather(weatherData3[, vars_wd3]))) {
+    weatherData4 <- weatherData3
+
+  } else {
+    daymeans <- data.frame(
+      Year = NA,
+      aggregate(
+        weatherData1[, weather_dataColumns()],
+        by = weatherData1["DOY"],
+        FUN = mean,
+        na.rm = TRUE
+      )
+    )
+
+
+    if (!is.null(subData)) {
+      dif_wd <- rSOILWAT2::calc_dailyInputFlags(weatherData1)
+      dif_sd <- rSOILWAT2::calc_dailyInputFlags(subData)
+
+      tmp_vars <- setdiff(names(dif_sd)[dif_sd], names(dif_wd)[dif_wd])
+
+      if (length(tmp_vars) > 0L) {
+        sd_daymeans <- data.frame(
+          Year = NA,
+          aggregate(
+            subData[, weather_dataColumns()],
+            by = subData["DOY"],
+            FUN = mean,
+            na.rm = TRUE
+          )
+        )
+
+        daymeans[, tmp_vars] <- sd_daymeans[, tmp_vars]
+      }
+    }
+
+    # Linear interpolate any missing long-term daily means
+    daymeans2 <- suppressWarnings(
+      dbW_imputeWeather(
+        daymeans,
+        use_wg = FALSE,
+        method_after_wg = "interp",
+        nmax_run = Inf,
+        return_weatherDF = TRUE
+      )
+    )
+
+    # Create object with long-term daily means repeated for each requested year
+    daymeans_years <- do.call(
+      rbind,
+      args = lapply(
+        seq(new_startYear, new_endYear),
+        function(year) {
+          tmp <- daymeans2
+          tmp[["Year"]] <- year
+          tmp
+        }
+      )
+    )
+
+    weatherData4 <- dbW_substituteWeather(
+      weatherData = weatherData3,
+      subData = daymeans_years,
+      return_weatherDF = TRUE
+    )
+
+    is_miss4 <- is_missing_weather(weatherData4[, weather_dataColumns()])
+    meta[!is_miss4 & is_miss3] <- "longTermDailyMean"
+  }
+
+
+  #--- Return
+  list(
+    weatherData = if (isTRUE(as.logical(return_weatherDF[[1L]]))) {
+      weatherData4
+    } else {
+      dbW_dataframe_to_weatherData(weatherData4)
+    },
+    meta = meta
+  )
 }

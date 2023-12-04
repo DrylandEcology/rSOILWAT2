@@ -32,9 +32,9 @@ compared against \code{ref_weather}.}
 in \code{weather}.}
 
 \item{WET_limit_cm}{A numeric value. A day with more precipitation than
-this value is considered \var{wet} instead of \var{dry}. Default is 0.
+this value is considered \code{wet} instead of \code{dry}. Default is 0.
 This values should be equal to the corresponding value used in
-\var{SOILWAT2}'s function \code{SW_MKV_today}.}
+\code{SOILWAT2}'s function \code{SW_MKV_today()}.}
 
 \item{path}{A character string. The directory path in which output figures
 will be saved.}

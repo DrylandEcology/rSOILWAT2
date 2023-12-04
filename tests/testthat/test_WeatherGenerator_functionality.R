@@ -64,7 +64,7 @@ test_that("Weather generator: estimate input parameters", {
 })
 
 
-test_that("Weather generator: generate weather", {
+test_that("Weather generator: generate and impute weather", {
   digits <- 9L
 
   for (k in seq_along(tests)) {
@@ -74,10 +74,12 @@ test_that("Weather generator: generate weather", {
     years <- get_years_from_weatherData(test_dat)
     n <- length(test_dat)
 
+    test_dat1_df <- dbW_weatherData_to_dataframe(test_dat)
+
     wout <- list()
 
-    # Case 1: generate weather for dataset and impute missing values
-    wout[[1]] <- suppressMessages(
+    # Case 1: generate weather for dataset and impute missing wgen parameters
+    wout[[1L]] <- suppressMessages(
       dbW_generateWeather(
         test_dat,
         imputation_type = "mean",
@@ -87,7 +89,37 @@ test_that("Weather generator: generate weather", {
       )
     )
 
-    # Case 2: generate weather based on partial dataset,
+    # weather generator is exactly reproducible
+    tmp <- suppressMessages(
+      dbW_generateWeather(
+        test_dat,
+        imputation_type = "mean",
+        imputation_span = 5,
+        digits = digits,
+        seed = 123
+      )
+    )
+    expect_equal(tmp, wout[[1L]], tolerance = 10 ^ (-digits))
+
+
+    # Case 1b: generate weather for missing days via impute weather function
+    wout[[2L]] <- suppressMessages(
+      dbW_imputeWeather(
+        test_dat,
+        use_wg = TRUE,
+        seed = 123,
+        method_after_wg = "none"
+      )
+    )
+
+    # Expect that weather generator is equivalent between the two functions
+    expect_equal(
+      dbW_weatherData_to_dataframe(wout[[2L]]),
+      dbW_weatherData_to_dataframe(wout[[1L]]),
+      tolerance = 10 ^ (-digits)
+    )
+
+    # Case 3: generate weather based on partial dataset,
     #   use estimated weather generator coefficients from full dataset
     wgen_coeffs <- suppressMessages(
       dbW_estimate_WGen_coefs(
@@ -97,16 +129,16 @@ test_that("Weather generator: generate weather", {
       )
     )
 
-    wout[[2]] <- dbW_generateWeather(
+    wout[[3L]] <- dbW_generateWeather(
       test_dat[(n - 5):n],
       years = years[length(years)] + 0:10 - 5,
       wgen_coeffs = wgen_coeffs
     )
 
-    # Case 3: generate weather based only on estimated weather generator
+    # Case 4: generate weather based only on estimated weather generator
     #   coefficients from full dataset
     x_empty <- weatherHistory()
-    wout[[3]] <- dbW_generateWeather(
+    wout[[4L]] <- dbW_generateWeather(
       x_empty,
       years = years[length(years)] + 30:40,
       wgen_coeffs = wgen_coeffs
@@ -128,27 +160,28 @@ test_that("Weather generator: generate weather", {
 
 
     #--- Expect that values remain unchanged
-    # wgen-variables: on days where all wgen-variables are non-missing
-    # Non-wgen variables: any non-missing value remain unchanged
-
-    wout1_df <- rSOILWAT2::dbW_weatherData_to_dataframe(wout[[1L]])
-    test_dat1_df <- rSOILWAT2::dbW_weatherData_to_dataframe(test_dat)
-
+    # for wgen-variables: on days where all wgen-variables are non-missing
     ids_wgen <- which(
-      colnames(test_dat1_df) %in% rSOILWAT2::weatherGenerator_dataColumns()
+      colnames(test_dat1_df) %in% weatherGenerator_dataColumns()
     )
+    # indices of weather generator variables
+    #   * for days where at least one variable is missing (is_missing_wgen)
+    #   * for days where no variable is missing (isnot_missing_wgen)
     tmp <- apply(
       !is_missing_weather(test_dat1_df[, ids_wgen, drop = FALSE]),
       MARGIN = 1L,
       FUN = all
     )
-    isnot_missing_wgen <- as.matrix(data.frame(
-      row = rep(which(tmp), times = length(ids_wgen)),
-      col = rep(ids_wgen, each = sum(tmp))
-    ))
+    isnot_missing_wgen <- as.matrix(
+      data.frame(
+        row = rep(which(tmp), times = length(ids_wgen)),
+        col = rep(ids_wgen, each = sum(tmp))
+      )
+    )
 
+    # for non-wgen variables: any non-missing value remain unchanged
     ids_nowgen <- which(
-      !colnames(test_dat1_df) %in% rSOILWAT2::weatherGenerator_dataColumns()
+      !colnames(test_dat1_df) %in% weatherGenerator_dataColumns()
     )
     isnot_missing_nowgen <- which(
       !is_missing_weather(test_dat1_df[, ids_nowgen, drop = FALSE]),
@@ -159,11 +192,13 @@ test_that("Weather generator: generate weather", {
     isnot_missing <- rbind(isnot_missing_wgen, isnot_missing_nowgen)
 
 
-    expect_equal(
-      test_dat1_df[isnot_missing],
-      wout1_df[isnot_missing],
-      tolerance = 10 ^ (-digits)
-    )
+    for (ke in 1:2) {
+      expect_equal(
+        test_dat1_df[isnot_missing],
+        dbW_weatherData_to_dataframe(wout[[ke]])[isnot_missing],
+        tolerance = 10 ^ (-digits)
+      )
+    }
   }
 })
 

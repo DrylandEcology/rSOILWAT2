@@ -50,7 +50,6 @@ test_that("Upgrade old rSOILWAT2 weather objects", {
   expect_gt(length(fnames_vdata), 0L)
 
 
-  # Upgrade weather data, i.e., lists of class `swWeatherData`
   for (k in seq_along(fnames_vdata)) {
     x <- readRDS(fnames_vdata[k])
 
@@ -58,6 +57,18 @@ test_that("Upgrade old rSOILWAT2 weather objects", {
       expect_false(dbW_check_weatherData(x))
     }
 
+    # Upgrade weather data, i.e., lists of class `swWeatherData`
     expect_true(dbW_check_weatherData(upgrade_weatherHistory(x)))
+
+    # Upgrade weather data frames
+    expect_true(
+      dbW_check_weatherData(
+        dbW_dataframe_to_weatherData(
+          upgrade_weatherDF(
+            dbW_weatherData_to_dataframe(x)
+          )
+        )
+      )
+    )
   }
 })
