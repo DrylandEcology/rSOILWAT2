@@ -1705,10 +1705,7 @@ dbW_fixWeather <- function(
   dif_wd3 <- rSOILWAT2::calc_dailyInputFlags(weatherData3)
   vars_wd3 <- names(dif_wd3)[dif_wd3]
 
-  if (!any(is_missing_weather(weatherData3[, vars_wd3]))) {
-    weatherData4 <- weatherData3
-
-  } else {
+  if (any(is_missing_weather(weatherData3[, vars_wd3]))) {
     daymeans <- data.frame(
       Year = NA,
       aggregate(
@@ -1773,6 +1770,9 @@ dbW_fixWeather <- function(
 
     is_miss4 <- is_missing_weather(weatherData4[, weather_dataColumns()])
     meta[!is_miss4 & is_miss3] <- "longTermDailyMean"
+
+  } else {
+    weatherData4 <- weatherData3
   }
 
 

@@ -189,16 +189,14 @@ options(tinytex.verbose = TRUE)
 
 ## Create base rSOILWAT2 input object
 ```{r, input_object}
-  # Preferred option:
+  ## Quick option
+  # Note: This approach is discouraged because it is very easy to miss to
+  # set all relevant parameters and variables to site-specific values
+  sw_in__bad <- rSOILWAT2::sw_exampleData ## Don't do this!
+
+  ## Preferred option
   # All relevant site-specific parameters and variables are set to NA
   sw_in <- rSOILWAT2::swInputData()
-
-  # Quick option:
-  # This approach is discouraged because it is very easy to miss to
-  # set all relevant parameters and variables to site-specific values
-  if (FALSE) {
-    sw_in <- rSOILWAT2::sw_exampleData
-  }
 ```
 
 ## Simulation time and location
@@ -644,10 +642,9 @@ by `SOILWAT2` with the selected pedotransfer function.
   # Declare that parameter values are already estimated
   rSOILWAT2::swSite_hasSWRCp(sw_in) <- TRUE
 
-  if (FALSE) {
-    # Alternatively, set soil properties and SWRC parameters at once
-    rSOILWAT2::set_swSoils(sw_in) <- list(Layers = soil_new, SWRCp = swrcp)
-  }
+  # Alternatively (and equivalently),
+  # set soil properties and SWRC parameters with one assignment
+  rSOILWAT2::set_swSoils(sw_in) <- list(Layers = soil_new, SWRCp = swrcp)
 ```
 
 

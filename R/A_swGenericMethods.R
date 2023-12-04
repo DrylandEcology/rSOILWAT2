@@ -137,7 +137,7 @@ check_version <- function(
       expected[[c(1, 3)]] <- 0
     }
 
-    if (level %in% "major") {
+    if (identical(level, "major")) {
       # zero the minor-level
       has[[c(1, 2)]] <- 0
       expected[[c(1, 2)]] <- 0

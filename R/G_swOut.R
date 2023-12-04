@@ -281,7 +281,7 @@ setMethod(
     #   update `do_upgrade` when `n_exp` changes or new upgrades required!
     do_upgrade <- c(
       from_v230 = n_has == 30L && n_exp %in% 31L:32L,
-      from_v310 = n_has == 31L && n_exp %in% 32L
+      from_v310 = n_has == 31L && n_exp == 32L
     )
 
     do_upgrade <- do_upgrade[do_upgrade]

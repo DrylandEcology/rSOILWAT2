@@ -44,20 +44,20 @@ weather_dataColumns <- function() {
 #' @export
 weather_dataAggFun <- function() {
   c(
-    "Tmax_C" = mean,
-    "Tmin_C" = mean,
-    "PPT_cm" = sum,
-    "cloudCov_pct" = mean,
-    "windSpeed_mPERs" = mean,
-    "windSpeed_east_mPERs" = mean,
-    "windSpeed_north_mPERs" = mean,
-    "rHavg_pct" = mean,
-    "rHmax_pct" = mean,
-    "rHmin_pct" = mean,
-    "specHavg_pct" = mean,
-    "Tdewpoint_C" = mean,
-    "actVP_kPa" = mean,
-    "shortWR" = mean
+    Tmax_C = mean,
+    Tmin_C = mean,
+    PPT_cm = sum,
+    cloudCov_pct = mean,
+    windSpeed_mPERs = mean,
+    windSpeed_east_mPERs = mean,
+    windSpeed_north_mPERs = mean,
+    rHavg_pct = mean,
+    rHmax_pct = mean,
+    rHmin_pct = mean,
+    specHavg_pct = mean,
+    Tdewpoint_C = mean,
+    actVP_kPa = mean,
+    shortWR = mean
   )
 }
 

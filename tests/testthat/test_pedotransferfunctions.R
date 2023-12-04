@@ -52,7 +52,10 @@ vwc_fix <- data.frame(
 row.names(vwc_fix) <- row.names(texture)
 
 ftemp <- file.path("..", "test_data", "swp_values.rds")
-if (FALSE) {
+if (file.exists(ftemp)) {
+  swp_vals <- readRDS(ftemp)
+
+} else {
   swp_vals <- unlist(lapply(
     row.names(texture),
     function(itext) {
@@ -70,9 +73,6 @@ if (FALSE) {
     row.names(texture)
   )
   saveRDS(swp_vals, file = ftemp)
-
-} else {
-  swp_vals <- readRDS(ftemp)
 }
 
 #--- Tests
