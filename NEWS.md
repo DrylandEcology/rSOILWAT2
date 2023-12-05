@@ -1,4 +1,4 @@
-# rSOILWAT2 v6.0.4-9000
+# rSOILWAT2 v6.0.4
 * This version produces the same output as the previous version.
 
 ## New features
