@@ -133,12 +133,12 @@ sw_upgrade_MonthlyScalingParams <- function( # nolint: object_length_linter.
   vars_exp <- colnames(default@MonthlyScalingParams)
   vars_has <- colnames(MonthlyScalingParams)
 
-  if (!all(vars_exp %in% vars_has)) {
+  if (all(vars_exp %in% vars_has)) {
+    MonthlyScalingParams
+  } else {
     res <- default@MonthlyScalingParams
     res[, vars_has] <- MonthlyScalingParams[, vars_has]
     res
-  } else {
-    MonthlyScalingParams
   }
 }
 
@@ -243,7 +243,7 @@ setValidity(
     sns <- setdiff(slotNames("swWeather"), inheritedSlotNames("swWeather"))
 
     for (sn in sns) {
-      n_exp <- if (sn %in% "dailyInputFlags") {
+      n_exp <- if (identical(sn, "dailyInputFlags")) {
         rSW2_glovars[["kSOILWAT2"]][["kINT"]][["MAX_INPUT_COLUMNS"]]
       } else {
         1L

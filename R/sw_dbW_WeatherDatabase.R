@@ -39,9 +39,9 @@
 #'
 #' @param years A numeric vector. The calendar years.
 #' @param digits An integer value. The number of decimal places for rounding
-#'   weather values.
+#'   weather values (or `TRUE` but no rounding if `FALSE` or not finite).
 #' @param round An integer value. The number of decimal places for rounding
-#'   weather values.
+#'   weather values (or `TRUE` but no rounding if `FALSE` or not finite).
 #'
 #' @param weather_tag A character string. The base file name without extension
 #' for `SOILWAT2`-formatted input files; default is `"weath"`
@@ -2173,14 +2173,16 @@ dbW_weatherData_to_dataframe <- function(weatherData, valNA = NULL) {
   )
 }
 
-#' Round weather data in a list class \code{\linkS4class{swWeatherData}}
+#' Round weather data
 #'
 #' @inheritParams sw_weather_data
 #'
 #' @section Notes:
 #' `weatherDF_dataColumns` lists the columns of `weatherData` to be rounded.
 #'
-#' @return A list with \code{\linkS4class{swWeatherData}} elements.
+#' @return A list with class [`swWeatherData`] elements or
+#' a data frame where columns represent weather variables
+#' (depending on `weatherData`).
 #'
 #' @export
 #' @md
@@ -2189,16 +2191,31 @@ dbW_weatherData_round <- function(
   digits = 4L,
   weatherDF_dataColumns = weather_dataColumns()
 ) {
-  lapply(
-    weatherData,
-    function(x) {
-      slot(x, "data")[, weatherDF_dataColumns] <- round(
-        slot(x, "data")[, weatherDF_dataColumns],
-        digits = digits
-      )
-      x
-    }
-  )
+  if (isFALSE(is.na(digits)) && isTRUE(is.logical(digits))) {
+    digits <- if (isTRUE(as.logical(digits))) 4L else NA
+  }
+
+  if (!isTRUE(is.finite(digits))) return(weatherData)
+
+  if (dbW_check_weatherData(weatherData, check_all = FALSE)) {
+    lapply(
+      weatherData,
+      function(x) {
+        slot(x, "data")[, weatherDF_dataColumns] <- round(
+          slot(x, "data")[, weatherDF_dataColumns],
+          digits = digits
+        )
+        x
+      }
+    )
+
+  } else {
+    weatherData[, weatherDF_dataColumns] <- round(
+      weatherData[, weatherDF_dataColumns],
+      digits = digits
+    )
+    weatherData
+  }
 }
 
 
@@ -2406,8 +2423,16 @@ dbW_dataframe_to_weatherData <- function(
   weatherDF,
   years = NULL,
   weatherDF_dataColumns = NULL,
-  round = 2
+  round = NA
 ) {
+  if (isTRUE(is.finite(round))) {
+    .Deprecated(
+      msg = paste(
+        "Argument 'round' is deprecated.
+        Please call `dbW_weatherData_round()` instead."
+      )
+    )
+  }
 
   if (is.null(weatherDF_dataColumns)) {
     weatherDF_dataColumns <- intersect(
@@ -2428,8 +2453,9 @@ dbW_dataframe_to_weatherData <- function(
 
   ylist <- get_years_from_weatherDF(weatherDF, years, weatherDF_dataColumns)
 
-  if (isTRUE(is.logical(round) && round || is.numeric(round))) {
-    weatherDF <- round(weatherDF, digits = if (is.logical(round)) 2 else round)
+  # Remove call to `dbW_weatherData_round()` once argument `round` is removed.
+  if (isTRUE(is.finite(round))) {
+    weatherDF <- dbW_weatherData_round(weatherDF, digits = round)
   }
 
   template <- new("swWeatherData")

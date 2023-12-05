@@ -145,12 +145,12 @@ swCloud <- function(...) {
   # We don't set values for slot `Cloud` (except SnowDensity and RainEvents)
   # if not passed via ...; this is to prevent simulation runs with
   # accidentally incorrect values
-  if (!("Cloud" %in% dns)) {
-    ids <- 4:5
-    def@Cloud[- ids, ] <- NA_real_
-  } else {
+  if ("Cloud" %in% dns) {
     # Guarantee names
     dimnames(dots[["Cloud"]]) <- dimnames(def@Cloud)
+  } else {
+    ids <- 4:5
+    def@Cloud[- ids, ] <- NA_real_
   }
 
   tmp <- lapply(

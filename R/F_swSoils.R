@@ -185,24 +185,24 @@ swSoils <- function(...) {
 
   # We don't set values for slot `Layers` if not passed via ...; this
   # is to prevent simulation runs with accidentally incorrect values
-  if (!("Layers" %in% dns)) {
-    def@Layers <- def@Layers[1, , drop = FALSE]
-    def@Layers[] <- NA_real_
-    ntmp <- 1
-  } else {
+  if ("Layers" %in% dns) {
     # Guarantee names
     dimnames(dots[["Layers"]]) <- list(NULL, colnames(def@Layers))
     ntmp <- nrow(dots[["Layers"]])
+  } else {
+    def@Layers <- def@Layers[1, , drop = FALSE]
+    def@Layers[] <- NA_real_
+    ntmp <- 1
   }
 
   # We don't set values for slot `SWRCp` if not passed via ...; this
   # is to prevent simulation runs with accidentally incorrect values
-  if (!("SWRCp" %in% dns)) {
-    def@SWRCp <- def@SWRCp[rep.int(1, ntmp), , drop = FALSE]
-    def@SWRCp[] <- NA_real_
-  } else {
+  if ("SWRCp" %in% dns) {
     # Guarantee names
     dimnames(dots[["SWRCp"]]) <- list(NULL, colnames(def@SWRCp))
+  } else {
+    def@SWRCp <- def@SWRCp[rep.int(1, ntmp), , drop = FALSE]
+    def@SWRCp[] <- NA_real_
   }
 
   # Copy from SOILWAT2 "testing" (defaults), but dot arguments take precedence

@@ -34,7 +34,7 @@ calendar year \code{year} (optional) and day of year \code{DOY}, see
 \code{\link[=weather_dataColumns]{weather_dataColumns()}}.}
 
 \item{digits}{An integer value. The number of decimal places for rounding
-weather values.}
+weather values (or \code{TRUE} but no rounding if \code{FALSE} or not finite).}
 }
 \description{
 Conversion: object of class \code{\linkS4class{swWeatherData}} or

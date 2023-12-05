@@ -8,6 +8,7 @@
 \alias{sw_upgrade,swFiles-method}
 \alias{sw_upgrade,swMonthlyScalingParams-method}
 \alias{sw_upgrade,swWeather-method}
+\alias{upgrade_weatherDF}
 \alias{upgrade_weatherHistory}
 \alias{sw_upgrade,swProd-method}
 \alias{sw_upgrade,swSite-method}
@@ -27,6 +28,11 @@ sw_upgrade(object, verbose = FALSE)
 \S4method{sw_upgrade}{swMonthlyScalingParams}(object, verbose = FALSE)
 
 \S4method{sw_upgrade}{swWeather}(object, verbose = FALSE)
+
+upgrade_weatherDF(
+  weatherDF,
+  template_weatherColumns = c("Year", "DOY", weather_dataColumns())
+)
 
 upgrade_weatherHistory(object, verbose = FALSE)
 
@@ -48,10 +54,17 @@ upgrade_weatherHistory(object, verbose = FALSE)
 \item{object}{An object of a \code{rSOILWAT2} class.}
 
 \item{verbose}{A logical value.}
+
+\item{weatherDF}{A data frame with weather variables.}
+
+\item{template_weatherColumns}{A vector with requested weather variables.}
 }
 \value{
 The upgraded \code{object}, if needed, to match the current version
 with missing slots and elements filled with default values.
+
+For \code{\link[=upgrade_weatherDF]{upgrade_weatherDF()}}:
+an updated \code{weatherDF} with requested columns.
 }
 \description{
 Missing slots and elements are added and
@@ -95,6 +108,10 @@ new slot \code{"vegType"}
 }
 
 \examples{
-  x <- sw_upgrade(rSOILWAT2::sw_exampleData, verbose = TRUE)
+x <- sw_upgrade(rSOILWAT2::sw_exampleData, verbose = TRUE)
+
+upgrade_weatherDF(
+  data.frame(DOY = 1:2, Tmax_C = runif(2), dummy = runif(2))
+)
 
 }

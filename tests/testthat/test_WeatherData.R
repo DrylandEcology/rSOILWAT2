@@ -247,12 +247,163 @@ test_that("Weather data object conversions", {
   res <- rSOILWAT2::dbW_dataframe_to_weatherData(
     weatherDF = rSOILWAT2::dbW_weatherData_to_dataframe(
       rSOILWAT2::weatherData
-    ),
-    round = FALSE
+    )
   )
 
   expect_true(rSOILWAT2::dbW_check_weatherData(res))
 
   expect_identical(res, rSOILWAT2::weatherData)
+
+})
+
+
+
+
+test_that("Weather data substitution", {
+  # Load example data
+  path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
+  dif <- c(rep(TRUE, 3L), rep(FALSE, 11L))
+  dif[13L] <- TRUE # ACTUAL_VP
+  dif[14L] <- TRUE # SHORT_WR, desc_rsds = 2
+  wdata <- rSOILWAT2::getWeatherData_folders(
+    LookupWeatherFolder = file.path(path_example1, "Input"),
+    weatherDirName = grep(
+      "data_weather_daymet",
+      x = dir_weather,
+      value = TRUE,
+      fixed = TRUE
+    ),
+    filebasename = "weath",
+    startYear = 1980,
+    endYear = 1981,
+    dailyInputFlags = dif
+  )
+
+  # Prepare example data
+  x0 <- x <- dbW_weatherData_to_dataframe(wdata)
+  dif0 <- calc_dailyInputFlags(x0)
+
+  # Set June-August of 1980 as missing
+  ids_1980 <- x[, "Year"] == 1980
+  ids_missing <- ids_1980 & x[, "DOY"] >= 153 & x[, "DOY"] <= 244
+  x[ids_missing, -(1:2)] <- NA
+
+  # Test: substitute missing values of all variables
+  expect_identical(
+    dbW_substituteWeather(x, x0[ids_1980, ], return_weatherDF = TRUE),
+    x0
+  )
+
+  # Test: substitute missing values of some variables
+  var_test <- "shortWR"
+  expect_identical(
+    dbW_substituteWeather(
+      x,
+      subData = x0[ids_1980, ],
+      vars_substitute = var_test,
+      return_weatherDF = TRUE
+    )[, var_test],
+    x0[, var_test]
+  )
+
+  # Test: substitute missing values if only some variables are available
+  vars_has <- c("Year", "DOY", "Tmax_C", "shortWR")
+  expect_identical(
+    dbW_substituteWeather(
+      x,
+      subData = x0[ids_1980, vars_has],
+      return_weatherDF = TRUE
+    )[, vars_has],
+    x0[, vars_has]
+  )
+
+  expect_warning(
+    dbW_substituteWeather(
+      x,
+      subData = x0[ids_1980, vars_has],
+      vars_substitute = weather_dataColumns(),
+      return_weatherDF = TRUE
+    ),
+    regexp = "Not all requested variables present"
+  )
+
+  # Test: match rows if "by" variables differ
+  expect_identical(
+    dbW_substituteWeather(
+      x,
+      subData = data.frame(
+        annus = x0[, "Year"],
+        dies = x0[, "DOY"],
+        x0[, setdiff(colnames(x0), c("Year", "DOY"))]
+      )[ids_1980, ],
+      by_weatherData = c("Year", "DOY"),
+      by_subData = c("annus", "dies"),
+      return_weatherDF = TRUE
+    ),
+    x0
+  )
+
+})
+
+
+test_that("Weather data fixing", {
+  x0 <- x <- as.data.frame(dbW_weatherData_to_dataframe(rSOILWAT2::weatherData))
+  dif <- calc_dailyInputFlags(x0)
+  vars <- names(dif)[dif]
+
+
+  #--- * Check no change to no missing values ------
+  xf <- dbW_fixWeather(x0, return_weatherDF = TRUE)
+  expect_identical(xf[["weatherData"]], x0)
+  expect_true(all(is.na(xf[["meta"]])))
+
+
+  #--- * Check interpolation and substitution ------
+  # * Expect short missing spell to interpolate (except precipitation)
+  # Set May 23-24 of 1981 as missing
+  tmp <- x[, "Year"] == 1981
+  ids_to_interp <- tmp & x[, "DOY"] >= 144 & x[, "DOY"] <= 145
+  x[ids_to_interp, -(1:2)] <- NA
+
+  # * Expect long missing spell to substitute
+  # Set June-August of 1980 as missing
+  tmp <- x[, "Year"] == 1980
+  ids_to_sub <- tmp & x[, "DOY"] >= 153 & x[, "DOY"] <= 244
+  x[ids_to_sub, -(1:2)] <- NA
+
+
+  xf <- dbW_fixWeather(
+    weatherData = x,
+    subData = x0,
+    new_endYear = max(x[["Year"]]) + 1L, # expect long term daily mean
+    nmax_interp = 5L,
+    return_weatherDF = TRUE
+  )
+
+  expect_false(anyNA(xf[["weatherData"]][, vars]))
+
+  ids_has <- seq_len(nrow(x0))
+  expect_identical(
+    xf[["weatherData"]][ids_has[!ids_to_interp], vars],
+    x0[!ids_to_interp, vars]
+  )
+
+  tmpc <- table(xf[["meta"]])
+  expect_identical(
+    tmpc[["interpolateLinear (<= 5 days)"]],
+    sum(ids_to_interp) * length(setdiff(vars, "PPT_cm"))
+  )
+  expect_identical(
+    tmpc[["fixedValue"]],
+    sum(ids_to_interp) # precipitation
+  )
+  expect_identical(
+    tmpc[["substituteData"]],
+    sum(ids_to_sub) * length(vars)
+  )
+  expect_identical(
+    tmpc[["longTermDailyMean"]],
+    365L * length(vars)
+  )
 
 })

@@ -10,49 +10,45 @@ dbW_generateWeather(
   wgen_coeffs = NULL,
   imputation_type = "mean",
   imputation_span = 5L,
-  digits = 4L,
+  return_weatherDF = FALSE,
+  digits = NA,
   seed = NULL
 )
 }
 \arguments{
-\item{weatherData}{A list of elements of class
-\code{\linkS4class{swWeatherData}} or a \code{data.frame} as returned by
-\code{\link{dbW_weatherData_to_dataframe}}.}
+\item{weatherData}{A list of elements of class \code{\link{swWeatherData}}
+or a data frame as returned by \code{\link[=dbW_weatherData_to_dataframe]{dbW_weatherData_to_dataframe()}}.}
 
 \item{years}{An integer vector. The calendar years for which to generate
 daily weather. If \code{NULL}, then extracted from \code{weatherData}.}
 
-\item{wgen_coeffs}{A list with two named elements \var{mkv_doy} and
-\var{mkv_woy}, i.e., the return value of
-\code{\link{dbW_estimate_WGen_coefs}}. If \code{NULL}, then determined
-based on \code{weatherData}.}
+\item{wgen_coeffs}{A list with two named elements \code{"mkv_doy"} and
+\code{"mkv_woy"}, i.e., the return value of \code{\link[=dbW_estimate_WGen_coefs]{dbW_estimate_WGen_coefs()}}.
+If \code{NULL}, then \code{\link[=dbW_estimate_WGen_coefs]{dbW_estimate_WGen_coefs()}} is called on \code{weatherData}.}
 
-\item{imputation_type}{A character string describing the imputation method;
- currently, one of three values: \describe{
-   \item{\var{"none"}}{no imputation is carried out;}
-   \item{\var{"mean"}}{missing values will be replaced by the average
-     of \code{imputation_span} non-missing values before and
-     \code{imputation_span} non-missing values after; note:
-     this may fail if there are less than \code{2 * imputation_span}
-     non-missing values;}
-   \item{\var{"locf"}}{missing values will be replaced by the
-     \var{"last-observation-carried-forward"} imputation method.}
-}}
+\item{imputation_type}{A text string. Passed to \code{\link[rSW2utils:impute_df]{rSW2utils::impute_df()}}
+for imputation of missing values in estimated weather generator coefficients.}
 
-\item{imputation_span}{An integer value. The number of non-missing values
-considered if \code{imputation_type = "mean"}.}
+\item{imputation_span}{An integer value. Passed to \code{\link[rSW2utils:impute_df]{rSW2utils::impute_df()}}
+for imputation of missing values in estimated weather generator coefficients.}
 
-\item{digits}{An integer value. The returned values will be rounded to
-the specified number of decimal places.}
+\item{return_weatherDF}{A logical value. See section "Value".}
 
-\item{seed}{An integer value or \code{NULL}. See \code{\link{set.seed}}.}
+\item{digits}{An integer value. The number of decimal places for rounding
+weather values (or \code{TRUE} but no rounding if \code{FALSE} or not finite).}
+
+\item{seed}{An integer value or \code{NULL}. See \code{\link[base:Random]{base::set.seed()}}.}
 }
 \value{
-A list of elements of class \code{\linkS4class{swWeatherData}}.
+An updated copy of \code{weatherData} where missing values are imputed
+by the weather generator.
+If \code{return_weatherDF} is \code{TRUE}, then the result is converted to a
+data frame where columns represent weather variables.
+If \code{return_weatherDF} is \code{FALSE}, then the result is
+a list of elements of class \code{\link{swWeatherData}}.
 }
 \description{
-This function is a convenience wrapper for
-\code{\link{dbW_estimate_WGen_coefs}}.
+This function is a convenience wrapper for \code{\link[=dbW_estimate_WGen_coefs]{dbW_estimate_WGen_coefs()}}.
 }
 \section{Details}{
 
@@ -77,7 +73,7 @@ ids <- x[, "Year"] == 2008 & x[, "DOY"] >= 153 & x[, "DOY"] <= 244
 x[ids, -(1:2)] <- NA
 
 ## Example 1: generate weather for any missing values in our 'dataset'
-wout1 <- dbW_generateWeather(x)
+wout1 <- dbW_generateWeather(x, return_weatherDF = TRUE)
 
 ## Example 2: generate weather based on our 'dataset' but for
 ## years 2005-2015 and use estimated weather generator coefficients from
@@ -110,11 +106,14 @@ wout3 <- dbW_generateWeather(
 path <- tempdir()
 compare_weather(
   ref_weather = x,
-  weather = dbW_weatherData_to_dataframe(wout1),
+  weather = wout1,
   N = 1,
   path = path,
   tag = "Example1-WeatherGenerator"
 )
 unlink(list.files(path), force = TRUE)
 
+}
+\seealso{
+\code{\link[=dbW_imputeWeather]{dbW_imputeWeather()}}
 }

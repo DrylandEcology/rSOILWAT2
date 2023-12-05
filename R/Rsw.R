@@ -502,15 +502,8 @@ set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE,
       # Check dimensional agreement
       ndim_gt1_vals <- sum(dim(data.frame(vals)) > 1)
       ndim_gt1_def <- sum(dim(data.frame(def)) > 1)
-      if (!(ndim_gt1_vals == 1 && ndim_gt1_def == 1)) {
-        stop(
-          "ERROR: ",
-          toString(shQuote(val_names)),
-          " are not represented as 1-dimensional objects in",
-          " class 'swInputData'."
-        )
 
-      } else {
+      if (ndim_gt1_vals == 1 && ndim_gt1_def == 1) {
         # Transfer values
         itemp <- sapply(names(def), function(x) {
           k <- grep(substr(x, 1, 4), val_names)
@@ -522,6 +515,14 @@ set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE,
         }
 
         swIn <- get(paste0(fun, "<-"))(swIn, def)
+
+      } else {
+        stop(
+          "ERROR: ",
+          toString(shQuote(val_names)),
+          " are not represented as 1-dimensional objects in",
+          " class 'swInputData'."
+        )
       }
     }
   }

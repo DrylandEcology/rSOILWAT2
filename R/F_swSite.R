@@ -211,14 +211,14 @@ swSite <- function(...) {
     tmp <- c("Longitude", "Latitude", "Altitude", "Slope", "Aspect")
     def@IntrinsicSiteParams[tmp] <- NA_real_
   }
-  if (!("TranspirationRegions" %in% dns)) {
-    def@TranspirationRegions[, "layer"] <- NA_integer_
-  } else {
+  if ("TranspirationRegions" %in% dns) {
     # Guarantee names
     dimnames(dots[["TranspirationRegions"]]) <- list(
       NULL,
       colnames(def@TranspirationRegions)
     )
+  } else {
+    def@TranspirationRegions[, "layer"] <- NA_integer_
   }
 
   if ("swrc_flags" %in% dns) {

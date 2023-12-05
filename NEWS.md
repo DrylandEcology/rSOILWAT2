@@ -1,3 +1,40 @@
+# rSOILWAT2 v6.0.4
+* This version produces the same output as the previous version.
+
+## New features
+* New `upgrade_weatherDF()` adds requested weather columns to a data frame
+  (@dschlaep).
+* Improved rounding of weather functionality (@dschlaep):
+    * `dbW_weatherData_round()` now rounds both `"weatherList"` and
+      `"weatherDF"` objects; argument `"digits"` can now also be logical
+      (if `TRUE`, then digits takes the default value of 4) or not finite
+      (e.g., `NA`; not finite values return the input without rounding).
+    * Argument `"round"` of `dbW_dataframe_to_weatherData()` is deprecated and
+      changed the default value from rounding to 2 digits to no rounding (`NA`);
+      recommended replacement is a separate call to `dbW_weatherData_round()`.
+    * Argument `"digits"` of `dbW_generateWeather()` changed the default value
+      from rounding to 4 digits to no rounding (`NA`).
+* `dbW_generateWeather()` gained `"return_weatherDF"` and now returns a
+  user requested weather object type (@dschlaep).
+  If `return_weatherDF` is `TRUE`, then the result is converted to a
+  data frame where columns represent weather variables; otherwise,
+  a list of elements of class `swWeatherData` is returned (as previously).
+* New `dbW_imputeWeather()` replaces missing weather values using
+  using the weather generator and
+  using functionality by `rSW2utils::impute_df()` (@dschlaep).
+* New `dbW_substituteWeather()` replaces missing weather values in one
+  weather data object with values from a second weather data object (@dschlaep).
+* New `dbW_fixWeather()` fixes missing weather values using a sequence of
+  approaches including linear interpolation for short missing spells,
+  a fixed value for short spells of missing precipitation (optionally),
+  substitution from a second weather data object, and
+  replacement with long term daily mean values (@dschlaep).
+* New family of functions `sw_meteo_obtain` that obtain (download) weather
+  data from external sources and prepare for use by `"rSOILWAT2"` (@dschlaep):
+      * New `sw_meteo_obtain_DayMet()` obtains and formats data from `"Daymet"`
+      * New `sw_meteo_obtain_SCAN()` obtains and formats data from `"SCAN"`
+
+
 # rSOILWAT2 v6.0.3
 * This version produces the same output as the previous version.
 * Update `SOILWAT2` to v7.2.0 which improves error handling and fixes

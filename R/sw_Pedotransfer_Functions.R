@@ -769,7 +769,7 @@ rSW2_SWRC_PTF_estimate_parameters <- function( # nolint: object_length_linter.
   fail = TRUE,
   ...
 ) {
-  ptf_name <- std_ptf(ptf_name)[1]
+  ptf_name <- std_ptf(ptf_name)[[1L]]
   has_ptf <- ptf_name %in% ptfs_implemented_by_rSW2()
 
   list_soilargs <- list(
@@ -778,7 +778,7 @@ rSW2_SWRC_PTF_estimate_parameters <- function( # nolint: object_length_linter.
     bdensity = bdensity
   )
 
-  if (has_ptf && ptf_name %in% "Rosetta3") {
+  if (has_ptf && ptf_name == "Rosetta3") {
     dots <- list(...)
     dots[["version"]] <- if ("version" %in% names(dots)) {
       as.character(dots[["version"]])
@@ -791,7 +791,7 @@ rSW2_SWRC_PTF_estimate_parameters <- function( # nolint: object_length_linter.
       args = c(list_soilargs, dots)
     )
 
-  } else if (has_ptf && ptf_name %in% "neuroFX2021") {
+  } else if (has_ptf && ptf_name == "neuroFX2021") {
     do.call(
       ptf_neuroFX2021_for_FXW,
       args = c(list_soilargs, list(...))

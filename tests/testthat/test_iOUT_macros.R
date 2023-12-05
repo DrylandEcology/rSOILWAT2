@@ -58,10 +58,6 @@ test_that("Tests of iOUT and iOUT2", {
           for (i in seq_len(n_vars)) {
             # test `iOUT` for 'key = 1'
             icol <- ncol_TimeOUT[pd] + i
-            if (FALSE) {
-              print(paste("key =", key, "var =", i, "irow =", irow_OUT[pd],
-                "icol =", icol, "iOUT =", iOUT(i, pd, irow_OUT)))
-            }
             p_OUT[key, pd][[1]][irow_OUT[pd], icol] <- iOUT(i, pd, irow_OUT)
           }
 
@@ -70,11 +66,6 @@ test_that("Tests of iOUT and iOUT2", {
           for (k in seq_len(NVEGTYPES)) {
             for (i in seq_len(n_layers)) {
               icol <- ncol_TimeOUT[pd] + i + n_layers * (k - 1)
-              if (FALSE) {
-                print(paste("key =", key, "veg =", k, "slyr =", i, "irow =",
-                  irow_OUT[pd], "icol =", icol, "iOUT =",
-                  iOUT2(i, k, pd, irow_OUT)))
-              }
               p_OUT[key, pd][[1]][irow_OUT[pd], icol] <-
                 iOUT2(i, k, pd, irow_OUT)
             }

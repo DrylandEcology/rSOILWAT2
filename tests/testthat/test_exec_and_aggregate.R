@@ -164,11 +164,14 @@ for (it in tests) {
 
   #------ Run SOILWAT2
   test_that("Simulate and aggregate", {
-    rd <- sw_exec(
-      inputData = sw_input,
-      weatherList = sw_weather,
-      echo = FALSE,
-      quiet = TRUE
+    # Run silently
+    expect_silent(
+      rd <- sw_exec(
+        inputData = sw_input,
+        weatherList = sw_weather,
+        echo = FALSE,
+        quiet = TRUE
+      )
     )
 
     # Check rSOILWAT2 output object
@@ -176,23 +179,6 @@ for (it in tests) {
     expect_s4_class(rd, "swOutput")
     expect_false(has_soilTemp_failed())
     expect_true(all(sw_out_flags() %in% slotNames(rd)))
-
-    # Run silently/verbosely
-    expect_silent(sw_exec(
-      inputData = sw_input,
-      weatherList = sw_weather,
-      echo = FALSE, quiet = TRUE
-    ))
-
-    # This doesn't work; apparently, testthat::expect_message and similar
-    # functions don't capture text written by LogError directly to the console.
-    if (FALSE) {
-      expect_message(sw_exec(
-        inputData = sw_input,
-        weatherList = sw_weather,
-        echo = FALSE, quiet = FALSE
-      ))
-    }
 
 
     # Check that input weather is identical to output weather
