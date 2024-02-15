@@ -3,7 +3,6 @@
 \docType{package}
 \name{rSOILWAT2}
 \alias{rSOILWAT2}
-\alias{_PACKAGE}
 \alias{rSOILWAT2-package}
 \alias{SoilWat}
 \alias{SOILWAT}
