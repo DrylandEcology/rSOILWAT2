@@ -62,7 +62,7 @@ setMethod(
     tmp <- try(inherits(object, "numeric_version"), silent = TRUE)
     if (inherits(tmp, "try-error") || !isTRUE(tmp)) {
       tmp <- try(object@version, silent = TRUE)
-      if (inherits(tmp, "try-error")) {
+      if (length(tmp) == 0L || inherits(tmp, "try-error")) {
         NA_character_
       } else {
         as.character(as.numeric_version(tmp))
@@ -105,7 +105,7 @@ check_version <- function(
 ) {
   has <- get_version(object)
 
-  if (is.na(has) || is.na(expected_version)) {
+  if (length(has) == 0L || is.na(has) || is.na(expected_version)) {
     FALSE
 
   } else {
