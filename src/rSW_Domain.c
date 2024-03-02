@@ -50,6 +50,46 @@ static char *MyFileName;
 /*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
+SEXP onGet_SW_SPINUP(void) {
+	SW_DOMAIN *d = &SoilWatDomain;
+
+	SEXP swSpinup;
+	SEXP SW_DOM;
+	SEXP swSpinup;
+	SEXP SpinupMode;
+	SEXP SpinupScope;
+	SEXP SpinupDuration;
+	SEXP SpinupSeed;
+	SEXP SpinupActive;
+
+	char *cSW_DOM_names[] = { "SpinupMode", "SpinupScope", "SpinupDuration",
+							"SpinupSeed", "SpinupActive" };
+
+	PROTECT(swSpinup = MAKE_CLASS("swSpinup"));
+	PROTECT(SW_SPINUP = NEW_OBJECT(swSpinup));
+
+	PROTECT(SpinupMode = NEW_INTEGER(1));
+	INTEGER_POINTER(SpinupMode)[0] = d->SW_SpinUp.mode;
+	PROTECT(SpinupScope = NEW_INTEGER(1));
+	INTEGER_POINTER(SpinupScope)[0] = d->SW_SpinUp.scope;
+	PROTECT(SpinupDuration = NEW_INTEGER(1));
+	INTEGER_POINTER(SpinupDuration)[0] = d->SW_SpinUp.duration;
+	PROTECT(SpinupSeed = NEW_REAL(1));
+	INTEGER_POINTER(SpinupSeed)[0] = d->SW_SpinUp.rng_seed;
+	PROTECT(SpinupActive = NEW_LOGICAL(1));
+	LOGICAL_POINTER(SpinupActive)[0] = d->SW_SpinUp.spinup;	
+
+	// attaching main's elements
+	SET_SLOT(SW_SPINUP, install(cSW_DOM_names[0]), SpinupMode);
+	SET_SLOT(SW_SPINUP, install(cSW_DOM_names[1]), SpinupScope);
+	SET_SLOT(SW_SPINUP, install(cSW_DOM_names[2]), SpinupDuration);
+	SET_SLOT(SW_SPINUP, install(cSW_DOM_names[3]), SpinupSeed);
+	SET_SLOT(SW_SPINUP, install(cSW_DOM_names[4]), SpinupActive);
+
+	UNPROTECT(7);
+	return SW_SPINUP;
+}
+
 SEXP onGet_SW_MDL(void) {
 	SW_MODEL *m = &SoilWatAll.Model;
 
@@ -88,6 +128,73 @@ SEXP onGet_SW_MDL(void) {
 
 	UNPROTECT(7);
 	return SW_MDL;
+}
+
+void onSet_SW_SPINUP(SEXP SW_DOM, LOG_INFO* LogInfo) {
+	SW_DOMAIN *d = &SoilWatDomain;
+	SW_MODEL *m = &SoilWatAll.Model;
+
+	SEXP SpinupMode;
+	SEXP SpinupScope;
+	SEXP SpinupDuration;
+	SEXP SpinupSeed;
+	SEXP SpinupActive;
+
+	Bool fstartdy = FALSE, fenddy = FALSE, fhemi = FALSE;
+	TimeInt range;
+	char enddyval[6], errstr[MAX_ERROR];
+
+	MyFileName = PathInfo.InFiles[eDomain];
+	range = m->endyr - m->startyr;
+
+	if (!IS_S4_OBJECT(SW_DOM)) {
+		LogError(LogInfo, LOGERROR, "%s: No input.", MyFileName);
+        return; // Exit function prematurely due to error
+	}
+
+	PROTECT(SpinupMode = GET_SLOT(SW_DOM, install("SpinupMode")));
+	if (INTEGER(SpinupMode)[0] != 1 && INTEGER(SpinupScope)[0] != 2) {
+		LogError(LogInfo, LOGERROR, "%s: Invalid Spinup mode (%d). Please select \"1\" or \"2\"",
+		MyFileName, INTEGER(SpinupMode)[0]);
+
+        UNPROTECT(1);
+        return; // Exit function prematurely due to error
+	}
+	d->mode = INTEGER(SpinupMode)[0];
+
+	PROTECT(SpinupScope = GET_SLOT(SW_DOM, install("SpinupScope")));
+	if ( INTEGER(SpinupScope)[0] < 1 || INTEGER(SpinupScope)[0] > range) {
+		LogError(LogInfo, LOGERROR, "%s: Spinup scope (%d) out of range: (%d)", MyFileName,
+		INTEGER(SpinupScope)[0], range);
+
+        UNPROTECT(2);
+        return; // Exit function prematurely due to error
+	}
+	d->scope = INTEGER(SpinupScope)[0];
+
+	PROTECT(SpinupDuration = GET_SLOT(SW_DOM, install("SpinupDuration")));
+	if (INTEGER(SpinupDuration)[0] < 0 ) {
+		LogError(LogInfo, LOGERROR, "%s: Negative spinup duration (%d)", MyFileName, INTEGER(SpinupDuration)[0]);
+
+		UNPROTECT(3);
+		return; // Exit function prematurely due to error		
+	}
+	d->duration = INTEGER(SpinupDuration)[0];
+
+	PROTECT(SpinupSeed = GET_SLOT(SW_DOM, install("SpinupSeed")));
+	d->rng_seed = REAL(SpinupSeed)[0];
+
+	PROTECT(SpinupActive = GET_SLOT(SW_DOM, install("SpinupActive")));
+	d->spinup = (Bool)LOGICAL(SpinupActive)[0];
+
+	if (s->duration == 0) {
+		d->spinup = FALSE;
+	}
+	else {
+		d->spinup = TRUE;
+	}
+
+	UNPROTECT(5);
 }
 
 void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
