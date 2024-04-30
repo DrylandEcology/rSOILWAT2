@@ -747,6 +747,115 @@ setGeneric(
 )
 ########################
 
+#########DOMAIN#########
+#' \code{get_swSpinup}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "get_swSpinup",
+  function(object) standardGeneric("get_swSpinup")
+)
+
+#' \code{swSpinup_SpinupMode}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupMode",
+  function(object) standardGeneric("swSpinup_SpinupMode")
+)
+
+#' \code{swSpinup_SpinupScope}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupScope",
+  function(object) standardGeneric("swSpinup_SpinupScope")
+)
+
+#' \code{swSpinup_SpinupDuration}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupDuration",
+  function(object) standardGeneric("swSpinup_SpinupDuration")
+)
+
+#' \code{swSpinup_SpinupSeed}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupSeed",
+  function(object) standardGeneric("swSpinup_SpinupSeed")
+)
+
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swSpinup<-}} doesn't work.
+#' \code{set_swSpinup}
+#'
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#'
+#' @export
+setGeneric(
+  "set_swSpinup",
+  function(object, value) standardGeneric("set_swSpinup")
+)
+
+#' \code{set_swSpinup<-}
+#' @inheritParams set_swSpinup
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "set_swSpinup<-",
+  function(object, value) standardGeneric("set_swSpinup<-")
+)
+
+#' \code{swSpinup_SpinupMode<-}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupMode<-",
+  function(object, value) standardGeneric("swSpinup_SpinupMode<-")
+)
+
+#' \code{swSpinup_SpinupScope<-}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupScope<-",
+  function(object, value) standardGeneric("swSpinup_SpinupScope<-")
+)
+
+#' \code{swSpinup_SpinupDuration<-}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupDuration<-",
+  function(object, value) standardGeneric("swSpinup_SpinupDuration<-")
+)
+
+#' \code{swSpinup_SpinupSeed<-}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupSeed<-",
+  function(object, value) standardGeneric("swSpinup_SpinupSeed<-")
+)
+########################
+
 ########WEATHER#########
 #' \code{get_swWeather}
 #' @param object An object of class \code{\linkS4class{swWeather}} or

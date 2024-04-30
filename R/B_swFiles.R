@@ -64,8 +64,8 @@ setClass(
   ),
   prototype = list(
     ProjDir = NA_character_,
-    # 23 must be equal to rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_NFILES"]]
-    InFiles = rep(NA_character_, 23),
+    # 26 must be equal to rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_NFILES"]]
+    InFiles = rep(NA_character_, 26),
     WeatherPrefix = NA_character_,
     OutputPrefix = NA_character_
   )
