@@ -22,7 +22,7 @@
 ###############################################################################
 
 
-###############################################################Spinup############
+############Spinup############
 #' Class \code{"swSpinup"}
 #'
 #' The methods listed below work on this class and the proper slot of the class
@@ -60,14 +60,14 @@ setClass(
     SpinupMode = "integer",
     SpinupScope = "integer",
     SpinupDuration = "integer",
-    SpinupSeed = "numeric",
+    SpinupSeed = "integer",
     SpinupActive = "logical"
   ),
   prototype = list(
     SpinupMode = NA_integer_,
     SpinupScope = NA_integer_,
     SpinupDuration = NA_integer_,
-    SpinupSeed = NA_real_,
+    SpinupSeed = NA_integer_,
     SpinupActive = FALSE
   )
 )
@@ -103,8 +103,8 @@ setValidity(
 
     if (
       length(object@SpinupMode) != 1L ||
-      ( object@SpinupMode != 1L &&
-      object@SpinupMode != 2L )
+      (object@SpinupMode != 1L &&
+      object@SpinupMode != 2L)
     ) {
       msg <- paste("There must be exactly NA or one @SpinupMode ",
       "that is equal to either 1 or 2.")
@@ -154,16 +154,20 @@ setValidity(
 
 #' @rdname swSpinup-class
 #' @export
-setMethod("swSpinup_SpinupMode", "swSpinup", function(object) object@SpinupMode)
+setMethod("swSpinup_SpinupMode", "swSpinup",
+  function(object) object@SpinupMode)
 #' @rdname swSpinup-class
 #' @export
-setMethod("swSpinup_SpinupScope", "swSpinup", function(object) object@SpinupScope)
+setMethod("swSpinup_SpinupScope", "swSpinup",
+  function(object) object@SpinupScope)
 #' @rdname swSpinup-class
 #' @export
-setMethod("swSpinup_SpinupDuration", "swSpinup", function(object) object@SpinupDuration)
+setMethod("swSpinup_SpinupDuration", "swSpinup",
+  function(object) object@SpinupDuration)
 #' @rdname swSpinup-class
 #' @export
-setMethod("swSpinup_SpinupSeed", "swSpinup", function(object) object@SpinupSeed)
+setMethod("swSpinup_SpinupSeed", "swSpinup",
+  function(object) object@SpinupSeed)
 
 
 #' @rdname swSpinup-class
@@ -229,7 +233,7 @@ setMethod(
     object@SpinupMode <- readInteger(infiletext[8])
     object@SpinupScope <- readInteger(infiletext[9])
     object@SpinupDuration <- readInteger(infiletext[10])
-    object@SpinupSeed\ <- readInteger(infiletext[11])
+    object@SpinupSeed <- readInteger(infiletext[11])
     temp <- unlist(strsplit(x = infiletext[8], split = "\t"))
     temp <- unlist(strsplit(x = temp, split = " "))
     temp <- temp[temp != ""][1]
