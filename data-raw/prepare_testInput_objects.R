@@ -198,7 +198,7 @@ toggleCO2Effects <- function(path, activate = TRUE) {
 }
 
 toggleSurfaceTilt <- function(path, tilt = FALSE, slope = 30, aspect = -45) {
-  ftmp <- file.path(path, "Input", "siteparam.in")
+  ftmp <- file.path(path, "Input", "modelrun.in")
   fin <- readLines(ftmp)
 
   line <- grep("slope (degrees)", fin, fixed = TRUE)
@@ -253,6 +253,8 @@ toggleVegEstab <- function(path, activate = TRUE) {
 #------- Loop over examples/tests, setup, and create test objects------
 for (it in seq_along(tests)) {
   message("\n", examples[it], " ----------------------------------")
+
+  message("\ncheckpoint 1")
 
   dir_ex <- file.path(dir_extdata, examples[it])
 
@@ -341,6 +343,8 @@ for (it in seq_along(tests)) {
 
   stopifnot(rSOILWAT2::dbW_check_weatherData(sw_weather))
 
+  message("\ncheckpoint 2")
+
   #--- Compare weather to previous version
   res_cmp <- waldo::compare(
     readRDS(
@@ -368,6 +372,8 @@ for (it in seq_along(tests)) {
   #--- Compare input to previous version
   set_WeatherHistory(sw_input) <- weatherHistory()
 
+  message("\ncheckpoint 3")
+
   res_cmp <- compare_objects(
     sw_input,
     old = readRDS(
@@ -389,10 +395,13 @@ for (it in seq_along(tests)) {
     )
   }
 
+  message("\ncheckpoint 4")
 
   #--- Run rSOILWAT2 with yearly output and save it as reference output
   if (!rSOILWAT2::swWeather_UseMarkov(sw_input)) {
     rSOILWAT2::swOUT_TimeStepsForEveryKey(sw_input) <- 3
+
+  message("\ncheckpoint 5")
 
     rdy <- rSOILWAT2::sw_exec(
       inputData = sw_input,
@@ -400,6 +409,8 @@ for (it in seq_along(tests)) {
       echo = FALSE,
       quiet = TRUE
     )
+
+    message("\ncheckpoint 6")
 
     #--- Compare ouput to previous version
     res_cmp <- compare_objects(
@@ -412,6 +423,8 @@ for (it in seq_along(tests)) {
         )
       )
     )
+
+    message("\ncheckpoint 7")
 
     # Save test output (if different from previous)
     if (res_cmp[["resave"]]) {
