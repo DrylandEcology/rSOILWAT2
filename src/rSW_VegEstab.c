@@ -76,7 +76,7 @@ void onSet_SW_VES(SEXP VES, LOG_INFO* LogInfo) {
 	int nSPPS;
 	SoilWatAll.VegEstab.use = TRUE;
 	SEXP use, count;
-	MyFileName = PathInfo.InFiles[eVegEstab];
+	MyFileName = SoilWatDomain.PathInfo.InFiles[eVegEstab];
 
 	PROTECT(use = GET_SLOT(VES,install("useEstab")));
 	PROTECT(count = GET_SLOT(VES,install("count")));
@@ -101,7 +101,7 @@ void onSet_SW_VES(SEXP VES, LOG_INFO* LogInfo) {
 		}
 	}
 
-	SW_VegEstab_construct(&SoilWatAll.VegEstab, LogInfo);
+	SW_VES_construct(&SoilWatAll.VegEstab);
     if(LogInfo->stopRun) {
         goto report; // Exit function prematurely due to error
     }

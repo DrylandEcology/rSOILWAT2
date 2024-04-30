@@ -217,10 +217,10 @@ void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo) {
 	RealD *p_MonthlyValues;
 	int *p_dailyInputFlags;
 
-	MyFileName = PathInfo.InFiles[eWeather];
+	MyFileName = SoilWatDomain.PathInfo.InFiles[eWeather];
 
     // Copy weather prefix from PathInfo to Weather within `SoilWatAll`
-    strcpy(SoilWatAll.Weather.name_prefix, PathInfo.weather_prefix);
+    strcpy(SoilWatAll.Weather.name_prefix, SoilWatDomain.PathInfo.weather_prefix);
 
 	PROTECT(MonthlyScalingParams = GET_SLOT(SW_WTH, install(cSW_WTH_names[0])));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
@@ -977,7 +977,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
         deallocateClimateStructs(&climateOutput, &climateAverages);
         deallocateAllWeather(allHist, numYears);
 
-        sw_write_warnings(&local_LogInfo);
+        sw_write_warnings("(rWeather) ", &local_LogInfo);
         sw_fail_on_error(&local_LogInfo);
     }
 

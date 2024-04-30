@@ -118,7 +118,7 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 	RealD *p_Layers;
 
 	/* note that Files.read() must be called prior to this. */
-	MyFileName = PathInfo.InFiles[eLayers];
+	MyFileName = SoilWatDomain.PathInfo.InFiles[eLayers];
 
 	j = nrows(SW_LYR);
 	p_Layers = REAL(SW_LYR);
@@ -214,7 +214,7 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp, LOG_INFO* LogInfo) {
 	RealD *p_SWRCp;
 
 	/* note that Files.read() must be called prior to this. */
-	MyFileName = PathInfo.InFiles[eSWRCp];
+	MyFileName = SoilWatDomain.PathInfo.InFiles[eSWRCp];
 
 	/* Check that we have n = `SWRC_PARAM_NMAX` values per layer */
 	if (ncols(SW_SWRCp) != SWRC_PARAM_NMAX) {
@@ -285,6 +285,7 @@ void onSet_SW_SOILS(SEXP SW_SOILS, LOG_INFO* LogInfo) {
 SEXP onGet_SW_SIT(void) {
 	int i;
 	SW_SITE *v = &SoilWatAll.Site;
+	SW_MODEL *m = &SoilWatAll.Model;
 
 	SEXP swSite;
 	SEXP SW_SIT;
@@ -308,7 +309,7 @@ SEXP onGet_SW_SIT(void) {
 	char *cTranspirationCoefficients[] = { "RateShift", "RateShape", "InflectionPoint", "Range" };
 
 	SEXP IntrinsicSiteParams, IntrinsicSiteParams_names;
-	char *cIntrinsicSiteParams[] = { "Longitude", "Latitude", "Altitude", "Slope", "Aspect" };
+	char *cIntrinsicSiteParams[] = { "Longitude", "Latitude", "Elevation", "Slope", "Aspect" };
 
 	SEXP SoilTemperatureConstants_use, SoilTemperatureConstants, SoilTemperatureConstants_names;
 	char *cSoilTempValues[] = {
@@ -331,7 +332,7 @@ SEXP onGet_SW_SIT(void) {
 	char *cTranspirationRegions[] = { "ndx", "layer" };
 	int *p_transp; // ideally `LyrIndex` so that same type as `_TranspRgnBounds`, but R API INTEGER() is signed
 
-	MyFileName = PathInfo.InFiles[eSite];
+	MyFileName = SoilWatDomain.PathInfo.InFiles[eSite];
 
 	PROTECT(swSite = MAKE_CLASS("swSite"));
 	PROTECT(SW_SIT = NEW_OBJECT(swSite));
@@ -401,11 +402,11 @@ SEXP onGet_SW_SIT(void) {
 
 	// SOILWAT2 calculates internally in radians, but input/output are in arc-degrees
 	PROTECT(IntrinsicSiteParams = allocVector(REALSXP, 5));
-	REAL(IntrinsicSiteParams)[0] = v->longitude * rad_to_deg;
-	REAL(IntrinsicSiteParams)[1] = v->latitude * rad_to_deg;
-	REAL(IntrinsicSiteParams)[2] = v->altitude;
-	REAL(IntrinsicSiteParams)[3] = v->slope * rad_to_deg;
-	REAL(IntrinsicSiteParams)[4] = missing(v->aspect) ? SW_MISSING : v->aspect * rad_to_deg;
+	REAL(IntrinsicSiteParams)[0] = m->longitude * rad_to_deg;
+	REAL(IntrinsicSiteParams)[1] = m->latitude * rad_to_deg;
+	REAL(IntrinsicSiteParams)[2] = m->elevation;
+	REAL(IntrinsicSiteParams)[3] = m->slope * rad_to_deg;
+	REAL(IntrinsicSiteParams)[4] = missing(m->aspect) ? SW_MISSING : m->aspect * rad_to_deg;
 	PROTECT(IntrinsicSiteParams_names = allocVector(STRSXP, 5));
 	for (i = 0; i < 5; i++)
 		SET_STRING_ELT(IntrinsicSiteParams_names, i, mkChar(cIntrinsicSiteParams[i]));
@@ -483,6 +484,7 @@ SEXP onGet_SW_SIT(void) {
 void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	int i;
 	SW_SITE *v = &SoilWatAll.Site;
+	SW_MODEL *m = &SoilWatAll.Model;
 
 	SEXP SWClimits;
 	SEXP ModelFlags;
@@ -504,7 +506,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
   int debug = 0;
   #endif
 
-	MyFileName = PathInfo.InFiles[eSite];
+	MyFileName = SoilWatDomain.PathInfo.InFiles[eSite];
 
 	LyrIndex r; /* transp region definition number */
 	Bool too_many_regions = FALSE;
@@ -572,12 +574,12 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 
 	// SOILWAT2 calculates internally in radians, but input/output are in arc-degrees
 	PROTECT(IntrinsicSiteParams = GET_SLOT(SW_SIT, install("IntrinsicSiteParams")));
-	v->longitude = REAL(IntrinsicSiteParams)[0] * deg_to_rad;
-	v->latitude = REAL(IntrinsicSiteParams)[1] * deg_to_rad;
-	v->altitude = REAL(IntrinsicSiteParams)[2];
-	v->slope = REAL(IntrinsicSiteParams)[3] * deg_to_rad;
-	v->aspect = REAL(IntrinsicSiteParams)[4];
-	v->aspect = missing(v->aspect) ? SW_MISSING : v->aspect * deg_to_rad;
+	m->longitude = REAL(IntrinsicSiteParams)[0] * deg_to_rad;
+	m->latitude = REAL(IntrinsicSiteParams)[1] * deg_to_rad;
+	m->elevation = REAL(IntrinsicSiteParams)[2];
+	m->slope = REAL(IntrinsicSiteParams)[3] * deg_to_rad;
+	m->aspect = REAL(IntrinsicSiteParams)[4];
+	m->aspect = missing(m->aspect) ? SW_MISSING : m->aspect * deg_to_rad;
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" > 'location'");
 	#endif

@@ -439,7 +439,7 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 	SEXP CO2Coefficients;
 	RealD *p_Grasslands, *p_Shrublands, *p_Forest, *p_Forb;
 
-	MyFileName = PathInfo.InFiles[eVegProd];
+	MyFileName = SoilWatDomain.PathInfo.InFiles[eVegProd];
 
     PROTECT(veg_method = GET_SLOT(SW_VPD, install(cVegProd_names[0])));
     v->veg_method = INTEGER(veg_method)[0];
@@ -755,7 +755,7 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
         // Note: no SOILWAT2 memory was allocated, nothing to deallocate
         UNPROTECT(8);
 
-        sw_write_warnings(&local_LogInfo);
+        sw_write_warnings("(rVegProd) ", &local_LogInfo);
         sw_fail_on_error(&local_LogInfo);
     }
 
