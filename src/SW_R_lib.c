@@ -20,9 +20,11 @@
 #include "SOILWAT2/include/SW_Output.h"
 #include "SOILWAT2/include/SW_Main_lib.h"
 #include "SOILWAT2/include/SW_Site.h"
+#include "SOILWAT2/include/SW_Domain.h"
+
 
 #include "rSW_Files.h"
-#include "rSW_Model.h"
+#include "rSW_Domain.h"
 #include "rSW_Weather.h"
 #include "rSW_Markov.h"
 #include "rSW_Sky.h"
@@ -49,6 +51,7 @@
 SW_ALL SoilWatAll;
 SW_OUTPUT_POINTERS SoilWatOutputPtrs[SW_OUTNKEYS];
 SW_DOMAIN SoilWatDomain;
+// SW_WALLTIME SW_WallTime;
 
 Bool EchoInits;
 FILE *current_sw_verbosity = (FILE *) TRUE; // quiet = FALSE; verbose = TRUE (show SOILWAT2 warnings)
@@ -118,7 +121,7 @@ static void setGlobal_soiltempError(Bool soiltempError) {
 
   Global variables managed by rSOILWAT2: SoilWatAll, SoilWatOutputPtrs, PathInfo.
 */
-void setupSOILWAT2(SEXP inputOptions, LOG_INFO* LogInfo) {
+void setupSOILWAT2(SEXP inputOptions, Bool from_files, LOG_INFO* LogInfo) {
 	int i, argc;
 	char *argv[7];
   unsigned long userSUID;
@@ -130,6 +133,7 @@ void setupSOILWAT2(SEXP inputOptions, LOG_INFO* LogInfo) {
   #ifdef RSWDEBUG
   if (debug) swprintf("Set args\n");
   #endif
+
 
 	argc = length(inputOptions);
 	if (argc > 7) {
@@ -147,8 +151,8 @@ void setupSOILWAT2(SEXP inputOptions, LOG_INFO* LogInfo) {
   #endif
 
     SW_DOM_init_ptrs(&SoilWatDomain);
-    SW_CTL_init_ptrs(&SoilWatAll, SoilWatDomain.PathInfo.InFiles);
-    sw_init_args(argc, argv, &EchoInits, &SoilWatDomain.PathInfo.InFiles[eFirst], &userSUID, LogInfo);
+    SW_CTL_init_ptrs(&SoilWatAll);
+    sw_init_args(argc, argv, &EchoInits, &SoilWatDomain.PathInfo.InFiles[eFirst], &userSUID, NULL, LogInfo);
     if(LogInfo->stopRun) {
         return; // Exit function prematurely due to error
     }
@@ -158,17 +162,19 @@ void setupSOILWAT2(SEXP inputOptions, LOG_INFO* LogInfo) {
   #endif
 
     // TODO: userSUID not set yet
-    SW_CTL_setup_domain(userSUID, &SoilWatDomain, LogInfo);
-    if(LogInfo->stoprun) {
+    // rSW_CTL_obtain_domain_inputs(TRUE, NULL, NULL, LogInfo);
+    // rSW_CTL_setup_domain1(userSUID, &SoilWatDomain, LogInfo);
+    rSW_CTL_setup_domain(from_files, NULL, NULL, userSUID, &SoilWatDomain, LogInfo); // NEW FUNCTION *****************************************************************
+    if(LogInfo->stopRun) {
       return; // Exit function prematurely due to error
     }
 
-    SW_CTL_setup_model(&SoilWatAll, SoilWatOutputPtrs, &SoilWatDomain.PathInfo, LogInfo);
+    SW_CTL_setup_model(&SoilWatAll, SoilWatOutputPtrs, LogInfo); // NEW FUNCTION ************************************************************
     if(LogInfo->stopRun) {
         return; // Exit function prematurely due to error
     }
 
-    SW_MDL_get_ModelRun(&SoilWatAll, &SoilWatDomain, NULL, LogInfo);
+    SW_MDL_get_ModelRun(&SoilWatAll.Model, &SoilWatDomain, NULL, LogInfo); // NEW FUCNTION ???????? ******************************************
     if(LogInfo->stopRun) {
       return; // Exit function prematurely due to error
     }
@@ -199,7 +205,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   PROTECT(oRlogfile = NEW_OBJECT(swLog));
 
   // setup and construct model (independent of inputs)
-  setupSOILWAT2(inputOptions, &local_LogInfo);
+  setupSOILWAT2(inputOptions, TRUE, &local_LogInfo);
   if(local_LogInfo.stopRun) {
     goto report;
   }
@@ -343,9 +349,9 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
     UNPROTECT(numUnprotects);
 
    // de-allocate SOILWAT2 memory, but let R handle `p_OUT`
-    SW_CTL_clear_model(FALSE, &SoilWatAll, &SoilWatDomain.PathInfo);
+    SW_CTL_clear_model(FALSE, &SoilWatAll);
 
-    sw_write_warnings(&local_LogInfo);
+    sw_write_warnings("(rlib) ", &local_LogInfo);
     sw_fail_on_error(&local_LogInfo);
   }
 
@@ -388,16 +394,18 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
   #ifdef RSWDEBUG
   if (debug) swprintf(" input arguments & setup model ...");
   #endif
-	setupSOILWAT2(inputOptions, &local_LogInfo);
+	useFiles = isNull(inputData) ? swTRUE : swFALSE; // Moved from above rSW_CTL_obtain_inputs to above setupSOILWAT2
+  setupSOILWAT2(inputOptions, FALSE, &local_LogInfo);
   if(local_LogInfo.stopRun) {
     goto report;
   }
 
 	// read user inputs: either from files or from memory (depending on useFiles)
+
 	#ifdef RSWDEBUG
 	if (debug) swprintf(" obtain inputs ...");
 	#endif
-	useFiles = isNull(inputData) ? swTRUE : swFALSE;
+	
 	rSW_CTL_obtain_inputs(useFiles, inputData, weatherList, &local_LogInfo);
   if(local_LogInfo.stopRun) {
     goto report;
@@ -461,9 +469,9 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
     }
 
    // de-allocate SOILWAT2 memory, but let R handle `p_OUT`
-    SW_CTL_clear_model(FALSE, &SoilWatAll, &SoilWatDomain.PathInfo);
+    SW_CTL_clear_model(FALSE, &SoilWatAll);
 
-    sw_write_warnings(&local_LogInfo);
+    sw_write_warnings("(rlib) ", &local_LogInfo);
     sw_fail_on_error(&local_LogInfo);
   }
 
@@ -493,7 +501,7 @@ SEXP onGetOutputDeprecated(SEXP inputData) {
   numUnprotects++;
   SET_STRING_ELT(inputOptions, 0, mkChar("SOILWAT2"));
 
-  setupSOILWAT2(inputOptions, &local_LogInfo);
+  setupSOILWAT2(inputOptions, FALSE, &local_LogInfo); // is from_files true or false here??? or dynamic?
   if(local_LogInfo.stopRun) {
     goto report;
   }
@@ -506,9 +514,9 @@ SEXP onGetOutputDeprecated(SEXP inputData) {
     UNPROTECT(numUnprotects);
 
     // de-allocate SOILWAT2 memory
-    SW_CTL_clear_model(FALSE, &SoilWatAll, &SoilWatDomain.PathInfo);
+    SW_CTL_clear_model(FALSE, &SoilWatAll);
 
-    sw_write_warnings(&local_LogInfo);
+    sw_write_warnings("(rlib) ", &local_LogInfo);
     sw_fail_on_error(&local_LogInfo);
   }
 
@@ -555,7 +563,7 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   numUnprotects++;
   SET_STRING_ELT(inputOptions, 0, mkChar("SOILWAT2"));
 
-  setupSOILWAT2(inputOptions, &local_LogInfo);
+  setupSOILWAT2(inputOptions, FALSE, &local_LogInfo); // I think from_files should be false here...
   if(local_LogInfo.stopRun) {
     goto report;
   }
@@ -631,9 +639,9 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
     UNPROTECT(numUnprotects);
 
     // de-allocate SOILWAT2 memory
-    SW_CTL_clear_model(FALSE, &SoilWatAll, &SoilWatDomain.PathInfo);
+    SW_CTL_clear_model(FALSE, &SoilWatAll);
 
-    sw_write_warnings(&local_LogInfo);
+    sw_write_warnings("(rlib) ", &local_LogInfo);
     sw_fail_on_error(&local_LogInfo);
   }
 
@@ -691,7 +699,7 @@ SEXP rSW2_readAllWeatherFromDisk(
   numUnprotects++;
   SET_STRING_ELT(inputOptions, 0, mkChar("SOILWAT2"));
 
-  setupSOILWAT2(inputOptions, &local_LogInfo);
+  setupSOILWAT2(inputOptions, TRUE, &local_LogInfo);
   if(local_LogInfo.stopRun) {
     goto report;
   }
@@ -781,9 +789,9 @@ SEXP rSW2_readAllWeatherFromDisk(
     UNPROTECT(numUnprotects);
 
     // de-allocate SOILWAT2 memory
-    SW_CTL_clear_model(FALSE, &SoilWatAll, &SoilWatDomain.PathInfo);
+    SW_CTL_clear_model(FALSE, &SoilWatAll);
 
-    sw_write_warnings(&local_LogInfo);
+    sw_write_warnings("(rlib) ", &local_LogInfo);
     sw_fail_on_error(&local_LogInfo);
   }
 
@@ -1152,7 +1160,7 @@ SEXP rSW2_SWRC_PTF_estimate_parameters(
       // Note: no SOILWAT2 memory was allocated
       UNPROTECT(7);
 
-      sw_write_warnings(&local_LogInfo);
+      sw_write_warnings("(rlib) ", &local_LogInfo);
       sw_fail_on_error(&local_LogInfo);
   }
 
@@ -1283,7 +1291,7 @@ SEXP rSW2_SWRC_check_parameters(SEXP swrc_type, SEXP swrcp) {
       // Note: no SOILWAT2 memory was allocated
       UNPROTECT(numUnprotects);
 
-      sw_write_warnings(&local_LogInfo);
+      sw_write_warnings("(rlib) ", &local_LogInfo);
       sw_fail_on_error(&local_LogInfo);
   }
 
@@ -1457,7 +1465,7 @@ SEXP rSW2_SWRC(
       // Note: no SOILWAT2 memory was allocated
       UNPROTECT(numUnprotects);
 
-      sw_write_warnings(&local_LogInfo);
+      sw_write_warnings("(rlib) ", &local_LogInfo);
       sw_fail_on_error(&local_LogInfo);
   }
 
