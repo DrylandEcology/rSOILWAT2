@@ -164,17 +164,17 @@ void setupSOILWAT2(SEXP inputOptions, Bool from_files, LOG_INFO* LogInfo) {
     // TODO: userSUID not set yet
     // rSW_CTL_obtain_domain_inputs(TRUE, NULL, NULL, LogInfo);
     // rSW_CTL_setup_domain1(userSUID, &SoilWatDomain, LogInfo);
-    rSW_CTL_setup_domain(from_files, NULL, NULL, userSUID, &SoilWatDomain, LogInfo); // NEW FUNCTION *****************************************************************
+    rSW_CTL_setup_domain(from_files, NULL, NULL, userSUID, &SoilWatDomain, LogInfo); 
     if(LogInfo->stopRun) {
       return; // Exit function prematurely due to error
     }
 
-    SW_CTL_setup_model(&SoilWatAll, SoilWatOutputPtrs, LogInfo); // NEW FUNCTION ************************************************************
+    SW_CTL_setup_model(&SoilWatAll, SoilWatOutputPtrs, LogInfo);
     if(LogInfo->stopRun) {
         return; // Exit function prematurely due to error
     }
 
-    SW_MDL_get_ModelRun(&SoilWatAll.Model, &SoilWatDomain, NULL, LogInfo); // NEW FUCNTION ???????? ******************************************
+    SW_MDL_get_ModelRun(&SoilWatAll.Model, &SoilWatDomain, NULL, LogInfo);
     if(LogInfo->stopRun) {
       return; // Exit function prematurely due to error
     }
