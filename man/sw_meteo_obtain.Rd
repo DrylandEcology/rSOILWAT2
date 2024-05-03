@@ -48,6 +48,10 @@ Extract meteorological data from external source and format for \code{rSOILWAT2}
 via \code{\link[daymetr:download_daymet]{daymetr::download_daymet()}}.
 The argument \code{x} is a named vector with \code{"longitude"} and \code{"latitude"} in
 decimal degrees.
+\code{"DayMet"} uses a \code{"noleap"} (\code{"365_day"}) calendar which is converted
+to a \code{"standard"} calendar (i.e., one with leap days); this results in
+missing values on inserted leap days (see code example).
+\code{"DayMet"} does not contain wind speed which is a required input.
 
 
 \code{sw_meteo_obtain_SCAN()} uses data from
@@ -66,10 +70,10 @@ if (requireNamespace("curl") && curl::has_internet()) {
     end_year = 2023
   )
 
-  # Fill in missing values
+  # Fill in missing values on leap days
   mm_dm_wdata <- rSOILWAT2::dbW_fixWeather(mm_dm[["weatherDF"]])
 
-  # Prepare weather setup for a SOILWAT2 simulation
+  # Prepare a SOILWAT2 simulation
   swin <- rSOILWAT2::sw_exampleData
   rSOILWAT2::swYears_EndYear(swin) <- 2023
   rSOILWAT2::swYears_StartYear(swin) <- 2015
@@ -79,7 +83,21 @@ if (requireNamespace("curl") && curl::has_internet()) {
   swin@weather@use_humidityMonthly <- mm_dm[["use_humidityMonthly"]]
   swin@weather@dailyInputFlags <- mm_dm[["dailyInputFlags"]]
 
-  # Run simulation (after providing inputs for CO2, etc.)
+  # Set mean monthly climate values to missing
+  # (except wind speed which is missing in DayMet)
+  rSOILWAT2::swCloud_Humidity(swin)[] <- NA_real_
+  rSOILWAT2::swCloud_WindSpeed(swin)[] <- rep(1.5, times = 12L)
+  rSOILWAT2::swCloud_SkyCover(swin)[] <- NA_real_
+
+  # Obtain atmospheric CO2 concentration
+  rSOILWAT2::swCarbon_Scenario(swin) <- "CMIP6_historical|CMIP6_SSP119"
+  rSOILWAT2::swCarbon_CO2ppm(swin) <- rSOILWAT2::lookup_annual_CO2a(
+    start = 2015,
+    end = 2023,
+    name_co2 = rSOILWAT2::swCarbon_Scenario(swin)
+  )
+
+  # Run simulation (after providing remaining inputs, e.g., soils)
   swout <- try(
     rSOILWAT2::sw_exec(
       inputData = swin,
