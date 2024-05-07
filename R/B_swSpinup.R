@@ -18,7 +18,7 @@
 ###############################################################################
 
 
-# Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2013-2018)
+# Author: Savannah (2024); Daniel R Schlaepfer (2013-2024)
 ###############################################################################
 
 
@@ -30,7 +30,6 @@
 #'
 #' @param object An object of class \code{\linkS4class{swSpinup}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param file A character string. The file name from which to read.
 #' @param ... Arguments to the helper constructor function.
 #'  Dots can either contain objects to copy into slots of that class
 #'  (must be named identical to the corresponding slot) or
@@ -40,12 +39,22 @@
 #'  \code{rSOILWAT2::sw_exampleData}
 #'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
-#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swInputData}} \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
-#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#' @seealso
+#' \code{\linkS4class{swInputData}}
+#' \code{\linkS4class{swFiles}}
+#' \code{\linkS4class{swYears}}
+#' \code{\linkS4class{swWeather}}
+#' \code{\linkS4class{swCloud}}
+#' \code{\linkS4class{swMarkov}}
+#' \code{\linkS4class{swProd}}
+#' \code{\linkS4class{swSite}}
+#' \code{\linkS4class{swSoils}}
+#' \code{\linkS4class{swSpinup}}
+#' \code{\linkS4class{swEstab}}
+#' \code{\linkS4class{swOUT}}
+#' \code{\linkS4class{swCarbon}}
+#' \code{\linkS4class{swSWC}}
+#' \code{\linkS4class{swLog}}
 #'
 #' @examples
 #' showClass("swSpinup")
@@ -102,47 +111,66 @@ setValidity(
     val <- TRUE
 
     if (
-      length(object@SpinupMode) != 1L ||
-      (object@SpinupMode != 1L &&
-      object@SpinupMode != 2L)
-    ) {
-      msg <- paste("There must be exactly NA or one @SpinupMode ",
-      "that is equal to either 1 or 2.")
-      val <- if (isTRUE(val)) msg else c(val, msg)
-    }
-
-    if (
-      length(object@SpinupScope) != 1L ||
-        (!anyNA(object@SpinupScope) && isTRUE(object@SpinupScope < 0L)) ||
-        (!anyNA(object@SpinupScope) && !anyNA(object@StartYear) &&
-            isTRUE(object@SpinupScope <= object@StartYear))
-    ) {
-      msg <- paste(
-        "The @SpinupScope must not exceed the value given for @StartYear"
-      )
-      val <- if (isTRUE(val)) msg else c(val, msg)
-    }
-
-    if (
-      length(object@SpinupDuration) != 1L ||
-      object@SpinupDuration < 0L
-    ) {
-      msg <- paste(
-        "There must be exactly NA or one non-negative @SpinupDuration."
-      )
-      val <- if (isTRUE(val)) msg else c(val, msg)
-    }
-
-    if (
-      length(object@SpinupSeed) != 1L ||
-      !is.finite(object@SpinupSeed) ||
-      object@SpinupSeed < 0L ||
-      object@SpinupSeed > 366L ||
-      object@SpinupSeed < object@FDOFY
-    ) {
-      msg <- paste(
-        "There must be exactly one non-negative finite @SpinupSeed value"
+      !all(
+        length(object@SpinupMode) == 1L,
+        any(
+          isTRUE(is.na(object@SpinupMode)),
+          isTRUE(object@SpinupMode %in% 1L:2L)
         )
+      )
+    ) {
+      msg <- paste("@SpinupMode: must be NA or one integer value in 1:2.")
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (
+      !all(
+        length(object@SpinupScope) == 1L,
+        any(isTRUE(is.na(object@SpinupScope)), isTRUE(object@SpinupScope > 0L))
+      )
+    ) {
+      msg <- paste(
+        "@SpinupScope: must be NA or one finite integer value larger than 0",
+        "(and not larger than the number of available years)."
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (
+      !all(
+        length(object@SpinupDuration) == 1L,
+        any(
+          isTRUE(is.na(object@SpinupDuration)),
+          isTRUE(object@SpinupDuration >= 0L)
+        )
+      )
+    ) {
+      msg <- paste(
+        "@SpinupDuration: must be NA or one non-negative finite integer value."
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (
+      !all(
+        length(object@SpinupSeed) == 1L,
+        any(
+          isTRUE(is.na(object@SpinupSeed)),
+          isTRUE(is.finite(object@SpinupSeed))
+        )
+      )
+    ) {
+      msg <- paste("@SpinupSeed: must be NA or a finite value.")
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (
+      !all(
+        length(object@SpinupActive) == 1L,
+        is.logical(object@SpinupActive)
+      )
+    ) {
+      msg <- paste("@SpinupActive: must be one logical value.")
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
@@ -154,21 +182,57 @@ setValidity(
 
 #' @rdname swSpinup-class
 #' @export
+setMethod("get_swSpinup", "swSpinup", function(object) object)
+
+#' @rdname swSpinup-class
+#' @export
+setMethod("swSpinup_SpinupActive", "swSpinup",
+  function(object) object@SpinupActive)
+
+#' @rdname swSpinup-class
+#' @export
 setMethod("swSpinup_SpinupMode", "swSpinup",
   function(object) object@SpinupMode)
+
 #' @rdname swSpinup-class
 #' @export
 setMethod("swSpinup_SpinupScope", "swSpinup",
   function(object) object@SpinupScope)
+
 #' @rdname swSpinup-class
 #' @export
 setMethod("swSpinup_SpinupDuration", "swSpinup",
   function(object) object@SpinupDuration)
+
 #' @rdname swSpinup-class
 #' @export
 setMethod("swSpinup_SpinupSeed", "swSpinup",
   function(object) object@SpinupSeed)
 
+
+#' @rdname swSpinup-class
+#' @export
+setReplaceMethod(
+  "set_swSpinup",
+  signature = "swSpinup",
+  function(object, value) {
+    object <- value
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname swSpinup-class
+#' @export
+setReplaceMethod(
+  "swSpinup_SpinupActive",
+  signature = "swSpinup",
+  function(object, value) {
+    object@SpinupActive <- as.logical(value)
+    validObject(object)
+    object
+  }
+)
 
 #' @rdname swSpinup-class
 #' @export
@@ -212,32 +276,8 @@ setReplaceMethod(
   "swSpinup_SpinupSeed",
   signature = "swSpinup",
   function(object, value) {
-    object@SpinupSeed <- value
+    object@SpinupSeed <- as.integer(value)
     validObject(object)
     object
   }
 )
-
-
-
-
-#' @rdname swSpinup-class
-#' @export
-# nolint start
-setMethod(
-  "swReadLines",
-  signature = c(object = "swSpinup", file = "character"),
-  function(object, file) {
-    stop("swReadLines is defunct")
-    infiletext <- readLines(con = file)
-    object@SpinupMode <- readInteger(infiletext[8])
-    object@SpinupScope <- readInteger(infiletext[9])
-    object@SpinupDuration <- readInteger(infiletext[10])
-    object@SpinupSeed <- readInteger(infiletext[11])
-    temp <- unlist(strsplit(x = infiletext[8], split = "\t"))
-    temp <- unlist(strsplit(x = temp, split = " "))
-    temp <- temp[temp != ""][1]
-
-    object
-})
-# nolint end

@@ -32,6 +32,7 @@
 #include "SOILWAT2/include/SW_Model.h"
 #include "SOILWAT2/include/SW_Domain.h"
 
+#include "rSW_Files.h"
 #include "rSW_Domain.h"
 #include "SW_R_lib.h"
 
@@ -49,6 +50,41 @@ static char *MyFileName;
 /* =================================================== */
 /*             Global Function Definitions             */
 /* --------------------------------------------------- */
+
+// onGet_SW_DOM() is currently empty and unused because
+// rSOILWAT2 doesn't have a swDomain S4 class
+// -- see instead onGet_SW_SPINUP()
+SEXP onGet_SW_DOM(void) {
+    SEXP swDOM = NULL;
+
+    return swDOM ;
+}
+
+void onSet_SW_DOM(SEXP InputData, LOG_INFO* LogInfo) {
+    // Maintenance note: if `sw_start()` switches from using
+    // `SW_CTL_main()` to `SW_CTL_RunSimSet()`, then we would need to
+    // copy here complete and correct values into `SoilWatDomain`
+
+    // Currently not implemented in rSOILWAT2 but required in SOILWAT2
+    strcpy(SoilWatDomain.DomainType, "s");
+    SoilWatDomain.nDimX = 1;
+    SoilWatDomain.nDimY = 1;
+    SoilWatDomain.nDimS = 1;
+    // Currently not implemented in rSOILWAT2 and not utilized in SOILWAT2
+    // SoilWatDomain.startyr =
+    // SoilWatDomain.endyr =
+    // SoilWatDomain.startstart =
+    // SoilWatDomain.endend =
+    // SoilWatDomain.crs_bbox =
+    // SoilWatDomain.min_x =
+    // SoilWatDomain.min_y =
+    // SoilWatDomain.max_x =
+    // SoilWatDomain.max_y =
+
+    // Spinup
+    onSet_SW_SPINUP(GET_SLOT(InputData, install("spinup")), LogInfo);
+}
+
 
 SEXP onGet_SW_SPINUP(void) {
 	SW_DOMAIN *d = &SoilWatDomain;
@@ -76,7 +112,7 @@ SEXP onGet_SW_SPINUP(void) {
 	PROTECT(SpinupSeed = NEW_INTEGER(1));
 	INTEGER_POINTER(SpinupSeed)[0] = d->SW_SpinUp.rng_seed;
 	PROTECT(SpinupActive = NEW_LOGICAL(1));
-	LOGICAL_POINTER(SpinupActive)[0] = d->SW_SpinUp.spinup;	
+	LOGICAL_POINTER(SpinupActive)[0] = d->SW_SpinUp.spinup;
 
 	// attaching main's elements
 	SET_SLOT(SW_SPINUP, install(cSW_DOM_names[0]), SpinupMode);
@@ -129,82 +165,78 @@ SEXP onGet_SW_MDL(void) {
 	return SW_MDL;
 }
 
-/**
-   @brief Copy domain setup from `SOILWAT2` `SW_DOMAIN`
-   to `rSOILWAT2` S4 `swDomain`
 
-   Called by `onGetInputDataFromFiles()`
-*/
-void onGet_SW_DOM_setup(void) {
-
-
-}
 
 void onSet_SW_SPINUP(SEXP SW_DOM, LOG_INFO* LogInfo) {
-	SW_DOMAIN *d = &SoilWatDomain;
-	SW_MODEL *m = &SoilWatAll.Model;
+    SW_DOMAIN *d = &SoilWatDomain;
 
-	SEXP SpinupMode;
-	SEXP SpinupScope;
-	SEXP SpinupDuration;
-	SEXP SpinupSeed;
-	SEXP SpinupActive;
+    SEXP SpinupMode;
+    SEXP SpinupScope;
+    SEXP SpinupDuration;
+    SEXP SpinupSeed;
+    SEXP SpinupActive;
 
-	// Bool fstartdy = FALSE, fenddy = FALSE, fhemi = FALSE;
-	TimeInt range;
-	// char enddyval[6], errstr[MAX_ERROR];
+    if (!IS_S4_OBJECT(SW_DOM)) {
+      LogError(LogInfo, LOGERROR, "onSet_SW_SPINUP: No input.");
+          return; // Exit function prematurely due to error
+    }
 
-	MyFileName = SoilWatDomain.PathInfo.InFiles[eDomain];
-	range = m->endyr - m->startyr;
-
-	if (!IS_S4_OBJECT(SW_DOM)) {
-		LogError(LogInfo, LOGERROR, "%s: No input.", MyFileName);
-        return; // Exit function prematurely due to error
-	}
-
-	PROTECT(SpinupMode = GET_SLOT(SW_DOM, install("SpinupMode")));
-	if (INTEGER(SpinupMode)[0] != 1 && INTEGER(SpinupMode)[0] != 2) {
-		LogError(LogInfo, LOGERROR, "%s: Invalid Spinup mode (%d). Please select \"1\" or \"2\"",
-		MyFileName, INTEGER(SpinupMode)[0]);
+    PROTECT(SpinupMode = GET_SLOT(SW_DOM, install("SpinupMode")));
+    if (INTEGER(SpinupMode)[0] != 1 && INTEGER(SpinupMode)[0] != 2) {
+        LogError(
+            LogInfo,
+            LOGERROR,
+            "onSet_SW_SPINUP: Invalid Spinup mode (%d). Please select \"1\" or \"2\"",
+            INTEGER(SpinupMode)[0]
+        );
 
         UNPROTECT(1);
         return; // Exit function prematurely due to error
-	}
-	d->SW_SpinUp.mode = INTEGER(SpinupMode)[0];
+    }
+    d->SW_SpinUp.mode = INTEGER(SpinupMode)[0];
 
-	PROTECT(SpinupScope = GET_SLOT(SW_DOM, install("SpinupScope")));
-	if ( INTEGER(SpinupScope)[0] < 1 || INTEGER(SpinupScope)[0] > range) {
-		LogError(LogInfo, LOGERROR, "%s: Spinup scope (%d) out of range: (%d)", MyFileName,
-		INTEGER(SpinupScope)[0], range);
+    PROTECT(SpinupScope = GET_SLOT(SW_DOM, install("SpinupScope")));
+    if ( INTEGER(SpinupScope)[0] < 1) {
+          LogError(
+              LogInfo,
+              LOGERROR,
+              "onSet_SW_SPINUP: Spinup scope (%d) is less than 1.",
+              INTEGER(SpinupScope)[0]
+          );
 
-        UNPROTECT(2);
+          UNPROTECT(2);
+          return; // Exit function prematurely due to error
+    }
+    d->SW_SpinUp.scope = INTEGER(SpinupScope)[0];
+
+    PROTECT(SpinupDuration = GET_SLOT(SW_DOM, install("SpinupDuration")));
+    if (INTEGER(SpinupDuration)[0] < 0 ) {
+        LogError(
+            LogInfo,
+            LOGERROR,
+            "onSet_SW_SPINUP: Negative spinup duration (%d)",
+            INTEGER(SpinupDuration)[0]
+        );
+
+        UNPROTECT(3);
         return; // Exit function prematurely due to error
-	}
-	d->SW_SpinUp.scope = INTEGER(SpinupScope)[0];
+    }
+    d->SW_SpinUp.duration = INTEGER(SpinupDuration)[0];
 
-	PROTECT(SpinupDuration = GET_SLOT(SW_DOM, install("SpinupDuration")));
-	if (INTEGER(SpinupDuration)[0] < 0 ) {
-		LogError(LogInfo, LOGERROR, "%s: Negative spinup duration (%d)", MyFileName, INTEGER(SpinupDuration)[0]);
+    PROTECT(SpinupSeed = GET_SLOT(SW_DOM, install("SpinupSeed")));
+    d->SW_SpinUp.rng_seed = INTEGER(SpinupSeed)[0];
 
-		UNPROTECT(3);
-		return; // Exit function prematurely due to error		
-	}
-	d->SW_SpinUp.duration = INTEGER(SpinupDuration)[0];
+    PROTECT(SpinupActive = GET_SLOT(SW_DOM, install("SpinupActive")));
+    d->SW_SpinUp.spinup = (Bool)LOGICAL(SpinupActive)[0];
 
-	PROTECT(SpinupSeed = GET_SLOT(SW_DOM, install("SpinupSeed")));
-	d->SW_SpinUp.rng_seed = REAL(SpinupSeed)[0];
+    if (d->SW_SpinUp.duration == 0) {
+      d->SW_SpinUp.spinup = FALSE;
+    }
+    else {
+      d->SW_SpinUp.spinup = TRUE;
+    }
 
-	PROTECT(SpinupActive = GET_SLOT(SW_DOM, install("SpinupActive")));
-	d->SW_SpinUp.spinup = (Bool)LOGICAL(SpinupActive)[0];
-
-	if (d->SW_SpinUp.duration == 0) {
-		d->SW_SpinUp.spinup = FALSE;
-	}
-	else {
-		d->SW_SpinUp.spinup = TRUE;
-	}
-
-	UNPROTECT(5);
+    UNPROTECT(5);
 }
 
 void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
@@ -316,77 +348,88 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 // }
 
 
-// // Equivalent to `SW_DOM_read()`:
-// // fill `SOILWAT2` with values from `rSOILWAT2`
-// static void rSW2_setupDomain(SEXP listAllW, SW_DOMAIN **SW_Domain, LOG_INFO* LogInfo) {
-//     unsigned int yearIndex, year;
+// // Equivalent to `SW_CTL_setup_domain()`:
+// // fill `SOILWAT2` with values from `rSOILWAT2` or read from files
+void rSW_CTL_setup_domain(
+    Bool from_files,
+    SEXP InputData,
+    unsigned long userSUID,
+    SW_DOMAIN* SW_Domain,
+    LOG_INFO* LogInfo
+) {
+  #ifdef RSWDEBUG
+  int debug = 0;
+  #endif
 
-//     SW_F_construct(
-//         SW_Domain->PathInfo.InFiles[eFirst],
-//         SW_Domain->PathInfo._ProjDir,
-//         LogInfo
-//     );
-//     if(LogInfo->stopRun) {
-//         return; // Exit function prematurely due to error
-//     }
-//     swprintf("'SW_Control.c: SW_CTL_setup_domain': check 1\n");
+    SW_F_construct(
+       SW_Domain->PathInfo.InFiles[eFirst],
+       SW_Domain->PathInfo._ProjDir,
+       LogInfo
+    );
 
-//     SW_F_read(&SW_Domain->PathInfo, LogInfo);
-//     if(LogInfo->stopRun) {
-//         return; // Exit function prematurely due to error
-//     }
+    if(LogInfo->stopRun) {
+       return;  // Exit function prematurely due to error
+    }
 
-//     swprintf("'SW_Control.c: SW_CTL_setup_domain': check 2\n");
+    if (from_files) {
+        #ifdef RSWDEBUG
+        if (debug) {
+          swprintf(
+            "\n'rSW_CTL_setup_domain()': "
+            "Use SOILWAT2 code to read values from disk:"
+          );
+        }
+        #endif
 
-//     #if defined(SWNETCDF)
-//     SW_NC_read(&SW_Domain->netCDFInfo, &SW_Domain->PathInfo, LogInfo);
-//     if(LogInfo->stopRun) {
-//         return; // Exit function prematurely due to error
-//     }
-//     #endif
+        SW_F_read(&SW_Domain->PathInfo, LogInfo);
+        if(LogInfo->stopRun) {
+           return; // Exit function prematurely due to error
+        }
 
-//     SW_DOM_read(SW_Domain, LogInfo);
-//     if(LogInfo->stopRun) {
-//         return; // Exit function prematurely due to error
-//     }
+        SW_DOM_read(SW_Domain, LogInfo);
+        if(LogInfo->stopRun) {
+           return;  // Exit function prematurely due to error
+        }
 
-//     SW_DOM_construct(SW_Domain->SW_SpinUp.rng_seed, SW_Domain);
+    } else {
+        #ifdef RSWDEBUG
+        if (debug) {
+          swprintf(
+            "\n'rSW_CTL_setup_domain()': "
+            "Copy data from rSOILWAT2 S4 'InputData' object to SOILWAT2 variables:"
+          );
+        }
+        #endif
 
-//     SW_DOM_calc_nSUIDs(SW_Domain);
+        onSet_SW_F(GET_SLOT(InputData, install("files")), LogInfo);
+        #ifdef RSWDEBUG
+        if (debug) swprintf(" > 'files'");
+        #endif
+        if (LogInfo->stopRun) {
+            return; // Exit function prematurely due to error
+        }
 
-//     #if defined(SWNETCDF)
-//     // Create domain template if it does not exist (and exit)
-//     if(!FileExists(SW_Domain->netCDFInfo.InFilesNC[vNCdom])) {
-//         SW_NC_create_domain_template(SW_Domain, LogInfo);
-//         if(LogInfo->stopRun) {
-//             return; // Exit prematurely due to error
-//         }
+        onSet_SW_DOM(InputData, LogInfo);
+        #ifdef RSWDEBUG
+        if (debug) swprintf(" > 'domain'");
+        #endif
+        if (LogInfo->stopRun) {
+            return; // Exit function prematurely due to error
+        }
+    }
 
-//         LogError(LogInfo, LOGERROR, "Domain netCDF template has been created. "
-//                                     "Please modify it and rename it to "
-//                                     "'domain.nc' when done and try again. "
-//                                     "The template path is: %s",
-//                                     DOMAIN_TEMP);
-//         return; // Exit prematurely so the user can modify the domain template
-//     }
+    SW_DOM_construct(SW_Domain->SW_SpinUp.rng_seed, SW_Domain);
 
-//     // Open necessary netCDF input files and check for consistency with domain
-//     SW_NC_open_dom_prog_files(&SW_Domain->netCDFInfo, LogInfo);
-//     if(LogInfo->stopRun) {
-//         return; // Exit function prematurely due to error
-//     }
+    SW_DOM_calc_nSUIDs(SW_Domain);
 
-//     SW_NC_check(SW_Domain, SW_Domain->netCDFInfo.ncFileIDs[vNCdom],
-//                 SW_Domain->netCDFInfo.InFilesNC[vNCdom], LogInfo);
-//     if(LogInfo->stopRun) {
-//         return; // Exit function prematurely due to error
-//     }
-//     #endif
+    SW_DOM_CreateProgress(SW_Domain, LogInfo);
+    if(LogInfo->stopRun) {
+       return;  // Exit function prematurely due to error
+    }
 
-//     SW_DOM_CreateProgress(SW_Domain, LogInfo);
-//     if(LogInfo->stopRun) {
-//         return; // Exit function prematurely due to error
-//     }
+    SW_DOM_SimSet(SW_Domain, userSUID, LogInfo);
 
-//     SW_DOM_SimSet(SW_Domain, userSUID, LogInfo);
-// }
+    #ifdef RSWDEBUG
+    if (debug) swprintf(" completed.\n");
+    #endif
+}

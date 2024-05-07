@@ -1,0 +1,68 @@
+	SW2 variable	SW2 txt output	SW2 units	XY+Dim	Do output?	netCDF variable name	netCDF long_name	netCDF comment	netCDF units	netCDF cell_method	User comment
+TEMP	temp_max	max_C	degC	T	1	tasmax	daily maximum air temperature	NA	degC	time: maximum	CMIP6/CMOR3
+TEMP	temp_min	min_C	degC	T	1	tasmin	daily minimum air temperature	NA	degC	time: minimum	CMIP6/CMOR3
+TEMP	temp_avg	avg_C	degC	T	1	tas	daily mean air temperature	NA	degC	time: mean	CMIP6/CMOR3
+TEMP	surfaceMax	surfaceTemp_max_C	degC	T	1	tgsmax	daily maximum soil surface temperature	NA	degC	time: maximum	Not standardized but see tgs
+TEMP	surfaceMin	surfaceTemp_min_C	degC	T	1	tgsmin	daily minimum soil surface temperature	NA	degC	time: minimum	Not standardized but see tgs
+TEMP	surfaceAvg	surfaceTemp_avg_C	degC	T	1	tgs	daily mean soil surface temperature	NA	degC	time: mean	CMIP6/CMOR3
+PRECIP	ppt	ppt	cm	T	1	pr	precipitation amount	total accumulated precipitation	mm	time: sum	CMIP6/CMOR3
+PRECIP	rain	rain	cm	T	1	prra	rainfall amount	total accumulated rainfall	mm	time: sum	CMIP6/CMOR3
+PRECIP	snow	snow_fall	cm	T	1	prsn	snowfall amount	total accumulated snowfall	mm	time: sum	CMIP6/CMOR3
+PRECIP	snowmelt	snowmelt	cm	T	1	snm	surface snow melt amount	total accumulated snow loss due to surface melting	mm	time: sum	CMIP6/CMOR3
+PRECIP	snowloss	snowloss	cm	T	1	esn	surface snow sublimation amount	total accumulated surface snow loss due to sublimation	mm	time: sum	CMIP6/CMOR3
+SOILINFILT	soil_inf	soil_inf	cm	T	1	infiltration	infiltration amount	downward movement of water amount at soil surface	mm	time: sum	NA
+RUNOFF	net	net	cm	T	1	mrros	total surface runoff amount	net surface runoff amount (runoff - runon) (excluding drainage through the base of the soil model)	mm	time: sum	CMIP6/CMOR3
+RUNOFF	surfaceRunoff	ponded_runoff	cm	T	1	runoff	surface runoff amount	surface runoff amount (excluding drainage through the base of the soil model)	mm	time: sum	NA
+RUNOFF	snowRunoff	snowmelt_runoff	cm	T	1	runoffsn	surface runoff amount from snow	surface runoff amount from snow (excluding drainage through the base of the soil model)	mm	time: sum	NA
+RUNOFF	surfaceRunon	ponded_runon	cm	T	1	runon	runon amount	surface runon amount (excluding drainage through the base of the soil model)	mm	time: sum	NA
+SURFACEWATER	surfaceWater	surfaceWater_cm	cm	T	1	sw	land surface liquid water amount	Surface water storage other than soil, snow or interception storage	mm	time: sum	CMIP6/CMOR3
+EVAPSURFACE	total_evap	evap_total	cm	T	1	eclow	water evaporation amount from canopy, above-ground litter, and surface water	Evaporation from water intercepted by canopy or by above-ground litter and from open water (excluding bare soil evaporation), i.e., ec + eLitterAbove + eow	mm	time: sum	NA
+EVAPSURFACE	evap_veg	evap_<veg>	cm	TV	1	ecPFT	water evaporation amount from canopy by plant functional type	Interception evaporation by plant functional type	mm	time: sum	Not standardized but see ec
+EVAPSURFACE	litter_evap	evap_litter	cm	T	1	eLitterAbove	water evaporation amount from above-ground litter	NA	mm	time: sum	Not standardized but see ec and cLitterAbove
+EVAPSURFACE	surfaceWater_evap	evap_surfaceWater	cm	T	1	eow	surface water evaporation amount	Open water evaporation	mm	time: sum	CMIP6/CMOR3
+INTERCEPTION	total_int	int_total	cm	T	1	wveg	water amount on canopy and above-ground litter	Water storage that was intercepted by the vegetation canopy or above-ground litter before reaching the ground, i.e., cw + wLitterAbove	mm	time: sum	NA
+INTERCEPTION	int_veg	int_<veg>	cm	TV	1	cwPFT	canopy water amount by plant functional type	Canopy water storage by plant functional type that was intercepted by the vegetation canopy before reaching the ground	mm	time: sum	Not standardized but see cw
+INTERCEPTION	litter_int	int_litter	cm	T	1	wLitterAbove	water amount on above-ground litter	Water storage that was intercepted by above-ground litter before reaching the ground	mm	time: sum	Not standardized but see cw and cLitterAbove
+AET	aet	evapotr_cm	cm	T	1	evspsbl	water evapotranspiration amount	Evaporation at surface including sublimation and transpiration	mm	time: sum	CMIP6/CMOR3
+AET	tran	tran_cm	cm	T	1	tran	transpiration amount	Transpiration	mm	time: sum	CMIP6/CMOR3
+AET	esoil	esoil_cm	cm	T	1	es	water evaporation amount from soil	Bare soil evaporation	mm	time: sum	CMIP6/CMOR3
+AET	ecnw	ecnw_cm	cm	T	1	ec	water evaporation amount from canopy	Interception evaporation	mm	time: sum	CMIP6/CMOR3
+AET	esurf	esurf_cm	cm	T	1	eow	surface water evaporation amount	Open water evaporation	mm	time: sum	CMIP6/CMOR3
+AET	snowloss	esnow_cm	cm	T	1	esn	surface snow sublimation amount	Total accumulated surface snow loss due to sublimation	mm	time: sum	CMIP6/CMOR3
+PET	pet	pet_cm	cm	T	1	evspsblpot	potential evapotranspiration amount	NA	mm	time: sum	CMIP6/CMOR3
+PET	H_oh	H_oh_MJm-2	MJ m-2	T	1	hoh	extraterrestrial horizontal solar irradiation	NA	MJ m-2	time: sum	NA
+PET	H_ot	H_ot_MJm-2	MJ m-2	T	1	hot	extraterrestrial tilted solar irradiation	NA	MJ m-2	time: sum	NA
+PET	H_gh	H_gh_MJm-2	MJ m-2	T	1	hgh	global horizontal irradiation	NA	MJ m-2	time: sum	NA
+PET	H_gt	H_gt_MJm-2	MJ m-2	T	1	hgt	global tilted irradiation	NA	MJ m-2	time: sum	NA
+SNOWPACK	snowpack	snowpackWaterEquivalent_cm	cm	T	1	snw	surface snow amount	Liquid water equivalent of surface snow	mm	time: mean	CMIP6/CMOR3
+SNOWPACK	snowdepth	snowdepth_cm	cm	T	1	snd	surface snow thickness	Snow depth	m	time: mean	CMIP6/CMOR3
+DEEPSWC	deep	lowLayerDrain_cm	cm	T	1	qgwr	drainage amount through base of soil model	Groundwater recharge from soil layer	mm	time: sum	CMIP6/CMOR3
+ESTABL	estab_doy	<sppname>	1	T	1	<sppname>	day of year of first establishment event of %s	Day of year is the sequential day number starting with day 1 on January 1st	1	time: minimum	NA
+CO2EFFECTS	veg.co2_multipliers[BIO_INDEX]	BioMult_<veg>	1	TV	1	bco2PFT	effect by atmospheric CO2 on biomass by plant functional type	Multiplicative factor enhancing biomass	1	time: mean	NA
+CO2EFFECTS	veg.co2_multipliers[WUE_INDEX]	WUEMult_<veg>	1	TV	1	wueco2PFT	effect by atmospheric CO2 on water-use efficiency by plant functional type	Multiplicative factor enhancing water use efficiency	1	time: mean	NA
+BIOMASS	bare_cov.fCover	fCover_BareGround	1	T	1	baresoilFrac	Bare Soil Percentage Area Coverage	Fraction of entire grid cell that is covered by bare soil	1	time: mean	CMIP6/CMOR3
+BIOMASS	veg.cov.fCover	fCover_<veg>	1	TV	1	vegFracPFT	vegetated percentage cover by plant functional type	Fraction of entire grid cell that is covered by vegetation by plant functional type	1	time: mean	Not standardized but see vegFrac
+BIOMASS	biomass_total	Biomass_total	g m-2	T	1	bVeg	biomass in above-ground vegetation	NA	g m-2	time: mean	Not standardized but see cVeg
+BIOMASS	veg.biomass_inveg	Biomass_<veg>	g m-2	TV	1	bVegPFT	biomass in above-ground vegetation by plant functional type	NA	g m-2	time: mean	Not standardized but see cVeg
+BIOMASS	litter_total	Biomass_litter	g m-2	T	1	bLitterAbove	biomass in above-ground litter	NA	g m-2	time: mean	Not standardized but see cVeg and cLitterAbove
+BIOMASS	biolive_total	Biolive_total	g m-2	T	1	bVegLive	live biomass in above-ground vegetation	NA	g m-2	time: mean	Not standardized but see cVeg
+BIOMASS	veg.biolive_inveg	Biolive_<veg>	g m-2	TV	1	bVegLivePFT	live biomass in above-ground vegetation by plant functional type	NA	g m-2	time: mean	Not standardized but see cVeg
+BIOMASS	LAI	LAI_total	m m-2	T	1	lai	leaf area index	A ratio obtained by dividing the total upper leaf surface area of vegetation by the (horizontal) surface area of the land on which it grows.	m m-2	time: mean	CMIP6/CMOR3
+VWCBULK	vwcBulk	Lyr_<slyr>	cm cm-1	ZT	1	vwc	volumetric soil moisture of soil layer	Volume fraction of water in soil layer, i.e., mrsol divided by soil layer depth	mm mm-1	time: mean	NA
+VWCMATRIC	vwcMatric	Lyr_<slyr>	cm cm-1	ZT	1	vwcMatric	volumetric soil moisture in matric component of soil layer	Volume fraction of water in matric component of soil layer, i.e., mrsol divided by soil layer depth without coarse fragments	mm mm-1	time: mean	NA
+SWCBULK	swcBulk	Lyr_<slyr>	cm	ZT	1	mrsol	mass content of water in soil layer	Total water content of soil layer	mm	time: mean	CMIP6/CMOR3
+SWA	SWA_VegType	swa_<veg>_Lyr_<slyr>	cm	ZTV	1	swaPFT	available water content in soil layer by plant functional type	Water content of soil layer held at a plant functional type specific potential	mm	time: mean	NA
+SWABULK	swaBulk	Lyr_<slyr>	cm	ZT	1	swa	available water content in soil layer	Water content of soil layer held at a potential > -1.5 MPa	mm	time: mean	NA
+SWAMATRIC	swaMatric	Lyr_<slyr>	cm	ZT	1	swaMatric	available water content in matric component of soil layer	Water content of matric component of soil layer held at a potential > -1.5 MPa	mm	time: mean	NA
+SWPMATRIC	swpMatric	Lyr_<slyr>	-1bar	ZT	1	swpMatric	soil water potential of soil layer	NA	MPa	time: mean	NA
+TRANSP	transp_total	transp_total_Lyr_<slyr>	cm	ZT	1	tranl	water extraction amount by roots for transpiration from soil layer	NA	mm	time: sum	Not standardized but see tran
+TRANSP	transp	transp_<veg>_Lyr_<slyr>	cm	ZTV	1	tranlPFT	water extraction amount by roots for transpiration from soil layer by plant functional type	NA	mm	time: sum	Not standardized but see tran
+EVAPSOIL	evap_baresoil	Lyr_<slyr>	cm	ZT	1	esl	water evaporation amount from soil layer	Bare soil evaporation of soil layer	mm	time: sum	Not standardized but see es
+LYRDRAIN	lyrdrain	Lyr_<slyr>	cm	ZT	1	percl	water percolation from soil layer	NA	mm	time: sum	NA
+HYDRED	hydred_total	total_Lyr_<slyr>	cm	ZT	1	hydredl	hydraulic redistribution from soil layer	NA	mm	time: sum	NA
+HYDRED	hydred	<veg>_Lyr_<slyr>	cm	ZTV	1	hydredlPFT	hydraulic redistribution from soil layer by plant functional type	NA	mm	time: sum	NA
+WETDAY	is_wet	Lyr_<slyr>	1	ZT	1	wet	soil wetness	Count of days if soil layer has any soil moisture held at potential > -1.5 MPa 	1	time: mean	NA
+SOILTEMP	maxLyrTemperature	Lyr_<slyr>_max_C	degC	ZT	1	tslmax	daily maximum soil temperature	Maximum temperature of each soil layer	degC	time: maximum	Not standardized but see tsl
+SOILTEMP	minLyrTemperature	Lyr_<slyr>_min_C	degC	ZT	1	tslmin	daily minimum soil temperature	Minimum temperature of each soil layer	degC	time: minimum	Not standardized but see tsl
+SOILTEMP	avgLyrTemp	Lyr_<slyr>_avg_C	degC	ZT	1	tsl	daily mean soil temperature	Mean temperature of each soil layer	degC	time: mean	CMIP6/CMOR3
+FROZEN	lyrFrozen	Lyr_<slyr>	1	ZT	1	frozen	frozen soil	Count of days if soil layer has soil moisture in the solid phase	1	time: mean	Not standardized but see mrfsofr

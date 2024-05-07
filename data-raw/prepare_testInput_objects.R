@@ -109,18 +109,9 @@ compare_objects <- function(new, old, tolerance = 1e-9) {
   # Ignore "timestamp"
   has_timestamp_diff <- grepl("timestamp", res_cmp, fixed = TRUE)
 
-  # Ignore difference in version less than minor
-  vge <- rSOILWAT2::check_version(
-    new,
-    rSOILWAT2::get_version(old),
-    level = "minor"
-  )
-  vle <- rSOILWAT2::check_version(
-    new,
-    rSOILWAT2::get_version(old),
-    level = "minor"
-  )
-  has_version_diff <- !(vge && vle)
+  # Ignore "version"
+  has_version_diff <- grepl("version", res_cmp, fixed = TRUE)
+
 
   list(
     res_waldo = res_cmp,
@@ -254,8 +245,6 @@ toggleVegEstab <- function(path, activate = TRUE) {
 for (it in seq_along(tests)) {
   message("\n", examples[it], " ----------------------------------")
 
-  message("\ncheckpoint 1")
-
   dir_ex <- file.path(dir_extdata, examples[it])
 
   #--- Create raw example input files from original SOILWAT2 inputs ------
@@ -343,7 +332,6 @@ for (it in seq_along(tests)) {
 
   stopifnot(rSOILWAT2::dbW_check_weatherData(sw_weather))
 
-  message("\ncheckpoint 2")
 
   #--- Compare weather to previous version
   res_cmp <- waldo::compare(
@@ -372,8 +360,6 @@ for (it in seq_along(tests)) {
   #--- Compare input to previous version
   set_WeatherHistory(sw_input) <- weatherHistory()
 
-  message("\ncheckpoint 3")
-
   res_cmp <- compare_objects(
     sw_input,
     old = readRDS(
@@ -395,13 +381,10 @@ for (it in seq_along(tests)) {
     )
   }
 
-  message("\ncheckpoint 4")
 
   #--- Run rSOILWAT2 with yearly output and save it as reference output
   if (!rSOILWAT2::swWeather_UseMarkov(sw_input)) {
     rSOILWAT2::swOUT_TimeStepsForEveryKey(sw_input) <- 3
-
-  message("\ncheckpoint 5")
 
     rdy <- rSOILWAT2::sw_exec(
       inputData = sw_input,
@@ -409,8 +392,6 @@ for (it in seq_along(tests)) {
       echo = FALSE,
       quiet = TRUE
     )
-
-    message("\ncheckpoint 6")
 
     #--- Compare ouput to previous version
     res_cmp <- compare_objects(
@@ -424,7 +405,6 @@ for (it in seq_along(tests)) {
       )
     )
 
-    message("\ncheckpoint 7")
 
     # Save test output (if different from previous)
     if (res_cmp[["resave"]]) {

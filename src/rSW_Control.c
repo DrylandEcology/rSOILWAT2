@@ -22,8 +22,6 @@
 #include "SOILWAT2/include/SW_Files.h"
 #include "SOILWAT2/include/SW_Domain.h"
 
-#include "rSW_Files.h"
-#include "rSW_Domain.h"
 #include "rSW_Weather.h"
 #include "rSW_Markov.h"
 #include "rSW_Sky.h"
@@ -86,14 +84,6 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
       );
     }
     #endif
-
-    onSet_SW_F(GET_SLOT(InputData, install("files")), LogInfo);
-    #ifdef RSWDEBUG
-    if (debug) swprintf(" 'files'");
-    #endif
-    if (LogInfo->stopRun) {
-        return; // Exit function prematurely due to error
-    }
 
     onSet_SW_MDL(GET_SLOT(InputData, install("years")), LogInfo);
     #ifdef RSWDEBUG

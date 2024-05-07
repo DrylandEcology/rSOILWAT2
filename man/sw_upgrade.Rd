@@ -74,6 +74,12 @@ take the new default values from \code{SOILWAT2}.
 
 List of changes:
 \itemize{
+\item Changes with \code{v6.1.0}:
+\itemize{
+\item class \code{\linkS4class{swInputData}}:
+new slot \code{"spinup"} of new class \code{\linkS4class{swSpinup}}
+\item class \code{\linkS4class{swFiles}}: new total of 27 input files
+}
 \item Changes with \code{v6.0.0}:
 \itemize{
 \item class \code{\linkS4class{swSite}}:

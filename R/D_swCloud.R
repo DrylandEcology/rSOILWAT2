@@ -42,12 +42,22 @@
 #'  \code{rSOILWAT2::sw_exampleData}
 #'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
-#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swWeather}} \code{\linkS4class{swInputData}}
-#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
-#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#' @seealso
+#' \code{\linkS4class{swInputData}}
+#' \code{\linkS4class{swFiles}}
+#' \code{\linkS4class{swYears}}
+#' \code{\linkS4class{swWeather}}
+#' \code{\linkS4class{swCloud}}
+#' \code{\linkS4class{swMarkov}}
+#' \code{\linkS4class{swProd}}
+#' \code{\linkS4class{swSite}}
+#' \code{\linkS4class{swSoils}}
+#' \code{\linkS4class{swSpinup}}
+#' \code{\linkS4class{swEstab}}
+#' \code{\linkS4class{swOUT}}
+#' \code{\linkS4class{swCarbon}}
+#' \code{\linkS4class{swSWC}}
+#' \code{\linkS4class{swLog}}
 #'
 #' @examples
 #' showClass("swCloud")

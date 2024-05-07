@@ -37,7 +37,6 @@
 /* =================================================== */
 /*                  Local Variables                    */
 /* --------------------------------------------------- */
-static char *MyFileName;
 
 
 
@@ -71,48 +70,62 @@ SEXP onGet_SW_VES(void) {
 	return VES;
 }
 
+// see SW_VES_read2()
 void onSet_SW_VES(SEXP VES, LOG_INFO* LogInfo) {
-	IntU i;
-	int nSPPS;
-	SoilWatAll.VegEstab.use = TRUE;
-	SEXP use, count;
-	MyFileName = SoilWatDomain.PathInfo.InFiles[eVegEstab];
+    IntU i;
+    int nSPPS;
+    SEXP use, count;
 
-	PROTECT(use = GET_SLOT(VES,install("useEstab")));
-	PROTECT(count = GET_SLOT(VES,install("count")));
+    // Clean out and allocate memory
+    SW_VES_deconstruct(&SoilWatAll.VegEstab);
+    SW_VES_construct(&SoilWatAll.VegEstab);
+    SW_VES_alloc_outptrs(&SoilWatAll.VegEstab, LogInfo);
+    if(LogInfo->stopRun) {
+        return; // Exit function prematurely due to error
+    }
 
-	if (LOGICAL(use)[0] == FALSE) {
-		//LogError(logfp, LOGWARN, "Establishment not used.\n");
-		SoilWatAll.VegEstab.use = FALSE;
-	} else {
-		nSPPS = INTEGER(count)[0];
-		if (nSPPS == 0) {
-			LogError(LogInfo, LOGWARN, "Establishment is TRUE but no data. Setting False.");
-			SoilWatAll.VegEstab.use = FALSE;
-		} else {
-			SoilWatAll.VegEstab.use = TRUE;
-			for (i = 0; i < nSPPS; i++) {
-				onSet_SW_VES_spp(VES, i, LogInfo); // sets `SW_VegEstab.count` incrementally
+    SoilWatAll.VegEstab.use = TRUE;
 
-            if (LogInfo->stopRun) {
-                goto report; // Exit function prematurely due to error
-            }
-      }
-		}
-	}
 
-	SW_VES_construct(&SoilWatAll.VegEstab);
+    // Get rSOILWAT2 inputs: use flag and count of species
+    PROTECT(use = GET_SLOT(VES, install("useEstab")));
+    PROTECT(count = GET_SLOT(VES, install("count")));
+
+
+    if (LOGICAL(use)[0] == FALSE) {
+        SoilWatAll.VegEstab.use = FALSE;
+
+    } else {
+        nSPPS = INTEGER(count)[0];
+
+        if (nSPPS == 0) {
+            LogError(LogInfo, LOGWARN, "Establishment is TRUE but no data. Setting False.");
+            SoilWatAll.VegEstab.use = FALSE;
+
+        } else {
+            for (i = 0; i < nSPPS; i++) {
+                onSet_SW_VES_spp(VES, i, LogInfo); // sets `SW_VegEstab.count` incrementally
+
+                if (LogInfo->stopRun) {
+                    goto report; // Exit function prematurely due to error
+                }
+              }
+          }
+    }
+
+    SW_VegEstab_alloc_outptrs(&SoilWatAll.VegEstab, LogInfo);
     if(LogInfo->stopRun) {
         goto report; // Exit function prematurely due to error
     }
 
-	if (EchoInits)
+	if (EchoInits) {
 		_echo_VegEstab(SoilWatAll.Site.width, SoilWatAll.VegEstab.parms,
 					   SoilWatAll.VegEstab.count);
+	}
 
-  report: {
-    UNPROTECT(2);
-  }
+    report: {
+        UNPROTECT(2);
+    }
 }
 
 void onGet_SW_VES_spps(SEXP SPP) {

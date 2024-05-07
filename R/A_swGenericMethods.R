@@ -208,6 +208,10 @@ format_timestamp <- function(object) {
 #'
 #' @section Details:
 #' List of changes:
+#'   * Changes with `v6.1.0`:
+#'       * class [`swInputData-class`]:
+#'         new slot `"spinup"` of new class [`swSpinup-class`]
+#'       * class [`swFiles-class`]: new total of 27 input files
 #'   * Changes with `v6.0.0`:
 #'       * class [`swSite-class`]:
 #'         new slots `"swrc_flags"`, `"has_swrcp"`, and
@@ -762,6 +766,15 @@ setGeneric(
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
 setGeneric(
+  "swSpinup_SpinupActive",
+  function(object) standardGeneric("swSpinup_SpinupActive")
+)
+
+#' \code{swSpinup_SpinupMode}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
   "swSpinup_SpinupMode",
   function(object) standardGeneric("swSpinup_SpinupMode")
 )
@@ -813,6 +826,16 @@ setGeneric(
 setGeneric(
   "set_swSpinup<-",
   function(object, value) standardGeneric("set_swSpinup<-")
+)
+
+#' \code{swSpinup_SpinupActive<-}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupActive<-",
+  function(object, value) standardGeneric("swSpinup_SpinupActive<-")
 )
 
 #' \code{swSpinup_SpinupMode<-}

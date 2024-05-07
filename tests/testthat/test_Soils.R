@@ -46,10 +46,16 @@ test_that("Unrealistic soils", {
 
 
   #--- Check zero evaporation coefficients
-  # Expect no output for bare-soil evaporation (interpreted as zero)
   sw_input@soils@Layers[, "EvapBareSoil_frac"] <- 0
   sw_out <- try(sw_exec(inputData = sw_input, quiet = TRUE), silent = TRUE)
   e_bs <- slot(slot(sw_out, "EVAPSOIL"), "Day")
-  expect_gt(nrow(e_bs), 0)
-  expect_equal(ncol(e_bs), 2 + 0) # Year DOY
+  expect_gt(nrow(e_bs), 0L)
+  if (getNamespaceVersion("rSOILWAT2") <= "6.0.0") {
+    # rSOILWAT2: < v6.0.0: expect no output for esoil (interpreted as zero)
+    expect_identical(ncol(e_bs), 2L) # Year DOY
+  } else {
+    # rSOILWAT2: >= v6.0.0: expect one layer of 0s for esoil
+    expect_identical(ncol(e_bs), 3L) # Year DOY Lyr_1
+    expect_identical(sum(e_bs[, 3L]), 0)
+  }
 })

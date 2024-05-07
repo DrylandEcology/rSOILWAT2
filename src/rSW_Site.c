@@ -309,7 +309,7 @@ SEXP onGet_SW_SIT(void) {
 	char *cTranspirationCoefficients[] = { "RateShift", "RateShape", "InflectionPoint", "Range" };
 
 	SEXP IntrinsicSiteParams, IntrinsicSiteParams_names;
-	char *cIntrinsicSiteParams[] = { "Longitude", "Latitude", "Elevation", "Slope", "Aspect" };
+	char *cIntrinsicSiteParams[] = { "Longitude", "Latitude", "Altitude", "Slope", "Aspect" };
 
 	SEXP SoilTemperatureConstants_use, SoilTemperatureConstants, SoilTemperatureConstants_names;
 	char *cSoilTempValues[] = {

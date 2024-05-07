@@ -92,14 +92,13 @@ test_that("Run 'rSOILWAT2' with different 'swSite' inputs", {
     swSite_TranspirationRegions(sw_input) <- mc
 
     # Run SOILWAT
-    expect_s4_class(
-      sw_exec(
-        inputData = sw_input,
-        weatherList = sw_weather,
-        echo = FALSE,
-        quiet = TRUE
-      ),
-      "swOutput"
+    res <- sw_exec(
+      inputData = sw_input,
+      weatherList = sw_weather,
+      echo = FALSE,
+      quiet = TRUE
     )
+
+    expect_s4_class(res, "swOutput")
   }
 })
