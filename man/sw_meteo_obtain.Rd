@@ -110,14 +110,20 @@ if (requireNamespace("curl") && curl::has_internet()) {
 
 ## Example: SCAN station "Mccracken Mesa"
 if (requireNamespace("curl") && curl::has_internet()) {
-  mm_scan <- rSOILWAT2::sw_meteo_obtain_SCAN(
-    x = 2140, # SCAN station code
-    start_year = 2015,
-    end_year = 2023
+  mm_scan <- try(
+    rSOILWAT2::sw_meteo_obtain_SCAN(
+      x = 2140, # SCAN station code
+      start_year = 2015,
+      end_year = 2023
+    )
   )
 }
 
-if (exists("mm_scan") && exists("mm_dm") && requireNamespace("graphics")) {
+if (
+  exists("mm_scan") && !inherits(mm_scan, "try-error") &&
+  exists("mm_dm") &&
+  requireNamespace("graphics")
+) {
   vars <- c("Tmax_C", "Tmin_C", "PPT_cm")
   par_prev <- graphics::par(mfrow = grDevices::n2mfrow(length(vars)))
 

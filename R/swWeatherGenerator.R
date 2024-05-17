@@ -634,6 +634,8 @@ compare_weather <- function(
   dir.create(path, recursive = TRUE, showWarnings = FALSE)
   time_steps <- c("Year", "Month", "Week", "Day")
   weather_vars <- c("Tmax_C", "Tmin_C", "PPT_cm")
+  vtags <- c("tamax (C)", "tamin (C)", "pr (cm)")
+  ftags <- c("Mean", "SD", "Cor(., pr)")
 
   #--- Prepare reference weather
   ref_df <- list(prepare_weather_for_comparison(ref_weather, na.rm = TRUE))
@@ -654,30 +656,46 @@ compare_weather <- function(
 
 
   #------- OUTPUTS
-  #--- Compare means and SDs: boxplots
-  calculate_MeansSDs <- function(data) {
-    temp <- lapply(
-      weather_vars,
+  #--- * Boxplots of means, SD, and cor(., pr) ------
+  calculate_MeansSDs <- function(
+    data,
+    vars = weather_vars,
+    var_ppt = "PPT_cm",
+    periods = time_steps
+  ) {
+    tmp <- lapply(
+      vars,
       function(var) {
-        sapply(
-          time_steps,
+        vapply(
+          periods,
           function(ts) {
-            sapply(
+            vapply(
               data,
               function(x) {
-                temp <- x[[ts]][, var]
-                c(mean(temp, na.rm = TRUE), sd(temp, na.rm = TRUE))
-              }
+                tmp <- x[[ts]][, var]
+                c(
+                  mean(tmp, na.rm = TRUE),
+                  stats::sd(tmp, na.rm = TRUE),
+                  stats::cor(tmp, x[[ts]][, var_ppt])
+                )
+              },
+              FUN.VALUE = rep(NA_real_, times = 3L)
             )
-          }
+          },
+          FUN.VALUE = array(NA_real_, dim = c(3L, times = length(data)))
         )
       }
     )
 
     array(
-      unlist(temp),
-      dim = c(2, length(data), length(time_steps), length(weather_vars)),
-      dimnames = list(c("mean", "sd"), names(data), time_steps, weather_vars)
+      unlist(tmp),
+      dim = c(3L, length(data), length(time_steps), length(weather_vars)),
+      dimnames = list(
+        c("mean", "sd", "cor(., pr)"),
+        names(data),
+        time_steps,
+        weather_vars
+      )
     )
   }
 
@@ -719,13 +737,13 @@ compare_weather <- function(
   comp_MeanSD <- calculate_MeansSDs(comp_df)
 
   # Make figure
-  panels <- c(3, 2)
+  panels <- dim(ref_MeanSD)[c(1L, 4L)]
   grDevices::png(
     units = "in",
     res = 150,
-    height = 3 * panels[1],
-    width = 6 * panels[2],
-    file = file.path(path, paste0(tag, "_CompareWeather_Boxplots_MeanSD.png"))
+    height = 3 * panels[[1L]],
+    width = 4 * panels[[2L]],
+    file = file.path(path, paste0(tag, "_CompareWeather_Boxplots.png"))
   )
   par_prev <- graphics::par(
     mfrow = panels,
@@ -735,45 +753,28 @@ compare_weather <- function(
     cex = 1
   )
 
-  foo_bxp(
-    data = comp_MeanSD["mean", , , "PPT_cm"],
-    ref_data = ref_MeanSD["mean", , , "PPT_cm"],
-    ylab = "Mean Precipitation (cm)",
-    legend = TRUE
-  )
-  foo_bxp(
-    data = comp_MeanSD["sd", , , "PPT_cm"],
-    ref_data = ref_MeanSD["sd", , , "PPT_cm"],
-    ylab = "SD Precipitation (cm)"
-  )
+  for (kv in seq_along(vtags)) {
+    for (kf in seq_along(ftags)) {
+      tmp_ylab <- if (grepl(".", ftags[[kf]], fixed = TRUE)) {
+        sub(".", vtags[[kv]], ftags[[kf]], fixed = TRUE)
+      } else {
+        paste(ftags[[kf]], vtags[[kv]])
+      }
 
-  foo_bxp(
-    data = comp_MeanSD["mean", , , "Tmax_C"],
-    ref_data = ref_MeanSD["mean", , , "Tmax_C"],
-    ylab = "Mean Daily Max Temperature (C)"
-  )
-  foo_bxp(
-    data = comp_MeanSD["sd", , , "Tmax_C"],
-    ref_data = ref_MeanSD["sd", , , "Tmax_C"],
-    ylab = "SD Daily Max Temperature (C)"
-  )
-
-  foo_bxp(
-    data = comp_MeanSD["mean", , , "Tmin_C"],
-    ref_data = ref_MeanSD["mean", , , "Tmin_C"],
-    ylab = "Mean Daily Min Temperature (C)"
-  )
-  foo_bxp(
-    data = comp_MeanSD["sd", , , "Tmin_C"],
-    ref_data = ref_MeanSD["sd", , , "Tmin_C"],
-    ylab = "SD Daily Min Temperature (C)"
-  )
+      foo_bxp(
+        data = comp_MeanSD[kf, , , kv],
+        ref_data = ref_MeanSD[kf, , , kv],
+        ylab = tmp_ylab,
+        legend = kv == 1L && kf == 1L
+      )
+    }
+  }
 
   graphics::par(par_prev)
   grDevices::dev.off()
 
 
-  #--- Quantile-quantile comparisons: scatterplots
+  #--- * Quantile-quantile scatterplots ------
   foo_qq <- function(data, ref_data, var, time, lab, legend = FALSE) {
 
     vlim <- range(
@@ -786,8 +787,8 @@ compare_weather <- function(
     if (all(is.finite(vlim))) {
       probs <- seq(0, 1, length.out = 1000)
 
-      x <- quantile(
-        ref_data[[1]][[time]][, var], probs = probs,
+      x <- stats::quantile(
+        ref_data[[1L]][[time]][, var], probs = probs,
         na.rm = TRUE
       )
       graphics::plot(
@@ -797,12 +798,12 @@ compare_weather <- function(
         xlim = vlim,
         ylim = vlim,
         asp = 1,
-        xlab = paste0(time, "ly : reference ", lab),
-        ylab = paste0(time, "ly : weather ", lab)
+        xlab = paste0(time, "ly: reference ", lab),
+        ylab = paste0(time, "ly: weather ", lab)
       )
 
       for (k in seq_along(data)) {
-        qy <- quantile(
+        qy <- stats::quantile(
           data[[k]][[time]][, var], probs = probs,
           na.rm = TRUE
         )
@@ -840,12 +841,12 @@ compare_weather <- function(
   }
 
   # Make figure
-  panels <- c(length(time_steps), 3)
+  panels <- c(length(time_steps), length(weather_vars))
   grDevices::png(
     units = "in",
     res = 150,
-    height = 3 * panels[1],
-    width = 3 * panels[2],
+    height = 3 * panels[[1L]],
+    width = 3 * panels[[2L]],
     file = file.path(path, paste0(tag, "_CompareWeather_QQplots.png"))
   )
   par_prev <- graphics::par(
@@ -856,38 +857,130 @@ compare_weather <- function(
     cex = 1
   )
 
-  for (ts in time_steps) {
-    foo_qq(
-      comp_df,
-      ref_df,
-      var = "PPT_cm",
-      time = ts,
-      lab = "precipitation (cm)",
-      legend = ts == time_steps[1]
-    )
-    foo_qq(
-      comp_df,
-      ref_df,
-      var = "Tmax_C",
-      time = ts,
-      lab = "max temp (C)"
-    )
-    foo_qq(
-      comp_df,
-      ref_df,
-      var = "Tmin_C",
-      time = ts,
-      lab = "min temp (C)"
-    )
+  for (kt in seq_along(time_steps)) {
+    for (kv in seq_along(weather_vars)) {
+      foo_qq(
+        comp_df,
+        ref_df,
+        var = weather_vars[[kv]],
+        time = time_steps[[kt]],
+        lab = vtags[[kv]],
+        legend = kt == 1L
+      )
+    }
   }
 
   graphics::par(par_prev)
   grDevices::dev.off()
 
 
-  #--- Does output weather recreate weather generator inputs?
+
+  #--- * Climate time-series ------
+  foo_mts <- function(data, ref_data, var, time, lab, legend = FALSE) {
+
+    get_mts <- function(x, var, time) {
+      if (identical(time, "Year")) {
+        lapply(x, function(x) x[[time]][, var])
+      } else {
+        lapply(
+          x,
+          function(x) {
+            tapply(
+              x[[time]][, var],
+              INDEX = x[[time]][, 2L],
+              FUN = mean,
+              na.rm = TRUE
+            )
+          }
+        )
+      }
+    }
+
+    xref <- get_mts(ref_data, var, time)[[1L]]
+    xw <- get_mts(data, var, time)
+
+    vlim <- range(
+      vapply(
+        c(xref, xw),
+        range,
+        na.rm = TRUE,
+        FUN.VALUE = rep(NA_real_, times = 2L)
+      )
+    )
+
+    if (all(is.finite(vlim))) {
+      xt <- seq_along(xref)
+
+      graphics::plot(
+        xt,
+        y = xref,
+        type = "n",
+        ylim = vlim,
+        xlab = if (identical(time, "Year")) time else paste("Mean", time),
+        ylab = lab
+      )
+
+      for (k in seq_along(xw)) {
+        graphics::lines(xt, xw[[k]], col = "darkgray")
+      }
+
+      graphics::lines(xt, xref, col = "red")
+
+      if (legend) {
+        graphics::legend(
+          "topleft",
+          legend = c("Reference", "Weather"),
+          col = c("red", "black"),
+          pch = c(NA, 16),
+          pt.lwd = 2,
+          lty = c(1, NA),
+          lwd = 2,
+          merge = TRUE
+        )
+      }
+
+    } else {
+      graphics::plot.new()
+    }
+  }
+
+  # Make figure
+  panels <- c(length(time_steps), length(weather_vars))
+  grDevices::png(
+    units = "in",
+    res = 150,
+    height = 3 * panels[[1L]],
+    width = 4 * panels[[2L]],
+    file = file.path(path, paste0(tag, "_CompareWeather_MeanTimeSeries.png"))
+  )
+  par_prev <- graphics::par(
+    mfrow = panels,
+    mar = c(2, 2.5, 0.5, 0.5),
+    mgp = c(1, 0, 0),
+    tcl = 0.3,
+    cex = 1
+  )
+
+  for (kt in seq_along(time_steps)) {
+    for (kv in seq_along(weather_vars)) {
+      foo_mts(
+        comp_df,
+        ref_df,
+        var = weather_vars[[kv]],
+        time = time_steps[[kt]],
+        lab = vtags[[kv]],
+        legend = kt == 1L
+      )
+    }
+  }
+
+  graphics::par(par_prev)
+  grDevices::dev.off()
+
+
+  #--- * Does output weather recreate weather generator inputs? ------
   ref_wgin <- dbW_estimate_WGen_coefs(
-    ref_df[[1]][["Day"]],
+    ref_df[[1L]][["Day"]],
     WET_limit_cm = WET_limit_cm,
     imputation_type = "mean"
   )
@@ -905,20 +998,20 @@ compare_weather <- function(
 
 
   foo_scatter_wgin <- function(data, ref_data, obj, fname) {
-    vars <- colnames(ref_data[[obj]])[-1]
-    panels <- if (length(vars) == 4) {
-      c(2, 2)
-    } else if (length(vars) == 10) {
-      c(4, 3)
+    vars <- colnames(ref_data[[obj]])[-1L]
+    panels <- if (length(vars) == 4L) {
+      c(2L, 2L)
+    } else if (length(vars) == 10L) {
+      c(4L, 3L)
     } else {
-      rep(ceiling(sqrt(length(vars))), 2)
+      rep(ceiling(sqrt(length(vars))), 2L)
     }
 
     grDevices::png(
       units = "in",
       res = 150,
-      height = 3 * panels[1],
-      width = 3 * panels[2],
+      height = 3 * panels[[1L]],
+      width = 3 * panels[[2L]],
       file = fname
     )
 
