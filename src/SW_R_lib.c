@@ -970,6 +970,8 @@ SEXP sw_consts(void) {
   // Note: `cInF` must agree with SW_Files.h/SW_FileIndex
   char *cInF[] = {
     "eFirst",
+    "eNCIn", "eNCInAtt", "eNCOutVars",
+    "eDomain",
     "eModel", "eLog",
     "eSite", "eLayers", "eSWRCp",
     "eWeather", "eMarkovProb", "eMarkovCov", "eSky",
