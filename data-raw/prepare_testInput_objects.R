@@ -109,18 +109,9 @@ compare_objects <- function(new, old, tolerance = 1e-9) {
   # Ignore "timestamp"
   has_timestamp_diff <- grepl("timestamp", res_cmp, fixed = TRUE)
 
-  # Ignore difference in version less than minor
-  vge <- rSOILWAT2::check_version(
-    new,
-    rSOILWAT2::get_version(old),
-    level = "minor"
-  )
-  vle <- rSOILWAT2::check_version(
-    new,
-    rSOILWAT2::get_version(old),
-    level = "minor"
-  )
-  has_version_diff <- !(vge && vle)
+  # Ignore "version"
+  has_version_diff <- grepl("version", res_cmp, fixed = TRUE)
+
 
   list(
     res_waldo = res_cmp,
@@ -198,7 +189,7 @@ toggleCO2Effects <- function(path, activate = TRUE) {
 }
 
 toggleSurfaceTilt <- function(path, tilt = FALSE, slope = 30, aspect = -45) {
-  ftmp <- file.path(path, "Input", "siteparam.in")
+  ftmp <- file.path(path, "Input", "modelrun.in")
   fin <- readLines(ftmp)
 
   line <- grep("slope (degrees)", fin, fixed = TRUE)
@@ -341,6 +332,7 @@ for (it in seq_along(tests)) {
 
   stopifnot(rSOILWAT2::dbW_check_weatherData(sw_weather))
 
+
   #--- Compare weather to previous version
   res_cmp <- waldo::compare(
     readRDS(
@@ -412,6 +404,7 @@ for (it in seq_along(tests)) {
         )
       )
     )
+
 
     # Save test output (if different from previous)
     if (res_cmp[["resave"]]) {

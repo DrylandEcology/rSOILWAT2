@@ -64,7 +64,8 @@ SEXP onGet_MKV(void) {
 void onSet_MKV(SEXP MKV, LOG_INFO* LogInfo) {
   SEXP MKV_prob, MKV_conv;
 
-  SW_MKV_construct(SoilWatAll.Weather.rng_seed, &SoilWatAll.Markov, LogInfo);
+  SW_MKV_construct(SoilWatAll.Weather.rng_seed, &SoilWatAll.Markov);
+  allocateMKV(&SoilWatAll.Markov, LogInfo);
   if(LogInfo->stopRun) {
     return; // Exit function prematurely due to error
   }

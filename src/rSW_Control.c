@@ -19,9 +19,9 @@
 #include "SOILWAT2/include/generic.h"  // for `swprintf`
 #include "SOILWAT2/include/SW_Carbon.h"  // for `calculate_CO2_multipliers`
 #include "SOILWAT2/include/SW_Control.h"  // for `SW_CTL_read_inputs_from_disk`
+#include "SOILWAT2/include/SW_Files.h"
+#include "SOILWAT2/include/SW_Domain.h"
 
-#include "rSW_Files.h"
-#include "rSW_Model.h"
 #include "rSW_Weather.h"
 #include "rSW_Markov.h"
 #include "rSW_Sky.h"
@@ -33,6 +33,7 @@
 #include "rSW_SoilWater.h"
 
 #include "rSW_Control.h"
+#include "rSW_Domain.h"
 #include "SW_R_lib.h" // externs `InputData`
 
 #include <R.h>
@@ -72,7 +73,7 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
   #endif
 
   if (from_files) {
-    SW_CTL_read_inputs_from_disk(&SoilWatAll, &PathInfo, LogInfo);
+    SW_CTL_read_inputs_from_disk(&SoilWatAll, &SoilWatDomain.PathInfo, LogInfo);
 
   } else { //Use R data to set the data
     #ifdef RSWDEBUG
@@ -83,14 +84,6 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
       );
     }
     #endif
-
-    onSet_SW_F(GET_SLOT(InputData, install("files")), LogInfo);
-    #ifdef RSWDEBUG
-    if (debug) swprintf(" 'files'");
-    #endif
-    if (LogInfo->stopRun) {
-        return; // Exit function prematurely due to error
-    }
 
     onSet_SW_MDL(GET_SLOT(InputData, install("years")), LogInfo);
     #ifdef RSWDEBUG

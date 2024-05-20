@@ -21,7 +21,8 @@
 /* --------------------------------------------------- */
 extern SW_ALL SoilWatAll;
 extern SW_OUTPUT_POINTERS SoilWatOutputPtrs[SW_OUTNKEYS];
-extern PATH_INFO PathInfo;
+// extern PATH_INFO PathInfo;
+extern SW_DOMAIN SoilWatDomain;
 
 extern Bool EchoInits;
 extern FILE *current_sw_verbosity;
@@ -40,7 +41,8 @@ SEXP rSW2_readAllWeatherFromDisk(
   SEXP name_prefix,
   SEXP startYear,
   SEXP endYear,
-  SEXP dailyInputFlags
+  SEXP dailyInputFlags,
+  SEXP sw_template
 );
 SEXP sw_consts(void);
 

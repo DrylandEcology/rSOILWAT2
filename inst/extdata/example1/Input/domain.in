@@ -1,0 +1,33 @@
+#------ Input file for the spatial and temporal domain
+
+# A domain describes a set of related simulation runs
+
+# USER: years must be consistent with `weathsetup.in`, `carbon.in`,
+#       and (if used) `swcsetup.in`.
+# NOTE: This file follows a key-value pair. That is, the value is only matched with the key
+# eliminating the possibility of incorrect reads due to line dependencies.
+
+Domain    s                     # Supported types: "xy" (grid), "s" (sites)
+nDimX     1                     # Number of grid cells along x dimension (used if "xy")
+nDimY     1                     # Number of grid cells along y dimension (used if "xy")
+nDimS     1                     # Number of sites (used if "s")
+
+StartYear 1980                  # First (Gregorian) calendar year of simulation
+EndYear   2010                  # Last (Gregorian) calendar year of simulation
+StartDoy  1                     # First day of first year
+EndDoy    365                   # Last day of last year (365 is equivalent to 366)
+
+# Bounding box information
+crs_bbox WGS84  # Supported:
+                # Geographic - "Absent", "WGS84", "WGS 84", "EPSG:4326", "WGS_1984", "World Geodetic System 1984"
+                # Projected - "NAD83 / Conus Albers", "North American Daymet"
+xmin_bbox -105.58
+ymin_bbox 39.59
+xmax_bbox -105.58
+ymax_bbox 39.59
+
+# Spinup
+SpinupMode      1               # Mode ( 1: repeated random resample; 2: sequence of m years ), default = 1
+SpinupScope     1               # Scope ( N ): use first N years of simulation, default = 1
+SpinupDuration  0               # Duration ( M ): sample M years of the first N years (no spinup: M = 0), default = 0
+SpinupSeed      11              # Seed for randomly generating years for mode 1, default = 11

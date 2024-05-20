@@ -178,6 +178,18 @@
 \alias{swSWC_Method<-,swInputData,integer-method}
 \alias{swSWC_HistoricList<-,swInputData,list-method}
 \alias{swSWC_HistoricData<-,swInputData,swSWC_hist-method}
+\alias{get_swSpinup,swInputData-method}
+\alias{swSpinup_SpinupActive,swInputData-method}
+\alias{swSpinup_SpinupMode,swInputData-method}
+\alias{swSpinup_SpinupScope,swInputData-method}
+\alias{swSpinup_SpinupDuration,swInputData-method}
+\alias{swSpinup_SpinupSeed,swInputData-method}
+\alias{swSpinup_SpinupActive<-,swInputData-method}
+\alias{swSpinup_SpinupMode<-,swInputData-method}
+\alias{swSpinup_SpinupScope<-,swInputData-method}
+\alias{swSpinup_SpinupDuration<-,swInputData-method}
+\alias{swSpinup_SpinupSeed<-,swInputData-method}
+\alias{set_swSpinup<-,swInputData-method}
 \alias{get_swCarbon,swInputData-method}
 \alias{swCarbon_Use_Bio,swInputData-method}
 \alias{swCarbon_Use_WUE,swInputData-method}
@@ -557,6 +569,30 @@ swInputData(...)
 
 \S4method{swSWC_HistoricData}{swInputData,swSWC_hist}(object) <- value
 
+\S4method{get_swSpinup}{swInputData}(object)
+
+\S4method{swSpinup_SpinupActive}{swInputData}(object)
+
+\S4method{swSpinup_SpinupMode}{swInputData}(object)
+
+\S4method{swSpinup_SpinupScope}{swInputData}(object)
+
+\S4method{swSpinup_SpinupDuration}{swInputData}(object)
+
+\S4method{swSpinup_SpinupSeed}{swInputData}(object)
+
+\S4method{swSpinup_SpinupActive}{swInputData}(object) <- value
+
+\S4method{swSpinup_SpinupMode}{swInputData}(object) <- value
+
+\S4method{swSpinup_SpinupScope}{swInputData}(object) <- value
+
+\S4method{swSpinup_SpinupDuration}{swInputData}(object) <- value
+
+\S4method{swSpinup_SpinupSeed}{swInputData}(object) <- value
+
+\S4method{set_swSpinup}{swInputData}(object) <- value
+
 \S4method{get_swCarbon}{swInputData}(object)
 
 \S4method{swCarbon_Use_Bio}{swInputData}(object)
@@ -639,6 +675,7 @@ read in. These slots can be accessed via the following functions: \itemize{
   \item \code{\link{get_swProd}}
   \item \code{\link{get_swSite}}
   \item \code{\link{get_swSoils}}
+  \item \code{\link{get_swSpinup}}
   \item \code{\link{get_swSWC}}
   \item \code{\link{get_swWeather}}
   \item \code{\link{get_swWeatherData}}
@@ -660,11 +697,18 @@ x <- swInputData() # constructor helper
 
 }
 \seealso{
-\code{\linkS4class{swFiles}} \code{\linkS4class{swYears}}
-\code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
-\code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
-\code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
-\code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
-\code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+\code{\linkS4class{swFiles}}
+\code{\linkS4class{swYears}}
+\code{\linkS4class{swWeather}}
+\code{\linkS4class{swCloud}}
+\code{\linkS4class{swMarkov}}
+\code{\linkS4class{swProd}}
+\code{\linkS4class{swSite}}
+\code{\linkS4class{swSoils}}
+\code{\linkS4class{swSpinup}}
+\code{\linkS4class{swEstab}}
+\code{\linkS4class{swOUT}}
 \code{\linkS4class{swCarbon}}
+\code{\linkS4class{swSWC}}
+\code{\linkS4class{swLog}}
 }

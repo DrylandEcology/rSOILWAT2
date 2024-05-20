@@ -4,8 +4,16 @@
 # All names are relative to current directory of execution
 # USER: change path and file names as suitable for own application
 
+#--- Files for netCDF-related inputs
+Input_nc/files_nc.in
+Input_nc/desc_nc.in
+Input_nc/SW2_netCDF_output_variables.tsv
+
+#--- Constant (between simulation runs) temporal description of the simulation
+Input/domain.in
+
 #--- Description of a model run
-Input/years.in		# Input file for model time: start - end years
+Input/modelrun.in	# Input file for model time: start - end years
 Output/logfile.log	# Output file to which warnings, errors, and other important information is written (can also be stdout)
 
 #--- Description of simulated site

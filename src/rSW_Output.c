@@ -69,7 +69,7 @@ void onSet_SW_OUT(SEXP OUT, LOG_INFO* LogInfo) {
 	#ifdef RSWDEBUG
 	if (debug) swprintf("onSet_SW_OUT: start ...");
 	#endif
-	MyFileName = PathInfo.InFiles[eOutput];
+	MyFileName = SoilWatDomain.PathInfo.InFiles[eOutput];
 
 	PROTECT(sep = GET_SLOT(OUT, install("outputSeparator")));
 
@@ -99,7 +99,7 @@ void onSet_SW_OUT(SEXP OUT, LOG_INFO* LogInfo) {
 			&SoilWatAll.VegProd.use_SWA,
 			SoilWatAll.Site.deepdrain,
 			SoilWatAll.Output,
-			PathInfo.InFiles
+			SoilWatDomain.PathInfo.InFiles
 		);
 
 		if (msg_type > 0) {
