@@ -908,7 +908,24 @@ compare_weather <- function(
       )
     )
 
-    if (all(is.finite(vlim))) {
+    is_comparable <- if (identical(time, "Year")) {
+      all(
+        vapply(
+          data,
+          function(x) {
+            identical(
+              ref_data[[1L]][["Year"]][, "Year"],
+              x[["Year"]][, "Year"]
+            )
+          },
+          FUN.VALUE = NA
+        )
+      )
+    } else {
+      all(lengths(xw) == length(xref))
+    }
+
+    if (all(is_comparable, is.finite(vlim))) {
       xt <- seq_along(xref)
 
       graphics::plot(

@@ -282,6 +282,6 @@ test_that("Weather generator (integration tests): compare input/output", {
       path = dir_inttests,
       pattern = tag
     ),
-    n = 4L
+    n = 5L
   )
 })
