@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h> // for fmin, fmax
 
 #include "SOILWAT2/include/generic.h"
 #include "SOILWAT2/include/filefuncs.h"
@@ -714,9 +715,9 @@ static void rSW2_set_weather_hist(
                     e = (v1 * 1013.25) / (.378 * v1 + .622);
 
                     relHum = e / es;
-                    relHum = max(0., relHum);
+                    relHum = fmax(0., relHum);
 
-                    yearWeather->r_humidity_daily[doy] = min(100., relHum);
+                    yearWeather->r_humidity_daily[doy] = fmin(100., relHum);
                 }
             }
 

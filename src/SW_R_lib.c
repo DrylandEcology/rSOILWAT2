@@ -132,7 +132,7 @@ static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LO
 
 
   #ifdef RSWDEBUG
-  if (debug) swprintf("setupSOILWAT2: set args\n");
+  if (debug) sw_printf("setupSOILWAT2: set args\n");
   #endif
 
 
@@ -148,7 +148,7 @@ static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LO
 	}
 
     #ifdef RSWDEBUG
-    if (debug) swprintf("Set call arguments\n");
+    if (debug) sw_printf("Set call arguments\n");
     #endif
 
     SW_DOM_init_ptrs(&SoilWatDomain);
@@ -160,7 +160,7 @@ static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LO
     }
 
     #ifdef RSWDEBUG
-    if (debug) swprintf("Initialize SOILWAT ...");
+    if (debug) sw_printf("Initialize SOILWAT ...");
     #endif
 
     rSW_CTL_setup_domain(from_files, InputData, userSUID, &SoilWatDomain, LogInfo);
@@ -210,7 +210,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   sw_init_logs(current_sw_verbosity, &local_LogInfo);
 
   #ifdef RSWDEBUG
-  if (debug) swprintf("Set log\n");
+  if (debug) sw_printf("Set log\n");
   #endif
   PROTECT(swLog = MAKE_CLASS("swLog"));
   PROTECT(oRlogfile = NEW_OBJECT(swLog));
@@ -218,7 +218,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   // read user inputs: from files
   // setup and construct global variables
   #ifdef RSWDEBUG
-  if (debug) swprintf("Read input from disk files into SOILWAT2 variables (part 1)\n");
+  if (debug) sw_printf("Read input from disk files into SOILWAT2 variables (part 1)\n");
   #endif
   setupSOILWAT2(TRUE, NULL, inputOptions, &local_LogInfo);
   if(local_LogInfo.stopRun) {
@@ -227,7 +227,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 
   // read user inputs: from files
   #ifdef RSWDEBUG
-  if (debug) swprintf("Read input from disk files into SOILWAT2 variables (part 2)\n");
+  if (debug) sw_printf("Read input from disk files into SOILWAT2 variables (part 2)\n");
   #endif
   rSW_CTL_obtain_inputs(TRUE, NULL, NULL, &local_LogInfo);
   if(local_LogInfo.stopRun) {
@@ -236,7 +236,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 
   // finalize daily weather
   #ifdef RSWDEBUG
-  if (debug) swprintf(" finalize daily weather ...\n");
+  if (debug) sw_printf(" finalize daily weather ...\n");
   #endif
   SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
     SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &local_LogInfo);
@@ -246,7 +246,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 
   // initialize simulation run (based on user inputs)
   #ifdef RSWDEBUG
-  if (debug) swprintf(" init simulation run ...\n");
+  if (debug) sw_printf(" init simulation run ...\n");
   #endif
   SW_CTL_init_run(&SoilWatAll, &local_LogInfo);
   if(local_LogInfo.stopRun) {
@@ -270,7 +270,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 
   #ifdef RSWDEBUG
   if (debug) {
-    swprintf(
+    sw_printf(
       "\n'onGetInputDataFromFiles()': "
       "copy data from SOILWAT2 variables to rSOILWAT2 S4 classes: "
     );
@@ -286,32 +286,32 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 
   SET_SLOT(SW_DataList, install("files"), onGet_SW_F());
   #ifdef RSWDEBUG
-  if (debug) swprintf(" 'files'");
+  if (debug) sw_printf(" 'files'");
   #endif
 
   SET_SLOT(SW_DataList, install("spinup"), onGet_SW_SPINUP());
   #ifdef RSWDEBUG
-  if (debug) swprintf(" > 'domain'");
+  if (debug) sw_printf(" > 'domain'");
   #endif
 
   SET_SLOT(SW_DataList, install("years"), onGet_SW_MDL());
   #ifdef RSWDEBUG
-  if (debug) swprintf(" > 'model'");
+  if (debug) sw_printf(" > 'model'");
   #endif
 
   SET_SLOT(SW_DataList, install("weather"), onGet_SW_WTH_setup());
   #ifdef RSWDEBUG
-  if (debug) swprintf(" > 'weather-setup'");
+  if (debug) sw_printf(" > 'weather-setup'");
   #endif
 
   SET_SLOT(SW_DataList, install("weatherHistory"), onGet_WTH_DATA());
   #ifdef RSWDEBUG
-  if (debug) swprintf(" > 'weather-data'");
+  if (debug) sw_printf(" > 'weather-data'");
   #endif
 
   SET_SLOT(SW_DataList, install("cloud"), onGet_SW_SKY());
   #ifdef RSWDEBUG
-  if (debug) swprintf(" > 'climate'");
+  if (debug) sw_printf(" > 'climate'");
   #endif
 
   if (
@@ -327,43 +327,43 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   ) {
     SET_SLOT(SW_DataList, install("markov"), onGet_MKV());
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'weather generator'");
+    if (debug) sw_printf(" > 'weather generator'");
     #endif
   }
 
   SET_SLOT(SW_DataList, install("prod"), onGet_SW_VPD());
   #ifdef RSWDEBUG
-  if (debug) swprintf(" > 'veg'");
+  if (debug) sw_printf(" > 'veg'");
   #endif
 
   SET_SLOT(SW_DataList, install("site"), onGet_SW_SIT());
   #ifdef RSWDEBUG
-  if (debug) swprintf(" > 'site'");
+  if (debug) sw_printf(" > 'site'");
   #endif
 
   SET_SLOT(SW_DataList, install("soils"), onGet_SW_SOILS());
   #ifdef RSWDEBUG
-  if (debug) swprintf(" > 'soils' + 'swrc parameters'");
+  if (debug) sw_printf(" > 'soils' + 'swrc parameters'");
   #endif
 
   SET_SLOT(SW_DataList, install("estab"), onGet_SW_VES());
   #ifdef RSWDEBUG
-  if (debug) swprintf(" > 'establishment'");
+  if (debug) sw_printf(" > 'establishment'");
   #endif
 
   SET_SLOT(SW_DataList, install("output"), onGet_SW_OUT());
   #ifdef RSWDEBUG
-  if (debug) swprintf(" > 'ouput'");
+  if (debug) sw_printf(" > 'ouput'");
   #endif
 
   SET_SLOT(SW_DataList, install("carbon"), onGet_SW_CARBON());
   #ifdef RSWDEBUG
-  if (debug) swprintf(" > 'CO2'");
+  if (debug) sw_printf(" > 'CO2'");
   #endif
 
   SET_SLOT(SW_DataList, install("swc"), onGet_SW_SWC(&local_LogInfo));
   #ifdef RSWDEBUG
-  if (debug) swprintf(" > 'swc'");
+  if (debug) sw_printf(" > 'swc'");
   #endif
   if(local_LogInfo.stopRun) {
     goto report;
@@ -372,7 +372,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   SET_SLOT(SW_DataList, install("log"), oRlogfile);
 
   #ifdef RSWDEBUG
-  if (debug) swprintf(" > de-allocate most memory; \n");
+  if (debug) sw_printf(" > de-allocate most memory; \n");
   #endif
 
   report: {
@@ -387,7 +387,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   }
 
   #ifdef RSWDEBUG
-  if (debug) swprintf(" onGetInputDataFromFiles completed.\n");
+  if (debug) sw_printf(" onGetInputDataFromFiles completed.\n");
   #endif
 
   return SW_DataList;
@@ -419,14 +419,14 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
 
 
   #ifdef RSWDEBUG
-  if (debug) swprintf("'start': create log ...");
+  if (debug) sw_printf("'start': create log ...");
   #endif
 	PROTECT(swLog = MAKE_CLASS("swLog"));
 	PROTECT(oRlogfile = NEW_OBJECT(swLog));
 
   // setup and construct model (via inputData)
   #ifdef RSWDEBUG
-  if (debug) swprintf(" input arguments & setup model ...");
+  if (debug) sw_printf(" input arguments & setup model ...");
   #endif
   setupSOILWAT2(FALSE, inputData, inputOptions, &local_LogInfo);
   if(local_LogInfo.stopRun) {
@@ -436,7 +436,7 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
 	// read user inputs: either from files or from memory (depending on useFiles)
 
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" obtain inputs ...");
+	if (debug) sw_printf(" obtain inputs ...");
 	#endif
 
 	rSW_CTL_obtain_inputs(FALSE, inputData, weatherList, &local_LogInfo);
@@ -446,7 +446,7 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
 
 	// finalize daily weather
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" finalize daily weather ...\n");
+	if (debug) sw_printf(" finalize daily weather ...\n");
 	#endif
 	SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
     SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &local_LogInfo);
@@ -456,7 +456,7 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
 
 	// initialize simulation run (based on user inputs)
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" init simulation run ...");
+	if (debug) sw_printf(" init simulation run ...");
 	#endif
 	SW_CTL_init_run(&SoilWatAll, &local_LogInfo);
     if(local_LogInfo.stopRun) {
@@ -480,7 +480,7 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
 
     // initialize output
     #ifdef RSWDEBUG
-    if (debug) swprintf(" setup output variables ...");
+    if (debug) sw_printf(" setup output variables ...");
     #endif
 
     SW_CTL_alloc_outptrs(&SoilWatAll, &local_LogInfo);
@@ -507,7 +507,7 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
 
   // run simulation: loop through each year
   #ifdef RSWDEBUG
-  if (debug) swprintf(" run SOILWAT2 ...");
+  if (debug) sw_printf(" run SOILWAT2 ...");
   #endif
     // Ideally, we call here SW_CTL_RunSimSet() -- equivalently to SOILWAT2;
     // however, rSOILWAT2's output memory is handled by R instead of SOILWAT2,
@@ -525,7 +525,7 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
 
 
   #ifdef RSWDEBUG
-  if (debug) swprintf(" clean up ...");
+  if (debug) sw_printf(" clean up ...");
   #endif
 
   report: {
@@ -545,7 +545,7 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
   }
 
   #ifdef RSWDEBUG
-  if (debug) swprintf(" completed.\n");
+  if (debug) sw_printf(" completed.\n");
   #endif
 
 	return(outputData);
@@ -612,7 +612,7 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   #endif
 
   #ifdef RSWDEBUG
-  if (debug) swprintf("\n'rSW2_processAllWeather': data preparation: ");
+  if (debug) sw_printf("\n'rSW2_processAllWeather': data preparation: ");
   #endif
 
   if (isNull(weatherList)) {
@@ -625,7 +625,7 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
 
   // setup and construct model
   #ifdef RSWDEBUG
-  if (debug) swprintf("'setup' > ");
+  if (debug) sw_printf("'setup' > ");
   #endif
 
   // values of `inputOptions` are not used
@@ -642,7 +642,7 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   // rSW_CTL_obtain_inputs():
   // `onSet_WTH_DATA()` requires correct `endyr` and `startyr` of `SW_Model`
   #ifdef RSWDEBUG
-  if (debug) swprintf("'model' > ");
+  if (debug) sw_printf("'model' > ");
   #endif
   onSet_SW_MDL(GET_SLOT(inputData, install("years")), &local_LogInfo);
   if (local_LogInfo.stopRun) {
@@ -651,7 +651,7 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
 
   // `onSet_WTH_DATA()` requires additive/multiplicative scaling parameters
   #ifdef RSWDEBUG
-  if (debug) swprintf(" > 'weather-setup'");
+  if (debug) sw_printf(" > 'weather-setup'");
   #endif
   onSet_SW_WTH_setup(GET_SLOT(inputData, install("weather")), &local_LogInfo);
   if(local_LogInfo.stopRun) {
@@ -672,7 +672,7 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   ) {
     onSet_MKV(GET_SLOT(inputData, install("markov")), &local_LogInfo);
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'weather generator'.\n");
+    if (debug) sw_printf(" > 'weather generator'.\n");
     #endif
     if(local_LogInfo.stopRun) {
       goto report;
@@ -682,7 +682,7 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
 
   // Process weather data
   #ifdef RSWDEBUG
-  if (debug) swprintf("'rSW2_processAllWeather': process weather data");
+  if (debug) sw_printf("'rSW2_processAllWeather': process weather data");
   #endif
   onSet_WTH_DATA(weatherList, &local_LogInfo);
   if(local_LogInfo.stopRun) {
@@ -691,7 +691,7 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
 
   // Finalize daily weather (weather generator & monthly scaling)
   #ifdef RSWDEBUG
-  if (debug) swprintf(" > finalize daily weather.\n");
+  if (debug) sw_printf(" > finalize daily weather.\n");
   #endif
   SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
     SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &local_LogInfo);
@@ -747,7 +747,7 @@ SEXP rSW2_readAllWeatherFromDisk(
   #endif
 
   #ifdef RSWDEBUG
-  if (debug) swprintf("\n'rSW2_readAllWeatherFromDisk': data preparation: ");
+  if (debug) sw_printf("\n'rSW2_readAllWeatherFromDisk': data preparation: ");
   #endif
 
   LOG_INFO local_LogInfo;
@@ -833,7 +833,7 @@ SEXP rSW2_readAllWeatherFromDisk(
 
   // Read weather data
   #ifdef RSWDEBUG
-  if (debug) swprintf("'rSW2_readAllWeatherFromDisk': read weather data");
+  if (debug) sw_printf("'rSW2_readAllWeatherFromDisk': read weather data");
   #endif
   SW_WTH_read(&SoilWatAll.Weather, &SoilWatAll.Sky, &SoilWatAll.Model, &local_LogInfo);
   if(local_LogInfo.stopRun) {
@@ -842,7 +842,7 @@ SEXP rSW2_readAllWeatherFromDisk(
 
   // Finalize daily weather (weather generator & monthly scaling)
   #ifdef RSWDEBUG
-  if (debug) swprintf(" > finalize daily weather.\n");
+  if (debug) sw_printf(" > finalize daily weather.\n");
   #endif
   SW_WTH_finalize_all_weather(&SoilWatAll.Markov, &SoilWatAll.Weather,
     SoilWatAll.Model.cum_monthdays, SoilWatAll.Model.days_in_month, &local_LogInfo);
@@ -896,7 +896,7 @@ SEXP sw_consts(void) {
   const int nNUM = 1; // length of vNUM and cNUM
 
   #ifdef RSWDEBUG
-  if (debug) swprintf("sw_consts: define variables ... ");
+  if (debug) sw_printf("sw_consts: define variables ... ");
   #endif
 
   SEXP
@@ -985,7 +985,7 @@ SEXP sw_consts(void) {
 
   // create vector of numeric/real/double constants
   #ifdef RSWDEBUG
-  if (debug) swprintf(" create ret_num ...");
+  if (debug) sw_printf(" create ret_num ...");
   #endif
   PROTECT(ret_num = allocVector(REALSXP, nNUM));
   pvNUM = REAL(ret_num);
@@ -998,7 +998,7 @@ SEXP sw_consts(void) {
 
   // create vector of integer constants
   #ifdef RSWDEBUG
-  if (debug) swprintf(" create ret_int ...");
+  if (debug) sw_printf(" create ret_int ...");
   #endif
   PROTECT(ret_int = allocVector(INTSXP, nINT));
   pvINT = INTEGER(ret_int);
@@ -1011,7 +1011,7 @@ SEXP sw_consts(void) {
 
   // create vector of vegetation types
   #ifdef RSWDEBUG
-  if (debug) swprintf(" create ret_int2 ...");
+  if (debug) sw_printf(" create ret_int2 ...");
   #endif
   PROTECT(ret_int2 = allocVector(INTSXP, NVEGTYPES));
   pvINT = INTEGER(ret_int2);
@@ -1024,7 +1024,7 @@ SEXP sw_consts(void) {
 
   // create vector of output key constants
   #ifdef RSWDEBUG
-  if (debug) swprintf(" create ret_str1 ...");
+  if (debug) sw_printf(" create ret_str1 ...");
   #endif
   PROTECT(ret_str1 = allocVector(STRSXP, SW_OUTNKEYS));
   PROTECT(cnames = allocVector(STRSXP, SW_OUTNKEYS));
@@ -1036,7 +1036,7 @@ SEXP sw_consts(void) {
 
   // create vector of output period constants
   #ifdef RSWDEBUG
-  if (debug) swprintf(" create ret_str2 ...");
+  if (debug) sw_printf(" create ret_str2 ...");
   #endif
   PROTECT(ret_str2 = allocVector(STRSXP, SW_OUTNPERIODS));
   PROTECT(cnames = allocVector(STRSXP, SW_OUTNPERIODS));
@@ -1048,7 +1048,7 @@ SEXP sw_consts(void) {
 
   // create vector of output summary constants
   #ifdef RSWDEBUG
-  if (debug) swprintf(" create ret_str3 ...");
+  if (debug) sw_printf(" create ret_str3 ...");
   #endif
   PROTECT(ret_str3 = allocVector(STRSXP, SW_NSUMTYPES));
   PROTECT(cnames = allocVector(STRSXP, SW_NSUMTYPES));
@@ -1060,7 +1060,7 @@ SEXP sw_consts(void) {
 
   // create vector of input file descriptors
   #ifdef RSWDEBUG
-  if (debug) swprintf(" create ret_infiles ...");
+  if (debug) sw_printf(" create ret_infiles ...");
   #endif
   PROTECT(ret_infiles = allocVector(INTSXP, SW_NFILES));
   pvINT = INTEGER(ret_infiles);
@@ -1073,7 +1073,7 @@ SEXP sw_consts(void) {
 
   // create vector of SWRC types
   #ifdef RSWDEBUG
-  if (debug) swprintf(" create ret_swrc ...");
+  if (debug) sw_printf(" create ret_swrc ...");
   #endif
   PROTECT(ret_swrc = allocVector(INTSXP, N_SWRCs));
   pvINT = INTEGER(ret_swrc);
@@ -1086,7 +1086,7 @@ SEXP sw_consts(void) {
 
   // create vector of PTF types
   #ifdef RSWDEBUG
-  if (debug) swprintf(" create ret_ptf ...");
+  if (debug) sw_printf(" create ret_ptf ...");
   #endif
   PROTECT(ret_ptf = allocVector(INTSXP, N_PTFs));
   pvINT = INTEGER(ret_ptf);
@@ -1100,7 +1100,7 @@ SEXP sw_consts(void) {
 
   // combine vectors into a list and return
   #ifdef RSWDEBUG
-  if (debug) swprintf(" create ret ...");
+  if (debug) sw_printf(" create ret ...");
   #endif
   PROTECT(ret = allocVector(VECSXP, nret));
   PROTECT(cnames = allocVector(STRSXP, nret));
@@ -1120,7 +1120,7 @@ SEXP sw_consts(void) {
   // clean up
   UNPROTECT(nret * 2 + 2);
   #ifdef RSWDEBUG
-  if (debug) swprintf(" ... done.\n");
+  if (debug) sw_printf(" ... done.\n");
   #endif
 
   return ret;

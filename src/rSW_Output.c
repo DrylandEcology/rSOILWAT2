@@ -67,7 +67,7 @@ void onSet_SW_OUT(SEXP OUT, LOG_INFO* LogInfo) {
 	#endif
 
 	#ifdef RSWDEBUG
-	if (debug) swprintf("onSet_SW_OUT: start ...");
+	if (debug) sw_printf("onSet_SW_OUT: start ...");
 	#endif
 	MyFileName = SoilWatDomain.PathInfo.InFiles[eOutput];
 
@@ -130,7 +130,7 @@ void onSet_SW_OUT(SEXP OUT, LOG_INFO* LogInfo) {
 	UNPROTECT(3);
 
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" ... done. \n");
+	if (debug) sw_printf(" ... done. \n");
 	#endif
 }
 
@@ -151,7 +151,7 @@ SEXP onGet_SW_OUT(void) {
   #endif
 
 	#ifdef RSWDEBUG
-	if (debug) swprintf("onGet_SW_OUT: start ...");
+	if (debug) sw_printf("onGet_SW_OUT: start ...");
 	#endif
 
 	PROTECT(swOUT = MAKE_CLASS("swOUT"));
@@ -210,7 +210,7 @@ SEXP onGet_SW_OUT(void) {
 	UNPROTECT(11);
 
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" ... done. \n");
+	if (debug) sw_printf(" ... done. \n");
 	#endif
 
 	return OUT;
@@ -265,7 +265,7 @@ SEXP onGetOutput(SEXP inputData, LOG_INFO* LogInfo) {
   #endif
 
 	#ifdef RSWDEBUG
-	if (debug) swprintf("onGetOutput: start ...\n");
+	if (debug) sw_printf("onGetOutput: start ...\n");
 	#endif
 
 	PROTECT(swOutput = MAKE_CLASS("swOutput"));
@@ -303,7 +303,7 @@ SEXP onGetOutput(SEXP inputData, LOG_INFO* LogInfo) {
         numUnprotects = 4;
 		if (use[k]) {
 			#ifdef RSWDEBUG
-			if (debug) swprintf("%s (ncol = %d):", key2str[k], GenOut->ncol_OUT[k]);
+			if (debug) sw_printf("%s (ncol = %d):", key2str[k], GenOut->ncol_OUT[k]);
 			#endif
 
 			PROTECT(stemp_KEY = NEW_OBJECT(swOutput_KEY));
@@ -328,7 +328,7 @@ SEXP onGetOutput(SEXP inputData, LOG_INFO* LogInfo) {
 				}
 
 				#ifdef RSWDEBUG
-				if (debug) swprintf(" %s (n=%ld = %ld x (%d + %d) alloc'ed) /",
+				if (debug) sw_printf(" %s (n=%ld = %ld x (%d + %d) alloc'ed) /",
 					pd2longstr[GenOut->timeSteps[k][i]],
 					GenOut->nrow_OUT[GenOut->timeSteps[k][i]] *
 					(GenOut->ncol_OUT[k] + ncol_TimeOUT[GenOut->timeSteps[k][i]]),
@@ -369,7 +369,7 @@ SEXP onGetOutput(SEXP inputData, LOG_INFO* LogInfo) {
 			SET_SLOT(swOutput_Object, install(key2str[k]), stemp_KEY);
 
 			#ifdef RSWDEBUG
-			if (debug) swprintf(" %s completed.\n", key2str[k]);
+			if (debug) sw_printf(" %s completed.\n", key2str[k]);
 			#endif
 
 			UNPROTECT(2);
@@ -381,7 +381,7 @@ SEXP onGetOutput(SEXP inputData, LOG_INFO* LogInfo) {
     }
 
         #ifdef RSWDEBUG
-        if (debug) swprintf(" ... done. \n");
+        if (debug) sw_printf(" ... done. \n");
         #endif
 
 	return swOutput_Object;

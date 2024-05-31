@@ -16,7 +16,7 @@
 /*                INCLUDES / DEFINES                   */
 /* --------------------------------------------------- */
 
-#include "SOILWAT2/include/generic.h"  // for `swprintf`
+#include "SOILWAT2/include/generic.h"  // for `sw_printf`
 #include "SOILWAT2/include/SW_Carbon.h"  // for `calculate_CO2_multipliers`
 #include "SOILWAT2/include/SW_Control.h"  // for `SW_CTL_read_inputs_from_disk`
 #include "SOILWAT2/include/SW_Files.h"
@@ -78,7 +78,7 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
   } else { //Use R data to set the data
     #ifdef RSWDEBUG
     if (debug) {
-      swprintf(
+      sw_printf(
         "\n'rSW_CTL_obtain_inputs()': "
         "Copy data from rSOILWAT2 S4 'InputData' object to SOILWAT2 variables:"
       );
@@ -87,7 +87,7 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
 
     onSet_SW_MDL(GET_SLOT(InputData, install("years")), LogInfo);
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'model'");
+    if (debug) sw_printf(" > 'model'");
     #endif
     if (LogInfo->stopRun) {
         return; // Exit function prematurely due to error
@@ -95,7 +95,7 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
 
     onSet_SW_WTH_setup(GET_SLOT(InputData, install("weather")), LogInfo);
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'weather-setup'");
+    if (debug) sw_printf(" > 'weather-setup'");
     #endif
     if (LogInfo->stopRun) {
         return; // Exit function prematurely due to error
@@ -103,7 +103,7 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
 
     onSet_SW_SKY(GET_SLOT(InputData, install("cloud")));
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'climate'");
+    if (debug) sw_printf(" > 'climate'");
     #endif
 
     if (
@@ -111,7 +111,7 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
     ) {
       onSet_MKV(GET_SLOT(InputData, install("markov")), LogInfo);
       #ifdef RSWDEBUG
-      if (debug) swprintf(" > 'weather generator'");
+      if (debug) sw_printf(" > 'weather generator'");
       #endif
       if (LogInfo->stopRun) {
           return; // Exit function prematurely due to error
@@ -123,7 +123,7 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
     }
     onSet_WTH_DATA(weatherList, LogInfo);
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'weather-history'");
+    if (debug) sw_printf(" > 'weather-history'");
     #endif
     if (LogInfo->stopRun) {
         return; // Exit function prematurely due to error
@@ -131,7 +131,7 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
 
     onSet_SW_VPD(GET_SLOT(InputData, install("prod")), LogInfo);
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'veg'");
+    if (debug) sw_printf(" > 'veg'");
     #endif
     if (LogInfo->stopRun) {
         return; // Exit function prematurely due to error
@@ -139,7 +139,7 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
 
     onSet_SW_SIT(GET_SLOT(InputData, install("site")), LogInfo);
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'site'");
+    if (debug) sw_printf(" > 'site'");
     #endif
     if (LogInfo->stopRun) {
         return; // Exit function prematurely due to error
@@ -147,7 +147,7 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
 
     onSet_SW_SOILS(GET_SLOT(InputData, install("soils")), LogInfo);
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'soils' + 'swrc parameters'");
+    if (debug) sw_printf(" > 'soils' + 'swrc parameters'");
     #endif
     if (LogInfo->stopRun) {
         return; // Exit function prematurely due to error
@@ -155,7 +155,7 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
 
     onSet_SW_VES(GET_SLOT(InputData, install("estab")), LogInfo);
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'establishment'");
+    if (debug) sw_printf(" > 'establishment'");
     #endif
     if (LogInfo->stopRun) {
         return; // Exit function prematurely due to error
@@ -163,7 +163,7 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
 
     onSet_SW_OUT(GET_SLOT(InputData, install("output")), LogInfo);
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'ouput'");
+    if (debug) sw_printf(" > 'ouput'");
     #endif
     if (LogInfo->stopRun) {
         return; // Exit function prematurely due to error
@@ -171,7 +171,7 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
 
     onSet_swCarbon(GET_SLOT(InputData, install("carbon")), LogInfo);
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'CO2'");
+    if (debug) sw_printf(" > 'CO2'");
     #endif
     if (LogInfo->stopRun) {
         return; // Exit function prematurely due to error
@@ -179,8 +179,8 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
 
     onSet_SW_SWC(GET_SLOT(InputData, install("swc")), LogInfo);
     #ifdef RSWDEBUG
-    if (debug) swprintf(" > 'swc'");
-    if (debug) swprintf(" completed.\n");
+    if (debug) sw_printf(" > 'swc'");
+    if (debug) sw_printf(" completed.\n");
     #endif
     if (LogInfo->stopRun) {
         return; // Exit function prematurely due to error

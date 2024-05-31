@@ -512,7 +512,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	Bool too_many_regions = FALSE;
 
 	#ifdef RSWDEBUG
-	if (debug) swprintf("'onSet_SW_SIT':");
+	if (debug) sw_printf("'onSet_SW_SIT':");
 	#endif
 
 	PROTECT(SWClimits = GET_SLOT(SW_SIT, install("SWClimits")));
@@ -520,14 +520,14 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	v->_SWCInitVal = REAL(SWClimits)[1];
 	v->_SWCWetVal = REAL(SWClimits)[2];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'SWClimits'");
+	if (debug) sw_printf(" > 'SWClimits'");
 	#endif
 
 	PROTECT(ModelFlags = GET_SLOT(SW_SIT, install("ModelFlags")));
 	v->reset_yr = LOGICAL(ModelFlags)[0];
 	v->deepdrain = LOGICAL(ModelFlags)[1];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'flags'");
+	if (debug) sw_printf(" > 'flags'");
 	#endif
 
 	PROTECT(ModelCoefficients = GET_SLOT(SW_SIT, install("ModelCoefficients")));
@@ -535,7 +535,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	v->percentRunoff = REAL(ModelCoefficients)[1];
 	v->percentRunon = REAL(ModelCoefficients)[2];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'coefs'");
+	if (debug) sw_printf(" > 'coefs'");
 	#endif
 
 	PROTECT(SnowSimulationParameters = GET_SLOT(SW_SIT, install("SnowSimulationParameters")));
@@ -545,13 +545,13 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	v->RmeltMin = REAL(SnowSimulationParameters)[3];
 	v->RmeltMax = REAL(SnowSimulationParameters)[4];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'snow'");
+	if (debug) sw_printf(" > 'snow'");
 	#endif
 
 	PROTECT(DrainageCoefficient = GET_SLOT(SW_SIT, install("DrainageCoefficient")));
 	v->slow_drain_coeff = REAL(DrainageCoefficient)[0];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'drain-coef'");
+	if (debug) sw_printf(" > 'drain-coef'");
 	#endif
 
 	PROTECT(EvaporationCoefficients = GET_SLOT(SW_SIT, install("EvaporationCoefficients")));
@@ -560,7 +560,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	v->evap.yinflec = REAL(EvaporationCoefficients)[2];
 	v->evap.range = REAL(EvaporationCoefficients)[3];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'evap-coef'");
+	if (debug) sw_printf(" > 'evap-coef'");
 	#endif
 
 	PROTECT(TranspirationCoefficients = GET_SLOT(SW_SIT, install("TranspirationCoefficients")));
@@ -569,7 +569,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	v->transp.yinflec = REAL(TranspirationCoefficients)[2];
 	v->transp.range = REAL(TranspirationCoefficients)[3];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'transp-coef'");
+	if (debug) sw_printf(" > 'transp-coef'");
 	#endif
 
 	// SOILWAT2 calculates internally in radians, but input/output are in arc-degrees
@@ -581,13 +581,13 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	m->aspect = REAL(IntrinsicSiteParams)[4];
 	m->aspect = missing(m->aspect) ? SW_MISSING : m->aspect * deg_to_rad;
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'location'");
+	if (debug) sw_printf(" > 'location'");
 	#endif
 
 	PROTECT(SoilTemperatureConstants_use = GET_SLOT(SW_SIT, install("SoilTemperatureFlag")));
 	v->use_soil_temp = LOGICAL(SoilTemperatureConstants_use)[0];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'soiltemp-flag'");
+	if (debug) sw_printf(" > 'soiltemp-flag'");
 	#endif
 
 	PROTECT(SoilTemperatureConstants = GET_SLOT(SW_SIT, install("SoilTemperatureConstants")));
@@ -602,13 +602,13 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	v->stDeltaX = REAL(SoilTemperatureConstants)[8];
 	v->stMaxDepth = REAL(SoilTemperatureConstants)[9];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'soiltemp-constants'");
+	if (debug) sw_printf(" > 'soiltemp-constants'");
 	#endif
 
 	PROTECT(SoilDensityInputType = GET_SLOT(SW_SIT, install("SoilDensityInputType")));
 	v->type_soilDensityInput = INTEGER(SoilDensityInputType)[0];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'density-type'");
+	if (debug) sw_printf(" > 'density-type'");
 	#endif
 
 
@@ -625,7 +625,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	v->site_has_swrcp = LOGICAL(has_swrcp)[0];
 
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'swrc/ptf-type'");
+	if (debug) sw_printf(" > 'swrc/ptf-type'");
 	#endif
 
 
@@ -647,7 +647,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
         return; // Exit function prematurely due to error
 	}
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'transp-regions'");
+	if (debug) sw_printf(" > 'transp-regions'");
 	#endif
 
 	/* check for any discontinuities (reversals) in the transpiration regions */
@@ -661,7 +661,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	}
 
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" ... done. \n");
+	if (debug) sw_printf(" ... done. \n");
 	#endif
 
 	UNPROTECT(14);

@@ -374,7 +374,7 @@ void rSW_CTL_setup_domain(
     if (from_files) {
         #ifdef RSWDEBUG
         if (debug) {
-          swprintf(
+          sw_printf(
             "\n'rSW_CTL_setup_domain()': "
             "Use SOILWAT2 code to read values from disk:"
           );
@@ -394,7 +394,7 @@ void rSW_CTL_setup_domain(
     } else {
         #ifdef RSWDEBUG
         if (debug) {
-          swprintf(
+          sw_printf(
             "\n'rSW_CTL_setup_domain()': "
             "Copy data from rSOILWAT2 S4 'InputData' object to SOILWAT2 variables:"
           );
@@ -403,7 +403,7 @@ void rSW_CTL_setup_domain(
 
         onSet_SW_F(GET_SLOT(InputData, install("files")), LogInfo);
         #ifdef RSWDEBUG
-        if (debug) swprintf(" > 'files'");
+        if (debug) sw_printf(" > 'files'");
         #endif
         if (LogInfo->stopRun) {
             return; // Exit function prematurely due to error
@@ -411,7 +411,7 @@ void rSW_CTL_setup_domain(
 
         onSet_SW_DOM(InputData, LogInfo);
         #ifdef RSWDEBUG
-        if (debug) swprintf(" > 'domain'");
+        if (debug) sw_printf(" > 'domain'");
         #endif
         if (LogInfo->stopRun) {
             return; // Exit function prematurely due to error
@@ -430,6 +430,6 @@ void rSW_CTL_setup_domain(
     SW_DOM_SimSet(SW_Domain, userSUID, LogInfo);
 
     #ifdef RSWDEBUG
-    if (debug) swprintf(" completed.\n");
+    if (debug) sw_printf(" completed.\n");
     #endif
 }

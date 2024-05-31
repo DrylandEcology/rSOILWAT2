@@ -156,7 +156,7 @@ void onSet_swCarbon(SEXP object, LOG_INFO* LogInfo) {
 
   #ifdef RSWDEBUG
   if (debug) {
-    swprintf("'onSet_swCarbon': year = %d, n_sim = %d, n_input = %d, i = %d\n",
+    sw_printf("'onSet_swCarbon': year = %d, n_sim = %d, n_input = %d, i = %d\n",
       year, n_sim, n_input, i);
   }
   #endif
@@ -177,7 +177,7 @@ void onSet_swCarbon(SEXP object, LOG_INFO* LogInfo) {
 
     #ifdef RSWDEBUG
     if (debug) {
-      swprintf("ppm[year = %d] = %3.2f <-> S4[i = %d] = %3.2f\n",
+      sw_printf("ppm[year = %d] = %3.2f <-> S4[i = %d] = %3.2f\n",
         year, c->ppm[year], i, values[i - 1 + n_input * 1]);
     }
     #endif
