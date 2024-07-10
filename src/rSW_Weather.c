@@ -29,7 +29,7 @@
 
 #include "SOILWAT2/include/SW_Weather.h"
 #include "rSW_Weather.h"
-#include "SW_R_lib.h" // externs `SoilWatAll`
+#include "SW_R_lib.h" // externs `SoilWatRun`
 
 #include <R.h>
 #include <Rinternals.h>
@@ -106,7 +106,7 @@ SEXP onGet_SW_WTH_setup(void) {
 	int i;
 	const int nitems = 8;
 	RealD *p_MonthlyValues;
-	SW_WEATHER *w = &SoilWatAll.Weather;
+	SW_WEATHER *w = &SoilWatRun.Weather;
 
 	SEXP swWeather;
 	SEXP SW_WTH;
@@ -140,7 +140,7 @@ SEXP onGet_SW_WTH_setup(void) {
 	/* `SW_weather.yr` was removed from SOILWAT2:
 	INTEGER_POINTER(yr_first)[0] = w->yr.first;
 	*/
-	INTEGER_POINTER(yr_first)[0] = SoilWatAll.Weather.startYear;
+	INTEGER_POINTER(yr_first)[0] = SoilWatRun.Weather.startYear;
 
 	PROTECT(use_cloudCoverMonthly = NEW_LOGICAL(1));
 	LOGICAL_POINTER(use_cloudCoverMonthly)[0] = w->use_cloudCoverMonthly;
@@ -207,7 +207,7 @@ SEXP onGet_SW_WTH_setup(void) {
 */
 void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo) {
 	int i;
-	SW_WEATHER *w = &SoilWatAll.Weather;
+	SW_WEATHER *w = &SoilWatRun.Weather;
 	SEXP
         use_snow, pct_snowdrift, pct_snowRunoff,
         use_weathergenerator, use_weathergenerator_only,
@@ -220,8 +220,8 @@ void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo) {
 
 	MyFileName = SoilWatDomain.PathInfo.InFiles[eWeather];
 
-    // Copy weather prefix from PathInfo to Weather within `SoilWatAll`
-    strcpy(SoilWatAll.Weather.name_prefix, SoilWatDomain.PathInfo.weather_prefix);
+    // Copy weather prefix from PathInfo to Weather within `SoilWatRun`
+    strcpy(SoilWatRun.Weather.name_prefix, SoilWatDomain.PathInfo.weather_prefix);
 
 	PROTECT(MonthlyScalingParams = GET_SLOT(SW_WTH, install(cSW_WTH_names[0])));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
@@ -315,11 +315,11 @@ SEXP onGet_WTH_DATA(void) {
 	SEXP WTH_DATA, WTH_DATA_names;
 	char cYear[5];
 
-	PROTECT(WTH_DATA = allocVector(VECSXP, SoilWatAll.Weather.n_years));
-	PROTECT(WTH_DATA_names = allocVector(STRSXP, SoilWatAll.Weather.n_years));
+	PROTECT(WTH_DATA = allocVector(VECSXP, SoilWatRun.Weather.n_years));
+	PROTECT(WTH_DATA_names = allocVector(STRSXP, SoilWatRun.Weather.n_years));
 
-	for (yearIndex = 0; yearIndex < SoilWatAll.Weather.n_years; yearIndex++) {
-		year = SoilWatAll.Weather.startYear + yearIndex;
+	for (yearIndex = 0; yearIndex < SoilWatRun.Weather.n_years; yearIndex++) {
+		year = SoilWatRun.Weather.startYear + yearIndex;
 		snprintf(cYear, sizeof cYear, "%4d", year);
 		SET_STRING_ELT(WTH_DATA_names, yearIndex, mkChar(cYear));
 
@@ -362,10 +362,10 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 		"shortWR"
 	};
 	RealD *p_Year;
-	SW_WEATHER *w = &SoilWatAll.Weather;
+	SW_WEATHER *w = &SoilWatRun.Weather;
 
 	days = Time_get_lastdoy_y(year);
-	yearIndex = year - SoilWatAll.Weather.startYear;
+	yearIndex = year - SoilWatRun.Weather.startYear;
 
 	PROTECT(swWeatherData = MAKE_CLASS("swWeatherData"));
 	PROTECT(WeatherData = NEW_OBJECT(swWeatherData));
@@ -437,14 +437,14 @@ void onSet_WTH_DATA(SEXP weatherList, LOG_INFO* LogInfo) {
   // Deallocate (previous, if any) `allHist`
   // (using value of `SW_Weather.n_years` previously used to allocate)
   // `SW_WTH_construct()` sets `n_years` to zero
-  deallocateAllWeather(SoilWatAll.Weather.allHist, SoilWatAll.Weather.n_years);
+  deallocateAllWeather(SoilWatRun.Weather.allHist, SoilWatRun.Weather.n_years);
 
   // Update number of years and first calendar year represented
-  SoilWatAll.Weather.n_years = SoilWatAll.Model.endyr - SoilWatAll.Model.startyr + 1;
-  SoilWatAll.Weather.startYear = SoilWatAll.Model.startyr;
+  SoilWatRun.Weather.n_years = SoilWatRun.Model.endyr - SoilWatRun.Model.startyr + 1;
+  SoilWatRun.Weather.startYear = SoilWatRun.Model.startyr;
 
   // Allocate new `allHist` (based on current `SW_Weather.n_years`)
-  allocateAllWeather(&SoilWatAll.Weather.allHist, SoilWatAll.Weather.n_years, LogInfo);
+  allocateAllWeather(&SoilWatRun.Weather.allHist, SoilWatRun.Weather.n_years, LogInfo);
   if(LogInfo->stopRun) {
     return; // Exit function prematurely due to error
   }
@@ -454,17 +454,17 @@ void onSet_WTH_DATA(SEXP weatherList, LOG_INFO* LogInfo) {
   // fill `SOILWAT2` `allHist` with values from `rSOILWAT2`
   rSW2_setAllWeather(
     weatherList,
-    SoilWatAll.Weather.allHist,
-    SoilWatAll.Weather.startYear,
-    SoilWatAll.Weather.n_years,
-    SoilWatAll.Weather.use_weathergenerator_only,
-    SoilWatAll.Weather.use_cloudCoverMonthly,
-    SoilWatAll.Weather.use_humidityMonthly,
-    SoilWatAll.Weather.use_windSpeedMonthly,
-    SoilWatAll.Weather.dailyInputFlags,
-    SoilWatAll.Sky.cloudcov,
-    SoilWatAll.Sky.windspeed,
-    SoilWatAll.Sky.r_humidity,
+    SoilWatRun.Weather.allHist,
+    SoilWatRun.Weather.startYear,
+    SoilWatRun.Weather.n_years,
+    SoilWatRun.Weather.use_weathergenerator_only,
+    SoilWatRun.Weather.use_cloudCoverMonthly,
+    SoilWatRun.Weather.use_humidityMonthly,
+    SoilWatRun.Weather.use_windSpeedMonthly,
+    SoilWatRun.Weather.dailyInputFlags,
+    SoilWatRun.Sky.cloudcov,
+    SoilWatRun.Sky.windspeed,
+    SoilWatRun.Sky.r_humidity,
     LogInfo
   );
 }
@@ -491,7 +491,7 @@ static void rSW2_setAllWeather(
 
     /* Interpolation is to be in base0 in `interpolate_monthlyValues()` */
     Bool interpAsBase1 = swFALSE;
-    SW_MODEL *SW_Model = &SoilWatAll.Model;
+    SW_MODEL *SW_Model = &SoilWatRun.Model;
 
     for(yearIndex = 0; yearIndex < n_years; yearIndex++) {
         year = yearIndex + startYear;

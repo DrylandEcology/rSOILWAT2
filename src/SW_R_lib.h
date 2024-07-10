@@ -19,8 +19,7 @@
 /* =================================================== */
 /*            Externed Global Variables                */
 /* --------------------------------------------------- */
-extern SW_ALL SoilWatAll;
-extern SW_OUTPUT_POINTERS SoilWatOutputPtrs[SW_OUTNKEYS];
+extern SW_RUN SoilWatRun;
 // extern PATH_INFO PathInfo;
 extern SW_DOMAIN SoilWatDomain;
 

@@ -73,7 +73,7 @@ static char *cSWRCp[] = {
 /* Copy soil properties into "Layers" matrix */
 static SEXP onGet_SW_LYR(void) {
 	int i, dmax = 0;
-	SW_SITE *v = &SoilWatAll.Site;
+	SW_SITE *v = &SoilWatRun.Site;
 	SEXP Layers, Layers_names, Layers_names_y;
 	RealD *p_Layers;
 
@@ -111,7 +111,7 @@ static SEXP onGet_SW_LYR(void) {
 */
 static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 
-	SW_SITE *v = &SoilWatAll.Site;
+	SW_SITE *v = &SoilWatRun.Site;
 	LyrIndex lyrno;
 	int i, j, k, columns;
 	RealF dmin = 0.0, dmax, evco, trco_veg[NVEGTYPES], psand, pclay, soildensity, imperm, soiltemp, f_gravel;
@@ -137,7 +137,7 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 	}
 
 	for (i = 0; i < j; i++) {
-		lyrno = SoilWatAll.Site.n_layers++;
+		lyrno = SoilWatRun.Site.n_layers++;
 
 		dmax = p_Layers[i + j * 0];
 		soildensity = p_Layers[i + j * 1];
@@ -182,7 +182,7 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 /* Copy SWRC parameters into "SWRCp" matrix */
 static SEXP onGet_SW_SWRCp(void) {
 	int i, k;
-	SW_SITE *v = &SoilWatAll.Site;
+	SW_SITE *v = &SoilWatRun.Site;
 	SEXP SWRCp, SWRCp_names, SWRCp_names_y;
 	RealD *p_SWRCp;
 
@@ -209,7 +209,7 @@ static SEXP onGet_SW_SWRCp(void) {
 /* Function `onSet_SW_SWRCp()` corresponds to SOILWAT2's `SW_SWRC_read()` */
 static void onSet_SW_SWRCp(SEXP SW_SWRCp, LOG_INFO* LogInfo) {
 
-	SW_SITE *v = &SoilWatAll.Site;
+	SW_SITE *v = &SoilWatRun.Site;
 	int i, k;
 	RealD *p_SWRCp;
 
@@ -228,13 +228,13 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp, LOG_INFO* LogInfo) {
 	}
 
 	/* Check that we have `SW_Site.n_layers` */
-	if (nrows(SW_SWRCp) != SoilWatAll.Site.n_layers) {
+	if (nrows(SW_SWRCp) != SoilWatRun.Site.n_layers) {
 		LogError(
 			LogInfo,
 			LOGERROR,
 			"%s : Number of layers with SWRC parameters (%d) "
 			"must match number of soil layers (%d)\n",
-			MyFileName, nrows(SW_SWRCp), SoilWatAll.Site.n_layers
+			MyFileName, nrows(SW_SWRCp), SoilWatRun.Site.n_layers
 		);
         return; // Exit function prematurely due to error
 	}
@@ -284,8 +284,8 @@ void onSet_SW_SOILS(SEXP SW_SOILS, LOG_INFO* LogInfo) {
 
 SEXP onGet_SW_SIT(void) {
 	int i;
-	SW_SITE *v = &SoilWatAll.Site;
-	SW_MODEL *m = &SoilWatAll.Model;
+	SW_SITE *v = &SoilWatRun.Site;
+	SW_MODEL *m = &SoilWatRun.Model;
 
 	SEXP swSite;
 	SEXP SW_SIT;
@@ -483,8 +483,8 @@ SEXP onGet_SW_SIT(void) {
 
 void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	int i;
-	SW_SITE *v = &SoilWatAll.Site;
-	SW_MODEL *m = &SoilWatAll.Model;
+	SW_SITE *v = &SoilWatRun.Site;
+	SW_MODEL *m = &SoilWatRun.Model;
 
 	SEXP SWClimits;
 	SEXP ModelFlags;

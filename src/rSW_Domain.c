@@ -126,7 +126,7 @@ SEXP onGet_SW_SPINUP(void) {
 }
 
 SEXP onGet_SW_MDL(void) {
-	SW_MODEL *m = &SoilWatAll.Model;
+	SW_MODEL *m = &SoilWatRun.Model;
 
 	SEXP swYears;
 	SEXP SW_MDL;//, SW_MDL_names;
@@ -240,7 +240,7 @@ void onSet_SW_SPINUP(SEXP SW_DOM, LOG_INFO* LogInfo) {
 }
 
 void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
-	SW_MODEL *m = &SoilWatAll.Model;
+	SW_MODEL *m = &SoilWatRun.Model;
 
 	SEXP StartYear;
 	SEXP EndYear;
@@ -344,7 +344,7 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 
 //   // Equivalent to `SW_DOM_read()`:
 //   // fill `SOILWAT2` with values from `rSOILWAT2`
-//   rSW2_setDomain(weatherList, SoilWatAll.Weather.allHist, LogInfo);
+//   rSW2_setDomain(weatherList, SoilWatRun.Weather.allHist, LogInfo);
 // }
 
 

@@ -57,14 +57,14 @@ void rSW_CTL_setup_model2(void) {
 /** Prepare inputs for SOILWAT2
 
   Side effect is that SOILWAT2 structures contain input values
-  (i.e., rSOILWAT2 global variable SoilWatAll).
+  (i.e., rSOILWAT2 global variable SoilWatRun).
 
   @param[in] from_files If TRUE, then read inputs from disk and copy into
-      SoilWatAll.
+      SoilWatRun.
   @param[in] InputData If from_files is FALSE, then copy values from
-      InputData to SoilWatAll.
+      InputData to SoilWatRun.
   @param[in] weatherList If from_files is FALSE, then copy values from
-      weatherList to SoilWatAll
+      weatherList to SoilWatRun
       (unless weatherList is NULL, then slot weatherHistory of InputData is used).
 */
 void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LOG_INFO* LogInfo) {
@@ -73,7 +73,8 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
   #endif
 
   if (from_files) {
-    SW_CTL_read_inputs_from_disk(&SoilWatAll, &SoilWatDomain.PathInfo, LogInfo);
+    SW_CTL_read_inputs_from_disk(&SoilWatRun, &SoilWatDomain.OutDom,
+                                 &SoilWatDomain.PathInfo, LogInfo);
 
   } else { //Use R data to set the data
     #ifdef RSWDEBUG
