@@ -232,7 +232,7 @@ toggleVegEstab <- function(path, activate = TRUE) {
   line <- grep("establishment results", fin, fixed = TRUE)
   stopifnot(length(line) == 1, line > 0, line < length(fin))
   fin[line] <- sub(
-    pattern = "OFF",
+    pattern = "AVG", # "AVG" is the new SOILWAT2 default example since v8.0.0
     replacement = if (activate) "AVG" else "OFF",
     x = fin[line],
     fixed = TRUE
