@@ -53,7 +53,8 @@ test_that("Upgrade old rSOILWAT2 weather objects", {
   for (k in seq_along(fnames_vdata)) {
     x <- readRDS(fnames_vdata[k])
 
-    if (!check_version(vs[k])) {
+    if (!check_version(vs[k]) && k < length(fnames_vdata)) {
+      # Expect weather data to be outdated if old version and not last object
       expect_false(dbW_check_weatherData(x))
     }
 

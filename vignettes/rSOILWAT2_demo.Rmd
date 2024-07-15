@@ -670,6 +670,15 @@ by `SOILWAT2` with the selected pedotransfer function.
 ```
 
 
+## Spinup simulations
+```{r, spinup}
+  rSOILWAT2::swSpinup_SpinupActive(sw_in) <- TRUE
+  # mode 1 (random resample), mode 2 (sequence of years)
+  rSOILWAT2::swSpinup_SpinupMode(sw_in) <- 2L
+  rSOILWAT2::swSpinup_SpinupDuration(sw_in) <- 3L
+  rSOILWAT2::swSpinup_SpinupScope(sw_in) <- 10L
+```
+
 
 
 ## Modifying climate conditions
@@ -682,7 +691,6 @@ by `SOILWAT2` with the selected pedotransfer function.
   # Example: 2 C warming
   rSOILWAT2::swWeather_MonScalingParams(sw_in2)[, c("MaxT", "MinT")] <- 2
 ```
-
 
 ## Run SOILWAT2 for prepared site
 Note: Knitting vignette crashes with C-level messages -> run quietly

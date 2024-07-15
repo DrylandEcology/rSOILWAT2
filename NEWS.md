@@ -1,3 +1,15 @@
+# rSOILWAT2 v6.1.0-9000
+* This version produces the same output as the previous version.
+* `SOILWAT2` updated to v8.0.0 which now includes a simulation domain;
+  however, this has no impact on `rSOILWAT2`.
+
+## New features
+* SOILWAT2 gained spin-up functionality (@niteflyunicorns, @dschlaep).
+  A user-requested sequence of (random) years is simulated (without output)
+  before the actual simulation run to provide better starting values
+  (e.g., soil moisture, soil temperature).
+
+
 # rSOILWAT2 v6.0.4
 * This version produces the same output as the previous version.
 

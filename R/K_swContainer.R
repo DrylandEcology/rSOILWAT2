@@ -36,6 +36,7 @@
 #'   \item \code{\link{get_swProd}}
 #'   \item \code{\link{get_swSite}}
 #'   \item \code{\link{get_swSoils}}
+#'   \item \code{\link{get_swSpinup}}
 #'   \item \code{\link{get_swSWC}}
 #'   \item \code{\link{get_swWeather}}
 #'   \item \code{\link{get_swWeatherData}}
@@ -65,13 +66,21 @@
 #'   \var{SWC} \code{data} object.
 #' @param vegtype The name or index of the vegetation type.
 #'
-#' @seealso \code{\linkS4class{swFiles}} \code{\linkS4class{swYears}}
-#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
-#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#' @seealso
+#' \code{\linkS4class{swFiles}}
+#' \code{\linkS4class{swYears}}
+#' \code{\linkS4class{swWeather}}
+#' \code{\linkS4class{swCloud}}
+#' \code{\linkS4class{swMarkov}}
+#' \code{\linkS4class{swProd}}
+#' \code{\linkS4class{swSite}}
+#' \code{\linkS4class{swSoils}}
+#' \code{\linkS4class{swSpinup}}
+#' \code{\linkS4class{swEstab}}
+#' \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swCarbon}}
+#' \code{\linkS4class{swSWC}}
+#' \code{\linkS4class{swLog}}
 #'
 #' @examples
 #' showClass("swInputData")
@@ -94,6 +103,7 @@ setClass(
     prod = "swProd",
     site = "swSite",
     soils = "swSoils",
+    spinup = "swSpinup",
     estab = "swEstab",
     carbon = "swCarbon",
     output = "swOUT",
@@ -202,6 +212,12 @@ swInputData <- function(...) {
     do.call(swSWC, dots)
   }
 
+  object@spinup <- if ("spinup" %in% dns) {
+    swSpinup(dots[["spinup"]])
+  } else {
+    do.call(swSpinup, dots)
+  }
+
   object@log <- if ("log" %in% dns) {
     swLog(dots[["log"]])
   } else {
@@ -239,6 +255,7 @@ setMethod(
     # Suppress warnings in case `object` is indeed invalid (outdated)
     if (!suppressWarnings(check_version(object))) {
 
+      # Upgrade slots of swInputData
       for (sn in slotNames(object)) {
         if (identical(sn, "weatherHistory")) {
           if (!dbW_check_weatherData(slot(object, sn), check_all = FALSE)) {
@@ -250,10 +267,24 @@ setMethod(
 
         } else {
           tmp <- try(validObject(slot(object, sn)), silent = TRUE)
+
           if (inherits(tmp, "try-error")) {
-            slot(object, sn) <- suppressWarnings(
-              sw_upgrade(slot(object, sn), verbose = FALSE)
-            )
+            if (grepl("invalid class", tmp, fixed = TRUE)) {
+              # Upgrade existing but invalid slots
+              slot(object, sn) <- suppressWarnings(
+                sw_upgrade(slot(object, sn), verbose = FALSE)
+              )
+
+            } else if (grepl("no slot of name", tmp, fixed = TRUE)) {
+              # Add new slot
+              if (identical(sn, "spinup")) {
+                object@spinup <- swSpinup()
+              }
+
+            } else {
+              stop("Failed to upgrade 'swInputData' object slot ", shQuote(sn))
+            }
+
             msg_upgrades <- c(msg_upgrades, sn)
           }
         }
@@ -2149,6 +2180,106 @@ setReplaceMethod(
     object
   }
 )
+
+
+# Methods for slot \code{spinup}
+#' @rdname swInputData-class
+#' @export
+setMethod("get_swSpinup", "swInputData", function(object) object@spinup)
+
+#' @rdname swInputData-class
+#' @export
+setMethod("swSpinup_SpinupActive", "swInputData",
+  function(object) swSpinup_SpinupActive(object@spinup))
+
+#' @rdname swInputData-class
+#' @export
+setMethod("swSpinup_SpinupMode", "swInputData",
+  function(object) swSpinup_SpinupMode(object@spinup))
+
+#' @rdname swInputData-class
+#' @export
+setMethod("swSpinup_SpinupScope", "swInputData",
+  function(object) swSpinup_SpinupScope(object@spinup))
+
+#' @rdname swInputData-class
+#' @export
+setMethod("swSpinup_SpinupDuration", "swInputData",
+  function(object) swSpinup_SpinupDuration(object@spinup))
+
+#' @rdname swInputData-class
+#' @export
+setMethod("swSpinup_SpinupSeed", "swInputData",
+  function(object) swSpinup_SpinupSeed(object@spinup))
+
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "swSpinup_SpinupActive",
+  signature = "swInputData",
+  function(object, value) {
+    swSpinup_SpinupActive(object@spinup) <- as.logical(value)
+    object
+  }
+)
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "swSpinup_SpinupMode",
+  signature = "swInputData",
+  function(object, value) {
+    swSpinup_SpinupMode(object@spinup) <- as.integer(value)
+    object
+  }
+)
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "swSpinup_SpinupScope",
+  signature = "swInputData",
+  function(object, value) {
+    swSpinup_SpinupScope(object@spinup) <- as.integer(value)
+    object
+  }
+)
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "swSpinup_SpinupDuration",
+  signature = "swInputData",
+  function(object, value) {
+    swSpinup_SpinupDuration(object@spinup) <- as.integer(value)
+    object
+  }
+)
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "swSpinup_SpinupSeed",
+  signature = "swInputData",
+  function(object, value) {
+    swSpinup_SpinupSeed(object@spinup) <- as.integer(value)
+    object
+  }
+)
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "set_swSpinup",
+  signature = "swInputData",
+  function(object, value) {
+    set_swSpinup(object@spinup) <- value
+    object
+  }
+)
+
+
 
 
 # Methods for slot \code{carbon}

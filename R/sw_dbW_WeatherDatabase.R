@@ -2062,7 +2062,8 @@ getWeatherData_folders <- function(
       filebasename,
       used_years[[1L]],
       used_years[[length(used_years)]],
-      dailyInputFlags
+      dailyInputFlags,
+      rSOILWAT2::sw_exampleData
     )
 
   } else if (method == "R") {

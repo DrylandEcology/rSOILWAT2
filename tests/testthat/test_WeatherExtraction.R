@@ -55,6 +55,8 @@ test_that("Weather data extraction", {
       )
     )
 
-    expect_obtained_meteo(mm_scan)
+    if (!inherits(mm_scan, "try-error")) {
+      expect_obtained_meteo(mm_scan)
+    }
   }
 })

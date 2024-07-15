@@ -37,7 +37,6 @@
 /* =================================================== */
 /*                  Local Variables                    */
 /* --------------------------------------------------- */
-static char *MyFileName;
 
 
 
@@ -55,15 +54,15 @@ SEXP onGet_SW_VES(void) {
 	PROTECT(VES = NEW_OBJECT(swEstab));
 
 	PROTECT(count = NEW_INTEGER(1));
-	INTEGER(count)[0] = SoilWatAll.VegEstab.count;
+	INTEGER(count)[0] = SoilWatRun.VegEstab.count;
 
 	PROTECT(use = NEW_LOGICAL(1));
-	LOGICAL(use)[0] = SoilWatAll.VegEstab.use;
+	LOGICAL(use)[0] = SoilWatRun.VegEstab.use;
 
 	SET_SLOT(VES, install("count"), count);
 	SET_SLOT(VES, install("useEstab"), use);
 
-	if (SoilWatAll.VegEstab.use) {
+	if (SoilWatRun.VegEstab.use) {
 		onGet_SW_VES_spps(VES);
 	}
 
@@ -71,48 +70,62 @@ SEXP onGet_SW_VES(void) {
 	return VES;
 }
 
+// see SW_VES_read2()
 void onSet_SW_VES(SEXP VES, LOG_INFO* LogInfo) {
-	IntU i;
-	int nSPPS;
-	SoilWatAll.VegEstab.use = TRUE;
-	SEXP use, count;
-	MyFileName = PathInfo.InFiles[eVegEstab];
+    IntU i;
+    int nSPPS;
+    SEXP use, count;
 
-	PROTECT(use = GET_SLOT(VES,install("useEstab")));
-	PROTECT(count = GET_SLOT(VES,install("count")));
+    // Clean out and allocate memory
+    SW_VES_deconstruct(&SoilWatRun.VegEstab);
+    SW_VES_construct(&SoilWatRun.VegEstab);
+    SW_VES_alloc_outptrs(&SoilWatRun.VegEstab, LogInfo);
+    if(LogInfo->stopRun) {
+        return; // Exit function prematurely due to error
+    }
 
-	if (LOGICAL(use)[0] == FALSE) {
-		//LogError(logfp, LOGWARN, "Establishment not used.\n");
-		SoilWatAll.VegEstab.use = FALSE;
-	} else {
-		nSPPS = INTEGER(count)[0];
-		if (nSPPS == 0) {
-			LogError(LogInfo, LOGWARN, "Establishment is TRUE but no data. Setting False.");
-			SoilWatAll.VegEstab.use = FALSE;
-		} else {
-			SoilWatAll.VegEstab.use = TRUE;
-			for (i = 0; i < nSPPS; i++) {
-				onSet_SW_VES_spp(VES, i, LogInfo); // sets `SW_VegEstab.count` incrementally
+    SoilWatRun.VegEstab.use = TRUE;
 
-            if (LogInfo->stopRun) {
-                goto report; // Exit function prematurely due to error
-            }
-      }
-		}
-	}
 
-	SW_VegEstab_construct(&SoilWatAll.VegEstab, LogInfo);
+    // Get rSOILWAT2 inputs: use flag and count of species
+    PROTECT(use = GET_SLOT(VES, install("useEstab")));
+    PROTECT(count = GET_SLOT(VES, install("count")));
+
+
+    if (LOGICAL(use)[0] == FALSE) {
+        SoilWatRun.VegEstab.use = FALSE;
+
+    } else {
+        nSPPS = INTEGER(count)[0];
+
+        if (nSPPS == 0) {
+            LogError(LogInfo, LOGWARN, "Establishment is TRUE but no data. Setting False.");
+            SoilWatRun.VegEstab.use = FALSE;
+
+        } else {
+            for (i = 0; i < nSPPS; i++) {
+                onSet_SW_VES_spp(VES, i, LogInfo); // sets `SW_VegEstab.count` incrementally
+
+                if (LogInfo->stopRun) {
+                    goto report; // Exit function prematurely due to error
+                }
+              }
+          }
+    }
+
+    SW_VegEstab_alloc_outptrs(&SoilWatRun.VegEstab, LogInfo);
     if(LogInfo->stopRun) {
         goto report; // Exit function prematurely due to error
     }
 
-	if (EchoInits)
-		_echo_VegEstab(SoilWatAll.Site.width, SoilWatAll.VegEstab.parms,
-					   SoilWatAll.VegEstab.count);
+	if (EchoInits) {
+		_echo_VegEstab(SoilWatRun.Site.width, SoilWatRun.VegEstab.parms,
+					   SoilWatRun.VegEstab.count);
+	}
 
-  report: {
-    UNPROTECT(2);
-  }
+    report: {
+        UNPROTECT(2);
+    }
 }
 
 void onGet_SW_VES_spps(SEXP SPP) {
@@ -121,26 +134,26 @@ void onGet_SW_VES_spps(SEXP SPP) {
 	SEXP fileName, name, vegType, estab_lyrs, barsGERM, barsESTAB, min_pregerm_days, max_pregerm_days, min_wetdays_for_germ, max_drydays_postgerm, min_wetdays_for_estab, min_days_germ2estab,
 			max_days_germ2estab, min_temp_germ, max_temp_germ, min_temp_estab, max_temp_estab;
 
-	PROTECT(fileName = allocVector(STRSXP,SoilWatAll.VegEstab.count));
-	PROTECT(name = allocVector(STRSXP,SoilWatAll.VegEstab.count));
-	PROTECT(vegType = NEW_INTEGER(SoilWatAll.VegEstab.count));
-	PROTECT(estab_lyrs = NEW_INTEGER(SoilWatAll.VegEstab.count));
-	PROTECT(barsGERM = allocVector(REALSXP,SoilWatAll.VegEstab.count));
-	PROTECT(barsESTAB = allocVector(REALSXP,SoilWatAll.VegEstab.count));
-	PROTECT(min_pregerm_days = NEW_INTEGER(SoilWatAll.VegEstab.count));
-	PROTECT(max_pregerm_days = NEW_INTEGER(SoilWatAll.VegEstab.count));
-	PROTECT(min_wetdays_for_germ = NEW_INTEGER(SoilWatAll.VegEstab.count));
-	PROTECT(max_drydays_postgerm = NEW_INTEGER(SoilWatAll.VegEstab.count));
-	PROTECT(min_wetdays_for_estab = NEW_INTEGER(SoilWatAll.VegEstab.count));
-	PROTECT(min_days_germ2estab = NEW_INTEGER(SoilWatAll.VegEstab.count));
-	PROTECT(max_days_germ2estab = NEW_INTEGER(SoilWatAll.VegEstab.count));
-	PROTECT(min_temp_germ = NEW_NUMERIC(SoilWatAll.VegEstab.count));
-	PROTECT(max_temp_germ = NEW_NUMERIC(SoilWatAll.VegEstab.count));
-	PROTECT(min_temp_estab = NEW_NUMERIC(SoilWatAll.VegEstab.count));
-	PROTECT(max_temp_estab = NEW_NUMERIC(SoilWatAll.VegEstab.count));
+	PROTECT(fileName = allocVector(STRSXP,SoilWatRun.VegEstab.count));
+	PROTECT(name = allocVector(STRSXP,SoilWatRun.VegEstab.count));
+	PROTECT(vegType = NEW_INTEGER(SoilWatRun.VegEstab.count));
+	PROTECT(estab_lyrs = NEW_INTEGER(SoilWatRun.VegEstab.count));
+	PROTECT(barsGERM = allocVector(REALSXP,SoilWatRun.VegEstab.count));
+	PROTECT(barsESTAB = allocVector(REALSXP,SoilWatRun.VegEstab.count));
+	PROTECT(min_pregerm_days = NEW_INTEGER(SoilWatRun.VegEstab.count));
+	PROTECT(max_pregerm_days = NEW_INTEGER(SoilWatRun.VegEstab.count));
+	PROTECT(min_wetdays_for_germ = NEW_INTEGER(SoilWatRun.VegEstab.count));
+	PROTECT(max_drydays_postgerm = NEW_INTEGER(SoilWatRun.VegEstab.count));
+	PROTECT(min_wetdays_for_estab = NEW_INTEGER(SoilWatRun.VegEstab.count));
+	PROTECT(min_days_germ2estab = NEW_INTEGER(SoilWatRun.VegEstab.count));
+	PROTECT(max_days_germ2estab = NEW_INTEGER(SoilWatRun.VegEstab.count));
+	PROTECT(min_temp_germ = NEW_NUMERIC(SoilWatRun.VegEstab.count));
+	PROTECT(max_temp_germ = NEW_NUMERIC(SoilWatRun.VegEstab.count));
+	PROTECT(min_temp_estab = NEW_NUMERIC(SoilWatRun.VegEstab.count));
+	PROTECT(max_temp_estab = NEW_NUMERIC(SoilWatRun.VegEstab.count));
 
-	for (i = 0; i < SoilWatAll.VegEstab.count; i++) {
-		v = SoilWatAll.VegEstab.parms[i];
+	for (i = 0; i < SoilWatRun.VegEstab.count; i++) {
+		v = SoilWatRun.VegEstab.parms[i];
 		SET_STRING_ELT(fileName, i, mkChar(v->sppFileName));
 		SET_STRING_ELT(name, i, mkChar(v->sppname));
 		INTEGER(vegType)[i] = v->vegType;
@@ -185,12 +198,12 @@ void onSet_SW_VES_spp(SEXP SPP, IntU i, LOG_INFO* LogInfo) {
 	SEXP fileName, Name;
 	unsigned int count;
 
-	count = _new_species(&SoilWatAll.VegEstab, LogInfo);
+	count = _new_species(&SoilWatRun.VegEstab, LogInfo);
     if(LogInfo->stopRun) {
         return; // Exit function prematurely due to error
     }
 
-	v = SoilWatAll.VegEstab.parms[count];
+	v = SoilWatRun.VegEstab.parms[count];
 
 	v->vegType = INTEGER(GET_SLOT(SPP, install("vegType")))[i];
 	v->estab_lyrs = INTEGER(GET_SLOT(SPP, install("estab_lyrs")))[i];

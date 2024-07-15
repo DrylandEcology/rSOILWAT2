@@ -63,7 +63,7 @@ char *cMonths[] = {
 
 SEXP onGet_SW_VPD(void) {
 	int i;
-	SW_VEGPROD *v = &SoilWatAll.VegProd;
+	SW_VEGPROD *v = &SoilWatRun.VegProd;
 	SEXP swProd;
 	SEXP VegProd;
 
@@ -417,7 +417,7 @@ SEXP onGet_SW_VPD(void) {
 
 void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 	int i;
-	SW_VEGPROD *v = &SoilWatAll.VegProd;
+	SW_VEGPROD *v = &SoilWatRun.VegProd;
 
     SEXP veg_method;
 	SEXP VegComp;
@@ -439,7 +439,7 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 	SEXP CO2Coefficients;
 	RealD *p_Grasslands, *p_Shrublands, *p_Forest, *p_Forb;
 
-	MyFileName = PathInfo.InFiles[eVegProd];
+	MyFileName = SoilWatDomain.PathInfo.InFiles[eVegProd];
 
     PROTECT(veg_method = GET_SLOT(SW_VPD, install(cVegProd_names[0])));
     v->veg_method = INTEGER(veg_method)[0];
@@ -570,7 +570,7 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 	v->critSoilWater[2] = REAL(CSWP)[3];
 	v->critSoilWater[3] = REAL(CSWP)[0];
 
-	get_critical_rank(&SoilWatAll.VegProd);
+	get_critical_rank(&SoilWatRun.VegProd);
 
 	PROTECT(MonthlyVeg = GET_SLOT(SW_VPD, install(cVegProd_names[12])));
 	PROTECT(Grasslands = VECTOR_ELT(MonthlyVeg, SW_GRASS));
@@ -625,14 +625,14 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 	v->veg[SW_FORBS].co2_wue_coeff2 = REAL(CO2Coefficients)[15];
 
 
-  SW_VPD_fix_cover(&SoilWatAll.VegProd, LogInfo);
+  SW_VPD_fix_cover(&SoilWatRun.VegProd, LogInfo);
   if(LogInfo->stopRun) {
     UNPROTECT(18); // Unprotect the eighteen protected variables before exiting
     return; // Exit function prematurely due to error
   }
 
 	if (EchoInits)
-		_echo_VegProd(SoilWatAll.VegProd.veg, SoilWatAll.VegProd.bare_cov);
+		_echo_VegProd(SoilWatRun.VegProd.veg, SoilWatRun.VegProd.bare_cov);
 
 	UNPROTECT(18);
 }
@@ -755,7 +755,7 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
         // Note: no SOILWAT2 memory was allocated, nothing to deallocate
         UNPROTECT(8);
 
-        sw_write_warnings(&local_LogInfo);
+        sw_write_warnings("(rVegProd) ", &local_LogInfo);
         sw_fail_on_error(&local_LogInfo);
     }
 

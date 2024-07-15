@@ -39,13 +39,22 @@
 #'  \code{rSOILWAT2::sw_exampleData}
 #'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
-#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swYears}}
-#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
-#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#' @seealso
+#' \code{\linkS4class{swInputData}}
+#' \code{\linkS4class{swFiles}}
+#' \code{\linkS4class{swYears}}
+#' \code{\linkS4class{swWeather}}
+#' \code{\linkS4class{swCloud}}
+#' \code{\linkS4class{swMarkov}}
+#' \code{\linkS4class{swProd}}
+#' \code{\linkS4class{swSite}}
+#' \code{\linkS4class{swSoils}}
+#' \code{\linkS4class{swSpinup}}
+#' \code{\linkS4class{swEstab}}
+#' \code{\linkS4class{swOUT}}
 #' \code{\linkS4class{swCarbon}}
+#' \code{\linkS4class{swSWC}}
+#' \code{\linkS4class{swLog}}
 #'
 #' @examples
 #' showClass("swFiles")
@@ -64,8 +73,8 @@ setClass(
   ),
   prototype = list(
     ProjDir = NA_character_,
-    # 23 must be equal to rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_NFILES"]]
-    InFiles = rep(NA_character_, 23),
+    # 27 must be equal to rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_NFILES"]]
+    InFiles = rep(NA_character_, 27L),
     WeatherPrefix = NA_character_,
     OutputPrefix = NA_character_
   )
@@ -134,6 +143,8 @@ setMethod(
   "sw_upgrade",
   signature = "swFiles",
   definition = function(object, verbose = FALSE) {
+    target <- swFiles()
+
     #--- Compare available and expected number of files
     n_exp <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_NFILES"]]
     n_has <- length(object@InFiles)
@@ -142,54 +153,46 @@ setMethod(
     #--- Identify upgrade(s)
     # Maintenance:
     #   update `do_upgrade` when `n_exp` changes or new upgrades required!
-    do_upgrade <- c(
-      from_v230 = n_has == 22L && n_exp == 23L
-    )
-
-    do_upgrade <- do_upgrade[do_upgrade]
-
-    if (any(do_upgrade)) {
-      target <- swFiles()
-      stopifnot(nrow(target) == n_exp)
-
-
-      #--- Loop over upgrades sequentially
-      for (k in seq_along(do_upgrade)) {
-
-        if (verbose) {
-          message(
-            "Upgrading object of class `swFiles`: ",
-            shQuote(names(do_upgrade)[k])
-          )
-        }
-
-        # Maintenance: update `switch` when `n_exp` changes!
-        id_new <- switch(
-          EXPR = names(do_upgrade)[k],
-          from_v230 = 6L,
-          stop(
-            "Upgrade ", shQuote(names(do_upgrade)[k]),
-            " is not implemented for class `swFiles`."
-          )
-        )
-
-
-        #--- Upgrade `InFiles`
-        object@InFiles <- c(
-          if (id_new > 1L) {
-            object@InFiles[1L:(id_new - 1L)]
-          },
-          target@InFiles[id_new],
-          if (id_new <= n_has) {
-            object@InFiles[id_new:n_has]
-          }
-        )
-      }
-
-
-      #--- Check validity and return
-      validObject(object)
+    if (verbose) {
+      message("Upgrading object of class `swFiles`")
     }
+
+    is_lt_v600 <- n_has == 22L
+    is_in_v600tov604 <- n_has == 23L
+    is_ge_v610 <- n_has == 27L
+
+
+    #--- Upgrade object from < v6.0.0 to v6.0.0-v6.0.4
+    if (is_lt_v600 && n_exp == 23L) {
+      object@InFiles <- c(
+        object@InFiles[1L:5L],
+        target@InFiles[6L], # insert names of new file with v6.0.0
+        object@InFiles[6L:22L]
+      )
+    }
+
+    #--- Upgrade object from < v6.0.0 to >= v6.1.0
+    if (is_lt_v600 && n_exp == 27L) {
+      object@InFiles <- c(
+        object@InFiles[1L],
+        target@InFiles[2L:6L],  # insert names of new files with v6.1.0
+        object@InFiles[3L:5L],
+        target@InFiles[10L], # insert name of new file with v6.0.0,
+        object@InFiles[6L:22L]
+      )
+    }
+
+    #--- Upgrade object from v6.0.0-v6.0.4 to >= v6.1.0
+    if (is_in_v600tov604 && n_exp == 27L) {
+      object@InFiles <- c(
+        object@InFiles[1L],
+        target@InFiles[2L:6L],  # insert names of new files with v6.1.0
+        object@InFiles[3L:23L]
+      )
+    }
+
+    #--- Check validity and return
+    validObject(object)
 
     object
   }

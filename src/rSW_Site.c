@@ -73,7 +73,7 @@ static char *cSWRCp[] = {
 /* Copy soil properties into "Layers" matrix */
 static SEXP onGet_SW_LYR(void) {
 	int i, dmax = 0;
-	SW_SITE *v = &SoilWatAll.Site;
+	SW_SITE *v = &SoilWatRun.Site;
 	SEXP Layers, Layers_names, Layers_names_y;
 	RealD *p_Layers;
 
@@ -111,14 +111,14 @@ static SEXP onGet_SW_LYR(void) {
 */
 static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 
-	SW_SITE *v = &SoilWatAll.Site;
+	SW_SITE *v = &SoilWatRun.Site;
 	LyrIndex lyrno;
 	int i, j, k, columns;
 	RealF dmin = 0.0, dmax, evco, trco_veg[NVEGTYPES], psand, pclay, soildensity, imperm, soiltemp, f_gravel;
 	RealD *p_Layers;
 
 	/* note that Files.read() must be called prior to this. */
-	MyFileName = PathInfo.InFiles[eLayers];
+	MyFileName = SoilWatDomain.PathInfo.InFiles[eLayers];
 
 	j = nrows(SW_LYR);
 	p_Layers = REAL(SW_LYR);
@@ -137,7 +137,7 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 	}
 
 	for (i = 0; i < j; i++) {
-		lyrno = SoilWatAll.Site.n_layers++;
+		lyrno = SoilWatRun.Site.n_layers++;
 
 		dmax = p_Layers[i + j * 0];
 		soildensity = p_Layers[i + j * 1];
@@ -182,7 +182,7 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 /* Copy SWRC parameters into "SWRCp" matrix */
 static SEXP onGet_SW_SWRCp(void) {
 	int i, k;
-	SW_SITE *v = &SoilWatAll.Site;
+	SW_SITE *v = &SoilWatRun.Site;
 	SEXP SWRCp, SWRCp_names, SWRCp_names_y;
 	RealD *p_SWRCp;
 
@@ -209,12 +209,12 @@ static SEXP onGet_SW_SWRCp(void) {
 /* Function `onSet_SW_SWRCp()` corresponds to SOILWAT2's `SW_SWRC_read()` */
 static void onSet_SW_SWRCp(SEXP SW_SWRCp, LOG_INFO* LogInfo) {
 
-	SW_SITE *v = &SoilWatAll.Site;
+	SW_SITE *v = &SoilWatRun.Site;
 	int i, k;
 	RealD *p_SWRCp;
 
 	/* note that Files.read() must be called prior to this. */
-	MyFileName = PathInfo.InFiles[eSWRCp];
+	MyFileName = SoilWatDomain.PathInfo.InFiles[eSWRCp];
 
 	/* Check that we have n = `SWRC_PARAM_NMAX` values per layer */
 	if (ncols(SW_SWRCp) != SWRC_PARAM_NMAX) {
@@ -228,13 +228,13 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp, LOG_INFO* LogInfo) {
 	}
 
 	/* Check that we have `SW_Site.n_layers` */
-	if (nrows(SW_SWRCp) != SoilWatAll.Site.n_layers) {
+	if (nrows(SW_SWRCp) != SoilWatRun.Site.n_layers) {
 		LogError(
 			LogInfo,
 			LOGERROR,
 			"%s : Number of layers with SWRC parameters (%d) "
 			"must match number of soil layers (%d)\n",
-			MyFileName, nrows(SW_SWRCp), SoilWatAll.Site.n_layers
+			MyFileName, nrows(SW_SWRCp), SoilWatRun.Site.n_layers
 		);
         return; // Exit function prematurely due to error
 	}
@@ -284,7 +284,8 @@ void onSet_SW_SOILS(SEXP SW_SOILS, LOG_INFO* LogInfo) {
 
 SEXP onGet_SW_SIT(void) {
 	int i;
-	SW_SITE *v = &SoilWatAll.Site;
+	SW_SITE *v = &SoilWatRun.Site;
+	SW_MODEL *m = &SoilWatRun.Model;
 
 	SEXP swSite;
 	SEXP SW_SIT;
@@ -331,7 +332,7 @@ SEXP onGet_SW_SIT(void) {
 	char *cTranspirationRegions[] = { "ndx", "layer" };
 	int *p_transp; // ideally `LyrIndex` so that same type as `_TranspRgnBounds`, but R API INTEGER() is signed
 
-	MyFileName = PathInfo.InFiles[eSite];
+	MyFileName = SoilWatDomain.PathInfo.InFiles[eSite];
 
 	PROTECT(swSite = MAKE_CLASS("swSite"));
 	PROTECT(SW_SIT = NEW_OBJECT(swSite));
@@ -401,11 +402,11 @@ SEXP onGet_SW_SIT(void) {
 
 	// SOILWAT2 calculates internally in radians, but input/output are in arc-degrees
 	PROTECT(IntrinsicSiteParams = allocVector(REALSXP, 5));
-	REAL(IntrinsicSiteParams)[0] = v->longitude * rad_to_deg;
-	REAL(IntrinsicSiteParams)[1] = v->latitude * rad_to_deg;
-	REAL(IntrinsicSiteParams)[2] = v->altitude;
-	REAL(IntrinsicSiteParams)[3] = v->slope * rad_to_deg;
-	REAL(IntrinsicSiteParams)[4] = missing(v->aspect) ? SW_MISSING : v->aspect * rad_to_deg;
+	REAL(IntrinsicSiteParams)[0] = m->longitude * rad_to_deg;
+	REAL(IntrinsicSiteParams)[1] = m->latitude * rad_to_deg;
+	REAL(IntrinsicSiteParams)[2] = m->elevation;
+	REAL(IntrinsicSiteParams)[3] = m->slope * rad_to_deg;
+	REAL(IntrinsicSiteParams)[4] = missing(m->aspect) ? SW_MISSING : m->aspect * rad_to_deg;
 	PROTECT(IntrinsicSiteParams_names = allocVector(STRSXP, 5));
 	for (i = 0; i < 5; i++)
 		SET_STRING_ELT(IntrinsicSiteParams_names, i, mkChar(cIntrinsicSiteParams[i]));
@@ -482,7 +483,8 @@ SEXP onGet_SW_SIT(void) {
 
 void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	int i;
-	SW_SITE *v = &SoilWatAll.Site;
+	SW_SITE *v = &SoilWatRun.Site;
+	SW_MODEL *m = &SoilWatRun.Model;
 
 	SEXP SWClimits;
 	SEXP ModelFlags;
@@ -504,13 +506,13 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
   int debug = 0;
   #endif
 
-	MyFileName = PathInfo.InFiles[eSite];
+	MyFileName = SoilWatDomain.PathInfo.InFiles[eSite];
 
 	LyrIndex r; /* transp region definition number */
 	Bool too_many_regions = FALSE;
 
 	#ifdef RSWDEBUG
-	if (debug) swprintf("'onSet_SW_SIT':");
+	if (debug) sw_printf("'onSet_SW_SIT':");
 	#endif
 
 	PROTECT(SWClimits = GET_SLOT(SW_SIT, install("SWClimits")));
@@ -518,14 +520,14 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	v->_SWCInitVal = REAL(SWClimits)[1];
 	v->_SWCWetVal = REAL(SWClimits)[2];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'SWClimits'");
+	if (debug) sw_printf(" > 'SWClimits'");
 	#endif
 
 	PROTECT(ModelFlags = GET_SLOT(SW_SIT, install("ModelFlags")));
 	v->reset_yr = LOGICAL(ModelFlags)[0];
 	v->deepdrain = LOGICAL(ModelFlags)[1];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'flags'");
+	if (debug) sw_printf(" > 'flags'");
 	#endif
 
 	PROTECT(ModelCoefficients = GET_SLOT(SW_SIT, install("ModelCoefficients")));
@@ -533,7 +535,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	v->percentRunoff = REAL(ModelCoefficients)[1];
 	v->percentRunon = REAL(ModelCoefficients)[2];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'coefs'");
+	if (debug) sw_printf(" > 'coefs'");
 	#endif
 
 	PROTECT(SnowSimulationParameters = GET_SLOT(SW_SIT, install("SnowSimulationParameters")));
@@ -543,13 +545,13 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	v->RmeltMin = REAL(SnowSimulationParameters)[3];
 	v->RmeltMax = REAL(SnowSimulationParameters)[4];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'snow'");
+	if (debug) sw_printf(" > 'snow'");
 	#endif
 
 	PROTECT(DrainageCoefficient = GET_SLOT(SW_SIT, install("DrainageCoefficient")));
 	v->slow_drain_coeff = REAL(DrainageCoefficient)[0];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'drain-coef'");
+	if (debug) sw_printf(" > 'drain-coef'");
 	#endif
 
 	PROTECT(EvaporationCoefficients = GET_SLOT(SW_SIT, install("EvaporationCoefficients")));
@@ -558,7 +560,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	v->evap.yinflec = REAL(EvaporationCoefficients)[2];
 	v->evap.range = REAL(EvaporationCoefficients)[3];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'evap-coef'");
+	if (debug) sw_printf(" > 'evap-coef'");
 	#endif
 
 	PROTECT(TranspirationCoefficients = GET_SLOT(SW_SIT, install("TranspirationCoefficients")));
@@ -567,25 +569,25 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	v->transp.yinflec = REAL(TranspirationCoefficients)[2];
 	v->transp.range = REAL(TranspirationCoefficients)[3];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'transp-coef'");
+	if (debug) sw_printf(" > 'transp-coef'");
 	#endif
 
 	// SOILWAT2 calculates internally in radians, but input/output are in arc-degrees
 	PROTECT(IntrinsicSiteParams = GET_SLOT(SW_SIT, install("IntrinsicSiteParams")));
-	v->longitude = REAL(IntrinsicSiteParams)[0] * deg_to_rad;
-	v->latitude = REAL(IntrinsicSiteParams)[1] * deg_to_rad;
-	v->altitude = REAL(IntrinsicSiteParams)[2];
-	v->slope = REAL(IntrinsicSiteParams)[3] * deg_to_rad;
-	v->aspect = REAL(IntrinsicSiteParams)[4];
-	v->aspect = missing(v->aspect) ? SW_MISSING : v->aspect * deg_to_rad;
+	m->longitude = REAL(IntrinsicSiteParams)[0] * deg_to_rad;
+	m->latitude = REAL(IntrinsicSiteParams)[1] * deg_to_rad;
+	m->elevation = REAL(IntrinsicSiteParams)[2];
+	m->slope = REAL(IntrinsicSiteParams)[3] * deg_to_rad;
+	m->aspect = REAL(IntrinsicSiteParams)[4];
+	m->aspect = missing(m->aspect) ? SW_MISSING : m->aspect * deg_to_rad;
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'location'");
+	if (debug) sw_printf(" > 'location'");
 	#endif
 
 	PROTECT(SoilTemperatureConstants_use = GET_SLOT(SW_SIT, install("SoilTemperatureFlag")));
 	v->use_soil_temp = LOGICAL(SoilTemperatureConstants_use)[0];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'soiltemp-flag'");
+	if (debug) sw_printf(" > 'soiltemp-flag'");
 	#endif
 
 	PROTECT(SoilTemperatureConstants = GET_SLOT(SW_SIT, install("SoilTemperatureConstants")));
@@ -600,13 +602,13 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	v->stDeltaX = REAL(SoilTemperatureConstants)[8];
 	v->stMaxDepth = REAL(SoilTemperatureConstants)[9];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'soiltemp-constants'");
+	if (debug) sw_printf(" > 'soiltemp-constants'");
 	#endif
 
 	PROTECT(SoilDensityInputType = GET_SLOT(SW_SIT, install("SoilDensityInputType")));
 	v->type_soilDensityInput = INTEGER(SoilDensityInputType)[0];
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'density-type'");
+	if (debug) sw_printf(" > 'density-type'");
 	#endif
 
 
@@ -623,7 +625,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	v->site_has_swrcp = LOGICAL(has_swrcp)[0];
 
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'swrc/ptf-type'");
+	if (debug) sw_printf(" > 'swrc/ptf-type'");
 	#endif
 
 
@@ -645,7 +647,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
         return; // Exit function prematurely due to error
 	}
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" > 'transp-regions'");
+	if (debug) sw_printf(" > 'transp-regions'");
 	#endif
 
 	/* check for any discontinuities (reversals) in the transpiration regions */
@@ -659,7 +661,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	}
 
 	#ifdef RSWDEBUG
-	if (debug) swprintf(" ... done. \n");
+	if (debug) sw_printf(" ... done. \n");
 	#endif
 
 	UNPROTECT(14);

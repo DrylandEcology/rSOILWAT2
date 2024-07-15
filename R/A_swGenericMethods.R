@@ -62,7 +62,7 @@ setMethod(
     tmp <- try(inherits(object, "numeric_version"), silent = TRUE)
     if (inherits(tmp, "try-error") || !isTRUE(tmp)) {
       tmp <- try(object@version, silent = TRUE)
-      if (inherits(tmp, "try-error")) {
+      if (length(tmp) == 0L || inherits(tmp, "try-error")) {
         NA_character_
       } else {
         as.character(as.numeric_version(tmp))
@@ -105,7 +105,7 @@ check_version <- function(
 ) {
   has <- get_version(object)
 
-  if (is.na(has) || is.na(expected_version)) {
+  if (length(has) == 0L || is.na(has) || is.na(expected_version)) {
     FALSE
 
   } else {
@@ -208,6 +208,10 @@ format_timestamp <- function(object) {
 #'
 #' @section Details:
 #' List of changes:
+#'   * Changes with `v6.1.0`:
+#'       * class [`swInputData-class`]:
+#'         new slot `"spinup"` of new class [`swSpinup-class`]
+#'       * class [`swFiles-class`]: new total of 27 input files
 #'   * Changes with `v6.0.0`:
 #'       * class [`swSite-class`]:
 #'         new slots `"swrc_flags"`, `"has_swrcp"`, and
@@ -744,6 +748,134 @@ setGeneric(
 setGeneric(
   "swYears_isNorth<-",
   function(object, value) standardGeneric("swYears_isNorth<-")
+)
+########################
+
+#########DOMAIN#########
+#' \code{get_swSpinup}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "get_swSpinup",
+  function(object) standardGeneric("get_swSpinup")
+)
+
+#' \code{swSpinup_SpinupMode}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupActive",
+  function(object) standardGeneric("swSpinup_SpinupActive")
+)
+
+#' \code{swSpinup_SpinupMode}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupMode",
+  function(object) standardGeneric("swSpinup_SpinupMode")
+)
+
+#' \code{swSpinup_SpinupScope}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupScope",
+  function(object) standardGeneric("swSpinup_SpinupScope")
+)
+
+#' \code{swSpinup_SpinupDuration}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupDuration",
+  function(object) standardGeneric("swSpinup_SpinupDuration")
+)
+
+#' \code{swSpinup_SpinupSeed}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupSeed",
+  function(object) standardGeneric("swSpinup_SpinupSeed")
+)
+
+# Need to define and export this generic method -- otherwise,
+# \code{\link{set_swSpinup<-}} doesn't work.
+#' \code{set_swSpinup}
+#'
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#'
+#' @export
+setGeneric(
+  "set_swSpinup",
+  function(object, value) standardGeneric("set_swSpinup")
+)
+
+#' \code{set_swSpinup<-}
+#' @inheritParams set_swSpinup
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "set_swSpinup<-",
+  function(object, value) standardGeneric("set_swSpinup<-")
+)
+
+#' \code{swSpinup_SpinupActive<-}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupActive<-",
+  function(object, value) standardGeneric("swSpinup_SpinupActive<-")
+)
+
+#' \code{swSpinup_SpinupMode<-}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupMode<-",
+  function(object, value) standardGeneric("swSpinup_SpinupMode<-")
+)
+
+#' \code{swSpinup_SpinupScope<-}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupScope<-",
+  function(object, value) standardGeneric("swSpinup_SpinupScope<-")
+)
+
+#' \code{swSpinup_SpinupDuration<-}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupDuration<-",
+  function(object, value) standardGeneric("swSpinup_SpinupDuration<-")
+)
+
+#' \code{swSpinup_SpinupSeed<-}
+#' @param object An object of class \code{\linkS4class{swSpinup}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSpinup}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSpinup_SpinupSeed<-",
+  function(object, value) standardGeneric("swSpinup_SpinupSeed<-")
 )
 ########################
 

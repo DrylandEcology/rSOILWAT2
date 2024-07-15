@@ -1,0 +1,54 @@
+#------ Input file for netCDF attribute/CRS specifications
+#
+# NOTE: This file follows the convention of key-value pairs. That is, the value is only matched with the key eliminating the possibility of incorrect reads due to line dependencies.
+# NOTE: When writing the value for any "crs_wkt" please remove occurrences of '\' within it (when generating netCDFs, the '\' will be placed back into the attribute value).
+
+# NOTE: "SW2_netCDF_output_variables.tsv" (tab-separated values)
+#   * missing rows (outkey-variable pairs) turn off respective output
+#   * user can provide their input for fields "Do output?",
+#     "netCDF variable name", "netCDF long_name", "netCDF comment",
+#     and "netCDF units"
+#   * field "netCDF cell_method" refers to internal within-day calculation
+#   * field "User comment" is ignored
+#   * changing values of other fields leads to incorrect output or a crash
+
+
+#------ Global Attributes
+title              example_title
+author             example_author
+institution        example_name
+comment            None
+
+# Coordinate Reference System
+primary_crs geographic          # options: geographic, projected
+
+
+#------ Geographic CRS Attributes
+
+geo_long_name                   WGS84
+geo_grid_mapping_name           latitude_longitude
+geo_crs_wkt                     GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]
+geo_longitude_of_prime_meridian 0.0
+geo_semi_major_axis             6378137.0
+geo_inverse_flattening          298.257223563
+
+#------ Projected CRS Attributes (optional)
+
+proj_long_name                     NAD83 / Conus Albers
+proj_grid_mapping_name             albers_conical_equal_area
+proj_crs_wkt                       PROJCS["NAD83 / Conus Albers",GEOGCS["NAD83",DATUM["North_American_Datum_1983",SPHEROID["GRS 1980",6378137,298.257222101]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4269"]],PROJECTION["Albers_Conic_Equal_Area"],PARAMETER["latitude_of_center",23],PARAMETER["longitude_of_center",-96],PARAMETER["standard_parallel_1",29.5],PARAMETER["standard_parallel_2",45.5],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","5070"]]
+proj_longitude_of_prime_meridian 0.0
+proj_semi_major_axis               6378137.0
+proj_inverse_flattening            298.257222101
+proj_datum                         NAD83
+proj_units                         m
+proj_standard_parallel             29.5 45.5
+proj_longitude_of_central_meridian -96
+proj_latitude_of_projection_origin 23
+proj_false_easting                 0
+proj_false_northing                0
+
+
+#------ Output file information
+strideOutYears   20                 # Specifies the number of years to put into a single output netCDF -- may be 1, X (e.g., 10), or "Inf" (all years in one file), defaults to "Inf" if this line is not found
+baseCalendarYear 1980
