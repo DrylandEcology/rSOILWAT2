@@ -1717,16 +1717,16 @@ dbW_fixWeather <- function(
   tmp <- which(rowSums(!is_miss1) > 0L)
   ids <- tmp[c(1L, length(tmp))]
 
-  ids_startend <-
+  ids_startend <- if (length(tmp) > 0L) {
     # before start
     (weatherData1[["Year"]] < weatherData1[ids[[1L]], "Year"]) |
-    (weatherData1[["Year"]] == weatherData1[ids[[1L]], "Year"] &
-        weatherData1[["DOY"]] < weatherData1[ids[[1L]], "DOY"]) |
-    # after end
-    (weatherData1[["Year"]] == weatherData1[ids[[2L]], "Year"] &
-        weatherData1[["DOY"]] > weatherData1[ids[[2L]], "DOY"]) |
-    (weatherData1[["Year"]] > weatherData1[ids[[2L]], "Year"])
-
+      (weatherData1[["Year"]] == weatherData1[ids[[1L]], "Year"] &
+          weatherData1[["DOY"]] < weatherData1[ids[[1L]], "DOY"]) |
+      # after end
+      (weatherData1[["Year"]] == weatherData1[ids[[2L]], "Year"] &
+          weatherData1[["DOY"]] > weatherData1[ids[[2L]], "DOY"]) |
+      (weatherData1[["Year"]] > weatherData1[ids[[2L]], "Year"])
+  }
 
 
   #--- Interpolate short missing runs
