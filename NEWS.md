@@ -1,3 +1,6 @@
+# rSOILWAT2 v6.1.1-9000
+
+
 # rSOILWAT2 v6.1.0-9000
 * This version produces the same output as the previous version.
 * `SOILWAT2` updated to v8.0.0 which now includes a simulation domain;
