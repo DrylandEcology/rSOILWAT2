@@ -31,6 +31,13 @@ test_that("Weather data check", {
     get_WeatherHistory(rSOILWAT2::sw_exampleData)
   ))
   expect_true(dbW_check_weatherData(weatherHistory(), check_all = FALSE))
+
+  expect_true(
+    validObject_weatherHistory(get_WeatherHistory(rSOILWAT2::sw_exampleData))
+  )
+  expect_true(validObject_weatherHistory(rSOILWAT2::weatherData))
+  expect_true(validObject_weatherHistory(list(swWeatherData())))
+  expect_true(validObject_weatherHistory(NULL))
 })
 
 test_that("Missing weather data", {

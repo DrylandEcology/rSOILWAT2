@@ -72,4 +72,26 @@ test_that("Upgrade old rSOILWAT2 weather objects", {
       )
     )
   }
+
+
+  #--- upgrade_weatherColumns
+  expect_named(
+    upgrade_weatherColumns(
+      data.frame(DOY = 1:2, Tmax_C = runif(2), dummy = runif(2))
+    ),
+    c("DOY", "Tmax_C", "dummy")
+  )
+
+  expect_named(
+    upgrade_weatherColumns(
+      data.frame(DOY = 1:2, Tmax_C = runif(2), specHavg_pct = NA)
+    ),
+    c("DOY", "Tmax_C", "specHavg_gPERkg")
+  )
+
+  expect_error(
+    upgrade_weatherColumns(
+      data.frame(DOY = 1:2, Tmax_C = runif(2), specHavg_pct = runif(2))
+    )
+  )
 })

@@ -1,7 +1,14 @@
 # rSOILWAT2 v6.2.0-9000
 
+* `validObject()` method for class `"swInputData"` now includes checks for a
+  valid `"weatherHistory"` object.
+
 ## Bugfix
 * `dbW_fixWeather()` now handles data objects with all missing values.
+
+## Changes to interface
+* The inputs of daily specific humidity changed units (`"%"` to `"g kg-1"`)
+  and name (`"specHavg_pct"` to `"specHavg_gPERkg"`).
 
 
 # rSOILWAT2 v6.1.0

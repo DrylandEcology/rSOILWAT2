@@ -32,9 +32,24 @@ weather_dataColumns <- function() {
     "Tmax_C", "Tmin_C", "PPT_cm",
     "cloudCov_pct",
     "windSpeed_mPERs", "windSpeed_east_mPERs", "windSpeed_north_mPERs",
-    "rHavg_pct", "rHmax_pct", "rHmin_pct", "specHavg_pct", "Tdewpoint_C",
+    "rHavg_pct", "rHmax_pct", "rHmin_pct", "specHavg_gPERkg", "Tdewpoint_C",
     "actVP_kPa",
     "shortWR"
+  )
+}
+
+#' @return A data frame with four columns:
+#'   * `"old"`: the outdated weather data column name
+#'   * `"new"`: the new weather data column name
+#'   * `"v"`: the `"rSOILWAT2"` version when the name change was introduced
+#'   * `"fail"`: error if non-missing values are present
+#' @md
+#' @noRd
+weather_renamedDataColumns <- function() {
+  rbind(
+    data.frame(
+      old = "specHavg_pct", new = "specHavg_gPERkg", v = "6.2.0", fail = TRUE
+    )
   )
 }
 
@@ -54,7 +69,8 @@ weather_dataAggFun <- function() {
     rHavg_pct = mean,
     rHmax_pct = mean,
     rHmin_pct = mean,
-    specHavg_pct = mean,
+    specHavg_pct = mean, # specific humidity: rSOILWAT2 v6.0.0 - v6.1.0
+    specHavg_gPERkg = mean, # specific humidity: rSOILWAT2 >= v6.1.1
     Tdewpoint_C = mean,
     actVP_kPa = mean,
     shortWR = mean
@@ -89,7 +105,7 @@ weather_dataAggFun <- function() {
 #'   \var{windSpeed_mPERs},
 #'   \var{windSpeed_east_mPERs}, \var{windSpeed_north_mPERs},
 #'   \var{rHavg_pct}, \var{rHmax_pct}, \var{rHmin_pct},
-#'   \var{specHavg_pct}, \var{Tdewpoint_C},
+#'   \var{specHavg_gPERkg}, \var{Tdewpoint_C},
 #'   \var{actVP_kPa}, and
 #'   \var{shortWR}.
 #'
@@ -156,13 +172,28 @@ setValidity(
     }
 
     tmp <- dim(object@data)
-    if (tmp[2] != ncol(ref@data)) {
+    if (tmp[[2L]] != ncol(ref@data)) {
       msg <- paste(
         "@data must have exactly", ncol(ref@data), "columns corresponding to",
         toString(colnames(ref@data))
       )
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
+
+    cns <- colnames(object@data)
+    validCns <- c("day", colnames(ref@data))
+    if (!all(tolower(cns) %in% tolower(validCns))) {
+      shouldNot <- setdiff(tolower(cns), tolower(validCns))
+      shouldHave <- setdiff(tolower(colnames(ref@data)), tolower(cns))
+      msg <- paste(
+        "@data has column(s)",
+        toString(shQuote(cns[tolower(cns) %in% shouldNot])),
+        "instead of",
+        toString(shQuote(validCns[tolower(validCns) %in% shouldHave]))
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
     if (!(tmp[1] %in% c(365, 366))) {
       msg <- "@data must 365 or 366 rows corresponding to day of year."
       val <- if (isTRUE(val)) msg else c(val, msg)
@@ -198,15 +229,60 @@ swWeatherData <- function(...) {
   do.call("new", args = c("swWeatherData", dots[dns %in% sns]))
 }
 
+
 #' @param weatherDF A data frame with weather variables.
 #' @param template_weatherColumns A vector with requested weather variables.
 #'
+#' @return For [upgrade_weatherColumns()]:
+#' an updated `weatherDF` with requested column name changes.
+#'
+#' @examples
+#' upgrade_weatherColumns(
+#'   data.frame(DOY = 1:2, Tmax_C = runif(2), dummy = runif(2))
+#' )
+#' upgrade_weatherColumns(
+#'   data.frame(DOY = 1:2, Tmax_C = runif(2), specHavg_pct = NA)
+#' )
+#'
+#' @md
+#' @rdname sw_upgrade
+#' @export
+upgrade_weatherColumns <- function(
+  weatherDF,
+  template_weatherColumns = c("Year", "DOY", weather_dataColumns())
+) {
+  cns <- colnames(weatherDF)
+  if (any(!cns %in% template_weatherColumns)) {
+    rds <- weather_renamedDataColumns()
+    ids <- match(cns, rds[, "old", drop = TRUE], nomatch = 0L)
+    for (k in which(ids > 0L)) {
+      if (isTRUE(rds[ids[[k]], "fail", drop = TRUE])) {
+        if (!all(is_missing_weather(weatherDF[, cns[[k]], drop = TRUE]))) {
+          stop(
+            "Renaming ", shQuote(cns[[k]]), " to ",
+            shQuote(as.character(rds[ids[[k]], "new", drop = TRUE])),
+            " failed because of non-missing values."
+          )
+        }
+      }
+
+      cns[[k]] <- as.character(rds[ids[[k]], "new", drop = TRUE])
+    }
+    colnames(weatherDF) <- cns
+  }
+
+  weatherDF
+}
+
 #' @return For [upgrade_weatherDF()]:
 #' an updated `weatherDF` with requested columns.
 #'
 #' @examples
 #' upgrade_weatherDF(
 #'   data.frame(DOY = 1:2, Tmax_C = runif(2), dummy = runif(2))
+#' )
+#' upgrade_weatherDF(
+#'   data.frame(DOY = 1:2, Tmax_C = runif(2), specHavg_pct = NA)
 #' )
 #'
 #' @md
@@ -222,6 +298,8 @@ upgrade_weatherDF <- function(
       dimnames = list(NULL, template_weatherColumns)
     )
   )
+
+  weatherDF <- upgrade_weatherColumns(weatherDF)
 
   cns <- intersect(template_weatherColumns, colnames(weatherDF))
   if (length(cns) < 1L) stop("Required weather variables not found.")
@@ -275,6 +353,15 @@ weatherHistory <- function(weatherList = NULL) {
   }
 }
 
+validObject_weatherHistory <- function(object) {
+  res <- lapply(object, function(x) validObject(x))
+  has_msg <- sapply(res, is.character)
+  if (any(has_msg)) {
+    unlist(res[has_msg])
+  } else {
+    TRUE
+  }
+}
 
 #' @rdname swWeatherData-class
 #' @export

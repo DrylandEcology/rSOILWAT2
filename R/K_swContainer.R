@@ -232,7 +232,17 @@ swInputData <- function(...) {
 setValidity(
   "swInputData",
   function(object) {
-    res <- lapply(slotNames(object), function(sn) validObject(slot(object, sn)))
+    res <- lapply(
+      slotNames(object),
+      function(sn) {
+        if (identical(sn, "weatherHistory")) {
+          validObject_weatherHistory(slot(object, sn))
+        } else {
+          validObject(slot(object, sn))
+        }
+      }
+    )
+
     has_msg <- sapply(res, is.character)
     if (any(has_msg)) {
       unlist(res[has_msg])

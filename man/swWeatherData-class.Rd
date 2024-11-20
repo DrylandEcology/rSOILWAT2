@@ -50,7 +50,7 @@ one calendar \code{year} with columns
 \var{windSpeed_mPERs},
 \var{windSpeed_east_mPERs}, \var{windSpeed_north_mPERs},
 \var{rHavg_pct}, \var{rHmax_pct}, \var{rHmin_pct},
-\var{specHavg_pct}, \var{Tdewpoint_C},
+\var{specHavg_gPERkg}, \var{Tdewpoint_C},
 \var{actVP_kPa}, and
 \var{shortWR}.}
 }}

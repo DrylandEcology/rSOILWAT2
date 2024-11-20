@@ -2254,7 +2254,12 @@ dbW_weatherData_to_monthly <- function(
   valNA = NULL,
   funs = weather_dataAggFun()
 ) {
-  vars <- names(funs)
+  tmpv <- if (length(dailySW) > 0L) {
+    colnames(dailySW[[1L]]@data)
+  } else {
+    weather_dataColumns()
+  }
+  vars <- intersect(names(funs), tmpv)
 
   monthly <- matrix(
     nrow = length(dailySW) * 12,
@@ -2330,7 +2335,7 @@ dbW_dataframe_aggregate <- function(
     )
   }
 
-  vars <- names(funs)
+  vars <- intersect(names(funs), colnames(dailySW))
 
   res <- as.matrix(
     cbind(

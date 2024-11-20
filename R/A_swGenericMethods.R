@@ -208,6 +208,10 @@ format_timestamp <- function(object) {
 #'
 #' @section Details:
 #' List of changes:
+#'   * Changes with `v6.2.0`:
+#'       * class [`swWeatherData`]: slot `"data"` changed column name
+#'         (`"specHavg_pct"` to `"specHavg_gPERkg"`) and
+#'         units (`"%"` to `"g kg-1"`).
 #'   * Changes with `v6.1.0`:
 #'       * class [`swInputData-class`]:
 #'         new slot `"spinup"` of new class [`swSpinup-class`]

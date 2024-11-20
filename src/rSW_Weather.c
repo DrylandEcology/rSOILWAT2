@@ -343,7 +343,7 @@ SEXP onGet_WTH_DATA(void) {
   Daily weather elements that are not internally stored by `SOILWAT2` are
   returned as missing values; these are
   `"windSpeed_east_mPERs"`, `"windSpeed_north_mPERs"`,
-  `"rHmax_pct"`, `"rHmin_pct"`, `"specHavg_pct"`, `"Tdewpoint_C"`
+  `"rHmax_pct"`, `"rHmin_pct"`, `"specHavg_gPERkg"`, `"Tdewpoint_C"`
 
   Called by `onGet_WTH_DATA()`
 */
@@ -359,7 +359,7 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 		"Tmax_C", "Tmin_C", "PPT_cm",
 		"cloudCov_pct",
 		"windSpeed_mPERs", "windSpeed_east_mPERs", "windSpeed_north_mPERs",
-		"rHavg_pct", "rHmax_pct", "rHmin_pct", "specHavg_pct", "Tdewpoint_C",
+		"rHavg_pct", "rHmax_pct", "rHmin_pct", "specHavg_gPERkg", "Tdewpoint_C",
 		"actVP_kPa",
 		"shortWR"
 	};
