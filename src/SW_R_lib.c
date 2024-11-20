@@ -606,6 +606,7 @@ SEXP onGetOutputDeprecated(SEXP inputData) {
 */
 SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   SEXP res = NULL, inputOptions;
+  SEXP IntrinsicSiteParams;
   int numUnprotects = 0;
   #ifdef RSWDEBUG
   int debug = 0;
@@ -640,7 +641,7 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
 
 
   // rSW_CTL_obtain_inputs():
-  // `onSet_WTH_DATA()` requires correct `endyr` and `startyr` of `SW_Model`
+  // `onSet_WTH_DATA()` requires `endyr`, `startyr`, `elevation` from `SW_Model`
   #ifdef RSWDEBUG
   if (debug) sw_printf("'model' > ");
   #endif
@@ -648,6 +649,14 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   if (local_LogInfo.stopRun) {
     goto report;
   }
+
+  PROTECT(
+    IntrinsicSiteParams = GET_SLOT(
+      GET_SLOT(inputData, install("site")), install("IntrinsicSiteParams")
+    )
+  );
+  numUnprotects++;
+  SoilWatRun.Model.elevation = REAL(IntrinsicSiteParams)[2];
 
   // `onSet_WTH_DATA()` requires additive/multiplicative scaling parameters
   #ifdef RSWDEBUG
@@ -736,6 +745,7 @@ SEXP rSW2_readAllWeatherFromDisk(
   SEXP name_prefix,
   SEXP startYear,
   SEXP endYear,
+  SEXP elevation,
   SEXP dailyInputFlags,
   SEXP sw_template
 ) {
@@ -758,8 +768,9 @@ SEXP rSW2_readAllWeatherFromDisk(
   name_prefix = PROTECT(AS_CHARACTER(name_prefix));
   startYear = PROTECT(coerceVector(startYear, INTSXP));
   endYear = PROTECT(coerceVector(endYear, INTSXP));
+  elevation = PROTECT(coerceVector(elevation, REALSXP));
   dailyInputFlags = PROTECT(coerceVector(dailyInputFlags, LGLSXP));
-  numUnprotects += 5;
+  numUnprotects += 6;
 
 
   /* Create convenience pointers */
@@ -779,6 +790,8 @@ SEXP rSW2_readAllWeatherFromDisk(
   /* Copy relevant data to global variable SoilWatRun */
   SoilWatRun.Model.startyr = INTEGER(startYear)[0];
   SoilWatRun.Model.endyr = INTEGER(endYear)[0];
+
+  SoilWatRun.Model.elevation = REAL(elevation)[0];
 
   strcpy(SoilWatRun.Weather.name_prefix, CHAR(STRING_ELT(path, 0)));
   strcat(SoilWatRun.Weather.name_prefix, "/");

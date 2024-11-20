@@ -40,6 +40,7 @@ SEXP rSW2_readAllWeatherFromDisk(
   SEXP name_prefix,
   SEXP startYear,
   SEXP endYear,
+  SEXP elevation,
   SEXP dailyInputFlags,
   SEXP sw_template
 );

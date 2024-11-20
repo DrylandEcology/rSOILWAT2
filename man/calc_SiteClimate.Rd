@@ -11,7 +11,8 @@ calc_SiteClimate(
   do_C4vars = FALSE,
   do_Cheatgrass_ClimVars = FALSE,
   simTime2 = NULL,
-  latitude = 90
+  latitude = 90,
+  elevation = NA
 )
 }
 \arguments{
@@ -41,6 +42,10 @@ They are only used if \code{isTRUE(do_C4vars)}.}
 \item{latitude}{A numeric value. The latitude in degree of the site. Used
 to adjust seasons between northern/southern hemisphere only if
 \code{isTRUE(do_C4vars)} and \code{simTime2} has to be re-calculated.}
+
+\item{elevation}{A numeric value. Site elevation above sea level `[m]`.
+Used only if specific humidity is provided as input
+for calculating relative humidity.}
 }
 \value{
 A list with named elements \describe{

@@ -15,6 +15,7 @@ dbW_addWeatherData(
   Scenario_id = NULL,
   Scenario = "Current",
   weather_tag = "weath",
+  elevation = NA,
   ignore.case = FALSE,
   overwrite = FALSE,
   verbose = FALSE
@@ -48,6 +49,10 @@ scenario.}
 
 \item{weather_tag}{A character string. The base file name without extension
 for \code{SOILWAT2}-formatted input files; default is \code{"weath"}}
+
+\item{elevation}{A numeric value. Site elevation above sea level `[m]`.
+Used only if specific humidity is provided as input
+for calculating relative humidity.}
 
 \item{ignore.case}{A logical value.}
 

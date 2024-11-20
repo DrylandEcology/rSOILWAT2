@@ -11,7 +11,8 @@ getWeatherData_folders(
   startYear = NULL,
   endYear = NULL,
   dailyInputFlags = c(rep(TRUE, 3L), rep(FALSE, 11L)),
-  method = c("R", "C")
+  method = c("R", "C"),
+  elevation = NA
 )
 }
 \arguments{
@@ -33,6 +34,10 @@ see \code{"weathsetup.in"}.}
 
 \item{method}{A character string. \code{"R"} uses code in \code{R} to read files as-is
 whereas \code{"C"} uses \code{"SOILWAT2"} code to read and process files.}
+
+\item{elevation}{A numeric value. Site elevation above sea level \verb{[m]}.
+Used only if specific humidity is provided as input
+for calculating relative humidity.}
 }
 \value{
 A list of elements of class \code{\linkS4class{swWeatherData}}.

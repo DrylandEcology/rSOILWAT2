@@ -20,6 +20,9 @@
 #' @param latitude A numeric value. The latitude in degree of the site. Used
 #'   to adjust seasons between northern/southern hemisphere only if
 #'   \code{isTRUE(do_C4vars)} and \code{simTime2} has to be re-calculated.
+#' @param elevation A numeric value. Site elevation above sea level `[m]`.
+#'   Used only if specific humidity is provided as input
+#'   for calculating relative humidity.
 #'
 #' @return A list with named elements \describe{
 #'   \item{\var{\dQuote{meanMonthlyTempC}}}{A numeric vector of length 12.
@@ -60,7 +63,7 @@
 #' @export
 calc_SiteClimate <- function(weatherList, year.start = NA, year.end = NA,
   do_C4vars = FALSE, do_Cheatgrass_ClimVars = FALSE, simTime2 = NULL,
-  latitude = 90) {
+  latitude = 90, elevation = NA) {
 
       x <- dbW_weatherData_to_dataframe(weatherList)
 
@@ -90,7 +93,8 @@ calc_SiteClimate <- function(weatherList, year.start = NA, year.end = NA,
                    year.end,
                    do_C4vars,
                    do_Cheatgrass_ClimVars,
-                   latitude
+                   latitude,
+                   elevation
       )
 
       res[["dailyTempMin"]] <- if (do_C4vars) x[, "Tmin_C"] else NA

@@ -7,6 +7,7 @@
 dbW_generateWeather(
   weatherData,
   years = NULL,
+  elevation = NA,
   wgen_coeffs = NULL,
   imputation_type = "mean",
   imputation_span = 5L,
@@ -21,6 +22,10 @@ or a data frame as returned by \code{\link[=dbW_weatherData_to_dataframe]{dbW_we
 
 \item{years}{An integer vector. The calendar years for which to generate
 daily weather. If \code{NULL}, then extracted from \code{weatherData}.}
+
+\item{elevation}{A numeric value. Site elevation above sea level \verb{[m]}.
+Used only if specific humidity is provided as input
+for calculating relative humidity.}
 
 \item{wgen_coeffs}{A list with two named elements \code{"mkv_doy"} and
 \code{"mkv_woy"}, i.e., the return value of \code{\link[=dbW_estimate_WGen_coefs]{dbW_estimate_WGen_coefs()}}.

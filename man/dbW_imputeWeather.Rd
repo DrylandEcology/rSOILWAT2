@@ -10,6 +10,7 @@ dbW_imputeWeather(
   seed = NULL,
   method_after_wg = c("interp", "locf", "mean", "none", "fail"),
   nmax_run = Inf,
+  elevation = NA,
   return_weatherDF = FALSE
 )
 }
@@ -28,6 +29,10 @@ weather generator.}
 \item{nmax_run}{An integer value. Runs (sets of consecutive missing values)
 that are equal or shorter to \code{nmax_run} are imputed;
 longer runs remain unchanged. Passed to \code{\link[rSW2utils:impute_df]{rSW2utils::impute_df()}}.}
+
+\item{elevation}{A numeric value. Site elevation above sea level \verb{[m]}.
+Used only if specific humidity is provided as input
+for calculating relative humidity.}
 
 \item{return_weatherDF}{A logical value. See section "Value".}
 }
