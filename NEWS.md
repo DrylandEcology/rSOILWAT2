@@ -1,5 +1,4 @@
-# rSOILWAT2 v6.1.1-9000
-* This version produces the same output as the previous version.
+# rSOILWAT2 v6.2.0-9000
 
 ## Bugfix
 * `dbW_fixWeather()` now handles data objects with all missing values.
