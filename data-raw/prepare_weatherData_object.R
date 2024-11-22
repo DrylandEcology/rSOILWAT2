@@ -25,4 +25,20 @@ weatherData <- rSOILWAT2::getWeatherData_folders(
 
 stopifnot(rSOILWAT2::dbW_check_weatherData(weatherData))
 
-usethis::use_data(weatherData, internal = FALSE) # nolint: namespace_linter.
+
+
+#--- Compare weather to previous version
+prev_weatherData <- rSOILWAT2::weatherData
+
+res_cmp <- waldo::compare(weatherData, prev_weatherData, max_diffs = Inf)
+
+
+#--- Save weather (if different from previous)
+if (length(res_cmp) > 0) {
+  message("Update package example weather data:")
+  print(res_cmp)
+
+  # nolint start: namespace_linter.
+  usethis::use_data(weatherData, internal = FALSE, overwrite = TRUE)
+  # nolint end: namespace_linter.
+}
