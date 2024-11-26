@@ -12,7 +12,7 @@
 ^cran-comments\.md$
 ^NEWS\.md$
 ^tests/
-tests/rSOILWAT_IntegrationTestOutput
+tests/rSOILWAT_IntegrationTestOutput*
 src/SOILWAT2/\.git
 src/SOILWAT2/\.github
 src/SOILWAT2/doc

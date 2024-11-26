@@ -224,6 +224,14 @@ format_timestamp <- function(object) {
 #'       * class [`swFiles-class`]:
 #'         `SWRC` parameter input file added as file 6 for a new total of 23
 #'       * class [`swProd-class`]: new slot `"veg_method"`
+#'       * class [`swWeatherData`]: new slots `"use_cloudCoverMonthly"`,
+#'         `"use_windSpeedMonthly"`, `"use_humidityMonthly"`,
+#'         `"dailyInputFlags"`, and `"desc_rsds"`
+#'       * class [`swWeatherData`]: slot `"data"` gained 11 new columns:
+#'         `"cloudCov_pct"`, `"windSpeed_mPERs"`, `"windSpeed_east_mPERs"`,
+#'         `"windSpeed_north_mPERs"`, `"rHavg_pct"`, `"rHmax_pct"`,
+#'         `"rHmin_pct"`, `"specHavg_pct"`, `"Tdewpoint_C"`, `"actVP_kPa"`,
+#'         and `"shortWR"`
 #'   * Changes with `v5.4.0`:
 #'       * classes [`swEstabSpecies-class`] and [`swEstab-class`]:
 #'         new slot `"vegType"`

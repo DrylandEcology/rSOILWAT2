@@ -104,6 +104,14 @@ new slots \code{"swrc_flags"}, \code{"has_swrcp"}, and
 \item class \code{\linkS4class{swFiles}}:
 \code{SWRC} parameter input file added as file 6 for a new total of 23
 \item class \code{\linkS4class{swProd}}: new slot \code{"veg_method"}
+\item class \code{\link{swWeatherData}}: new slots \code{"use_cloudCoverMonthly"},
+\code{"use_windSpeedMonthly"}, \code{"use_humidityMonthly"},
+\code{"dailyInputFlags"}, and \code{"desc_rsds"}
+\item class \code{\link{swWeatherData}}: slot \code{"data"} gained 11 new columns:
+\code{"cloudCov_pct"}, \code{"windSpeed_mPERs"}, \code{"windSpeed_east_mPERs"},
+\code{"windSpeed_north_mPERs"}, \code{"rHavg_pct"}, \code{"rHmax_pct"},
+\code{"rHmin_pct"}, \code{"specHavg_pct"}, \code{"Tdewpoint_C"}, \code{"actVP_kPa"},
+and \code{"shortWR"}
 }
 \item Changes with \code{v5.4.0}:
 \itemize{
