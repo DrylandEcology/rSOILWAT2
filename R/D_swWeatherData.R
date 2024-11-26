@@ -48,7 +48,8 @@ weather_dataColumns <- function() {
 weather_renamedDataColumns <- function() {
   rbind(
     data.frame(
-      old = "specHavg_pct", new = "specHavg_gPERkg", v = "6.2.0", fail = TRUE
+      old = "specHavg_pct", new = "specHavg_gPERkg", v = "6.2.0", fail = TRUE,
+      stringsAsFactors = FALSE
     )
   )
 }
@@ -252,18 +253,19 @@ upgrade_weatherColumns <- function(
   template_weatherColumns = c("Year", "DOY", weather_dataColumns())
 ) {
   cns <- colnames(weatherDF)
-  if (any(!cns %in% template_weatherColumns)) {
+  if (!all(cns %in% template_weatherColumns)) {
     rds <- weather_renamedDataColumns()
     ids <- match(cns, rds[, "old", drop = TRUE], nomatch = 0L)
     for (k in which(ids > 0L)) {
-      if (isTRUE(rds[ids[[k]], "fail", drop = TRUE])) {
-        if (!all(is_missing_weather(weatherDF[, cns[[k]], drop = TRUE]))) {
-          stop(
-            "Renaming ", shQuote(cns[[k]]), " to ",
-            shQuote(as.character(rds[ids[[k]], "new", drop = TRUE])),
-            " failed because of non-missing values."
-          )
-        }
+      if (
+        isTRUE(rds[ids[[k]], "fail", drop = TRUE]) &&
+          !all(is_missing_weather(weatherDF[, cns[[k]], drop = TRUE]))
+      ) {
+        stop(
+          "Renaming ", shQuote(cns[[k]]), " to ",
+          shQuote(as.character(rds[ids[[k]], "new", drop = TRUE])),
+          " failed because of non-missing values."
+        )
       }
 
       cns[[k]] <- as.character(rds[ids[[k]], "new", drop = TRUE])
@@ -354,8 +356,8 @@ weatherHistory <- function(weatherList = NULL) {
 }
 
 validObject_weatherHistory <- function(object) {
-  res <- lapply(object, function(x) validObject(x))
-  has_msg <- sapply(res, is.character)
+  res <- lapply(object, validObject)
+  has_msg <- vapply(res, is.character, FUN.VALUE = NA)
   if (any(has_msg)) {
     unlist(res[has_msg])
   } else {
