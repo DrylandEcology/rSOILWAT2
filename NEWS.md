@@ -1,5 +1,10 @@
-# rSOILWAT2 v6.2.0-9000
+# rSOILWAT2 v6.2.0
+* Simulation output remains the same as the previous version unless
+  relative humidity is calculated from vapor pressure or specific humidity.
+* Update `SOILWAT2` to v8.0.1 which fixed the calculation of relative humidity
+  and the count of days where missing weather was imputed by `"LOCF"`.
 
+## New features
 * `validObject()` method for class `"swInputData"` now includes checks for a
   valid `"weatherHistory"` object.
 
