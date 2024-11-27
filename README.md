@@ -106,15 +106,6 @@ Your computer must be set up adequately (see below for requirements).
     correctly install `rSOILWAT2` or explore one of the development branches.
 
 
-### Binary package
-If you require a binary version of the 'rSOILWAT2' package
-(e.g., to distribute to someone without development tools)
-for a platform to which you do not have access,
-then you may consider using one of the cloud services (no endorsements), e.g.,
-- [rhub](https://builder.r-hub.io) offers different
-  `Linux`, `Windows`, and `macOS` flavors as targets
-
-
 
 ### Minimal requirements
   - on any platform:

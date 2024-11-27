@@ -31,6 +31,13 @@ test_that("Weather data check", {
     get_WeatherHistory(rSOILWAT2::sw_exampleData)
   ))
   expect_true(dbW_check_weatherData(weatherHistory(), check_all = FALSE))
+
+  expect_true(
+    validObject_weatherHistory(get_WeatherHistory(rSOILWAT2::sw_exampleData))
+  )
+  expect_true(validObject_weatherHistory(rSOILWAT2::weatherData))
+  expect_true(validObject_weatherHistory(list(swWeatherData())))
+  expect_true(validObject_weatherHistory(NULL))
 })
 
 test_that("Missing weather data", {
@@ -47,8 +54,12 @@ test_that("Missing weather data", {
 test_that("Weather data sources", {
   template_swin <- rSOILWAT2::sw_exampleData
 
+  siteElevation <- swSite_IntrinsicSiteParams(template_swin)[[3L]]
+
   # see data-raw/prepare_testInput_objects.R
-  add_weather_sources <- c("minimalInputs", "daymet", "gridmet", "maca")
+  add_weather_sources <- c(
+    "minimalInputs", "daymet", "gridmet", "maca-type1", "maca-type2"
+  )
   template_dailyInputFlags <- c(rep(TRUE, 3L), rep(FALSE, 11L))
 
   for (ws in add_weather_sources) {
@@ -69,12 +80,20 @@ test_that("Weather data sources", {
         dif[14L] <- TRUE # SHORT_WR, desc_rsds = 1
         dif
       },
-      maca = {
+      "maca-type1" = {
         dif <- template_dailyInputFlags
         dif[6L] <- TRUE # WIND_EAST
         dif[7L] <- TRUE # WIND_NORTH
         dif[9L] <- TRUE # REL_HUMID_MAX
         dif[10L] <- TRUE # REL_HUMID_MIN
+        dif[14L] <- TRUE # SHORT_WR, desc_rsds = 1
+        dif
+      },
+      "maca-type2" = {
+        dif <- template_dailyInputFlags
+        dif[6L] <- TRUE # WIND_EAST
+        dif[7L] <- TRUE # WIND_NORTH
+        dif[11L] <- TRUE # SPEC_HUMID
         dif[14L] <- TRUE # SHORT_WR, desc_rsds = 1
         dif
       }
@@ -86,21 +105,28 @@ test_that("Weather data sources", {
       grep(ws, dir_weather, value = TRUE)
     )
 
+    # suppress warnings "relative humidity set to 100%" related
+    # to specific humidity
     sww <- list(
-      C = rSOILWAT2::getWeatherData_folders(
-        LookupWeatherFolder = file.path(path_example1, "Input"),
-        weatherDirName = weatherDirName,
-        filebasename = "weath",
-        dailyInputFlags = ws_dailyInputFlags,
-        method = "C"
+      C = suppressWarnings(
+        rSOILWAT2::getWeatherData_folders(
+          LookupWeatherFolder = file.path(path_example1, "Input"),
+          weatherDirName = weatherDirName,
+          filebasename = "weath",
+          dailyInputFlags = ws_dailyInputFlags,
+          elevation = siteElevation,
+          method = "C"
+        )
       ),
 
-      R = rSOILWAT2::getWeatherData_folders(
+      R = suppressWarnings(rSOILWAT2::getWeatherData_folders(
         LookupWeatherFolder = file.path(path_example1, "Input"),
         weatherDirName = weatherDirName,
         filebasename = "weath",
         dailyInputFlags = ws_dailyInputFlags,
+        elevation = siteElevation,
         method = "R"
+      )
       )
     )
 
@@ -155,7 +181,7 @@ test_that("Weather data sources", {
       swin@weather@use_windSpeedMonthly <- FALSE # has daily wind
       swin@weather@use_humidityMonthly <- FALSE # has humidity
 
-    } else if (ws == "maca") {
+    } else if (ws %in% c("maca-type1", "maca-type2")) {
       swin@weather@desc_rsds <- 1L # flux density over 24-hour period
       swin@weather@use_cloudCoverMonthly <- FALSE # use radiation instead
       swin@weather@use_windSpeedMonthly <- FALSE # has daily wind

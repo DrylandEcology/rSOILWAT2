@@ -16,7 +16,8 @@ dbW_addFromFolders(
 (in that order) (name of site weather data) \code{folder},
 \code{lat} (site latitude),
 \code{long} (site longitude),
-\code{label} (name of site).}
+\code{label} (name of site),
+\code{elevation} (site elevation).}
 
 \item{FoldersPath}{A character string. The path to the folder that contains
 the site weather data folders.}

@@ -21,7 +21,9 @@ on:
   pull_request:
     branches: [main, release/**]
 
-name: R-CMD-check
+name: R-CMD-check.yml
+
+permissions: read-all
 
 jobs:
   R-CMD-check:
@@ -33,7 +35,7 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: macOS-latest,   r: 'release'}
+          - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
           - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
           - {os: ubuntu-latest,   r: 'release'}
@@ -45,7 +47,7 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -72,4 +74,5 @@ jobs:
         with:
           upload-snapshots: true
           error-on: '"error"'
+          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
 

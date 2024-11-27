@@ -1218,6 +1218,9 @@ dbW_addWeatherDataNoCheck <- function(
 #' @inheritParams sw_weather_database
 #' @inheritParams dbW_getSiteId
 #' @param weatherFolderPath A character string. The path to the parent folder.
+#' @param elevation A numeric value. Site elevation above sea level `[m]`.
+#'   Used only if specific humidity is provided as input
+#'   for calculating relative humidity.
 #' @param overwrite A logical value. Should weather data that already exists
 #' in the data base be overwritten?
 #'
@@ -1236,6 +1239,7 @@ dbW_addWeatherData <- function(
   Scenario_id = NULL,
   Scenario = "Current",
   weather_tag = "weath",
+  elevation = NA,
   ignore.case = FALSE,
   overwrite = FALSE,
   verbose = FALSE
@@ -1304,7 +1308,8 @@ dbW_addWeatherData <- function(
   if (is.null(weatherData)) {
     weatherData <- getWeatherData_folders(
       LookupWeatherFolder = weatherFolderPath,
-      filebasename = weather_tag
+      filebasename = weather_tag,
+      elevation = elevation
     )
   }
 
@@ -1605,7 +1610,8 @@ dbW_createDatabase <- function(
 #'   (in that order) (name of site weather data) `folder`,
 #'   `lat` (site latitude),
 #'   `long` (site longitude),
-#'   `label` (name of site).
+#'   `label` (name of site),
+#'   `elevation` (site elevation).
 #' @param FoldersPath A character string. The path to the folder that contains
 #'   the site weather data folders.
 #' @param ScenarioName A character string. The scenario name represented by
@@ -1635,6 +1641,7 @@ dbW_addFromFolders <- function(
           weatherFolderPath = file.path(FoldersPath, x[1]),
           weatherData = NULL,
           Label = x[4],
+          elevation = if (length(x) >= 5L) x[5L] else NA_real_,
           Scenario = ScenarioName,
           weather_tag = weather_tag
         )
@@ -1946,6 +1953,9 @@ dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
 #'   see `"weathsetup.in"`.
 #' @param method A character string. `"R"` uses code in `R` to read files as-is
 #'   whereas `"C"` uses `"SOILWAT2"` code to read and process files.
+#' @param elevation A numeric value. Site elevation above sea level `[m]`.
+#'   Used only if specific humidity is provided as input
+#'   for calculating relative humidity.
 #'
 #' @return A list of elements of class \code{\linkS4class{swWeatherData}}.
 #'
@@ -2012,7 +2022,8 @@ getWeatherData_folders <- function(
   startYear = NULL,
   endYear = NULL,
   dailyInputFlags = c(rep(TRUE, 3L), rep(FALSE, 11L)),
-  method = c("R", "C")
+  method = c("R", "C"),
+  elevation = NA
 ) {
 
   method <- match.arg(method)
@@ -2062,6 +2073,7 @@ getWeatherData_folders <- function(
       filebasename,
       used_years[[1L]],
       used_years[[length(used_years)]],
+      elevation,
       dailyInputFlags,
       rSOILWAT2::sw_exampleData
     )
@@ -2242,7 +2254,12 @@ dbW_weatherData_to_monthly <- function(
   valNA = NULL,
   funs = weather_dataAggFun()
 ) {
-  vars <- names(funs)
+  tmpv <- if (length(dailySW) > 0L) {
+    colnames(dailySW[[1L]]@data)
+  } else {
+    weather_dataColumns()
+  }
+  vars <- intersect(names(funs), tmpv)
 
   monthly <- matrix(
     nrow = length(dailySW) * 12,
@@ -2318,7 +2335,7 @@ dbW_dataframe_aggregate <- function(
     )
   }
 
-  vars <- names(funs)
+  vars <- intersect(names(funs), colnames(dailySW))
 
   res <- as.matrix(
     cbind(

@@ -34,7 +34,7 @@ Thumbs.db
 # Package check files
 ..Rcheck
 rSOILWAT2.Rcheck
-rSOILWAT_IntegrationTestOutput/
+rSOILWAT_IntegrationTestOutput*
 tests/spelling.Rout.save
 backup/
 

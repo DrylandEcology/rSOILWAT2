@@ -1129,6 +1129,9 @@ compare_weather <- function(
 #' @inheritParams sw_weather_data
 #' @param years An integer vector. The calendar years for which to generate
 #' daily weather. If `NULL`, then extracted from `weatherData`.
+#' @param elevation A numeric value. Site elevation above sea level `[m]`.
+#'   Used only if specific humidity is provided as input
+#'   for calculating relative humidity.
 #' @param wgen_coeffs A list with two named elements `"mkv_doy"` and
 #' `"mkv_woy"`, i.e., the return value of [dbW_estimate_WGen_coefs()].
 #' If `NULL`, then [dbW_estimate_WGen_coefs()] is called on `weatherData`.
@@ -1210,6 +1213,7 @@ compare_weather <- function(
 dbW_generateWeather <- function(
   weatherData,
   years = NULL,
+  elevation = NA,
   wgen_coeffs = NULL,
   imputation_type = "mean",
   imputation_span = 5L,
@@ -1242,6 +1246,9 @@ dbW_generateWeather <- function(
   # Set years
   swYears_EndYear(sw_in) <- max(years)
   swYears_StartYear(sw_in) <- min(years)
+
+  # Set elevation
+  swSite_IntrinsicSiteParams(sw_in)[3L] <- as.numeric(elevation)
 
   # Turn on weather generator (to fill in missing values)
   swWeather_UseMarkov(sw_in) <- TRUE
@@ -1371,6 +1378,7 @@ dbW_imputeWeather <- function(
   seed = NULL,
   method_after_wg = c("interp", "locf", "mean", "none", "fail"),
   nmax_run = Inf,
+  elevation = NA,
   return_weatherDF = FALSE
 ) {
 
@@ -1402,6 +1410,7 @@ dbW_imputeWeather <- function(
     #--- Use weather generator for available variables
     tmp <- dbW_generateWeather(
       weatherData = weatherData,
+      elevation = elevation,
       return_weatherDF = TRUE,
       seed = seed
     )
@@ -1717,16 +1726,16 @@ dbW_fixWeather <- function(
   tmp <- which(rowSums(!is_miss1) > 0L)
   ids <- tmp[c(1L, length(tmp))]
 
-  ids_startend <-
+  ids_startend <- if (length(tmp) > 0L) {
     # before start
     (weatherData1[["Year"]] < weatherData1[ids[[1L]], "Year"]) |
-    (weatherData1[["Year"]] == weatherData1[ids[[1L]], "Year"] &
-        weatherData1[["DOY"]] < weatherData1[ids[[1L]], "DOY"]) |
-    # after end
-    (weatherData1[["Year"]] == weatherData1[ids[[2L]], "Year"] &
-        weatherData1[["DOY"]] > weatherData1[ids[[2L]], "DOY"]) |
-    (weatherData1[["Year"]] > weatherData1[ids[[2L]], "Year"])
-
+      (weatherData1[["Year"]] == weatherData1[ids[[1L]], "Year"] &
+          weatherData1[["DOY"]] < weatherData1[ids[[1L]], "DOY"]) |
+      # after end
+      (weatherData1[["Year"]] == weatherData1[ids[[2L]], "Year"] &
+          weatherData1[["DOY"]] > weatherData1[ids[[2L]], "DOY"]) |
+      (weatherData1[["Year"]] > weatherData1[ids[[2L]], "Year"])
+  }
 
 
   #--- Interpolate short missing runs

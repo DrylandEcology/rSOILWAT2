@@ -285,3 +285,40 @@ test_that("Weather generator (integration tests): compare input/output", {
     n = 5L
   )
 })
+
+
+test_that("Weather: fix dataset", {
+  #--- Check: fixedValue, interpolatedLienar, substituteData
+  x0 <- x <- dbW_weatherData_to_dataframe(rSOILWAT2::weatherData)
+
+   tmp <- x[, "Year"] == 1981
+   ids_to_interp <- tmp & x[, "DOY"] >= 144 & x[, "DOY"] <= 145
+   x[ids_to_interp, -(1:2)] <- NA
+
+   tmp <- x[, "Year"] == 1980
+   ids_to_sub <- tmp & x[, "DOY"] >= 153 & x[, "DOY"] <= 244
+   x[ids_to_sub, -(1:2)] <- NA
+
+   xf <- dbW_fixWeather(x, x0, return_weatherDF = TRUE)
+
+   expect_identical(
+     xf[["weatherData"]][!ids_to_interp, ],
+     as.data.frame(x0)[!ids_to_interp, ]
+   )
+
+   expect_gt(sum(!is.na(xf[["meta"]])), 0L)
+
+   expect_setequal(
+     names(table(xf[["meta"]])),
+     c("fixedValue", "interpolateLinear (<= 7 days)", "substituteData")
+   )
+
+
+   #--- Check: all values missing in - all values missing out
+   x <- dbW_weatherData_to_dataframe(rSOILWAT2::weatherData)
+   x[, weather_dataColumns()] <- NA
+
+   xf <- dbW_fixWeather(x, return_weatherDF = TRUE)
+   expect_true(all(is.na(x[, weather_dataColumns()])))
+   expect_identical(sum(!is.na(xf[["meta"]])), 0L)
+})

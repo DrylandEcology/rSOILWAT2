@@ -104,7 +104,7 @@ for (k in seq_along(list_backups)) {
 #------ Helper functions -----
 compare_objects <- function(new, old, tolerance = 1e-9) {
   # Compare to previous version
-  res_cmp <- waldo::compare(old, new, tolerance = tolerance)
+  res_cmp <- waldo::compare(old, new, tolerance = tolerance, max_diffs = Inf)
 
   # Ignore "timestamp"
   has_timestamp_diff <- grepl("timestamp", res_cmp, fixed = TRUE)
@@ -303,9 +303,9 @@ for (it in seq_along(tests)) {
 
     # Save default package data (if different from previous)
     if (res_cmp[["resave"]]) {
-      print(res_cmp[["waldo_cmp"]])
-
       message("Update default package data: 'sw_exampleData'")
+
+      print(res_cmp[["res_waldo"]])
 
       # nolint start: namespace_linter.
       usethis::use_data(sw_exampleData, internal = FALSE, overwrite = TRUE)
@@ -342,12 +342,14 @@ for (it in seq_along(tests)) {
         paste0("Ex", tests[it], "_weather.rds")
       )
     ),
-    sw_weather
+    sw_weather,
+    max_diffs = Inf
   )
 
 
   #--- Save weather for unit testing (if different from previous)
   if (length(res_cmp) > 0) {
+    message("Update weather data (example ", it, ") for tests:")
     print(res_cmp)
 
     saveRDS(
@@ -373,7 +375,8 @@ for (it in seq_along(tests)) {
 
   #--- Save input for unit testing (if different from previous)
   if (res_cmp[["resave"]]) {
-    print(res_cmp[["waldo_cmp"]])
+    message("Update input data (example ", it, ") for tests:")
+    print(res_cmp[["res_waldo"]])
 
     saveRDS(
       object = sw_input,
@@ -393,7 +396,7 @@ for (it in seq_along(tests)) {
       quiet = TRUE
     )
 
-    #--- Compare ouput to previous version
+    #--- Compare output to previous version
     res_cmp <- compare_objects(
       rdy,
       old = readRDS(
@@ -408,7 +411,8 @@ for (it in seq_along(tests)) {
 
     # Save test output (if different from previous)
     if (res_cmp[["resave"]]) {
-      print(res_cmp[["waldo_cmp"]])
+      message("Update SOILWAT2 output (example ", it, ") for tests:")
+      print(res_cmp[["res_waldo"]])
 
       saveRDS(
         object = rdy,

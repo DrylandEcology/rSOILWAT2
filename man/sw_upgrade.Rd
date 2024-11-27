@@ -8,6 +8,7 @@
 \alias{sw_upgrade,swFiles-method}
 \alias{sw_upgrade,swMonthlyScalingParams-method}
 \alias{sw_upgrade,swWeather-method}
+\alias{upgrade_weatherColumns}
 \alias{upgrade_weatherDF}
 \alias{upgrade_weatherHistory}
 \alias{sw_upgrade,swProd-method}
@@ -28,6 +29,11 @@ sw_upgrade(object, verbose = FALSE)
 \S4method{sw_upgrade}{swMonthlyScalingParams}(object, verbose = FALSE)
 
 \S4method{sw_upgrade}{swWeather}(object, verbose = FALSE)
+
+upgrade_weatherColumns(
+  weatherDF,
+  template_weatherColumns = c("Year", "DOY", weather_dataColumns())
+)
 
 upgrade_weatherDF(
   weatherDF,
@@ -63,6 +69,9 @@ upgrade_weatherHistory(object, verbose = FALSE)
 The upgraded \code{object}, if needed, to match the current version
 with missing slots and elements filled with default values.
 
+For \code{\link[=upgrade_weatherColumns]{upgrade_weatherColumns()}}:
+an updated \code{weatherDF} with requested column name changes.
+
 For \code{\link[=upgrade_weatherDF]{upgrade_weatherDF()}}:
 an updated \code{weatherDF} with requested columns.
 }
@@ -74,6 +83,12 @@ take the new default values from \code{SOILWAT2}.
 
 List of changes:
 \itemize{
+\item Changes with \code{v6.2.0}:
+\itemize{
+\item class \code{\link{swWeatherData}}: slot \code{"data"} changed column name
+(\code{"specHavg_pct"} to \code{"specHavg_gPERkg"}) and
+units (\code{"\%"} to \code{"g kg-1"}).
+}
 \item Changes with \code{v6.1.0}:
 \itemize{
 \item class \code{\linkS4class{swInputData}}:
@@ -89,6 +104,14 @@ new slots \code{"swrc_flags"}, \code{"has_swrcp"}, and
 \item class \code{\linkS4class{swFiles}}:
 \code{SWRC} parameter input file added as file 6 for a new total of 23
 \item class \code{\linkS4class{swProd}}: new slot \code{"veg_method"}
+\item class \code{\link{swWeatherData}}: new slots \code{"use_cloudCoverMonthly"},
+\code{"use_windSpeedMonthly"}, \code{"use_humidityMonthly"},
+\code{"dailyInputFlags"}, and \code{"desc_rsds"}
+\item class \code{\link{swWeatherData}}: slot \code{"data"} gained 11 new columns:
+\code{"cloudCov_pct"}, \code{"windSpeed_mPERs"}, \code{"windSpeed_east_mPERs"},
+\code{"windSpeed_north_mPERs"}, \code{"rHavg_pct"}, \code{"rHmax_pct"},
+\code{"rHmin_pct"}, \code{"specHavg_pct"}, \code{"Tdewpoint_C"}, \code{"actVP_kPa"},
+and \code{"shortWR"}
 }
 \item Changes with \code{v5.4.0}:
 \itemize{
@@ -116,8 +139,18 @@ new slot \code{"vegType"}
 \examples{
 x <- sw_upgrade(rSOILWAT2::sw_exampleData, verbose = TRUE)
 
+upgrade_weatherColumns(
+  data.frame(DOY = 1:2, Tmax_C = runif(2), dummy = runif(2))
+)
+upgrade_weatherColumns(
+  data.frame(DOY = 1:2, Tmax_C = runif(2), specHavg_pct = NA)
+)
+
 upgrade_weatherDF(
   data.frame(DOY = 1:2, Tmax_C = runif(2), dummy = runif(2))
+)
+upgrade_weatherDF(
+  data.frame(DOY = 1:2, Tmax_C = runif(2), specHavg_pct = NA)
 )
 
 }

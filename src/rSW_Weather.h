@@ -11,4 +11,5 @@ void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo);
 SEXP onGet_WTH_DATA(void);
 void onSet_WTH_DATA(SEXP weatherList, LOG_INFO* LogInfo);
 SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
-                           SEXP do_C4vars, SEXP do_Cheatgrass_ClimVars, SEXP latitude);
+                           SEXP do_C4vars, SEXP do_Cheatgrass_ClimVars, SEXP latitude,
+                           SEXP elevation);

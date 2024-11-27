@@ -38,7 +38,7 @@
 0			# Relative humidity [%]
 0			# Maximum relative humidity [%]
 0			# Minimum relative humidity [%]
-0			# Specific humidity [%]
+0			# Specific humidity [g kg-1]
 0			# Dew point temperature [C]
 0			# Actual vapor pressure [kPa]
 0			# Downward surface shortwave radiation (see `Daily weather input descriptions`)

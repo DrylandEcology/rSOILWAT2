@@ -119,17 +119,6 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
       }
     }
 
-    if (isNull(weatherList)) {
-      weatherList = GET_SLOT(InputData, install("weatherHistory"));
-    }
-    onSet_WTH_DATA(weatherList, LogInfo);
-    #ifdef RSWDEBUG
-    if (debug) sw_printf(" > 'weather-history'");
-    #endif
-    if (LogInfo->stopRun) {
-        return; // Exit function prematurely due to error
-    }
-
     onSet_SW_VPD(GET_SLOT(InputData, install("prod")), LogInfo);
     #ifdef RSWDEBUG
     if (debug) sw_printf(" > 'veg'");
@@ -141,6 +130,17 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
     onSet_SW_SIT(GET_SLOT(InputData, install("site")), LogInfo);
     #ifdef RSWDEBUG
     if (debug) sw_printf(" > 'site'");
+    #endif
+    if (LogInfo->stopRun) {
+        return; // Exit function prematurely due to error
+    }
+
+    if (isNull(weatherList)) {
+      weatherList = GET_SLOT(InputData, install("weatherHistory"));
+    }
+    onSet_WTH_DATA(weatherList, LogInfo);
+    #ifdef RSWDEBUG
+    if (debug) sw_printf(" > 'weather-history'");
     #endif
     if (LogInfo->stopRun) {
         return; // Exit function prematurely due to error

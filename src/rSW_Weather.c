@@ -76,6 +76,7 @@ static void rSW2_setAllWeather(
   RealD *cloudcov,
   RealD *windspeed,
   RealD *r_humidity,
+  double elevation,
   LOG_INFO* LogInfo
 );
 
@@ -84,6 +85,7 @@ static void rSW2_set_weather_hist(
   TimeInt year,
   SW_WEATHER_HIST *yearWeather,
   Bool *dailyInputFlags,
+  double elevation,
   LOG_INFO* LogInfo
 );
 
@@ -341,7 +343,7 @@ SEXP onGet_WTH_DATA(void) {
   Daily weather elements that are not internally stored by `SOILWAT2` are
   returned as missing values; these are
   `"windSpeed_east_mPERs"`, `"windSpeed_north_mPERs"`,
-  `"rHmax_pct"`, `"rHmin_pct"`, `"specHavg_pct"`, `"Tdewpoint_C"`
+  `"rHmax_pct"`, `"rHmin_pct"`, `"specHavg_gPERkg"`, `"Tdewpoint_C"`
 
   Called by `onGet_WTH_DATA()`
 */
@@ -357,7 +359,7 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 		"Tmax_C", "Tmin_C", "PPT_cm",
 		"cloudCov_pct",
 		"windSpeed_mPERs", "windSpeed_east_mPERs", "windSpeed_north_mPERs",
-		"rHavg_pct", "rHmax_pct", "rHmin_pct", "specHavg_pct", "Tdewpoint_C",
+		"rHavg_pct", "rHmax_pct", "rHmin_pct", "specHavg_gPERkg", "Tdewpoint_C",
 		"actVP_kPa",
 		"shortWR"
 	};
@@ -390,7 +392,7 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 		p_Year[i + days * (REL_HUMID + 1)] = w->allHist[yearIndex]->r_humidity_daily[i];
 		p_Year[i + days * (REL_HUMID_MAX + 1)] = NA_REAL; // rHmax_pct
 		p_Year[i + days * (REL_HUMID_MIN + 1)] = NA_REAL; // rHmin_pct
-		p_Year[i + days * (SPEC_HUMID + 1)] = NA_REAL; // specHavg_pct
+		p_Year[i + days * (SPEC_HUMID + 1)] = NA_REAL; // specHavg_pct -- note: SOILWAT2 uses g kg-1!
 		p_Year[i + days * (TEMP_DEWPOINT + 1)] = NA_REAL; // Tdewpoint_C
 
 		p_Year[i + days * (ACTUAL_VP + 1)] = w->allHist[yearIndex]->actualVaporPressure[i];
@@ -430,6 +432,10 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
   @note `SW_Weather` (via `onSet_SW_WTH_setup()`) and
     `SW_Sky` (via `onSet_SW_SKY()`) must be set/updated
     before this function is called.
+
+  @note Element `elevation` of `SW_Model` must be set/updated
+    before this function is called, if relative humidity is to be calculated
+    from specific humidity.
 */
 void onSet_WTH_DATA(SEXP weatherList, LOG_INFO* LogInfo) {
 
@@ -465,6 +471,7 @@ void onSet_WTH_DATA(SEXP weatherList, LOG_INFO* LogInfo) {
     SoilWatRun.Sky.cloudcov,
     SoilWatRun.Sky.windspeed,
     SoilWatRun.Sky.r_humidity,
+    SoilWatRun.Model.elevation,
     LogInfo
   );
 }
@@ -485,6 +492,7 @@ static void rSW2_setAllWeather(
   RealD *cloudcov,
   RealD *windspeed,
   RealD *r_humidity,
+  double elevation,
   LOG_INFO* LogInfo
 ) {
     unsigned int yearIndex, year;
@@ -529,6 +537,7 @@ static void rSW2_setAllWeather(
               year,
               allHist[yearIndex],
               dailyInputFlags,
+              elevation,
               LogInfo
             );
 
@@ -547,6 +556,7 @@ static void rSW2_set_weather_hist(
   TimeInt year,
   SW_WEATHER_HIST *yearWeather,
   Bool *dailyInputFlags,
+  double elevation,
   LOG_INFO* LogInfo
 ) {
 
@@ -602,7 +612,7 @@ static void rSW2_set_weather_hist(
     Bool useHumidityDaily = (Bool) (hasMaxMinRelHumid || dailyInputFlags[REL_HUMID] ||
                                     dailyInputFlags[SPEC_HUMID] || dailyInputFlags[ACTUAL_VP]);
 
-    double v1, v2, es, e, relHum, tempSlope, svpVal;
+    double v1, v2;
 
 
     // Loop over days of current year
@@ -708,16 +718,34 @@ static void rSW2_set_weather_hist(
                 );
 
                 if (!missing(yearWeather->temp_avg[doy]) && !missing(v1)) {
-                    // Specific humidity (Bolton 1980)
-                    es = 6.112 * exp(17.67 * yearWeather->temp_avg[doy]) /
-                         (yearWeather->temp_avg[doy] + 243.5);
+                    // Relative humidity [0-100 %] calculated from
+                    // specific humidity [g kg-1] and temperature [C]
+                    yearWeather->r_humidity_daily[doy] = relativeHumidity2(
+                        v1, yearWeather->temp_avg[doy], elevation
+                    );
 
-                    e = (v1 * 1013.25) / (.378 * v1 + .622);
+                    // Snap relative humidity in 100-150% to 100%
+                    if (yearWeather->r_humidity_daily[doy] > 100. &&
+                        yearWeather->r_humidity_daily[doy] <= 150.) {
+                        LogError(
+                            LogInfo,
+                            LOGWARN,
+                            "Year %d - day %d: relative humidity set to 100%%: "
+                            "based on assumption that "
+                            "a presumed minor mismatch in inputs "
+                            "(specific humidity (%f), "
+                            "temperature (%f) and elevation (%f)) "
+                            "caused the calculated value (%f) to exceed 100%%.",
+                            year,
+                            doy,
+                            v1,
+                            yearWeather->temp_avg[doy],
+                            elevation,
+                            yearWeather->r_humidity_daily[doy]
+                        );
 
-                    relHum = e / es;
-                    relHum = fmax(0., relHum);
-
-                    yearWeather->r_humidity_daily[doy] = fmin(100., relHum);
+                        yearWeather->r_humidity_daily[doy] = 100.;
+                    }
                 }
             }
 
@@ -782,10 +810,32 @@ static void rSW2_set_weather_hist(
                     !missing(yearWeather->temp_avg[doy]) &&
                     !missing(yearWeather->actualVaporPressure[doy])
                 ) {
-                    svpVal = svp(yearWeather->temp_avg[doy], &tempSlope);
+                    // Relative humidity [0-100 %]
+                    yearWeather->r_humidity_daily[doy] = relativeHumidity1(
+                        yearWeather->actualVaporPressure[doy],
+                        yearWeather->temp_avg[doy]
+                    );
 
-                    yearWeather->r_humidity_daily[doy] =
-                        yearWeather->actualVaporPressure[doy] / svpVal;
+                    // Snap relative humidity in 100-150% to 100%
+                    if (yearWeather->r_humidity_daily[doy] > 100. &&
+                        yearWeather->r_humidity_daily[doy] <= 150.) {
+                        LogError(
+                            LogInfo,
+                            LOGWARN,
+                            "Year %d - day %d: relative humidity set to 100%%: "
+                            "based on assumption that "
+                            "a presumed minor mismatch in inputs "
+                            "(vapor pressure (%f) and temperature (%f)) "
+                            "caused the calculated value (%f) to exceed 100%%.",
+                            year,
+                            doy,
+                            yearWeather->actualVaporPressure[doy],
+                            yearWeather->temp_avg[doy],
+                            yearWeather->r_humidity_daily[doy]
+                        );
+
+                        yearWeather->r_humidity_daily[doy] = 100.;
+                    }
                 }
             }
         }
@@ -802,7 +852,8 @@ static void rSW2_set_weather_hist(
 
 // `calc_SiteClimate()` is R interface to rSW2_calc_SiteClimate()
 SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
-                           SEXP do_C4vars, SEXP do_Cheatgrass_ClimVars, SEXP latitude) {
+                           SEXP do_C4vars, SEXP do_Cheatgrass_ClimVars, SEXP latitude,
+                           SEXP elevation) {
 
     SW_WEATHER_HIST **allHist = NULL;
 
@@ -880,6 +931,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
       cloudcov,
       windspeed,
       r_humidity,
+      asReal(elevation),
       &local_LogInfo
     );
     if(local_LogInfo.stopRun) {
