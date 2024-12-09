@@ -78,8 +78,16 @@ RCP85
 
 
 # --- Soil characterization ---
+# Is the soil layer depth profile and number of soil layers identical (1) across the entire domain or do they vary among sites/gridcells (0)?
+1
+
 # Are inputs of density representing bulk soil (type 1) or the matric component (type 0)?
 0
+
+
+# --- Organic matter ---
+# Depth [cm] at which characteristics of organic matter have completely switched from fibric to sapric peat
+50
 
 
 #--- Soil water retention curve (SWRC) ------
@@ -99,7 +107,7 @@ Campbell1974				# Specify soil water retention curve
 Cosby1984AndOthers	# Specify pedotransfer function
 										# (if not implemented, then provide SWRC parameters via "swrc_params.in")
 
-0			# Has SWRC parameters (see `has_swrcp`)?
+0			# Has SWRC parameters for the mineral soil component (see `has_swrcp`)?
 			#    0: Estimate with specified pedotransfer function
 			#    1: Use values from "swrc_params.in"
 

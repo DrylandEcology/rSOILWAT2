@@ -1,7 +1,6 @@
 #------ Input for Soil Water Retention Curves (by soil layer) ------
 
-# A table with up to `MAX_LAYERS` rows (soil layers) and 6 columns:
-#   - the soil layers must match `soils.in`
+# Tables with 6 columns:
 #   - the interpretation of columns (SWRC parameters) depends on the
 #     selected SWRC (see `siteparam.in`)
 #   - unused columns are ignored (if selected SWRC uses fewer than 6 parameters)
@@ -13,6 +12,18 @@
 #   * param4 = n, measure of the pore-size distribution [-]
 #   * param5 = saturated hydraulic conductivity [cm/day]
 
+
+# Table with two sets of six SWRC parameters
+#   * first set (row): characteristics of fibric peat
+#   * second set (row): characteristics of sapric peat
+#   * source: Letts et al. 2000, doi:10.1080/07055900.2000.9649643
+# param1  param2   param3   param4     param5   param6
+    0.04    0.93    0.08       1.9   2419.2     0.0000
+    0.22    0.83    0.003      1.6      0.864   0.0000
+
+
+# Table with six SWRC parameters for up to `MAX_LAYERS` rows (soil layers)
+#   * the soil layers must match `soils.in`
 # param1   param2    param3      param4   param5    param6
 0.07564425 0.3925437 0.010035788 1.412233 19.871040    0
 0.10061329 0.4011315 0.009425738 1.352274  9.090754    0

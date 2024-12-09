@@ -54,7 +54,7 @@ SEXP onGet_SW_SKY(void) {
     "SnowDensity_kg/m^3", "RainEvents_per_day" };
   char *y_names[] = { "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December" };
-	RealD *p_Cloud;
+	double *p_Cloud;
 
 	PROTECT(swCloud = MAKE_CLASS("swCloud"));
 	PROTECT(SW_SKY = NEW_OBJECT(swCloud));
@@ -90,11 +90,11 @@ SEXP onGet_SW_SKY(void) {
 void onSet_SW_SKY(SEXP sxp_SW_SKY) {
 	int i, k = 5;
 	SW_SKY *v = &SoilWatRun.Sky;
-	RealD *p_Cloud;
+	double *p_Cloud;
 	PROTECT(sxp_SW_SKY);
 	p_Cloud = REAL(GET_SLOT(sxp_SW_SKY, install("Cloud")));
 
-	MyFileName = SoilWatDomain.PathInfo.InFiles[eSky];
+	MyFileName = SoilWatDomain.SW_PathInputs.txtInFiles[eSky];
 
 	for (i = 0; i < 12; i++) { //i=columns
 		v->cloudcov[i] = p_Cloud[0 + k * i];

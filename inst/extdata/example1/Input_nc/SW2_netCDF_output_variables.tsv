@@ -1,4 +1,4 @@
-	SW2 variable	SW2 txt output	SW2 units	XY+Dim	Do output?	netCDF variable name	netCDF long_name	netCDF comment	netCDF units	netCDF cell_method	User comment
+SW2 output group	SW2 variable	SW2 txt output	SW2 units	XY+Dim	Do output?	netCDF variable name	netCDF long_name	netCDF comment	netCDF units	netCDF cell_method	User comment
 TEMP	temp_max	max_C	degC	T	1	tasmax	daily maximum air temperature	NA	degC	time: maximum	CMIP6/CMOR3
 TEMP	temp_min	min_C	degC	T	1	tasmin	daily minimum air temperature	NA	degC	time: minimum	CMIP6/CMOR3
 TEMP	temp_avg	avg_C	degC	T	1	tas	daily mean air temperature	NA	degC	time: mean	CMIP6/CMOR3
@@ -15,12 +15,12 @@ RUNOFF	net	net	cm	T	1	mrros	total surface runoff amount	net surface runoff amoun
 RUNOFF	surfaceRunoff	ponded_runoff	cm	T	1	runoff	surface runoff amount	surface runoff amount (excluding drainage through the base of the soil model)	mm	time: sum	NA
 RUNOFF	snowRunoff	snowmelt_runoff	cm	T	1	runoffsn	surface runoff amount from snow	surface runoff amount from snow (excluding drainage through the base of the soil model)	mm	time: sum	NA
 RUNOFF	surfaceRunon	ponded_runon	cm	T	1	runon	runon amount	surface runon amount (excluding drainage through the base of the soil model)	mm	time: sum	NA
-SURFACEWATER	surfaceWater	surfaceWater_cm	cm	T	1	sw	land surface liquid water amount	Surface water storage other than soil, snow or interception storage	mm	time: sum	CMIP6/CMOR3
-EVAPSURFACE	total_evap	evap_total	cm	T	1	eclow	water evaporation amount from canopy, above-ground litter, and surface water	Evaporation from water intercepted by canopy or by above-ground litter and from open water (excluding bare soil evaporation), i.e., ec + eLitterAbove + eow	mm	time: sum	NA
+SURFACEWATER	surfaceWater	surfaceWater_cm	cm	T	1	sw	land surface liquid water amount	"Surface water storage other than soil, snow or interception storage"	mm	time: sum	CMIP6/CMOR3
+EVAPSURFACE	total_evap	evap_total	cm	T	1	eclow	"water evaporation amount from canopy, above-ground litter, and surface water"	"Evaporation from water intercepted by canopy or by above-ground litter and from open water (excluding bare soil evaporation), i.e., ec + eLitterAbove + eow"	mm	time: sum	NA
 EVAPSURFACE	evap_veg	evap_<veg>	cm	TV	1	ecPFT	water evaporation amount from canopy by plant functional type	Interception evaporation by plant functional type	mm	time: sum	Not standardized but see ec
 EVAPSURFACE	litter_evap	evap_litter	cm	T	1	eLitterAbove	water evaporation amount from above-ground litter	NA	mm	time: sum	Not standardized but see ec and cLitterAbove
 EVAPSURFACE	surfaceWater_evap	evap_surfaceWater	cm	T	1	eow	surface water evaporation amount	Open water evaporation	mm	time: sum	CMIP6/CMOR3
-INTERCEPTION	total_int	int_total	cm	T	1	wveg	water amount on canopy and above-ground litter	Water storage that was intercepted by the vegetation canopy or above-ground litter before reaching the ground, i.e., cw + wLitterAbove	mm	time: sum	NA
+INTERCEPTION	total_int	int_total	cm	T	1	wveg	water amount on canopy and above-ground litter	"Water storage that was intercepted by the vegetation canopy or above-ground litter before reaching the ground, i.e., cw + wLitterAbove"	mm	time: sum	NA
 INTERCEPTION	int_veg	int_<veg>	cm	TV	1	cwPFT	canopy water amount by plant functional type	Canopy water storage by plant functional type that was intercepted by the vegetation canopy before reaching the ground	mm	time: sum	Not standardized but see cw
 INTERCEPTION	litter_int	int_litter	cm	T	1	wLitterAbove	water amount on above-ground litter	Water storage that was intercepted by above-ground litter before reaching the ground	mm	time: sum	Not standardized but see cw and cLitterAbove
 AET	aet	evapotr_cm	cm	T	1	evspsbl	water evapotranspiration amount	Evaporation at surface including sublimation and transpiration	mm	time: sum	CMIP6/CMOR3
@@ -48,8 +48,8 @@ BIOMASS	litter_total	Biomass_litter	g m-2	T	1	bLitterAbove	biomass in above-grou
 BIOMASS	biolive_total	Biolive_total	g m-2	T	1	bVegLive	live biomass in above-ground vegetation	NA	g m-2	time: mean	Not standardized but see cVeg
 BIOMASS	veg.biolive_inveg	Biolive_<veg>	g m-2	TV	1	bVegLivePFT	live biomass in above-ground vegetation by plant functional type	NA	g m-2	time: mean	Not standardized but see cVeg
 BIOMASS	LAI	LAI_total	m m-2	T	1	lai	leaf area index	A ratio obtained by dividing the total upper leaf surface area of vegetation by the (horizontal) surface area of the land on which it grows.	m m-2	time: mean	CMIP6/CMOR3
-VWCBULK	vwcBulk	Lyr_<slyr>	cm cm-1	ZT	1	vwc	volumetric soil moisture of soil layer	Volume fraction of water in soil layer, i.e., mrsol divided by soil layer depth	mm mm-1	time: mean	NA
-VWCMATRIC	vwcMatric	Lyr_<slyr>	cm cm-1	ZT	1	vwcMatric	volumetric soil moisture in matric component of soil layer	Volume fraction of water in matric component of soil layer, i.e., mrsol divided by soil layer depth without coarse fragments	mm mm-1	time: mean	NA
+VWCBULK	vwcBulk	Lyr_<slyr>	cm cm-1	ZT	1	vwc	volumetric soil moisture of soil layer	"Volume fraction of water in soil layer, i.e., mrsol divided by soil layer depth"	mm mm-1	time: mean	NA
+VWCMATRIC	vwcMatric	Lyr_<slyr>	cm cm-1	ZT	1	vwcMatric	volumetric soil moisture in matric component of soil layer	"Volume fraction of water in matric component of soil layer, i.e., mrsol divided by soil layer depth without coarse fragments"	mm mm-1	time: mean	NA
 SWCBULK	swcBulk	Lyr_<slyr>	cm	ZT	1	mrsol	mass content of water in soil layer	Total water content of soil layer	mm	time: mean	CMIP6/CMOR3
 SWA	SWA_VegType	swa_<veg>_Lyr_<slyr>	cm	ZTV	1	swaPFT	available water content in soil layer by plant functional type	Water content of soil layer held at a plant functional type specific potential	mm	time: mean	NA
 SWABULK	swaBulk	Lyr_<slyr>	cm	ZT	1	swa	available water content in soil layer	Water content of soil layer held at a potential > -1.5 MPa	mm	time: mean	NA

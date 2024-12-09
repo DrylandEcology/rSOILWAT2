@@ -26,8 +26,11 @@ ymin_bbox 39.59
 xmax_bbox -105.58
 ymax_bbox 39.59
 
+# Domain Coordinates
+SpatialTolerance 1e-6            # Tolerance used to identify matching domain space
+
 # Spinup
-SpinupMode      1               # Mode ( 1: repeated random resample; 2: sequence of m years ), default = 1
-SpinupScope     1               # Scope ( N ): use first N years of simulation, default = 1
-SpinupDuration  0               # Duration ( M ): sample M years of the first N years (no spinup: M = 0), default = 0
-SpinupSeed      11              # Seed for randomly generating years for mode 1, default = 11
+SpinupMode       1               # Mode ( 1: repeated random resample; 2: sequence of m years ), default = 1
+SpinupScope      1               # Scope ( N ): use first N years of simulation, default = 1
+SpinupDuration   0               # Duration ( M ): sample M years of the first N years (no spinup: M = 0), default = 0
+SpinupSeed       11              # Seed for randomly generating years for mode 1, default = 11

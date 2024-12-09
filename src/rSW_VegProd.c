@@ -72,26 +72,26 @@ SEXP onGet_SW_VPD(void) {
 
 	SEXP Canopy, Canopy_names, Canopy_names_x;
 	char *cCanopy_names_x[] = { "xinflec", "yinflec", "range", "slope", "height_cm" };
-	RealD *p_Canopy;
+	double *p_Canopy;
 
 	SEXP VegInterception, VegInterception_names, VegInterception_names_x;
 	char *cVegInterception_x[] = { "kSmax", "kdead" };
-	RealD *p_VegInterception;
+	double *p_VegInterception;
 
 	SEXP LitterInterception, LitterInterception_names, LitterInterception_names_x;
 	char *cLitterInterception_x[] = { "kSmax" };
-	RealD *p_LitterInterception;
+	double *p_LitterInterception;
 
 	SEXP EsTpartitioning_param;
 	SEXP Es_param_limit;
 
 	SEXP Shade, Shade_names, Shade_names_x;
 	char *cShade_names_x[] = { "ShadeScale", "ShadeMaximalDeadBiomass", "tanfuncXinflec", "yinflec", "range", "slope" };
-	RealD *p_Shade;
+	double *p_Shade;
 
 	SEXP Hydraulic_flag;//"Flag"
 	SEXP Hydraulic, Hydraulic_names, Hydraulic_names_x;
-	RealD *p_Hydraulic;
+	double *p_Hydraulic;
 	char *cHydraulic_names[] = { "MaxCondRoot", "SoilWaterPotential50", "ShapeCond" };
 
 	SEXP CSWP;
@@ -110,7 +110,7 @@ SEXP onGet_SW_VPD(void) {
 	/* CO2 */
 	// Initialize variables
 	SEXP CO2Coefficients, CO2_names, CO2_col_names;
-	RealD *p_CO2Coefficients;
+	double *p_CO2Coefficients;
 
 	// Create row and column names
 	char *cCO2_col_names[] = { "Biomass Coeff1", "Biomass Coeff2", "WUE Coeff1", "WUE Coeff2" };
@@ -144,7 +144,7 @@ SEXP onGet_SW_VPD(void) {
 	SET_VECTOR_ELT(CO2_names, 0, vegtype_names);
 	setAttrib(CO2Coefficients, R_DimNamesSymbol, CO2_names);
 
-	RealD *p_Grasslands, *p_Shrublands, *p_Forest, *p_Forb;
+	double *p_Grasslands, *p_Shrublands, *p_Forest, *p_Forb;
 	SEXP MonthlyVeg_Column_names, MonthlyVeg_Row_names;
 	char *cMonthlyVeg_Column_names[] = { "Litter", "Biomass", "Live_pct", "LAI_conv" };
 
@@ -423,23 +423,23 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 	SEXP VegComp;
 	SEXP Albedo;
 	SEXP Canopy;
-	RealD *p_Canopy;
+	double *p_Canopy;
 	SEXP VegInterception;
-	RealD *p_VegInterception;
+	double *p_VegInterception;
 	SEXP LitterInterception;
-	RealD *p_LitterInterception;
+	double *p_LitterInterception;
 	SEXP EsTpartitioning_param;
 	SEXP Es_param_limit;
 	SEXP Shade;
-	RealD *p_Shade;
+	double *p_Shade;
 	SEXP Hydraulic;
 	SEXP Hydraulic_flag;
 	SEXP CSWP;
 	SEXP MonthlyVeg, Grasslands, Shrublands, Forest, Forb;
 	SEXP CO2Coefficients;
-	RealD *p_Grasslands, *p_Shrublands, *p_Forest, *p_Forb;
+	double *p_Grasslands, *p_Shrublands, *p_Forest, *p_Forb;
 
-	MyFileName = SoilWatDomain.PathInfo.InFiles[eVegProd];
+	MyFileName = SoilWatDomain.SW_PathInputs.txtInFiles[eVegProd];
 
     PROTECT(veg_method = GET_SLOT(SW_VPD, install(cVegProd_names[0])));
     v->veg_method = INTEGER(veg_method)[0];
@@ -632,7 +632,7 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
   }
 
 	if (EchoInits)
-		_echo_VegProd(SoilWatRun.VegProd.veg, SoilWatRun.VegProd.bare_cov);
+		echo_VegProd(SoilWatRun.VegProd.veg, SoilWatRun.VegProd.bare_cov);
 
 	UNPROTECT(18);
 }

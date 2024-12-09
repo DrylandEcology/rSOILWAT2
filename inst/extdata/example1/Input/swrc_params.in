@@ -1,7 +1,7 @@
-#------ Input for Soil Water Retention Curves (by soil layer) ------
+#------ Input for Soil Water Retention Curves ------
 
-# A table with up to `MAX_LAYERS` rows (soil layers) and 6 columns:
-#   - the soil layers must match `soils.in`
+
+# Tables with 6 columns:
 #   - the interpretation of columns (SWRC parameters) depends on the
 #     selected SWRC (see `siteparam.in`)
 #   - unused columns are ignored (if selected SWRC uses fewer than 6 parameters)
@@ -28,12 +28,23 @@
 #   * param6 = L, tortuosity/connectivity parameter [-]
 
 
+# Table with two sets of six SWRC parameters
+#   * first set (row): characteristics of fibric peat
+#   * second set (row): characteristics of sapric peat
+#   * source: Letts et al. 2000, doi:10.1080/07055900.2000.9649643
 # param1  param2   param3   param4     param5   param6
-18.6080  0.42703   5.3020   24.03047   0.0000   0.0000
-20.4644  0.43290   7.0500   14.94351   0.0000   0.0000
-22.8402  0.44013   9.4320   13.71177   0.0000   0.0000
-24.0381  0.44291  10.0690   13.43171   0.0000   0.0000
-24.2159  0.44359  10.3860   14.14351   0.0000   0.0000
-23.3507  0.44217  10.3830   40.63764   0.0000   0.0000
-12.3880  0.41370   7.3250   37.22899   0.0000   0.0000
-12.3880  0.41370   7.3250   37.22899   0.0000   0.0000
+    1.03    0.93      2.7   2419.2     0.0000   0.0000
+    1.01    0.83     12.0      0.864   0.0000   0.0000
+
+
+# Table with six SWRC parameters for up to `MAX_LAYERS` rows (soil layers)
+#   * the soil layers must match `soils.in`
+# param1  param2   param3   param4     param5   param6
+18.6080  0.42703   5.3020   53.90697   0.0000   0.0000
+20.4644  0.43290   7.0500   37.41493   0.0000   0.0000
+22.8402  0.44013   9.4320   23.10175   0.0000   0.0000
+24.0381  0.44291  10.0690   19.96388   0.0000   0.0000
+24.2159  0.44359  10.3860   18.82977   0.0000   0.0000
+23.3507  0.44217  10.3830   19.38407   0.0000   0.0000
+12.3880  0.41370   7.3250   52.97183   0.0000   0.0000
+12.3880  0.41370   7.3250   52.97183   0.0000   0.0000

@@ -128,6 +128,7 @@ static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LO
     #ifdef RSWDEBUG
     int debug = 0;
     #endif
+    Bool renameDomainTemplateNC = swFALSE;
 
 
   #ifdef RSWDEBUG
@@ -153,8 +154,8 @@ static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LO
     SW_DOM_init_ptrs(&SoilWatDomain);
     SW_CTL_init_ptrs(&SoilWatRun);
 
-    sw_init_args(argc, argv, &EchoInits, &SoilWatDomain.PathInfo.InFiles[eFirst],
-                 &userSUID, NULL, &SoilWatDomain.netCDFInfo.renameDomainTemplateNC,
+    sw_init_args(argc, argv, &EchoInits, &SoilWatDomain.SW_PathInputs.txtInFiles[eFirst],
+                 &userSUID, NULL, &renameDomainTemplateNC,
                  LogInfo);
     if(LogInfo->stopRun) {
         return; // Exit function prematurely due to error
@@ -214,7 +215,6 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   #endif
   PROTECT(swLog = MAKE_CLASS("swLog"));
   PROTECT(oRlogfile = NEW_OBJECT(swLog));
-
   // read user inputs: from files
   // setup and construct global variables
   #ifdef RSWDEBUG
@@ -248,20 +248,23 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   #ifdef RSWDEBUG
   if (debug) sw_printf(" init simulation run ...\n");
   #endif
-  SW_CTL_init_run(&SoilWatRun, &local_LogInfo);
+  SW_CTL_init_run(&SoilWatRun, swTRUE, &local_LogInfo);
   if(local_LogInfo.stopRun) {
     goto report;
   }
 
     // identify domain-wide soil profile information
+    // value of hasConsistentSoilLayerDepths does not matter
     SW_DOM_soilProfile(
-        &SoilWatDomain.hasConsistentSoilLayerDepths,
+        &SoilWatDomain.netCDFInput,
+        &SoilWatDomain.SW_PathInputs,
+        SoilWatDomain.hasConsistentSoilLayerDepths,
         &SoilWatDomain.nMaxSoilLayers,
         &SoilWatDomain.nMaxEvapLayers,
         SoilWatDomain.depthsAllSoilLayers,
         SoilWatRun.Site.n_layers,
         SoilWatRun.Site.n_evap_lyrs,
-        SoilWatRun.Site.depths,
+        SoilWatRun.Site.soils.depths,
         &local_LogInfo
     );
     if(local_LogInfo.stopRun) {
@@ -385,7 +388,6 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
     sw_write_warnings("(rlib) ", &local_LogInfo);
     sw_fail_on_error(&local_LogInfo);
   }
-
   #ifdef RSWDEBUG
   if (debug) sw_printf(" onGetInputDataFromFiles completed.\n");
   #endif
@@ -458,20 +460,23 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
 	#ifdef RSWDEBUG
 	if (debug) sw_printf(" init simulation run ...");
 	#endif
-	SW_CTL_init_run(&SoilWatRun, &local_LogInfo);
+	SW_CTL_init_run(&SoilWatRun, swTRUE, &local_LogInfo);
     if(local_LogInfo.stopRun) {
         goto report;
     }
 
     // identify domain-wide soil profile information
+    // value of hasConsistentSoilLayerDepths does not matter
     SW_DOM_soilProfile(
-        &SoilWatDomain.hasConsistentSoilLayerDepths,
+        &SoilWatDomain.netCDFInput,
+        &SoilWatDomain.SW_PathInputs,
+        SoilWatDomain.hasConsistentSoilLayerDepths,
         &SoilWatDomain.nMaxSoilLayers,
         &SoilWatDomain.nMaxEvapLayers,
         SoilWatDomain.depthsAllSoilLayers,
         SoilWatRun.Site.n_layers,
         SoilWatRun.Site.n_evap_lyrs,
-        SoilWatRun.Site.depths,
+        SoilWatRun.Site.soils.depths,
         &local_LogInfo
     );
     if(local_LogInfo.stopRun) {
@@ -848,7 +853,8 @@ SEXP rSW2_readAllWeatherFromDisk(
   #ifdef RSWDEBUG
   if (debug) sw_printf("'rSW2_readAllWeatherFromDisk': read weather data");
   #endif
-  SW_WTH_read(&SoilWatRun.Weather, &SoilWatRun.Sky, &SoilWatRun.Model, &local_LogInfo);
+  SW_WTH_read(&SoilWatRun.Weather, &SoilWatRun.Sky, &SoilWatRun.Model,
+              swTRUE, &local_LogInfo);
   if(local_LogInfo.stopRun) {
     goto report; // Exit function prematurely due to error
   }

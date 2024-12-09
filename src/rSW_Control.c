@@ -73,8 +73,9 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
   #endif
 
   if (from_files) {
-    SW_CTL_read_inputs_from_disk(&SoilWatRun, &SoilWatDomain.OutDom,
-                                 &SoilWatDomain.PathInfo, LogInfo);
+    SW_CTL_read_inputs_from_disk(&SoilWatRun, &SoilWatDomain,
+                                 &SoilWatDomain.hasConsistentSoilLayerDepths,
+                                 LogInfo);
 
   } else { //Use R data to set the data
     #ifdef RSWDEBUG

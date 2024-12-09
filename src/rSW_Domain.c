@@ -252,7 +252,7 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 	TimeInt d;
 	char enddyval[6], errstr[MAX_ERROR];
 
-	MyFileName = SoilWatDomain.PathInfo.InFiles[eModel];
+	MyFileName = SoilWatDomain.SW_PathInputs.txtInFiles[eModel];
 
 	if (!IS_S4_OBJECT(SW_MDL)) {
 		LogError(LogInfo, LOGERROR, "%s: No input.", MyFileName);
@@ -361,11 +361,7 @@ void rSW_CTL_setup_domain(
   int debug = 0;
   #endif
 
-    SW_F_construct(
-       SW_Domain->PathInfo.InFiles[eFirst],
-       SW_Domain->PathInfo._ProjDir,
-       LogInfo
-    );
+    SW_F_construct(&SW_Domain->SW_PathInputs,LogInfo);
 
     if(LogInfo->stopRun) {
        return;  // Exit function prematurely due to error
@@ -381,7 +377,7 @@ void rSW_CTL_setup_domain(
         }
         #endif
 
-        SW_F_read(&SW_Domain->PathInfo, LogInfo);
+        SW_F_read(&SW_Domain->SW_PathInputs, LogInfo);
         if(LogInfo->stopRun) {
            return; // Exit function prematurely due to error
         }
