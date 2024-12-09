@@ -1,3 +1,6 @@
+# rSOILWAT2 v6.3.0-9000
+
+
 # rSOILWAT2 v6.2.0
 * Simulation output remains the same as the previous version unless
   relative humidity is calculated from vapor pressure or specific humidity.
