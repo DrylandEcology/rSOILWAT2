@@ -136,6 +136,14 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
         return; // Exit function prematurely due to error
     }
 
+    onSet_SW_SIT_transp(GET_SLOT(InputData, install("site")), LogInfo);
+    #ifdef RSWDEBUG
+    if (debug) sw_printf(" > 'swrc/ptf-type'");
+    #endif
+    if (LogInfo->stopRun) {
+        return; // Exit function prematurely due to error
+    }
+
     if (isNull(weatherList)) {
       weatherList = GET_SLOT(InputData, install("weatherHistory"));
     }

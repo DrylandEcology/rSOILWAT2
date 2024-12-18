@@ -252,7 +252,7 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp, LOG_INFO* LogInfo) {
             i = 0;
         }
 
-        if (isMineral && !v->site_has_swrcpMineralSoil) {
+        if (isMineral && !v->inputsProvideSWRCp) {
             return;
         }
 
@@ -265,6 +265,9 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp, LOG_INFO* LogInfo) {
 		}
 
 	}
+
+    v->site_has_swrcpMineralSoil =
+        (Bool) (isMineral && v->inputsProvideSWRCp);
 }
 
 
@@ -476,7 +479,7 @@ SEXP onGet_SW_SIT(void) {
 	setAttrib(swrc_flags, R_NamesSymbol, swrc_names);
 
 	PROTECT(has_swrcp = NEW_LOGICAL(1));
-	LOGICAL(has_swrcp)[0] = v->site_has_swrcpMineralSoil;
+	LOGICAL(has_swrcp)[0] = v->inputsProvideSWRCp;
 
 
 	// Fill all slots of `SW_SIT`
@@ -500,7 +503,6 @@ SEXP onGet_SW_SIT(void) {
 }
 
 void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
-	int i;
 	SW_SITE *v = &SoilWatRun.Site;
 	SW_MODEL *m = &SoilWatRun.Model;
 
@@ -515,19 +517,13 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	SEXP SoilTemperatureConstants_use;
 	SEXP SoilTemperatureConstants;
 	SEXP SoilDensityInputType;
-	SEXP TranspirationRegions;
 	SEXP swrc_flags, has_swrcp;
-
-	int *p_transp; // ideally `LyrIndex` so that same type as `_TranspRgnBounds`, but R API INTEGER() is signed
 
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
 
 	MyFileName = SoilWatDomain.SW_PathInputs.txtInFiles[eSite];
-
-	LyrIndex r; /* transp region definition number */
-	Bool too_many_regions = FALSE;
 
 	#ifdef RSWDEBUG
 	if (debug) sw_printf("'onSet_SW_SIT':");
@@ -640,28 +636,38 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	strcpy(v->site_ptf_name, CHAR(STRING_ELT(swrc_flags, 1)));
 	v->site_ptf_type = encode_str2ptf(v->site_ptf_name);
 	PROTECT(has_swrcp = GET_SLOT(SW_SIT, install("has_swrcp")));
-	v->site_has_swrcpMineralSoil = LOGICAL(has_swrcp)[0];
+	v->inputsProvideSWRCp = LOGICAL(has_swrcp)[0];
 
-	#ifdef RSWDEBUG
-	if (debug) sw_printf(" > 'swrc/ptf-type'");
-	#endif
+    UNPROTECT(13);
+}
 
+void onSet_SW_SIT_transp(SEXP SW_SIT, LOG_INFO* LogInfo) {
+	SW_SITE *v = &SoilWatRun.Site;
+	SEXP TranspirationRegions;
 
-	PROTECT(TranspirationRegions = GET_SLOT(SW_SIT, install("TranspirationRegions")));
+	Bool too_many_regions = FALSE;
+	LyrIndex r; /* transp region definition number */
+    int lyr;
+    int i;
+	int *p_transp; // ideally `LyrIndex` so that same type as `_TranspRgnBounds`, but R API INTEGER() is signed
+
+    PROTECT(TranspirationRegions = GET_SLOT(SW_SIT, install("TranspirationRegions")));
 	p_transp = INTEGER(TranspirationRegions);
 	v->n_transp_rgn = nrows(TranspirationRegions);
 	if (MAX_TRANSP_REGIONS < v->n_transp_rgn) {
 		too_many_regions = TRUE;
 	} else {
 		for (i = 0; i < v->n_transp_rgn; i++) {
-			v->TranspRgnBounds[p_transp[i + v->n_transp_rgn * 0] - 1] = p_transp[i + v->n_transp_rgn * 1] - 1;
+            lyr = p_transp[i + v->n_transp_rgn * 1] - 1;
+			v->TranspRgnBounds[p_transp[i + v->n_transp_rgn * 0] - 1] = lyr;
+            v->TranspRgnDepths[i] = v->soils.depths[lyr];
 		}
 	}
 	if (too_many_regions) {
 		LogError(LogInfo, LOGERROR, "siteparam.in : Number of transpiration regions"
 				" exceeds maximum allowed (%d > %d)\n", v->n_transp_rgn, MAX_TRANSP_REGIONS);
 
-        UNPROTECT(14); // Unprotect the fourteen protected variables before exiting
+        UNPROTECT(1); // Unprotect the fourteen protected variables before exiting
         return; // Exit function prematurely due to error
 	}
 	#ifdef RSWDEBUG
@@ -673,7 +679,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 		if (v->TranspRgnBounds[r - 1] >= v->TranspRgnBounds[r]) {
 			LogError(LogInfo, LOGERROR, "siteparam.in : Discontinuity/reversal in transpiration regions.\n");
 
-            UNPROTECT(14); // Unprotect the fourteen protected variables before exiting
+            UNPROTECT(1); // Unprotect the fourteen protected variables before exiting
             return; // Exit function prematurely due to error
 		}
 	}
@@ -682,5 +688,5 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	if (debug) sw_printf(" ... done. \n");
 	#endif
 
-	UNPROTECT(14);
+	UNPROTECT(1);
 }
