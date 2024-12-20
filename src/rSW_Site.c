@@ -161,6 +161,7 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
         som_frac = p_Layers[i + j * 12];
 
 		v->soils.width[lyrno] = dmax - dmin;
+        v->soils.depths[lyrno] = dmax;
 		dmin = dmax;
 		v->soils.soilDensityInput[lyrno] = soildensity;
 		v->soils.fractionVolBulk_gravel[lyrno] = f_gravel;
@@ -185,6 +186,8 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
             return; // Exit function prematurely due to error
 		}
 	}
+
+    v->n_evap_lyrs = nlayers_bsevap(v->soils.evap_coeff, v->n_layers);
 }
 
 
