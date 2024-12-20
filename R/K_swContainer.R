@@ -1662,6 +1662,13 @@ setMethod(
   function(object) swSite_hasSWRCp(object@site)
 )
 
+#' @rdname swSite_depthSapric
+setMethod(
+  "swSite_depthSapric",
+  signature = "swInputData",
+  function(object) swSite_depthSapric(object@site)
+)
+
 
 #' @rdname swInputData-class
 #' @export
@@ -1810,6 +1817,17 @@ setReplaceMethod(
     object
   }
 )
+
+#' @rdname swSite_depthSapric
+setReplaceMethod(
+  "swSite_depthSapric",
+  signature = "swInputData",
+  function(object, value) {
+    swSite_depthSapric(object@site) <- value
+    object
+  }
+)
+
 #' @rdname swInputData-class
 #' @export
 setReplaceMethod(

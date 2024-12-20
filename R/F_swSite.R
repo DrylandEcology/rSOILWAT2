@@ -80,7 +80,8 @@ setClass(
     SoilDensityInputType = "integer",
     TranspirationRegions = "matrix",
     swrc_flags = "character",
-    has_swrcp = "logical"
+    has_swrcp = "logical",
+    depth_sapric = "numeric"
   ),
   prototype = list(
     SWClimits = c(swc_min = NA_real_, swc_init = NA_real_, swc_wet = NA_real_),
@@ -124,7 +125,8 @@ setClass(
       dimnames = list(NULL, c("ndx", "layer"))
     ),
     swrc_flags = c(swrc_name = NA_character_, ptf_name = NA_character_),
-    has_swrcp = NA
+    has_swrcp = NA,
+    depth_sapric = NA_real_
   )
 )
 
@@ -195,6 +197,11 @@ setValidity(
 
     if (length(object@has_swrcp) != 1L) {
       msg <- "@has_swrcp length != 1."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (length(object@depth_sapric) != 1L) {
+      msg <- "@depth_sapric length != 1."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
@@ -282,6 +289,13 @@ setMethod(
   "swSite_hasSWRCp",
   signature = "swSite",
   function(object) slot(object, "has_swrcp")
+)
+
+#' @rdname swSite_depthSapric
+setMethod(
+  "swSite_depthSapric",
+  signature = "swSite",
+  function(object) slot(object, "depth_sapric")
 )
 
 
@@ -408,6 +422,17 @@ setReplaceMethod(
 #' @rdname swSite_hasSWRCp
 setReplaceMethod(
   "swSite_hasSWRCp",
+  signature = "swSite",
+  definition = function(object, value) {
+    object@has_swrcp <- isTRUE(as.logical(value))
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname swSite_depthSapric
+setReplaceMethod(
+  "swSite_depthSapric",
   signature = "swSite",
   definition = function(object, value) {
     object@has_swrcp <- isTRUE(as.logical(value))

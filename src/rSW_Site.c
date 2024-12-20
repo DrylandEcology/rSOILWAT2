@@ -52,7 +52,8 @@ static char *cSW_SIT[] = {
   "SoilTemperatureConstants",
   "SoilDensityInputType",
   "TranspirationRegions",
-  "swrc_flags", "has_swrcp"
+  "swrc_flags", "has_swrcp",
+  "depth_sapric"
 };
 
 static char *cLayers[] = {
@@ -382,6 +383,7 @@ SEXP onGet_SW_SIT(void) {
 	char *cSWRCflags[] = {"swrc_name", "ptf_name"};
 
 	SEXP has_swrcp;
+    SEXP depthSapric;
 
 	SEXP SoilDensityInputType;
 
@@ -517,6 +519,8 @@ SEXP onGet_SW_SIT(void) {
 	PROTECT(has_swrcp = NEW_LOGICAL(1));
 	LOGICAL(has_swrcp)[0] = v->inputsProvideSWRCp;
 
+    PROTECT(depthSapric = NEW_NUMERIC(1));
+    REAL(depthSapric)[0] = v->depthSapric;
 
 	// Fill all slots of `SW_SIT`
 	SET_SLOT(SW_SIT, install(cSW_SIT[0]), SWClimits);
@@ -533,8 +537,9 @@ SEXP onGet_SW_SIT(void) {
 	SET_SLOT(SW_SIT, install(cSW_SIT[11]), TranspirationRegions);
 	SET_SLOT(SW_SIT, install(cSW_SIT[12]), swrc_flags);
 	SET_SLOT(SW_SIT, install(cSW_SIT[13]), has_swrcp);
+	SET_SLOT(SW_SIT, install(cSW_SIT[14]), depthSapric);
 
-	UNPROTECT(28);
+	UNPROTECT(29);
 	return SW_SIT;
 }
 
@@ -554,6 +559,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	SEXP SoilTemperatureConstants;
 	SEXP SoilDensityInputType;
 	SEXP swrc_flags, has_swrcp;
+    SEXP depthSapric;
 
   #ifdef RSWDEBUG
   int debug = 0;
@@ -674,7 +680,10 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	PROTECT(has_swrcp = GET_SLOT(SW_SIT, install("has_swrcp")));
 	v->inputsProvideSWRCp = LOGICAL(has_swrcp)[0];
 
-    UNPROTECT(13);
+    PROTECT(depthSapric = GET_SLOT(SW_SIT, install("depth_sapric")));
+    v->depthSapric = REAL(depthSapric)[0];
+
+    UNPROTECT(14);
 }
 
 void onSet_SW_SIT_transp(SEXP SW_SIT, LOG_INFO* LogInfo) {

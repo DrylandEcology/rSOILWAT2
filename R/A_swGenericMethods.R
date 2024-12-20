@@ -1758,6 +1758,25 @@ setGeneric(
   function(object) standardGeneric("swSite_hasSWRCp")
 )
 
+#' Are mineral soils `SWRC` parameters provided in `SWRCp`?
+#'
+#' Set to `TRUE` once `SWRCp` are set.
+#'
+#' @param object An object of class [swSite-class] or [swInputData-class].
+#'
+#' @return A logical value.
+#' `TRUE` if `SWRC` parameters are provided in `SWRCp`;
+#' `FALSE` if `SWRCp` should be estimated during a simulation run
+#' via specified pedotransfer function
+#' (see `"ptf_name"` of [swSite_SWRCflags()]).
+#'
+#' @md
+#' @exportMethod swSite_depthSapric
+setGeneric(
+  "swSite_depthSapric",
+  function(object) standardGeneric("swSite_depthSapric")
+)
+
 
 #' \code{swSite_SWClimits}
 #' @param object An object of class \code{\linkS4class{swSite}} or
@@ -1908,6 +1927,16 @@ setGeneric(
 setGeneric(
   "swSite_hasSWRCp<-",
   function(object, value) standardGeneric("swSite_hasSWRCp<-")
+)
+
+#' @rdname swSite_depthSapric
+#'
+#' @param value A logical value.
+#'
+#' @exportMethod swSite_depthSapric<-
+setGeneric(
+  "swSite_depthSapric<-",
+  function(object, value) standardGeneric("swSite_depthSapric<-")
 )
 
 #' \code{swSite_SWClimits<-}
