@@ -67,25 +67,34 @@ setClass(
   "swSoils",
   slots = c(
     Layers = "matrix",
-    SWRCp = "matrix"
+    SWRCp = "matrix",
+    omSWRCp = "matrix"
   ),
   prototype = list(
     Layers = array(
       NA_real_,
-      dim = c(0L, 12L),
+      dim = c(0L, 13L),
       dimnames = list(
         NULL,
         c(
-          "depth_cm", "bulkDensity_g/cm^3", "gravel_content",
-          "EvapBareSoil_frac", "transpGrass_frac", "transpShrub_frac",
-          "transpTree_frac", "transpForb_frac", "sand_frac", "clay_frac",
-          "impermeability_frac", "soilTemp_c"
+            "depth_cm", "bulkDensity_g/cm^3", "gravel_content",
+            "EvapBareSoil_frac", "transpGrass_frac", "transpShrub_frac",
+            "transpTree_frac", "transpForb_frac", "sand_frac", "clay_frac",
+            "impermeability_frac", "soilTemp_c", "som_frac"
         )
       )
     ),
     SWRCp = array(
       NA_real_,
       dim = c(0L, 6L),
+      dimnames = list(
+        NULL,
+        paste0("Param", seq_len(6L))
+      )
+    ),
+    omSWRCp = array(
+      NA_real_,
+      dim = c(2L, 6L),
       dimnames = list(
         NULL,
         paste0("Param", seq_len(6L))
@@ -101,15 +110,16 @@ setValidity(
     val <- TRUE
     tmpL <- dim(object@Layers)
     tmpp <- dim(object@SWRCp)
+    tmpom <- dim(object@omSWRCp)
     dtol1 <- 1. + tmpL[1] * rSW2_glovars[["tol"]]
 
     #--- Check "Layers"
-    if (tmpL[2] != 12L) {
+    if (tmpL[2] != 13L) {
       msg <- paste(
         "@Layers must have exactly 12 columns corresponding to",
         "depth_cm, bulkDensity_g/cm^3, gravel_content, EvapBareSoil_frac,",
         "transpGrass_frac,transpShrub_frac, transpTree_frac, transpForb_frac,",
-        "sand_frac, clay_frac, impermeability_frac, soilTemp_c"
+        "sand_frac, clay_frac, impermeability_frac, soilTemp_c", "som_frac"
       )
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
@@ -137,11 +147,11 @@ setValidity(
     }
 
 
-    tmp <- object@Layers[, 3L:11L]
+    tmp <- object@Layers[, c(3L:11L, 13L)]
     if (!(all(is.na(tmp)) || all(tmp >= 0., tmp <= dtol1))) {
       msg <- paste(
-        "@Layers values of gravel, evco, trcos, sand, clay, and",
-        "impermeability must be between 0 and 1",
+        "@Layers values of gravel, evco, trcos, sand, clay",
+        "impermeability, and som must be between 0 and 1",
         "(or all NA)."
       )
       val <- if (isTRUE(val)) msg else c(val, msg)
@@ -171,6 +181,23 @@ setValidity(
     ) {
       msg <- paste(
         "@SWRCp must have exactly",
+        rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SWRC_PARAM_NMAX"]],
+        "columns."
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (tmpom[1L] != 2L) {
+      msg <- paste(
+        "@omSWRCp must have exactly two layers."
+      )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    if (
+      tmpom[2L] != rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SWRC_PARAM_NMAX"]]
+    ) {
+      msg <- paste(
+        "@omSWRCp must have exactly",
         rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SWRC_PARAM_NMAX"]],
         "columns."
       )
@@ -215,6 +242,14 @@ swSoils <- function(...) {
     def@SWRCp[] <- NA_real_
   }
 
+  if ("omSWRCp" %in% dns) {
+    # Guarantee names
+    dimnames(dots[["omSWRCp"]]) <- list(NULL, colnames(def@omSWRCp))
+  } else {
+    def@omSWRCp <- def@omSWRCp[1:2, , drop = FALSE]
+    def@omSWRCp[] <- NA_real_
+  }
+
   # Copy from SOILWAT2 "testing" (defaults), but dot arguments take precedence
   tmp <- lapply(
     sns,
@@ -242,6 +277,14 @@ setMethod(
       object <- suppressWarnings(swSoils(object))
     }
 
+    tmp <- try(object@omSWRCp, silent = TRUE)
+    if (inherits(tmp, "try-error")) {
+      if (verbose) {
+        message("Upgrading object of class `swSoils`.")
+      }
+      object <- suppressWarnings(swSoils(object))
+    }
+
     object
   }
 )
@@ -257,6 +300,9 @@ setMethod("swSoils_Layers", "swSoils", function(object) object@Layers)
 #' @rdname swSoils_SWRCp
 setMethod("swSoils_SWRCp", "swSoils", function(object) object@SWRCp)
 
+#' @rdname swSoils_omSWRCp
+setMethod("swSoils_omSWRCp", "swSoils", function(object) object@omSWRCp)
+
 #' @rdname swSoils-class
 #' @export
 setReplaceMethod(
@@ -265,6 +311,7 @@ setReplaceMethod(
   function(object, value) {
     colnames(value@Layers) <- colnames(object@Layers)
     colnames(value@SWRCp) <- colnames(object@SWRCp)
+    colnames(value@omSWRCp) <- colnames(object@omSWRCp)
     object <- value
     validObject(object)
     object
@@ -279,10 +326,13 @@ setReplaceMethod(
   function(object, value) {
     idl <- if (utils::hasName(value, "Layers")) "Layers" else 1
     idp <- if (utils::hasName(value, "SWRCp")) "SWRCp" else 2
+    ido <- if (utils::hasName(value, "omSWRCp")) "omSWRCp" else 3
     colnames(value[[idl]]) <- colnames(object@Layers)
     colnames(value[[idp]]) <- colnames(object@SWRCp)
+    colnames(value[[ido]]) <- colnames(object@omSWRCp)
     object@Layers <- data.matrix(value[[idl]])
     object@SWRCp <- data.matrix(value[[idp]])
+    object@omSWRCp <- data.matrix(value[[ido]])
     validObject(object)
     object
   }
@@ -316,6 +366,17 @@ setReplaceMethod(
   }
 )
 
+#' @rdname swSoils_omSWRCp
+setReplaceMethod(
+  "swSoils_omSWRCp",
+  signature = "swSoils",
+  function(object, value) {
+    colnames(value) <- colnames(object@omSWRCp)
+    object@SWRCp <- data.matrix(value)
+    validObject(object)
+    object
+  }
+)
 
 
 reset_SWRCp <- function(SWRCp, new_nrow = 1L) {
@@ -323,6 +384,14 @@ reset_SWRCp <- function(SWRCp, new_nrow = 1L) {
     data = NA_real_,
     dim = c(new_nrow, ncol(SWRCp)),
     dimnames = list(NULL, colnames(SWRCp))
+  )
+}
+
+reset_omSWRCp <- function(omSWRCp) {
+  array(
+    data = NA_real_,
+    dim = c(2L, ncol(omSWRCp)),
+    dimnames = list(NULL, colnames(omSWRCp))
   )
 }
 

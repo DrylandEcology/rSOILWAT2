@@ -2065,6 +2065,19 @@ setGeneric(
   function(object) standardGeneric("swSoils_SWRCp")
 )
 
+#' `SWRC` parameters
+#'
+#' @param object An object of class [`swSoils`] or [swInputData-class].
+#'
+#' @return A data matrix.
+#'
+#' @md
+#' @exportMethod swSoils_omSWRCp
+setGeneric(
+  "swSoils_omSWRCp",
+  function(object) standardGeneric("swSoils_omSWRCp")
+)
+
 # Need to define and export this generic method -- otherwise,
 # \code{\link{set_swSoils<-}} doesn't work.
 #' \code{set_swSoils}
@@ -2105,6 +2118,17 @@ setGeneric(
 setGeneric(
   "swSoils_SWRCp<-",
   function(object, value) standardGeneric("swSoils_SWRCp<-")
+)
+
+#' @rdname swSoils_SWRCp
+#'
+#' @param value An object that can be converted to a data matrix and represents
+#' required `SWRC` parameters.
+#'
+#' @exportMethod swSoils_SWRCp<-
+setGeneric(
+  "swSoils_omSWRCp<-",
+  function(object, value) standardGeneric("swSoils_omSWRCp<-")
 )
 
 ########################

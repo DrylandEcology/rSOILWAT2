@@ -58,13 +58,17 @@ static char *cSW_SIT[] = {
 static char *cLayers[] = {
   "depth_cm", "bulkDensity_g/cm^3", "gravel_content",
   "EvapBareSoil_frac", "transpGrass_frac", "transpShrub_frac", "transpTree_frac",
-  "transpForb_frac", "sand_frac", "clay_frac", "impermeability_frac", "soilTemp_c"
+  "transpForb_frac", "sand_frac", "clay_frac", "impermeability_frac", "soilTemp_c",
+  "som_frac"
 };
 
 static char *cSWRCp[] = {
   "Param1", "Param2", "Param3", "Param4", "Param5", "Param6"
 };
 
+static char *cOMSWRCp[] = {
+    "fibric_peat", "sapric_peat"
+};
 
 /* =================================================== */
 /*             Local Function Definitions              */
@@ -77,7 +81,7 @@ static SEXP onGet_SW_LYR(void) {
 	SEXP Layers, Layers_names, Layers_names_y;
 	double *p_Layers;
 
-	PROTECT(Layers = allocMatrix(REALSXP, v->n_layers, 12));
+	PROTECT(Layers = allocMatrix(REALSXP, v->n_layers, 13));
 	p_Layers = REAL(Layers);
 	for (i = 0; i < (v->n_layers); i++) {
 		p_Layers[i + (v->n_layers) * 0] = dmax = v->soils.width[i] + dmax;
@@ -92,11 +96,12 @@ static SEXP onGet_SW_LYR(void) {
 		p_Layers[i + (v->n_layers) * 9] = v->soils.fractionWeightMatric_clay[i];
 		p_Layers[i + (v->n_layers) * 10] = v->soils.impermeability[i];
 		p_Layers[i + (v->n_layers) * 11] = v->soils.avgLyrTempInit[i];
+		p_Layers[i + (v->n_layers) * 12] = v->soils.fractionWeight_om[i];
 	}
 
 	PROTECT(Layers_names = allocVector(VECSXP, 2));
-	PROTECT(Layers_names_y = allocVector(STRSXP, 12));
-	for (i = 0; i < 12; i++) {
+	PROTECT(Layers_names_y = allocVector(STRSXP, 13));
+	for (i = 0; i < 13; i++) {
 		SET_STRING_ELT(Layers_names_y, i, mkChar(cLayers[i]));
 	}
 	SET_VECTOR_ELT(Layers_names, 1, Layers_names_y);
@@ -115,7 +120,7 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 	LyrIndex lyrno;
 	int i, j, k, columns;
 	double dmin = 0.0, dmax, evco, trco_veg[NVEGTYPES], psand, pclay,
-          soildensity, imperm, soiltemp, f_gravel;
+          soildensity, imperm, soiltemp, f_gravel, som_frac;
 	double *p_Layers;
 
 	/* note that Files.read() must be called prior to this. */
@@ -125,9 +130,9 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 	p_Layers = REAL(SW_LYR);
 	columns = ncols(SW_LYR);
 
-	/* Check that we have 12 values per layer */
+	/* Check that we have 13 values per layer */
 	/* Adjust number if new variables are added */
-	if (columns != 12) {
+	if (columns != 13) {
 		LogError(
 			LogInfo,
 			LOGERROR,
@@ -152,6 +157,7 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 		pclay = p_Layers[i + j * 9];
 		imperm = p_Layers[i + j * 10];
 		soiltemp = p_Layers[i + j * 11];
+        som_frac = p_Layers[i + j * 12];
 
 		v->soils.width[lyrno] = dmax - dmin;
 		dmin = dmax;
@@ -165,6 +171,7 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 		v->soils.fractionWeightMatric_clay[lyrno] = pclay;
 		v->soils.impermeability[lyrno] = imperm;
 		v->soils.avgLyrTempInit[lyrno] = soiltemp;
+        v->soils.fractionWeight_om[lyrno] = som_frac;
 
 		if (lyrno >= MAX_LAYERS) {
 			LogError(
@@ -191,7 +198,7 @@ static SEXP onGet_SW_SWRCp(void) {
 	p_SWRCp = REAL(SWRCp);
 	for (i = 0; i < (v->n_layers); i++) {
 		for (k = 0; k < SWRC_PARAM_NMAX; k++) {
-			p_SWRCp[i + (v->n_layers) * k] = v->swrcp[i][k];
+			p_SWRCp[i + (v->n_layers) * k] = v->soils.swrcpMineralSoil[i][k];
 		}
 	}
 
@@ -205,6 +212,32 @@ static SEXP onGet_SW_SWRCp(void) {
 
 	UNPROTECT(3);
 	return SWRCp;
+}
+
+/* Copy omSWRC parameters into "omSWRCp" matrix */
+static SEXP onGet_SW_omSWRCp(void) {
+	int i, k;
+	SW_SITE *v = &SoilWatRun.Site;
+    SEXP omSWRCp, omSWRCp_names, omSWRCp_names_y;
+    double *p_omSWRCp;
+
+	PROTECT(omSWRCp = allocMatrix(REALSXP, 2, SWRC_PARAM_NMAX));
+    p_omSWRCp = REAL(omSWRCp);
+    for (k = 0; k < 2; k++) {
+        for (i = 0; i < SWRC_PARAM_NMAX; i++) {
+			p_omSWRCp[i + SWRC_PARAM_NMAX * k] = v->swrcpOM[k][i];
+		}
+	}
+	PROTECT(omSWRCp_names = allocVector(VECSXP, 2));
+	PROTECT(omSWRCp_names_y = allocVector(STRSXP, SWRC_PARAM_NMAX));
+	for (i = 0; i < 2; i++) {
+		SET_STRING_ELT(omSWRCp_names_y, i, mkChar(cOMSWRCp[i]));
+	}
+	SET_VECTOR_ELT(omSWRCp_names, 1, omSWRCp_names_y);
+	setAttrib(omSWRCp, R_DimNamesSymbol, omSWRCp_names);
+
+    UNPROTECT(3);
+    return omSWRCp;
 }
 
 /* Function `onSet_SW_SWRCp()` corresponds to SOILWAT2's `SW_SWRC_read()` */
@@ -244,30 +277,29 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp, LOG_INFO* LogInfo) {
 	/* Copy values */
 	p_SWRCp = REAL(SW_SWRCp);
 
-	for (i = 0; i < (v->n_layers); i++) {
-        if (!isMineral && i > 1) {
-            /* Fibric and sapric peat are completed.
-            Now: reset and restart for swrcp of the mineral component */
-            isMineral = swTRUE;
-            i = 0;
+    for (i = 0; i < (v->n_layers); i++) {
+        for (k = 0; k < SWRC_PARAM_NMAX; k++) {
+            v->soils.swrcpMineralSoil[i][k] = p_SWRCp[i + (v->n_layers) * k];
         }
-
-        if (isMineral && !v->inputsProvideSWRCp) {
-            return;
-        }
-
-		for (k = 0; k < SWRC_PARAM_NMAX; k++) {
-            if (isMineral) {
-                v->soils.swrcpMineralSoil[i][k] = p_SWRCp[i + (v->n_layers) * k];
-            } else {
-                v->swrcpOM[i][k] = p_SWRCp[i + (v->n_layers) * k];
-            }
-		}
-
-	}
+    }
 
     v->site_has_swrcpMineralSoil =
         (Bool) (isMineral && v->inputsProvideSWRCp);
+}
+
+static void onSet_SW_omSWRCp(SEXP SW_omSWRCp, LOG_INFO* LogInfo) {
+    SW_SITE *v = &SoilWatRun.Site;
+    int i, k;
+    double *p_omSWRCp;
+
+    /* Copy values */
+    p_omSWRCp = REAL(SW_omSWRCp);
+
+    for (k = 0; k < 2; k++) {
+        for (i = 0; i < SWRC_PARAM_NMAX; i++) {
+            v->swrcpOM[k][i] = p_omSWRCp[i + SWRC_PARAM_NMAX * k];
+        }
+    }
 }
 
 
@@ -284,6 +316,7 @@ SEXP onGet_SW_SOILS(void) {
 
 	SET_SLOT(SW_SOILS, install("Layers"), onGet_SW_LYR());
 	SET_SLOT(SW_SOILS, install("SWRCp"), onGet_SW_SWRCp());
+	SET_SLOT(SW_SOILS, install("omSWRCp"), onGet_SW_omSWRCp());
 
 	UNPROTECT(2);
 	return SW_SOILS;
@@ -291,7 +324,7 @@ SEXP onGet_SW_SOILS(void) {
 
 /* Copy S4 class "swSoils" into SOILWAT2 soil properties and SWRC parameters */
 void onSet_SW_SOILS(SEXP SW_SOILS, LOG_INFO* LogInfo) {
-	SEXP SW_LYR, SW_SWRCp;
+	SEXP SW_LYR, SW_SWRCp, SW_omSWRCp;
 
 	PROTECT(SW_LYR = GET_SLOT(SW_SOILS, install("Layers")));
 	onSet_SW_LYR(SW_LYR, LogInfo);
@@ -299,7 +332,10 @@ void onSet_SW_SOILS(SEXP SW_SOILS, LOG_INFO* LogInfo) {
 	PROTECT(SW_SWRCp = GET_SLOT(SW_SOILS, install("SWRCp")));
 	onSet_SW_SWRCp(SW_SWRCp, LogInfo);
 
-	UNPROTECT(2);
+    PROTECT(SW_omSWRCp = GET_SLOT(SW_SOILS, install("omSWRCp")));
+    onSet_SW_omSWRCp(SW_omSWRCp, LogInfo);
+
+	UNPROTECT(3);
 }
 
 

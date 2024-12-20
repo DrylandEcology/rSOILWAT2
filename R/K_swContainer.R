@@ -1962,6 +1962,13 @@ setMethod(
  function(object) swSoils_SWRCp(object@soils)
 )
 
+#' @rdname swSoils_omSWRCp
+setMethod(
+ "swSoils_omSWRCp",
+ signature = "swInputData",
+ function(object) swSoils_omSWRCp(object@soils)
+)
+
 #' @rdname swInputData-class
 #' @export
 setReplaceMethod(
@@ -1999,6 +2006,7 @@ setReplaceMethod(
 #'   1. [swSoils_Layers()],
 #'   2. [swSite_SWRCflags()], and
 #'   3. [swSoils_SWRCp()] and [swSite_hasSWRCp()]
+#'   4. [swSoils_omSWRCp()]
 #'
 #' @md
 setReplaceMethod(
@@ -2028,6 +2036,7 @@ setReplaceMethod(
 #'   1. [swSoils_Layers()],
 #'   2. [swSite_SWRCflags()], and
 #'   3. [swSoils_SWRCp()] and [swSite_hasSWRCp()]
+#'   4. [swSoils_omSWRCp()]
 #'
 #' @md
 setReplaceMethod(
@@ -2039,6 +2048,24 @@ setReplaceMethod(
   }
 )
 
+#' @rdname swSoils_omSWRCp
+#'
+#' @section Details:
+#' The correct sequence for setting values is
+#'   1. [swSoils_Layers()],
+#'   2. [swSite_SWRCflags()], and
+#'   3. [swSoils_SWRCp()] and [swSite_hasSWRCp()]
+#'   4. [swSoils_omSWRCp()]
+#'
+#' @md
+setReplaceMethod(
+  "swSoils_omSWRCp",
+  signature = "swInputData",
+  function(object, value) {
+    swSoils_omSWRCp(object@soils) <- value
+    object
+  }
+)
 
 
 # Methods for slot \code{swc}
