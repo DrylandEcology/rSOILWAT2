@@ -4,7 +4,6 @@
 \name{swSoils_SWRCp}
 \alias{swSoils_SWRCp}
 \alias{swSoils_SWRCp<-}
-\alias{swSoils_omSWRCp<-}
 \alias{swSoils_SWRCp,swSoils-method}
 \alias{swSoils_SWRCp<-,swSoils-method}
 \alias{swSoils_SWRCp,swInputData-method}
@@ -14,8 +13,6 @@
 swSoils_SWRCp(object)
 
 swSoils_SWRCp(object) <- value
-
-swSoils_omSWRCp(object) <- value
 
 \S4method{swSoils_SWRCp}{swSoils}(object)
 
@@ -44,7 +41,7 @@ The correct sequence for setting values is
 \item \code{\link[=swSoils_Layers]{swSoils_Layers()}},
 \item \code{\link[=swSite_SWRCflags]{swSite_SWRCflags()}}, and
 \item \code{\link[=swSoils_SWRCp]{swSoils_SWRCp()}} and \code{\link[=swSite_hasSWRCp]{swSite_hasSWRCp()}}
-\item \code{\link[=swSoils_omSWRCp]{swSoils_omSWRCp()}}
+\item \code{\link[=swSoils_omSWRCp]{swSoils_omSWRCp()}} (and \code{\link[=swSite_depthSapric]{swSite_depthSapric()}})
 }
 }
 

@@ -3,6 +3,7 @@
 %   R/K_swContainer.R
 \name{swSoils_omSWRCp}
 \alias{swSoils_omSWRCp}
+\alias{swSoils_omSWRCp<-}
 \alias{swSoils_omSWRCp,swSoils-method}
 \alias{swSoils_omSWRCp<-,swSoils-method}
 \alias{swSoils_omSWRCp,swInputData-method}
@@ -10,6 +11,8 @@
 \title{\code{SWRC} parameters of fibric and sapric organic matter}
 \usage{
 swSoils_omSWRCp(object)
+
+swSoils_omSWRCp(object) <- value
 
 \S4method{swSoils_omSWRCp}{swSoils}(object)
 
@@ -21,6 +24,9 @@ swSoils_omSWRCp(object)
 }
 \arguments{
 \item{object}{An object of class \code{\link{swSoils}} or \linkS4class{swInputData}.}
+
+\item{value}{An object that can be converted to a data matrix and represents
+required `SWRC` parameters.}
 }
 \value{
 A data matrix.
@@ -35,7 +41,12 @@ The correct sequence for setting values is
 \item \code{\link[=swSoils_Layers]{swSoils_Layers()}},
 \item \code{\link[=swSite_SWRCflags]{swSite_SWRCflags()}}, and
 \item \code{\link[=swSoils_SWRCp]{swSoils_SWRCp()}} and \code{\link[=swSite_hasSWRCp]{swSite_hasSWRCp()}}
-\item \code{\link[=swSoils_omSWRCp]{swSoils_omSWRCp()}}
+\item \code{\link[=swSoils_omSWRCp]{swSoils_omSWRCp()}} (and \code{\link[=swSite_depthSapric]{swSite_depthSapric()}})
 }
 }
 
+\examples{
+  swin <- rSOILWAT2::sw_exampleData
+  swSoils_omSWRCp(swin) <- rSOILWAT2::sw2_list_omSWRCp[["Campbell1974"]]
+
+}

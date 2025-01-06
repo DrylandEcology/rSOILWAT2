@@ -651,9 +651,17 @@ by `SOILWAT2` with the selected pedotransfer function.
   # Declare that parameter values are already estimated
   rSOILWAT2::swSite_hasSWRCp(sw_in) <- TRUE
 
+  # Provide `SWRC` parameters for organic matter
+  rSOILWAT2::swSoils_omSWRCp(sw_in) <-
+    rSOILWAT2::sw2_list_omSWRCp[[tmp[["swrc_name"]]]]
+
   # Alternatively (and equivalently),
   # set soil properties and SWRC parameters with one assignment
-  rSOILWAT2::set_swSoils(sw_in) <- list(Layers = soil_new, SWRCp = swrcp)
+  rSOILWAT2::set_swSoils(sw_in) <- list(
+    Layers = soil_new, 
+    SWRCp = swrcp,
+    omSWRCp = rSOILWAT2::sw2_list_omSWRCp[[tmp[["swrc_name"]]]]
+  )
 ```
 
 

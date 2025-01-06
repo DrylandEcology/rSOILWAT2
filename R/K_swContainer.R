@@ -1791,6 +1791,7 @@ setReplaceMethod(
 #'   1. [swSoils_Layers()],
 #'   2. [swSite_SWRCflags()], and
 #'   3. [swSoils_SWRCp()] and [swSite_hasSWRCp()]
+#'   4. [swSoils_omSWRCp()] (and [swSite_depthSapric()])
 #'
 #' @md
 setReplaceMethod(
@@ -2024,7 +2025,7 @@ setReplaceMethod(
 #'   1. [swSoils_Layers()],
 #'   2. [swSite_SWRCflags()], and
 #'   3. [swSoils_SWRCp()] and [swSite_hasSWRCp()]
-#'   4. [swSoils_omSWRCp()]
+#'   4. [swSoils_omSWRCp()] (and [swSite_depthSapric()])
 #'
 #' @md
 setReplaceMethod(
@@ -2054,7 +2055,7 @@ setReplaceMethod(
 #'   1. [swSoils_Layers()],
 #'   2. [swSite_SWRCflags()], and
 #'   3. [swSoils_SWRCp()] and [swSite_hasSWRCp()]
-#'   4. [swSoils_omSWRCp()]
+#'   4. [swSoils_omSWRCp()] (and [swSite_depthSapric()])
 #'
 #' @md
 setReplaceMethod(
@@ -2073,7 +2074,7 @@ setReplaceMethod(
 #'   1. [swSoils_Layers()],
 #'   2. [swSite_SWRCflags()], and
 #'   3. [swSoils_SWRCp()] and [swSite_hasSWRCp()]
-#'   4. [swSoils_omSWRCp()]
+#'   4. [swSoils_omSWRCp()] (and [swSite_depthSapric()])
 #'
 #' @md
 setReplaceMethod(

@@ -134,3 +134,17 @@
 #'
 #' @md
 "sw2_tr_CO2a"
+
+#' Parameters of fibric and sapric peat for implemented `SWRCs`
+#'
+#' @format A named list with a matrix for each implemented
+#' soil water retention curve (`SWRC`)
+#'    * Columns represent the `SWRC` parameters
+#'    * Rows represent (1) fibric peat and (2) sapric peat
+#'
+#' @examples
+#'   swin <- rSOILWAT2::sw_exampleData
+#'   swSoils_omSWRCp(swin) <- rSOILWAT2::sw2_list_omSWRCp[["Campbell1974"]]
+#'
+#' @md
+"sw2_list_omSWRCp"

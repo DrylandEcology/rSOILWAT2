@@ -120,6 +120,35 @@ compare_objects <- function(new, old, tolerance = 1e-9) {
   )
 }
 
+#' @param classic Logical value.
+#'
+#' @section Classic vs. non-classic files:
+#'   * classic file lines: "value   # comment" where tag matches in the comment
+#'   * non-classic file line: "tag value  # comment" where tag matches tag
+setTxtInput <- function(filename, tag, value, classic = FALSE) {
+  value <- paste(value, collapse = " ")
+  # suppress warnings about incomplete final lines
+  fin <- suppressWarnings(readLines(filename))
+  line <- grep(
+    pattern = if (isTRUE(classic)) tag else paste0("^", tag, " "),
+    x = fin,
+    ignore.case = TRUE
+  )
+  stopifnot(length(line) == 1L, line > 0L, line <= length(fin))
+  posComment <- regexpr("#", text = fin[[line]], fixed = TRUE)
+  res <- if (isTRUE(classic)) as.character(value) else paste(tag, value)
+  fin[[line]] <- if (posComment > 0L) {
+    paste0(
+      res,
+      strrep(" ", times = max(1, posComment - 1L - nchar(res))),
+      substr(fin[[line]], start = posComment, stop = 1e3)
+    )
+  } else {
+    res
+  }
+  writeLines(fin, con = filename)
+}
+
 toggleWeatherGenerator <- function(path, activate = FALSE) {
   ftmp <- file.path(path, "Input", "weathsetup.in")
   fin <- readLines(ftmp)
@@ -241,6 +270,47 @@ toggleVegEstab <- function(path, activate = TRUE) {
 }
 
 
+setSWRC <- function(
+  path, swrc_name = "Campbell1974", ptf_name = "Cosby1984AndOthers"
+) {
+  fnameSWRCp <- switch(
+    EXPR = swrc_name,
+    Campbell1974 = "swrc_params.in",
+    vanGenuchten1980 = "swrc_params_vanGenuchten1980.in",
+    FXW = "swrc_params_FXW.in",
+    stop(shQuote(swrc_name), " is not implemented.")
+  )
+
+  setTxtInput(
+    filename = file.path(path, "files.in"),
+    tag = "# Input for soil water retention curve",
+    value = file.path("Input", fnameSWRCp),
+    classic = TRUE
+  )
+
+  setTxtInput(
+    filename = file.path(path, "Input", "siteparam.in"),
+    tag = "# Specify soil water retention curve",
+    value = swrc_name,
+    classic = TRUE
+  )
+
+  setTxtInput(
+    filename = file.path(path, "Input", "siteparam.in"),
+    tag = "# Specify pedotransfer function",
+    value = ptf_name,
+    classic = TRUE
+  )
+
+  setTxtInput(
+    filename = file.path(path, "Input", "siteparam.in"),
+    tag = "# Are SWRC parameters for the mineral soil component",
+    value = 1,
+    classic = TRUE
+  )
+}
+
+
 #------- Loop over examples/tests, setup, and create test objects------
 for (it in seq_along(tests)) {
   message("\n", examples[it], " ----------------------------------")
@@ -295,8 +365,8 @@ for (it in seq_along(tests)) {
   )
 
 
-  #--- Use default SOILWAT2 data as (default) package data ------
   if (it == 1) {
+    #--- * Use default SOILWAT2 data as (default) package data ------
     sw_exampleData <- sw_input
 
     res_cmp <- compare_objects(sw_exampleData, old = rSOILWAT2::sw_exampleData)
@@ -309,6 +379,52 @@ for (it in seq_along(tests)) {
 
       # nolint start: namespace_linter.
       usethis::use_data(sw_exampleData, internal = FALSE, overwrite = TRUE)
+      # nolint end
+    }
+
+
+    #--- * Data of organic matter SWRCp for each SWRC ------
+    swrcs <- rSOILWAT2::list_matched_swrcs_ptfs()
+    swrcn <- unique(swrcs[["SWRC"]])
+
+    sw2_list_omSWRCp <- lapply(
+      swrcn,
+      function(swrc_name) {
+        dir_tmp <- tempdir()
+        dir_tmp_sw <- file.path(dir_tmp, basename(dir_ex))
+
+        file.copy(from = dir_ex, to = dir_tmp, recursive = TRUE)
+        on.exit(unlink(dir_tmp_sw, recursive = TRUE))
+
+        setSWRC(
+          path = dir_tmp_sw,
+          swrc_name = swrc_name,
+          ptf_name = swrcs[swrcs[["SWRC"]] %in% swrc_name, "PTF"][[1L]]
+        )
+
+        tmpin <- rSOILWAT2::sw_inputDataFromFiles(
+          dir = dir_tmp_sw,
+          files.in = "files.in"
+        )
+
+        tmpin@soils@omSWRCp
+      }
+    )
+
+    names(sw2_list_omSWRCp) <- swrcn
+
+    res_cmp <- compare_objects(
+      sw2_list_omSWRCp, old = rSOILWAT2::sw2_list_omSWRCp
+    )
+
+    # Save data for organic matter SWRCp (if different from previous)
+    if (res_cmp[["resave"]]) {
+      message("Update data of organic matter SWRCp: 'sw2_list_omSWRCp'")
+
+      print(res_cmp[["res_waldo"]])
+
+      # nolint start: namespace_linter.
+      usethis::use_data(sw2_list_omSWRCp, internal = FALSE, overwrite = TRUE)
       # nolint end
     }
   }

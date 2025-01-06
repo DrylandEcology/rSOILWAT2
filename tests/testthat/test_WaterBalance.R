@@ -75,6 +75,9 @@ for (it in tests) {
     # Set SWRC/PTF
     rSOILWAT2::swSite_SWRCflags(sw_input) <- list_swrcs_ptfs[[isp]]
 
+    # Set omSWRCp
+    rSOILWAT2::swSoils_omSWRCp(sw_input) <-
+      rSOILWAT2::sw2_list_omSWRCp[[list_swrcs_ptfs[[isp]][[1L]]]]
 
     #---TESTS
     info1 <- paste(

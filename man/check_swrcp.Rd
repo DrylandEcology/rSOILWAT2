@@ -45,7 +45,7 @@ check_swrcp(swrc_name, swrcp[1, ])
 
 swrcp2 <- swrcp
 swrcp2[1, 1] <- -10
-check_swrcp(swrc_name, swrcp2)
+suppressWarnings(check_swrcp(swrc_name, swrcp2)) # expect first to fail
 
 }
 \seealso{

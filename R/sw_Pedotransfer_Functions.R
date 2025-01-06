@@ -1136,7 +1136,7 @@ iterate_neuroFX <- function(x, nfx, niter = 50) {
 #'
 #' swrcp2 <- swrcp
 #' swrcp2[1, 1] <- -10
-#' check_swrcp(swrc_name, swrcp2)
+#' suppressWarnings(check_swrcp(swrc_name, swrcp2)) # expect first to fail
 #'
 #' @export
 #' @md

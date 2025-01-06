@@ -155,8 +155,9 @@ setValidity(
     }
 
 
-    tmp <- object@Layers[, c(3L:11L, 13L)]
-    if (!(all(is.na(tmp)) || all(tmp >= 0., tmp <= dtol1))) {
+    tmp <- object@Layers[, c(3L:11L, 13L), drop = FALSE]
+    res <- apply(tmp, 2L, function(x) all(is.na(x)) || all(x >= 0., x <= dtol1))
+    if (!all(res)) {
       msg <- paste(
         "@Layers values of gravel, evco, trcos, sand, clay",
         "impermeability, and som must be between 0 and 1",
@@ -166,7 +167,7 @@ setValidity(
     }
 
     tmp <- colSums(object@Layers[, 4L:8L, drop = FALSE])
-    if (!(all(is.na(tmp)) || all(tmp <= dtol1, na.rm = TRUE))) {
+    if (!all(is.na(tmp) | tmp <= dtol1)) {
       msg <- paste(
         "@Layers values of profile sums of evco and trcos must be",
         "between 0 and 1",
@@ -252,7 +253,7 @@ swSoils <- function(...) {
 
   if ("omSWRCp" %in% dns) {
     # Guarantee names
-    dimnames(dots[["omSWRCp"]]) <- list(NULL, colnames(def@omSWRCp))
+    dimnames(dots[["omSWRCp"]]) <- dimnames(def@omSWRCp)
   } else {
     def@omSWRCp <- def@omSWRCp[1:2, , drop = FALSE]
     def@omSWRCp[] <- NA_real_
@@ -357,7 +358,7 @@ setReplaceMethod(
   function(object, value) {
     colnames(value@Layers) <- colnames(object@Layers)
     colnames(value@SWRCp) <- colnames(object@SWRCp)
-    colnames(value@omSWRCp) <- colnames(object@omSWRCp)
+    dimnames(value@omSWRCp) <- dimnames(object@omSWRCp)
     object <- value
     validObject(object)
     object
@@ -375,7 +376,7 @@ setReplaceMethod(
     ido <- if (utils::hasName(value, "omSWRCp")) "omSWRCp" else 3
     colnames(value[[idl]]) <- colnames(object@Layers)
     colnames(value[[idp]]) <- colnames(object@SWRCp)
-    colnames(value[[ido]]) <- colnames(object@omSWRCp)
+    dimnames(value[[ido]]) <- dimnames(object@omSWRCp)
     object@Layers <- data.matrix(value[[idl]])
     object@SWRCp <- data.matrix(value[[idp]])
     object@omSWRCp <- data.matrix(value[[ido]])
@@ -417,8 +418,8 @@ setReplaceMethod(
   "swSoils_omSWRCp",
   signature = "swSoils",
   function(object, value) {
-    colnames(value) <- colnames(object@omSWRCp)
-    object@SWRCp <- data.matrix(value)
+    dimnames(value) <- dimnames(object@omSWRCp)
+    object@omSWRCp <- data.matrix(value)
     validObject(object)
     object
   }
@@ -437,7 +438,7 @@ reset_omSWRCp <- function(omSWRCp) {
   array(
     data = NA_real_,
     dim = c(2L, ncol(omSWRCp)),
-    dimnames = list(NULL, colnames(omSWRCp))
+    dimnames = dimnames(omSWRCp)
   )
 }
 

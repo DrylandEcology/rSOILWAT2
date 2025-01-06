@@ -2093,6 +2093,10 @@ setGeneric(
 #'
 #' @return A data matrix.
 #'
+#' @examples
+#'   swin <- rSOILWAT2::sw_exampleData
+#'   swSoils_omSWRCp(swin) <- rSOILWAT2::sw2_list_omSWRCp[["Campbell1974"]]
+#'
 #' @md
 #' @exportMethod swSoils_omSWRCp
 setGeneric(
@@ -2142,12 +2146,12 @@ setGeneric(
   function(object, value) standardGeneric("swSoils_SWRCp<-")
 )
 
-#' @rdname swSoils_SWRCp
+#' @rdname swSoils_omSWRCp
 #'
 #' @param value An object that can be converted to a data matrix and represents
 #' required `SWRC` parameters.
 #'
-#' @exportMethod swSoils_SWRCp<-
+#' @exportMethod swSoils_omSWRCp<-
 setGeneric(
   "swSoils_omSWRCp<-",
   function(object, value) standardGeneric("swSoils_omSWRCp<-")

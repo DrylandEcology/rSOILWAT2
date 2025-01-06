@@ -220,27 +220,32 @@ static SEXP onGet_SW_SWRCp(void) {
 
 /* Copy omSWRC parameters into "omSWRCp" matrix */
 static SEXP onGet_SW_omSWRCp(void) {
-	int i, k;
-	SW_SITE *v = &SoilWatRun.Site;
-    SEXP omSWRCp, omSWRCp_names, omSWRCp_names_y;
+    int i, k;
+    SW_SITE *v = &SoilWatRun.Site;
+    SEXP omSWRCp, omSWRCp_names, omSWRCp_rownames, omSWRCp_colnames;
     double *p_omSWRCp;
 
-	PROTECT(omSWRCp = allocMatrix(REALSXP, 2, SWRC_PARAM_NMAX));
+    PROTECT(omSWRCp = allocMatrix(REALSXP, 2, SWRC_PARAM_NMAX));
     p_omSWRCp = REAL(omSWRCp);
-    for (k = 0; k < 2; k++) {
-        for (i = 0; i < SWRC_PARAM_NMAX; i++) {
-			p_omSWRCp[i + SWRC_PARAM_NMAX * k] = v->swrcpOM[k][i];
-		}
-	}
-	PROTECT(omSWRCp_names = allocVector(VECSXP, 2));
-	PROTECT(omSWRCp_names_y = allocVector(STRSXP, SWRC_PARAM_NMAX));
-	for (i = 0; i < 2; i++) {
-		SET_STRING_ELT(omSWRCp_names_y, i, mkChar(cOMSWRCp[i]));
-	}
-	SET_VECTOR_ELT(omSWRCp_names, 1, omSWRCp_names_y);
-	setAttrib(omSWRCp, R_DimNamesSymbol, omSWRCp_names);
+    for (i = 0; i < 2; i++) {
+        for (k = 0; k < SWRC_PARAM_NMAX; k++) {
+            p_omSWRCp[i + 2 * k] = v->swrcpOM[i][k];
+        }
+    }
+    PROTECT(omSWRCp_names = allocVector(VECSXP, 2));
+    PROTECT(omSWRCp_rownames = allocVector(STRSXP, 2));
+    for (i = 0; i < 2; i++) {
+        SET_STRING_ELT(omSWRCp_rownames, i, mkChar(cOMSWRCp[i]));
+    }
+    SET_VECTOR_ELT(omSWRCp_names, 0, omSWRCp_rownames);
+    PROTECT(omSWRCp_colnames = allocVector(STRSXP, SWRC_PARAM_NMAX));
+    for (i = 0; i < SWRC_PARAM_NMAX; i++) {
+        SET_STRING_ELT(omSWRCp_colnames, i, mkChar(cSWRCp[i]));
+    }
+    SET_VECTOR_ELT(omSWRCp_names, 1, omSWRCp_colnames);
+    setAttrib(omSWRCp, R_DimNamesSymbol, omSWRCp_names);
 
-    UNPROTECT(3);
+    UNPROTECT(4);
     return omSWRCp;
 }
 
@@ -250,7 +255,6 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp, LOG_INFO* LogInfo) {
 	SW_SITE *v = &SoilWatRun.Site;
 	int i, k;
 	double *p_SWRCp;
-    Bool isMineral = swFALSE;
 
 	/* note that Files.read() must be called prior to this. */
 	MyFileName = SoilWatDomain.SW_PathInputs.txtInFiles[eSWRCp];
@@ -287,8 +291,7 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp, LOG_INFO* LogInfo) {
         }
     }
 
-    v->site_has_swrcpMineralSoil =
-        (Bool) (isMineral && v->inputsProvideSWRCp);
+    v->site_has_swrcpMineralSoil = v->inputsProvideSWRCp;
 }
 
 static void onSet_SW_omSWRCp(SEXP SW_omSWRCp, LOG_INFO* LogInfo) {
@@ -299,9 +302,9 @@ static void onSet_SW_omSWRCp(SEXP SW_omSWRCp, LOG_INFO* LogInfo) {
     /* Copy values */
     p_omSWRCp = REAL(SW_omSWRCp);
 
-    for (k = 0; k < 2; k++) {
-        for (i = 0; i < SWRC_PARAM_NMAX; i++) {
-            v->swrcpOM[k][i] = p_omSWRCp[i + SWRC_PARAM_NMAX * k];
+    for (i = 0; i < 2; i++) {
+        for (k = 0; k < SWRC_PARAM_NMAX; k++) {
+            v->swrcpOM[i][k] = p_omSWRCp[i + 2 * k];
         }
     }
 }
