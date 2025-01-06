@@ -208,6 +208,11 @@ format_timestamp <- function(object) {
 #'
 #' @section Details:
 #' List of changes:
+#'   * Changes with `v6.3.0`:
+#'       * class [`swSoils-class`]:
+#'           * new slot `"omSWRCp"`; slot `"SWRCp"` refers to mineral soil
+#'           * slot `"Layers"` gained column `"som_frac"`
+#'       * class [`swSite-class`]: new slot `"depth_sapric"`
 #'   * Changes with `v6.2.0`:
 #'       * class [`swWeatherData`]: slot `"data"` changed column name
 #'         (`"specHavg_pct"` to `"specHavg_gPERkg"`) and
@@ -1739,14 +1744,12 @@ setGeneric(
   function(object) standardGeneric("swSite_SWRCflags")
 )
 
-#' Are `SWRC` parameters provided in `SWRCp`?
-#'
-#' Set to `TRUE` once `SWRCp` are set.
+#' Are mineral soil `SWRC` parameters provided in `SWRCp`?
 #'
 #' @param object An object of class [swSite-class] or [swInputData-class].
 #'
 #' @return A logical value.
-#' `TRUE` if `SWRC` parameters are provided in `SWRCp`;
+#' `TRUE` if mineral soil `SWRC` parameters are provided in `SWRCp`;
 #' `FALSE` if `SWRCp` should be estimated during a simulation run
 #' via specified pedotransfer function
 #' (see `"ptf_name"` of [swSite_SWRCflags()]).
@@ -1758,20 +1761,10 @@ setGeneric(
   function(object) standardGeneric("swSite_hasSWRCp")
 )
 
-#' Are mineral soils `SWRC` parameters provided in `SWRCp`?
-#'
-#' Set to `TRUE` once `SWRCp` are set.
-#'
-#' @param object An object of class [swSite-class] or [swInputData-class].
-#'
-#' @return A logical value.
-#' `TRUE` if `SWRC` parameters are provided in `SWRCp`;
-#' `FALSE` if `SWRCp` should be estimated during a simulation run
-#' via specified pedotransfer function
-#' (see `"ptf_name"` of [swSite_SWRCflags()]).
-#'
-#' @md
-#' @exportMethod swSite_depthSapric
+#' \code{swSite_depthSapric}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
 setGeneric(
   "swSite_depthSapric",
   function(object) standardGeneric("swSite_depthSapric")
@@ -1931,7 +1924,7 @@ setGeneric(
 
 #' @rdname swSite_depthSapric
 #'
-#' @param value A logical value.
+#' @param value A numeric value.
 #'
 #' @exportMethod swSite_depthSapric<-
 setGeneric(
@@ -2081,7 +2074,7 @@ setGeneric(
   function(object) standardGeneric("swSoils_Layers")
 )
 
-#' `SWRC` parameters
+#' `SWRC` parameters of the mineral soil
 #'
 #' @param object An object of class [`swSoils`] or [swInputData-class].
 #'
@@ -2094,7 +2087,7 @@ setGeneric(
   function(object) standardGeneric("swSoils_SWRCp")
 )
 
-#' `SWRC` parameters
+#' `SWRC` parameters of fibric and sapric organic matter
 #'
 #' @param object An object of class [`swSoils`] or [swInputData-class].
 #'

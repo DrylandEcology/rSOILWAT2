@@ -22,6 +22,20 @@
 ###############################################################################
 
 ###############################################################SOILS###########
+
+#' List names of currently implemented soil properties
+#' @return A vector of names of soil properties.
+#' @export
+soilLayer_dataColumns <- function() {
+  c(
+    "depth_cm", "bulkDensity_g/cm^3", "gravel_content",
+    "EvapBareSoil_frac", "transpGrass_frac", "transpShrub_frac",
+    "transpTree_frac", "transpForb_frac", "sand_frac", "clay_frac",
+    "impermeability_frac", "soilTemp_c", "som_frac"
+  )
+}
+
+
 #' Class \code{"swSoils"}
 #'
 #' The methods listed below work on this class and the proper slot of the class
@@ -74,15 +88,7 @@ setClass(
     Layers = array(
       NA_real_,
       dim = c(0L, 13L),
-      dimnames = list(
-        NULL,
-        c(
-            "depth_cm", "bulkDensity_g/cm^3", "gravel_content",
-            "EvapBareSoil_frac", "transpGrass_frac", "transpShrub_frac",
-            "transpTree_frac", "transpForb_frac", "sand_frac", "clay_frac",
-            "impermeability_frac", "soilTemp_c", "som_frac"
-        )
-      )
+      dimnames = list(NULL, soilLayer_dataColumns())
     ),
     SWRCp = array(
       NA_real_,
@@ -113,13 +119,15 @@ setValidity(
     tmpom <- dim(object@omSWRCp)
     dtol1 <- 1. + tmpL[1] * rSW2_glovars[["tol"]]
 
+    varsExpected <- soilLayer_dataColumns()
+
     #--- Check "Layers"
-    if (tmpL[2] != 13L) {
+    if (tmpL[2] != length(varsExpected)) {
       msg <- paste(
-        "@Layers must have exactly 12 columns corresponding to",
-        "depth_cm, bulkDensity_g/cm^3, gravel_content, EvapBareSoil_frac,",
-        "transpGrass_frac,transpShrub_frac, transpTree_frac, transpForb_frac,",
-        "sand_frac, clay_frac, impermeability_frac, soilTemp_c", "som_frac"
+        "@Layers must have exactly",
+        length(varsExpected),
+        "columns corresponding to",
+        toString(varsExpected)
       )
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
@@ -261,6 +269,48 @@ swSoils <- function(...) {
 }
 
 
+#' @rdname sw_upgrade
+#'
+#' @param soilLayers A two-dimensional object representing soil layers in
+#' rows and soil properties in columns,
+#' see slot `"Layers"` of `["swSoils-class"]`.
+#' @param template_soilLayerProperties A vector of standard names of
+#' soil properties, see [soilLayer_dataColumns()].
+#'
+#' @return For [upgrade_soilLayers()]:
+#' an updated `soilLayers` matrix with requested columns
+#' (a new `"som_frac"` is initialized to the default value of 0).
+#'
+#' @examples
+#' upgrade_soilLayers(
+#'   data.frame(sand_frac = runif(2), clay_frac = runif(2), dummy = runif(2))
+#' )
+#' soils <- slot(rSOILWAT2::sw_exampleData, "soils")
+#' upgrade_soilLayers(slot(soils, "Layers")[, 1:12L, drop = FALSE])
+#'
+#' @md
+#' @export
+upgrade_soilLayers <- function(
+  soilLayers,
+  template_soilLayerProperties = soilLayer_dataColumns()
+) {
+  template_data <- array(
+    dim = c(nrow(soilLayers), length(template_soilLayerProperties)),
+    dimnames = list(NULL, template_soilLayerProperties)
+  )
+
+  cns <- intersect(template_soilLayerProperties, colnames(soilLayers))
+  if (length(cns) < 1L) stop("Required variables not found.")
+  template_data[, cns] <- as.matrix(soilLayers)[, cns]
+
+  varsToZero <- "som_frac"
+  cns <- setdiff(varsToZero, colnames(soilLayers))
+  if (length(cns) > 0L) {
+    template_data[, cns] <- 0
+  }
+
+  template_data
+}
 
 #' @rdname sw_upgrade
 #' @export
@@ -268,20 +318,16 @@ setMethod(
   "sw_upgrade",
   signature = "swSoils",
   definition = function(object, verbose = FALSE) {
-    #--- Make sure we have SWRC parameters
-    tmp <- try(object@SWRCp, silent = TRUE)
-    if (inherits(tmp, "try-error")) {
-      if (verbose) {
-        message("Upgrading object of class `swSoils`.")
-      }
-      object <- suppressWarnings(swSoils(object))
-    }
+    needsUpgrade <-
+      !all(soilLayer_dataColumns() %in% colnames(object@Layers)) ||
+      inherits(try(object@SWRCp, silent = TRUE), "try-error") ||
+      inherits(try(object@omSWRCp, silent = TRUE), "try-error")
 
-    tmp <- try(object@omSWRCp, silent = TRUE)
-    if (inherits(tmp, "try-error")) {
+    if (needsUpgrade) {
       if (verbose) {
         message("Upgrading object of class `swSoils`.")
       }
+      object@Layers <- upgrade_soilLayers(object@Layers)
       object <- suppressWarnings(swSoils(object))
     }
 

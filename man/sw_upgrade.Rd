@@ -13,6 +13,7 @@
 \alias{upgrade_weatherHistory}
 \alias{sw_upgrade,swProd-method}
 \alias{sw_upgrade,swSite-method}
+\alias{upgrade_soilLayers}
 \alias{sw_upgrade,swSoils-method}
 \alias{sw_upgrade,swOUT-method}
 \alias{sw_upgrade,swEstabSpecies-method}
@@ -46,6 +47,11 @@ upgrade_weatherHistory(object, verbose = FALSE)
 
 \S4method{sw_upgrade}{swSite}(object, verbose = FALSE)
 
+upgrade_soilLayers(
+  soilLayers,
+  template_soilLayerProperties = soilLayer_dataColumns()
+)
+
 \S4method{sw_upgrade}{swSoils}(object, verbose = FALSE)
 
 \S4method{sw_upgrade}{swOUT}(object, verbose = FALSE)
@@ -64,6 +70,13 @@ upgrade_weatherHistory(object, verbose = FALSE)
 \item{weatherDF}{A data frame with weather variables.}
 
 \item{template_weatherColumns}{A vector with requested weather variables.}
+
+\item{soilLayers}{A two-dimensional object representing soil layers in
+rows and soil properties in columns,
+see slot \code{"Layers"} of \verb{["swSoils-class"]}.}
+
+\item{template_soilLayerProperties}{A vector of standard names of
+soil properties, see \code{\link[=soilLayer_dataColumns]{soilLayer_dataColumns()}}.}
 }
 \value{
 The upgraded \code{object}, if needed, to match the current version
@@ -74,6 +87,10 @@ an updated \code{weatherDF} with requested column name changes.
 
 For \code{\link[=upgrade_weatherDF]{upgrade_weatherDF()}}:
 an updated \code{weatherDF} with requested columns.
+
+For \code{\link[=upgrade_soilLayers]{upgrade_soilLayers()}}:
+an updated \code{soilLayers} matrix with requested columns
+(a new \code{"som_frac"} is initialized to the default value of 0).
 }
 \description{
 Missing slots and elements are added and
@@ -83,6 +100,15 @@ take the new default values from \code{SOILWAT2}.
 
 List of changes:
 \itemize{
+\item Changes with \code{v6.3.0}:
+\itemize{
+\item class \code{\linkS4class{swSoils}}:
+\itemize{
+\item new slot \code{"omSWRCp"}; slot \code{"SWRCp"} refers to mineral soil
+\item slot \code{"Layers"} gained column \code{"som_frac"}
+}
+\item class \code{\linkS4class{swSite}}: new slot \code{"depth_sapric"}
+}
 \item Changes with \code{v6.2.0}:
 \itemize{
 \item class \code{\link{swWeatherData}}: slot \code{"data"} changed column name
@@ -152,5 +178,11 @@ upgrade_weatherDF(
 upgrade_weatherDF(
   data.frame(DOY = 1:2, Tmax_C = runif(2), specHavg_pct = NA)
 )
+
+upgrade_soilLayers(
+  data.frame(sand_frac = runif(2), clay_frac = runif(2), dummy = runif(2))
+)
+soils <- slot(rSOILWAT2::sw_exampleData, "soils")
+upgrade_soilLayers(slot(soils, "Layers")[, 1:12L, drop = FALSE])
 
 }

@@ -9,7 +9,7 @@
 \alias{swSoils_SWRCp<-,swSoils-method}
 \alias{swSoils_SWRCp,swInputData-method}
 \alias{swSoils_SWRCp<-,swInputData-method}
-\title{\code{SWRC} parameters}
+\title{\code{SWRC} parameters of the mineral soil}
 \usage{
 swSoils_SWRCp(object)
 
@@ -35,7 +35,7 @@ required `SWRC` parameters.}
 A data matrix.
 }
 \description{
-\code{SWRC} parameters
+\code{SWRC} parameters of the mineral soil
 }
 \section{Details}{
 
