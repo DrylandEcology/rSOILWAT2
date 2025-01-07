@@ -28,6 +28,8 @@ src/SOILWAT2/\.LSAN_suppr\.txt
 src/SOILWAT2/src/SW_Main\.c
 src/SOILWAT2/.clang-format
 src/SOILWAT2/external/.clang-format
+src/SOILWAT2/.clang-tidy
+src/SOILWAT2/.clang-tidy_swtest
 src/*\.o
 src/*\.so
 src/*\.dll
