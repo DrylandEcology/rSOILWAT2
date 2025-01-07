@@ -380,7 +380,8 @@ data from `DayMet`
     sand = 0.65,
     clay = 0.05,
     impermeability = NA,
-    soil_temp = NA
+    soil_temp = NA,
+    som_frac = 0
   )
 
   soil_new <- data.frame(rSOILWAT2::swSoils_Layers(sw_in)[0, ])
@@ -461,6 +462,14 @@ data from `DayMet`
       tmp <- grep("fragvol_L", cns_sd, fixed = TRUE)
       soil_new[ids, "gravel_content"] <- soils_sda2[["soil_data"]][1, tmp]
     }
+  }
+```
+
+### Soil organic matter
+```{r, som, results = "hide"}
+  # Set soil organic matter to zero if we don't have values
+  if (anyNA(soil_new[, "som_frac"])) {
+    soil_new[, "som_frac"] <- 0
   }
 ```
 
