@@ -701,6 +701,9 @@ void onSet_SW_SIT_transp(SEXP SW_SIT, LOG_INFO* LogInfo) {
     int lyr;
     int i;
 	int *p_transp; // ideally `LyrIndex` so that same type as `_TranspRgnBounds`, but R API INTEGER() is signed
+#ifdef SWDEBUG
+    int debug = 0;
+#endif
 
     PROTECT(TranspirationRegions = GET_SLOT(SW_SIT, install("TranspirationRegions")));
 	p_transp = INTEGER(TranspirationRegions);
