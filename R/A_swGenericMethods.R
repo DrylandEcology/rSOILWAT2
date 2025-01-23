@@ -212,7 +212,8 @@ format_timestamp <- function(object) {
 #'       * class [`swSoils-class`]:
 #'           * new slot `"omSWRCp"`; slot `"SWRCp"` refers to mineral soil
 #'           * slot `"Layers"` gained column `"som_frac"`
-#'       * class [`swSite-class`]: new slot `"depth_sapric"`
+#'       * class [`swSite-class`]: new slots `"depth_sapric"` and
+#'         `"SurfaceTemperatureMethod"`
 #'   * Changes with `v6.2.0`:
 #'       * class [`swWeatherData`]: slot `"data"` changed column name
 #'         (`"specHavg_pct"` to `"specHavg_gPERkg"`) and
@@ -1843,6 +1844,19 @@ setGeneric(
   function(object) standardGeneric("swSite_IntrinsicSiteParams")
 )
 
+# swSite_SurfaceTempMethod() should be called
+# swSite_SurfaceTemperatureMethod() for consistency but that is
+# an "overlong name" (31 + 3 > 32, see swSite_SurfaceTempMethod())
+
+#' \code{swSite_SurfaceTempMethod}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_SurfaceTempMethod",
+  function(object) standardGeneric("swSite_SurfaceTempMethod")
+)
+
 #' \code{swSite_SoilTemperatureFlag}
 #' @param object An object of class \code{\linkS4class{swSite}} or
 #'   \code{\linkS4class{swInputData}}.
@@ -1861,7 +1875,7 @@ setGeneric(
   function(object) standardGeneric("swSite_SoilTemperatureConsts")
 )
 
-#' \code{swSite_SoilTemperatureFlag}
+#' \code{swSite_SoilDensityInputType}
 #' @param object An object of class \code{\linkS4class{swSite}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
@@ -2010,6 +2024,16 @@ setGeneric(
 setGeneric(
   "swSite_IntrinsicSiteParams<-",
   function(object, value) standardGeneric("swSite_IntrinsicSiteParams<-")
+)
+
+#' \code{swSite_SurfaceTempMethod<-}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_SurfaceTempMethod<-",
+  function(object, value) standardGeneric("swSite_SurfaceTempMethod<-")
 )
 
 #' \code{swSite_SoilTemperatureFlag<-}

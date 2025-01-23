@@ -1737,6 +1737,14 @@ setMethod(
 #' @rdname swInputData-class
 #' @export
 setMethod(
+  "swSite_SurfaceTempMethod",
+  signature = "swInputData",
+  function(object) swSite_SurfaceTempMethod(object@site)
+)
+
+#' @rdname swInputData-class
+#' @export
+setMethod(
   "swSite_SoilTemperatureFlag",
   signature = "swInputData",
   function(object) swSite_SoilTemperatureFlag(object@site)
@@ -1913,6 +1921,17 @@ setReplaceMethod(
   signature = "swInputData",
   function(object, value) {
     swSite_IntrinsicSiteParams(object@site) <- value
+    object
+  }
+)
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "swSite_SurfaceTempMethod",
+  signature = "swInputData",
+  function(object, value) {
+    swSite_SurfaceTempMethod(object@site) <- value
     object
   }
 )

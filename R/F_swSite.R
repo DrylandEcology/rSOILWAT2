@@ -75,6 +75,7 @@ setClass(
     EvaporationCoefficients = "numeric",
     TranspirationCoefficients = "numeric",
     IntrinsicSiteParams = "numeric",
+    SurfaceTemperatureMethod = "integer",
     SoilTemperatureFlag = "logical",
     SoilTemperatureConstants = "numeric",
     SoilDensityInputType = "integer",
@@ -108,6 +109,7 @@ setClass(
       rep(NA_real_, 5L),
       c("Longitude", "Latitude", "Altitude", "Slope", "Aspect")
     ),
+    SurfaceTemperatureMethod = NA_integer_,
     SoilTemperatureFlag = NA,
     SoilTemperatureConstants = stats::setNames(
       rep(NA_real_, 10L),
@@ -167,6 +169,10 @@ setValidity(
     }
     if (length(object@IntrinsicSiteParams) != 5L) {
       msg <- "@IntrinsicSiteParams length != 5."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    if (length(object@SurfaceTemperatureMethod) != 1L) {
+      msg <- "@SurfaceTemperatureMethod length != 1."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
     if (length(object@SoilTemperatureFlag) != 1L) {
@@ -366,6 +372,14 @@ setMethod(
 #' @rdname swSite-class
 #' @export
 setMethod(
+  "swSite_SurfaceTempMethod",
+  "swSite",
+  function(object) slot(object, "SurfaceTemperatureMethod")
+)
+
+#' @rdname swSite-class
+#' @export
+setMethod(
   "swSite_SoilTemperatureFlag",
   "swSite",
   function(object) slot(object, "SoilTemperatureFlag")
@@ -532,6 +546,18 @@ setReplaceMethod(
   signature = "swSite",
   definition = function(object, value) {
     object@IntrinsicSiteParams[] <- value
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname swSite-class
+#' @export
+setReplaceMethod(
+  "swSite_SurfaceTempMethod",
+  signature = "swSite",
+  definition = function(object, value) {
+    object@SurfaceTemperatureMethod <- as.integer(value)
     validObject(object)
     object
   }

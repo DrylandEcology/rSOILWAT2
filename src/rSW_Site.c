@@ -48,7 +48,9 @@ static char *MyFileName;
 static char *cSW_SIT[] = {
   "SWClimits", "ModelFlags", "ModelCoefficients",
   "SnowSimulationParameters", "DrainageCoefficient", "EvaporationCoefficients",
-  "TranspirationCoefficients", "IntrinsicSiteParams", "SoilTemperatureFlag",
+  "TranspirationCoefficients", "IntrinsicSiteParams",
+  "SurfaceTemperatureMethod",
+  "SoilTemperatureFlag",
   "SoilTemperatureConstants",
   "SoilDensityInputType",
   "TranspirationRegions",
@@ -375,6 +377,7 @@ SEXP onGet_SW_SIT(void) {
 	SEXP IntrinsicSiteParams, IntrinsicSiteParams_names;
 	char *cIntrinsicSiteParams[] = { "Longitude", "Latitude", "Altitude", "Slope", "Aspect" };
 
+	SEXP SurfaceTemperatureMethod;
 	SEXP SoilTemperatureConstants_use, SoilTemperatureConstants, SoilTemperatureConstants_names;
 	char *cSoilTempValues[] = {
 		"BiomassLimiter_g/m^2",
@@ -477,6 +480,9 @@ SEXP onGet_SW_SIT(void) {
 		SET_STRING_ELT(IntrinsicSiteParams_names, i, mkChar(cIntrinsicSiteParams[i]));
 	setAttrib(IntrinsicSiteParams, R_NamesSymbol, IntrinsicSiteParams_names);
 
+	PROTECT(SurfaceTemperatureMethod = NEW_INTEGER(1));
+	INTEGER(SurfaceTemperatureMethod)[0] = v->methodSurfaceTemperature;
+
 	PROTECT(SoilTemperatureConstants_use = NEW_LOGICAL(1));
 	LOGICAL(SoilTemperatureConstants_use)[0] = v->use_soil_temp;
 
@@ -537,15 +543,16 @@ SEXP onGet_SW_SIT(void) {
 	SET_SLOT(SW_SIT, install(cSW_SIT[5]), EvaporationCoefficients);
 	SET_SLOT(SW_SIT, install(cSW_SIT[6]), TranspirationCoefficients);
 	SET_SLOT(SW_SIT, install(cSW_SIT[7]), IntrinsicSiteParams);
-	SET_SLOT(SW_SIT, install(cSW_SIT[8]), SoilTemperatureConstants_use);
-	SET_SLOT(SW_SIT, install(cSW_SIT[9]), SoilTemperatureConstants);
-	SET_SLOT(SW_SIT, install(cSW_SIT[10]), SoilDensityInputType);
-	SET_SLOT(SW_SIT, install(cSW_SIT[11]), TranspirationRegions);
-	SET_SLOT(SW_SIT, install(cSW_SIT[12]), swrc_flags);
-	SET_SLOT(SW_SIT, install(cSW_SIT[13]), has_swrcp);
-	SET_SLOT(SW_SIT, install(cSW_SIT[14]), depthSapric);
+	SET_SLOT(SW_SIT, install(cSW_SIT[8]), SurfaceTemperatureMethod);
+	SET_SLOT(SW_SIT, install(cSW_SIT[9]), SoilTemperatureConstants_use);
+	SET_SLOT(SW_SIT, install(cSW_SIT[10]), SoilTemperatureConstants);
+	SET_SLOT(SW_SIT, install(cSW_SIT[11]), SoilDensityInputType);
+	SET_SLOT(SW_SIT, install(cSW_SIT[12]), TranspirationRegions);
+	SET_SLOT(SW_SIT, install(cSW_SIT[13]), swrc_flags);
+	SET_SLOT(SW_SIT, install(cSW_SIT[14]), has_swrcp);
+	SET_SLOT(SW_SIT, install(cSW_SIT[15]), depthSapric);
 
-	UNPROTECT(29);
+	UNPROTECT(30);
 	return SW_SIT;
 }
 
@@ -561,6 +568,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	SEXP EvaporationCoefficients;
 	SEXP TranspirationCoefficients;
 	SEXP IntrinsicSiteParams;
+	SEXP SurfaceTemperatureMethod;
 	SEXP SoilTemperatureConstants_use;
 	SEXP SoilTemperatureConstants;
 	SEXP SoilDensityInputType;
@@ -646,6 +654,12 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	if (debug) sw_printf(" > 'location'");
 	#endif
 
+	PROTECT(SurfaceTemperatureMethod = GET_SLOT(SW_SIT, install("SurfaceTemperatureMethod")));
+	v->methodSurfaceTemperature = INTEGER(SurfaceTemperatureMethod)[0];
+	#ifdef RSWDEBUG
+	if (debug) sw_printf(" > 'surftemp-method'");
+	#endif
+
 	PROTECT(SoilTemperatureConstants_use = GET_SLOT(SW_SIT, install("SoilTemperatureFlag")));
 	v->use_soil_temp = LOGICAL(SoilTemperatureConstants_use)[0];
 	#ifdef RSWDEBUG
@@ -689,7 +703,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
     PROTECT(depthSapric = GET_SLOT(SW_SIT, install("depth_sapric")));
     v->depthSapric = REAL(depthSapric)[0];
 
-    UNPROTECT(14);
+    UNPROTECT(15);
 }
 
 void onSet_SW_SIT_transp(SEXP SW_SIT, LOG_INFO* LogInfo) {

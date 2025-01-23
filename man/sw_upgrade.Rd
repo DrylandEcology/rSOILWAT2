@@ -107,7 +107,8 @@ List of changes:
 \item new slot \code{"omSWRCp"}; slot \code{"SWRCp"} refers to mineral soil
 \item slot \code{"Layers"} gained column \code{"som_frac"}
 }
-\item class \code{\linkS4class{swSite}}: new slot \code{"depth_sapric"}
+\item class \code{\linkS4class{swSite}}: new slots \code{"depth_sapric"} and
+\code{"SurfaceTemperatureMethod"}
 }
 \item Changes with \code{v6.2.0}:
 \itemize{
