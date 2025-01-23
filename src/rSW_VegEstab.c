@@ -120,7 +120,7 @@ void onSet_SW_VES(SEXP VES, LOG_INFO* LogInfo) {
 
 	if (EchoInits) {
 		echo_VegEstab(SoilWatRun.Site.soils.width, SoilWatRun.VegEstab.parms,
-					   SoilWatRun.VegEstab.count);
+					   SoilWatRun.VegEstab.count, LogInfo);
 	}
 
     report: {

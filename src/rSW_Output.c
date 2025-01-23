@@ -125,7 +125,7 @@ void onSet_SW_OUT(SEXP OUT, LOG_INFO* LogInfo) {
 	}
 
 	if (EchoInits)
-		echo_outputs(&SoilWatDomain.OutDom);
+		echo_outputs(&SoilWatDomain.OutDom, LogInfo);
 
 	UNPROTECT(3);
 
