@@ -269,15 +269,28 @@ setValidity(
       !all(
         vapply(
           object@MonthlyVeg,
-          function(x) identical(dim(x), c(12L, 4L)),
+          function(x) identical(dim(x), c(12L, 4L)) && all(x >= 0 | is.na(x)),
           FUN.VALUE = NA
         )
       )
     ) {
       msg <- paste(
         "@MonthlyVeg must be a list with NVEGTYPES elements of a",
-        "12x4 matrix."
+        "12x4 matrix with values larger than 0 (or NA)."
       )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (
+      !all(
+        vapply(
+          object@MonthlyVeg,
+          function(x) all(x[, 3L] <= 1 | is.na(x[, 3L])),
+          FUN.VALUE = NA
+        )
+      )
+    ) {
+      msg <- "@MonthlyVeg[, 'Live_pct'] must be <= 1 or NA."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
