@@ -11,6 +11,7 @@
 ^\.Rproj\.user$
 ^cran-comments\.md$
 ^NEWS\.md$
+inst/extdata/example1/Input_nc
 ^tests/
 tests/rSOILWAT_IntegrationTestOutput*
 src/SOILWAT2/\.git

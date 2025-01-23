@@ -53,3 +53,6 @@ vignettes/*.html
 vignettes/*.log
 /doc/
 /Meta/
+
+# nc-based SOILWAT2 example
+inst/extdata/example1/Input_nc
