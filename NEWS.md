@@ -1,4 +1,48 @@
 # rSOILWAT2 v6.3.0-9000
+## Breaking changes
+* `SOILWAT2` updated to v8.1.0
+* This version produces similar but not identical simulation output
+  as previously because of the following changes:
+    * Small deviations arise from replacing all remaining variables of
+      type float with type double in the internal C code.
+    * Saturated percolation is now limited which leads to different outcomes
+      during periods of high infiltration (e.g., snowmelt) and during conditions
+      of low hydraulic conductivity (e.g., frozen soils, sapric organic matter).
+    * Depth of snowpack is now consistent with snowpack water content.
+    * Surface temperature extremes are now less sensitive to high biomass, and
+      average surface temperature is now more consistent with daily extremes.
+
+## New features
+* SOILWAT2 can now represent the influence of soil organic matter on the
+  soil water retention curve and the saturated hydraulic conductivity
+  parameter.
+* Saturated percolation is now limited. The upper bound is a function based on
+  the saturated hydraulic conductivity parameter
+  (which includes effects of organic matter), frozen soils, and a
+  user-specified `"permeability"` factor.
+* Biomass effects are now capped at a value at which
+  cooling and heating effects on minimum and maximum surface temperature
+  result, across average conditions, in no change for mean surface temperature.
+  Effects of maximum air temperature on maximum surface temperature are limited
+  to air temperatures above freezing.
+
+## Bugfix
+* Fix the calculation of depth of snowpack.
+* Fix the estimation of surface temperature.
+
+## Changes to interface
+* The class `"swSoils"` gained the slot `"omSWRCp"` that stores parameters
+  of fibric and sapric organic soil water retention curves, and
+  the slot `"SWRCp"` now refers to parameters of mineral soil retention curves.
+  Additionally, the slot `"Layers"` gained the column `"som_frac"` that stores
+  soil organic matter for each soil layer.
+* The class `"swSite"` gained the slot `"depth_sapric"` that stores the
+  soil depth at which `"omSWRCp"` have completely changed from fibric to sapric,
+  and the slot `"SurfaceTemperatureMethod"` that determines the method used
+  to estimate biomass and other effects on surface temperature.
+* Class `"swFiles"` slot `"InFiles"` changed the position of `"LogFile"`
+  which is unused.
+* Default inputs now contain July-September snowpack density values.
 
 
 # rSOILWAT2 v6.2.0

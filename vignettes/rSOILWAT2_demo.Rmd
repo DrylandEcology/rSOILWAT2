@@ -658,7 +658,7 @@ by `SOILWAT2` with the selected pedotransfer function.
   # Alternatively (and equivalently),
   # set soil properties and SWRC parameters with one assignment
   rSOILWAT2::set_swSoils(sw_in) <- list(
-    Layers = soil_new, 
+    Layers = soil_new,
     SWRCp = swrcp,
     omSWRCp = rSOILWAT2::sw2_list_omSWRCp[[tmp[["swrc_name"]]]]
   )
