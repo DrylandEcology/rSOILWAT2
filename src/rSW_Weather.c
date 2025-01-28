@@ -39,7 +39,6 @@
 /* =================================================== */
 /*                  Local Variables                    */
 /* --------------------------------------------------- */
-static char *MyFileName;
 
 static char *cSW_WTH_names[] = {
   "MonthlyScalingParams",
@@ -220,7 +219,6 @@ void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo) {
 	double *p_MonthlyValues;
 	int *p_dailyInputFlags;
 
-	MyFileName = SoilWatDomain.SW_PathInputs.txtInFiles[eWeather];
 
     // Copy weather prefix from PathInfo to Weather within `SoilWatRun`
     strcpy(SoilWatRun.Weather.name_prefix, SoilWatDomain.SW_PathInputs.txtWeatherPrefix);
@@ -286,10 +284,10 @@ void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo) {
 		LogError(
 			logfp,
 			LOGERROR,
-			"%s : Model year (%d) starts before weather files (%d)"
+			"Model year (%d) starts before weather files (%d)"
 				" and weather generator turned off.\n"
 				" Please synchronize the years or set up the weather generator files",
-			MyFileName, SW_Model.startyr, w->startYear
+			SW_Model.startyr, w->startYear
 		);
 	}
 	*/

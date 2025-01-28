@@ -43,7 +43,6 @@
 /* =================================================== */
 /*                  Local Variables                    */
 /* --------------------------------------------------- */
-static char *MyFileName;
 static int swcdataIndex;
 
 
@@ -102,7 +101,6 @@ void onSet_SW_SWC(SEXP SWC, LOG_INFO* LogInfo) {
 	SEXP swcFirstYear;
 	SEXP swcMethod;
 
-	MyFileName = SoilWatDomain.SW_PathInputs.txtInFiles[eSoilwat];
 	LyrIndex i;
 	ForEachSoilLayer(i, SoilWatRun.Site.n_layers)
 		v->avgLyrTemp[i] = SoilWatRun.Site.soils.avgLyrTempInit[i];

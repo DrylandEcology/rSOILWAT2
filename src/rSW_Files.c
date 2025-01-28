@@ -89,7 +89,9 @@ void onSet_SW_F(SEXP SW_F_construct, LOG_INFO* LogInfo) {
 			free(SoilWatDomain.SW_PathInputs.txtInFiles[i]);
 		}
 	for (i = 0; i < j; i++) {
-		SoilWatDomain.SW_PathInputs.txtInFiles[i] = Str_Dup(CHAR(STRING_ELT(FilesIn,i)), LogInfo);
+		// txtInFiles is unused if values set by rSOILWAT2
+		// SoilWatDomain.SW_PathInputs.txtInFiles[i] = Str_Dup(CHAR(STRING_ELT(FilesIn,i)), LogInfo);
+		SoilWatDomain.SW_PathInputs.txtInFiles[i] = NULL;
         if(LogInfo->stopRun) {
             UNPROTECT(2); // Unprotect the two protected variables before exiting
             return; // Exit function prematurely

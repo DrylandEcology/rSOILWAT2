@@ -40,9 +40,6 @@ vegetation production parameter information.
 /* =================================================== */
 /*                  Local Variables                    */
 /* --------------------------------------------------- */
-static char *MyFileName;
-
-
 static char *cVegProd_names[] = {
 	"veg_method", "Composition", "Albedo", "CanopyHeight",
 	"VegetationInterceptionParameters", "LitterInterceptionParameters",
@@ -438,8 +435,6 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 	SEXP MonthlyVeg, Grasslands, Shrublands, Forest, Forb;
 	SEXP CO2Coefficients;
 	double *p_Grasslands, *p_Shrublands, *p_Forest, *p_Forb;
-
-	MyFileName = SoilWatDomain.SW_PathInputs.txtInFiles[eVegProd];
 
     PROTECT(veg_method = GET_SLOT(SW_VPD, install(cVegProd_names[0])));
     v->veg_method = INTEGER(veg_method)[0];

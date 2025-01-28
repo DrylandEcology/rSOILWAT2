@@ -41,12 +41,6 @@
 
 
 /* =================================================== */
-/*                Module-Level Variables               */
-/* --------------------------------------------------- */
-static char *MyFileName;
-
-
-/* =================================================== */
 /*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
@@ -69,7 +63,6 @@ void onSet_SW_OUT(SEXP OUT, LOG_INFO* LogInfo) {
 	#ifdef RSWDEBUG
 	if (debug) sw_printf("onSet_SW_OUT: start ...");
 	#endif
-	MyFileName = SoilWatDomain.SW_PathInputs.txtInFiles[eOutput];
 
 	PROTECT(sep = GET_SLOT(OUT, install("outputSeparator")));
 

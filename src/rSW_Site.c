@@ -42,9 +42,6 @@
 /*                  Local Variables                    */
 /* --------------------------------------------------- */
 
-static char *MyFileName;
-
-
 static char *cSW_SIT[] = {
   "SWClimits", "ModelFlags", "ModelCoefficients",
   "SnowSimulationParameters", "DrainageCoefficient", "EvaporationCoefficients",
@@ -126,9 +123,6 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
           soildensity, imperm, soiltemp, f_gravel, som_frac;
 	double *p_Layers;
 
-	/* note that Files.read() must be called prior to this. */
-	MyFileName = SoilWatDomain.SW_PathInputs.txtInFiles[eLayers];
-
 	j = nrows(SW_LYR);
 	p_Layers = REAL(SW_LYR);
 	columns = ncols(SW_LYR);
@@ -139,8 +133,8 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 		LogError(
 			LogInfo,
 			LOGERROR,
-			"%s : Too few columns in layers specified (%d).\n",
-			MyFileName, columns
+			"soils.in : Too few columns in layers specified (%d).\n",
+			columns
 		);
         return; // Exit function prematurely due to error
 	}
@@ -181,9 +175,9 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 			LogError(
 				LogInfo,
 				LOGERROR,
-				"%s : Too many layers specified (%d).\n"
+				"soils.in : Too many layers specified (%d).\n"
 				"Maximum number of layers is %d\n",
-				MyFileName, lyrno + 1, MAX_LAYERS
+				lyrno + 1, MAX_LAYERS
 			);
             return; // Exit function prematurely due to error
 		}
@@ -258,16 +252,13 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp, LOG_INFO* LogInfo) {
 	int i, k;
 	double *p_SWRCp;
 
-	/* note that Files.read() must be called prior to this. */
-	MyFileName = SoilWatDomain.SW_PathInputs.txtInFiles[eSWRCp];
-
 	/* Check that we have n = `SWRC_PARAM_NMAX` values per layer */
 	if (ncols(SW_SWRCp) != SWRC_PARAM_NMAX) {
 		LogError(
 			LogInfo,
 			LOGERROR,
-			"%s : Bad number of SWRC parameters %d -- must be %d.\n",
-			MyFileName, ncols(SW_SWRCp), SWRC_PARAM_NMAX
+			"swrcp.in : Bad number of SWRC parameters %d -- must be %d.\n",
+			ncols(SW_SWRCp), SWRC_PARAM_NMAX
 		);
         return; // Exit function prematurely due to error
 	}
@@ -277,9 +268,9 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp, LOG_INFO* LogInfo) {
 		LogError(
 			LogInfo,
 			LOGERROR,
-			"%s : Number of layers with SWRC parameters (%d) "
+			"swrcp.in : Number of layers with SWRC parameters (%d) "
 			"must match number of soil layers (%d)\n",
-			MyFileName, nrows(SW_SWRCp), SoilWatRun.Site.n_layers
+			nrows(SW_SWRCp), SoilWatRun.Site.n_layers
 		);
         return; // Exit function prematurely due to error
 	}
@@ -399,8 +390,6 @@ SEXP onGet_SW_SIT(void) {
 	SEXP TranspirationRegions, TranspirationRegions_names, TranspirationRegions_names_y;
 	char *cTranspirationRegions[] = { "ndx", "layer" };
 	int *p_transp; // ideally `LyrIndex` so that same type as `_TranspRgnBounds`, but R API INTEGER() is signed
-
-	MyFileName = SoilWatDomain.SW_PathInputs.txtInFiles[eSite];
 
 	PROTECT(swSite = MAKE_CLASS("swSite"));
 	PROTECT(SW_SIT = NEW_OBJECT(swSite));
@@ -578,8 +567,6 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
-
-	MyFileName = SoilWatDomain.SW_PathInputs.txtInFiles[eSite];
 
 	#ifdef RSWDEBUG
 	if (debug) sw_printf("'onSet_SW_SIT':");
