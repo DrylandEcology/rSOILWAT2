@@ -129,6 +129,7 @@ static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LO
     int debug = 0;
     #endif
     Bool renameDomainTemplateNC = swFALSE;
+    Bool prepareFiles = swFALSE;
 
 
   #ifdef RSWDEBUG
@@ -155,7 +156,7 @@ static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LO
     SW_CTL_init_ptrs(&SoilWatRun);
 
     sw_init_args(argc, argv, &EchoInits, &SoilWatDomain.SW_PathInputs.txtInFiles[eFirst],
-                 &userSUID, NULL, &renameDomainTemplateNC,
+                 &userSUID, NULL, &renameDomainTemplateNC, &prepareFiles,
                  LogInfo);
     if(LogInfo->stopRun) {
         return; // Exit function prematurely due to error
