@@ -43,7 +43,6 @@
 /* =================================================== */
 /*                  Local Variables                    */
 /* --------------------------------------------------- */
-static char *MyFileName;
 static int swcdataIndex;
 
 
@@ -102,10 +101,9 @@ void onSet_SW_SWC(SEXP SWC, LOG_INFO* LogInfo) {
 	SEXP swcFirstYear;
 	SEXP swcMethod;
 
-	MyFileName = SoilWatDomain.PathInfo.InFiles[eSoilwat];
 	LyrIndex i;
 	ForEachSoilLayer(i, SoilWatRun.Site.n_layers)
-		v->avgLyrTemp[i] = SoilWatRun.Site.avgLyrTempInit[i];
+		v->avgLyrTemp[i] = SoilWatRun.Site.soils.avgLyrTempInit[i];
 
 	PROTECT(swcUseData = GET_SLOT(SWC, install("UseSWCHistoricData")));
 	PROTECT(swcFilePrefix = GET_SLOT(SWC, install("DataFilePrefix")));
@@ -148,7 +146,7 @@ SEXP onGet_SW_SWC_hists(LOG_INFO* LogInfo) {
 
 	for (year = SoilWatRun.Model.startyr; year <= SoilWatRun.Model.endyr; year++) {
 		if (SoilWatRun.SoilWat.hist_use && year >= SoilWatRun.SoilWat.hist.yr.first) {
-			_read_swc_hist(&SoilWatRun.SoilWat.hist, year, LogInfo);
+			read_swc_hist(&SoilWatRun.SoilWat.hist, year, LogInfo);
             if(LogInfo->stopRun) {
                 UNPROTECT(2); // Unprotect the two protected variables before exiting
                 return NULL; // Exit function prematurely due to error
@@ -176,7 +174,7 @@ SEXP onGet_SW_SWC_hist(TimeInt year, LOG_INFO* LogInfo) {
 	SEXP hist;
 	char *cSWC_hist[] = { "doy", "lyr", "swc", "st_err" };
 	SEXP lyrs, lyrs_names, lyrs_names_y;
-	RealD *p_lyrs;
+	double *p_lyrs;
 
 	PROTECT(swSWC_hist = MAKE_CLASS("swSWC_hist"));
 	PROTECT(hist = NEW_OBJECT(swSWC_hist));
@@ -211,7 +209,7 @@ void onSet_SW_SWC_hist(LOG_INFO* LogInfo) {
 
 	int i, j = 0;
 	SW_SOILWAT *v = &SoilWatRun.SoilWat;
-	RealD *p_lyrs;
+	double *p_lyrs;
 	SEXP lyrs; // lyrs = VECTOR_ELT(VECTOR_ELT(VECTOR_ELT(InputData,7),4),swcdataIndex);
 	swcdataIndex++;
 

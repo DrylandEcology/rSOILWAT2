@@ -43,11 +43,6 @@
 
 
 /* =================================================== */
-/*                  Local Variables                    */
-/* --------------------------------------------------- */
-static char *MyFileName;
-
-/* =================================================== */
 /*             Global Function Definitions             */
 /* --------------------------------------------------- */
 
@@ -252,16 +247,14 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 	TimeInt d;
 	char enddyval[6], errstr[MAX_ERROR];
 
-	MyFileName = SoilWatDomain.PathInfo.InFiles[eModel];
-
 	if (!IS_S4_OBJECT(SW_MDL)) {
-		LogError(LogInfo, LOGERROR, "%s: No input.", MyFileName);
+		LogError(LogInfo, LOGERROR, "modelrun.in: missing input.");
         return; // Exit function prematurely due to error
 	}
 
 	PROTECT(StartYear = GET_SLOT(SW_MDL, install("StartYear")));
 	if (INTEGER(StartYear)[0] < 0) {
-		LogError(LogInfo, LOGERROR, "%s: Negative start year (%d)", MyFileName, INTEGER(StartYear)[0]);
+		LogError(LogInfo, LOGERROR, "Negative start year (%d)", INTEGER(StartYear)[0]);
 
         UNPROTECT(1);
         return; // Exit function prematurely due to error
@@ -269,20 +262,20 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 	m->startyr = INTEGER(StartYear)[0];
 	PROTECT(EndYear = GET_SLOT(SW_MDL, install("EndYear")));
 	if (isNull(EndYear) || INTEGER(EndYear)[0] == NA_INTEGER) {
-		LogError(LogInfo, LOGERROR, "%s: Ending year not found.", MyFileName);
+		LogError(LogInfo, LOGERROR, "Ending year not found.");
 
         UNPROTECT(2);
         return; // Exit function prematurely due to error
 	}
 	if (INTEGER(EndYear)[0] < 0) {
-		LogError(LogInfo, LOGERROR, "%s: Negative ending year (%d)", MyFileName, INTEGER(EndYear)[0]);
+		LogError(LogInfo, LOGERROR, "Negative ending year (%d)", INTEGER(EndYear)[0]);
 
         UNPROTECT(2);
         return; // Exit function prematurely due to error
 	}
 	m->endyr = INTEGER(EndYear)[0];
 	if (m->endyr < m->startyr) {
-		LogError(LogInfo, LOGERROR, "%s: Start Year > End Year", MyFileName);
+		LogError(LogInfo, LOGERROR, "Start Year > End Year");
 
         UNPROTECT(2);
         return; // Exit function prematurely due to error
@@ -303,7 +296,7 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 	fhemi = TRUE;
 
 	if (!(fstartdy && fenddy && fhemi)) {
-		snprintf(errstr, MAX_ERROR, "\nNot found in %s:\n", MyFileName);
+		snprintf(errstr, MAX_ERROR, "\nNot found in inputs:\n");
 		if (!fstartdy) {
 			strcat(errstr, "\tStart Day  - using 1\n");
 			m->startstart = 1;
@@ -361,11 +354,7 @@ void rSW_CTL_setup_domain(
   int debug = 0;
   #endif
 
-    SW_F_construct(
-       SW_Domain->PathInfo.InFiles[eFirst],
-       SW_Domain->PathInfo._ProjDir,
-       LogInfo
-    );
+    SW_F_construct(&SW_Domain->SW_PathInputs,LogInfo);
 
     if(LogInfo->stopRun) {
        return;  // Exit function prematurely due to error
@@ -381,7 +370,7 @@ void rSW_CTL_setup_domain(
         }
         #endif
 
-        SW_F_read(&SW_Domain->PathInfo, LogInfo);
+        SW_F_read(&SW_Domain->SW_PathInputs, LogInfo);
         if(LogInfo->stopRun) {
            return; // Exit function prematurely due to error
         }

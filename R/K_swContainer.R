@@ -1662,6 +1662,13 @@ setMethod(
   function(object) swSite_hasSWRCp(object@site)
 )
 
+#' @rdname swSite_depthSapric
+setMethod(
+  "swSite_depthSapric",
+  signature = "swInputData",
+  function(object) swSite_depthSapric(object@site)
+)
+
 
 #' @rdname swInputData-class
 #' @export
@@ -1730,6 +1737,14 @@ setMethod(
 #' @rdname swInputData-class
 #' @export
 setMethod(
+  "swSite_SurfaceTempMethod",
+  signature = "swInputData",
+  function(object) swSite_SurfaceTempMethod(object@site)
+)
+
+#' @rdname swInputData-class
+#' @export
+setMethod(
   "swSite_SoilTemperatureFlag",
   signature = "swInputData",
   function(object) swSite_SoilTemperatureFlag(object@site)
@@ -1784,6 +1799,7 @@ setReplaceMethod(
 #'   1. [swSoils_Layers()],
 #'   2. [swSite_SWRCflags()], and
 #'   3. [swSoils_SWRCp()] and [swSite_hasSWRCp()]
+#'   4. [swSoils_omSWRCp()] (and [swSite_depthSapric()])
 #'
 #' @md
 setReplaceMethod(
@@ -1810,6 +1826,17 @@ setReplaceMethod(
     object
   }
 )
+
+#' @rdname swSite_depthSapric
+setReplaceMethod(
+  "swSite_depthSapric",
+  signature = "swInputData",
+  function(object, value) {
+    swSite_depthSapric(object@site) <- value
+    object
+  }
+)
+
 #' @rdname swInputData-class
 #' @export
 setReplaceMethod(
@@ -1901,6 +1928,17 @@ setReplaceMethod(
 #' @rdname swInputData-class
 #' @export
 setReplaceMethod(
+  "swSite_SurfaceTempMethod",
+  signature = "swInputData",
+  function(object, value) {
+    swSite_SurfaceTempMethod(object@site) <- value
+    object
+  }
+)
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
   "swSite_SoilTemperatureFlag",
   signature = "swInputData",
   function(object, value) {
@@ -1962,6 +2000,13 @@ setMethod(
  function(object) swSoils_SWRCp(object@soils)
 )
 
+#' @rdname swSoils_omSWRCp
+setMethod(
+ "swSoils_omSWRCp",
+ signature = "swInputData",
+ function(object) swSoils_omSWRCp(object@soils)
+)
+
 #' @rdname swInputData-class
 #' @export
 setReplaceMethod(
@@ -1999,6 +2044,7 @@ setReplaceMethod(
 #'   1. [swSoils_Layers()],
 #'   2. [swSite_SWRCflags()], and
 #'   3. [swSoils_SWRCp()] and [swSite_hasSWRCp()]
+#'   4. [swSoils_omSWRCp()] (and [swSite_depthSapric()])
 #'
 #' @md
 setReplaceMethod(
@@ -2028,6 +2074,7 @@ setReplaceMethod(
 #'   1. [swSoils_Layers()],
 #'   2. [swSite_SWRCflags()], and
 #'   3. [swSoils_SWRCp()] and [swSite_hasSWRCp()]
+#'   4. [swSoils_omSWRCp()] (and [swSite_depthSapric()])
 #'
 #' @md
 setReplaceMethod(
@@ -2039,6 +2086,24 @@ setReplaceMethod(
   }
 )
 
+#' @rdname swSoils_omSWRCp
+#'
+#' @section Details:
+#' The correct sequence for setting values is
+#'   1. [swSoils_Layers()],
+#'   2. [swSite_SWRCflags()], and
+#'   3. [swSoils_SWRCp()] and [swSite_hasSWRCp()]
+#'   4. [swSoils_omSWRCp()] (and [swSite_depthSapric()])
+#'
+#' @md
+setReplaceMethod(
+  "swSoils_omSWRCp",
+  signature = "swInputData",
+  function(object, value) {
+    swSoils_omSWRCp(object@soils) <- value
+    object
+  }
+)
 
 
 # Methods for slot \code{swc}

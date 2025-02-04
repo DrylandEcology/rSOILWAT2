@@ -85,6 +85,8 @@ for (k0a in seq_along(fadj_ppts)) {
         rSOILWAT2::swSoils_Layers(sw_in) <- soils
         rSOILWAT2::swWeather_MonScalingParams(sw_in)[, "PPT"] <- fadj_ppts[k0a]
         rSOILWAT2::swSite_SWRCflags(sw_in) <- sp
+        rSOILWAT2::swSoils_omSWRCp(sw_input) <-
+          rSOILWAT2::sw2_list_omSWRCp[[sp[[1L]]]]
         rSOILWAT2::sw_exec(inputData = sw_in)
       }
     )

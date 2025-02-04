@@ -1,9 +1,0 @@
-#------ Input files relating to netCDF actions
-#
-# NOTE: This file follows a key-value-value triplet where
-#       The first value specifies the name of the variable within the netCDF.
-#       The second value is the path of the netCDF file.
-# This convention eliminates the possibility of incorrect reads due to line dependencies.
-
-domain domain Input_nc/domain.nc
-progress progress Input_nc/progress.nc    # Note: progress can be a separate file or the same as domain

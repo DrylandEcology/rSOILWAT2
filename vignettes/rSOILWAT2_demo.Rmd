@@ -380,7 +380,8 @@ data from `DayMet`
     sand = 0.65,
     clay = 0.05,
     impermeability = NA,
-    soil_temp = NA
+    soil_temp = NA,
+    som_frac = 0
   )
 
   soil_new <- data.frame(rSOILWAT2::swSoils_Layers(sw_in)[0, ])
@@ -461,6 +462,14 @@ data from `DayMet`
       tmp <- grep("fragvol_L", cns_sd, fixed = TRUE)
       soil_new[ids, "gravel_content"] <- soils_sda2[["soil_data"]][1, tmp]
     }
+  }
+```
+
+### Soil organic matter
+```{r, som, results = "hide"}
+  # Set soil organic matter to zero if we don't have values
+  if (anyNA(soil_new[, "som_frac"])) {
+    soil_new[, "som_frac"] <- 0
   }
 ```
 
@@ -642,9 +651,17 @@ by `SOILWAT2` with the selected pedotransfer function.
   # Declare that parameter values are already estimated
   rSOILWAT2::swSite_hasSWRCp(sw_in) <- TRUE
 
+  # Provide `SWRC` parameters for organic matter
+  rSOILWAT2::swSoils_omSWRCp(sw_in) <-
+    rSOILWAT2::sw2_list_omSWRCp[[tmp[["swrc_name"]]]]
+
   # Alternatively (and equivalently),
   # set soil properties and SWRC parameters with one assignment
-  rSOILWAT2::set_swSoils(sw_in) <- list(Layers = soil_new, SWRCp = swrcp)
+  rSOILWAT2::set_swSoils(sw_in) <- list(
+    Layers = soil_new,
+    SWRCp = swrcp,
+    omSWRCp = rSOILWAT2::sw2_list_omSWRCp[[tmp[["swrc_name"]]]]
+  )
 ```
 
 

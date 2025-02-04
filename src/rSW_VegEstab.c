@@ -119,8 +119,8 @@ void onSet_SW_VES(SEXP VES, LOG_INFO* LogInfo) {
     }
 
 	if (EchoInits) {
-		_echo_VegEstab(SoilWatRun.Site.width, SoilWatRun.VegEstab.parms,
-					   SoilWatRun.VegEstab.count);
+		echo_VegEstab(SoilWatRun.Site.soils.width, SoilWatRun.VegEstab.parms,
+					   SoilWatRun.VegEstab.count, LogInfo);
 	}
 
     report: {
@@ -198,7 +198,7 @@ void onSet_SW_VES_spp(SEXP SPP, IntU i, LOG_INFO* LogInfo) {
 	SEXP fileName, Name;
 	unsigned int count;
 
-	count = _new_species(&SoilWatRun.VegEstab, LogInfo);
+	count = new_species(&SoilWatRun.VegEstab, LogInfo);
     if(LogInfo->stopRun) {
         return; // Exit function prematurely due to error
     }

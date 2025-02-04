@@ -57,6 +57,7 @@ test_that("Check example data", {
 
     #--- Check that soil temperature turned on ------
     expect_true(swSite_SoilTemperatureFlag(sw_input))
+    expect_equal(swSite_SurfaceTempMethod(sw_input), 1L)
 
 
     #--- Check that CO2-effects are turned on ------

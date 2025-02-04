@@ -103,7 +103,7 @@ SEXP onGet_MKV_prob(void) {
 	const int nitems = 5;
 	SW_MARKOV *v = &SoilWatRun.Markov;
 	SEXP MKV_prob, MKV_prob_names, MKV_prob_names_y;
-	RealD *p_MKV_prob;
+	double *p_MKV_prob;
 	char *cMKC_prob[] = { "DOY", "p_wet_wet", "p_wet_dry", "avg_ppt", "std_ppt" };
 
 	PROTECT(MKV_prob = allocMatrix(REALSXP,MAX_DAYS, nitems));
@@ -135,7 +135,7 @@ Bool onSet_MKV_prob(SEXP MKV_prob) {
 	SW_MARKOV *v = &SoilWatRun.Markov;
 	const int nitems = 5;
 	int i;
-	RealD *p_MKV_prob;
+	double *p_MKV_prob;
 
 	if (nrows(MKV_prob) != MAX_DAYS && ncols(MKV_prob) != nitems) {
 		return FALSE;
@@ -158,7 +158,7 @@ SEXP onGet_MKV_conv(void) {
 	const int nitems = 11;
 	SW_MARKOV *v = &SoilWatRun.Markov;
 	SEXP MKV_conv, MKV_conv_names, MKV_conv_names_y;
-	RealD *p_MKV_conv;
+	double *p_MKV_conv;
 	char *cMKV_conv[] = { "WEEK", "wTmax_C", "wTmin_C", "var_wTmax",
 		"cov_wTmaxmin", "cov_wTminmax", "var_wTmin",
 		"cfmax_wet", "cfmax_dry", "cfmin_wet", "cfmin_dry" };
@@ -195,7 +195,7 @@ Bool onSet_MKV_conv(SEXP MKV_conv) {
 	SW_MARKOV *v = &SoilWatRun.Markov;
 	const int nitems = 11;
 	int i;
-	RealD *p_MKV_conv;
+	double *p_MKV_conv;
 
 
 	if ((nrows(MKV_conv) != MAX_WEEKS) && (ncols(MKV_conv) != nitems)) {

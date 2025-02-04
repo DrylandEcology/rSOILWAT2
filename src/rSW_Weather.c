@@ -39,7 +39,6 @@
 /* =================================================== */
 /*                  Local Variables                    */
 /* --------------------------------------------------- */
-static char *MyFileName;
 
 static char *cSW_WTH_names[] = {
   "MonthlyScalingParams",
@@ -65,7 +64,7 @@ static char *cSW_WTH_names[] = {
 static SEXP onGet_WTH_DATA_YEAR(TimeInt year);
 static void rSW2_setAllWeather(
   SEXP listAllW,
-  SW_WEATHER_HIST **allHist,
+  SW_WEATHER_HIST *allHist,
   int startYear,
   unsigned int n_years,
   Bool use_weathergenerator_only,
@@ -73,9 +72,9 @@ static void rSW2_setAllWeather(
   Bool use_humidityMonthly,
   Bool use_windSpeedMonthly,
   Bool *dailyInputFlags,
-  RealD *cloudcov,
-  RealD *windspeed,
-  RealD *r_humidity,
+  double *cloudcov,
+  double *windspeed,
+  double *r_humidity,
   double elevation,
   LOG_INFO* LogInfo
 );
@@ -83,7 +82,7 @@ static void rSW2_setAllWeather(
 static void rSW2_set_weather_hist(
   SEXP listAllW,
   TimeInt year,
-  SW_WEATHER_HIST *yearWeather,
+  double **tempWeatherHist,
   Bool *dailyInputFlags,
   double elevation,
   LOG_INFO* LogInfo
@@ -107,7 +106,7 @@ static double value_or_missing(double x) {
 SEXP onGet_SW_WTH_setup(void) {
 	int i;
 	const int nitems = 8;
-	RealD *p_MonthlyValues;
+	double *p_MonthlyValues;
 	SW_WEATHER *w = &SoilWatRun.Weather;
 
 	SEXP swWeather;
@@ -217,13 +216,12 @@ void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo) {
         desc_rsds,
         dailyInputFlags;
 	SEXP MonthlyScalingParams;
-	RealD *p_MonthlyValues;
+	double *p_MonthlyValues;
 	int *p_dailyInputFlags;
 
-	MyFileName = SoilWatDomain.PathInfo.InFiles[eWeather];
 
     // Copy weather prefix from PathInfo to Weather within `SoilWatRun`
-    strcpy(SoilWatRun.Weather.name_prefix, SoilWatDomain.PathInfo.weather_prefix);
+    strcpy(SoilWatRun.Weather.name_prefix, SoilWatDomain.SW_PathInputs.txtWeatherPrefix);
 
 	PROTECT(MonthlyScalingParams = GET_SLOT(SW_WTH, install(cSW_WTH_names[0])));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
@@ -286,10 +284,10 @@ void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo) {
 		LogError(
 			logfp,
 			LOGERROR,
-			"%s : Model year (%d) starts before weather files (%d)"
+			"Model year (%d) starts before weather files (%d)"
 				" and weather generator turned off.\n"
 				" Please synchronize the years or set up the weather generator files",
-			MyFileName, SW_Model.startyr, w->startYear
+			SW_Model.startyr, w->startYear
 		);
 	}
 	*/
@@ -363,7 +361,7 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 		"actVP_kPa",
 		"shortWR"
 	};
-	RealD *p_Year;
+	double *p_Year;
 	SW_WEATHER *w = &SoilWatRun.Weather;
 
 	days = Time_get_lastdoy_y(year);
@@ -379,24 +377,24 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 	p_Year = REAL(Year);
 	for (i = 0; i < days; i++) {
 		p_Year[i + days * 0] = (i + 1);
-		p_Year[i + days * (TEMP_MAX + 1)] = w->allHist[yearIndex]->temp_max[i];
-		p_Year[i + days * (TEMP_MIN + 1)] = w->allHist[yearIndex]->temp_min[i];
-		p_Year[i + days * (PPT + 1)] = w->allHist[yearIndex]->ppt[i];
+		p_Year[i + days * (TEMP_MAX + 1)] = w->allHist[yearIndex].temp_max[i];
+		p_Year[i + days * (TEMP_MIN + 1)] = w->allHist[yearIndex].temp_min[i];
+		p_Year[i + days * (PPT + 1)] = w->allHist[yearIndex].ppt[i];
 
-		p_Year[i + days * (CLOUD_COV + 1)] = w->allHist[yearIndex]->cloudcov_daily[i];
+		p_Year[i + days * (CLOUD_COV + 1)] = w->allHist[yearIndex].cloudcov_daily[i];
 
-		p_Year[i + days * (WIND_SPEED + 1)] = w->allHist[yearIndex]->windspeed_daily[i];
+		p_Year[i + days * (WIND_SPEED + 1)] = w->allHist[yearIndex].windspeed_daily[i];
 		p_Year[i + days * (WIND_EAST + 1)] = NA_REAL; // windSpeed_east_mPERs
 		p_Year[i + days * (WIND_NORTH + 1)] = NA_REAL; // windSpeed_north_mPERs
 
-		p_Year[i + days * (REL_HUMID + 1)] = w->allHist[yearIndex]->r_humidity_daily[i];
+		p_Year[i + days * (REL_HUMID + 1)] = w->allHist[yearIndex].r_humidity_daily[i];
 		p_Year[i + days * (REL_HUMID_MAX + 1)] = NA_REAL; // rHmax_pct
 		p_Year[i + days * (REL_HUMID_MIN + 1)] = NA_REAL; // rHmin_pct
 		p_Year[i + days * (SPEC_HUMID + 1)] = NA_REAL; // specHavg_pct -- note: SOILWAT2 uses g kg-1!
 		p_Year[i + days * (TEMP_DEWPOINT + 1)] = NA_REAL; // Tdewpoint_C
 
-		p_Year[i + days * (ACTUAL_VP + 1)] = w->allHist[yearIndex]->actualVaporPressure[i];
-		p_Year[i + days * (SHORT_WR + 1)] = w->allHist[yearIndex]->shortWaveRad[i];
+		p_Year[i + days * (ACTUAL_VP + 1)] = w->allHist[yearIndex].actualVaporPressure[i];
+		p_Year[i + days * (SHORT_WR + 1)] = w->allHist[yearIndex].shortWaveRad[i];
 	}
 
 	PROTECT(Year_names = allocVector(VECSXP, 2));
@@ -443,20 +441,24 @@ void onSet_WTH_DATA(SEXP weatherList, LOG_INFO* LogInfo) {
   // Deallocate (previous, if any) `allHist`
   // (using value of `SW_Weather.n_years` previously used to allocate)
   // `SW_WTH_construct()` sets `n_years` to zero
-  deallocateAllWeather(SoilWatRun.Weather.allHist, SoilWatRun.Weather.n_years);
+  deallocateAllWeather(&SoilWatRun.Weather.allHist);
 
   // Update number of years and first calendar year represented
   SoilWatRun.Weather.n_years = SoilWatRun.Model.endyr - SoilWatRun.Model.startyr + 1;
   SoilWatRun.Weather.startYear = SoilWatRun.Model.startyr;
 
   // Allocate new `allHist` (based on current `SW_Weather.n_years`)
-  allocateAllWeather(&SoilWatRun.Weather.allHist, SoilWatRun.Weather.n_years, LogInfo);
+  SW_WTH_allocateAllWeather(
+    &SoilWatRun.Weather.allHist,
+    SoilWatRun.Weather.n_years,
+    LogInfo
+  );
   if(LogInfo->stopRun) {
     return; // Exit function prematurely due to error
   }
 
 
-  // Equivalent to `readAllWeather()`:
+  // Equivalent to `SW_WTH_readAllWeather()`:
   // fill `SOILWAT2` `allHist` with values from `rSOILWAT2`
   rSW2_setAllWeather(
     weatherList,
@@ -481,7 +483,7 @@ void onSet_WTH_DATA(SEXP weatherList, LOG_INFO* LogInfo) {
 // fill `SOILWAT2` `allHist` with values from `rSOILWAT2`
 static void rSW2_setAllWeather(
   SEXP listAllW,
-  SW_WEATHER_HIST **allHist,
+  SW_WEATHER_HIST *allHist,
   int startYear,
   unsigned int n_years,
   Bool use_weathergenerator_only,
@@ -489,13 +491,19 @@ static void rSW2_setAllWeather(
   Bool use_humidityMonthly,
   Bool use_windSpeedMonthly,
   Bool *dailyInputFlags,
-  RealD *cloudcov,
-  RealD *windspeed,
-  RealD *r_humidity,
+  double *cloudcov,
+  double *windspeed,
+  double *r_humidity,
   double elevation,
   LOG_INFO* LogInfo
 ) {
     unsigned int yearIndex, year;
+    double ***tempWeatherHist = NULL;
+
+    allocate_temp_weather(n_years, &tempWeatherHist, LogInfo);
+    if (LogInfo->stopRun) {
+        return;
+    }
 
     /* Interpolation is to be in base0 in `interpolate_monthlyValues()` */
     Bool interpAsBase1 = swFALSE;
@@ -505,7 +513,7 @@ static void rSW2_setAllWeather(
         year = yearIndex + startYear;
 
         // Set all daily weather values to missing
-        _clear_hist_weather(allHist[yearIndex]);
+        clear_hist_weather(&allHist[yearIndex], tempWeatherHist[yearIndex]);
 
         // Update yearly day/month information needed when interpolating
         // cloud cover, wind speed, and relative humidity if necessary
@@ -514,38 +522,52 @@ static void rSW2_setAllWeather(
         if(use_cloudCoverMonthly) {
             interpolate_monthlyValues(cloudcov, interpAsBase1,
                     SW_Model->cum_monthdays, SW_Model->days_in_month,
-                    allHist[yearIndex]->cloudcov_daily);
+                    allHist[yearIndex].cloudcov_daily);
         }
 
         if(use_humidityMonthly) {
             interpolate_monthlyValues(r_humidity, interpAsBase1,
                     SW_Model->cum_monthdays, SW_Model->days_in_month,
-                    allHist[yearIndex]->r_humidity_daily);
+                    allHist[yearIndex].r_humidity_daily);
         }
 
         if(use_windSpeedMonthly) {
             interpolate_monthlyValues(windspeed, interpAsBase1,
                     SW_Model->cum_monthdays, SW_Model->days_in_month,
-                    allHist[yearIndex]->windspeed_daily);
+                    allHist[yearIndex].windspeed_daily);
         }
 
         // Read daily weather values from disk
         if (!use_weathergenerator_only) {
-
             rSW2_set_weather_hist(
               listAllW,
               year,
-              allHist[yearIndex],
+              tempWeatherHist[yearIndex],
               dailyInputFlags,
               elevation,
               LogInfo
             );
 
             if(LogInfo->stopRun) {
-                return; // Exit function prematurely due to error
+                goto freeTempWeather; // Exit function prematurely due to error
             }
         }
     }
+
+    if (!use_weathergenerator_only) {
+        SW_WTH_setWeatherValues(
+            startYear,
+            n_years,
+            dailyInputFlags,
+            tempWeatherHist,
+            elevation,
+            allHist,
+            LogInfo
+        );
+    }
+
+freeTempWeather:
+    deallocate_temp_weather(n_years, &tempWeatherHist);
 }
 
 
@@ -554,7 +576,7 @@ static void rSW2_setAllWeather(
 static void rSW2_set_weather_hist(
   SEXP listAllW,
   TimeInt year,
-  SW_WEATHER_HIST *yearWeather,
+  double **tempWeatherHist,
   Bool *dailyInputFlags,
   double elevation,
   LOG_INFO* LogInfo
@@ -566,6 +588,7 @@ static void rSW2_set_weather_hist(
     Bool weth_found = FALSE;
     SEXP tmpW, yrWData;
     double *p_yrWData;
+    int varNum;
 
     for (i = 0; !weth_found && i < nList; i++) {
       tmpW = VECTOR_ELT(listAllW, i);
@@ -598,26 +621,11 @@ static void rSW2_set_weather_hist(
     // Suitable year among rSOILWAT2 weather list located
     p_yrWData = REAL(yrWData);
 
-
-    // Copy values from rSOILWAT2 to SOILWAT2
+    // Copy values from rSOILWAT2 to temporary storage
     int doy;
-
-    // Pre-calculate logic for calculation of daily variables
-    Bool hasMaxMinTemp = (Bool) (dailyInputFlags[TEMP_MAX] && dailyInputFlags[TEMP_MIN]);
-    Bool hasMaxMinRelHumid = (Bool) (dailyInputFlags[REL_HUMID_MAX] && dailyInputFlags[REL_HUMID_MIN]);
-    Bool hasEastNorthWind = (Bool) (dailyInputFlags[WIND_EAST] && dailyInputFlags[WIND_NORTH]);
-
-    // Calculate if daily input values of humidity are to be used instead of
-    // being interpolated from monthly values
-    Bool useHumidityDaily = (Bool) (hasMaxMinRelHumid || dailyInputFlags[REL_HUMID] ||
-                                    dailyInputFlags[SPEC_HUMID] || dailyInputFlags[ACTUAL_VP]);
-
-    double v1, v2;
-
 
     // Loop over days of current year
     for (doy = 0; doy < numDaysYear; doy++) {
-
         /* --- Make the assignments ---- */
         // (Translate R's `NA` to SOILWAT2's `SW_MISSING`)
 
@@ -634,218 +642,12 @@ static void rSW2_set_weather_hist(
             return; // Exit function prematurely due to error
         }
 
-        // Maximum daily temperature [C]
-        yearWeather->temp_max[doy] = value_or_missing(
-            p_yrWData[doy + numDaysYear * (TEMP_MAX + 1)]
-        );
-
-        // Minimum daily temperature [C]
-        yearWeather->temp_min[doy] = value_or_missing(
-            p_yrWData[doy + numDaysYear * (TEMP_MIN + 1)]
-        );
-
-        // Calculate average air temperature if min/max not missing
-        if (
-            !missing(yearWeather->temp_max[doy]) &&
-            !missing(yearWeather->temp_min[doy])
-        ) {
-            yearWeather->temp_avg[doy] =
-                (yearWeather->temp_max[doy] + yearWeather->temp_min[doy]) / 2.0;
-        }
-
-        // Precipitation [cm]
-        yearWeather->ppt[doy] = value_or_missing(
-            p_yrWData[doy + numDaysYear * (PPT + 1)]
-        );
-
-
-        // Cloud cover [%]
-        if (dailyInputFlags[CLOUD_COV]) {
-            yearWeather->cloudcov_daily[doy] = value_or_missing(
-                p_yrWData[doy + numDaysYear * (CLOUD_COV + 1)]
-            );
-        }
-
-
-        // Wind speed [m/s]
-        if (dailyInputFlags[WIND_SPEED]) {
-            yearWeather->windspeed_daily[doy] = value_or_missing(
-                p_yrWData[doy + numDaysYear * (WIND_SPEED + 1)]
-            );
-
-        } else if (hasEastNorthWind) {
-
-            // Make sure wind is not calculated over SW_MISSING
-            v1 = value_or_missing(
-                p_yrWData[doy + numDaysYear * (WIND_EAST + 1)]
-            );
-            v2 = value_or_missing(
-                p_yrWData[doy + numDaysYear * (WIND_NORTH + 1)]
-            );
-
-            if (!missing(v1) && !missing(v2)) {
-                yearWeather->windspeed_daily[doy] = sqrt(
-                    squared(v1) + squared(v2)
+        for (varNum = 0; varNum < MAX_INPUT_COLUMNS; varNum++) {
+            if (dailyInputFlags[varNum]) {
+                tempWeatherHist[varNum][doy] = value_or_missing(
+                    p_yrWData[doy + numDaysYear * (varNum + 1)]
                 );
             }
-        }
-
-
-        // Relative humidity [%]
-        if (useHumidityDaily) {
-            if (hasMaxMinRelHumid) {
-                // Make sure rH is not calculated over SW_MISSING
-                v1 = value_or_missing(
-                    p_yrWData[doy + numDaysYear * (REL_HUMID_MAX + 1)]
-                );
-                v2 = value_or_missing(
-                    p_yrWData[doy + numDaysYear * (REL_HUMID_MIN + 1)]
-                );
-
-                if (!missing(v1) && !missing(v2)) {
-                    yearWeather->r_humidity_daily[doy] = (v1 + v2) / 2;
-                }
-
-            } else if (dailyInputFlags[REL_HUMID]) {
-                yearWeather->r_humidity_daily[doy] = value_or_missing(
-                    p_yrWData[doy + numDaysYear * (REL_HUMID + 1)]
-                );
-
-            } else if (dailyInputFlags[SPEC_HUMID]) {
-                // Make sure rH is not calculated over SW_MISSING
-                v1 = value_or_missing(
-                    p_yrWData[doy + numDaysYear * (SPEC_HUMID + 1)]
-                );
-
-                if (!missing(yearWeather->temp_avg[doy]) && !missing(v1)) {
-                    // Relative humidity [0-100 %] calculated from
-                    // specific humidity [g kg-1] and temperature [C]
-                    yearWeather->r_humidity_daily[doy] = relativeHumidity2(
-                        v1, yearWeather->temp_avg[doy], elevation
-                    );
-
-                    // Snap relative humidity in 100-150% to 100%
-                    if (yearWeather->r_humidity_daily[doy] > 100. &&
-                        yearWeather->r_humidity_daily[doy] <= 150.) {
-                        LogError(
-                            LogInfo,
-                            LOGWARN,
-                            "Year %d - day %d: relative humidity set to 100%%: "
-                            "based on assumption that "
-                            "a presumed minor mismatch in inputs "
-                            "(specific humidity (%f), "
-                            "temperature (%f) and elevation (%f)) "
-                            "caused the calculated value (%f) to exceed 100%%.",
-                            year,
-                            doy,
-                            v1,
-                            yearWeather->temp_avg[doy],
-                            elevation,
-                            yearWeather->r_humidity_daily[doy]
-                        );
-
-                        yearWeather->r_humidity_daily[doy] = 100.;
-                    }
-                }
-            }
-
-            // Actual vapor pressure [kPa]
-            if (dailyInputFlags[ACTUAL_VP]) {
-                yearWeather->actualVaporPressure[doy] = value_or_missing(
-                    p_yrWData[doy + numDaysYear * (ACTUAL_VP + 1)]
-                );
-
-            } else {
-                v1 = value_or_missing(
-                    p_yrWData[doy + numDaysYear * (TEMP_DEWPOINT + 1)]
-                );
-
-
-                if (dailyInputFlags[TEMP_DEWPOINT] && !missing(v1)) {
-                    yearWeather->actualVaporPressure[doy] = actualVaporPressure3(v1);
-
-                } else if (hasMaxMinTemp && hasMaxMinRelHumid) {
-                    // Make sure vp is not calculated over SW_MISSING
-                    v1 = value_or_missing(
-                        p_yrWData[doy + numDaysYear * (REL_HUMID_MAX + 1)]
-                    );
-                    v2 = value_or_missing(
-                        p_yrWData[doy + numDaysYear * (REL_HUMID_MIN + 1)]
-                    );
-
-                    if (
-                        !missing(yearWeather->temp_max[doy]) &&
-                        !missing(yearWeather->temp_min[doy]) &&
-                        !missing(v1) && !missing(v2)
-                    ) {
-                        yearWeather->actualVaporPressure[doy] = actualVaporPressure2(
-                            v1,
-                            v2,
-                            yearWeather->temp_max[doy],
-                            yearWeather->temp_min[doy]
-                        );
-                    }
-
-                } else if (dailyInputFlags[REL_HUMID] || dailyInputFlags[SPEC_HUMID]) {
-                    if (
-                        !missing(yearWeather->r_humidity_daily[doy]) &&
-                        !missing(yearWeather->temp_avg[doy])
-                    ) {
-                        yearWeather->actualVaporPressure[doy] = actualVaporPressure1(
-                            yearWeather->r_humidity_daily[doy],
-                            yearWeather->temp_avg[doy]
-                        );
-                    }
-                }
-            }
-
-
-            // Relative humidity [%] if still missing
-            if (
-                missing(yearWeather->r_humidity_daily[doy]) &&
-                (dailyInputFlags[ACTUAL_VP] || dailyInputFlags[TEMP_DEWPOINT])
-            ) {
-                // Make sure rH is not calculated over SW_MISSING
-                if (
-                    !missing(yearWeather->temp_avg[doy]) &&
-                    !missing(yearWeather->actualVaporPressure[doy])
-                ) {
-                    // Relative humidity [0-100 %]
-                    yearWeather->r_humidity_daily[doy] = relativeHumidity1(
-                        yearWeather->actualVaporPressure[doy],
-                        yearWeather->temp_avg[doy]
-                    );
-
-                    // Snap relative humidity in 100-150% to 100%
-                    if (yearWeather->r_humidity_daily[doy] > 100. &&
-                        yearWeather->r_humidity_daily[doy] <= 150.) {
-                        LogError(
-                            LogInfo,
-                            LOGWARN,
-                            "Year %d - day %d: relative humidity set to 100%%: "
-                            "based on assumption that "
-                            "a presumed minor mismatch in inputs "
-                            "(vapor pressure (%f) and temperature (%f)) "
-                            "caused the calculated value (%f) to exceed 100%%.",
-                            year,
-                            doy,
-                            yearWeather->actualVaporPressure[doy],
-                            yearWeather->temp_avg[doy],
-                            yearWeather->r_humidity_daily[doy]
-                        );
-
-                        yearWeather->r_humidity_daily[doy] = 100.;
-                    }
-                }
-            }
-        }
-
-
-        // Downward surface shortwave radiation
-        if (dailyInputFlags[SHORT_WR]) {
-            yearWeather->shortWaveRad[doy] = value_or_missing(
-                p_yrWData[doy + numDaysYear * (SHORT_WR + 1)]
-            );
         }
     }
 }
@@ -855,7 +657,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
                            SEXP do_C4vars, SEXP do_Cheatgrass_ClimVars, SEXP latitude,
                            SEXP elevation) {
 
-    SW_WEATHER_HIST **allHist = NULL;
+    SW_WEATHER_HIST *allHist = NULL;
 
     SW_CLIMATE_YEARLY climateOutput;
     SW_CLIMATE_CLIM climateAverages;
@@ -902,7 +704,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     C4Variables = PROTECT(allocVector(REALSXP, 6));
     Cheatgrass = PROTECT(allocVector(REALSXP, 6));
 
-    allocateAllWeather(&allHist, numYears, &local_LogInfo);
+    SW_WTH_allocateAllWeather(&allHist, numYears, &local_LogInfo);
     if(local_LogInfo.stopRun) {
         goto report;
     }
@@ -1028,7 +830,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
         // Note: no SOILWAT2 memory was allocated
         UNPROTECT(numUnprotects);
         deallocateClimateStructs(&climateOutput, &climateAverages);
-        deallocateAllWeather(allHist, numYears);
+        deallocateAllWeather(&allHist);
 
         sw_write_warnings("(rWeather) ", &local_LogInfo);
         sw_fail_on_error(&local_LogInfo);

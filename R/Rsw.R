@@ -223,6 +223,8 @@ sw_verbosity <- function(verbose = TRUE) {
 #' if (requireNamespace("curl") && curl::has_internet()) {
 #'   sw_in7 <- sw_in3
 #'   swSite_SWRCflags(sw_in7) <- c("vanGenuchten1980", "Rosetta3")
+#'   swSoils_omSWRCp(sw_in7) <-
+#'     rSOILWAT2::sw2_list_omSWRCp[["vanGenuchten1980"]]
 #'
 #'   sw_out7 <- sw_exec(inputData = sw_in7, weatherList = sw_weath3)
 #' }

@@ -54,7 +54,7 @@
 .5		# inflection point
 1.1		# range
 
-#---- Soil temperature
+#---- Surface and soil temperature
 # from Parton 1978, ch. 2.2.2 Temperature-profile Submodel
 300.		# biomass limiter, 300 g/m^2 in Parton's equation for T1(avg daily temperature at the top of the soil)
 15.		# constant for T1 equation (used if biomass <= biomass limiter), 15 in Parton's equation
@@ -67,6 +67,9 @@
 15.		# deltaX parameter for soil_temperature function, default is 15.  (distance between profile points in cm)  max depth (the next number) should be evenly divisible by this number
 990.		# max depth for the soil_temperature function equation, default is 990.  this number should be evenly divisible by deltaX
 1		# flag, 1 to calculate soil_temperature, 0 to not calculate soil_temperature
+1       # Method for average surface temperature:
+        #     0, default prior to v8.1.0 (Parton 1978)
+        #     1, default since v8.1.0 (Parton 1984)
 
 # ---- CO2 Settings ----
 # Activate (1) / deactivate (0) biomass multiplier
@@ -78,8 +81,32 @@ RCP85
 
 
 # --- Soil characterization ---
+# Simulated soil layer number determination:
+#   txt-mode: layers provided in "soils.in" and "swrc_params.in"
+#   nc-mode:  the first n layers with depth and width/thickness that are
+#             neither zero nor missing (if provided as input)
+
+1   # 0 = depth/thickness of soil layers vary among sites/gridcells
+    #     nc-mode: Vertical axis of outputs represents soil layers (units "1").
+    #              The soil is created from netCDF inputs; thus, all required
+    #              soil properties must be provided as netCDF inputs.
+    #
+    # 1 = depths/thickness of soil layers are equal among sites/gridcells
+    #     nc-mode: Vertical axis of outputs represents soil depth (units "cm").
+    #              The soil is based on text input files
+    #              ("soils.in" and "swrc_params.in"); soil properties provided
+    #              as netCDF inputs replace the values from the text inputs.
+    #              Thus, the soil input text files must contain the
+    #              maximum number of soil layers and the same depths/thickness
+    #              as netCDF soil inputs.
+
 # Are inputs of density representing bulk soil (type 1) or the matric component (type 0)?
 0
+
+
+# --- Organic matter ---
+# Depth [cm] at which characteristics of organic matter have completely switched from fibric to sapric peat
+50
 
 
 #--- Soil water retention curve (SWRC) ------
@@ -95,20 +122,21 @@ RCP85
 # Note: option "Campbell1974"/"Cosby1984AndOthers" was hard-coded < v7.0.0
 # Note: `rSOILWAT2` may implement additional PTFs
 
-Campbell1974				# Specify soil water retention curve
-Cosby1984AndOthers	# Specify pedotransfer function
-										# (if not implemented, then provide SWRC parameters via "swrc_params.in")
+Campbell1974        # Specify soil water retention curve
+Cosby1984AndOthers  # Specify pedotransfer function
+                    #   * if not implemented, then provide SWRC parameters
+                    #     as inputs via "swrc_params.in" and/or "swrcp.nc")
 
-0			# Has SWRC parameters (see `has_swrcp`)?
-			#    0: Estimate with specified pedotransfer function
-			#    1: Use values from "swrc_params.in"
+0                   # Are SWRC parameters for the mineral soil component
+                    # provided as inputs (see `has_swrcp`)?
+                    #   0: Estimate with specified pedotransfer function
+                    #   1: Use inputs from "swrc_params.in" and/or "swrcp.nc"
 
 
 #---- Transpiration regions
 # ndx  : 1=shallow, 2=medium, 3=deep, 4=very deep
-# layer: deepest soil layer number of the region.
-#        Must agree with soil layers as defined in `soils.in`
-#	ndx	layer
-	1	3
-	2	5
-	3	8
+# region depth (cm): depth from soil surface to bottom of a transpiration region
+#	ndx	depth (cm)
+	1	20
+	2	40
+	3	100

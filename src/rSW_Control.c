@@ -73,8 +73,9 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
   #endif
 
   if (from_files) {
-    SW_CTL_read_inputs_from_disk(&SoilWatRun, &SoilWatDomain.OutDom,
-                                 &SoilWatDomain.PathInfo, LogInfo);
+    SW_CTL_read_inputs_from_disk(&SoilWatRun, &SoilWatDomain,
+                                 &SoilWatDomain.hasConsistentSoilLayerDepths,
+                                 LogInfo);
 
   } else { //Use R data to set the data
     #ifdef RSWDEBUG
@@ -135,20 +136,28 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
         return; // Exit function prematurely due to error
     }
 
+    onSet_SW_SOILS(GET_SLOT(InputData, install("soils")), LogInfo);
+    #ifdef RSWDEBUG
+    if (debug) sw_printf(" > 'soils' + 'swrc parameters'");
+    #endif
+    if (LogInfo->stopRun) {
+        return; // Exit function prematurely due to error
+    }
+
+    onSet_SW_SIT_transp(GET_SLOT(InputData, install("site")), LogInfo);
+    #ifdef RSWDEBUG
+    if (debug) sw_printf(" > 'tr-regions'");
+    #endif
+    if (LogInfo->stopRun) {
+        return; // Exit function prematurely due to error
+    }
+
     if (isNull(weatherList)) {
       weatherList = GET_SLOT(InputData, install("weatherHistory"));
     }
     onSet_WTH_DATA(weatherList, LogInfo);
     #ifdef RSWDEBUG
     if (debug) sw_printf(" > 'weather-history'");
-    #endif
-    if (LogInfo->stopRun) {
-        return; // Exit function prematurely due to error
-    }
-
-    onSet_SW_SOILS(GET_SLOT(InputData, install("soils")), LogInfo);
-    #ifdef RSWDEBUG
-    if (debug) sw_printf(" > 'soils' + 'swrc parameters'");
     #endif
     if (LogInfo->stopRun) {
         return; // Exit function prematurely due to error
