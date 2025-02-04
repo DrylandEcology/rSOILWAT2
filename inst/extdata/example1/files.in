@@ -14,7 +14,6 @@ Input/domain.in
 
 #--- Description of a model run
 Input/modelrun.in	# Input file for model time: start - end years
-Output/logfile.log	# Output file to which warnings, errors, and other important information is written (can also be stdout)
 
 #--- Description of simulated site
 Input/siteparam.in	# Input file for site location, initialization, and miscellaneous model parameters
@@ -39,15 +38,4 @@ Input/carbon.in		# Input file for yearly atmospheric CO2 concentration
 Input/swcsetup.in	# Input file for settings used if soil moisture measurements should be incorporated at run time
 
 #--- Simulation outputs
-Output/			# Path for output files: / for same directory, or e.g., Output/; PROGRAMMER NOTE: This is currently the 13th position; if this changes then update function SW_Files.c/SW_F_read()
 Input/outsetup.in	# Input file that determines time periods, aggregation functions, and variables
-
-Output/sw2_daily.csv	# Output file if daily output time period was selected
-Output/sw2_weekly.csv	# Output file if weekly output time period was selected
-Output/sw2_monthly.csv	# Output file if monthly output time period was selected
-Output/sw2_yearly.csv	# Output file if yearly output time period was selected
-
-Output/sw2_daily_slyrs.csv	# Output file for soil layer specific variables if daily output time period was selected
-Output/sw2_weekly_slyrs.csv	# Output file for soil layer specific variables if weekly output time period was selected
-Output/sw2_monthly_slyrs.csv	# Output file for soil layer specific variables if monthly output time period was selected
-Output/sw2_yearly_slyrs.csv	# Output file for soil layer specific variables if yearly output time period was selected

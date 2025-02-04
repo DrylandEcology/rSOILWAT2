@@ -1,4 +1,4 @@
-# rSOILWAT2 v6.3.0-9000
+# rSOILWAT2 v6.3.0
 ## Breaking changes
 * `SOILWAT2` updated to v8.1.0
 * This version produces similar but not identical simulation output

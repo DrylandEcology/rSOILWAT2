@@ -72,3 +72,16 @@ TIMESTEP dy wk mo yr # must be lowercase
    CO2EFFECTS     AVG       DY       1     end      co2effects      /* vegetation CO2-effect (multiplier) for trees, shrubs, forbs, grasses; WUE CO2-effect (multiplier) for trees, shrubs, forbs, grasses */
       BIOMASS     AVG       DY       1     end      vegetation      /* vegetation: cover (%) for trees, shrubs, forbs, grasses; biomass (g/m2 as component of total) for total, trees, shrubs, forbs, grasses, and litter; live biomass (g/m2 as component of total) total, trees, shrubs, forbs, grasses; leaf area index LAI (m2/m2) */
 
+# Simulation output directory/filenames
+Output/			# Path for output files: / for same directory, or e.g., Output/; PROGRAMMER NOTE: This is currently the 13th position; if this changes then update function SW_Files.c/SW_F_read()
+logfile.log	        # Output file to which warnings, errors, and other important information is written (can also be stdout); relative to output directory
+
+sw2_daily.csv	        # Output file if daily output time period was selected; relative to output directory
+sw2_weekly.csv	        # Output file if weekly output time period was selected; relative to output directory
+sw2_monthly.csv	        # Output file if monthly output time period was selected; relative to output directory
+sw2_yearly.csv	        # Output file if yearly output time period was selected; relative to output directory
+
+sw2_daily_slyrs.csv	# Output file for soil layer specific variables if daily output time period was selected; relative to output directory
+sw2_weekly_slyrs.csv	# Output file for soil layer specific variables if weekly output time period was selected; relative to output directory
+sw2_monthly_slyrs.csv	# Output file for soil layer specific variables if monthly output time period was selected; relative to output directory
+sw2_yearly_slyrs.csv	# Output file for soil layer specific variables if yearly output time period was selected; relative to output directory
