@@ -1,4 +1,6 @@
 # rSOILWAT2 v6.3.1-9000
+## Bugfix
+* Fix methods that interact with depth of sapric conditions.
 
 
 # rSOILWAT2 v6.3.0

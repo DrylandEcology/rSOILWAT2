@@ -449,7 +449,7 @@ setReplaceMethod(
   "swSite_depthSapric",
   signature = "swSite",
   definition = function(object, value) {
-    object@has_swrcp <- isTRUE(as.logical(value))
+    object@depth_sapric <- as.numeric(value)
     validObject(object)
     object
   }
