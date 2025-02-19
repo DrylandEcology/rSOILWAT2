@@ -433,3 +433,24 @@ test_that("Weather data fixing", {
   )
 
 })
+
+
+test_that("Weather data scaling", {
+  swin <- rSOILWAT2::sw_exampleData
+
+  ref <- sw_exec(swin)
+
+  scalingParams <- setdiff(
+    colnames(swWeather_MonScalingParams(x)),
+    "ShortWR" # ShortWR only works if we provide daily radiation as input
+  )
+
+  for (k in seq_along(scalingParams)) {
+    x <- swin
+    swWeather_MonScalingParams(x)[, scalingParams[[k]]] <- 2
+    res <- sw_exec(x)
+
+    # Expect that the scaled simulation produces different SWC than the default
+    expect_false(isTRUE(all.equal(res@SWCBULK@Day, ref@SWCBULK@Day)))
+  }
+})
