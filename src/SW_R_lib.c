@@ -993,12 +993,13 @@ SEXP sw_consts(void) {
     "eNCIn", "eNCInAtt", "eNCOutVars",
     "eDomain",
     "eModel",
+    "eLog",
     "eSite", "eLayers", "eSWRCp",
     "eWeather", "eMarkovProb", "eMarkovCov", "eSky",
     "eVegProd", "eVegEstab",
     "eCarbon",
     "eSoilwat",
-    "eOutput", "eLog",
+    "eOutput",
     "eOutputDaily", "eOutputWeekly", "eOutputMonthly", "eOutputYearly",
     "eOutputDaily_soil", "eOutputWeekly_soil", "eOutputMonthly_soil", "eOutputYearly_soil"
   };
