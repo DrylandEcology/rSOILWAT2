@@ -1,6 +1,10 @@
-# rSOILWAT2 v6.3.1-9000
+# rSOILWAT2 v6.3.1
+* Simulation output remains the same as the previous version.
+* `SOILWAT2` updated to v8.1.1
+
 ## Bugfix
 * Fix methods that interact with depth of sapric conditions.
+* Fix scaling of daily meteorological variables.
 
 
 # rSOILWAT2 v6.3.0
