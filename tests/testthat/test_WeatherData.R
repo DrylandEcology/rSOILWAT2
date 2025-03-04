@@ -441,7 +441,7 @@ test_that("Weather data scaling", {
   ref <- sw_exec(swin)
 
   scalingParams <- setdiff(
-    colnames(swWeather_MonScalingParams(x)),
+    colnames(swWeather_MonScalingParams(swin)),
     "ShortWR" # ShortWR only works if we provide daily radiation as input
   )
 
