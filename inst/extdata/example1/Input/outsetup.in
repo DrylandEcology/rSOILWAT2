@@ -74,7 +74,6 @@ TIMESTEP dy wk mo yr # must be lowercase
 
 # Simulation output directory/filenames
 Output/			# Path for output files: / for same directory, or e.g., Output/; PROGRAMMER NOTE: This is currently the 13th position; if this changes then update function SW_Files.c/SW_F_read()
-logfile.log	        # Output file to which warnings, errors, and other important information is written (can also be stdout); relative to output directory
 
 sw2_daily.csv	        # Output file if daily output time period was selected; relative to output directory
 sw2_weekly.csv	        # Output file if weekly output time period was selected; relative to output directory

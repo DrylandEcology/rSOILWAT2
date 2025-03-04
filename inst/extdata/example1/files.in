@@ -14,6 +14,7 @@ Input/domain.in
 
 #--- Description of a model run
 Input/modelrun.in	# Input file for model time: start - end years
+logs/logfile.log	# Output file to which warnings, errors, and other important information is written (can also be stdout)
 
 #--- Description of simulated site
 Input/siteparam.in	# Input file for site location, initialization, and miscellaneous model parameters

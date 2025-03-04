@@ -1766,6 +1766,7 @@ setGeneric(
 #' @param object An object of class \code{\linkS4class{swSite}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+#' @exportMethod swSite_depthSapric
 setGeneric(
   "swSite_depthSapric",
   function(object) standardGeneric("swSite_depthSapric")
