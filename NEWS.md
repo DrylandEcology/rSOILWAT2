@@ -1,3 +1,6 @@
+# rSOILWAT2 v6.4.0-9000
+
+
 # rSOILWAT2 v6.3.1
 * Simulation output remains the same as the previous version.
 * `SOILWAT2` updated to v8.1.1
