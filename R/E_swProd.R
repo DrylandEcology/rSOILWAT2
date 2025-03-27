@@ -772,7 +772,7 @@ setMethod(
   "swReadLines",
   signature = c(object = "swProd", file = "character"),
   function(object, file) {
-    stop("swReadLines is defunct")
+    stop("swReadLines is defunct", call. = FALSE)
     infiletext <- readLines(con = file)
     object@Composition = readNumerics(infiletext[6],5)
     object@Albedo = readNumerics(infiletext[11],5)

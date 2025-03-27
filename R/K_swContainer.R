@@ -292,7 +292,10 @@ setMethod(
               }
 
             } else {
-              stop("Failed to upgrade 'swInputData' object slot ", shQuote(sn))
+              stop(
+                "Failed to upgrade 'swInputData' object slot ", shQuote(sn),
+                call. = FALSE
+              )
             }
 
             msg_upgrades <- c(msg_upgrades, sn)
@@ -1199,10 +1202,10 @@ setMethod(
   function(object, year) {
     index <- which(names(object@weatherHistory) == as.character(year))
     if (length(index) != 1) {
-      stop("Index has wrong length.")
+      stop("Index has wrong length.", call. = FALSE)
     }
     if (object@weatherHistory[[index]]@year != as.integer(year)) {
-      print("Somethings wrong with the weather data.")
+      stop("Somethings wrong with the weather data.", call. = FALSE)
     }
 
     object@weatherHistory[[index]]
@@ -1217,10 +1220,10 @@ setMethod(
   function(object, year) {
     index <- which(names(object) == as.character(year))
     if (length(index) != 1) {
-      stop("Index has wrong length.")
+      stop("Index has wrong length.", call. = FALSE)
     }
     if (object[[index]]@year != as.integer(year)) {
-      print("Somethings wrong with the weather data.")
+      stop("Somethings wrong with the weather data.", call. = FALSE)
     }
 
     object[[index]]
@@ -1247,14 +1250,14 @@ setReplaceMethod(
       years <- years[ids_sorted]
       names(object@weatherHistory) <- as.character(years)
       if (!all(years == cummax(years))) {
-        print("Weather data is Missing")
+        stop("Weather data is Missing", call. = FALSE)
       }
 
     } else if (length(index) == 1) {
       object@weatherHistory[[index]] <- value
 
     } else {
-      print("To many indices. Weather data not set")
+      stop("To many indices. Weather data not set", call. = FALSE)
     }
 
     object
@@ -1281,14 +1284,14 @@ setReplaceMethod(
       years <- years[ids_sorted]
       names(object) <- as.character(years)
       if (!all(years == cummax(years))) {
-        print("Weather data are missing")
+        stop("Weather data are missing", call. = FALSE)
       }
 
     } else if (length(index) == 1) {
      object[[index]] <- value
 
     } else {
-      print("To many indices. Weather data not set")
+      stop("To many indices. Weather data not set", call. = FALSE)
     }
 
     object
@@ -2242,14 +2245,14 @@ setReplaceMethod(
       years <- years[ids_sorted]
       names(object@swc@History) <- as.character(years)
       if (!all(years == cummax(years))) {
-        print("SWC data is Missing")
+        stop("SWC data is missing", call. = FALSE)
       }
 
     } else if (length(index) == 1) {
       object@swc@History[[index]] <- value
 
     } else {
-     print("To many index. Not set")
+      stop("To many index. Not set", call. = FALSE)
     }
 
     object
@@ -2584,7 +2587,7 @@ setMethod(
   "swReadLines",
   signature = c(object="swInputData",file="character"),
   function(object,file) {
-    print("TODO: method 'swReadLines' for class 'swInputData' is not up-to-date; hard-coded indices are incorrect")
+    stop("TODO: method 'swReadLines' for class 'swInputData' is not up-to-date; hard-coded indices are incorrect", call. = FALSE)
 
     object@files <- swReadLines(object@files,file)
     object@files@ProjDir <- dirname(file)

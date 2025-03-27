@@ -272,7 +272,7 @@ setMethod(
   "swReadLines",
   signature = c(object = "swCloud", file = "character"),
   function(object, file) {
-    stop("swReadLines is defunct")
+    stop("swReadLines is defunct", call. = FALSE)
     infiletext <- readLines(con = file)
     #should be no empty lines
     infiletext <- infiletext[infiletext != ""]

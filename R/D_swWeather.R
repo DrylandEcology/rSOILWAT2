@@ -524,10 +524,11 @@ setMethod(
   "swReadLines",
   signature = c(object = "swWeather", file = "character"),
   function(object, file) {
-    print(paste(
+    stop(
       "TODO: method 'swReadLines' for class 'swWeather' is not up-to-date;",
-      "hard-coded indices are incorrect"
-    ))
+      "hard-coded indices are incorrect",
+      call. = FALSE
+    )
     infiletext <- readLines(con = file)
 
     object@UseSnow <- readLogical(infiletext[4])

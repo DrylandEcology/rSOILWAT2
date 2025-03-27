@@ -163,6 +163,7 @@ test_that("Weather data sources", {
     swYears_EndYear(swin) <- max(years)
     swYears_StartYear(swin) <- min(years)
 
+    # nolint start: if_switch_linter.
     if (ws == "minimalInputs") {
       swin@weather@desc_rsds <- 0L
       swin@weather@use_cloudCoverMonthly <- TRUE
@@ -188,7 +189,7 @@ test_that("Weather data sources", {
       swin@weather@use_humidityMonthly <- FALSE # has humidity
 
     }
-
+    # nolint end.
 
     #--- Run and check simulation with specified weather data
     rd <- list()

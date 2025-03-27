@@ -547,8 +547,8 @@ setMethod(
   "swReadLines",
   signature = c(object = "swFiles", file = "character"),
   function(object, file) {
-  print(paste("TODO: method 'swReadLines' is not up-to-date;",
-    "hard-coded indices are incorrect"))
+  stop("TODO: method 'swReadLines' is not up-to-date;",
+    "hard-coded indices are incorrect", call. = FALSE)
 
     infiletext <- readLines(con = file)
     object@InFiles[1] <- file

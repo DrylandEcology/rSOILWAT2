@@ -128,7 +128,7 @@ dbW_InsistInteract <- function(
   stopifnot(dbW_IsValid())
 
   res <- NULL
-  k <- 1
+  k <- 1L
 
   repeat {
     # Capture errors in case database is busy
@@ -138,22 +138,25 @@ dbW_InsistInteract <- function(
     )
 
     if (inherits(res, "try-error")) {
-      if (k <= max_attempts) {
-        # Prepare next attempt
-        k <- k + 1
-
-        # Set busy handler to time out after 10 seconds
-        # (in milliseconds) of retries
-        # It's reported that SQLite may reset the busy handler
-        # https://github.com/r-dbi/RSQLite/issues/280#issuecomment-751441914
-        try(DBI::dbExecute(rSW2_glovars$con, "PRAGMA busy_timeout = 10000"))
-
-        # Wait a bit before next attempt
-        Sys.sleep(wait)
-
-      } else {
-        stop("`dbGetQuery` failed after ", k, " attempts: ", shQuote(res))
+      if (k > max_attempts) {
+        stop(
+          "`dbGetQuery` failed after ", k, " attempts: ", shQuote(res),
+          call. = FALSE
+        )
       }
+
+      # Prepare next attempt
+      k <- k + 1L
+
+      # Set busy handler to time out after 10 seconds
+      # (in milliseconds) of retries
+      # It's reported that SQLite may reset the busy handler
+      # https://github.com/r-dbi/RSQLite/issues/280#issuecomment-751441914
+      try(DBI::dbExecute(rSW2_glovars$con, "PRAGMA busy_timeout = 10000"))
+
+      # Wait a bit before next attempt
+      Sys.sleep(wait)
+
     } else {
       # success
       break
@@ -422,14 +425,14 @@ dbW_have_sites_all_weatherData <- function(
     site_ids <- rSOILWAT2::dbW_getSiteId(Labels = site_labels)
   }
   if (anyNA(site_ids)) {
-    stop("Not all sites available in weather database.")
+    stop("Not all sites available in weather database.", call. = FALSE)
   }
 
   if (is.null(scen_ids)) {
     scen_ids <- rSOILWAT2::dbW_getScenarioId(Scenario = scen_labels)
   }
   if (anyNA(scen_ids)) {
-    stop("Not all scenarios available in weather database.")
+    stop("Not all scenarios available in weather database.", call. = FALSE)
   }
 
   #--- Query database
@@ -682,12 +685,12 @@ dbW_getIDs <- function(
     if (length(iadd) > 0 && isTRUE(add_if_missing)) {
       # Some `site_id` do not exist -> attempt to create new entries
       iaddok <-
-        (!is.na(site_label[iadd]) & nchar(site_label[iadd]) > 0) |
+        (!is.na(site_label[iadd]) & nzchar(site_label[iadd])) |
         (!is.na(lat[iadd]) & !is.na(long[iadd]))
       iadd2 <- iadd[which(iaddok)]
 
-      tmp <- if (length(iadd2) > 0) {
-        df <- data.frame(
+      tmp <- if (length(iadd2) > 0L) {
+        tmp <- data.frame(
           Latitude = lat[iadd2],
           Longitude = long[iadd2],
           Label = site_label[iadd2],
@@ -695,7 +698,7 @@ dbW_getIDs <- function(
         )
 
         try(
-          dbW_addSites(site_data = df, ignore.case = ignore.case),
+          dbW_addSites(site_data = tmp, ignore.case = ignore.case),
           silent = TRUE
         )
       }
@@ -731,10 +734,10 @@ dbW_getIDs <- function(
     iadd <- which(is.na(res[["scenario_id"]]))
     if (length(iadd) > 0 && isTRUE(add_if_missing)) {
       # Some `scenario_id` do not exist -> attempt to create new entries
-      iaddok <- !is.na(scenario[iadd]) & nchar(site_label[iadd]) > 0
+      iaddok <- !is.na(scenario[iadd]) & nzchar(site_label[iadd])
       iadd2 <- iadd[which(iaddok)]
 
-      tmp <- if (length(iadd2) > 0) {
+      tmp <- if (length(iadd2) > 0L) {
         try(
           dbW_addScenarios(
             Scenarios = scenario[iadd2],
@@ -869,7 +872,8 @@ dbW_getWeatherData <- function(
         "More than one weather data object exists for site ",
         shQuote(IDs[["site_id"]][k]),
         " and scenario ", shQuote(IDs[["scenario_id"]][k]),
-        ": processing only the first one."
+        ": processing only the first one.",
+        call. = FALSE
       )
 
       x <- x[1, , drop = FALSE]
@@ -882,7 +886,8 @@ dbW_getWeatherData <- function(
         " does not exist in weather database."
       )
 
-      if (stop_if_missing) stop(msg) else warning(msg)
+      if (stop_if_missing) stop(msg, call. = FALSE)
+      warning(msg, call. = FALSE)
 
       next
     }
@@ -899,18 +904,20 @@ dbW_getWeatherData <- function(
         " and scenario ", shQuote(IDs[["scenario_id"]][k]), " is corrupted."
       )
 
-      if (stop_if_missing) stop(msg) else warning(msg)
+      if (stop_if_missing) stop(msg, call. = FALSE)
+      warning(msg, call. = FALSE)
 
       next
     }
 
-    tmp <- class(wd[[1]])
-    if (!(attr(tmp, "package") == "rSOILWAT2")) {
+    tmp <- class(wd[[1L]])
+    if (!identical(attr(tmp, "package"), "rSOILWAT2")) {
       message(
         "WARNING: The class of the extracted weather data object is ",
         shQuote(tmp), " from package ", shQuote(attr(tmp, "package")),
         " which is outdated. Please, upgrade weather database with function ",
-        "'dbW_upgrade_to_rSOILWAT2'."
+        "'dbW_upgrade_to_rSOILWAT2'.",
+        call. = FALSE
       )
     }
 
@@ -929,7 +936,8 @@ dbW_getWeatherData <- function(
       " does not exist in weather database."
     )
 
-    if (stop_if_missing) stop(msg) else warning(msg)
+    if (stop_if_missing) stop(msg, call. = FALSE)
+    warning(msg, call. = FALSE)
   }
 
   if (length(IDs[["site_id"]]) == 1) res[[1]] else res
@@ -1084,7 +1092,7 @@ dbW_disconnectConnection <- function() {
 dbW_addSites <- function(site_data, ignore.case = FALSE, verbose = FALSE) {
   req_cols <- c("Latitude", "Longitude", "Label")
   if (!all(req_cols %in% colnames(site_data))) {
-    stop("'dbW_addSites': argument misses required columns.")
+    stop("'dbW_addSites': argument misses required columns.", call. = FALSE)
   }
 
   has_sites <- dbW_has_sites(site_data[, "Label"], ignore.case = ignore.case)
@@ -1257,7 +1265,10 @@ dbW_addWeatherData <- function(
     inherits(weatherData[[1]], "swWeatherData")
 
   if (!has_weatherFolderPath && !has_weatherData) {
-    stop("'dbW_addWeatherData' requires either a folder path or weatherData.")
+    stop(
+      "'dbW_addWeatherData' requires either a folder path or weatherData.",
+      call. = FALSE
+    )
   }
 
   if (!is.null(weatherFolderPath) && is.null(Label)) {
@@ -1280,7 +1291,8 @@ dbW_addWeatherData <- function(
   if (!all(sapply(IDs, function(x) length(x) > 0 && is.finite(x)))) {
     stop(
       "'dbW_addWeatherData': insufficient information to generate ",
-      "site/scenario."
+      "site/scenario.",
+      call. = FALSE
     )
   }
 
@@ -1297,11 +1309,11 @@ dbW_addWeatherData <- function(
       tmp2 <- dbW_deleteSiteData(IDs[["site_id"]], IDs[["scenario_id"]])
 
       if (!tmp2) {
-        stop(tmp, " Overwritting previous data failed.")
+        stop(tmp, " Overwritting previous data failed.", call. = FALSE)
       }
 
     } else {
-      stop(tmp)
+      stop(tmp, call. = FALSE)
     }
   }
 
@@ -1410,7 +1422,7 @@ dbW_addWeatherData <- function(
   }
 
   #---Add Scenarios
-  Scenarios <- c(scen_ambient, Scenarios[!(Scenarios == scen_ambient)])
+  Scenarios <- c(scen_ambient, setdiff(Scenarios, scen_ambient))
   stopifnot(dbW_addScenarios(Scenarios, ignore.case = FALSE))
 
   invisible(TRUE)
@@ -1855,7 +1867,8 @@ select_years <- function(years, start_year = NULL, end_year = NULL) {
     ) {
       warning(
         "'select_years': wrong value for argument 'start_year' ",
-        "and/or 'end_year'"
+        "and/or 'end_year'",
+        call. = FALSE
       )
     }
 
@@ -2031,7 +2044,8 @@ getWeatherData_folders <- function(
   if (is.null(LookupWeatherFolder) || is.null(filebasename)) {
     stop(
       "Need 'LookupWeatherFolder' and 'filebasename' ",
-      "to locate weather data"
+      "to locate weather data",
+      call. = FALSE
     )
   }
 
@@ -2050,7 +2064,10 @@ getWeatherData_folders <- function(
   fweath <- tryCatch(
     list.files(dir_weather, pattern = filebasename),
     warning = function(w) {
-      stop("Path to weather data bad or filebasename not correct.")
+      stop(
+        "Path to weather data bad or filebasename not correct.",
+        call. = FALSE
+      )
     }
   )
 
@@ -2085,16 +2102,16 @@ getWeatherData_folders <- function(
       function(fname, yr) {
         object <- new("swWeatherData")
         object@year <- yr
-        data <- utils::read.table(
+        x <- utils::read.table(
           fname,
           header = FALSE,
           comment.char = "#",
           blank.lines.skip = TRUE,
           sep = "\t"
         )
-        stopifnot(ncol(data) %in% (0:1 + sum(dailyInputFlags)))
-        object@data <- object@data[seq_len(nrow(data)), , drop = FALSE]
-        object@data[, ids_cols] <- as.matrix(data)
+        stopifnot(ncol(x) %in% (0:1 + sum(dailyInputFlags)))
+        object@data <- object@data[seq_len(nrow(x)), , drop = FALSE]
+        object@data[, ids_cols] <- as.matrix(x)
         object
       },
       file.path(dir_weather, fweath[ids]),
@@ -2316,6 +2333,7 @@ dbW_dataframe_aggregate <- function(
   tmp <- as.POSIXlt(tmp, format = "%Y-%j", tz = "UTC")
   tmpy <- 1900L + unique(tmp$year)
 
+  # nolint start: if_switch_linter.
   if (time_step == "Year") {
     idaggs <- list(dailySW[, "Year"])
     hout <- data.frame(Year = tmpy)
@@ -2334,6 +2352,7 @@ dbW_dataframe_aggregate <- function(
       Week = rep(seq_len(53), times = length(tmpy))
     )
   }
+  # nolint end.
 
   vars <- intersect(names(funs), colnames(dailySW))
 
@@ -2406,22 +2425,25 @@ get_years_from_weatherDF <- function(weatherDF, years, weatherDF_dataColumns) {
     } else {
       stop(
         "Not sufficient year information was provided with the ",
-        "'weatherDF' object"
+        "'weatherDF' object",
+        call. = FALSE
       )
     }
 
   } else {
     tmp <- grepl("year", colnames(weatherDF), ignore.case = TRUE)
 
-    if (any(tmp)) {
-      year_ts <- weatherDF[, which(tmp)[1]]
-
-    } else {
-      stop("No year information was provided with the 'weatherDF' object")
+    if (!any(tmp)) {
+      stop(
+        "No year information was provided with the 'weatherDF' object",
+        call. = FALSE
+      )
     }
+
+    year_ts <- weatherDF[, which(tmp)[[1L]]]
   }
 
-  return(list(years = sort(unique(year_ts)), year_ts = year_ts))
+  list(years = sort(unique(year_ts)), year_ts = year_ts)
 }
 
 
@@ -2465,7 +2487,8 @@ dbW_dataframe_to_weatherData <- function(
   ) {
     stop(
       "Not every weatherDF_dataColumns is available in the ",
-      "'weatherDF' object"
+      "'weatherDF' object",
+      call. = FALSE
     )
   }
 
@@ -2547,7 +2570,8 @@ dbW_weather_to_SOILWATfiles <- function(
     ) {
       stop(
         "Not every weatherDF_dataColumns is available in the ",
-        "'weatherDF' object"
+        "'weatherDF' object",
+        call. = FALSE
       )
     }
 
@@ -2558,7 +2582,8 @@ dbW_weather_to_SOILWATfiles <- function(
   } else {
     stop(
       "Provide daily weather data either as 'weatherData' or ",
-      "'weatherDF' object"
+      "'weatherDF' object",
+      call. = FALSE
     )
   }
 

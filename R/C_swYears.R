@@ -262,7 +262,7 @@ setMethod(
   "swReadLines",
   signature = c(object = "swYears", file = "character"),
   function(object, file) {
-    stop("swReadLines is defunct")
+    stop("swReadLines is defunct", call. = FALSE)
     infiletext <- readLines(con = file)
     object@StartYear <- readInteger(infiletext[4])
     object@EndYear <- readInteger(infiletext[5])

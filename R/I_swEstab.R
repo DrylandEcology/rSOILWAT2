@@ -150,7 +150,7 @@ setMethod(
   "swReadLines",
   signature = c(object="swEstabSpecies",file="character"),
   function(object,file) {
-    stop("swReadLines is defunct")
+    stop("swReadLines is defunct", call. = FALSE)
     infiletext <- readLines(con = file)
 
     object@Name = c(object@Name, gsub("[[:space:]]", "",strsplit(x=infiletext[1],split = c("#", " ", "\t"),fixed=F)[[1]][1]))
@@ -307,7 +307,7 @@ setMethod(
   "swReadLines",
   signature = c(object="swEstab",file="character"),
   function(object,file) {
-    stop("swReadLines is defunct")
+    stop("swReadLines is defunct", call. = FALSE)
     infiletext <- readLines(con = file[1])
     index<-length(object@fileName)+1
     object@useEstab = readLogical(infiletext[9])

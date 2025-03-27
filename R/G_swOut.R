@@ -308,7 +308,8 @@ setMethod(
           from_v310 = 28L,
           stop(
             "Upgrade ", shQuote(names(do_upgrade)[k]),
-            " is not implemented for class `swOUT`."
+            " is not implemented for class `swOUT`.",
+            call. = FALSE
           )
         )
 
@@ -419,8 +420,9 @@ setReplaceMethod(
       if (any(tmp)) {
         warning(
           "Outkeys ",
-          paste0(shQuote(value[tmp]), collapse = "/"),
-          " are not available."
+          paste(shQuote(value[tmp]), collapse = "/"),
+          " are not available.",
+          call. = FALSE
         )
       }
     }
@@ -476,8 +478,9 @@ setReplaceMethod(
       if (any(tmp)) {
         warning(
           "Outkeys ",
-          paste0(shQuote(value[tmp]), collapse = "/"),
-          " are not available."
+          paste(shQuote(value[tmp]), collapse = "/"),
+          " are not available.",
+          call. = FALSE
         )
       }
     }
@@ -584,7 +587,7 @@ setMethod(
   "swReadLines",
   signature = c(object="swOUT",file="character"),
   function(object,file) {
-    print("TODO: method 'swReadLines' for class 'swOUT' is not up-to-date; hard-coded indices are incorrect")
+    stop("TODO: method 'swReadLines' for class 'swOUT' is not up-to-date; hard-coded indices are incorrect", call. = FALSE)
 
     infiletext <- readLines(con = file)
     if(temp<-strsplit(infiletext[41],split=" ")[[1]][2] == "t") {

@@ -53,8 +53,8 @@ NULL
 dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
   check_all = FALSE, with_resume = TRUE, clean_cache = TRUE) {
 
-  print(paste(Sys.time(), ": upgrading database", basename(dbWeatherDataFile),
-    "to package 'rSOILWAT2'"))
+  cat(Sys.time(), ": upgrading database", basename(dbWeatherDataFile),
+    "to package 'rSOILWAT2'", fill = TRUE)
 
   dbWeatherDataFile <- normalizePath(dbWeatherDataFile)
   con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbWeatherDataFile)
@@ -65,7 +65,7 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
 
   # Prepare call objects
   temp <- strsplit(basename(dbWeatherDataFile), split = ".", fixed = TRUE)
-  temp <- paste0(temp[[1]][-length(temp[[1]])], collapse = ".")
+  temp <- paste(temp[[1L]][-length(temp[[1L]])], collapse = ".")
 
   call_id <- list(f = "rSOILWAT2::dbW_upgrade_to_rSOILWAT2",
     dbWeatherDataFile = basename(dbWeatherDataFile),
@@ -93,9 +93,9 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
       } else if (identical(call_hash, temp[["call_hash"]])) {
         # if identical hash, load cache from previous call
         call_cache <- temp[["call_cache"]]
-        print(paste0(shQuote(call_id[["f"]]),
+        cat(paste0(shQuote(call_id[["f"]]),
           ": located cache from a previous call; ",
-          "upgrade will continue at record #", call_cache[["k"]]))
+          "upgrade will continue at record #", call_cache[["k"]]), fill = TRUE)
       }
     }
 
@@ -116,7 +116,7 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
 
     stop(shQuote(call_id[["f"]]), ": requires database version ",
       rSW2_glovars$dbW_version, "; this database is version ",
-      call_cache[["v_dbW"]])
+      call_cache[["v_dbW"]], call. = FALSE)
   }
 
   # Extract compression type
@@ -126,7 +126,10 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
   }
 
   # Check what data are there
-  print(paste(Sys.time(), ": examine database", basename(dbWeatherDataFile)))
+  cat(
+    paste(Sys.time(), ": examine database", basename(dbWeatherDataFile)),
+    fill = TRUE
+  )
 
   if (is.null(call_cache[["ids"]])) {
     call_cache[["ids"]] <- DBI::dbGetQuery(con,
@@ -153,8 +156,8 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
       #   iterator variable, but we need to store k in our cache
       call_cache[["k"]] <- k
 
-      print(paste(Sys.time(), ": processing", k, "out of",
-        call_cache[["n_ids"]]))
+      cat(paste(Sys.time(), ": processing", k, "out of",
+        call_cache[["n_ids"]]), fill = TRUE)
 
       # Upgrade weather data within a DBI-transaction in case something goes
       # awry
@@ -171,20 +174,20 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
         # Check that the old package is available and load it
         if (check_all || is.null(wd_pkg) || k == call_cache[["seq_ids"]][1]) {
 
-          wd_class <- if (inherits(wd, "list")) class(wd[[1]]) else class(wd)
-          if (!(wd_class == "swWeatherData")) {
+          wd_class <- if (inherits(wd, "list")) class(wd[[1L]]) else class(wd)
+          if (!identical(wd_class, "swWeatherData")) {
             stop(shQuote(call_id[["f"]]),
               ": cannot update a weather database with ",
               "data of class ", shQuote(wd_class),
-              "; instead class 'swWeatherData' is required.")
+              "; instead class 'swWeatherData' is required.", call. = FALSE)
           }
 
           wd_pkg <- attr(wd_class, "package")
           if (!has_old_notloaded) {
             if (wd_pkg == "rSOILWAT2") {
               if (!check_all) {
-                print(paste("Class of weather database data is already from",
-                  "package 'rSOILWAT2'; nothing to upgrade."))
+                cat(paste("Class of weather database data is already from",
+                  "package 'rSOILWAT2'; nothing to upgrade."), fill = TRUE)
                 return(invisible(NULL))
               }
 
@@ -193,13 +196,15 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
                 !suppressPackageStartupMessages(requireNamespace(wd_pkg))
               if (!has_old_notloaded) {
                 warning("The package ", shQuote(wd_pkg), " which created the",
-                  " weather data, is not available on this system.")
+                  " weather data, is not available on this system.",
+                  call. = FALSE
+                )
               }
             }
           }
         }
 
-        if (!(wd_pkg == "rSOILWAT2")) {
+        if (!identical(wd_pkg, "rSOILWAT2")) {
           # convert weather data to class of new package
           wd_new <- lapply(wd, function(x) {
             x_data <- slot(x, "data")
@@ -229,8 +234,8 @@ dbW_upgrade_to_rSOILWAT2 <- function(dbWeatherDataFile, fbackup = NULL,
   check_updatedDB(con)
 
   if (clean_cache) {
-    print(paste0(shQuote(call_id[["f"]]), ": upgrade appears successful and ",
-      "will remove temporary cache file from disk"))
+    cat(paste0(shQuote(call_id[["f"]]), ": upgrade appears successful and ",
+      "will remove temporary cache file from disk"), fill = TRUE)
     on.exit(unlink(ftemp_cache), add = TRUE)
   }
 
@@ -254,7 +259,9 @@ dbW_upgrade_v31to32 <- function(dbWeatherDataFile, fbackup = NULL) {
 
   if (inherits(v_dbW, "try-error") || v_dbW < "3.1.0" || v_dbW >= "3.2.0") {
     warning("The function 'dbW_upgrade_v3to31' upgrades weather databases ",
-      "from version 3.1.z to 3.2.0; this database is version ", v_dbW)
+      "from version 3.1.z to 3.2.0; this database is version ", v_dbW,
+      call. = FALSE
+    )
     return(FALSE)
   }
 
@@ -262,14 +269,16 @@ dbW_upgrade_v31to32 <- function(dbWeatherDataFile, fbackup = NULL) {
   temp <- req_tables %in% DBI::dbListTables(con)
   if (!all(temp)) {
     warning("Missing tables:", paste(shQuote(req_tables[!temp]),
-      collapse = "-"))
+      collapse = "-"), call. = FALSE)
     return(FALSE)
   }
 
-  print(paste(Sys.time(), ": upgrading database",
+  cat(Sys.time(), ": upgrading database",
     shQuote(basename(dbWeatherDataFile)),
     "to version 3.1.0; be patient, this may take considerable time depending",
-    "on the size of the database"))
+    "on the size of the database",
+    fill = TRUE
+  )
 
   # Backup copy
   fbackup <- backup_copy(dbWeatherDataFile, fbackup)
@@ -289,7 +298,7 @@ dbW_upgrade_v31to32 <- function(dbWeatherDataFile, fbackup = NULL) {
     compression_type = Meta[Meta[["Desc"]] == "Compression_type", "Value"]))
 
   # Copy weather data from old/backup to new database
-  print(paste(Sys.time(), ": moving weather data from old to new database"))
+  cat(Sys.time(), ": moving weather data from old to new database", fill = TRUE)
 
   con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbWeatherDataFile)
   con_old <- DBI::dbConnect(RSQLite::SQLite(), dbname = fbackup)
@@ -339,8 +348,8 @@ dbW_upgrade_v31to32 <- function(dbWeatherDataFile, fbackup = NULL) {
 dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL,
   type_new = "gzip") {
 
-  print(paste(Sys.time(), ": upgrading database", basename(dbWeatherDataFile),
-    "to version 3.1.0"))
+  cat(Sys.time(), ": upgrading database", basename(dbWeatherDataFile),
+    "to version 3.1.0", fill = TRUE)
 
   con <- DBI::dbConnect(RSQLite::SQLite(), dbname = dbWeatherDataFile)
   v_dbW <- try(numeric_version(as.character(DBI::dbGetQuery(con,
@@ -348,7 +357,8 @@ dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL,
 
   if (inherits(v_dbW, "try-error") || v_dbW >= "3.1.0" || v_dbW < "3.0.0") {
     warning("The function 'dbW_upgrade_v3to31' upgrades weather databases ",
-      "from version 3.0.z to 3.1.0; this database is version ", v_dbW)
+      "from version 3.0.z to 3.1.0; this database is version ", v_dbW,
+      call. = FALSE)
 
     return(invisible(0))
   }
@@ -358,9 +368,9 @@ dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL,
 
   if (!(type_new %in% eval(formals(memCompress)[[2]]))) {
     warning("The upgraded weather database cannot store BLOBs with ",
-      "compression type: ", type_new)
+      "compression type: ", type_new, call. = FALSE)
     warning("Instead, the previous compression type: ", type_old,
-      " will be used")
+      " will be used", call. = FALSE)
   }
 
   # Backup copy
@@ -378,12 +388,12 @@ dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL,
     }
 
     temp <- memDecompress(data_blob, type = type, asChar = TRUE)
-    data <- strsplit(temp, split = ";", fixed = TRUE)[[1]]
+    x <- strsplit(temp, split = ";", fixed = TRUE)[[1]]
     years <- StartYear:EndYear
 
     weatherData <- list()
     for (i in seq_along(years)) {
-      zz <- textConnection(data[i])
+      zz <- textConnection(x[i])
       ydata <- utils::read.table(zz, header = FALSE, sep = ",",
         stringsAsFactors = FALSE)
       close(zz)
@@ -399,7 +409,7 @@ dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL,
 
   if (n_ids > 0) {
     for (i in seq_len(n_ids)) {
-      print(paste(Sys.time(), ":", i, "out of", n_ids))
+      cat(Sys.time(), ":", i, "out of", n_ids, fill = TRUE)
 
       result <- DBI::dbGetQuery(con,
         paste0("SELECT StartYear,EndYear,data FROM WeatherData WHERE Site_id =",
@@ -409,10 +419,10 @@ dbW_upgrade_v3to31 <- function(dbWeatherDataFile, fbackup = NULL,
 
       if (inherits(weatherData, "try-error") || length(weatherData) == 0) {
         warning("Weather data for Site_id = ", ids[i, 1], " and Scenario = ",
-          ids[i, 2], " is missing or is corrupted")
+          ids[i, 2], " is missing or is corrupted", call. = FALSE)
 
       } else {
-        blob_new <- paste0("x'", paste0(memCompress(serialize(weatherData,
+        blob_new <- paste0("x'", paste(memCompress(serialize(weatherData,
           connection = NULL), type = type_new), collapse = ""), "'")
         DBI::dbExecute(con, paste0("UPDATE WeatherData SET data =", blob_new,
           "WHERE Site_id =", ids[i, 1], " AND Scenario =", ids[i, 2], ";"))
@@ -452,12 +462,13 @@ dbW_upgrade_v2to3 <- function(dbWeatherDataFile, fbackup = NULL) {
 
   if (inherits(v_dbW, "try-error") || v_dbW >= "3" && v_dbW < "2") {
     warning("The function 'dbW_upgrade_v2to3' upgrades weather databases ",
-      "from version 2.y.z to 3.0.0; this database is version ", v_dbW)
+      "from version 2.y.z to 3.0.0; this database is version ", v_dbW,
+      call. = FALSE)
     return(invisible(0))
   }
 
-  print(paste(Sys.time(), ": upgrading database", basename(dbWeatherDataFile),
-    "to version 3.0.0"))
+  cat(Sys.time(), ": upgrading database", basename(dbWeatherDataFile),
+    "to version 3.0.0", fill = TRUE)
 
   # Backup copy
   backup_copy(dbWeatherDataFile, fbackup)
@@ -508,13 +519,16 @@ dbW_upgrade_v1to2 <- function(
 
   if (inherits(v_dbW, "try-error") || v_dbW >= "2" && v_dbW < "1") {
     warning("The function 'dbW_upgrade_v1to2' upgrades weather databases ",
-      "from version 1.y.z to 2.0.0; this database is version ", v_dbW)
+      "from version 1.y.z to 2.0.0; this database is version ", v_dbW,
+      call. = FALSE)
     return(invisible(0))
   }
 
-  print(paste(Sys.time(), ": upgrading database", basename(dbWeatherDataFile),
+  cat(Sys.time(), ": upgrading database", basename(dbWeatherDataFile),
     "to version 2.0.0; be patient, this may take considerable time depending",
-    "on the size of the database"))
+    "on the size of the database",
+    fill = TRUE
+  )
 
   # Backup copy
   backup_copy(dbWeatherDataFile, fbackup)
@@ -565,7 +579,7 @@ dbW_upgrade_v1to2 <- function(
 
   if (length(old_ids) > 0) {
     for (iold in index_old) {
-      print(paste(Sys.time(), ":", iold, "out of", length(index_old)))
+      cat(Sys.time(), ":", iold, "out of", length(index_old), fill = TRUE)
 
       site_old <- DBI::dbGetQuery(con,
         paste("SELECT Latitude, Longitude, Label",
@@ -582,11 +596,11 @@ dbW_upgrade_v1to2 <- function(
             site_new$Site_id, "WHERE Site_id =", iold, ";"))
         } else {
           utils::str(site_new)
-          warning("No updated record for old site_id = ", iold)
+          warning("No updated record for old site_id = ", iold, call. = FALSE)
         }
       } else {
         utils::str(site_old)
-        warning("No record for old site_id = ", iold)
+        warning("No record for old site_id = ", iold, call. = FALSE)
       }
     }
 
@@ -616,25 +630,30 @@ dbW_upgrade_v1to2 <- function(
 #' @export
 #' @md
 check_updatedDB <- function(con) {
-  print(paste0(
+  cat(
     Sys.time(),
-    ": 'check_updatedDB' started with database integrity"
-  ))
+    ": 'check_updatedDB' started with database integrity",
+    fill = TRUE
+  )
 
-  print(paste0(Sys.time(), ": 'check_updatedDB' started 'quick check'"))
+  cat(Sys.time(), ": 'check_updatedDB' started 'quick check'", fill = TRUE)
   res <- DBI::dbExecute(con, "PRAGMA quick_check")
-  print(res)
-  print(paste0(Sys.time(), ": 'check_updatedDB' started 'integrity check'"))
-  print(DBI::dbExecute(con, "PRAGMA integrity_check"))
-  print(paste0(Sys.time(), ": 'check_updatedDB' started 'foreign key check'"))
-  print(DBI::dbExecute(con, "PRAGMA foreign_key_check"))
+  cat(res, fill = TRUE)
 
-  print(paste0(Sys.time(), ": 'check_updatedDB' checks indices"))
-  print(DBI::dbExecute(con, "PRAGMA index_list(WeatherData)"))
-  print(DBI::dbExecute(
-    con,
-    "PRAGMA index_info(sqlite_autoindex_WeatherData_1)"
-  ))
+  cat(Sys.time(), ": 'check_updatedDB' started 'integrity check'", fill = TRUE)
+  cat(DBI::dbExecute(con, "PRAGMA integrity_check"), fill = TRUE)
+
+  cat(
+    Sys.time(), ": 'check_updatedDB' started 'foreign key check'", fill = TRUE
+  )
+  cat(DBI::dbExecute(con, "PRAGMA foreign_key_check"), fill = TRUE)
+
+  cat(Sys.time(), ": 'check_updatedDB' checks indices", fill = TRUE)
+  cat(DBI::dbExecute(con, "PRAGMA index_list(WeatherData)"), fill = TRUE)
+  cat(
+    DBI::dbExecute(con, "PRAGMA index_info(sqlite_autoindex_WeatherData_1)"),
+    fill = TRUE
+  )
 }
 
 
@@ -645,7 +664,7 @@ check_updatedDB <- function(con) {
 #'
 #' @export
 backup_copy <- function(dbWeatherDataFile, fbackup = NULL) {
-  print(paste(Sys.time(), ": backup database", basename(dbWeatherDataFile)))
+  cat(Sys.time(), ": backup database", basename(dbWeatherDataFile), fill = TRUE)
 
   dbWeatherDataFile <- normalizePath(dbWeatherDataFile)
 

@@ -264,7 +264,8 @@ upgrade_weatherColumns <- function(
         stop(
           "Renaming ", shQuote(cns[[k]]), " to ",
           shQuote(as.character(rds[ids[[k]], "new", drop = TRUE])),
-          " failed because of non-missing values."
+          " failed because of non-missing values.",
+          call. = FALSE
         )
       }
 
@@ -304,7 +305,10 @@ upgrade_weatherDF <- function(
   weatherDF <- upgrade_weatherColumns(weatherDF)
 
   cns <- intersect(template_weatherColumns, colnames(weatherDF))
-  if (length(cns) < 1L) stop("Required weather variables not found.")
+  if (length(cns) < 1L) {
+    stop("Required weather variables not found.", call. = FALSE)
+  }
+
   template_data[, cns] <- weatherDF[, cns]
   template_data
 }
@@ -372,7 +376,9 @@ setMethod(
   signature = c(object = "swWeatherData", file = "character"),
   function(object, file) {
     .Deprecated("C_rSW2_readAllWeatherFromDisk")
-    warning("swReadLines works only with traditional weather data.")
+    warning(
+      "swReadLines works only with traditional weather data.", call. = FALSE
+    )
 
     object@year <- as.integer(
       strsplit(
@@ -381,17 +387,17 @@ setMethod(
       fixed = TRUE
       )[[1]][2]
     )
-    data <- utils::read.table(
+    x <- utils::read.table(
       file,
       header = FALSE,
       comment.char = "#",
       blank.lines.skip = TRUE,
       sep = "\t"
     )
-    stopifnot(ncol(data) != 4L)
-    colnames(data) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+    stopifnot(ncol(x) != 4L)
+    colnames(x) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
     object@data[] <- NA
-    object@data[, colnames(data)] <- as.matrix(data)
+    object@data[, colnames(x)] <- as.matrix(x)
 
     object
 })

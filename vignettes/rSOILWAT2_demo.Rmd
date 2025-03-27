@@ -413,7 +413,9 @@ data from `DayMet`
 
 
     if (inherits(soils_sda, "try-error")) {
-      warning("Vignette was not able to extract soils from NRCS SDA!")
+      warning(
+        "Vignette was not able to extract soils from NRCS SDA!", call. = FALSE
+      )
 
     } else {
       # Add homogenized soil layers

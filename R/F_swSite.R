@@ -633,7 +633,7 @@ setMethod(
   "swReadLines",
   signature = c(object="swSite",file="character"),
   function(object,file) {
-    print("TODO: method 'swReadLines' is not up-to-date; hard-coded indices are incorrect")
+    stop("TODO: method 'swReadLines' is not up-to-date; hard-coded indices are incorrect", call. = FALSE)
 			infiletext <- readLines(con = file)
 			object@SWClimits[1] = readNumeric(infiletext[2])
 			object@SWClimits[2] = readNumeric(infiletext[3])

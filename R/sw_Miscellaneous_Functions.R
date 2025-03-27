@@ -83,8 +83,11 @@ calc_SiteClimate <- function(weatherList, year.start = NA, year.end = NA,
       years <- unique(x[, "Year"])
 
       if (length(years) == 0) {
-        stop("'calc_SiteClimate': no weather data available for ",
-          "requested range of years")
+        stop(
+          "'calc_SiteClimate': no weather data available for ",
+          "requested range of years",
+          call. = FALSE
+        )
       }
 
       res <- .Call(C_rSW2_calc_SiteClimate,
@@ -156,7 +159,7 @@ lookup_annual_CO2a <- function(
   tr_CO2a = rSOILWAT2::sw2_tr_CO2a
 ) {
   # Locate scenario
-  name_co2 <- paste0(name_co2, collapse = "|")
+  name_co2 <- paste(name_co2, collapse = "|")
   scenario_index <- grep(name_co2, colnames(tr_CO2a), ignore.case = TRUE)
   n_sc <- length(scenario_index)
 
@@ -188,12 +191,13 @@ lookup_annual_CO2a <- function(
     if (anyNA(scenarioCO2_ppm)) {
       stop(
         "Some requested years have no CO2 values for scenario(s) ",
-        shQuote(name_co2)
+        shQuote(name_co2),
+        call. = FALSE
       )
     }
 
   } else {
-    stop("Lookup of CO2 failed.")
+    stop("Lookup of CO2 failed.", call. = FALSE)
   }
 
   scenarioCO2_ppm

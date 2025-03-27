@@ -93,7 +93,7 @@ setMethod(
   "swReadLines",
   signature = c(object = "swSWC_hist", file = "character"),
   function(object, file) {
-    stop("swReadLines is defunct.")
+    stop("swReadLines is defunct.", call. = FALSE)
     object@year <- as.integer(strsplit(x = file, split = ".",
       fixed = TRUE)[[1]][2])
     infiletext <- readLines(con = file)
@@ -221,11 +221,14 @@ setMethod(
   function(object, year) {
     index <- which(names(object@History) == as.character(year))
     if (length(index) != 1) {
-      print("swc historic data Index has wrong length.")
+      warning("swc historic data Index has wrong length.", call. = FALSE)
       return(NULL)
     }
     if (object@History[[index]]@year != as.integer(year)) {
-      print("Somethings wrong with the historical soil moisture data.")
+      warning(
+        "Somethings wrong with the historical soil moisture data.",
+        call. = FALSE
+      )
     }
 
     object@History[[index]]
@@ -307,14 +310,14 @@ setReplaceMethod(
       years <- years[ids_sorted]
       names(object@History) <- as.character(years)
       if (!all(years == cummax(years))) {
-        print("SWC data is Missing")
+        stop("SWC data is missing", call. = FALSE)
       }
 
     } else if (length(index) == 1) {
       object@History[[index]] <- value
 
     } else {
-      print("To many index. Not set")
+      stop("To many index. Not set", call. = FALSE)
     }
 
     object
@@ -329,7 +332,7 @@ setMethod(
   "swReadLines",
   signature = c(object = "swSWC", file = "character"),
   function(object, file) {
-    stop("swReadLines is defunct")
+    stop("swReadLines is defunct", call. = FALSE)
     infiletext <- readLines(con = file)
     #should be no empty lines
     infiletext <- infiletext[infiletext != ""]

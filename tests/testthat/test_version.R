@@ -106,7 +106,7 @@ test_that("rSOILWAT2 object versions", {
   expect_identical(get_version(1), NA_character_)
   expect_identical(get_version(list()), NA_character_)
   expect_identical(
-    get_version(try(stop("error"), silent = TRUE)),
+    get_version(try(stop("error", call. = FALSE), silent = TRUE)),
     NA_character_
   )
   expect_identical(get_version(swSoils_Layers(sw_in)), NA_character_)
@@ -137,7 +137,10 @@ test_that("rSOILWAT2 object timestamps", {
   expect_equal(get_timestamp(NULL), NA_real_)
   expect_equal(get_timestamp(1), NA_real_)
   expect_equal(get_timestamp(list()), NA_real_)
-  expect_equal(get_timestamp(try(stop("error"), silent = TRUE)), NA_real_)
+  expect_equal(
+    get_timestamp(try(stop("error", call. = FALSE), silent = TRUE)),
+    NA_real_
+  )
   expect_equal(get_timestamp(swSoils_Layers(sw_in)), NA_real_)
 
   expect_equal(format_timestamp(NA), as.POSIXct(NA))

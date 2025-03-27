@@ -272,9 +272,9 @@ dbW_estimate_WGen_coefs <- function(
     )
 
     if (imputation_type == "none") {
-      warning("Insufficient weather data to estimate ", msg)
+      warning("Insufficient weather data to estimate ", msg, call. = FALSE)
     } else {
-      message("Impute missing `mkv_prob` ", msg)
+      message("Impute missing `mkv_prob` ", msg, call. = FALSE)
       mkv_prob <- rSW2utils::impute_df(
         mkv_prob,
         imputation_type = imputation_type,
@@ -407,9 +407,9 @@ dbW_estimate_WGen_coefs <- function(
     )
 
     if (imputation_type == "none") {
-      warning("Insufficient weather data to estimate ", msg)
+      warning("Insufficient weather data to estimate ", msg, call. = FALSE)
     } else {
-      message("Impute missing `mkv_cov` ", msg)
+      message("Impute missing `mkv_cov` ", msg, call. = FALSE)
       mkv_cov <- rSW2utils::impute_df(
         mkv_cov,
         imputation_type = imputation_type,
@@ -540,7 +540,7 @@ prepare_weather_for_comparison <- function(
     res <- prepare_weather(weather, na.rm = na.rm)
 
   } else {
-    stop("Structure of `weather` not suitable")
+    stop("Structure of `weather` not suitable", call. = FALSE)
   }
 
   res
@@ -651,7 +651,7 @@ compare_weather <- function(
     comp_df <- list(prepare_weather_for_comparison(weather, na.rm = TRUE))
 
   } else {
-    stop("Structure of `weather` not suitable")
+    stop("Structure of `weather` not suitable", call. = FALSE)
   }
 
 
@@ -1437,7 +1437,8 @@ dbW_imputeWeather <- function(
         "Missing values in variables ",
         if (use_wg) "after weather generator ",
         "(method_after_wg = 'fail'): ",
-        toString(vars_wv[unique(needs_im[, "col"])])
+        toString(vars_wv[unique(needs_im[, "col"])]),
+        call. = FALSE
       )
     }
 
@@ -1542,7 +1543,7 @@ dbW_substituteWeather <- function(
     vars_req <- intersect(vars_both, vars_substitute)
     if (length(vars_req) != length(vars_substitute)) {
       warning(
-        "Not all requested variables present in both datasets."
+        "Not all requested variables present in both datasets.", call. = FALSE
       )
     }
   }
@@ -1569,7 +1570,7 @@ dbW_substituteWeather <- function(
       !all(by_subData %in% colnames(subData))
     )
   ) {
-    stop("Insufficient/bad information to match days.")
+    stop("Insufficient/bad information to match days.", call. = FALSE)
   }
 
   wdids <- do.call(
@@ -1585,7 +1586,7 @@ dbW_substituteWeather <- function(
   idsnn <- ids > 0L
 
   if (!any(idsnn)) {
-    warning("No matching days found.")
+    warning("No matching days found.", call. = FALSE)
   }
 
   needsSub <- is_missing_weather(weatherData[idsnn, vars_meteo, drop = FALSE])

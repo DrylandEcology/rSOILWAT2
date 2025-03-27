@@ -96,7 +96,8 @@ get_transpiration <- function(
     } else {
       stop(
         "Simulation run without producing transpiration output: ",
-        "consider turning on output keys 'AET' or 'TRANSP'."
+        "consider turning on output keys 'AET' or 'TRANSP'.",
+        call. = FALSE
       )
     }
   }
@@ -178,7 +179,8 @@ get_evaporation <- function(
       stop(
         "Simulation run without producing evaporation output: ",
         "consider turning on output keys 'AET' or ",
-        "'EVAPSURFACE', 'EVAPSOIL', and 'PRECIP'."
+        "'EVAPSURFACE', 'EVAPSOIL', and 'PRECIP'.",
+        call. = FALSE
       )
     }
   }
@@ -276,7 +278,8 @@ get_soiltemp <- function(
         "Simulation run without producing soil surface temperature output: ",
         "consider turning on output key ",
         shQuote(sw_out_flags()["sw_temp"]),
-        "."
+        ".",
+        call. = FALSE
       )
     }
 
@@ -305,7 +308,8 @@ get_soiltemp <- function(
         "Simulation run without producing soil temperature output: ",
         "consider turning on output key ",
         shQuote(sw_out_flags()["sw_soiltemp"]),
-        "."
+        ".",
+        call. = FALSE
       )
     }
 
@@ -336,7 +340,7 @@ get_soiltemp <- function(
       req_has_sl <- lengths(tmp) > 0
 
       if (verbose && length(soillayers) != sum(req_has_sl)) {
-        warning("Some requested `soillayers` are not available.")
+        warning("Some requested `soillayers` are not available.", call. = FALSE)
       }
 
       soillayers <- soillayers[req_has_sl]
@@ -367,7 +371,8 @@ get_soiltemp <- function(
           if (verbose) {
             warning(
               shQuote(lvl),
-              " soil surface temperature not available: average used instead."
+              " soil surface temperature not available: average used instead.",
+              call. = FALSE
             )
           }
           tmp_sf[, cns_sf, drop = FALSE] # rSOILWAT2 before 5.3.0
@@ -388,7 +393,8 @@ get_soiltemp <- function(
           if (verbose) {
             warning(
               shQuote(lvl),
-              " soil temperature not available: average used instead."
+              " soil temperature not available: average used instead.",
+              call. = FALSE
             )
           }
           tmp_sl[, cns_sl, drop = FALSE] # rSOILWAT2 before 5.3.0
@@ -509,6 +515,7 @@ get_soilmoisture <- function(
           fcoarse
         }
 
+        # nolint start: if_switch_linter.
         if (type == "swc") {
           if (has_vwcbulk) {
             # calculate swc as depth * vwc_bulk
@@ -587,6 +594,7 @@ get_soilmoisture <- function(
             }
           }
         }
+        # nolint end.
 
       } else {
         msg <- paste(
@@ -607,7 +615,7 @@ get_soilmoisture <- function(
   }
 
   if (!is.null(msg)) {
-    stop(msg)
+    stop(msg, call. = FALSE)
   }
 
   if (keep_time) {

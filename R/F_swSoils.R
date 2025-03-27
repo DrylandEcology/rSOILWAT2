@@ -301,7 +301,7 @@ upgrade_soilLayers <- function(
   )
 
   cns <- intersect(template_soilLayerProperties, colnames(soilLayers))
-  if (length(cns) < 1L) stop("Required variables not found.")
+  if (length(cns) < 1L) stop("Required variables not found.", call. = FALSE)
   template_data[, cns] <- as.matrix(soilLayers)[, cns]
 
   varsToZero <- "som_frac"
@@ -451,7 +451,7 @@ setMethod(
   "swReadLines",
   signature = c(object = "swSoils", file = "character"),
   function(object, file) {
-    stop("This function no longer works correctly; and SWRCp are not read.")
+    stop("This function no longer works correctly; and SWRCp are not read.", call. = FALSE)
     infiletext <- readLines(con = file)
     infiletext <- infiletext[infiletext != ""] #get rid of extra spaces
     infiletext <- infiletext[17:length(infiletext)] #get rid of comments

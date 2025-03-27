@@ -266,13 +266,13 @@ setMethod(
   "swReadLines",
   signature = c(object = "swMarkov", file = "character"),
   function(object, file) {
-    stop("swReadLines is defunct")
+    stop("swReadLines is defunct", call. = FALSE)
     id_skip <- 1:2
 
     infiletext <- readLines(con = file[1])
     infiletext <- infiletext[-id_skip]
     if (length(infiletext) != 366)
-      stop("Markov Prod wrong number of lines")
+      stop("Markov Prod wrong number of lines", call. = FALSE)
 
     object@Prob <- matrix(0, 366, 5)
     for (i in seq_len(366)) {
@@ -282,7 +282,7 @@ setMethod(
     infiletext <- readLines(con = file[2])
     infiletext <- infiletext[-id_skip]
     if (length(infiletext) != 53)
-      stop("Markov Prod wrong number of lines")
+      stop("Markov Prod wrong number of lines", call. = FALSE)
 
     object@Conv <- matrix(0, 53, 11)
     for (i in seq_len(53)) {
