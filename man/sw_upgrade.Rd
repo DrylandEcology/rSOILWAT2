@@ -100,6 +100,11 @@ take the new default values from \code{SOILWAT2}.
 
 List of changes:
 \itemize{
+\item Changes with \code{v6.4.0}:
+\itemize{
+\item class \code{\linkS4class{swProd}}: new slots \code{"vegYear"} and
+\code{"isBiomAsIf100Cover"}
+}
 \item Changes with \code{v6.3.0}:
 \itemize{
 \item class \code{\linkS4class{swSoils}}:

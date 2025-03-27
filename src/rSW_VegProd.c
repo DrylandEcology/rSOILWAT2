@@ -45,7 +45,7 @@ static char *cVegProd_names[] = {
 	"VegetationInterceptionParameters", "LitterInterceptionParameters",
 	"EsTpartitioning_param", "Es_param_limit", "Shade", "HydraulicRedistribution_use",
 	"HydraulicRedistribution", "CriticalSoilWaterPotential", "MonthlyVeg",
-	"CO2Coefficients"
+	"CO2Coefficients", "vegYear", "isBiomAsIf100Cover"
 };
 
 char *cMonths[] = {
@@ -92,6 +92,9 @@ SEXP onGet_SW_VPD(void) {
 	char *cHydraulic_names[] = { "MaxCondRoot", "SoilWaterPotential50", "ShapeCond" };
 
 	SEXP CSWP;
+
+	SEXP VegYear;
+	SEXP IsBiomAsIf100Cover;
 
 	SEXP MonthlyVeg;
 	SEXP Grasslands, Grasslands_names;
@@ -321,6 +324,12 @@ SEXP onGet_SW_VPD(void) {
 	REAL(CSWP)[3] = v->veg[SW_FORBS].SWPcrit / -10; //Forb
 	setAttrib(CSWP, R_NamesSymbol, vegtype_names);
 
+    PROTECT(VegYear = NEW_INTEGER(1));
+    INTEGER(VegYear)[0] = v->vegYear;
+
+    PROTECT(IsBiomAsIf100Cover = NEW_LOGICAL(1));
+    LOGICAL_POINTER(IsBiomAsIf100Cover)[0] = v->isBiomAsIf100Cover;
+
 	PROTECT(MonthlyVeg_Column_names = allocVector(STRSXP, 4));
 	for (i = 0; i < 4; i++)
 		SET_STRING_ELT(MonthlyVeg_Column_names, i, mkChar(cMonthlyVeg_Column_names[i]));
@@ -407,8 +416,10 @@ SEXP onGet_SW_VPD(void) {
 	SET_SLOT(VegProd, install(cVegProd_names[11]), CSWP);
 	SET_SLOT(VegProd, install(cVegProd_names[12]), MonthlyVeg);
 	SET_SLOT(VegProd, install(cVegProd_names[13]), CO2Coefficients);
+	SET_SLOT(VegProd, install(cVegProd_names[14]), VegYear);
+	SET_SLOT(VegProd, install(cVegProd_names[15]), IsBiomAsIf100Cover);
 
-	UNPROTECT(41);
+	UNPROTECT(43);
 	return VegProd;
 }
 
@@ -432,6 +443,8 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 	SEXP Hydraulic;
 	SEXP Hydraulic_flag;
 	SEXP CSWP;
+	SEXP VegYear;
+	SEXP IsBiomAsIf100Cover;
 	SEXP MonthlyVeg, Grasslands, Shrublands, Forest, Forb;
 	SEXP CO2Coefficients;
 	double *p_Grasslands, *p_Shrublands, *p_Forest, *p_Forb;
@@ -567,6 +580,12 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 
 	get_critical_rank(&SoilWatRun.VegProd);
 
+    PROTECT(VegYear = GET_SLOT(SW_VPD, install(cVegProd_names[14])));
+    v->vegYear = INTEGER(VegYear)[0];
+
+    PROTECT(IsBiomAsIf100Cover = GET_SLOT(SW_VPD, install(cVegProd_names[15])));
+    v->isBiomAsIf100Cover = LOGICAL(IsBiomAsIf100Cover)[0];
+
 	PROTECT(MonthlyVeg = GET_SLOT(SW_VPD, install(cVegProd_names[12])));
 	PROTECT(Grasslands = VECTOR_ELT(MonthlyVeg, SW_GRASS));
 	p_Grasslands = REAL(Grasslands);
@@ -622,14 +641,14 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 
   SW_VPD_fix_cover(&SoilWatRun.VegProd, LogInfo);
   if(LogInfo->stopRun) {
-    UNPROTECT(18); // Unprotect the eighteen protected variables before exiting
+    UNPROTECT(20); // Unprotect the eighteen protected variables before exiting
     return; // Exit function prematurely due to error
   }
 
 	if (EchoInits)
 		echo_VegProd(SoilWatRun.VegProd.veg, SoilWatRun.VegProd.bare_cov);
 
-	UNPROTECT(18);
+	UNPROTECT(20);
 }
 
 // `estimate_PotNatVeg_composition()` is R interface to rSW2_estimate_PotNatVeg_composition()

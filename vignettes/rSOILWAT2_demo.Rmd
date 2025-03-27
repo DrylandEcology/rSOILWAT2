@@ -334,7 +334,7 @@ data from `DayMet`
 ## Atmospheric CO2 concentration
 ```{r, co2a}
   # Name of the CO2 concentration scenario
-  co2_nametag <- "RCP85"
+  co2_nametag <- "CMIP5_historical|CMIP5_RCP85"
 
   # Obtain yearly values from look-up table
   co2_data <- rSOILWAT2::lookup_annual_CO2a(

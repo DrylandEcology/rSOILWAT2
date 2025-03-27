@@ -83,11 +83,13 @@ setClass(
     HydraulicRedistribution = "matrix",
     CriticalSoilWaterPotential = "numeric",
     CO2Coefficients = "matrix",
+    vegYear = "integer",
+    isBiomAsIf100Cover = "logical",
     MonthlyVeg = "list"
   ),
   prototype = list(
     veg_method = NA_integer_,
-    # this should be 1 + rSW2_glovars[["kSOILWAT2"]][["kINT"]][["NVEGTYPES"]]
+    # 5 should be 1 + rSW2_glovars[["kSOILWAT2"]][["kINT"]][["NVEGTYPES"]]
     Composition = stats::setNames(rep(NA_real_, 5), lc_names),
     Albedo = stats::setNames(rep(NA_real_, 5), lc_names),
     CanopyHeight = array(
@@ -145,6 +147,8 @@ setClass(
         c("Biomass Coeff1", "Biomass Coeff2", "WUE Coeff1", "WUE Coeff2")
       )
     ),
+    vegYear = NA_integer_,
+    isBiomAsIf100Cover = NA,
     MonthlyVeg = stats::setNames(
       lapply(
         veg_names,
@@ -261,6 +265,16 @@ setValidity(
     temp <- dim(object@CO2Coefficients)
     if (!identical(temp, c(4L, nvegs))) {
       msg <- "@CO2Coefficients must be a 4xNVEGTYPES matrix."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (length(object@vegYear) != 1L) {
+      msg <- "@vegYear length != 1."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (length(object@isBiomAsIf100Cover) != 1L) {
+      msg <- "@isBiomAsIf100Cover length != 1."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
