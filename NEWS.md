@@ -1,4 +1,7 @@
 # rSOILWAT2 v6.4.0-9000
+* `dbW_fixWeather()` now also can sort daily minimum/maximum value pairs of
+  weather variables (air temperature, relative humidity) on days with
+  a larger minimum than maximum value.
 
 
 # rSOILWAT2 v6.3.1

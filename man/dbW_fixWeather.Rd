@@ -11,6 +11,8 @@ dbW_fixWeather(
   new_endYear = NULL,
   nmax_interp = 7L,
   precip_lt_nmax = 0,
+  fillMissingValues = TRUE,
+  sortMinMaxValues = FALSE,
   return_weatherDF = FALSE
 )
 }
@@ -35,58 +37,69 @@ linearly interpolated (if \code{NA}),
 substituted with values from \code{subData} (if \code{Inf}), or
 replaced by a fixed numeric value (default is 0)?}
 
+\item{fillMissingValues}{A logical value.
+Fill in missing values (see details).}
+
+\item{sortMinMaxValues}{A logical value.
+Correct switched daily minimum/maximum weather values (see details).}
+
 \item{return_weatherDF}{A logical value. See section "Value".}
 }
 \value{
 A list with two named elements
 \itemize{
 \item \code{"weatherData"}: An updated copy of the input \code{weatherData}
-where missing values have been replaced.
+where missing values have been replaced and/or
+switched min/max value pairs correctly ordered.
 If \code{return_weatherDF} is \code{TRUE}, then the result is converted to a
 data frame where columns represent weather variables.
 If \code{return_weatherDF} is \code{FALSE}, then the result is
 a list of elements of class \code{\link{swWeatherData}}.
 \item \code{"meta"}: a data frame with the same dimensions as \code{"weatherData"}
 with tags indicating which approach was used to replaced missing values
-in corresponding cells of \code{weatherData} (see section \code{Details})
+in corresponding cells of \code{weatherData} and/or
+switched min/max value pairs were correctly ordered
+(see section \code{Details}).
 }
 }
 \description{
-Missing values are \code{"fixed"} with the following approach:
+This function applies the following 1-3 steps to the input weather data:
 \enumerate{
 \item \code{weatherData} is formatted for \code{rSOILWAT2}, i.e., converted to a
 Gregorian calendar and required but missing variables added.
-\item Short spells of missing values
-(consecutive days shorter than \code{nmax_interp}) are linearly interpolated
-from adjacent non-missing values
+\item If \code{fillMissingValues} is requested, then missing values are \code{"fixed"}
+a) Short spells of missing values
+(consecutive days shorter than \code{nmax_interp}) are linearly
+interpolated from adjacent non-missing values
 (meta data tag \code{"interpolateLinear (<= X days)"})
-\item Short spells of missing precipitation values are
+b) Short spells of missing precipitation values are
 \itemize{
 \item Linearly interpolated if \code{precip_lt_nmax} is \code{NA}
 \item Set to a fixed numeric value of \code{precip_lt_nmax}
 (meta data tag \code{"fixedValue"})
 \item Substituted with values from \code{subData} if \code{precip_lt_nmax} is \code{Inf}
 (see next point)
-}
-\item Values from a second weather data object \code{subData} are used to replace
-(meta data tag \verb{substituteData"}):
-\itemize{
+c) Values from a second weather data object \code{subData} are used to
+replace (meta data tag \verb{substituteData"}):
 \item Missing precipitation values (if \code{precip_lt_nmax} is \code{Inf})
 \item Values before first day with any non-missing values
 \item Variables absent in \code{weatherData} and present in \code{subData}
-}
-\item Long-term daily means are used to replace any remaining missing values
-(meta data tag \code{"longTermDailyMean"});
+d) Long-term daily means are used to replace any remaining missing
+values (meta data tag \code{"longTermDailyMean"});
 for instance, this approach may be applied for
-\itemize{
 \item Values of variables that are present in \code{weatherData} and
 absent in \code{subData}, before first day with any non-missing values
 \item Values after end of available values in both \code{weatherData} and
 \code{subData}
 }
+\item If \code{sortMinMaxValues} is requested, then correctly sort
+daily minimum/maximum value pairs of weather variables
+(air temperature, relative humidity) on days with a
+larger minimum than maximum value (meta data tag \code{"sortMinMax"}).
 }
 }
 \examples{
+# Example with missing values
 x0 <- x <- dbW_weatherData_to_dataframe(rSOILWAT2::weatherData)
 
 tmp <- x[, "Year"] == 1981
@@ -102,6 +115,17 @@ all.equal(
   xf[["weatherData"]][!ids_to_interp, ],
   as.data.frame(x0)[!ids_to_interp, ]
 )
+table(xf[["meta"]])
+
+
+# Example with switched min/max values
+x <- x0
+
+ids <- x[, "Year"] == 1981 & x[, "DOY"] >= 144 & x[, "DOY"] <= 145
+x[ids, c("Tmin_C", "Tmax_C")] <- x[ids, c("Tmax_C", "Tmin_C")]
+
+xf <- dbW_fixWeather(x, sortMinMaxValues = TRUE, return_weatherDF = TRUE)
+all.equal(xf[["weatherData"]], as.data.frame(x0))
 table(xf[["meta"]])
 
 }

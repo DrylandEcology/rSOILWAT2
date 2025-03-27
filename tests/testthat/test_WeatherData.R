@@ -374,7 +374,7 @@ test_that("Weather data substitution", {
 
 
 test_that("Weather data fixing", {
-  x0 <- x <- as.data.frame(dbW_weatherData_to_dataframe(rSOILWAT2::weatherData))
+  x0 <- as.data.frame(dbW_weatherData_to_dataframe(rSOILWAT2::weatherData))
   dif <- calc_dailyInputFlags(x0)
   vars <- names(dif)[dif]
 
@@ -386,23 +386,25 @@ test_that("Weather data fixing", {
 
 
   #--- * Check interpolation and substitution ------
+  x1 <- x0
+
   # * Expect short missing spell to interpolate (except precipitation)
   # Set May 23-24 of 1981 as missing
-  tmp <- x[, "Year"] == 1981
-  ids_to_interp <- tmp & x[, "DOY"] >= 144 & x[, "DOY"] <= 145
-  x[ids_to_interp, -(1:2)] <- NA
+  tmp <- x1[, "Year"] == 1981
+  ids_to_interp <- tmp & x1[, "DOY"] >= 144 & x1[, "DOY"] <= 145
+  x1[ids_to_interp, -(1:2)] <- NA
 
   # * Expect long missing spell to substitute
   # Set June-August of 1980 as missing
-  tmp <- x[, "Year"] == 1980
-  ids_to_sub <- tmp & x[, "DOY"] >= 153 & x[, "DOY"] <= 244
-  x[ids_to_sub, -(1:2)] <- NA
+  tmp <- x1[, "Year"] == 1980
+  ids_to_sub <- tmp & x1[, "DOY"] >= 153 & x1[, "DOY"] <= 244
+  x1[ids_to_sub, -(1:2)] <- NA
 
 
   xf <- dbW_fixWeather(
-    weatherData = x,
+    weatherData = x1,
     subData = x0,
-    new_endYear = max(x[["Year"]]) + 1L, # expect long term daily mean
+    new_endYear = max(x1[["Year"]]) + 1L, # expect long term daily mean
     nmax_interp = 5L,
     return_weatherDF = TRUE
   )
@@ -433,6 +435,68 @@ test_that("Weather data fixing", {
     365L * length(vars)
   )
 
+
+  #--- * Check switched min/max daily temperature ------
+  x2 <- x0
+
+  #--- Weather with switched min/max daily temperature
+  ids1 <- x2[, "Year"] == 1949 & x2[, "DOY"] >= 144 & x2[, "DOY"] <= 145
+  x2[ids1, c("Tmin_C", "Tmax_C")] <- x2[ids1, c("Tmax_C", "Tmin_C")]
+  Ns1 <- sum(ids1)
+
+  # Sort
+  xf <- dbW_fixWeather(x2, sortMinMaxValues = TRUE, return_weatherDF = TRUE)
+
+  # Expect correct values
+  expect_identical(xf[["weatherData"]], as.data.frame(x0))
+
+  tmpc <- table(xf[["meta"]])
+  expect_identical(tmpc[["sortMinMax"]], expected = 2L * Ns1)
+
+
+  #--- * Check substitute and min/max daily temperature ------
+  x0s <- x0
+
+  #--- Weather with switched min/max daily temperature
+  ids2 <- which(ids_to_sub)[1L:2L]
+  x0s[ids2, c("Tmin_C", "Tmax_C")] <- x0s[ids2, c("Tmax_C", "Tmin_C")]
+  Ns2 <- length(ids2)
+
+  # Fix and sort
+  xf <- dbW_fixWeather(
+    weatherData = x1,
+    subData = x0s,
+    new_endYear = max(x1[["Year"]]) + 1L, # expect long term daily mean
+    nmax_interp = 5L,
+    sortMinMaxValues = TRUE,
+    return_weatherDF = TRUE
+  )
+
+  expect_false(anyNA(xf[["weatherData"]][, vars]))
+
+  ids_has <- seq_len(nrow(x0))
+  expect_identical(
+    xf[["weatherData"]][ids_has[!ids_to_interp], vars],
+    x0[!ids_to_interp, vars]
+  )
+
+  tmpc <- table(xf[["meta"]])
+  expect_identical(
+    tmpc[["interpolateLinear (<= 5 days)"]],
+    sum(ids_to_interp) * length(setdiff(vars, "PPT_cm"))
+  )
+  expect_identical(
+    tmpc[["fixedValue"]],
+    sum(ids_to_interp) # precipitation
+  )
+  expect_identical(
+    tmpc[["substituteData"]],
+    sum(ids_to_sub) * length(vars) - 2L * Ns2
+  )
+  expect_identical(
+    tmpc[["substituteData, sortMinMax"]],
+    2L * Ns2
+  )
 })
 
 
