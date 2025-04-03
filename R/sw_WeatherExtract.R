@@ -248,6 +248,7 @@ sw_download_SCAN <- function(nrcs_site_code, years) {
 #'   }
 #'
 #'   graphics::par(par_prev)
+#'   unlink("Rplots.*") # clean up
 #' }
 #'
 #' @md

@@ -11,6 +11,7 @@ getWeatherData_folders(
   startYear = NULL,
   endYear = NULL,
   dailyInputFlags = c(rep(TRUE, 3L), rep(FALSE, 11L)),
+  correctWeatherValues = rep(FALSE, 3L),
   method = c("R", "C"),
   elevation = NA
 )
@@ -31,6 +32,9 @@ files.}
 
 \item{dailyInputFlags}{A logical vector of length \code{MAX_INPUT_COLUMNS},
 see \code{"weathsetup.in"}.}
+
+\item{correctWeatherValues}{A logical of vector of length \code{NFIXWEATHER},
+see \code{"weathsetup.in"}. Used only with \code{method} \code{"C"}.}
 
 \item{method}{A character string. \code{"R"} uses code in \code{R} to read files as-is
 whereas \code{"C"} uses \code{"SOILWAT2"} code to read and process files.}

@@ -741,9 +741,6 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
 /**
   @brief Read daily driving (weather) variables from disk using SOILWAT2 code
 
-  Applies additive/multiplicative scaling parameters and
-  uses imputation/weather generator to fill missing values
-
   `getWeatherData_folders()` is R interface to rSW2_readAllWeatherFromDisk()
 */
 SEXP rSW2_readAllWeatherFromDisk(
@@ -753,6 +750,7 @@ SEXP rSW2_readAllWeatherFromDisk(
   SEXP endYear,
   SEXP elevation,
   SEXP dailyInputFlags,
+  SEXP fixWeatherData,
   SEXP sw_template
 ) {
   SEXP res = NULL, inputOptions;
@@ -776,11 +774,13 @@ SEXP rSW2_readAllWeatherFromDisk(
   endYear = PROTECT(coerceVector(endYear, INTSXP));
   elevation = PROTECT(coerceVector(elevation, REALSXP));
   dailyInputFlags = PROTECT(coerceVector(dailyInputFlags, LGLSXP));
-  numUnprotects += 6;
+  fixWeatherData = PROTECT(coerceVector(fixWeatherData, LGLSXP));
+  numUnprotects += 7;
 
 
   /* Create convenience pointers */
   int *xdif = LOGICAL(dailyInputFlags); /* LGLSXP are internally coded as int */
+  int *xfix = LOGICAL(fixWeatherData); /* LGLSXP are internally coded as int */
 
 
   /* Setup global variables including SoilWatRun */
@@ -849,6 +849,11 @@ SEXP rSW2_readAllWeatherFromDisk(
     SoilWatRun.Weather.scale_shortWaveRad[i] = 1;
   }
 
+  // Requested fixes of weather values
+  for (i = 0; i < NFIXWEATHER; i++) {
+    SoilWatRun.Weather.fixWeatherData[i] = xfix[i] ? swTRUE : swFALSE;
+  }
+
 
   // Read weather data
   #ifdef RSWDEBUG
@@ -860,15 +865,15 @@ SEXP rSW2_readAllWeatherFromDisk(
     goto report; // Exit function prematurely due to error
   }
 
-  // Finalize daily weather (weather generator & monthly scaling)
-  #ifdef RSWDEBUG
-  if (debug) sw_printf(" > finalize daily weather.\n");
-  #endif
-  SW_WTH_finalize_all_weather(&SoilWatRun.Markov, &SoilWatRun.Weather,
-    SoilWatRun.Model.cum_monthdays, SoilWatRun.Model.days_in_month, &local_LogInfo);
-  if(local_LogInfo.stopRun) {
-    goto report; // Exit function prematurely due to error
-  }
+//   // Finalize daily weather (weather generator & monthly scaling)
+//   #ifdef RSWDEBUG
+//   if (debug) sw_printf(" > finalize daily weather.\n");
+//   #endif
+//   SW_WTH_finalize_all_weather(&SoilWatRun.Markov, &SoilWatRun.Weather,
+//     SoilWatRun.Model.cum_monthdays, SoilWatRun.Model.days_in_month, &local_LogInfo);
+//   if(local_LogInfo.stopRun) {
+//     goto report; // Exit function prematurely due to error
+//   }
 
 
   // Return processed weather data
@@ -912,7 +917,7 @@ SEXP sw_consts(void) {
   #endif
 
   const int nret = 9; // length of cret
-  const int nINT = 14; // length of vINT and cINT
+  const int nINT = 15; // length of vINT and cINT
   const int nNUM = 1; // length of vNUM and cNUM
 
   #ifdef RSWDEBUG
@@ -952,14 +957,14 @@ SEXP sw_consts(void) {
     SWRC_PARAM_NMAX,
     eSW_NoTime, SW_OUTNPERIODS, SW_OUTNKEYS, SW_NSUMTYPES, NVEGTYPES,
     OUT_DIGITS,
-    N_SWRCs, N_PTFs, MAX_INPUT_COLUMNS
+    N_SWRCs, N_PTFs, MAX_INPUT_COLUMNS, NFIXWEATHER
   };
   char *cINT[] = {
     "SW_NFILES", "MAX_LAYERS", "MAX_TRANSP_REGIONS", "MAX_NYEAR",
     "SWRC_PARAM_NMAX",
     "eSW_NoTime", "SW_OUTNPERIODS", "SW_OUTNKEYS", "SW_NSUMTYPES", "NVEGTYPES",
     "OUT_DIGITS",
-    "N_SWRCs", "N_PTFs", "MAX_INPUT_COLUMNS"
+    "N_SWRCs", "N_PTFs", "MAX_INPUT_COLUMNS", "NFIXWEATHER"
   };
 
   // Vegetation types

@@ -224,7 +224,8 @@ setClass(
     use_windSpeedMonthly = "logical",
     use_humidityMonthly = "logical",
     desc_rsds = "integer",
-    dailyInputFlags = "logical"
+    dailyInputFlags = "logical",
+    correctWeatherValues = "logical"
   ),
   # TODO: this class should not contain `swMonthlyScalingParams` but
   # instead be a composition, i.e., have a slot of that class
@@ -242,7 +243,10 @@ setClass(
     desc_rsds = NA_integer_,
     # NOTE: 14 must be
     # equal to rSW2_glovars[["kSOILWAT2"]][["kINT"]][["MAX_INPUT_COLUMNS"]]
-    dailyInputFlags = rep(NA, 14L)
+    dailyInputFlags = rep(NA, 14L),
+    # NOTE: 3 must be
+    # equal to rSW2_glovars[["kSOILWAT2"]][["kINT"]][["NFIXWEATHER"]]
+    correctWeatherValues = rep(NA, 3L)
   )
 )
 
@@ -253,11 +257,14 @@ setValidity(
     sns <- setdiff(slotNames("swWeather"), inheritedSlotNames("swWeather"))
 
     for (sn in sns) {
-      n_exp <- if (identical(sn, "dailyInputFlags")) {
-        rSW2_glovars[["kSOILWAT2"]][["kINT"]][["MAX_INPUT_COLUMNS"]]
-      } else {
+      n_exp <- switch(
+        EXPR = sn,
+        dailyInputFlags =
+          rSW2_glovars[["kSOILWAT2"]][["kINT"]][["MAX_INPUT_COLUMNS"]],
+        correctWeatherValues =
+          rSW2_glovars[["kSOILWAT2"]][["kINT"]][["NFIXWEATHER"]],
         1L
-      }
+      )
 
       n_has <- length(slot(object, sn))
 

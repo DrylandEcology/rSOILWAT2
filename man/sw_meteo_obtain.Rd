@@ -138,6 +138,7 @@ if (
   }
 
   graphics::par(par_prev)
+  unlink("Rplots.*") # clean up
 }
 
 }

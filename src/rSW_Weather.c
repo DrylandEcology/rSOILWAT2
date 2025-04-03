@@ -52,7 +52,8 @@ static char *cSW_WTH_names[] = {
   "use_windSpeedMonthly",
   "use_humidityMonthly",
   "desc_rsds",
-  "dailyInputFlags"
+  "dailyInputFlags",
+  "correctWeatherValues"
 };
 
 
@@ -72,6 +73,7 @@ static void rSW2_setAllWeather(
   Bool use_humidityMonthly,
   Bool use_windSpeedMonthly,
   Bool *dailyInputFlags,
+  Bool *fixWeatherData,
   double *cloudcov,
   double *windspeed,
   double *r_humidity,
@@ -119,6 +121,7 @@ SEXP onGet_SW_WTH_setup(void) {
         use_cloudCoverMonthly, use_windSpeedMonthly, use_humidityMonthly,
         desc_rsds,
         dailyInputFlags;
+    SEXP fixWeatherData;
 	SEXP MonthlyScalingParams, MonthlyScalingParams_names, MonthlyScalingParams_names_x, MonthlyScalingParams_names_y;
 
 	char *cMonthlyScalingParams_names[] = {"PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "ActVP", "ShortWR"};
@@ -158,6 +161,11 @@ SEXP onGet_SW_WTH_setup(void) {
 		LOGICAL_POINTER(dailyInputFlags)[i] = w->dailyInputFlags[i];
 	}
 
+	PROTECT(fixWeatherData = allocVector(LGLSXP, NFIXWEATHER));
+	for (i = 0; i < NFIXWEATHER; i++) {
+		LOGICAL_POINTER(fixWeatherData)[i] = w->fixWeatherData[i];
+	}
+
 	PROTECT(MonthlyScalingParams = allocMatrix(REALSXP, 12, nitems));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
 	for (i = 0; i < 12; i++) {
@@ -193,9 +201,10 @@ SEXP onGet_SW_WTH_setup(void) {
 	SET_SLOT(SW_WTH, install(cSW_WTH_names[9]), use_humidityMonthly);
 	SET_SLOT(SW_WTH, install(cSW_WTH_names[10]), desc_rsds);
 	SET_SLOT(SW_WTH, install(cSW_WTH_names[11]), dailyInputFlags);
+	SET_SLOT(SW_WTH, install(cSW_WTH_names[12]), fixWeatherData);
 
 
-	UNPROTECT(17);
+	UNPROTECT(18);
 	return SW_WTH;
 }
 
@@ -215,9 +224,11 @@ void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo) {
         use_cloudCoverMonthly, use_windSpeedMonthly, use_humidityMonthly,
         desc_rsds,
         dailyInputFlags;
+    SEXP fixWeatherData;
 	SEXP MonthlyScalingParams;
 	double *p_MonthlyValues;
 	int *p_dailyInputFlags;
+	int *p_fixWeatherData;
 
 
     // Copy weather prefix from PathInfo to Weather within `SoilWatRun`
@@ -276,6 +287,12 @@ void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo) {
 		w->dailyInputFlags[i] = (Bool) p_dailyInputFlags[i];
 	}
 
+	PROTECT(fixWeatherData = GET_SLOT(SW_WTH, install(cSW_WTH_names[12])));
+	p_fixWeatherData = INTEGER(fixWeatherData);
+	for (i = 0; i < NFIXWEATHER; i++) {
+		w->fixWeatherData[i] = (Bool) p_fixWeatherData[i];
+	}
+
   /* `SW_weather.yr` was removed from SOILWAT2:
 	w->yr.last = SW_Model.endyr;
 	w->yr.total = w->yr.last - w->yr.first + 1;
@@ -300,7 +317,7 @@ void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo) {
     LogInfo
 	);
 
-	UNPROTECT(11);
+	UNPROTECT(12);
 }
 
 
@@ -470,6 +487,7 @@ void onSet_WTH_DATA(SEXP weatherList, LOG_INFO* LogInfo) {
     SoilWatRun.Weather.use_humidityMonthly,
     SoilWatRun.Weather.use_windSpeedMonthly,
     SoilWatRun.Weather.dailyInputFlags,
+    SoilWatRun.Weather.fixWeatherData,
     SoilWatRun.Sky.cloudcov,
     SoilWatRun.Sky.windspeed,
     SoilWatRun.Sky.r_humidity,
@@ -491,6 +509,7 @@ static void rSW2_setAllWeather(
   Bool use_humidityMonthly,
   Bool use_windSpeedMonthly,
   Bool *dailyInputFlags,
+  Bool *fixWeatherData,
   double *cloudcov,
   double *windspeed,
   double *r_humidity,
@@ -559,6 +578,7 @@ static void rSW2_setAllWeather(
             startYear,
             n_years,
             dailyInputFlags,
+            fixWeatherData,
             tempWeatherHist,
             elevation,
             allHist,
@@ -674,6 +694,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     index, numUnprotects = 11;
 
     Bool dailyInputFlags[MAX_INPUT_COLUMNS];
+    Bool fixWeatherData[NFIXWEATHER];
     double cloudcov[MAX_MONTHS], windspeed[MAX_MONTHS], r_humidity[MAX_MONTHS];
 
     SEXP res = NULL, monthlyMean, monthlyMax, monthlyMin, monthlyPPT, MAT_C, MAP_cm, vectorNames,
@@ -719,6 +740,11 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
     dailyInputFlags[TEMP_MIN] = TRUE;
     dailyInputFlags[PPT] = TRUE;
 
+    // Set fixWeatherData: fix potential problems in weather data
+    for (index = 0; index < NFIXWEATHER; index++) {
+        fixWeatherData[index] = TRUE;
+    }
+
     // Fill SOILWAT `allHist` with data from weatherList
     rSW2_setAllWeather(
       weatherList,
@@ -730,6 +756,7 @@ SEXP rSW2_calc_SiteClimate(SEXP weatherList, SEXP yearStart, SEXP yearEnd,
       FALSE, // use_windSpeedMonthly,
       FALSE, // use_humidityMonthly,
       dailyInputFlags,
+      fixWeatherData,
       cloudcov,
       windspeed,
       r_humidity,

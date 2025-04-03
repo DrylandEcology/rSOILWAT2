@@ -11,8 +11,9 @@ dbW_fixWeather(
   new_endYear = NULL,
   nmax_interp = 7L,
   precip_lt_nmax = 0,
+  elevation = NA,
+  correctWeatherValues = FALSE,
   fillMissingValues = TRUE,
-  sortMinMaxValues = FALSE,
   return_weatherDF = FALSE
 )
 }
@@ -37,11 +38,15 @@ linearly interpolated (if \code{NA}),
 substituted with values from \code{subData} (if \code{Inf}), or
 replaced by a fixed numeric value (default is 0)?}
 
+\item{elevation}{A numeric value. Site elevation above sea level \verb{[m]}.
+Used only if specific humidity is provided as input
+for calculating relative humidity.}
+
+\item{correctWeatherValues}{A logical value.
+Apply all available corrections to weather values (see details).}
+
 \item{fillMissingValues}{A logical value.
 Fill in missing values (see details).}
-
-\item{sortMinMaxValues}{A logical value.
-Correct switched daily minimum/maximum weather values (see details).}
 
 \item{return_weatherDF}{A logical value. See section "Value".}
 }
@@ -49,16 +54,14 @@ Correct switched daily minimum/maximum weather values (see details).}
 A list with two named elements
 \itemize{
 \item \code{"weatherData"}: An updated copy of the input \code{weatherData}
-where missing values have been replaced and/or
-switched min/max value pairs correctly ordered.
+where missing values have been replaced and/or values corrected.
 If \code{return_weatherDF} is \code{TRUE}, then the result is converted to a
 data frame where columns represent weather variables.
 If \code{return_weatherDF} is \code{FALSE}, then the result is
 a list of elements of class \code{\link{swWeatherData}}.
 \item \code{"meta"}: a data frame with the same dimensions as \code{"weatherData"}
 with tags indicating which approach was used to replaced missing values
-in corresponding cells of \code{weatherData} and/or
-switched min/max value pairs were correctly ordered
+in corresponding cells of \code{weatherData} and/or values corrected
 (see section \code{Details}).
 }
 }
@@ -67,6 +70,15 @@ This function applies the following 1-3 steps to the input weather data:
 \enumerate{
 \item \code{weatherData} is formatted for \code{rSOILWAT2}, i.e., converted to a
 Gregorian calendar and required but missing variables added.
+\item If \code{correctWeatherValues} is requested, then apply all available
+corrections to weather values (meta data tag \code{"correctedValue"})
+including (see \code{SOILWAT2} \code{"weathsetup.in"})
+* Swap min/max values if min > max
+(air temperature, relative humidity).
+* Reset percentages to 100\% if they are larger than 100\%
+(relative humidity, cloud cover).
+* Reset observed solar radiation to extraterrestrial radiation if
+the observed value is larger than expected.
 \item If \code{fillMissingValues} is requested, then missing values are \code{"fixed"}
 a) Short spells of missing values
 (consecutive days shorter than \code{nmax_interp}) are linearly
@@ -92,10 +104,6 @@ absent in \code{subData}, before first day with any non-missing values
 \item Values after end of available values in both \code{weatherData} and
 \code{subData}
 }
-\item If \code{sortMinMaxValues} is requested, then correctly sort
-daily minimum/maximum value pairs of weather variables
-(air temperature, relative humidity) on days with a
-larger minimum than maximum value (meta data tag \code{"sortMinMax"}).
 }
 }
 \examples{
@@ -118,13 +126,13 @@ all.equal(
 table(xf[["meta"]])
 
 
-# Example with switched min/max values
+# Example fixing weather values: switched min/max temperature
 x <- x0
 
 ids <- x[, "Year"] == 1981 & x[, "DOY"] >= 144 & x[, "DOY"] <= 145
 x[ids, c("Tmin_C", "Tmax_C")] <- x[ids, c("Tmax_C", "Tmin_C")]
 
-xf <- dbW_fixWeather(x, sortMinMaxValues = TRUE, return_weatherDF = TRUE)
+xf <- dbW_fixWeather(x, correctWeatherValues = TRUE, return_weatherDF = TRUE)
 all.equal(xf[["weatherData"]], as.data.frame(x0))
 table(xf[["meta"]])
 

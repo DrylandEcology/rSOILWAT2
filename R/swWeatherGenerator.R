@@ -274,7 +274,7 @@ dbW_estimate_WGen_coefs <- function(
     if (imputation_type == "none") {
       warning("Insufficient weather data to estimate ", msg, call. = FALSE)
     } else {
-      message("Impute missing `mkv_prob` ", msg, call. = FALSE)
+      message("Impute missing `mkv_prob` ", msg)
       mkv_prob <- rSW2utils::impute_df(
         mkv_prob,
         imputation_type = imputation_type,
@@ -1609,7 +1609,16 @@ dbW_substituteWeather <- function(
 #' This function applies the following 1-3 steps to the input weather data:
 #'   1. `weatherData` is formatted for `rSOILWAT2`, i.e., converted to a
 #'      Gregorian calendar and required but missing variables added.
-#'   2. If `fillMissingValues` is requested, then missing values are `"fixed"`
+#'   2. If `correctWeatherValues` is requested, then apply all available
+#'      corrections to weather values (meta data tag `"correctedValue"`)
+#'      including (see `SOILWAT2` `"weathsetup.in"`)
+#'          * Swap min/max values if min > max
+#'            (air temperature, relative humidity).
+#'          * Reset percentages to 100% if they are larger than 100%
+#'            (relative humidity, cloud cover).
+#'          * Reset observed solar radiation to extraterrestrial radiation if
+#'            the observed value is larger than expected.
+#'   3. If `fillMissingValues` is requested, then missing values are `"fixed"`
 #'      a) Short spells of missing values
 #'         (consecutive days shorter than `nmax_interp`) are linearly
 #'         interpolated from adjacent non-missing values
@@ -1632,11 +1641,8 @@ dbW_substituteWeather <- function(
 #'           absent in `subData`, before first day with any non-missing values
 #'         * Values after end of available values in both `weatherData` and
 #'          `subData`
-#'   3. If `sortMinMaxValues` is requested, then correctly sort
-#'      daily minimum/maximum value pairs of weather variables
-#'      (air temperature, relative humidity) on days with a
-#'      larger minimum than maximum value (meta data tag `"sortMinMax"`).
 #'
+#' @inheritParams dbW_generateWeather
 #' @inheritParams dbW_substituteWeather
 #' @inheritParams dbW_convert_to_GregorianYears
 #' @param nmax_interp An integer value. Maximum spell length of missing values
@@ -1646,23 +1652,21 @@ dbW_substituteWeather <- function(
 #' linearly interpolated (if `NA`),
 #' substituted with values from `subData` (if `Inf`), or
 #' replaced by a fixed numeric value (default is 0)?
+#' @param correctWeatherValues A logical value.
+#' Apply all available corrections to weather values (see details).
 #' @param fillMissingValues A logical value.
 #' Fill in missing values (see details).
-#' @param sortMinMaxValues A logical value.
-#' Correct switched daily minimum/maximum weather values (see details).
 #'
 #' @return A list with two named elements
 #'   * `"weatherData"`: An updated copy of the input `weatherData`
-#'     where missing values have been replaced and/or
-#'     switched min/max value pairs correctly ordered.
+#'     where missing values have been replaced and/or values corrected.
 #'     If `return_weatherDF` is `TRUE`, then the result is converted to a
 #'     data frame where columns represent weather variables.
 #'     If `return_weatherDF` is `FALSE`, then the result is
 #'     a list of elements of class [`swWeatherData`].
 #'   * `"meta"`: a data frame with the same dimensions as `"weatherData"`
 #'     with tags indicating which approach was used to replaced missing values
-#'     in corresponding cells of `weatherData` and/or
-#'     switched min/max value pairs were correctly ordered
+#'     in corresponding cells of `weatherData` and/or values corrected
 #'     (see section `Details`).
 #'
 #' @seealso [dbW_imputeWeather()], [dbW_substituteWeather()],
@@ -1688,13 +1692,13 @@ dbW_substituteWeather <- function(
 #' table(xf[["meta"]])
 #'
 #'
-#' # Example with switched min/max values
+#' # Example fixing weather values: switched min/max temperature
 #' x <- x0
 #'
 #' ids <- x[, "Year"] == 1981 & x[, "DOY"] >= 144 & x[, "DOY"] <= 145
 #' x[ids, c("Tmin_C", "Tmax_C")] <- x[ids, c("Tmax_C", "Tmin_C")]
 #'
-#' xf <- dbW_fixWeather(x, sortMinMaxValues = TRUE, return_weatherDF = TRUE)
+#' xf <- dbW_fixWeather(x, correctWeatherValues = TRUE, return_weatherDF = TRUE)
 #' all.equal(xf[["weatherData"]], as.data.frame(x0))
 #' table(xf[["meta"]])
 #'
@@ -1707,8 +1711,9 @@ dbW_fixWeather <- function(
   new_endYear = NULL,
   nmax_interp = 7L,
   precip_lt_nmax = 0,
+  elevation = NA,
+  correctWeatherValues = FALSE,
   fillMissingValues = TRUE,
-  sortMinMaxValues = FALSE,
   return_weatherDF = FALSE
 ) {
   nmax_interp <- as.integer(nmax_interp)
@@ -1738,15 +1743,74 @@ dbW_fixWeather <- function(
 
 
   #--- Add missing days to complete full requested calendar years
-  wd1 <- dbW_convert_to_GregorianYears(
+  wd0 <- dbW_convert_to_GregorianYears(
     weatherData = wd,
     new_startYear = new_startYear,
     new_endYear = new_endYear,
     type = "asis"
   )
 
-  is_miss1 <- is_missing_weather(wd1[, weather_dataColumns()])
+  is_miss1 <- is_missing_weather(wd0[, weather_dataColumns()])
   meta <- array(dim = dim(is_miss1), dimnames = dimnames(is_miss1))
+
+
+  #--- Correct problematic weather values (using SOILWAT2) ------
+  if (isTRUE(correctWeatherValues)) {
+    sw_in <- rSOILWAT2::sw_exampleData
+
+    # Set years
+    swYears_EndYear(sw_in) <- new_endYear
+    swYears_StartYear(sw_in) <- new_startYear
+
+    # Set elevation
+    swSite_IntrinsicSiteParams(sw_in)[3L] <- as.numeric(elevation)
+
+    # Turn off weather generator
+    swWeather_UseMarkov(sw_in) <- FALSE
+    swWeather_UseMarkovOnly(sw_in) <- FALSE
+
+    # Set daily/monthly weather variables
+    sw_in@weather@use_cloudCoverMonthly <- FALSE
+    sw_in@weather@use_humidityMonthly <- FALSE
+    sw_in@weather@use_windSpeedMonthly <- FALSE
+    dif0 <- calc_dailyInputFlags(wd0)
+    sw_in@weather@dailyInputFlags <- dif0
+
+    # Turn
+    sw_in@weather@correctWeatherValues[] <- TRUE
+
+    #--- Process weather in SOILWAT2
+    wdc <- dbW_weatherData_to_dataframe(
+      suppressWarnings(
+        .Call(
+          C_rSW2_processAllWeather, dbW_dataframe_to_weatherData(wd0), sw_in
+        )
+      )
+    )
+
+    difc <- calc_dailyInputFlags(wdc)
+
+    varsc <- c(
+      intersect(names(dif0)[dif0], names(difc)[difc]),
+      setdiff(names(difc)[difc], names(dif0)[dif0])
+    )
+    wd1 <- wd0
+    wd1[, varsc] <- wdc[, varsc, drop = FALSE]
+
+    tol <- sqrt(.Machine[["double.eps"]])
+    idsFixed <- which(
+      abs(wd1[, varsc, drop = FALSE] - wd0[, varsc, drop = FALSE]) > tol,
+      arr.ind = TRUE
+    )
+    meta[idsFixed] <- vapply(
+      meta[idsFixed],
+      function(x) toString(na.omit(c(x, "correctedValue"))),
+      FUN.VALUE = NA_character_
+    )
+
+  } else {
+    wd1 <- wd0
+  }
 
 
   #--- Fill missing values ------
@@ -1801,13 +1865,21 @@ dbW_fixWeather <- function(
     wd2[ids_startend, weather_dataColumns()] <- NA
 
     is_miss2 <- is_missing_weather(wd2[, weather_dataColumns()])
-    meta[!is_miss2 & is_miss1] <- sprintf(
-      "interpolateLinear (<= %d days)",
-      nmax_interp
+    idsFixed <- !is_miss2 & is_miss1
+    idsFixed[is_pptFixedValue, "PPT_cm"] <- FALSE
+    msg <- sprintf("interpolateLinear (<= %d days)", nmax_interp)
+    meta[idsFixed] <- vapply(
+      meta[idsFixed],
+      function(x) toString(na.omit(c(x, msg))),
+      FUN.VALUE = NA_character_
     )
 
     if (length(is_pptFixedValue) > 0L) {
-      meta[is_pptFixedValue, "PPT_cm"] <- "fixedValue"
+      meta[is_pptFixedValue, "PPT_cm"] <- vapply(
+        meta[is_pptFixedValue, "PPT_cm"],
+        function(x) toString(na.omit(c(x, "fixedValue"))),
+        FUN.VALUE = NA_character_
+      )
     }
 
 
@@ -1844,7 +1916,12 @@ dbW_fixWeather <- function(
       )
 
       is_miss3 <- is_missing_weather(wd3[, weather_dataColumns()])
-      meta[!is_miss3 & is_miss2] <- "substituteData"
+      idsFixed <- !is_miss3 & is_miss2
+      meta[idsFixed] <- vapply(
+        meta[idsFixed],
+        function(x) toString(na.omit(c(x, "substituteData"))),
+        FUN.VALUE = NA_character_
+      )
     }
 
 
@@ -1918,7 +1995,12 @@ dbW_fixWeather <- function(
       )
 
       is_miss4 <- is_missing_weather(wd4[, weather_dataColumns()])
-      meta[!is_miss4 & is_miss3] <- "longTermDailyMean"
+      idsFixed <- !is_miss4 & is_miss3
+      meta[idsFixed] <- vapply(
+        meta[idsFixed],
+        function(x) toString(na.omit(c(x, "longTermDailyMean"))),
+        FUN.VALUE = NA_character_
+      )
 
     } else {
       wd4 <- wd3
@@ -1926,36 +2008,6 @@ dbW_fixWeather <- function(
 
   } else {
     wd4 <-  wd1
-  }
-
-
-  #--- Sort switched min/max value pairs ------
-  if (isTRUE(sortMinMaxValues)) {
-    tasks <- rbind(
-      airTemperature = c(min = "Tmin_C", max = "Tmax_C"),
-      relativeHumidity = c(min = "rHmin_pct", max = "rHmax_pct")
-    )
-
-    for (k in seq_len(nrow(tasks))) {
-      varmin <- tasks[k, "min"]
-      varmax <- tasks[k, "max"]
-      isSwitched <- which(
-        wd4[, varmin, drop = TRUE] > wd4[, varmax, drop = TRUE]
-      )
-      tmp <- wd4[isSwitched, c(varmin, varmax), drop = FALSE]
-      wd4[isSwitched, c(varmin, varmax)] <- tmp[, 2L:1L]
-
-      tmp <- is.na(meta[isSwitched, c(varmin, varmax)])
-      meta[isSwitched, c(varmin, varmax)][tmp] <- "sortMinMax"
-      if (!all(tmp)) {
-        ids <- which(!tmp)
-        meta[isSwitched, c(varmin, varmax)][ids] <- vapply(
-          meta[isSwitched, c(varmin, varmax)][ids],
-          function(x) toString(c(x, "sortMinMax")),
-          FUN.VALUE = NA_character_
-        )
-      }
-    }
   }
 
 

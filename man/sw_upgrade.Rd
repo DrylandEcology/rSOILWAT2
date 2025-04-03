@@ -104,6 +104,7 @@ List of changes:
 \itemize{
 \item class \code{\linkS4class{swProd}}: new slots \code{"vegYear"} and
 \code{"isBiomAsIf100Cover"}
+\item class \code{\linkS4class{swWeather}}: new slot \code{"correctWeatherValues"}
 }
 \item Changes with \code{v6.3.0}:
 \itemize{

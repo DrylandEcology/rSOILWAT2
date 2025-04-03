@@ -1,15 +1,18 @@
 # rSOILWAT2 v6.4.0-9000
+
 ## Breaking changes
 * `SOILWAT2` updated to v8.2.0-9000
 * This version produces similar but not identical simulation output
   as previously because of the following changes:
     * CO2-fertilization effects are now using provided atmospheric CO2 of the
       reference year 1995; previously, 360 ppm was assumed.
+* `SOILWAT2` no longer provides automatic corrections for weather values;
+  instead, corrections now need to be requested by the user.
 
 ## New features
-* `dbW_fixWeather()` now also can sort daily minimum/maximum value pairs of
-  weather variables (air temperature, relative humidity) on days with
-  a larger minimum than maximum value.
+* User-requested corrections are now applied to problematic weather inputs
+  via new input `"correctWeatherValues"`.
+* `dbW_fixWeather()` now also can correct weather values.
 * CO2-fertilization is now adjusted for the year when vegetation inputs
   were made.
 * The user can now specify if vegetation biomass inputs reflect
@@ -21,6 +24,8 @@
 * The class `"swProd"` gained slot `"vegYear"` for the calendar year that
   corresponds to vegetation inputs (used for CO2-fertilization) and slot
   `"isBiomAsIf100Cover"` identifying the spatial reference of biomass inputs.
+* The class `"swWeather"` gained slot `"correctWeatherValues"` that specifies
+  which corrections are applied to problematic weather inputs.
 
 
 # rSOILWAT2 v6.3.1

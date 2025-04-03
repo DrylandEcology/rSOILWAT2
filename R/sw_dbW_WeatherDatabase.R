@@ -1964,6 +1964,8 @@ dbW_weatherData_to_blob <- function(weatherData, type = "gzip") {
 #' @param endYear Numeric. Extracted weather data will end with this year.
 #' @param dailyInputFlags A logical vector of length `MAX_INPUT_COLUMNS`,
 #'   see `"weathsetup.in"`.
+#' @param correctWeatherValues A logical of vector of length `NFIXWEATHER`,
+#'   see `"weathsetup.in"`. Used only with `method` `"C"`.
 #' @param method A character string. `"R"` uses code in `R` to read files as-is
 #'   whereas `"C"` uses `"SOILWAT2"` code to read and process files.
 #' @param elevation A numeric value. Site elevation above sea level `[m]`.
@@ -2035,6 +2037,7 @@ getWeatherData_folders <- function(
   startYear = NULL,
   endYear = NULL,
   dailyInputFlags = c(rep(TRUE, 3L), rep(FALSE, 11L)),
+  correctWeatherValues = rep(FALSE, 3L),
   method = c("R", "C"),
   elevation = NA
 ) {
@@ -2053,6 +2056,10 @@ getWeatherData_folders <- function(
     identical(
       length(dailyInputFlags),
       rSW2_glovars[["kSOILWAT2"]][["kINT"]][["MAX_INPUT_COLUMNS"]]
+    ),
+    identical(
+      length(correctWeatherValues),
+      rSW2_glovars[["kSOILWAT2"]][["kINT"]][["NFIXWEATHER"]]
     )
   )
 
@@ -2092,6 +2099,7 @@ getWeatherData_folders <- function(
       used_years[[length(used_years)]],
       elevation,
       dailyInputFlags,
+      correctWeatherValues,
       rSOILWAT2::sw_exampleData
     )
 

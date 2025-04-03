@@ -56,3 +56,6 @@ vignettes/*.log
 
 # nc-based SOILWAT2 example
 inst/extdata/example1/Input_nc
+
+# code example output
+Rplots.pdf
