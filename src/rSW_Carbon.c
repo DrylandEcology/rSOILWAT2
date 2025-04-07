@@ -137,6 +137,7 @@ void onSet_swCarbon(SEXP object, LOG_INFO* LogInfo) {
 
   // Only extract the CO2 values that will be used
   TimeInt year;
+  TimeInt year2;
   unsigned int i, n_input, n_sim;
   #ifdef RSWDEBUG
   int debug = 0;
@@ -145,8 +146,16 @@ void onSet_swCarbon(SEXP object, LOG_INFO* LogInfo) {
   SEXP CO2ppm;
   double *values;
 
-  year = SoilWatRun.Model.startyr + SoilWatRun.Model.addtl_yr; // real calendar year when simulation begins
-  n_sim = SoilWatRun.Model.endyr - SoilWatRun.Model.startyr + 1;
+  year = MIN(
+    SoilWatRun.Model.startyr + SoilWatRun.Model.addtl_yr,
+    SoilWatRun.VegProd.vegYear
+  );
+  year2 = MAX(
+    SoilWatRun.Model.endyr + SoilWatRun.Model.addtl_yr,
+    SoilWatRun.VegProd.vegYear
+  );
+  n_sim = year2 - year + 1;
+
   PROTECT(CO2ppm = GET_SLOT(object, install("CO2ppm")));
   n_input = nrows(CO2ppm);
   values = REAL(CO2ppm);
