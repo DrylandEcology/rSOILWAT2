@@ -497,7 +497,7 @@ SEXP onGet_SW_SIT(void) {
 	p_transp = INTEGER(TranspirationRegions);
 	for (i = 0; i < (v->n_transp_rgn); i++) {
 		p_transp[i + (v->n_transp_rgn) * 0] = (i + 1);
-		p_transp[i + (v->n_transp_rgn) * 1] = (v->TranspRgnBounds[i]+1);
+		p_transp[i + (v->n_transp_rgn) * 1] = v->TranspRgnBounds[i];
 	}
 	PROTECT(TranspirationRegions_names = allocVector(VECSXP,2));
 	PROTECT(TranspirationRegions_names_y = allocVector(STRSXP,2));
@@ -713,7 +713,7 @@ void onSet_SW_SIT_transp(SEXP SW_SIT, LOG_INFO* LogInfo) {
 		too_many_regions = TRUE;
 	} else {
 		for (i = 0; i < v->n_transp_rgn; i++) {
-            lyr = p_transp[i + v->n_transp_rgn * 1] - 1;
+            lyr = p_transp[i + v->n_transp_rgn * 1];
 			v->TranspRgnBounds[p_transp[i + v->n_transp_rgn * 0] - 1] = lyr;
             v->TranspRgnDepths[i] = v->soils.depths[lyr];
 		}
