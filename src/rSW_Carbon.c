@@ -62,7 +62,7 @@ SEXP onGet_SW_CARBON(void) {
   int i, year, n_sim;
   double *vCO2ppm;
 
-  SW_CARBON *c = &SoilWatRun.Carbon;
+  SW_CARBON_INPUTS *c = &SoilWatRun.CarbonIn;
 
   // Grab our S4 carbon class as an object
   PROTECT(class  = MAKE_CLASS("swCarbon"));
@@ -82,13 +82,13 @@ SEXP onGet_SW_CARBON(void) {
   SET_SLOT(object, install(cSW_CARBON[2]), Scenario);
 
   PROTECT(DeltaYear = NEW_INTEGER(1));
-  INTEGER(DeltaYear)[0] = SoilWatRun.Model.addtl_yr;
+  INTEGER(DeltaYear)[0] = SoilWatRun.ModelSim.addtl_yr;
   SET_SLOT(object, install(cSW_CARBON[3]), DeltaYear);
 
-  n_sim = SoilWatRun.Model.endyr - SoilWatRun.Model.startyr + 1;
+  n_sim = SoilWatRun.ModelIn.endyr - SoilWatRun.ModelIn.startyr + 1;
   PROTECT(CO2ppm = allocMatrix(REALSXP, n_sim, 2));
   vCO2ppm = REAL(CO2ppm);
-  for (i = 0, year = SoilWatRun.Model.startyr; i < n_sim; i++, year++)
+  for (i = 0, year = SoilWatRun.ModelIn.startyr; i < n_sim; i++, year++)
   {
     vCO2ppm[i + n_sim * 0] = year;
     vCO2ppm[i + n_sim * 1] = c->ppm[year];
@@ -121,12 +121,12 @@ SEXP onGet_SW_CARBON(void) {
  * @param object An instance of the swCarbon class.
  */
 void onSet_swCarbon(SEXP object, LOG_INFO* LogInfo) {
-  SW_CARBON *c = &SoilWatRun.Carbon;
+  SW_CARBON_INPUTS *c = &SoilWatRun.CarbonIn;
 
   // Extract the slots from our object into our structure
   c->use_bio_mult = INTEGER(GET_SLOT(object, install("CarbonUseBio")))[0];
   c->use_wue_mult = INTEGER(GET_SLOT(object, install("CarbonUseWUE")))[0];
-  SoilWatRun.Model.addtl_yr = INTEGER(GET_SLOT(object, install("DeltaYear")))[0];  // This is needed for output 100% of the time
+  SoilWatRun.ModelSim.addtl_yr = INTEGER(GET_SLOT(object, install("DeltaYear")))[0];  // This is needed for output 100% of the time
   strcpy(c->scenario, CHAR(STRING_ELT(GET_SLOT(object, install("Scenario")), 0)));
 
   // If CO2 is not being used, we can run without extracting ppm data
@@ -147,12 +147,12 @@ void onSet_swCarbon(SEXP object, LOG_INFO* LogInfo) {
   double *values;
 
   year = MIN(
-    SoilWatRun.Model.startyr + SoilWatRun.Model.addtl_yr,
-    SoilWatRun.VegProd.vegYear
+    SoilWatRun.ModelIn.startyr + SoilWatRun.ModelSim.addtl_yr,
+    SoilWatRun.VegProdIn.vegYear
   );
   year2 = MAX(
-    SoilWatRun.Model.endyr + SoilWatRun.Model.addtl_yr,
-    SoilWatRun.VegProd.vegYear
+    SoilWatRun.ModelIn.endyr + SoilWatRun.ModelSim.addtl_yr,
+    SoilWatRun.VegProdIn.vegYear
   );
   n_sim = year2 - year + 1;
 

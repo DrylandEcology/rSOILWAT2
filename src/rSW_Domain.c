@@ -121,7 +121,8 @@ SEXP onGet_SW_SPINUP(void) {
 }
 
 SEXP onGet_SW_MDL(void) {
-	SW_MODEL *m = &SoilWatRun.Model;
+	SW_MODEL_INPUTS *m = &SoilWatRun.ModelIn;
+	SW_MODEL_RUN_INPUTS *mr = &SoilWatRun.RunIn.ModelRunIn;
 
 	SEXP swYears;
 	SEXP SW_MDL;//, SW_MDL_names;
@@ -147,7 +148,7 @@ SEXP onGet_SW_MDL(void) {
 	//PROTECT(DayMid = NEW_INTEGER(1));
 	//INTEGER_POINTER(DayMid)[0] = m->daymid;
 	PROTECT(North = NEW_LOGICAL(1));
-	LOGICAL_POINTER(North)[0] = m->isnorth;
+	LOGICAL_POINTER(North)[0] = mr->isnorth;
 
 	// attaching main's elements
 	SET_SLOT(SW_MDL, install(cSW_MDL_names[0]), StartYear);
@@ -235,7 +236,8 @@ void onSet_SW_SPINUP(SEXP SW_DOM, LOG_INFO* LogInfo) {
 }
 
 void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
-	SW_MODEL *m = &SoilWatRun.Model;
+	SW_MODEL_INPUTS *m = &SoilWatRun.ModelIn;
+	SW_MODEL_RUN_INPUTS *mr = &SoilWatRun.RunIn.ModelRunIn;
 
 	SEXP StartYear;
 	SEXP EndYear;
@@ -292,7 +294,7 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 	//PROTECT(DayMid = VECTOR_ELT(SW_MDL, 4));
 	//m->daymid = INTEGER(DayMid)[0];
 	PROTECT(North = GET_SLOT(SW_MDL, install("isNorth")));
-	m->isnorth = (Bool)LOGICAL(North)[0];
+	mr->isnorth = (Bool)LOGICAL(North)[0];
 	fhemi = TRUE;
 
 	if (!(fstartdy && fenddy && fhemi)) {
@@ -307,13 +309,13 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 		}
 		if (!fhemi) {
 			strcat(errstr, "\tHemisphere - using \"N\"\n");
-			m->isnorth = TRUE;
+			mr->isnorth = TRUE;
 		}
 		strcat(errstr, "Continuing.\n");
 		LogError(LogInfo, LOGWARN, errstr);
 	}
 
-	m->startstart += ((m->isnorth) ? DAYFIRST_NORTH : DAYFIRST_SOUTH) - 1;
+	m->startstart += ((mr->isnorth) ? DAYFIRST_NORTH : DAYFIRST_SOUTH) - 1;
 	//if (strcmp(enddyval, "end") == 0) {
 		//m->endend = (m->isnorth) ? Time_get_lastdoy_y(m->endyr) : DAYLAST_SOUTH;
 	//} else {
@@ -354,7 +356,7 @@ void rSW_CTL_setup_domain(
   int debug = 0;
   #endif
 
-    SW_F_construct(&SW_Domain->SW_PathInputs,LogInfo);
+    SW_F_construct(&SW_Domain->SW_PathInputs, LogInfo);
 
     if(LogInfo->stopRun) {
        return;  // Exit function prematurely due to error

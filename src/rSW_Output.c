@@ -90,8 +90,8 @@ void onSet_SW_OUT(SEXP OUT, LOG_INFO* LogInfo) {
 			last_orig[k],
 			msg,
 			sizeof msg,
-			&SoilWatRun.VegProd.use_SWA,
-			SoilWatRun.Site.deepdrain,
+			&SoilWatRun.VegProdIn.use_SWA,
+			SoilWatRun.SiteIn.deepdrain,
 			SoilWatDomain.SW_PathInputs.txtInFiles
 		);
 
@@ -277,7 +277,7 @@ SEXP onGetOutput(SEXP inputData, LOG_INFO* LogInfo) {
 	find_OutPeriods_inUse(&SoilWatDomain.OutDom);
 
 	// Determine number of used years/months/weeks/days in simulation period
-	SW_OUT_set_nrow(&SoilWatRun.Model, OutDom->use_OutPeriod,
+	SW_OUT_set_nrow(&SoilWatRun.ModelIn, OutDom->use_OutPeriod,
 					OutDom->nrow_OUT);
 
 	ForEachOutPeriod(pd) {
