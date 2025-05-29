@@ -712,18 +712,24 @@ void onSet_SW_SIT_transp(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	if (MAX_TRANSP_REGIONS < v->n_transp_rgn) {
 		too_many_regions = TRUE;
 	} else {
-		for (i = 0; i < v->n_transp_rgn; i++) {
+        for (i = 0; i < v->n_transp_rgn; i++) {
             lyr = p_transp[i + v->n_transp_rgn * 1];
-			v->TranspRgnBounds[p_transp[i + v->n_transp_rgn * 0] - 1] = lyr;
-            v->TranspRgnDepths[i] = v->soils.depths[lyr];
-		}
+            v->TranspRgnBounds[i] = lyr;
+            if (i != (p_transp[i + v->n_transp_rgn * 0] - 1) || lyr == 0) {
+                LogError(
+                    LogInfo,
+                    LOGERROR,
+                    "siteparam.in : Misspecified transpiration regions."
+                );
+                goto freeMem; // Exit function prematurely due to error
+            }
+            v->TranspRgnDepths[i] = v->soils.depths[lyr - 1];
+        }
 	}
 	if (too_many_regions) {
 		LogError(LogInfo, LOGERROR, "siteparam.in : Number of transpiration regions"
 				" exceeds maximum allowed (%d > %d)\n", v->n_transp_rgn, MAX_TRANSP_REGIONS);
-
-        UNPROTECT(1); // Unprotect the fourteen protected variables before exiting
-        return; // Exit function prematurely due to error
+        goto freeMem; // Exit function prematurely due to error
 	}
 	#ifdef RSWDEBUG
 	if (debug) sw_printf(" > 'transp-regions'");
@@ -733,9 +739,7 @@ void onSet_SW_SIT_transp(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	for (r = 1; r < v->n_transp_rgn; r++) {
 		if (v->TranspRgnBounds[r - 1] >= v->TranspRgnBounds[r]) {
 			LogError(LogInfo, LOGERROR, "siteparam.in : Discontinuity/reversal in transpiration regions.\n");
-
-            UNPROTECT(1); // Unprotect the fourteen protected variables before exiting
-            return; // Exit function prematurely due to error
+            goto freeMem; // Exit function prematurely due to error
 		}
 	}
 
@@ -743,5 +747,6 @@ void onSet_SW_SIT_transp(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	if (debug) sw_printf(" ... done. \n");
 	#endif
 
+freeMem:
 	UNPROTECT(1);
 }
