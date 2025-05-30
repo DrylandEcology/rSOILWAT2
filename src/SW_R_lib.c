@@ -54,7 +54,15 @@ SW_DOMAIN SoilWatDomain;
 SW_RUN SoilWatRun;
 
 Bool EchoInits;
-FILE *current_sw_verbosity = (FILE *) TRUE; // quiet = FALSE; verbose = TRUE (show SOILWAT2 warnings)
+
+/* dummyLogFile is a marker to indicate that current_sw_verbosity is not NULL */
+static FILE dummyLogFile;
+
+/* rSOILWAT2 writes warnings and error messages to the console; thus
+RSOILWAT does not use logfp other than checking
+if it's NULL or not NULL (where NULL represents silent mode).
+Not NULL is represented by dummyLogFile */
+FILE *current_sw_verbosity = &dummyLogFile;
 
 
 
@@ -85,7 +93,7 @@ SEXP sw_verbose(SEXP verbose) {
 
 	if (LOGICAL(coerceVector(verbose, LGLSXP))[0]) {
 		// verbose: tell `LogError()` that R should print messages to the console
-		current_sw_verbosity = (FILE *) TRUE; // any non-NULL file pointer
+		current_sw_verbosity = &dummyLogFile; // any non-NULL file pointer
 	} else {
 		// quiet: tell `LogError()` that R should NOT print messages to the console
 		current_sw_verbosity = NULL;

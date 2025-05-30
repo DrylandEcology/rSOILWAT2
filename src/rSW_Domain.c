@@ -171,7 +171,7 @@ void onSet_SW_SPINUP(SEXP SW_DOM, LOG_INFO* LogInfo) {
     SEXP SpinupSeed;
     SEXP SpinupActive;
 
-    if (!IS_S4_OBJECT(SW_DOM)) {
+    if (!Rf_isS4(SW_DOM)) {
       LogError(LogInfo, LOGERROR, "onSet_SW_SPINUP: No input.");
           return; // Exit function prematurely due to error
     }
@@ -247,7 +247,7 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 	TimeInt d;
 	char enddyval[6], errstr[MAX_ERROR];
 
-	if (!IS_S4_OBJECT(SW_MDL)) {
+	if (!Rf_isS4(SW_MDL)) {
 		LogError(LogInfo, LOGERROR, "modelrun.in: missing input.");
         return; // Exit function prematurely due to error
 	}
