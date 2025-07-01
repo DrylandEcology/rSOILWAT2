@@ -138,6 +138,7 @@ static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LO
     #endif
     Bool renameDomainTemplateNC = swFALSE;
     Bool prepareFiles = swFALSE;
+    Bool endQuietly = swFALSE;
     int rank = 0; // unused
 
 
@@ -174,9 +175,10 @@ static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LO
         NULL,
         &renameDomainTemplateNC,
         &prepareFiles,
+        &endQuietly,
         LogInfo
     );
-    if(LogInfo->stopRun) {
+    if(endQuietly || LogInfo->stopRun) {
         return; // Exit function prematurely due to error
     }
 
@@ -263,6 +265,8 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
         SoilWatRun.RunIn.weathRunAllHist,
         SoilWatRun.ModelSim.cum_monthdays,
         SoilWatRun.ModelSim.days_in_month,
+        NULL,
+        swFALSE,
         &local_LogInfo
     );
     if(local_LogInfo.stopRun) {
@@ -481,6 +485,8 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
         SoilWatRun.RunIn.weathRunAllHist,
         SoilWatRun.ModelSim.cum_monthdays,
         SoilWatRun.ModelSim.days_in_month,
+        NULL,
+        swFALSE,
         &local_LogInfo
     );
     if(local_LogInfo.stopRun) {
@@ -740,6 +746,8 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
         SoilWatRun.RunIn.weathRunAllHist,
         SoilWatRun.ModelSim.cum_monthdays,
         SoilWatRun.ModelSim.days_in_month,
+        NULL,
+        swFALSE,
         &local_LogInfo
     );
     if(local_LogInfo.stopRun) {
