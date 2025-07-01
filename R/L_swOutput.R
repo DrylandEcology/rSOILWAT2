@@ -55,7 +55,9 @@ sw_out_flags <- function() {
     sw_vwcmatric = tmp["SW_VWCMATRIC"],
     sw_co2effects = tmp["SW_CO2EFFECTS"],
     sw_veg = tmp["SW_BIOMASS"],
-    sw_wetdays = tmp["SW_WETDAY"]
+    sw_wetdays = tmp["SW_WETDAY"],
+    sw_derivedsum = tmp["SW_DERIVEDSUM"],
+    sw_derivedavg = tmp["SW_DERIVEDAVG"]
   )
 
   # Fix names
@@ -230,7 +232,9 @@ swOutput <- setClass(
     ALLVEG = "swOutput_KEY",
     ESTABL = "swOutput_KEY",
     CO2EFFECTS = "swOutput_KEY",
-    BIOMASS = "swOutput_KEY"
+    BIOMASS = "swOutput_KEY",
+    DERIVEDSUM = "swOutput_KEY",
+    DERIVEDAVG = "swOutput_KEY"
   ),
   prototype = list(
     version = rSW2_version(),
@@ -269,7 +273,9 @@ swOutput <- setClass(
     ALLVEG = swOutput_KEY(),
     ESTABL = swOutput_KEY(),
     CO2EFFECTS = swOutput_KEY(),
-    BIOMASS = swOutput_KEY()
+    BIOMASS = swOutput_KEY(),
+    DERIVEDSUM = swOutput_KEY(),
+    DERIVEDAVG = swOutput_KEY()
   )
 )
 

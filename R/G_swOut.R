@@ -58,13 +58,13 @@ setClass(
   ),
   # TODO: lengths must be rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]
   prototype = list(
-    mykey = rep(NA_integer_, 32L),
-    myobj = rep(NA_integer_, 32L),
-    sumtype = rep(NA_integer_, 32L),
-    use = rep(NA, 32L),
-    first_orig = rep(NA_integer_, 32L),
-    last_orig = rep(NA_integer_, 32L),
-    outfile = rep(NA_character_, 32L)
+    mykey = rep(NA_integer_, 34L),
+    myobj = rep(NA_integer_, 34L),
+    sumtype = rep(NA_integer_, 34L),
+    use = rep(NA, 34L),
+    first_orig = rep(NA_integer_, 34L),
+    last_orig = rep(NA_integer_, 34L),
+    outfile = rep(NA_character_, 34L)
   )
 )
 
@@ -176,7 +176,7 @@ setClass(
     #   * 999 must be rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]]
     #   * nrows = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]
     #   * ncols = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
-    timeSteps = array(999, dim = c(32L, 4L))
+    timeSteps = array(999, dim = c(34L, 4L))
   )
 )
 
@@ -281,7 +281,8 @@ setMethod(
     #   update `do_upgrade` when `n_exp` changes or new upgrades required!
     do_upgrade <- c(
       from_v230 = n_has == 30L && n_exp %in% 31L:32L,
-      from_v310 = n_has == 31L && n_exp == 32L
+      from_v310 = n_has == 31L && n_exp == 32L,
+      from_v630 = n_has == 32L && n_exp == 34L
     )
 
     do_upgrade <- do_upgrade[do_upgrade]
@@ -306,6 +307,7 @@ setMethod(
           EXPR = names(do_upgrade)[k],
           from_v230 = n_exp,
           from_v310 = 28L,
+          from_v630 = 33L:34L,
           stop(
             "Upgrade ", shQuote(names(do_upgrade)[k]),
             " is not implemented for class `swOUT`.",

@@ -212,6 +212,9 @@ format_timestamp <- function(object) {
 #'       * class [`swProd-class`]: new slots `"vegYear"` and
 #'         `"isBiomAsIf100Cover"`
 #'       * class [`swWeather-class`]: new slot `"correctWeatherValues"`
+#'       * class [`swOUT-class`]:
+#'         two new `outkey`s `"DERIVEDSUM"` and `"DERIVEDAVG"`,
+#'         for a new total of 34 `outkey`s
 #'   * Changes with `v6.3.0`:
 #'       * class [`swSoils-class`]:
 #'           * new slot `"omSWRCp"`; slot `"SWRCp"` refers to mineral soil
