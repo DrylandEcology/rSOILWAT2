@@ -40,7 +40,6 @@
 \alias{swFiles_SWCsetup<-,swFiles-method}
 \alias{swFiles_Carbon<-,swFiles-method}
 \alias{swFiles_Output<-,swFiles-method}
-\alias{swReadLines,swFiles,character-method}
 \title{Class \code{"swFiles"}}
 \usage{
 swFiles(...)
@@ -116,8 +115,6 @@ swFiles(...)
 \S4method{swFiles_Carbon}{swFiles}(object) <- value
 
 \S4method{swFiles_Output}{swFiles}(object) <- value
-
-\S4method{swReadLines}{swFiles,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -132,8 +129,6 @@ If dots are missing, then corresponding values of
 \item{object}{An object of class \code{\linkS4class{swFiles}}.}
 
 \item{value}{A value to assign to a specific slot of the object.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class

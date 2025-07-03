@@ -31,7 +31,6 @@
 #'
 #' @param object An object of class \code{\linkS4class{swYears}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param file A character string. The file name from which to read.
 #' @param ... Arguments to the helper constructor function.
 #'  Dots can either contain objects to copy into slots of that class
 #'  (must be named identical to the corresponding slot) or
@@ -253,26 +252,3 @@ setReplaceMethod(
     object
   }
 )
-
-
-#' @rdname swYears-class
-#' @export
-# nolint start
-setMethod(
-  "swReadLines",
-  signature = c(object = "swYears", file = "character"),
-  function(object, file) {
-    stop("swReadLines is defunct", call. = FALSE)
-    infiletext <- readLines(con = file)
-    object@StartYear <- readInteger(infiletext[4])
-    object@EndYear <- readInteger(infiletext[5])
-    object@FDOFY <- readInteger(infiletext[6])
-    object@EDOEY <- readInteger(infiletext[7])
-    temp <- unlist(strsplit(x = infiletext[8], split = "\t"))
-    temp <- unlist(strsplit(x = temp, split = " "))
-    temp <- temp[temp != ""][1]
-    object@isNorth <- isTRUE(temp == "N")
-
-    object
-})
-# nolint end

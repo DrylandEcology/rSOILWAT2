@@ -16,7 +16,6 @@
 \alias{swCloud_Humidity<-,swCloud-method}
 \alias{swCloud_SnowDensity<-,swCloud-method}
 \alias{swCloud_RainEvents<-,swCloud-method}
-\alias{swReadLines,swCloud,character-method}
 \title{Class \code{"swCloud"}}
 \usage{
 swCloud(...)
@@ -44,8 +43,6 @@ swCloud(...)
 \S4method{swCloud_SnowDensity}{swCloud}(object) <- value
 
 \S4method{swCloud_RainEvents}{swCloud}(object) <- value
-
-\S4method{swReadLines}{swCloud,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -60,8 +57,6 @@ If dots are missing, then corresponding values of
 \item{object}{An object of class \code{\linkS4class{swCloud}}.}
 
 \item{value}{A value to assign to a specific slot of the object.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class

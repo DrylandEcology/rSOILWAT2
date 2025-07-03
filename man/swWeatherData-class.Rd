@@ -5,14 +5,11 @@
 \alias{swWeatherData-class}
 \alias{swWeatherData}
 \alias{weatherHistory}
-\alias{swReadLines,swWeatherData,character-method}
 \title{Class \code{"swWeatherData"}}
 \usage{
 swWeatherData(...)
 
 weatherHistory(weatherList = NULL)
-
-\S4method{swReadLines}{swWeatherData,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -27,10 +24,6 @@ If dots are missing, then corresponding values of
 \item{weatherList}{A list or \code{NULL}. Each element is an object of class
 \code{\link[rSOILWAT2:swWeatherData-class]{rSOILWAT2::swWeatherData}}
 containing daily weather data of a specific year.}
-
-\item{object}{An object of class \code{\linkS4class{swWeatherData}}.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class

@@ -32,7 +32,6 @@
 #'
 #' @param object An object of class \code{\linkS4class{swCloud}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param file A character string. The file name from which to read.
 #' @param ... Arguments to the helper constructor function.
 #'  Dots can either contain objects to copy into slots of that class
 #'  (must be named identical to the corresponding slot) or
@@ -264,30 +263,3 @@ setReplaceMethod(
     object
   }
 )
-
-#' @rdname swCloud-class
-#' @export
-# nolint start
-setMethod(
-  "swReadLines",
-  signature = c(object = "swCloud", file = "character"),
-  function(object, file) {
-    stop("swReadLines is defunct", call. = FALSE)
-    infiletext <- readLines(con = file)
-    #should be no empty lines
-    infiletext <- infiletext[infiletext != ""]
-
-    object@Cloud <- matrix(data = NA, nrow = 5, ncol = 12, byrow = TRUE)
-
-    colnames(object@Cloud) <- c("January", "February", "March", "April", "May",
-      "June", "July", "August", "September", "October", "November", "December")
-    rownames(object@Cloud) <- c("SkyCoverPCT", "WindSpeed_m/s", "HumidityPCT",
-      "SnowDensity_kg/m^3", "RainEvents_per_day")
-
-    for (i in seq_along(infiletext)) {
-      object@Cloud[i, ] <- readNumerics(infiletext[i], 12)
-    }
-
-    object
-})
-# nolint end

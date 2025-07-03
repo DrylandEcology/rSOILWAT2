@@ -24,13 +24,6 @@
 ###############################################################################
 
 ##########################GENERIC METHODS/FUNCTIONS############################
-#' \code{swReadLines}
-#' @param object An object of a class such \code{\linkS4class{swInputData}}.
-#' @param file A character string. The file path.
-#' @seealso \code{\linkS4class{swInputData}}
-setGeneric("swReadLines", function(object, file) standardGeneric("swReadLines"))
-
-
 #' Create \pkg{rSOILWAT2} version representation
 rSW2_version <- function() {
   as.character(as.numeric_version(getNamespaceVersion("rSOILWAT2")))

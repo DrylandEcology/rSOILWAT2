@@ -43,7 +43,6 @@ soilLayer_dataColumns <- function() {
 #'
 #' @param object An object of class \code{\linkS4class{swSoils}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param file A character string. The file name from which to read.
 #' @param ... Arguments to the helper constructor function.
 #'  Dots can either contain objects to copy into slots of that class
 #'  (must be named identical to the corresponding slot) or
@@ -441,30 +440,3 @@ reset_omSWRCp <- function(omSWRCp) {
     dimnames = dimnames(omSWRCp)
   )
 }
-
-
-
-#' @rdname swSoils-class
-#' @export
-# nolint start
-setMethod(
-  "swReadLines",
-  signature = c(object = "swSoils", file = "character"),
-  function(object, file) {
-    stop("This function no longer works correctly; and SWRCp are not read.", call. = FALSE)
-    infiletext <- readLines(con = file)
-    infiletext <- infiletext[infiletext != ""] #get rid of extra spaces
-    infiletext <- infiletext[17:length(infiletext)] #get rid of comments
-    object@Layers <- matrix(data = NA, nrow = length(infiletext), ncol = 12)
-    colnames(object@Layers) <- c("depth_cm", "bulkDensity_g/cm^3",
-      "gravel_content", "EvapBareSoil_frac", "transpGrass_frac",
-      "transpShrub_frac", "transpTree_frac", "transpForb_frac",
-      "sand_frac", "clay_frac", "impermeability_frac", "soilTemp_c")
-    for (i in seq_along(infiletext)) {
-      object@Layers[i, ] <- readNumerics(infiletext[i], 12)
-    }
-
-    object
-  }
-)
-# nolint end

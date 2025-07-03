@@ -42,7 +42,6 @@
 \alias{swProd_MonProd_shrub<-,swProd-method}
 \alias{swProd_MonProd_tree<-,swProd-method}
 \alias{swProd_MonProd_forb<-,swProd-method}
-\alias{swReadLines,swProd,character-method}
 \title{Class \code{"swProd"}}
 \usage{
 swProd(...)
@@ -122,8 +121,6 @@ swProd(...)
 \S4method{swProd_MonProd_tree}{swProd}(object) <- value
 
 \S4method{swProd_MonProd_forb}{swProd}(object) <- value
-
-\S4method{swReadLines}{swProd,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -140,8 +137,6 @@ If dots are missing, then corresponding values of
 \item{vegtype}{The name or index of the vegetation type.}
 
 \item{value}{A value to assign to a specific slot of the object.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class

@@ -14,7 +14,6 @@
 \alias{swYears_FDOFY<-,swYears-method}
 \alias{swYears_EDOEY<-,swYears-method}
 \alias{swYears_isNorth<-,swYears-method}
-\alias{swReadLines,swYears,character-method}
 \title{Class \code{"swYears"}}
 \usage{
 swYears(...)
@@ -38,8 +37,6 @@ swYears(...)
 \S4method{swYears_EDOEY}{swYears}(object) <- value
 
 \S4method{swYears_isNorth}{swYears}(object) <- value
-
-\S4method{swReadLines}{swYears,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -54,8 +51,6 @@ If dots are missing, then corresponding values of
 \item{object}{An object of class \code{\linkS4class{swYears}}.}
 
 \item{value}{A value to assign to a specific slot of the object.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class

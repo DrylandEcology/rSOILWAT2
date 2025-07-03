@@ -122,7 +122,6 @@ swOUT_key <- function(...) {
 #'
 #' @param object An object of class \code{\linkS4class{swOUT}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param file A character string. The file name from which to read.
 #' @param ... Arguments to the helper constructor function.
 #'  Dots can either contain objects to copy into slots of that class
 #'  (must be named identical to the corresponding slot) or
@@ -569,79 +568,3 @@ setReplaceMethod(
     object
   }
 )
-
-
-# used by swReadLines
-KEY <- c("WTHR", "TEMP", "PRECIP", "SOILINFILT", "RUNOFF", "ALLH2O", "VWCBULK",
-  "VWCMATRIC", "SWCBULK", "SWA", "SWABULK", "SWAMATRIC", "SWPMATRIC",
-  "SURFACEWATER", "TRANSP", "EVAPSOIL", "EVAPSURFACE", "INTERCEPTION",
-  "LYRDRAIN", "HYDRED", "ET", "AET", "PET", "WETDAY", "SNOWPACK", "DEEPSWC",
-  "SOILTEMP", "FROZEN", "ALLVEG", "ESTABL")
-OutSum <- c("off", "sum", "avg", "fnl") # only used for 'swReadLines'
-#Remember this models the C code so index starts at 0 not 1
-timePeriods <- c("dy", "wk", "mo", "yr")
-
-
-#' @rdname swOUT-class
-#' @export
-# nolint start
-setMethod(
-  "swReadLines",
-  signature = c(object="swOUT",file="character"),
-  function(object,file) {
-    stop("TODO: method 'swReadLines' for class 'swOUT' is not up-to-date; hard-coded indices are incorrect", call. = FALSE)
-
-    infiletext <- readLines(con = file)
-    if(temp<-strsplit(infiletext[41],split=" ")[[1]][2] == "t") {
-      object@outputSeparator="\t"
-    } else if(temp == "s") {
-      object@outputSeparator=" "
-    } else if(temp == "c"){
-      object@outputSeparator=","
-    } else {
-      object@outputSeparator="\t"
-    }
-
-    if (infiletext[42] == "") {
-      useTimeStep = FALSE
-    } else {
-      useTimeStep = TRUE
-      temp<-strsplit(x=infiletext[42], split=" ")[[1]][-1]
-      object@timeSteps = as.integer(
-        sapply(
-          1:length(temp),
-          FUN=function(i) which(temp[i] == timePeriods)
-        )-1
-      )
-    }
-
-    for(i in 45:length(infiletext)) {
-      if(infiletext[i] != "") {
-        temp<-strsplit(x=infiletext[i],split="\t")[[1]]
-        temp<-unlist(strsplit(x=temp,split=" "))
-        temp <- temp[temp != ""][1:6]
-        mykey<- as.integer(grep(pattern=temp[1],x=KEY)[1])
-        sumtype <- as.integer(grep(pattern=temp[2],x=OutSum))-1
-        period <- which(tolower(temp[3]) == timePeriods)-1
-        start <- as.integer(temp[4])
-        if(grepl(pattern="end",x=temp[5])) {
-          end <- as.integer(366)
-        } else {
-          end <- as.integer(temp[5])
-        }
-        object@mykey[mykey] = as.integer(mykey-1)
-        object@sumtype[mykey] = as.integer(sumtype)
-        object@first_orig[mykey] = start
-        object@last_orig[mykey] = end
-        object@outfile[mykey] = temp[6]
-        if(object@sumtype[mykey] != 0) {
-          object@use[mykey] = TRUE
-        } else {
-          object@use[mykey] = FALSE
-        }
-      }
-    }
-    return(object)
-  }
-)
-# nolint end

@@ -30,7 +30,6 @@
 #'
 #' @param object An object of class \code{\linkS4class{swMarkov}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param file A character string. The file name from which to read.
 #' @param ... Arguments to the helper constructor function.
 #'  Dots can either contain objects to copy into slots of that class
 #'  (must be named identical to the corresponding slot) or
@@ -257,39 +256,3 @@ setReplaceMethod(
     object
   }
 )
-
-
-#' @rdname swMarkov-class
-#' @export
-# nolint start
-setMethod(
-  "swReadLines",
-  signature = c(object = "swMarkov", file = "character"),
-  function(object, file) {
-    stop("swReadLines is defunct", call. = FALSE)
-    id_skip <- 1:2
-
-    infiletext <- readLines(con = file[1])
-    infiletext <- infiletext[-id_skip]
-    if (length(infiletext) != 366)
-      stop("Markov Prod wrong number of lines", call. = FALSE)
-
-    object@Prob <- matrix(0, 366, 5)
-    for (i in seq_len(366)) {
-      object@Prob[i, ] <- readNumerics(infiletext[i], 5)
-    }
-
-    infiletext <- readLines(con = file[2])
-    infiletext <- infiletext[-id_skip]
-    if (length(infiletext) != 53)
-      stop("Markov Prod wrong number of lines", call. = FALSE)
-
-    object@Conv <- matrix(0, 53, 11)
-    for (i in seq_len(53)) {
-      object@Conv[i, ] <- readNumerics(infiletext[i], 11)
-    }
-
-    object
-  }
-)
-# nolint end

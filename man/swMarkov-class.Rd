@@ -12,7 +12,6 @@
 \alias{set_swMarkov<-,swMarkov-method}
 \alias{swMarkov_Prob<-,swMarkov-method}
 \alias{swMarkov_Conv<-,swMarkov-method}
-\alias{swReadLines,swMarkov,character-method}
 \title{Class \code{"swMarkov"}}
 \usage{
 swMarkov(...)
@@ -32,8 +31,6 @@ swMarkov(...)
 \S4method{swMarkov_Prob}{swMarkov}(object) <- value
 
 \S4method{swMarkov_Conv}{swMarkov}(object) <- value
-
-\S4method{swReadLines}{swMarkov,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -48,8 +45,6 @@ If dots are missing, then corresponding values of
 \item{object}{An object of class \code{\linkS4class{swMarkov}}.}
 
 \item{value}{A value to assign to a specific slot of the object.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class

@@ -16,7 +16,6 @@
 \alias{swSWC_Method<-,swSWC,integer-method}
 \alias{swSWC_HistoricList<-,swSWC,list-method}
 \alias{swSWC_HistoricData<-,swSWC,swSWC_hist-method}
-\alias{swReadLines,swSWC,character-method}
 \title{Class \code{"swSWC"}}
 \usage{
 swSWC(...)
@@ -44,8 +43,6 @@ swSWC(...)
 \S4method{swSWC_HistoricList}{swSWC,list}(object) <- value
 
 \S4method{swSWC_HistoricData}{swSWC,swSWC_hist}(object) <- value
-
-\S4method{swReadLines}{swSWC,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -63,8 +60,6 @@ If dots are missing, then corresponding values of
 \code{data} object.}
 
 \item{value}{A value to assign to a specific slot of the object.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class

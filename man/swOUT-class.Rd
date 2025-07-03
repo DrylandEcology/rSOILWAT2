@@ -13,7 +13,6 @@
 \alias{swOUT_TimeStep<-,swOUT-method}
 \alias{swOUT_TimeStepsForEveryKey<-,swOUT-method}
 \alias{swOUT_OutputSeparator<-,swOUT-method}
-\alias{swReadLines,swOUT,character-method}
 \title{Class \code{swOUT}}
 \usage{
 swOUT(...)
@@ -35,8 +34,6 @@ swOUT(...)
 \S4method{swOUT_TimeStepsForEveryKey}{swOUT}(object) <- value
 
 \S4method{swOUT_OutputSeparator}{swOUT}(object) <- value
-
-\S4method{swReadLines}{swOUT,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -51,8 +48,6 @@ If dots are missing, then corresponding values of
 \item{object}{An object of class \code{\linkS4class{swOUT}}.}
 
 \item{value}{A value to assign to a specific slot of the object.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class

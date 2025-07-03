@@ -7,7 +7,6 @@
 \alias{get_swSoils,swSoils-method}
 \alias{set_swSoils<-,swSoils,swSoils-method}
 \alias{set_swSoils<-,swSoils,list-method}
-\alias{swReadLines,swSoils,character-method}
 \title{Class \code{"swSoils"}}
 \usage{
 swSoils(...)
@@ -17,8 +16,6 @@ swSoils(...)
 \S4method{set_swSoils}{swSoils,swSoils}(object) <- value
 
 \S4method{set_swSoils}{swSoils,list}(object) <- value
-
-\S4method{swReadLines}{swSoils,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -33,8 +30,6 @@ If dots are missing, then corresponding values of
 \item{object}{An object of class \code{\linkS4class{swSoils}}.}
 
 \item{value}{A value to assign to a specific slot of the object.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class

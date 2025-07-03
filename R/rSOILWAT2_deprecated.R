@@ -130,7 +130,7 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 		for(j in 1:length(weath)) {
 			year <- as.numeric(sub(pattern="weath.",replacement="",weath[j]))
 			temp <- utils::read.csv(file.path(weatherFolderPath,weath[j]),header=FALSE,skip=2,sep="\t")
-			weatherData[[j]] <- swReadLines(new("swWeatherData",year),file.path(weatherFolderPath,weath[j]))
+			weatherData[[j]] <- swReadLinesWeather3Vars(new("swWeatherData",year),file.path(weatherFolderPath,weath[j]))
 		}
 		StartYear <- years[1]
 		EndYear <- years[length(years)]
@@ -138,6 +138,35 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 		DBI::dbExecute(rSW2_glovars$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,", ",scenarioID,", ",StartYear,", ",EndYear,", ",data_blob,");",sep=""))
 		#dbCommit(rSW2_glovars$con)
 	}
+}
+
+
+swReadLinesWeather3Vars <- function(object, file) {
+    .Deprecated("C_rSW2_readAllWeatherFromDisk")
+    warning(
+      "swReadLines works only with traditional weather data.", call. = FALSE
+    )
+
+    object@year <- as.integer(
+      strsplit(
+        x = basename(file),
+        split = ".",
+      fixed = TRUE
+      )[[1]][2]
+    )
+    x <- utils::read.table(
+      file,
+      header = FALSE,
+      comment.char = "#",
+      blank.lines.skip = TRUE,
+      sep = "\t"
+    )
+    stopifnot(ncol(x) != 4L)
+    colnames(x) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+    object@data[] <- NA
+    object@data[, colnames(x)] <- as.matrix(x)
+
+    object
 }
 
 

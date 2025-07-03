@@ -83,8 +83,6 @@ weather_dataAggFun <- function() {
 #' The methods listed below work on this class and the proper slot of the class
 #'   \code{\linkS4class{swInputData}}.
 #'
-#' @param object An object of class \code{\linkS4class{swWeatherData}}.
-#' @param file A character string. The file name from which to read.
 #' @param weatherList A list or \code{NULL}. Each element is an object of class
 #'   \code{\link[rSOILWAT2:swWeatherData-class]{rSOILWAT2::swWeatherData}}
 #'   containing daily weather data of a specific year.
@@ -368,36 +366,3 @@ validObject_weatherHistory <- function(object) {
     TRUE
   }
 }
-
-#' @rdname swWeatherData-class
-#' @export
-setMethod(
-  "swReadLines",
-  signature = c(object = "swWeatherData", file = "character"),
-  function(object, file) {
-    .Deprecated("C_rSW2_readAllWeatherFromDisk")
-    warning(
-      "swReadLines works only with traditional weather data.", call. = FALSE
-    )
-
-    object@year <- as.integer(
-      strsplit(
-        x = basename(file),
-        split = ".",
-      fixed = TRUE
-      )[[1]][2]
-    )
-    x <- utils::read.table(
-      file,
-      header = FALSE,
-      comment.char = "#",
-      blank.lines.skip = TRUE,
-      sep = "\t"
-    )
-    stopifnot(ncol(x) != 4L)
-    colnames(x) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
-    object@data[] <- NA
-    object@data[, colnames(x)] <- as.matrix(x)
-
-    object
-})

@@ -20,7 +20,6 @@
 \alias{swWeather_UseMarkovOnly<-,swWeather-method}
 \alias{swWeather_UseSnow<-,swWeather-method}
 \alias{swWeather_MonScalingParams<-,swWeather-method}
-\alias{swReadLines,swWeather,character-method}
 \title{Class \code{"swWeather"}}
 \usage{
 swWeather(...)
@@ -56,8 +55,6 @@ swWeather(...)
 \S4method{swWeather_UseSnow}{swWeather}(object) <- value
 
 \S4method{swWeather_MonScalingParams}{swWeather}(object) <- value
-
-\S4method{swReadLines}{swWeather,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -72,8 +69,6 @@ If dots are missing, then corresponding values of
 \item{object}{An object of class \code{\linkS4class{swWeather}}.}
 
 \item{value}{A value to assign to a specific slot of the object.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class

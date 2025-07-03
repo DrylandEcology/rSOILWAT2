@@ -214,7 +214,6 @@
 \alias{activate_swOUT_OutKey<-,swInputData-method}
 \alias{deactivate_swOUT_OutKey<-,swInputData-method}
 \alias{swLog_setLine<-,swInputData-method}
-\alias{swReadLines,swInputData,character-method}
 \title{Class \code{"swInputData"}}
 \usage{
 swInputData(...)
@@ -642,8 +641,6 @@ swInputData(...)
 \S4method{deactivate_swOUT_OutKey}{swInputData}(object) <- value
 
 \S4method{swLog_setLine}{swInputData}(object) <- value
-
-\S4method{swReadLines}{swInputData,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -663,17 +660,15 @@ If dots are missing, then corresponding values of
 \var{SWC} \code{data} object.}
 
 \item{vegtype}{The name or index of the vegetation type.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
-This class is a container class to the input file \var{S4} objects. The
+This class is a container class to the input \var{S4} objects. The
 generic functions listed work on this and the proper \pkg{rSOILWAT2}
 classes in the container's slots.
 }
 \details{
-\code{\linkS4class{swInputData}} consists of slots for each file that is
-read in. These slots can be accessed via the following functions: \itemize{
+\code{\linkS4class{swInputData}} consists of slots for each input class.
+These slots can be accessed via the following functions: \itemize{
   \item \code{\link{get_swMarkov}}
   \item \code{\link{get_swCloud}}
   \item \code{\link{get_swFiles}}
