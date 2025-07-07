@@ -78,12 +78,8 @@ sw_out_flags <- function() {
 #' @param value A value to assign to a specific slot of the object.
 #' @param index An integer value. One of the four possible time steps.
 #'
-#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
-#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#'
+#' @seealso \code{\linkS4class{swInputData}}
 #'
 #' @examples
 #' showClass("swOutput_KEY")
@@ -179,12 +175,7 @@ setReplaceMethod(
 #' @param index An integer value. One of the four possible time steps.
 #' @param name A character string. The name of the of the slots of this class.
 #'
-#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
-#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#' @seealso \code{\linkS4class{swInputData}}
 #'
 #' @examples
 #' showClass("swOutput")

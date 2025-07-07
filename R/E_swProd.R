@@ -42,22 +42,7 @@ lc_names <- c(veg_names, "Bare Ground")
 #'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #' @param vegtype The name or index of the vegetation type.
 #'
-#' @seealso
-#' \code{\linkS4class{swInputData}}
-#' \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swYears}}
-#' \code{\linkS4class{swWeather}}
-#' \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}}
-#' \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}}
-#' \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swSpinup}}
-#' \code{\linkS4class{swEstab}}
-#' \code{\linkS4class{swOUT}}
-#' \code{\linkS4class{swCarbon}}
-#' \code{\linkS4class{swSWC}}
-#' \code{\linkS4class{swLog}}
+#' @seealso \code{\linkS4class{swInputData}}
 #'
 #' @examples
 #' showClass("swProd")

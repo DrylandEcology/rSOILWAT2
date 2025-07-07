@@ -104,12 +104,7 @@ swSWC_hist <- function(...) {
 #' @param year An integer value. The calendar year of the \var{SWC}
 #'   \code{data} object.
 #'
-#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
-#' \code{\linkS4class{swInputData}} \code{\linkS4class{swLog}}
+#' @seealso \code{\linkS4class{swInputData}}
 #'
 #' @examples
 #' showClass("swSWC")
