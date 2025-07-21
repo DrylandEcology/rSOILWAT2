@@ -274,14 +274,18 @@ setMethod(
     n_exp <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]
     n_has <- nrow(object@timeSteps)
 
-
     #--- Identify upgrade(s)
     # Maintenance:
     #   update `do_upgrade` when `n_exp` changes or new upgrades required!
     do_upgrade <- c(
-      from_v230 = n_has == 30L && n_exp %in% 31L:32L,
-      from_v310 = n_has == 31L && n_exp == 32L,
-      from_v630 = n_has == 32L && n_exp == 34L
+      # v230: `"SWA"` added as `outkey` 8 for a new total of 30
+      to_v230 = n_has <= 29L && n_exp >= 30L,
+      # v312: `"BIOMASS"` added as `outkey` 31 for a new total of 31
+      to_v312 = n_has <= 30L && n_exp >= 31L,
+      # v520: `"FROZEN"` added as `outkey` 28 for a new total of 32
+      to_v520 = n_has <= 31L && n_exp >= 32L,
+      # v640: `"DERIVEDSUM"` and `"DERIVEDAVG"` for a new total of 34
+      to_v640 = n_has <= 32L && n_exp >= 34L
     )
 
     do_upgrade <- do_upgrade[do_upgrade]
@@ -297,18 +301,23 @@ setMethod(
         if (verbose) {
           message(
             "Upgrading object of class `swOUT`: ",
-            shQuote(names(do_upgrade)[k])
+            shQuote(names(do_upgrade)[[k]])
           )
         }
 
         # Maintenance: update `switch` when `n_exp` changes!
-        id_new <- switch(
-          EXPR = names(do_upgrade)[k],
-          from_v230 = n_exp,
-          from_v310 = 28L,
-          from_v630 = 33L:34L,
+        ids_new <- switch(
+          EXPR = names(do_upgrade)[[k]],
+          # v230: `"SWA"` added as `outkey` 8 for a new total of 30
+          to_v230 = 8L,
+          # v312: `"BIOMASS"` added as `outkey` 31 for a new total of 31
+          to_v312 = 31L,
+          # v520: `"FROZEN"` added as `outkey` 28 for a new total of 32
+          to_v520 = 28L,
+          # v640: `"DERIVEDSUM"` and `"DERIVEDAVG"` for a new total of 34
+          to_v640 = 33L:34L,
           stop(
-            "Upgrade ", shQuote(names(do_upgrade)[k]),
+            "Upgrade ", shQuote(names(do_upgrade)[[k]]),
             " is not implemented for class `swOUT`.",
             call. = FALSE
           )
@@ -328,18 +337,18 @@ setMethod(
         )
         id <- which(!has_missing)
         tmp_new <- if (length(id) > 0) {
-          tmp[id[[1L]], , drop = FALSE]
+          tmp[rep_len(id, length(ids_new)), , drop = FALSE]
         } else {
-          target@timeSteps[id_new, , drop = FALSE]
+          target@timeSteps[ids_new, , drop = FALSE]
         }
 
         object@timeSteps <- rbind(
-          if (id_new > 1L) {
-            tmp[1L:(id_new - 1L), , drop = FALSE]
+          if (ids_new[[1L]] > 1L) {
+            tmp[1L:(ids_new[[1L]] - 1L), , drop = FALSE]
           },
           tmp_new,
-          if (id_new <= n_has) {
-            tmp[id_new:n_has, , drop = FALSE]
+          if (max(ids_new) <= n_has) {
+            tmp[max(ids_new):n_has, , drop = FALSE]
           }
         )
 
@@ -353,18 +362,16 @@ setMethod(
         for (sn in list_keys) {
           tmp <- slot(object, sn)
           slot(object, sn) <- c(
-            if (id_new > 1L) {
-              tmp[1L:(id_new - 1L)]
+            if (ids_new[[1L]] > 1L) {
+              tmp[1L:(ids_new[[1L]] - 1L)]
             },
-            slot(target, sn)[id_new],
-            if (id_new <= n_has) {
-              tmp[id_new:n_has]
+            slot(target, sn)[ids_new],
+            if (max(ids_new) <= n_has) {
+              tmp[max(ids_new):n_has]
             }
           )
         }
-
       }
-
 
       #--- Check validity and return
       validObject(object)

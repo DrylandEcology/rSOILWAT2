@@ -159,7 +159,7 @@ new slot \code{"vegType"}
 \item class \code{\linkS4class{swOUT}}:
 \code{"FROZEN"} added as \code{outkey} 28 for a new total of 32
 }
-\item Changes with \code{v3.1.0}:
+\item Changes with \code{v3.1.2}:
 \itemize{
 \item class \code{\linkS4class{swOUT}}:
 \code{"BIOMASS"} added as \code{outkey} 31 for a new total of 31

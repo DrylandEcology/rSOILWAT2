@@ -18,7 +18,7 @@ test_that("Upgrade old rSOILWAT2 input objects", {
 
   # Upgrade `swInputData`
   for (k in seq_along(fnames_vdata)) {
-    xold <- readRDS(fnames_vdata[k])
+    xold <- readRDS(fnames_vdata[[k]])
 
     if (!suppressWarnings(check_version(xold))) {
       expect_error(validObject(xold))

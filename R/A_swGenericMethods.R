@@ -244,7 +244,7 @@ format_timestamp <- function(object) {
 #'   * Changes with `v5.2.0`:
 #'       * class [`swOUT-class`]:
 #'         `"FROZEN"` added as `outkey` 28 for a new total of 32
-#'   * Changes with `v3.1.0`:
+#'   * Changes with `v3.1.2`:
 #'       * class [`swOUT-class`]:
 #'         `"BIOMASS"` added as `outkey` 31 for a new total of 31
 #'   * Changes with `v2.3.0`:
