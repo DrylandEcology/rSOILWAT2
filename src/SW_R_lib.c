@@ -277,7 +277,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   #ifdef RSWDEBUG
   if (debug) sw_printf(" init simulation run ...\n");
   #endif
-  SW_CTL_init_run(&SoilWatRun, swTRUE, &local_LogInfo);
+  SW_CTL_init_run(&SoilWatRun, &local_LogInfo);
   if(local_LogInfo.stopRun) {
     goto report;
   }
@@ -497,7 +497,7 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
 	#ifdef RSWDEBUG
 	if (debug) sw_printf(" init simulation run ...");
 	#endif
-	SW_CTL_init_run(&SoilWatRun, swTRUE, &local_LogInfo);
+	SW_CTL_init_run(&SoilWatRun, &local_LogInfo);
     if(local_LogInfo.stopRun) {
         goto report;
     }

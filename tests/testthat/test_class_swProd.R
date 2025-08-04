@@ -60,14 +60,6 @@ test_that("Manipulate 'swProd' class", {
       swProd_MonProd_veg(xinv, names_VegTypes[1 + k])
     )
 
-    # veg-type named version
-    f <- utils::getFromNamespace(
-      paste0("swProd_MonProd_", names_VegTypes2[1 + k]),
-      ns = "rSOILWAT2"
-    )
-    expect_equal(f(xinput), f(xinv))
-    expect_equal(swProd_MonProd_veg(xinv, 1 + k), f(xinv))
-
     #--- replacement methods failures
     data_fail <- matrix(NA, 10, 2)
 
@@ -76,13 +68,6 @@ test_that("Manipulate 'swProd' class", {
 
     expect_error(swProd_MonProd_veg(xinput, names_VegTypes[1 + k]) <- data_fail)
     expect_error(swProd_MonProd_veg(xinv, names_VegTypes[1 + k]) <- data_fail)
-
-    fr <- utils::getFromNamespace(
-      paste0("swProd_MonProd_", names_VegTypes2[1 + k], "<-"),
-      ns = "rSOILWAT2"
-    )
-    expect_error(fr(xinput, data_fail))
-    expect_error(fr(xinv, data_fail))
 
     #--- replacement methods
     data_good <- swProd_MonProd_veg(xinv, 1 + k)
@@ -98,8 +83,5 @@ test_that("Manipulate 'swProd' class", {
     expect_equal(xinput, xinput_ref)
     swProd_MonProd_veg(xinv, names_VegTypes[1 + k]) <- data_good
     expect_equal(xinv, xinv_ref)
-
-    expect_equal(fr(xinput, data_good), xinput_ref)
-    expect_equal(fr(xinv, data_good), xinv_ref)
   }
 })

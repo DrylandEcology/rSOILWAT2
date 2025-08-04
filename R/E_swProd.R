@@ -475,54 +475,6 @@ setMethod(
 
 #' @rdname swProd-class
 #' @export
-setMethod(
-  "swProd_MonProd_grass",
-  "swProd",
-  function(object) {
-    object@MonthlyVeg[[
-      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]
-    ]]
-  }
-)
-
-#' @rdname swProd-class
-#' @export
-setMethod(
-  "swProd_MonProd_shrub",
-  "swProd",
-  function(object) {
-    object@MonthlyVeg[[
-      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]
-    ]]
-  }
-)
-
-#' @rdname swProd-class
-#' @export
-setMethod(
-  "swProd_MonProd_tree",
-  "swProd",
-  function(object) {
-    object@MonthlyVeg[[
-      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]
-    ]]
-  }
-)
-
-#' @rdname swProd-class
-#' @export
-setMethod(
-  "swProd_MonProd_forb",
-  "swProd",
-  function(object) {
-    object@MonthlyVeg[[
-      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]
-    ]]
-  }
-)
-
-#' @rdname swProd-class
-#' @export
 setReplaceMethod(
   "set_swProd",
   signature = "swProd",
@@ -709,54 +661,6 @@ setReplaceMethod(
       names(rSW2_glovars[["kSOILWAT2"]][["VegTypes"]]),
       ignore.case = TRUE
     )
-    swProd_MonProd_veg(object, id_vegtype) <- value
-    object
-  }
-)
-
-#' @rdname swProd-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_grass",
-  signature = "swProd",
-  function(object, value) {
-    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]
-    swProd_MonProd_veg(object, id_vegtype) <- value
-    object
-  }
-)
-
-#' @rdname swProd-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_shrub",
-  signature = "swProd",
-  function(object, value) {
-    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]
-    swProd_MonProd_veg(object, id_vegtype) <- value
-    object
-  }
-)
-
-#' @rdname swProd-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_tree",
-  signature = "swProd",
-  function(object, value) {
-    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]
-    swProd_MonProd_veg(object, id_vegtype) <- value
-    object
-  }
-)
-
-#' @rdname swProd-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_forb",
-  signature = "swProd",
-  function(object, value) {
-    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]
     swProd_MonProd_veg(object, id_vegtype) <- value
     object
   }

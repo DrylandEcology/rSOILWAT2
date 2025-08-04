@@ -344,7 +344,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
 #'
 #' @examples
 #' sw_in <- rSOILWAT2::sw_exampleData
-#' tmp <- swProd_MonProd_grass(sw_in)
+#' tmp <- swProd_MonProd_veg(sw_in, "SW_GRASS")
 #' phen_reference <- data.frame(
 #'   tmp,
 #'   Litter_pct = tmp[, "Litter"] / max(tmp[, "Litter"]),

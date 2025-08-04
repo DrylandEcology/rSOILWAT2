@@ -520,8 +520,8 @@ data from `DayMet`
   # Note: monthly biomass values of forbs, trees, etc. need to be estimated
   v1 <- c("Litter", "Biomass", "Perc.Live")
   v2 <- c("Litter", "Biomass", "Live_pct")
-  rSOILWAT2::swProd_MonProd_grass(sw_in)[, v2] <- veg_biom[["grass"]][, v1]
-  rSOILWAT2::swProd_MonProd_shrub(sw_in)[, v2] <- veg_biom[["shrub"]][, v1]
+  rSOILWAT2::swProd_MonProd_veg(sw_in, "SW_GRASS")[, v2] <- veg_biom[["grass"]][, v1]
+  rSOILWAT2::swProd_MonProd_veg(sw_in, "SW_SHRUB")[, v2] <- veg_biom[["shrub"]][, v1]
 ```
 
 

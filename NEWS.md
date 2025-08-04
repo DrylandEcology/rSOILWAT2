@@ -26,6 +26,8 @@
   `"isBiomAsIf100Cover"` identifying the spatial reference of biomass inputs.
 * The class `"swWeather"` gained slot `"correctWeatherValues"` that specifies
   which corrections are applied to problematic weather inputs.
+* Methods to replace/access biomass values for a specific plant functional type
+  are deprecated.
 
 
 # rSOILWAT2 v6.3.1

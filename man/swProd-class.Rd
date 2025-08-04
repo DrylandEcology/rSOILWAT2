@@ -19,10 +19,6 @@
 \alias{swProd_CO2Coefficients,swProd-method}
 \alias{swProd_MonProd_veg,swProd,numeric-method}
 \alias{swProd_MonProd_veg,swProd,character-method}
-\alias{swProd_MonProd_grass,swProd-method}
-\alias{swProd_MonProd_shrub,swProd-method}
-\alias{swProd_MonProd_tree,swProd-method}
-\alias{swProd_MonProd_forb,swProd-method}
 \alias{set_swProd<-,swProd-method}
 \alias{swProd_Composition<-,swProd-method}
 \alias{swProd_Albedo<-,swProd-method}
@@ -38,10 +34,6 @@
 \alias{swProd_CO2Coefficients<-,swProd-method}
 \alias{swProd_MonProd_veg<-,swProd,numeric,matrix-method}
 \alias{swProd_MonProd_veg<-,swProd,character,matrix-method}
-\alias{swProd_MonProd_grass<-,swProd-method}
-\alias{swProd_MonProd_shrub<-,swProd-method}
-\alias{swProd_MonProd_tree<-,swProd-method}
-\alias{swProd_MonProd_forb<-,swProd-method}
 \title{Class \code{"swProd"}}
 \usage{
 swProd(...)
@@ -76,14 +68,6 @@ swProd(...)
 
 \S4method{swProd_MonProd_veg}{swProd,character}(object, vegtype)
 
-\S4method{swProd_MonProd_grass}{swProd}(object)
-
-\S4method{swProd_MonProd_shrub}{swProd}(object)
-
-\S4method{swProd_MonProd_tree}{swProd}(object)
-
-\S4method{swProd_MonProd_forb}{swProd}(object)
-
 \S4method{set_swProd}{swProd}(object) <- value
 
 \S4method{swProd_Composition}{swProd}(object) <- value
@@ -113,14 +97,6 @@ swProd(...)
 \S4method{swProd_MonProd_veg}{swProd,numeric,matrix}(object, vegtype) <- value
 
 \S4method{swProd_MonProd_veg}{swProd,character,matrix}(object, vegtype) <- value
-
-\S4method{swProd_MonProd_grass}{swProd}(object) <- value
-
-\S4method{swProd_MonProd_shrub}{swProd}(object) <- value
-
-\S4method{swProd_MonProd_tree}{swProd}(object) <- value
-
-\S4method{swProd_MonProd_forb}{swProd}(object) <- value
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.

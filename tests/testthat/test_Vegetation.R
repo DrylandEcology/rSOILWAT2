@@ -370,13 +370,13 @@ test_that("Vegetation: estimate land cover composition", {
 
 test_that("Vegetation: adjust phenology", {
   phen_in <- list()
-  phen_in[["x1n"]] <- swProd_MonProd_grass(sw_exampleData)
-  phen_in[["x11"]] <- phen_in[["x1n"]][, 2]
+  phen_in[["x1n"]] <- swProd_MonProd_veg(sw_exampleData, "SW_GRASS")
+  phen_in[["x11"]] <- phen_in[["x1n"]][, 2L]
   phen_in[["xnn"]] <- list(
-    swProd_MonProd_forb(sw_exampleData),
-    swProd_MonProd_grass(sw_exampleData),
-    swProd_MonProd_shrub(sw_exampleData),
-    swProd_MonProd_tree(sw_exampleData)
+    swProd_MonProd_veg(sw_exampleData, "SW_FORBS"),
+    swProd_MonProd_veg(sw_exampleData, "SW_GRASS"),
+    swProd_MonProd_veg(sw_exampleData, "SW_SHRUB"),
+    swProd_MonProd_veg(sw_exampleData, "SW_TREE")
   )
 
   phen_in <- lapply(phen_in, as.data.frame)

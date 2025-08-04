@@ -1494,42 +1494,6 @@ setGeneric(
   function(object, vegtype) standardGeneric("swProd_MonProd_veg")
 )
 
-#' \code{swProd_MonProd_grass}
-#' @param object An object of class \code{\linkS4class{swProd}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
-setGeneric(
-  "swProd_MonProd_grass",
-  function(object) standardGeneric("swProd_MonProd_grass")
-)
-
-#' \code{swProd_MonProd_shrub}
-#' @param object An object of class \code{\linkS4class{swProd}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
-setGeneric(
-  "swProd_MonProd_shrub",
-  function(object) standardGeneric("swProd_MonProd_shrub")
-)
-
-#' \code{swProd_MonProd_tree}
-#' @param object An object of class \code{\linkS4class{swProd}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
-setGeneric(
-  "swProd_MonProd_tree",
-  function(object) standardGeneric("swProd_MonProd_tree")
-)
-
-#' \code{swProd_MonProd_forb}
-#' @param object An object of class \code{\linkS4class{swProd}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
-setGeneric(
-  "swProd_MonProd_forb",
-  function(object) standardGeneric("swProd_MonProd_forb")
-)
-
 # Need to define and export this generic method -- otherwise,
 # \code{\link{set_swProd<-}} doesn't work.
 #' \code{set_swProd}
@@ -1681,45 +1645,6 @@ setGeneric(
   function(object, vegtype, value) standardGeneric("swProd_MonProd_veg<-")
 )
 
-#' \code{swProd_MonProd_grass<-}
-#' @param object An object of class \code{\linkS4class{swProd}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
-#' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
-setGeneric(
-  "swProd_MonProd_grass<-",
-  function(object, value) standardGeneric("swProd_MonProd_grass<-")
-)
-
-#' \code{swProd_MonProd_shrub<-}
-#' @param object An object of class \code{\linkS4class{swProd}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
-#' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
-setGeneric(
-  "swProd_MonProd_shrub<-",
-  function(object, value) standardGeneric("swProd_MonProd_shrub<-")
-)
-
-#' \code{swProd_MonProd_tree<-}
-#' @param object An object of class \code{\linkS4class{swProd}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
-#' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
-setGeneric(
-  "swProd_MonProd_tree<-",
-  function(object, value) standardGeneric("swProd_MonProd_tree<-")
-)
-
-#' \code{swProd_MonProd_forb<-}
-#' @param object An object of class \code{\linkS4class{swProd}} or
-#'   \code{\linkS4class{swInputData}}.
-#' @param value A value to assign to a specific slot of the \code{object}.
-#' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
-setGeneric(
-  "swProd_MonProd_forb<-",
-  function(object, value) standardGeneric("swProd_MonProd_forb<-")
-)
 ########################
 
 #######SITE#############

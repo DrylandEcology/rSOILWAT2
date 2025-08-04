@@ -1407,38 +1407,6 @@ setMethod(
   function(object, vegtype) swProd_MonProd_veg(object@prod, vegtype)
 )
 
-#' @rdname swInputData-class
-#' @export
-setMethod(
-  "swProd_MonProd_grass",
-  signature = "swInputData",
-  function(object) swProd_MonProd_grass(object@prod)
-)
-
-#' @rdname swInputData-class
-#' @export
-setMethod(
-  "swProd_MonProd_shrub",
-  signature = "swInputData",
-  function(object) swProd_MonProd_shrub(object@prod)
-)
-
-#' @rdname swInputData-class
-#' @export
-setMethod(
-  "swProd_MonProd_tree",
-  signature = "swInputData",
-  function(object) swProd_MonProd_tree(object@prod)
-)
-
-#' @rdname swInputData-class
-#' @export
-setMethod(
-  "swProd_MonProd_forb",
-  signature = "swInputData",
-  function(object) swProd_MonProd_forb(object@prod)
-)
-
 
 #' @rdname swInputData-class
 #' @export
@@ -1590,50 +1558,6 @@ setReplaceMethod(
   signature = "swInputData",
   function(object, vegtype, value) {
     swProd_MonProd_veg(object@prod, vegtype) <- value
-    object
-  }
-)
-
-#' @rdname swInputData-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_grass",
-  signature = "swInputData",
-  function(object, value) {
-    swProd_MonProd_grass(object@prod) <- value
-    object
-  }
-)
-
-#' @rdname swInputData-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_shrub",
-  signature = "swInputData",
-  function(object, value) {
-    swProd_MonProd_shrub(object@prod) <- value
-    object
-  }
-)
-
-#' @rdname swInputData-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_tree",
-  signature = "swInputData",
-  function(object, value) {
-    swProd_MonProd_tree(object@prod) <- value
-    object
-  }
-)
-
-#' @rdname swInputData-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_forb",
-  signature = "swInputData",
-  function(object, value) {
-    swProd_MonProd_forb(object@prod) <- value
     object
   }
 )
