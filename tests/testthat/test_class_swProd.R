@@ -10,13 +10,13 @@ test_that("Test data availability", {
 
 
 #---TESTS
-test_that("Manipulate 'swProd' class", {
-  ids_VegType <- rSW2_glovars[["kSOILWAT2"]][["VegTypes"]]
+test_that("Manipulate 'swProd2' class", {
+  ids_VegType <- 1L + rSW2_glovars[["kSOILWAT2"]][["VegTypes2"]]
   names_VegTypes <- tolower(
     gsub(
       "SW_",
       "",
-      names(rSW2_glovars[["kSOILWAT2"]][["VegTypes"]]),
+      names(rSW2_glovars[["kSOILWAT2"]][["VegTypes2"]]),
       fixed = TRUE
     )
   )
@@ -33,15 +33,15 @@ test_that("Manipulate 'swProd' class", {
   )
 
 
-  x <- new("swProd")
-  expect_s4_class(x, "swProd")
+  x <- new("swProd2")
+  expect_s4_class(x, "swProd2")
 
-  # Tests for the 'swProd' slot of signature 'swInputData'
+  # Tests for the 'swProd2' slot of signature 'swInputData'
   xinput <- xinput2 <- swInputData()
-  expect_s4_class(get_swProd(xinput), "swProd")
+  expect_s4_class(get_swProd(xinput), "swProd2")
 
   x1 <- get_swProd(xinput)
-  x2 <- swProd()
+  x2 <- swProd2()
   expect_equal(x1, x2)
   set_swProd(xinput2) <- x1
   expect_equal(xinput, xinput2)
@@ -54,48 +54,48 @@ test_that("Manipulate 'swProd' class", {
     #--- extraction methods
     # integer-index version
     expect_equal(
-      swProd_MonProd_veg(xinput, 1 + k),
-      swProd_MonProd_veg(xinv, 1 + k)
+      swProd_MonProd_veg(xinput, k),
+      swProd_MonProd_veg(xinv, k)
     )
 
     # character-index version
     expect_equal(
-      swProd_MonProd_veg(xinput, names_VegTypes[1 + k]),
-      swProd_MonProd_veg(xinv, names_VegTypes[1 + k])
+      swProd_MonProd_veg(xinput, names_VegTypes[k]),
+      swProd_MonProd_veg(xinv, names_VegTypes[k])
     )
     expect_equal(
-      swProd_MonProd_veg(xinv, 1 + k),
-      swProd_MonProd_veg(xinv, names_VegTypes[1 + k])
+      swProd_MonProd_veg(xinv, k),
+      swProd_MonProd_veg(xinv, names_VegTypes[k])
     )
 
     #--- replacement methods failures
     data_fail <- matrix(NA, 10, 2)
 
-    expect_error(swProd_MonProd_veg(xinput, 1 + k) <- data_fail)
-    expect_error(swProd_MonProd_veg(xinv, 1 + k) <- data_fail)
+    expect_error(swProd_MonProd_veg(xinput, k) <- data_fail)
+    expect_error(swProd_MonProd_veg(xinv, k) <- data_fail)
 
-    expect_error(swProd_MonProd_veg(xinput, names_VegTypes[1 + k]) <- data_fail)
-    expect_error(swProd_MonProd_veg(xinv, names_VegTypes[1 + k]) <- data_fail)
+    expect_error(swProd_MonProd_veg(xinput, names_VegTypes[k]) <- data_fail)
+    expect_error(swProd_MonProd_veg(xinv, names_VegTypes[k]) <- data_fail)
 
     #--- replacement methods
-    data_good <- swProd_MonProd_veg(xinv, 1 + k)
+    data_good <- swProd_MonProd_veg(xinv, k)
     xinput_ref <- xinput
     xinv_ref <- xinv
 
-    swProd_MonProd_veg(xinput, 1 + k) <- data_good
+    swProd_MonProd_veg(xinput, k) <- data_good
     expect_equal(xinput, xinput_ref)
-    swProd_MonProd_veg(xinv, 1 + k) <- data_good
+    swProd_MonProd_veg(xinv, k) <- data_good
     expect_equal(xinv, xinv_ref)
 
-    swProd_MonProd_veg(xinput, names_VegTypes[1 + k]) <- data_good
+    swProd_MonProd_veg(xinput, names_VegTypes[k]) <- data_good
     expect_equal(xinput, xinput_ref)
-    swProd_MonProd_veg(xinv, names_VegTypes[1 + k]) <- data_good
+    swProd_MonProd_veg(xinv, names_VegTypes[k]) <- data_good
     expect_equal(xinv, xinv_ref)
   }
 })
 
 
-test_that("Run 'rSOILWAT2' with different 'swProd' inputs", {
+test_that("Run 'rSOILWAT2' with different 'swProd2' inputs", {
   it <- tests[[1L]]
 
   #---INPUTS
@@ -109,7 +109,7 @@ test_that("Run 'rSOILWAT2' with different 'swProd' inputs", {
 
   for (ftype in types) {
     # Set method
-    sw_input@prod@veg_method <- ftype
+    sw_input@prod2@veg_method <- ftype
 
     # Run SOILWAT
     res <- sw_exec(

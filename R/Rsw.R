@@ -508,10 +508,10 @@ set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE,
     }
 
     # Check dimensional agreement
-    ndim_gt1_vals <- sum(dim(data.frame(vals)) > 1)
-    ndim_gt1_def <- sum(dim(data.frame(def)) > 1)
+    ndim_gt1_vals <- sum(dim(data.frame(vals)) > 1L)
+    ndim_gt1_def <- sum(dim(data.frame(def)) > 1L)
 
-    if (!all(ndim_gt1_vals == 1, ndim_gt1_def == 1)) {
+    if (!all(ndim_gt1_vals == 1L, ndim_gt1_def == 1L)) {
       stop(
         "ERROR: ",
         toString(shQuote(val_names)),
@@ -522,13 +522,20 @@ set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE,
     }
 
     # Transfer values
-    itemp <- sapply(names(def), function(x) {
-      k <- grep(substr(x, 1, 4), val_names)
-      if (length(k) == 1) k else 0})
-    def[itemp > 0] <- vals[itemp]
+    nc <- max(nchar(rSW2_glovars[["kSOILWAT2"]][["VegTypeNames2"]]))
+
+    itemp <- vapply(
+      names(def),
+      function(x) {
+        k <- grep(substr(x, 1L, nc), val_names)
+        if (length(k) == 1L) k else 0L
+      },
+      FUN.VALUE = NA_integer_
+    )
+    def[itemp > 0L] <- vals[itemp]
 
     if (reset) {
-      def[itemp == 0] <- default
+      def[itemp == 0L] <- default
     }
 
     swIn <- get(paste0(fun, "<-"))(swIn, def)

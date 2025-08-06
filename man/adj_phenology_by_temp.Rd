@@ -74,7 +74,7 @@ Adjusted values are destandardized before returning.
 
 \examples{
 sw_in <- rSOILWAT2::sw_exampleData
-tmp <- swProd_MonProd_veg(sw_in, "SW_GRASS")
+tmp <- swProd_MonProd_veg(sw_in, namesVegTypes("v2")[[5L]])
 phen_reference <- data.frame(
   tmp,
   Litter_pct = tmp[, "Litter"] / max(tmp[, "Litter"]),

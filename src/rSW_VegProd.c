@@ -41,14 +41,24 @@ vegetation production parameter information.
 /*                  Local Variables                    */
 /* --------------------------------------------------- */
 static char *cVegProd_names[] = {
-	"veg_method", 
-	"nYearsDynamicShort", 
-	"nYearsDynamicLong", 
-	"Composition", "Albedo", "CanopyHeight",
-	"VegetationInterceptionParameters", "LitterInterceptionParameters",
-	"EsTpartitioning_param", "Es_param_limit", "Shade", "HydraulicRedistribution_use",
-	"HydraulicRedistribution", "CriticalSoilWaterPotential", "MonthlyVeg",
-	"CO2Coefficients", "vegYear", "isBiomAsIf100Cover"
+	"veg_method",
+	"nYearsDynamicShort",
+	"nYearsDynamicLong",
+	"Composition", 
+    "Albedo", 
+    "CanopyHeight",
+	"VegetationInterceptionParameters", 
+    "LitterInterceptionParameters",
+	"EsTpartitioning_param", 
+    "Es_param_limit", 
+    "Shade", 
+    "HydraulicRedistribution_use",
+	"HydraulicRedistribution", 
+    "CriticalSoilWaterPotential", 
+    "MonthlyVeg",
+	"CO2Coefficients", 
+    "vegYear", 
+    "isBiomAsIf100Cover"
 };
 
 char *cMonths[] = {
@@ -62,101 +72,65 @@ char *cMonths[] = {
 /* --------------------------------------------------- */
 
 SEXP onGet_SW_VPD(void) {
-	int i;
-	SW_VEGPROD_INPUTS *vi = &SoilWatRun.VegProdIn;
-	SW_VEGPROD_RUN_INPUTS *v = &SoilWatRun.RunIn.VegProdRunIn;
-	SEXP swProd;
-	SEXP VegProd;
+    int i;
+    int k;
+    SW_VEGPROD_INPUTS *vi = &SoilWatRun.VegProdIn;
+    SW_VEGPROD_RUN_INPUTS *v = &SoilWatRun.RunIn.VegProdRunIn;
+    SEXP swProd2;
+    SEXP VegProd;
 
-	SEXP VegComp, VegComp_names, vegtype_names, col_names;
-	SEXP Albedo, veg_method;
+    SEXP VegComp, LandCover_names, vegtype_names;
+    SEXP Albedo, veg_method;
     SEXP nYearsDynamicShort;
 	SEXP nYearsDynamicLong;
 
-	SEXP Canopy, Canopy_names, Canopy_names_x;
-	char *cCanopy_names_x[] = { "xinflec", "yinflec", "range", "slope", "height_cm" };
-	double *p_Canopy;
+    SEXP Canopy, Canopy_names, Canopy_names_x;
+    char *cCanopy_names_x[] = { "xinflec", "yinflec", "range", "slope", "height_cm" };
+    double *p_Canopy;
 
-	SEXP VegInterception, VegInterception_names, VegInterception_names_x;
-	char *cVegInterception_x[] = { "kSmax", "kdead" };
-	double *p_VegInterception;
+    SEXP VegInterception, VegInterception_names, VegInterception_names_x;
+    char *cVegInterception_x[] = { "kSmax", "kdead" };
+    double *p_VegInterception;
 
-	SEXP LitterInterception, LitterInterception_names, LitterInterception_names_x;
-	char *cLitterInterception_x[] = { "kSmax" };
-	double *p_LitterInterception;
+    SEXP LitterInterception, LitterInterception_names, LitterInterception_names_x;
+    char *cLitterInterception_x[] = { "kSmax" };
+    double *p_LitterInterception;
 
-	SEXP EsTpartitioning_param;
-	SEXP Es_param_limit;
+    SEXP EsTpartitioning_param;
+    SEXP Es_param_limit;
 
-	SEXP Shade, Shade_names, Shade_names_x;
-	char *cShade_names_x[] = { "ShadeScale", "ShadeMaximalDeadBiomass", "tanfuncXinflec", "yinflec", "range", "slope" };
-	double *p_Shade;
+    SEXP Shade, Shade_names, Shade_names_x;
+    char *cShade_names_x[] = { "ShadeScale", "ShadeMaximalDeadBiomass", "tanfuncXinflec", "yinflec", "range", "slope" };
+    double *p_Shade;
 
-	SEXP Hydraulic_flag;//"Flag"
-	SEXP Hydraulic, Hydraulic_names, Hydraulic_names_x;
-	double *p_Hydraulic;
-	char *cHydraulic_names[] = { "MaxCondRoot", "SoilWaterPotential50", "ShapeCond" };
+    SEXP Hydraulic_flag;//"Flag"
+    SEXP Hydraulic, Hydraulic_names, Hydraulic_names_x;
+    double *p_Hydraulic;
+    char *cHydraulic_names[] = { "MaxCondRoot", "SoilWaterPotential50", "ShapeCond" };
 
-	SEXP CSWP;
+    SEXP CSWP;
 
-	SEXP VegYear;
-	SEXP IsBiomAsIf100Cover;
+    SEXP VegYear;
+    SEXP IsBiomAsIf100Cover;
 
-	SEXP MonthlyVeg;
-	SEXP Grasslands, Grasslands_names;
-	SEXP Shrublands, Shrublands_names;
-	SEXP Forest, Forest_names;
-	SEXP Forb, Forb_names;
+    SEXP CO2Coefficients, CO2_names, CO2_col_names;
+    double *p_CO2Coefficients;
+    char *cCO2_col_names[] = { "Biomass Coeff1", "Biomass Coeff2", "WUE Coeff1", "WUE Coeff2" };
 
-	char *cvegtype_names[] = { "Grasses", "Shrubs", "Trees", "Forbs" };
-	PROTECT(vegtype_names = allocVector(STRSXP, NVEGTYPES));
-	for (i = 0; i < NVEGTYPES; i++)
-		SET_STRING_ELT(vegtype_names, i, mkChar(cvegtype_names[i]));
+    SEXP MonthlyVeg, MonthlyVeg_names;
+    SEXP monBiomass;
+    double *p_monBiomass;
 
-	/* CO2 */
-	// Initialize variables
-	SEXP CO2Coefficients, CO2_names, CO2_col_names;
-	double *p_CO2Coefficients;
+    PROTECT(vegtype_names = allocVector(STRSXP, NVEGTYPES));
+    for (k = 0; k < NVEGTYPES; k++) {
+        SET_STRING_ELT(vegtype_names, k, mkChar(key2veg[k]));
+    }
 
-	// Create row and column names
-	char *cCO2_col_names[] = { "Biomass Coeff1", "Biomass Coeff2", "WUE Coeff1", "WUE Coeff2" };
-	PROTECT(CO2_col_names = allocVector(STRSXP, 4));
-	for (i = 0; i < 4; i++)
-		SET_STRING_ELT(CO2_col_names, i, mkChar(cCO2_col_names[i]));
+    SEXP MonthlyVeg_Column_names, MonthlyVeg_Row_names;
+    char *cMonthlyVeg_Column_names[] = { "Litter", "Biomass", "Live_pct", "LAI_conv" };
 
-	// Create matrix containing the multipliers
-	PROTECT(CO2Coefficients = allocMatrix(REALSXP, NVEGTYPES, 4));
-	p_CO2Coefficients = REAL(CO2Coefficients);
-	p_CO2Coefficients[0] = vi->veg[SW_GRASS].co2_bio_coeff1;
-	p_CO2Coefficients[1] = vi->veg[SW_SHRUB].co2_bio_coeff1;
-	p_CO2Coefficients[2] = vi->veg[SW_TREES].co2_bio_coeff1;
-	p_CO2Coefficients[3] = vi->veg[SW_FORBS].co2_bio_coeff1;
-	p_CO2Coefficients[4] = vi->veg[SW_GRASS].co2_bio_coeff2;
-	p_CO2Coefficients[5] = vi->veg[SW_SHRUB].co2_bio_coeff2;
-	p_CO2Coefficients[6] = vi->veg[SW_TREES].co2_bio_coeff2;
-	p_CO2Coefficients[7] = vi->veg[SW_FORBS].co2_bio_coeff2;
-	p_CO2Coefficients[8] = vi->veg[SW_GRASS].co2_wue_coeff1;
-	p_CO2Coefficients[9] = vi->veg[SW_SHRUB].co2_wue_coeff1;
-	p_CO2Coefficients[10] = vi->veg[SW_TREES].co2_wue_coeff1;
-	p_CO2Coefficients[11] = vi->veg[SW_FORBS].co2_wue_coeff1;
-	p_CO2Coefficients[12] = vi->veg[SW_GRASS].co2_wue_coeff2;
-	p_CO2Coefficients[13] = vi->veg[SW_SHRUB].co2_wue_coeff2;
-	p_CO2Coefficients[14] = vi->veg[SW_TREES].co2_wue_coeff2;
-	p_CO2Coefficients[15] = vi->veg[SW_FORBS].co2_wue_coeff2;
 
-	// Integrate values with names
-	PROTECT(CO2_names = allocVector(VECSXP, 2));
-	SET_VECTOR_ELT(CO2_names, 1, CO2_col_names);
-	SET_VECTOR_ELT(CO2_names, 0, vegtype_names);
-	setAttrib(CO2Coefficients, R_DimNamesSymbol, CO2_names);
-
-	double *p_Grasslands, *p_Shrublands, *p_Forest, *p_Forb;
-	SEXP MonthlyVeg_Column_names, MonthlyVeg_Row_names;
-	char *cMonthlyVeg_Column_names[] = { "Litter", "Biomass", "Live_pct", "LAI_conv" };
-
-	PROTECT(swProd = MAKE_CLASS("swProd"));
-	PROTECT(VegProd = NEW_OBJECT(swProd));
-
+    /* Get values for slot: veg_method */
     PROTECT(veg_method = NEW_INTEGER(1));
     INTEGER(veg_method)[0] = vi->veg_method;
 
@@ -168,254 +142,219 @@ SEXP onGet_SW_VPD(void) {
     PROTECT(nYearsDynamicLong = NEW_INTEGER(1));
     INTEGER(nYearsDynamicLong)[0] = vi->nYearsDynamicLong;
 
-	PROTECT(VegComp = allocVector(REALSXP, NVEGTYPES + 1));
-	REAL(VegComp)[0] = v->veg[SW_GRASS].cov.fCover; //Grass
-	REAL(VegComp)[1] = v->veg[SW_SHRUB].cov.fCover; //Shrub
-	REAL(VegComp)[2] = v->veg[SW_TREES].cov.fCover; //Tree
-	REAL(VegComp)[3] = v->veg[SW_FORBS].cov.fCover; //forb
-	REAL(VegComp)[4] = v->bare_cov.fCover; //Bare Ground
 
-	PROTECT(VegComp_names = allocVector(STRSXP, NVEGTYPES + 1));
-	SET_STRING_ELT(VegComp_names, 0, mkChar("Grasses"));
-	SET_STRING_ELT(VegComp_names, 1, mkChar("Shrubs"));
-	SET_STRING_ELT(VegComp_names, 2, mkChar("Trees"));
-	SET_STRING_ELT(VegComp_names, 3, mkChar("Forbs"));
-	SET_STRING_ELT(VegComp_names, 4, mkChar("Bare Ground"));
-	setAttrib(VegComp, R_NamesSymbol, VegComp_names);
+    /* Get values for slot: Composition */
+    PROTECT(VegComp = allocVector(REALSXP, NVEGTYPES + 1));
+    for (k = 0; k < NVEGTYPES; k++) {
+        REAL(VegComp)[k] = v->veg[k].cov.fCover;
+    }
+    REAL(VegComp)[NVEGTYPES] = v->bare_cov.fCover;
 
-	PROTECT(Albedo = allocVector(REALSXP, NVEGTYPES + 1));
-	REAL(Albedo)[0] = vi->veg[SW_GRASS].cov.albedo; //Grass
-	REAL(Albedo)[1] = vi->veg[SW_SHRUB].cov.albedo; //Shrub
-	REAL(Albedo)[2] = vi->veg[SW_TREES].cov.albedo; //Tree
-	REAL(Albedo)[3] = vi->veg[SW_FORBS].cov.albedo; //forb
-	REAL(Albedo)[4] = vi->bare_cov.albedo; //bare ground
-	setAttrib(Albedo, R_NamesSymbol, VegComp_names);
+    PROTECT(LandCover_names = allocVector(STRSXP, NVEGTYPES + 1));
+    for (k = 0; k < NVEGTYPES; k++) {
+        SET_STRING_ELT(LandCover_names, k, mkChar(key2veg[k]));
+    }
+    SET_STRING_ELT(LandCover_names, NVEGTYPES, mkChar("Bare Ground"));
+    setAttrib(VegComp, R_NamesSymbol, LandCover_names);
 
-	PROTECT(Canopy = allocMatrix(REALSXP, 5, NVEGTYPES));
-	p_Canopy = REAL(Canopy);
-	p_Canopy[0] = vi->veg[SW_GRASS].cnpy.xinflec;
-	p_Canopy[1] = vi->veg[SW_GRASS].cnpy.yinflec;
-	p_Canopy[2] = vi->veg[SW_GRASS].cnpy.range;
-	p_Canopy[3] = vi->veg[SW_GRASS].cnpy.slope;
-	p_Canopy[4] = vi->veg[SW_GRASS].canopy_height_constant;
-	p_Canopy[5] = vi->veg[SW_SHRUB].cnpy.xinflec;
-	p_Canopy[6] = vi->veg[SW_SHRUB].cnpy.yinflec;
-	p_Canopy[7] = vi->veg[SW_SHRUB].cnpy.range;
-	p_Canopy[8] = vi->veg[SW_SHRUB].cnpy.slope;
-	p_Canopy[9] = vi->veg[SW_SHRUB].canopy_height_constant;
-	p_Canopy[10] = vi->veg[SW_TREES].cnpy.xinflec;
-	p_Canopy[11] = vi->veg[SW_TREES].cnpy.yinflec;
-	p_Canopy[12] = vi->veg[SW_TREES].cnpy.range;
-	p_Canopy[13] = vi->veg[SW_TREES].cnpy.slope;
-	p_Canopy[14] = vi->veg[SW_TREES].canopy_height_constant;
-	p_Canopy[15] = vi->veg[SW_FORBS].cnpy.xinflec;
-	p_Canopy[16] = vi->veg[SW_FORBS].cnpy.yinflec;
-	p_Canopy[17] = vi->veg[SW_FORBS].cnpy.range;
-	p_Canopy[18] = vi->veg[SW_FORBS].cnpy.slope;
-	p_Canopy[19] = vi->veg[SW_FORBS].canopy_height_constant;
-	PROTECT(Canopy_names = allocVector(VECSXP, 2));
-	PROTECT(Canopy_names_x = allocVector(STRSXP, 5));
-	for (i = 0; i < 5; i++)
-		SET_STRING_ELT(Canopy_names_x, i, mkChar(cCanopy_names_x[i]));
-	SET_VECTOR_ELT(Canopy_names, 0, Canopy_names_x);
-	SET_VECTOR_ELT(Canopy_names, 1, vegtype_names);
-	setAttrib(Canopy, R_DimNamesSymbol, Canopy_names);
 
-	PROTECT(VegInterception = allocMatrix(REALSXP, 2, NVEGTYPES));
-	p_VegInterception = REAL(VegInterception);
-	p_VegInterception[0] = vi->veg[SW_GRASS].veg_kSmax;
-	p_VegInterception[1] = vi->veg[SW_GRASS].veg_kdead;
-	p_VegInterception[2] = vi->veg[SW_SHRUB].veg_kSmax;
-	p_VegInterception[3] = vi->veg[SW_SHRUB].veg_kdead;
-	p_VegInterception[4] = vi->veg[SW_TREES].veg_kSmax;
-	p_VegInterception[5] = vi->veg[SW_TREES].veg_kdead;
-	p_VegInterception[6] = vi->veg[SW_FORBS].veg_kSmax;
-	p_VegInterception[7] = vi->veg[SW_FORBS].veg_kdead;
-	PROTECT(VegInterception_names = allocVector(VECSXP, 2));
-	PROTECT(VegInterception_names_x = allocVector(STRSXP, 2));
-	for (i = 0; i < 2; i++)
-		SET_STRING_ELT(VegInterception_names_x, i, mkChar(cVegInterception_x[i]));
-	SET_VECTOR_ELT(VegInterception_names, 0, VegInterception_names_x);
-	SET_VECTOR_ELT(VegInterception_names, 1, vegtype_names);
-	setAttrib(VegInterception, R_DimNamesSymbol, VegInterception_names);
+    /* Get values for slot: Albedo */
+    PROTECT(Albedo = allocVector(REALSXP, NVEGTYPES + 1));
+    for (k = 0; k < NVEGTYPES; k++) {
+        REAL(Albedo)[k] = vi->veg[k].cov.albedo;
+    }
+    REAL(Albedo)[NVEGTYPES] = vi->bare_cov.albedo;
+    setAttrib(Albedo, R_NamesSymbol, LandCover_names);
 
-	PROTECT(LitterInterception = allocMatrix(REALSXP, 1, NVEGTYPES));
-	p_LitterInterception = REAL(LitterInterception);
-	p_LitterInterception[0] = vi->veg[SW_GRASS].lit_kSmax;
-	p_LitterInterception[1] = vi->veg[SW_SHRUB].lit_kSmax;
-	p_LitterInterception[2] = vi->veg[SW_TREES].lit_kSmax;
-	p_LitterInterception[3] = vi->veg[SW_FORBS].lit_kSmax;
-	PROTECT(LitterInterception_names = allocVector(VECSXP, 2));
-	PROTECT(LitterInterception_names_x = allocVector(STRSXP, 1));
-	for (i = 0; i < 1; i++)
-		SET_STRING_ELT(LitterInterception_names_x, i, mkChar(cLitterInterception_x[i]));
-	SET_VECTOR_ELT(LitterInterception_names, 0, LitterInterception_names_x);
-	SET_VECTOR_ELT(LitterInterception_names, 1, vegtype_names);
-	setAttrib(LitterInterception, R_DimNamesSymbol, LitterInterception_names);
 
-	PROTECT(EsTpartitioning_param = allocVector(REALSXP, NVEGTYPES));
-	REAL(EsTpartitioning_param)[0] = vi->veg[SW_GRASS].EsTpartitioning_param; //Grass
-	REAL(EsTpartitioning_param)[1] = vi->veg[SW_SHRUB].EsTpartitioning_param; //Shrub
-	REAL(EsTpartitioning_param)[2] = vi->veg[SW_TREES].EsTpartitioning_param; //Tree
-	REAL(EsTpartitioning_param)[3] = vi->veg[SW_FORBS].EsTpartitioning_param; //forb
-	setAttrib(EsTpartitioning_param, R_NamesSymbol, vegtype_names);
+    /* Get values for slot: CanopyHeight */
+    PROTECT(Canopy = allocMatrix(REALSXP, NVEGTYPES, 5));
+    p_Canopy = REAL(Canopy);
+    for (k = 0; k < NVEGTYPES; k++) {
+        p_Canopy[k] = vi->veg[k].cnpy.xinflec;
+        p_Canopy[k + NVEGTYPES] = vi->veg[k].cnpy.yinflec;
+        p_Canopy[k + 2 * NVEGTYPES] = vi->veg[k].cnpy.range;
+        p_Canopy[k + 3 * NVEGTYPES] = vi->veg[k].cnpy.slope;
+        p_Canopy[k + 4 * NVEGTYPES] = vi->veg[k].canopy_height_constant;
+    }
+    PROTECT(Canopy_names = allocVector(VECSXP, 2));
+    PROTECT(Canopy_names_x = allocVector(STRSXP, 5));
+    for (i = 0; i < 5; i++) {
+        SET_STRING_ELT(Canopy_names_x, i, mkChar(cCanopy_names_x[i]));
+    }
+    SET_VECTOR_ELT(Canopy_names, 0, vegtype_names);
+    SET_VECTOR_ELT(Canopy_names, 1, Canopy_names_x);
+    setAttrib(Canopy, R_DimNamesSymbol, Canopy_names);
 
-	PROTECT(Es_param_limit = allocVector(REALSXP, NVEGTYPES));
-	REAL(Es_param_limit)[0] = vi->veg[SW_GRASS].Es_param_limit; //Grass
-	REAL(Es_param_limit)[1] = vi->veg[SW_SHRUB].Es_param_limit; //Shrub
-	REAL(Es_param_limit)[2] = vi->veg[SW_TREES].Es_param_limit; //Tree
-	REAL(Es_param_limit)[3] = vi->veg[SW_FORBS].Es_param_limit; //forb
-	setAttrib(Es_param_limit, R_NamesSymbol, vegtype_names);
 
-	PROTECT(Shade = allocMatrix(REALSXP, 6, NVEGTYPES));
-	p_Shade = REAL(Shade);
-	p_Shade[0] = vi->veg[SW_GRASS].shade_scale;
-	p_Shade[1] = vi->veg[SW_GRASS].shade_deadmax;
-	p_Shade[2] = vi->veg[SW_GRASS].tr_shade_effects.xinflec;
-	p_Shade[3] = vi->veg[SW_GRASS].tr_shade_effects.yinflec;
-	p_Shade[4] = vi->veg[SW_GRASS].tr_shade_effects.range;
-	p_Shade[5] = vi->veg[SW_GRASS].tr_shade_effects.slope;
-	p_Shade[6] = vi->veg[SW_SHRUB].shade_scale;
-	p_Shade[7] = vi->veg[SW_SHRUB].shade_deadmax;
-	p_Shade[8] = vi->veg[SW_SHRUB].tr_shade_effects.xinflec;
-	p_Shade[9] = vi->veg[SW_SHRUB].tr_shade_effects.yinflec;
-	p_Shade[10] = vi->veg[SW_SHRUB].tr_shade_effects.range;
-	p_Shade[11] = vi->veg[SW_SHRUB].tr_shade_effects.slope;
-	p_Shade[12] = vi->veg[SW_TREES].shade_scale;
-	p_Shade[13] = vi->veg[SW_TREES].shade_deadmax;
-	p_Shade[14] = vi->veg[SW_TREES].tr_shade_effects.xinflec;
-	p_Shade[15] = vi->veg[SW_TREES].tr_shade_effects.yinflec;
-	p_Shade[16] = vi->veg[SW_TREES].tr_shade_effects.range;
-	p_Shade[17] = vi->veg[SW_TREES].tr_shade_effects.slope;
-	p_Shade[18] = vi->veg[SW_FORBS].shade_scale;
-	p_Shade[19] = vi->veg[SW_FORBS].shade_deadmax;
-	p_Shade[20] = vi->veg[SW_FORBS].tr_shade_effects.xinflec;
-	p_Shade[21] = vi->veg[SW_FORBS].tr_shade_effects.yinflec;
-	p_Shade[22] = vi->veg[SW_FORBS].tr_shade_effects.range;
-	p_Shade[23] = vi->veg[SW_FORBS].tr_shade_effects.slope;
-	PROTECT(Shade_names = allocVector(VECSXP, 2));
-	PROTECT(Shade_names_x = allocVector(STRSXP, 6));
-	for (i = 0; i < 6; i++)
-		SET_STRING_ELT(Shade_names_x, i, mkChar(cShade_names_x[i]));
-	SET_VECTOR_ELT(Shade_names, 0, Shade_names_x);
-	SET_VECTOR_ELT(Shade_names, 1, vegtype_names);
-	setAttrib(Shade, R_DimNamesSymbol, Shade_names);
+    /* Get values for slot: VegetationInterceptionParameters */
+    PROTECT(VegInterception = allocMatrix(REALSXP, NVEGTYPES, 2));
+    p_VegInterception = REAL(VegInterception);
+    for (k = 0; k < NVEGTYPES; k++) {
+        p_VegInterception[k] = vi->veg[k].veg_kSmax;
+        p_VegInterception[k + NVEGTYPES] = vi->veg[k].veg_kdead;
+    }
+    PROTECT(VegInterception_names = allocVector(VECSXP, 2));
+    PROTECT(VegInterception_names_x = allocVector(STRSXP, 2));
+    for (i = 0; i < 2; i++) {
+        SET_STRING_ELT(VegInterception_names_x, i, mkChar(cVegInterception_x[i]));
+    }
+    SET_VECTOR_ELT(VegInterception_names, 0, vegtype_names);
+    SET_VECTOR_ELT(VegInterception_names, 1, VegInterception_names_x);
+    setAttrib(VegInterception, R_DimNamesSymbol, VegInterception_names);
 
-	PROTECT(Hydraulic_flag = allocVector(LGLSXP, NVEGTYPES));
-	LOGICAL_POINTER(Hydraulic_flag)[0] = vi->veg[SW_GRASS].flagHydraulicRedistribution; //Grass
-	LOGICAL_POINTER(Hydraulic_flag)[1] = vi->veg[SW_SHRUB].flagHydraulicRedistribution; //Shrub
-	LOGICAL_POINTER(Hydraulic_flag)[2] = vi->veg[SW_TREES].flagHydraulicRedistribution; //Tree
-	LOGICAL_POINTER(Hydraulic_flag)[3] = vi->veg[SW_FORBS].flagHydraulicRedistribution; //forb
-	setAttrib(Hydraulic_flag, R_NamesSymbol, vegtype_names);
 
-	PROTECT(Hydraulic = allocMatrix(REALSXP, 3, NVEGTYPES));
-	p_Hydraulic = REAL(Hydraulic);
-	p_Hydraulic[0] = vi->veg[SW_GRASS].maxCondroot;
-	p_Hydraulic[1] = vi->veg[SW_GRASS].swpMatric50;
-	p_Hydraulic[2] = vi->veg[SW_GRASS].shapeCond;
-	p_Hydraulic[3] = vi->veg[SW_SHRUB].maxCondroot;
-	p_Hydraulic[4] = vi->veg[SW_SHRUB].swpMatric50;
-	p_Hydraulic[5] = vi->veg[SW_SHRUB].shapeCond;
-	p_Hydraulic[6] = vi->veg[SW_TREES].maxCondroot;
-	p_Hydraulic[7] = vi->veg[SW_TREES].swpMatric50;
-	p_Hydraulic[8] = vi->veg[SW_TREES].shapeCond;
-	p_Hydraulic[9] = vi->veg[SW_FORBS].maxCondroot;
-	p_Hydraulic[10] = vi->veg[SW_FORBS].swpMatric50;
-	p_Hydraulic[11] = vi->veg[SW_FORBS].shapeCond;
-	PROTECT(Hydraulic_names = allocVector(VECSXP, 2));
-	PROTECT(Hydraulic_names_x = allocVector(STRSXP, 3));
-	for (i = 0; i < 3; i++) {
-		SET_STRING_ELT(Hydraulic_names_x, i, mkChar(cHydraulic_names[i]));
-	}
-	SET_VECTOR_ELT(Hydraulic_names, 0, Hydraulic_names_x);
-	SET_VECTOR_ELT(Hydraulic_names, 1, vegtype_names);
-	setAttrib(Hydraulic, R_DimNamesSymbol, Hydraulic_names);
+    /* Get values for slot: LitterInterceptionParameters */
+    PROTECT(LitterInterception = allocMatrix(REALSXP, NVEGTYPES, 1));
+    p_LitterInterception = REAL(LitterInterception);
+    for (k = 0; k < NVEGTYPES; k++) {
+        p_LitterInterception[k] = vi->veg[k].lit_kSmax;
+    }
+    PROTECT(LitterInterception_names = allocVector(VECSXP, 2));
+    PROTECT(LitterInterception_names_x = allocVector(STRSXP, 1));
+    for (i = 0; i < 1; i++) {
+        SET_STRING_ELT(LitterInterception_names_x, i, mkChar(cLitterInterception_x[i]));
+    }
+    SET_VECTOR_ELT(LitterInterception_names, 0, vegtype_names);
+    SET_VECTOR_ELT(LitterInterception_names, 1, LitterInterception_names_x);
+    setAttrib(LitterInterception, R_DimNamesSymbol, LitterInterception_names);
 
-	PROTECT(CSWP = allocVector(REALSXP, NVEGTYPES));
-	REAL(CSWP)[0] = vi->veg[SW_GRASS].SWPcrit / -10; //Grass
-	REAL(CSWP)[1] = vi->veg[SW_SHRUB].SWPcrit / -10; //Shrub
-	REAL(CSWP)[2] = vi->veg[SW_TREES].SWPcrit / -10; //Tree
-	REAL(CSWP)[3] = vi->veg[SW_FORBS].SWPcrit / -10; //Forb
-	setAttrib(CSWP, R_NamesSymbol, vegtype_names);
 
+    /* Get values for slot: EsTpartitioning_param */
+    PROTECT(EsTpartitioning_param = allocVector(REALSXP, NVEGTYPES));
+    for (k = 0; k < NVEGTYPES; k++) {
+        REAL(EsTpartitioning_param)[k] = vi->veg[k].EsTpartitioning_param;
+    }
+    setAttrib(EsTpartitioning_param, R_NamesSymbol, vegtype_names);
+
+
+    /* Get values for slot: Es_param_limit */
+    PROTECT(Es_param_limit = allocVector(REALSXP, NVEGTYPES));
+    for (k = 0; k < NVEGTYPES; k++) {
+        REAL(Es_param_limit)[k] = vi->veg[k].Es_param_limit;
+    }
+    setAttrib(Es_param_limit, R_NamesSymbol, vegtype_names);
+
+
+    /* Get values for slot: Shade */
+    PROTECT(Shade = allocMatrix(REALSXP, NVEGTYPES, 6));
+    p_Shade = REAL(Shade);
+    for (k = 0; k < NVEGTYPES; k++) {
+        p_Shade[k] = vi->veg[k].shade_scale;
+        p_Shade[k + NVEGTYPES] = vi->veg[k].shade_deadmax;
+        p_Shade[k + 2 * NVEGTYPES] = vi->veg[k].tr_shade_effects.xinflec;
+        p_Shade[k + 3 * NVEGTYPES] = vi->veg[k].tr_shade_effects.yinflec;
+        p_Shade[k + 4 * NVEGTYPES] = vi->veg[k].tr_shade_effects.range;
+        p_Shade[k + 5 * NVEGTYPES] = vi->veg[k].tr_shade_effects.slope;
+    }
+    PROTECT(Shade_names = allocVector(VECSXP, 2));
+    PROTECT(Shade_names_x = allocVector(STRSXP, 6));
+    for (i = 0; i < 6; i++) {
+        SET_STRING_ELT(Shade_names_x, i, mkChar(cShade_names_x[i]));
+    }
+    SET_VECTOR_ELT(Shade_names, 0, vegtype_names);
+    SET_VECTOR_ELT(Shade_names, 1, Shade_names_x);
+    setAttrib(Shade, R_DimNamesSymbol, Shade_names);
+
+
+    /* Get values for slot: HydraulicRedistribution_use */
+    PROTECT(Hydraulic_flag = allocVector(LGLSXP, NVEGTYPES));
+    for (k = 0; k < NVEGTYPES; k++) {
+        LOGICAL_POINTER(Hydraulic_flag)[k] = vi->veg[k].flagHydraulicRedistribution;
+    }
+    setAttrib(Hydraulic_flag, R_NamesSymbol, vegtype_names);
+
+
+    /* Get values for slot: HydraulicRedistribution */
+    PROTECT(Hydraulic = allocMatrix(REALSXP, NVEGTYPES, 3));
+    p_Hydraulic = REAL(Hydraulic);
+    for (k = 0; k < NVEGTYPES; k++) {
+        p_Hydraulic[k] = vi->veg[k].maxCondroot;
+        p_Hydraulic[k + NVEGTYPES] = vi->veg[k].swpMatric50;
+        p_Hydraulic[k + 2 * NVEGTYPES] = vi->veg[k].shapeCond;
+    }
+    PROTECT(Hydraulic_names = allocVector(VECSXP, 2));
+    PROTECT(Hydraulic_names_x = allocVector(STRSXP, 3));
+    for (i = 0; i < 3; i++) {
+        SET_STRING_ELT(Hydraulic_names_x, i, mkChar(cHydraulic_names[i]));
+    }
+    SET_VECTOR_ELT(Hydraulic_names, 0, vegtype_names);
+    SET_VECTOR_ELT(Hydraulic_names, 1, Hydraulic_names_x);
+    setAttrib(Hydraulic, R_DimNamesSymbol, Hydraulic_names);
+
+
+    /* Get values for slot: CriticalSoilWaterPotential */
+    PROTECT(CSWP = allocVector(REALSXP, NVEGTYPES));
+    for (k = 0; k < NVEGTYPES; k++) {
+        REAL(CSWP)[k] = vi->veg[k].SWPcrit / -10;
+    }
+    setAttrib(CSWP, R_NamesSymbol, vegtype_names);
+
+
+    /* Get values for slot: MonthlyVeg */
+    PROTECT(MonthlyVeg_Column_names = allocVector(STRSXP, 4));
+    for (i = 0; i < 4; i++) {
+        SET_STRING_ELT(MonthlyVeg_Column_names, i, mkChar(cMonthlyVeg_Column_names[i]));
+    }
+    PROTECT(MonthlyVeg_Row_names = allocVector(STRSXP, 12));
+    for (i = 0; i < 12; i++) {
+        SET_STRING_ELT(MonthlyVeg_Row_names, i, mkChar(cMonths[i]));
+    }
+    PROTECT(MonthlyVeg_names = allocVector(VECSXP, 2));
+    SET_VECTOR_ELT(MonthlyVeg_names, 0, MonthlyVeg_Row_names);
+    SET_VECTOR_ELT(MonthlyVeg_names, 1, MonthlyVeg_Column_names);
+
+    PROTECT(MonthlyVeg = allocVector(VECSXP, NVEGTYPES));
+    for (k = 0; k < NVEGTYPES; k++) {
+        PROTECT(monBiomass = allocMatrix(REALSXP, 12, 4));
+        p_monBiomass = REAL(monBiomass);
+        for (i = 0; i < 12; i++) {
+            p_monBiomass[i + 12 * 0] = v->veg[k].litter[i];
+            p_monBiomass[i + 12 * 1] = v->veg[k].biomass[i];
+            p_monBiomass[i + 12 * 2] = v->veg[k].pct_live[i];
+            p_monBiomass[i + 12 * 3] = v->veg[k].lai_conv[i];
+        }
+        setAttrib(monBiomass, R_DimNamesSymbol, MonthlyVeg_names);
+        SET_VECTOR_ELT(MonthlyVeg, k, monBiomass);
+        UNPROTECT(1);
+    }
+    setAttrib(MonthlyVeg, R_NamesSymbol, vegtype_names);
+
+
+    /* Get values for slot: CO2Coefficients */
+    PROTECT(CO2_col_names = allocVector(STRSXP, 4));
+    for (i = 0; i < 4; i++) {
+        SET_STRING_ELT(CO2_col_names, i, mkChar(cCO2_col_names[i]));
+    }
+    PROTECT(CO2Coefficients = allocMatrix(REALSXP, NVEGTYPES, 4));
+    p_CO2Coefficients = REAL(CO2Coefficients);
+    for (k = 0; k < NVEGTYPES; k++) {
+        p_CO2Coefficients[k] = vi->veg[k].co2_bio_coeff1;
+        p_CO2Coefficients[k + NVEGTYPES] = vi->veg[k].co2_bio_coeff2;
+        p_CO2Coefficients[k + 2 * NVEGTYPES] = vi->veg[k].co2_wue_coeff1;
+        p_CO2Coefficients[k + 3 * NVEGTYPES] = vi->veg[k].co2_wue_coeff2;
+    }
+    PROTECT(CO2_names = allocVector(VECSXP, 2));
+    SET_VECTOR_ELT(CO2_names, 1, CO2_col_names);
+    SET_VECTOR_ELT(CO2_names, 0, vegtype_names);
+    setAttrib(CO2Coefficients, R_DimNamesSymbol, CO2_names);
+
+
+    /* Get values for slot: vegYear */
     PROTECT(VegYear = NEW_INTEGER(1));
     INTEGER(VegYear)[0] = vi->vegYear;
 
+
+    /* Get values for slot: isBiomAsIf100Cover */
     PROTECT(IsBiomAsIf100Cover = NEW_LOGICAL(1));
     LOGICAL_POINTER(IsBiomAsIf100Cover)[0] = vi->isBiomAsIf100Cover;
 
-	PROTECT(MonthlyVeg_Column_names = allocVector(STRSXP, 4));
-	for (i = 0; i < 4; i++)
-		SET_STRING_ELT(MonthlyVeg_Column_names, i, mkChar(cMonthlyVeg_Column_names[i]));
-	PROTECT(MonthlyVeg_Row_names = allocVector(STRSXP, 12));
-	for (i = 0; i < 12; i++)
-		SET_STRING_ELT(MonthlyVeg_Row_names, i, mkChar(cMonths[i]));
 
-	PROTECT(Grasslands = allocMatrix(REALSXP, 12, 4));
-	p_Grasslands = REAL(Grasslands);
-	for (i = 0; i < 12; i++) {
-		p_Grasslands[i + 12 * 0] = v->veg[SW_GRASS].litter[i];
-		p_Grasslands[i + 12 * 1] = v->veg[SW_GRASS].biomass[i];
-		p_Grasslands[i + 12 * 2] = v->veg[SW_GRASS].pct_live[i];
-		p_Grasslands[i + 12 * 3] = v->veg[SW_GRASS].lai_conv[i];
-	}
-	PROTECT(Grasslands_names = allocVector(VECSXP, 2));
-	SET_VECTOR_ELT(Grasslands_names, 0, MonthlyVeg_Row_names);
-	SET_VECTOR_ELT(Grasslands_names, 1, MonthlyVeg_Column_names);
-	setAttrib(Grasslands, R_DimNamesSymbol, Grasslands_names);
+    /* Create class swProd2 */
+    PROTECT(swProd2 = MAKE_CLASS("swProd2"));
+    PROTECT(VegProd = NEW_OBJECT(swProd2));
 
-	PROTECT(Shrublands = allocMatrix(REALSXP, 12, 4));
-	p_Shrublands = REAL(Shrublands);
-	for (i = 0; i < 12; i++) {
-		p_Shrublands[i + 12 * 0] = v->veg[SW_SHRUB].litter[i];
-		p_Shrublands[i + 12 * 1] = v->veg[SW_SHRUB].biomass[i];
-		p_Shrublands[i + 12 * 2] = v->veg[SW_SHRUB].pct_live[i];
-		p_Shrublands[i + 12 * 3] = v->veg[SW_SHRUB].lai_conv[i];
-	}
-	PROTECT(Shrublands_names = allocVector(VECSXP, 2));
-	SET_VECTOR_ELT(Shrublands_names, 0, MonthlyVeg_Row_names);
-	SET_VECTOR_ELT(Shrublands_names, 1, MonthlyVeg_Column_names);
-	setAttrib(Shrublands, R_DimNamesSymbol, Shrublands_names);
-
-	PROTECT(Forest = allocMatrix(REALSXP, 12, 4));
-	p_Forest = REAL(Forest);
-	for (i = 0; i < 12; i++) {
-		p_Forest[i + 12 * 0] = v->veg[SW_TREES].litter[i];
-		p_Forest[i + 12 * 1] = v->veg[SW_TREES].biomass[i];
-		p_Forest[i + 12 * 2] = v->veg[SW_TREES].pct_live[i];
-		p_Forest[i + 12 * 3] = v->veg[SW_TREES].lai_conv[i];
-	}
-	PROTECT(Forest_names = allocVector(VECSXP, 2));
-	SET_VECTOR_ELT(Forest_names, 0, MonthlyVeg_Row_names);
-	SET_VECTOR_ELT(Forest_names, 1, MonthlyVeg_Column_names);
-	setAttrib(Forest, R_DimNamesSymbol, Forest_names);
-
-	PROTECT(Forb = allocMatrix(REALSXP, 12, 4));
-	p_Forb = REAL(Forb);
-	for (i = 0; i < 12; i++) {
-		p_Forb[i + 12 * 0] = v->veg[SW_FORBS].litter[i];
-		p_Forb[i + 12 * 1] = v->veg[SW_FORBS].biomass[i];
-		p_Forb[i + 12 * 2] = v->veg[SW_FORBS].pct_live[i];
-		p_Forb[i + 12 * 3] = v->veg[SW_FORBS].lai_conv[i];
-	}
-	PROTECT(Forb_names = allocVector(VECSXP, 2));
-	SET_VECTOR_ELT(Forb_names, 0, MonthlyVeg_Row_names);
-	SET_VECTOR_ELT(Forb_names, 1, MonthlyVeg_Column_names);
-	setAttrib(Forb, R_DimNamesSymbol, Forb_names);
-
-	PROTECT(MonthlyVeg = allocVector(VECSXP, NVEGTYPES));
-	SET_VECTOR_ELT(MonthlyVeg, SW_TREES, Forest);
-	SET_VECTOR_ELT(MonthlyVeg, SW_SHRUB, Shrublands);
-	SET_VECTOR_ELT(MonthlyVeg, SW_FORBS, Forb);
-	SET_VECTOR_ELT(MonthlyVeg, SW_GRASS, Grasslands);
-
-	PROTECT(col_names = allocVector(STRSXP, NVEGTYPES));
-	SET_STRING_ELT(col_names, 0, mkChar("Trees"));
-	SET_STRING_ELT(col_names, 1, mkChar("Shrubs"));
-	SET_STRING_ELT(col_names, 2, mkChar("Forbs"));
-	SET_STRING_ELT(col_names, 3, mkChar("Grasses"));
-	setAttrib(MonthlyVeg, R_NamesSymbol, col_names);
-
+    /* Copy elements to slots of class swProd2 */
     SET_SLOT(VegProd, install(cVegProd_names[0]), veg_method);
     SET_SLOT(VegProd, install(cVegProd_names[1]), nYearsDynamicShort);
     SET_SLOT(VegProd, install(cVegProd_names[2]), nYearsDynamicLong);
@@ -435,247 +374,202 @@ SEXP onGet_SW_VPD(void) {
     SET_SLOT(VegProd, install(cVegProd_names[16]), VegYear);
     SET_SLOT(VegProd, install(cVegProd_names[17]), IsBiomAsIf100Cover);
 
-	UNPROTECT(45);
-	return VegProd;
+    /* Memory clean up */
+    UNPROTECT(37);
+
+    return VegProd;
 }
 
 void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
-	int i;
-	SW_VEGPROD_INPUTS *vi = &SoilWatRun.VegProdIn;
-	SW_VEGPROD_RUN_INPUTS *v = &SoilWatRun.RunIn.VegProdRunIn;
+    int i;
+    int k;
+    SW_VEGPROD_INPUTS *vi = &SoilWatRun.VegProdIn;
+    SW_VEGPROD_RUN_INPUTS *v = &SoilWatRun.RunIn.VegProdRunIn;
 
     SEXP veg_method;
+    SEXP VegComp;
     SEXP nYearsDynamicShort;
     SEXP nYearsDynamicLong;
-	SEXP VegComp;
-	SEXP Albedo;
-	SEXP Canopy;
-	double *p_Canopy;
-	SEXP VegInterception;
-	double *p_VegInterception;
-	SEXP LitterInterception;
-	double *p_LitterInterception;
-	SEXP EsTpartitioning_param;
-	SEXP Es_param_limit;
-	SEXP Shade;
-	double *p_Shade;
-	SEXP Hydraulic;
-	SEXP Hydraulic_flag;
-	SEXP CSWP;
-	SEXP VegYear;
-	SEXP IsBiomAsIf100Cover;
-	SEXP MonthlyVeg, Grasslands, Shrublands, Forest, Forb;
-	SEXP CO2Coefficients;
-	double *p_Grasslands, *p_Shrublands, *p_Forest, *p_Forb;
+    SEXP Albedo;
+    SEXP Canopy;
+    double *p_Canopy;
+    SEXP VegInterception;
+    double *p_VegInterception;
+    SEXP LitterInterception;
+    double *p_LitterInterception;
+    SEXP EsTpartitioning_param;
+    SEXP Es_param_limit;
+    SEXP Shade;
+    double *p_Shade;
+    SEXP Hydraulic;
+    SEXP Hydraulic_flag;
+    SEXP CSWP;
+    SEXP MonthlyVeg;
+    SEXP monBiomass;
+    double *p_monBiomass;
+    SEXP CO2Coefficients;
+    SEXP VegYear;
+    SEXP IsBiomAsIf100Cover;
 
+
+    /* Set values using slot: veg_method */
     PROTECT(veg_method = GET_SLOT(SW_VPD, install(cVegProd_names[0])));
     vi->veg_method = INTEGER(veg_method)[0];
+
 
     /* Set values using slots: nYearsDynamicShort, nYearsDynamicLong */
     PROTECT(nYearsDynamicShort = GET_SLOT(SW_VPD, install(cVegProd_names[1])));
     vi->nYearsDynamicShort = INTEGER(nYearsDynamicShort)[0];
-    
+
     PROTECT(nYearsDynamicLong = GET_SLOT(SW_VPD, install(cVegProd_names[2])));
     vi->nYearsDynamicLong = INTEGER(nYearsDynamicLong)[0];
 
-	PROTECT(VegComp = GET_SLOT(SW_VPD, install(cVegProd_names[3])));
-	v->veg[SW_GRASS].cov.fCover = REAL(VegComp)[0]; //Grass
-	v->veg[SW_SHRUB].cov.fCover = REAL(VegComp)[1]; //Shrub
-	v->veg[SW_TREES].cov.fCover = REAL(VegComp)[2]; //Tree
-	v->veg[SW_FORBS].cov.fCover = REAL(VegComp)[3]; //Forb
-	v->bare_cov.fCover = REAL(VegComp)[4]; //Bare Ground
 
-	PROTECT(Albedo = GET_SLOT(SW_VPD, install(cVegProd_names[4])));
-	vi->veg[SW_GRASS].cov.albedo = REAL(Albedo)[0]; //Grass
-	vi->veg[SW_SHRUB].cov.albedo = REAL(Albedo)[1]; //Shrub
-	vi->veg[SW_TREES].cov.albedo = REAL(Albedo)[2]; //Tree
-	vi->veg[SW_FORBS].cov.albedo = REAL(Albedo)[3]; //Forb
-	vi->bare_cov.albedo = REAL(Albedo)[4]; //Bare Ground
+    /* Set values using slot: Composition */
+    PROTECT(VegComp = GET_SLOT(SW_VPD, install(cVegProd_names[3])));
+    for (k = 0; k < NVEGTYPES; k++) {
+        v->veg[k].cov.fCover = REAL(VegComp)[k];
+    }
+    v->bare_cov.fCover = REAL(VegComp)[NVEGTYPES]; //Bare Ground
 
-	PROTECT(Canopy = GET_SLOT(SW_VPD, install(cVegProd_names[5])));
-	p_Canopy = REAL(Canopy);
-	vi->veg[SW_GRASS].cnpy.xinflec = p_Canopy[0];
-	vi->veg[SW_GRASS].cnpy.yinflec = p_Canopy[1];
-	vi->veg[SW_GRASS].cnpy.range = p_Canopy[2];
-	vi->veg[SW_GRASS].cnpy.slope = p_Canopy[3];
-	vi->veg[SW_GRASS].canopy_height_constant = p_Canopy[4];
-	vi->veg[SW_SHRUB].cnpy.xinflec = p_Canopy[5];
-	vi->veg[SW_SHRUB].cnpy.yinflec = p_Canopy[6];
-	vi->veg[SW_SHRUB].cnpy.range = p_Canopy[7];
-	vi->veg[SW_SHRUB].cnpy.slope = p_Canopy[8];
-	vi->veg[SW_SHRUB].canopy_height_constant = p_Canopy[9];
-	vi->veg[SW_TREES].cnpy.xinflec = p_Canopy[10];
-	vi->veg[SW_TREES].cnpy.yinflec = p_Canopy[11];
-	vi->veg[SW_TREES].cnpy.range = p_Canopy[12];
-	vi->veg[SW_TREES].cnpy.slope = p_Canopy[13];
-	vi->veg[SW_TREES].canopy_height_constant = p_Canopy[14];
-	vi->veg[SW_FORBS].cnpy.xinflec = p_Canopy[15];
-	vi->veg[SW_FORBS].cnpy.yinflec = p_Canopy[16];
-	vi->veg[SW_FORBS].cnpy.range = p_Canopy[17];
-	vi->veg[SW_FORBS].cnpy.slope = p_Canopy[18];
-	vi->veg[SW_FORBS].canopy_height_constant = p_Canopy[19];
 
-	PROTECT(VegInterception = GET_SLOT(SW_VPD, install(cVegProd_names[6])));
-	p_VegInterception = REAL(VegInterception);
-	vi->veg[SW_GRASS].veg_kSmax = p_VegInterception[0];
-	vi->veg[SW_GRASS].veg_kdead = p_VegInterception[1];
-	vi->veg[SW_SHRUB].veg_kSmax = p_VegInterception[2];
-	vi->veg[SW_SHRUB].veg_kdead = p_VegInterception[3];
-	vi->veg[SW_TREES].veg_kSmax = p_VegInterception[4];
-	vi->veg[SW_TREES].veg_kdead = p_VegInterception[5];
-	vi->veg[SW_FORBS].veg_kSmax = p_VegInterception[6];
-	vi->veg[SW_FORBS].veg_kdead = p_VegInterception[7];
+    /* Set values using slot: Albedo */
+    PROTECT(Albedo = GET_SLOT(SW_VPD, install(cVegProd_names[4])));
+    for (k = 0; k < NVEGTYPES; k++) {
+        vi->veg[k].cov.albedo = REAL(Albedo)[k];
+    }
+    vi->bare_cov.albedo = REAL(Albedo)[NVEGTYPES]; //Bare Ground
 
-	PROTECT(LitterInterception = GET_SLOT(SW_VPD, install(cVegProd_names[7])));
-	p_LitterInterception = REAL(LitterInterception);
-	vi->veg[SW_GRASS].lit_kSmax = p_LitterInterception[0];
-	vi->veg[SW_SHRUB].lit_kSmax = p_LitterInterception[1];
-	vi->veg[SW_TREES].lit_kSmax = p_LitterInterception[2];
-	vi->veg[SW_FORBS].lit_kSmax = p_LitterInterception[3];
 
-	PROTECT(EsTpartitioning_param = GET_SLOT(SW_VPD, install(cVegProd_names[8])));
-	vi->veg[SW_GRASS].EsTpartitioning_param = REAL(EsTpartitioning_param)[0]; //Grass
-	vi->veg[SW_SHRUB].EsTpartitioning_param = REAL(EsTpartitioning_param)[1]; //Shrub
-	vi->veg[SW_TREES].EsTpartitioning_param = REAL(EsTpartitioning_param)[2]; //Tree
-	vi->veg[SW_FORBS].EsTpartitioning_param = REAL(EsTpartitioning_param)[3]; //Forb
+    /* Set values using slot: CanopyHeight */
+    PROTECT(Canopy = GET_SLOT(SW_VPD, install(cVegProd_names[5])));
+    p_Canopy = REAL(Canopy);
+    for (k = 0; k < NVEGTYPES; k++) {
+        vi->veg[k].cnpy.xinflec = p_Canopy[k];
+        vi->veg[k].cnpy.yinflec = p_Canopy[k + NVEGTYPES];
+        vi->veg[k].cnpy.range = p_Canopy[k + 2 * NVEGTYPES];
+        vi->veg[k].cnpy.slope = p_Canopy[k + 3 * NVEGTYPES];
+        vi->veg[k].canopy_height_constant = p_Canopy[k + 4 * NVEGTYPES];
+    }
 
-	PROTECT(Es_param_limit = GET_SLOT(SW_VPD, install(cVegProd_names[9])));
-	vi->veg[SW_GRASS].Es_param_limit = REAL(Es_param_limit)[0]; //Grass
-	vi->veg[SW_SHRUB].Es_param_limit = REAL(Es_param_limit)[1]; //Shrub
-	vi->veg[SW_TREES].Es_param_limit = REAL(Es_param_limit)[2]; //Tree
-	vi->veg[SW_FORBS].Es_param_limit = REAL(Es_param_limit)[3]; //Forb
 
-	PROTECT(Shade = GET_SLOT(SW_VPD, install(cVegProd_names[10])));
-	p_Shade = REAL(Shade);
-	vi->veg[SW_GRASS].shade_scale = p_Shade[0];
-	vi->veg[SW_GRASS].shade_deadmax = p_Shade[1];
-	vi->veg[SW_GRASS].tr_shade_effects.xinflec = p_Shade[2];
-	vi->veg[SW_GRASS].tr_shade_effects.yinflec = p_Shade[3];
-	vi->veg[SW_GRASS].tr_shade_effects.range = p_Shade[4];
-	vi->veg[SW_GRASS].tr_shade_effects.slope = p_Shade[5];
-	vi->veg[SW_SHRUB].shade_scale = p_Shade[6];
-	vi->veg[SW_SHRUB].shade_deadmax = p_Shade[7];
-	vi->veg[SW_SHRUB].tr_shade_effects.xinflec = p_Shade[8];
-	vi->veg[SW_SHRUB].tr_shade_effects.yinflec = p_Shade[9];
-	vi->veg[SW_SHRUB].tr_shade_effects.range = p_Shade[10];
-	vi->veg[SW_SHRUB].tr_shade_effects.slope = p_Shade[11];
-	vi->veg[SW_TREES].shade_scale = p_Shade[12];
-	vi->veg[SW_TREES].shade_deadmax = p_Shade[13];
-	vi->veg[SW_TREES].tr_shade_effects.xinflec = p_Shade[14];
-	vi->veg[SW_TREES].tr_shade_effects.yinflec = p_Shade[15];
-	vi->veg[SW_TREES].tr_shade_effects.range = p_Shade[16];
-	vi->veg[SW_TREES].tr_shade_effects.slope = p_Shade[17];
-	vi->veg[SW_FORBS].shade_scale = p_Shade[18];
-	vi->veg[SW_FORBS].shade_deadmax = p_Shade[19];
-	vi->veg[SW_FORBS].tr_shade_effects.xinflec = p_Shade[20];
-	vi->veg[SW_FORBS].tr_shade_effects.yinflec = p_Shade[21];
-	vi->veg[SW_FORBS].tr_shade_effects.range = p_Shade[22];
-	vi->veg[SW_FORBS].tr_shade_effects.slope = p_Shade[23];
+    /* Set values using slot: VegetationInterceptionParameters */
+    PROTECT(VegInterception = GET_SLOT(SW_VPD, install(cVegProd_names[6])));
+    p_VegInterception = REAL(VegInterception);
+    for (k = 0; k < NVEGTYPES; k++) {
+        vi->veg[k].veg_kSmax = p_VegInterception[k];
+        vi->veg[k].veg_kdead = p_VegInterception[k + NVEGTYPES];
+    }
 
-	PROTECT(Hydraulic_flag = GET_SLOT(SW_VPD, install(cVegProd_names[11])));
-	PROTECT(Hydraulic = GET_SLOT(SW_VPD, install(cVegProd_names[12])));
-	vi->veg[SW_GRASS].flagHydraulicRedistribution = LOGICAL_POINTER(Hydraulic_flag)[0]; //Grass
-	vi->veg[SW_SHRUB].flagHydraulicRedistribution = LOGICAL_POINTER(Hydraulic_flag)[1]; //Shrub
-	vi->veg[SW_TREES].flagHydraulicRedistribution = LOGICAL_POINTER(Hydraulic_flag)[2]; //Tree
-	vi->veg[SW_FORBS].flagHydraulicRedistribution = LOGICAL_POINTER(Hydraulic_flag)[3]; //Forb
-	vi->veg[SW_GRASS].maxCondroot = REAL(Hydraulic)[0]; //Grass
-	vi->veg[SW_GRASS].swpMatric50 = REAL(Hydraulic)[1]; //Grass
-	vi->veg[SW_GRASS].shapeCond = REAL(Hydraulic)[2]; //Grass
-	vi->veg[SW_SHRUB].maxCondroot = REAL(Hydraulic)[3]; //Shrub
-	vi->veg[SW_SHRUB].swpMatric50 = REAL(Hydraulic)[4]; //Shrub
-	vi->veg[SW_SHRUB].shapeCond = REAL(Hydraulic)[5]; //Shrub
-	vi->veg[SW_TREES].maxCondroot = REAL(Hydraulic)[6]; //Tree
-	vi->veg[SW_TREES].swpMatric50 = REAL(Hydraulic)[7]; //Tree
-	vi->veg[SW_TREES].shapeCond = REAL(Hydraulic)[8]; //Tree
-	vi->veg[SW_FORBS].maxCondroot = REAL(Hydraulic)[9]; //Forb
-	vi->veg[SW_FORBS].swpMatric50 = REAL(Hydraulic)[10]; //Forb
-	vi->veg[SW_FORBS].shapeCond = REAL(Hydraulic)[11]; //Forb
 
-	PROTECT(CSWP = GET_SLOT(SW_VPD, install(cVegProd_names[13])));
-	vi->veg[SW_GRASS].SWPcrit = -10 * REAL(CSWP)[0]; //Grass
-	vi->veg[SW_SHRUB].SWPcrit = -10 * REAL(CSWP)[1]; //Shrub
-	vi->veg[SW_TREES].SWPcrit = -10 * REAL(CSWP)[2]; //Tree
-	vi->veg[SW_FORBS].SWPcrit = -10 * REAL(CSWP)[3]; //Forb
+    /* Set values using slot: LitterInterceptionParameters */
+    PROTECT(LitterInterception = GET_SLOT(SW_VPD, install(cVegProd_names[7])));
+    p_LitterInterception = REAL(LitterInterception);
+    for (k = 0; k < NVEGTYPES; k++) {
+        vi->veg[k].lit_kSmax = p_LitterInterception[k];
+    }
 
-	// getting critSoilWater for use with SWA and get_critical_rank()
-	// critSoilWater goes tree, shrub, forb, grass
-	vi->critSoilWater[0] = REAL(CSWP)[2];
-	vi->critSoilWater[1] = REAL(CSWP)[1];
-	vi->critSoilWater[2] = REAL(CSWP)[3];
-	vi->critSoilWater[3] = REAL(CSWP)[0];
 
-	get_critical_rank(&SoilWatRun.VegProdIn);
+    /* Set values using slot: EsTpartitioning_param */
+    PROTECT(EsTpartitioning_param = GET_SLOT(SW_VPD, install(cVegProd_names[8])));
+    for (k = 0; k < NVEGTYPES; k++) {
+        vi->veg[k].EsTpartitioning_param = REAL(EsTpartitioning_param)[k];
+    }
 
+
+    /* Set values using slot: Es_param_limit */
+    PROTECT(Es_param_limit = GET_SLOT(SW_VPD, install(cVegProd_names[9])));
+    for (k = 0; k < NVEGTYPES; k++) {
+        vi->veg[k].Es_param_limit = REAL(Es_param_limit)[k];
+    }
+
+
+    /* Set values using slot: Shade */
+    PROTECT(Shade = GET_SLOT(SW_VPD, install(cVegProd_names[10])));
+    p_Shade = REAL(Shade);
+    for (k = 0; k < NVEGTYPES; k++) {
+        vi->veg[k].shade_scale = p_Shade[k];
+        vi->veg[k].shade_deadmax = p_Shade[k + NVEGTYPES];
+        vi->veg[k].tr_shade_effects.xinflec = p_Shade[k + 2 * NVEGTYPES];
+        vi->veg[k].tr_shade_effects.yinflec = p_Shade[k + 3 * NVEGTYPES];
+        vi->veg[k].tr_shade_effects.range = p_Shade[k + 4 * NVEGTYPES];
+        vi->veg[k].tr_shade_effects.slope = p_Shade[k + 5 * NVEGTYPES];
+    }
+
+
+    /* Set values using slot: HydraulicRedistribution_use */
+    PROTECT(Hydraulic_flag = GET_SLOT(SW_VPD, install(cVegProd_names[11])));
+    for (k = 0; k < NVEGTYPES; k++) {
+        vi->veg[k].flagHydraulicRedistribution = LOGICAL_POINTER(Hydraulic_flag)[k];
+    }
+
+
+    /* Set values using slot: HydraulicRedistribution */
+    PROTECT(Hydraulic = GET_SLOT(SW_VPD, install(cVegProd_names[12])));
+    for (k = 0; k < NVEGTYPES; k++) {
+        vi->veg[k].maxCondroot = REAL(Hydraulic)[k];
+        vi->veg[k].swpMatric50 = REAL(Hydraulic)[k + NVEGTYPES];
+        vi->veg[k].shapeCond = REAL(Hydraulic)[k + 2 * NVEGTYPES];
+    }
+
+
+    /* Set values using slot: CriticalSoilWaterPotential */
+    PROTECT(CSWP = GET_SLOT(SW_VPD, install(cVegProd_names[13])));
+    for (k = 0; k < NVEGTYPES; k++) {
+        vi->veg[k].SWPcrit = -10 * REAL(CSWP)[k];
+        // for use with get_swa for properly partitioning swa
+        vi->critSoilWater[k] = REAL(CSWP)[k];
+    }
+    get_critical_rank(vi);
+
+
+    /* Set values using slot: MonthlyVeg */
+    PROTECT(MonthlyVeg = GET_SLOT(SW_VPD, install(cVegProd_names[14])));
+    for (k = 0; k < NVEGTYPES; k++) {
+        PROTECT(monBiomass =  VECTOR_ELT(MonthlyVeg, k));
+        p_monBiomass = REAL(monBiomass);
+        for (i = 0; i < 12; i++) {
+            v->veg[k].litter[i] = p_monBiomass[i + 12 * 0];
+            v->veg[k].biomass[i] = p_monBiomass[i + 12 * 1];
+            v->veg[k].pct_live[i] = p_monBiomass[i + 12 * 2];
+            v->veg[k].lai_conv[i] = p_monBiomass[i + 12 * 3];
+        }
+        UNPROTECT(1);
+    }
+
+
+    /* Set values using slot: CO2Coefficients */
+    PROTECT(CO2Coefficients = GET_SLOT(SW_VPD, install(cVegProd_names[15])));
+    for (k = 0; k < NVEGTYPES; k++) {
+        vi->veg[k].co2_bio_coeff1 = REAL(CO2Coefficients)[k];
+        vi->veg[k].co2_bio_coeff2 = REAL(CO2Coefficients)[k + NVEGTYPES];
+        vi->veg[k].co2_wue_coeff1 = REAL(CO2Coefficients)[k + 2 * NVEGTYPES];
+        vi->veg[k].co2_wue_coeff2 = REAL(CO2Coefficients)[k + 3 * NVEGTYPES];
+    }
+
+
+    /* Set values using slot: vegYear */
     PROTECT(VegYear = GET_SLOT(SW_VPD, install(cVegProd_names[16])));
     vi->vegYear = INTEGER(VegYear)[0];
 
+
+    /* Set values using slot: isBiomAsIf100Cover */
     PROTECT(IsBiomAsIf100Cover = GET_SLOT(SW_VPD, install(cVegProd_names[17])));
     vi->isBiomAsIf100Cover = LOGICAL(IsBiomAsIf100Cover)[0];
 
-	PROTECT(MonthlyVeg = GET_SLOT(SW_VPD, install(cVegProd_names[14])));
-	PROTECT(Grasslands = VECTOR_ELT(MonthlyVeg, SW_GRASS));
-	p_Grasslands = REAL(Grasslands);
-	for (i = 0; i < 12; i++) {
-		v->veg[SW_GRASS].litter[i] = p_Grasslands[i + 12 * 0];
-		v->veg[SW_GRASS].biomass[i] = p_Grasslands[i + 12 * 1];
-		v->veg[SW_GRASS].pct_live[i] = p_Grasslands[i + 12 * 2];
-		v->veg[SW_GRASS].lai_conv[i] = p_Grasslands[i + 12 * 3];
-	}
-	PROTECT(Shrublands = VECTOR_ELT(MonthlyVeg, SW_SHRUB));
-	p_Shrublands = REAL(Shrublands);
-	for (i = 0; i < 12; i++) {
-		v->veg[SW_SHRUB].litter[i] = p_Shrublands[i + 12 * 0];
-		v->veg[SW_SHRUB].biomass[i] = p_Shrublands[i + 12 * 1];
-		v->veg[SW_SHRUB].pct_live[i] = p_Shrublands[i + 12 * 2];
-		v->veg[SW_SHRUB].lai_conv[i] = p_Shrublands[i + 12 * 3];
-	}
-	PROTECT(Forest = VECTOR_ELT(MonthlyVeg, SW_TREES));
-	p_Forest = REAL(Forest);
-	for (i = 0; i < 12; i++) {
-		v->veg[SW_TREES].litter[i] = p_Forest[i + 12 * 0];
-		v->veg[SW_TREES].biomass[i] = p_Forest[i + 12 * 1];
-		v->veg[SW_TREES].pct_live[i] = p_Forest[i + 12 * 2];
-		v->veg[SW_TREES].lai_conv[i] = p_Forest[i + 12 * 3];
-	}
-	PROTECT(Forb = VECTOR_ELT(MonthlyVeg, SW_FORBS));
-	p_Forb = REAL(Forb);
-	for (i = 0; i < 12; i++) {
-		v->veg[SW_FORBS].litter[i] = p_Forb[i + 12 * 0];
-		v->veg[SW_FORBS].biomass[i] = p_Forb[i + 12 * 1];
-		v->veg[SW_FORBS].pct_live[i] = p_Forb[i + 12 * 2];
-		v->veg[SW_FORBS].lai_conv[i] = p_Forb[i + 12 * 3];
-	}
 
-	PROTECT(CO2Coefficients = GET_SLOT(SW_VPD, install(cVegProd_names[15])));
-	vi->veg[SW_GRASS].co2_bio_coeff1 = REAL(CO2Coefficients)[0];
-	vi->veg[SW_SHRUB].co2_bio_coeff1 = REAL(CO2Coefficients)[1];
-	vi->veg[SW_TREES].co2_bio_coeff1 = REAL(CO2Coefficients)[2];
-	vi->veg[SW_FORBS].co2_bio_coeff1 = REAL(CO2Coefficients)[3];
-	vi->veg[SW_GRASS].co2_bio_coeff2 = REAL(CO2Coefficients)[4];
-	vi->veg[SW_SHRUB].co2_bio_coeff2 = REAL(CO2Coefficients)[5];
-	vi->veg[SW_TREES].co2_bio_coeff2 = REAL(CO2Coefficients)[6];
-	vi->veg[SW_FORBS].co2_bio_coeff2 = REAL(CO2Coefficients)[7];
-	vi->veg[SW_GRASS].co2_wue_coeff1 = REAL(CO2Coefficients)[8];
-	vi->veg[SW_SHRUB].co2_wue_coeff1 = REAL(CO2Coefficients)[9];
-	vi->veg[SW_TREES].co2_wue_coeff1 = REAL(CO2Coefficients)[10];
-	vi->veg[SW_FORBS].co2_wue_coeff1 = REAL(CO2Coefficients)[11];
-	vi->veg[SW_GRASS].co2_wue_coeff2 = REAL(CO2Coefficients)[12];
-	vi->veg[SW_SHRUB].co2_wue_coeff2 = REAL(CO2Coefficients)[13];
-	vi->veg[SW_TREES].co2_wue_coeff2 = REAL(CO2Coefficients)[14];
-	vi->veg[SW_FORBS].co2_wue_coeff2 = REAL(CO2Coefficients)[15];
+    /* Wrap up */
+    SW_VPD_fix_cover(&SoilWatRun.RunIn.VegProdRunIn, LogInfo);
+    if (LogInfo->stopRun) {
+        goto freeMem; // Exit function prematurely due to error
+    }
 
+    if (EchoInits) {
+        echo_VegProd(&SoilWatRun.RunIn.VegProdRunIn, &SoilWatRun.VegProdIn);
+    }
 
-  SW_VPD_fix_cover(&SoilWatRun.RunIn.VegProdRunIn, LogInfo);
-  if(LogInfo->stopRun) {
-    UNPROTECT(22); // Unprotect the protected variables before exiting
-    return; // Exit function prematurely due to error
-  }
-
-	if (EchoInits) {
-		echo_VegProd(&SoilWatRun.RunIn.VegProdRunIn, &SoilWatRun.VegProdIn);
-	}
-
-	UNPROTECT(22);
+freeMem:
+    UNPROTECT(18);
 }
 
 // `estimate_PotNatVeg_composition()` is R interface to rSW2_estimate_PotNatVeg_composition()
@@ -686,7 +580,13 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
                                          SEXP C4_Fraction, SEXP C3_Fraction, SEXP Shrubs_Fraction, SEXP Forbs_Fraction,
                                          SEXP Trees_Fraction, SEXP BareGround_Fraction) {
 
-    double RelAbundanceL0[8], RelAbundanceL1[5], grasses[3];
+    int nRes = 4;
+    int nL0 = 8;
+    int nL1 = 5;
+    int nL2 = 7;
+    int nGrasses = 3;
+
+    double RelAbundanceL0[8], RelAbundanceL1[5], RelAbundanceL2[7], grasses[3];
 
     LOG_INFO local_LogInfo;
     sw_init_logs(current_sw_verbosity, &local_LogInfo);
@@ -710,10 +610,19 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
     double inputValues_D[8] = {Succulents_Fraction_D, Forbs_Fraction_D, C3_Fraction_D,
         C4_Fraction_D, Annuals_Fraction_D, Shrubs_Fraction_D, Trees_Fraction_D, BareGround_Fraction_D};
 
-    char *RelAbundanceL0Names[] = {"Succulents", "Forbs", "Grasses_C3", "Grasses_C4",
-        "Grasses_Annuals", "Shrubs", "Trees", "BareGround"};
-    char *RelAbundanceL1Names[] = {"SW_TREES", "SW_SHRUB", "SW_FORBS", "SW_GRASS", "SW_BAREGROUND"};
-    char *finalListNames[] = {"Rel_Abundance_L0", "Rel_Abundance_L1", "Grasses"};
+    char *finalListNames[] = {
+        "Rel_Abundance_L0", "Rel_Abundance_L1", "Rel_Abundance_L2", "Grasses"
+    };
+    char *RelAbundanceL0Names[] = {
+        "Succulents", "Forbs", "Grasses_C3", "Grasses_C4",
+        "Grasses_Annuals", "Shrubs", "Trees", "BareGround"
+    };
+    char *RelAbundanceL1Names[] = {
+        "SW_TREES", "SW_SHRUB", "SW_FORBS", "SW_GRASS", "SW_BAREGROUND"
+    };
+    char *RelAbundanceL2Names[] = {
+        "SW_TREENL", "SW_TREEBL", "SW_SHRUB", "SW_FORBS", "SW_GRASS3", "SW_GRASS4", "SW_BAREGROUND"
+    };
     char *grassesNames[] = {"Grasses_C3", "Grasses_C4", "Grasses_Annuals"};
 
     // "inter_" meaning the intermediate R -> C conversion
@@ -724,31 +633,51 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
     final_isNorth = (Bool) asLogical(isNorth) ? swTRUE : swFALSE,
     final_fix_bareGround = (Bool) asLogical(fixBareGround) ? swTRUE : swFALSE;
 
-    SEXP cRelAbL1Names, cRelAbL0Names, cfinalNames, cgrasses,
-    final_RelAbundanceL1, final_RelAbundanceL0, final_grasses, res;
+    SEXP cRelAbL2Names, cRelAbL1Names, cRelAbL0Names, cgrasses;
+    SEXP cfinalNames;
+    SEXP final_RelAbundanceL2, final_RelAbundanceL1, final_RelAbundanceL0;
+    SEXP final_grasses;
+    SEXP res;
 
-    res = PROTECT(allocVector(VECSXP, 3));
-    final_RelAbundanceL0 = PROTECT(allocVector(REALSXP, 8));
-    final_RelAbundanceL1 = PROTECT(allocVector(REALSXP, 5));
-    final_grasses = PROTECT(allocVector(REALSXP, 3));
-    cRelAbL1Names = PROTECT(allocVector(STRSXP, 5));
-    cRelAbL0Names = PROTECT(allocVector(STRSXP, 8));
-    cfinalNames = PROTECT(allocVector(STRSXP, 3));
-    cgrasses = PROTECT(allocVector(STRSXP, 3));
+    res = PROTECT(allocVector(VECSXP, nRes));
+    cfinalNames = PROTECT(allocVector(STRSXP, nRes));
 
-    for(index = 0; index < 3; index++) {
+    cRelAbL0Names = PROTECT(allocVector(STRSXP, nL0));
+    final_RelAbundanceL0 = PROTECT(allocVector(REALSXP, nL0));
+
+    final_RelAbundanceL1 = PROTECT(allocVector(REALSXP, nL1));
+    cRelAbL1Names = PROTECT(allocVector(STRSXP, nL1));
+
+    final_RelAbundanceL2 = PROTECT(allocVector(REALSXP, nL2));
+    cRelAbL2Names = PROTECT(allocVector(STRSXP, nL2));
+
+    final_grasses = PROTECT(allocVector(REALSXP, nGrasses));
+    cgrasses = PROTECT(allocVector(STRSXP, nGrasses));
+
+    for(index = 0; index < nRes; index++) {
         SET_STRING_ELT(cfinalNames, index, mkChar(finalListNames[index]));
+    }
+
+    for(index = 0; index < nL0; index++) {
+        SET_STRING_ELT(cRelAbL0Names, index, mkChar(RelAbundanceL0Names[index]));
+    }
+
+    for(index = 0; index < nL1; index++) {
+        SET_STRING_ELT(cRelAbL1Names, index, mkChar(RelAbundanceL1Names[index]));
+    }
+
+    for(index = 0; index < nL2; index++) {
+        SET_STRING_ELT(cRelAbL2Names, index, mkChar(RelAbundanceL2Names[index]));
+    }
+
+    for(index = 0; index < nGrasses; index++) {
         SET_STRING_ELT(cgrasses, index, mkChar(grassesNames[index]));
     }
 
-    for(index = 0; index < 8; index++) {
-        SET_STRING_ELT(cRelAbL0Names, index, mkChar(RelAbundanceL0Names[index]));
-        if(index < 5) SET_STRING_ELT(cRelAbL1Names, index, mkChar(RelAbundanceL1Names[index]));
-    }
-
+    namesgets(res, cfinalNames);
     namesgets(final_RelAbundanceL0, cRelAbL0Names);
     namesgets(final_RelAbundanceL1, cRelAbL1Names);
-    namesgets(res, cfinalNames);
+    namesgets(final_RelAbundanceL2, cRelAbL2Names);
     namesgets(final_grasses, cgrasses);
 
     for(index = 0; index < MAX_MONTHS; index++) {
@@ -773,28 +702,35 @@ SEXP rSW2_estimate_PotNatVeg_composition(SEXP MAP_mm, SEXP MAT_C, SEXP mean_mont
     estimatePotNatVegComposition(final_MAT_C, final_MAP_cm, final_MonTemp_C,
           final_MonPPT_cm, inputValues_D, final_shrubLimit, final_SumGrassesFraction, C4Variables,
           final_fill_empty_with_BareGround, final_isNorth, final_warn_extrapolation,
-          final_fix_bareGround, grasses, RelAbundanceL0, RelAbundanceL1, &local_LogInfo);
+          final_fix_bareGround, grasses, RelAbundanceL0, RelAbundanceL1, RelAbundanceL2, &local_LogInfo);
     if(local_LogInfo.stopRun) {
         goto report;
     }
 
-    for(index = 0; index < 8; index++) {
+    for (index = 0; index < nL0; index++) {
         REAL(final_RelAbundanceL0)[index] = RelAbundanceL0[index];
-        if(index < 5) {
-            REAL(final_RelAbundanceL1)[index] = RelAbundanceL1[index];
-        }
-        if(index < 3) {
-            REAL(final_grasses)[index] = grasses[index];
-        }
+    }
+
+    for (index = 0; index < nL1; index++) {
+        REAL(final_RelAbundanceL1)[index] = RelAbundanceL1[index];
+    }
+
+    for (index = 0; index < nL2; index++) {
+        REAL(final_RelAbundanceL2)[index] = RelAbundanceL2[index];
+    }
+
+    for (index = 0; index < nGrasses; index++) {
+        REAL(final_grasses)[index] = grasses[index];
     }
 
     SET_VECTOR_ELT(res, 0, final_RelAbundanceL0);
     SET_VECTOR_ELT(res, 1, final_RelAbundanceL1);
-    SET_VECTOR_ELT(res, 2, final_grasses);
+    SET_VECTOR_ELT(res, 2, final_RelAbundanceL2);
+    SET_VECTOR_ELT(res, 3, final_grasses);
 
     report: {
         // Note: no SOILWAT2 memory was allocated, nothing to deallocate
-        UNPROTECT(8);
+        UNPROTECT(10);
 
         sw_write_warnings("(rVegProd) ", &local_LogInfo);
         sw_fail_on_error(&local_LogInfo);
