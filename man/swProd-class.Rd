@@ -4,99 +4,9 @@
 \name{swProd-class}
 \alias{swProd-class}
 \alias{swProd}
-\alias{get_swProd,swProd-method}
-\alias{swProd_Composition,swProd-method}
-\alias{swProd_Albedo,swProd-method}
-\alias{swProd_CanopyHeight,swProd-method}
-\alias{swProd_VegInterParam,swProd-method}
-\alias{swProd_LitterInterParam,swProd-method}
-\alias{swProd_EsTpartitioning_param,swProd-method}
-\alias{swProd_Es_param_limit,swProd-method}
-\alias{swProd_Shade,swProd-method}
-\alias{swProd_HydrRedstro_use,swProd-method}
-\alias{swProd_HydrRedstro,swProd-method}
-\alias{swProd_CritSoilWaterPotential,swProd-method}
-\alias{swProd_CO2Coefficients,swProd-method}
-\alias{swProd_MonProd_veg,swProd,numeric-method}
-\alias{swProd_MonProd_veg,swProd,character-method}
-\alias{set_swProd<-,swProd-method}
-\alias{swProd_Composition<-,swProd-method}
-\alias{swProd_Albedo<-,swProd-method}
-\alias{swProd_CanopyHeight<-,swProd-method}
-\alias{swProd_VegInterParam<-,swProd-method}
-\alias{swProd_LitterInterParam<-,swProd-method}
-\alias{swProd_EsTpartitioning_param<-,swProd-method}
-\alias{swProd_Es_param_limit<-,swProd-method}
-\alias{swProd_Shade<-,swProd-method}
-\alias{swProd_HydrRedstro_use<-,swProd-method}
-\alias{swProd_HydrRedstro<-,swProd-method}
-\alias{swProd_CritSoilWaterPotential<-,swProd-method}
-\alias{swProd_CO2Coefficients<-,swProd-method}
-\alias{swProd_MonProd_veg<-,swProd,numeric,matrix-method}
-\alias{swProd_MonProd_veg<-,swProd,character,matrix-method}
 \title{Class \code{"swProd"}}
 \usage{
 swProd(...)
-
-\S4method{get_swProd}{swProd}(object)
-
-\S4method{swProd_Composition}{swProd}(object)
-
-\S4method{swProd_Albedo}{swProd}(object)
-
-\S4method{swProd_CanopyHeight}{swProd}(object)
-
-\S4method{swProd_VegInterParam}{swProd}(object)
-
-\S4method{swProd_LitterInterParam}{swProd}(object)
-
-\S4method{swProd_EsTpartitioning_param}{swProd}(object)
-
-\S4method{swProd_Es_param_limit}{swProd}(object)
-
-\S4method{swProd_Shade}{swProd}(object)
-
-\S4method{swProd_HydrRedstro_use}{swProd}(object)
-
-\S4method{swProd_HydrRedstro}{swProd}(object)
-
-\S4method{swProd_CritSoilWaterPotential}{swProd}(object)
-
-\S4method{swProd_CO2Coefficients}{swProd}(object)
-
-\S4method{swProd_MonProd_veg}{swProd,numeric}(object, vegtype)
-
-\S4method{swProd_MonProd_veg}{swProd,character}(object, vegtype)
-
-\S4method{set_swProd}{swProd}(object) <- value
-
-\S4method{swProd_Composition}{swProd}(object) <- value
-
-\S4method{swProd_Albedo}{swProd}(object) <- value
-
-\S4method{swProd_CanopyHeight}{swProd}(object) <- value
-
-\S4method{swProd_VegInterParam}{swProd}(object) <- value
-
-\S4method{swProd_LitterInterParam}{swProd}(object) <- value
-
-\S4method{swProd_EsTpartitioning_param}{swProd}(object) <- value
-
-\S4method{swProd_Es_param_limit}{swProd}(object) <- value
-
-\S4method{swProd_Shade}{swProd}(object) <- value
-
-\S4method{swProd_HydrRedstro_use}{swProd}(object) <- value
-
-\S4method{swProd_HydrRedstro}{swProd}(object) <- value
-
-\S4method{swProd_CritSoilWaterPotential}{swProd}(object) <- value
-
-\S4method{swProd_CO2Coefficients}{swProd}(object) <- value
-
-\S4method{swProd_MonProd_veg}{swProd,numeric,matrix}(object, vegtype) <- value
-
-\S4method{swProd_MonProd_veg}{swProd,character,matrix}(object, vegtype) <- value
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -107,14 +17,12 @@ any missing slots will take their default values).
 If dots are missing, then corresponding values of
 \code{rSOILWAT2::sw_exampleData}
 (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
-
-\item{object}{An object of class \code{\linkS4class{swProd}}.}
-
-\item{vegtype}{The name or index of the vegetation type.}
-
-\item{value}{A value to assign to a specific slot of the object.}
 }
 \description{
+Class \code{"swProd"} is superseded by class \code{"swProd2"} starting with
+\pkg{rSOILWAT2} v6.5.0 and \var{SOILWAT2} v8.3.0.
+}
+\details{
 The methods listed below work on this class and the proper slot of the class
   \code{\linkS4class{swInputData}}.
 }
