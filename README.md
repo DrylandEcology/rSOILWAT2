@@ -306,12 +306,7 @@ merge them into the main branch for release:
         - Investigate if any warning is reported.
         - This combines unit tests, documentation and code-style checks;
           the latter take a substantial amount of time to complete.
-       The environmental variable `RSOILWAT_ALLTESTS` determines whether or not
-       long-running expectations/unit-tests are skipped; the default is "true",
-       i.e., run all expectations/unit-tests. You may decide to run tests
-       while temporary skipping time-intensive tests, e.g.,
-       - `Sys.setenv(RSOILWAT_ALLTESTS = "false"); devtools::test()`
-       - `RSOILWAT_ALLTESTS="false" R CMD check *tar.gz`
+
 
     1. Run tests as if not on CRAN in an non-interactive session.
        ```{bash}

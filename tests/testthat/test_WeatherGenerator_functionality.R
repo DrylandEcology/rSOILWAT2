@@ -205,10 +205,7 @@ test_that("Weather generator: generate and impute weather", {
 
 test_that("Weather generator (integration tests): compare input/output", {
   skip_if_not(
-    identical(
-      tolower(Sys.getenv("RSOILWAT_INTEGRATIONTESTS")),
-      "true"
-    )
+    isTRUE(as.logical(Sys.getenv("RSOILWAT_INTEGRATIONTESTS", "false")))
   )
 
   tag <- "IntegrationTest-WeatherGenerator"
