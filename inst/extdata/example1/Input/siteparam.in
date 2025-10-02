@@ -76,8 +76,9 @@
 1
 # Activate (1) / deactivate (0) water-usage efficiency multiplier
 1
-# Name of CO2 scenario: see input file `carbon.in`
-RCP85
+# Name(s) of CO2 scenario: see input file `carbon.in`
+# (use | to concatenate two sets)
+CMIP5_historical|CMIP5_RCP85
 
 
 # --- Soil characterization ---
@@ -124,8 +125,9 @@ RCP85
 
 Campbell1974        # Specify soil water retention curve
 Cosby1984AndOthers  # Specify pedotransfer function
-                    #   * if not implemented, then provide SWRC parameters
-                    #     as inputs via "swrc_params.in" and/or "swrcp.nc")
+                    #   * Provide SWRC parameters as inputs
+                    #     (via "swrc_params.in" and/or "swrcp.nc") if no
+                    #     PTF for the selected SWRC is implemented
 
 0                   # Are SWRC parameters for the mineral soil component
                     # provided as inputs (see `has_swrcp`)?

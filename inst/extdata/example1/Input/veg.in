@@ -14,7 +14,7 @@
  	#     (values for other vegetation parameters from this file)
 
 #---- Composition of vegetation type components (0-1; must add up to 1)
-#	Grasses	Shrubs	Trees	Forbs	BareGround
+#	grass	shrub	tree	forbs	BareGround
 	0.2	0.2	0.2	0.2	0.2
 
 
@@ -24,7 +24,7 @@
 # MODIS albedo aggregated over pure IGBP cells where NDVI is greater than
 # the 98th percentile NDVI
 
-#	Grasses	Shrubs	Trees	Forbs	BareGround
+#	grass	shrub	tree	forbs	BareGround
 	0.167	0.143	0.106	0.167	0.15
 
 
@@ -32,7 +32,7 @@
 # Canopy height is either constant through season or
 # is a function of monthly biomass (g / m^2)
 
-#	Grasses	Shrubs	Trees	Forbs
+#	grass	shrub	tree	forbs
 	300.0	0.0	0.0	300.0	# xinflec
 	29.5	5.0	5.0	29.5	# yinflec
 	85.	100.	3000.	85.	# range
@@ -43,7 +43,7 @@
 #--- Vegetation interception parameters
 # Equation: kSmax * log10(1 + LAI_live + kdead * LAI_dead)
 
-#	Grasses	Shrubs	Trees	Forbs
+#	grass	shrub	tree	forbs
 	1.0	2.6	2.0	1.0	# kSmax (mm)
 	1.0	0.1	0.01	0.5	# kdead (0-1 fraction)
 
@@ -51,7 +51,7 @@
 #--- Litter interception parameters
 # Equation: kSmax * log10(1 + litter_density)
 
-#	Grasses	Shrubs	Trees	Forbs
+#	grass	shrub	tree	forbs
 	0.113	0.113	0.290	0.113	# kSmax (mm)
 
 
@@ -60,18 +60,18 @@
 # Default value for trees derived from a regression based on data from a
 # review by Daikoku et al. (2008) Hydrological Processes 22:4083-4096.
 
-#	Grasses	Shrubs	Trees	Forbs
+#	grass	shrub	tree	forbs
 	1.	1.	0.41	1.
 
 
 # --- Parameter for scaling and limiting bare soil evaporation rate
 # If totagb (g / m2) > param then no bare-soil evaporation
-#	Grasses	Shrubs	Trees	Forbs
+#	grass	shrub	tree	forbs
 	999.	999.	2099.	999.
 
 
 #--- Shade effects on transpiration based on live and dead biomass
-#	Grasses	Shrubs	Trees	Forbs
+#	grass	shrub	tree	forbs
 	0.3	0.3	0.3	0.3	# shade scale
 	150.	150.	150.	150.	# shade maximal dead biomass
 	300.	300.	0.	300.	# tanfunc: xinflec
@@ -82,7 +82,7 @@
 
 #---- Hydraulic redistribution
 # Implemenation based on Ryel et al. (2002)  Oecologia 130: 173-184.
-#	Grasses	Shrubs	Trees	Forbs
+#	grass	shrub	tree	forbs
 	1	1	1	1	# flag to turn on/off (1/0) hydraulic redistribution
 	-0.2328	-0.2328	-0.2328	-0.2328	# maxCondroot - maximum radial soil-root conductance of the entire active root system for water (cm/-bar/day) = 0.097 cm/MPa/h
 	10.	10.	10.	10.	# swp50 - soil water potential (-bar) where conductance is reduced by 50% = -1. MPa
@@ -93,7 +93,7 @@
 # Soil water potential below which transpiration rates cannot be sustained,
 # for instance, for many crop species -1.5 MPa is assumed (wilting point)
 
-#	Grasses	Shrubs	Trees	Forbs
+#	grass	shrub	tree	forbs
 	-3.5	-3.9	-2.0	-2.0
 
 
@@ -102,7 +102,7 @@
 # Coefficients assume that monthly biomass inputs reflect values for conditions
 # at 360 ppm CO2, i.e., multiplier = 1 for x = 360 ppm CO2
 
-#	Grasses  Shrubs  Trees  Forbs
+#	grass	shrub	tree	forbs
 	0.1319	0.1319	0.1319	0.1319	# Biomass Coeff1
 	0.3442	0.3442	0.3442	0.3442	# Biomass Coeff2
 	25.158	25.158	25.158	25.158	# WUE Coeff1
@@ -110,9 +110,13 @@
 
 
 #------ Mean monthly biomass values
+# Spatial reference of biomass inputs (isBiomAsIf100Cover)
+1   # 0, values as is (at given cover); 1, values as if cover was 100%
+
+# --- Interpretation of biomass if isBiomAsIf100Cover is true (1)
+# Input biomass values are independent of the input composition values.
 # Input biomass per unit area (g / m2) for each vegetation type represent
 # values as if that vegetation type covers 100% of the simulated surface.
-# That way input biomass values are independent of the input composition values.
 # For example,
 #   - inputs for forbs: fCover = 0.4, biomass = 300 g/m2
 #   - inputs for grasses: fCover = 0.6, biomass = 450 g/m2
@@ -125,13 +129,35 @@
 # and
 #     grass biomass = 270 g/m2 (= 0.6 * 450).
 
+# --- Interpretation of biomass if `isBiomAsIf100Cover` is false (0)
+# Input biomass represent values observed in the field.
+# Input biomass per unit area (g / m2) for each vegetation type represent
+# values at the provided vegetation type cover.
+# For example,
+#   - inputs for forbs: fCover = 0.4, biomass = 300 g/m2
+#   - inputs for grasses: fCover = 0.6, biomass = 450 g/m2
+# Then, SOILWAT2 simulates a surface with vegetation of
+#     fCover = 1 (= 0.4 + 0.6)
+# and a
+#     total biomass = 750 g / m2 (= 300 + 450)
+# of which
+#     forb biomass = 300 g / m2
+# and
+#     grass biomass = 450 g/m2.
+
+
 # Litter   - dead leafy material on the ground (g/m^2 ).
 # Biomass  - living and dead/woody aboveground standing biomass (g/m^2).
 # %Live    - proportion of Biomass that is actually living (0-1.0).
 # LAI_conv - monthly amount of biomass needed to produce LAI=1.0 (g/m^2).
 # There should be 12 rows, one for each month, starting with January.
 
-# Grasslands component:
+# Calendar year corresponding to vegetation inputs
+# Note: year during which atmospheric CO2 fertilization does not modify
+# biomass inputs and/or water use efficiency (default: 1995 at 360 ppm CO2)
+1995
+
+# grass component:
 #Litter  Biomass  %Live LAI_conv
  75.0    150.0    0.00  300.     # January
  80.0    150.0    0.00  300.     # February
@@ -146,7 +172,7 @@
  70.0    170.0    0.10  300.     # November
  75.0    160.0    0.00  300.     # December
 
-# Shrublands component:
+# shrub component:
 #Litter  Biomass  %Live LAI_conv
 85.4   210.0     0.06     372      # January
 88.2   212.0     0.08     372      # February
@@ -161,7 +187,7 @@
 110.4   218.0     0.08     372      # November
 104.3   214.0     0.06     372      # December
 
-# Forest component:
+# tree component:
 #Litter  Biomass  %Live  LAI_conv
 2000 15000     0.083  500      # January
 2000 15000     0.083  500      # February
@@ -176,7 +202,7 @@
 2000 15000     0.083  500      # November
 2000 15000     0.083  500      # December
 
-# Forb component:
+# forbs component:
 #Litter  Biomass  %Live LAI_conv
  75.0    150.0    0.00  300.     # January
  80.0    150.0    0.00  300.     # February

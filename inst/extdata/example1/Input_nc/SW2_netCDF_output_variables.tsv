@@ -66,3 +66,8 @@ SOILTEMP	maxLyrTemperature	Lyr_<slyr>_max_C	degC	ZT	1	tslmax	daily maximum soil 
 SOILTEMP	minLyrTemperature	Lyr_<slyr>_min_C	degC	ZT	1	tslmin	daily minimum soil temperature	Minimum temperature of each soil layer	degC	time: minimum	Not standardized but see tsl
 SOILTEMP	avgLyrTemp	Lyr_<slyr>_avg_C	degC	ZT	1	tsl	daily mean soil temperature	Mean temperature of each soil layer	degC	time: mean	CMIP6/CMOR3
 FROZEN	lyrFrozen	Lyr_<slyr>	1	ZT	1	frozen	frozen soil	Count of days if soil layer has soil moisture in the solid phase	1	time: mean	Not standardized but see mrfsofr
+DERIVEDSUM	cwd	cwd	cm	T	1	cwd	climatic water deficit	Climatic water deficit (difference between potential evapotranspiration and evapotranspiration)	mm	time: sum	NA
+DERIVEDSUM	ddd5C30bar000to100cm	ddd5C30bar000to100cm	degC day	T	1	ddd5C30bar000to100cm	dry degree-days	Degrees above 5 degC on days when there is no snowpack and when all soil moisture is held at more than 3.0 MPa tension within 0-100 cm soil depth	degC day	time: sum	NA
+DERIVEDSUM	wdd5C15bar000to100cm	wdd5C15bar000to100cm	degC day	T	1	wdd5C15bar000to100cm	wet degree-days	Degrees above 5 degC on days when there is no snowpack and when soil moisture is held at less than 1.5 MPa tension within 0-100 cm soil depth	degC day	time: sum	NA
+DERIVEDAVG	swa30bar000to100cm	swa30bar000to100cm	cm	T	1	swa30bar000to100cm	available water content in soil	Water content of soil across 0 to 100 cm depth (or soil depth if shallower) held at a tension of 3.0 MPa	mm	vertical: sum time: mean	NA
+DERIVEDAVG	swa39bar000to100cm	swa39bar000to100cm	cm	T	1	swa39bar000to100cm	available water content in soil	Water content of soil across 0 to 100 cm depth (or soil depth if shallower) held at a tension of 3.9 MPa	mm	vertical: sum time: mean	NA
