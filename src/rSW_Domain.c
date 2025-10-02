@@ -356,11 +356,7 @@ void rSW_CTL_setup_domain(
   int debug = 0;
   #endif
 
-    SW_F_construct(&SW_Domain->SW_PathInputs, LogInfo);
-
-    if(LogInfo->stopRun) {
-       return;  // Exit function prematurely due to error
-    }
+    SW_F_construct(&SW_Domain->SW_PathInputs);
 
     if (from_files) {
         #ifdef RSWDEBUG
