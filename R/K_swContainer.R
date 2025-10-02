@@ -23,12 +23,12 @@
 
 #' Class \code{"swInputData"}
 #'
-#' This class is a container class to the input file \var{S4} objects. The
+#' This class is a container class to the input \var{S4} objects. The
 #' generic functions listed work on this and the proper \pkg{rSOILWAT2}
 #' classes in the container's slots.
 #'
-#' \code{\linkS4class{swInputData}} consists of slots for each file that is
-#' read in. These slots can be accessed via the following functions: \itemize{
+#' \code{\linkS4class{swInputData}} consists of slots for each input class.
+#' These slots can be accessed via the following functions: \itemize{
 #'   \item \code{\link{get_swMarkov}}
 #'   \item \code{\link{get_swCloud}}
 #'   \item \code{\link{get_swFiles}}
@@ -53,7 +53,6 @@
 #'
 #' @param object An object of class \code{\linkS4class{swInputData}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param file A character string. The file name from which to read.
 #' @param ... Arguments to the helper constructor function.
 #'  Dots can either contain objects to copy into slots of that class
 #'  (must be named identical to the corresponding slot) or
@@ -1408,38 +1407,6 @@ setMethod(
   function(object, vegtype) swProd_MonProd_veg(object@prod, vegtype)
 )
 
-#' @rdname swInputData-class
-#' @export
-setMethod(
-  "swProd_MonProd_grass",
-  signature = "swInputData",
-  function(object) swProd_MonProd_grass(object@prod)
-)
-
-#' @rdname swInputData-class
-#' @export
-setMethod(
-  "swProd_MonProd_shrub",
-  signature = "swInputData",
-  function(object) swProd_MonProd_shrub(object@prod)
-)
-
-#' @rdname swInputData-class
-#' @export
-setMethod(
-  "swProd_MonProd_tree",
-  signature = "swInputData",
-  function(object) swProd_MonProd_tree(object@prod)
-)
-
-#' @rdname swInputData-class
-#' @export
-setMethod(
-  "swProd_MonProd_forb",
-  signature = "swInputData",
-  function(object) swProd_MonProd_forb(object@prod)
-)
-
 
 #' @rdname swInputData-class
 #' @export
@@ -1591,50 +1558,6 @@ setReplaceMethod(
   signature = "swInputData",
   function(object, vegtype, value) {
     swProd_MonProd_veg(object@prod, vegtype) <- value
-    object
-  }
-)
-
-#' @rdname swInputData-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_grass",
-  signature = "swInputData",
-  function(object, value) {
-    swProd_MonProd_grass(object@prod) <- value
-    object
-  }
-)
-
-#' @rdname swInputData-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_shrub",
-  signature = "swInputData",
-  function(object, value) {
-    swProd_MonProd_shrub(object@prod) <- value
-    object
-  }
-)
-
-#' @rdname swInputData-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_tree",
-  signature = "swInputData",
-  function(object, value) {
-    swProd_MonProd_tree(object@prod) <- value
-    object
-  }
-)
-
-#' @rdname swInputData-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_forb",
-  signature = "swInputData",
-  function(object, value) {
-    swProd_MonProd_forb(object@prod) <- value
     object
   }
 )
@@ -2577,45 +2500,3 @@ setReplaceMethod(
     object
   }
 )
-
-
-
-#' @rdname swInputData-class
-#' @export
-# nolint start
-setMethod(
-  "swReadLines",
-  signature = c(object="swInputData",file="character"),
-  function(object,file) {
-    stop("TODO: method 'swReadLines' for class 'swInputData' is not up-to-date; hard-coded indices are incorrect", call. = FALSE)
-
-    object@files <- swReadLines(object@files,file)
-    object@files@ProjDir <- dirname(file)
-    object@years <- swReadLines(object@years,file.path(object@files@ProjDir, object@files@InFiles[2]))
-    object@weather <- swReadLines(object@weather,file.path(object@files@ProjDir, object@files@InFiles[6]))
-    weatherFiles <- list.files(path=file.path(object@files@ProjDir,dirname(object@files@WeatherPrefix)), pattern=basename(object@files@WeatherPrefix), include.dirs=F, recursive=F, full.names=T)
-    object@weatherHistory <- list()
-    if(length(weatherFiles) > 0) {
-      for(i in 1:length(weatherFiles)) {
-        wd <- new("swWeatherData",year=0)
-        wd <- swReadLines(wd, weatherFiles[i])
-        object@weatherHistory[[i]] <- wd
-      }
-    }
-
-    object@cloud <- swReadLines(object@cloud,file.path(object@files@ProjDir, object@files@InFiles[9]))
-    if(all(file.exists(file.path(object@files@ProjDir, object@files@InFiles[7:8]))))
-      object@markov <- swReadLines(object@markov,file.path(object@files@ProjDir, object@files@InFiles[7:8]))
-    object@prod <- swReadLines(object@prod,file.path(object@files@ProjDir, object@files@InFiles[10]))
-    object@site <- swReadLines(object@site,file.path(object@files@ProjDir, object@files@InFiles[4]))
-    object@soils <- swReadLines(object@soils,file.path(object@files@ProjDir, object@files@InFiles[5]))
-    if(file.exists(file.path(object@files@ProjDir, object@files@InFiles[11]))) {#Optional File
-      object@estab <- swReadLines(object@estab,c(file.path(object@files@ProjDir, object@files@InFiles[11]),object@files@ProjDir))
-    }
-    object@output <- swReadLines(object@output,file.path(object@files@ProjDir, object@files@InFiles[14]))
-    object@swc <- swReadLines(object@swc,file.path(object@files@ProjDir, object@files@InFiles[13]))
-    object@carbon <- swReadLines(object@carbon, file.path(object@files@ProjDir, object@files@InFiles[12]))
-    return(object)
-  }
-)
-# nolint end

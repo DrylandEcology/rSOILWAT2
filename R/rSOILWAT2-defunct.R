@@ -168,3 +168,16 @@ update_requested_years <- function(...) {
     )
   )
 }
+
+
+#' @rdname rSOILWAT2-defunct
+#' @export
+swReadLines <- function(...) {
+  .Defunct(
+    msg = paste(
+      "rSOILWAT2::swReadLines() methods are defunct with version 6.4.0;",
+      "please use alternative functionality such as",
+      "rSOILWAT2::sw_inputDataFromFiles()"
+    )
+  )
+}

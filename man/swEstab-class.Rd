@@ -6,7 +6,6 @@
 \alias{swEstab}
 \alias{swEstab_useEstab,swEstab-method}
 \alias{swEstab_useEstab<-,swEstab-method}
-\alias{swReadLines,swEstab,character-method}
 \title{Class \code{"swEstab"}}
 \usage{
 swEstab(...)
@@ -14,8 +13,6 @@ swEstab(...)
 \S4method{swEstab_useEstab}{swEstab}(object)
 
 \S4method{swEstab_useEstab}{swEstab}(object) <- value
-
-\S4method{swReadLines}{swEstab,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -30,8 +27,6 @@ If dots are missing, then corresponding values of
 \item{object}{An object of class \code{\linkS4class{swEstab}}.}
 
 \item{value}{A value to assign to a specific slot of the object.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class
@@ -45,18 +40,4 @@ x <- swEstab()
 }
 \seealso{
 \code{\linkS4class{swInputData}}
-\code{\linkS4class{swFiles}}
-\code{\linkS4class{swYears}}
-\code{\linkS4class{swWeather}}
-\code{\linkS4class{swCloud}}
-\code{\linkS4class{swMarkov}}
-\code{\linkS4class{swProd}}
-\code{\linkS4class{swSite}}
-\code{\linkS4class{swSoils}}
-\code{\linkS4class{swSpinup}}
-\code{\linkS4class{swEstab}}
-\code{\linkS4class{swOUT}}
-\code{\linkS4class{swCarbon}}
-\code{\linkS4class{swSWC}}
-\code{\linkS4class{swLog}}
 }

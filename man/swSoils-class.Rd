@@ -7,7 +7,6 @@
 \alias{get_swSoils,swSoils-method}
 \alias{set_swSoils<-,swSoils,swSoils-method}
 \alias{set_swSoils<-,swSoils,list-method}
-\alias{swReadLines,swSoils,character-method}
 \title{Class \code{"swSoils"}}
 \usage{
 swSoils(...)
@@ -17,8 +16,6 @@ swSoils(...)
 \S4method{set_swSoils}{swSoils,swSoils}(object) <- value
 
 \S4method{set_swSoils}{swSoils,list}(object) <- value
-
-\S4method{swReadLines}{swSoils,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -33,8 +30,6 @@ If dots are missing, then corresponding values of
 \item{object}{An object of class \code{\linkS4class{swSoils}}.}
 
 \item{value}{A value to assign to a specific slot of the object.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class
@@ -48,18 +43,4 @@ x <- swSoils()
 }
 \seealso{
 \code{\linkS4class{swInputData}}
-\code{\linkS4class{swFiles}}
-\code{\linkS4class{swYears}}
-\code{\linkS4class{swWeather}}
-\code{\linkS4class{swCloud}}
-\code{\linkS4class{swMarkov}}
-\code{\linkS4class{swProd}}
-\code{\linkS4class{swSite}}
-\code{\linkS4class{swSoils}}
-\code{\linkS4class{swSpinup}}
-\code{\linkS4class{swEstab}}
-\code{\linkS4class{swOUT}}
-\code{\linkS4class{swCarbon}}
-\code{\linkS4class{swSWC}}
-\code{\linkS4class{swLog}}
 }

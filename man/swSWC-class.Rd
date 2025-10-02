@@ -16,7 +16,6 @@
 \alias{swSWC_Method<-,swSWC,integer-method}
 \alias{swSWC_HistoricList<-,swSWC,list-method}
 \alias{swSWC_HistoricData<-,swSWC,swSWC_hist-method}
-\alias{swReadLines,swSWC,character-method}
 \title{Class \code{"swSWC"}}
 \usage{
 swSWC(...)
@@ -44,8 +43,6 @@ swSWC(...)
 \S4method{swSWC_HistoricList}{swSWC,list}(object) <- value
 
 \S4method{swSWC_HistoricData}{swSWC,swSWC_hist}(object) <- value
-
-\S4method{swReadLines}{swSWC,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -63,8 +60,6 @@ If dots are missing, then corresponding values of
 \code{data} object.}
 
 \item{value}{A value to assign to a specific slot of the object.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class
@@ -77,10 +72,5 @@ x <- swSWC()
 
 }
 \seealso{
-\code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
-\code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
-\code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
-\code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
-\code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
-\code{\linkS4class{swInputData}} \code{\linkS4class{swLog}}
+\code{\linkS4class{swInputData}}
 }

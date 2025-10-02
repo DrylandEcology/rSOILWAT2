@@ -30,7 +30,6 @@
 #'
 #' @param object An object of class \code{\linkS4class{swSite}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param file A character string. The file name from which to read.
 #' @param ... Arguments to the helper constructor function.
 #'  Dots can either contain objects to copy into slots of that class
 #'  (must be named identical to the corresponding slot) or
@@ -40,22 +39,7 @@
 #'  \code{rSOILWAT2::sw_exampleData}
 #'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
-#' @seealso
-#' \code{\linkS4class{swInputData}}
-#' \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swYears}}
-#' \code{\linkS4class{swWeather}}
-#' \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}}
-#' \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}}
-#' \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swSpinup}}
-#' \code{\linkS4class{swEstab}}
-#' \code{\linkS4class{swOUT}}
-#' \code{\linkS4class{swCarbon}}
-#' \code{\linkS4class{swSWC}}
-#' \code{\linkS4class{swLog}}
+#' @seealso \code{\linkS4class{swInputData}}
 #'
 #' @examples
 #' showClass("swSite")
@@ -623,68 +607,3 @@ setReplaceMethod(
     object
   }
 )
-
-
-
-#' @rdname swSite-class
-#' @export
-# nolint start
-setMethod(
-  "swReadLines",
-  signature = c(object="swSite",file="character"),
-  function(object,file) {
-    stop("TODO: method 'swReadLines' is not up-to-date; hard-coded indices are incorrect", call. = FALSE)
-			infiletext <- readLines(con = file)
-			object@SWClimits[1] = readNumeric(infiletext[2])
-			object@SWClimits[2] = readNumeric(infiletext[3])
-			object@SWClimits[3] = readNumeric(infiletext[4])
-			object@ModelFlags[1] = readLogical(infiletext[7])
-			object@ModelFlags[2] = readLogical(infiletext[8])
-			object@ModelCoefficients[1] = readNumeric(infiletext[10])
-			object@ModelCoefficients[2] = readNumeric(infiletext[11])
-			object@ModelCoefficients[3] = readNumeric(infiletext[12])
-			object@SnowSimulationParameters[1] = readNumeric(infiletext[15])
-			object@SnowSimulationParameters[2] = readNumeric(infiletext[16])
-			object@SnowSimulationParameters[3] = readNumeric(infiletext[17])
-			object@SnowSimulationParameters[4] = readNumeric(infiletext[18])
-			object@SnowSimulationParameters[5] = readNumeric(infiletext[19])
-			object@DrainageCoefficient = readNumeric(infiletext[22])
-			object@EvaporationCoefficients[1] = readNumeric(infiletext[30])
-			object@EvaporationCoefficients[2] = readNumeric(infiletext[33])
-			object@EvaporationCoefficients[3] = readNumeric(infiletext[35])
-			object@EvaporationCoefficients[4] = readNumeric(infiletext[36])
-			object@TranspirationCoefficients[1] = readNumeric(infiletext[40])
-			object@TranspirationCoefficients[2] = readNumeric(infiletext[41])
-			object@TranspirationCoefficients[3] = readNumeric(infiletext[42])
-			object@TranspirationCoefficients[4] = readNumeric(infiletext[43])
-			object@IntrinsicSiteParams[1] = readNumeric(infiletext[46])
-			object@IntrinsicSiteParams[2] = readNumeric(infiletext[47])
-			object@IntrinsicSiteParams[3] = readNumeric(infiletext[48])
-			object@IntrinsicSiteParams[4] = readNumeric(infiletext[49])
-			object@SoilTemperatureConstants[1] = readNumeric(infiletext[53])
-			object@SoilTemperatureConstants[2] = readNumeric(infiletext[54])
-			object@SoilTemperatureConstants[3] = readNumeric(infiletext[55])
-			object@SoilTemperatureConstants[4] = readNumeric(infiletext[56])
-			object@SoilTemperatureConstants[5] = readNumeric(infiletext[57])
-			object@SoilTemperatureConstants[6] = readNumeric(infiletext[58])
-			object@SoilTemperatureConstants[7] = readNumeric(infiletext[59])
-			object@SoilTemperatureConstants[8] = readNumeric(infiletext[60])
-			object@SoilTemperatureConstants[9] = readNumeric(infiletext[61])
-			object@SoilTemperatureConstants[10] = readNumeric(infiletext[62])
-			object@SoilTemperatureFlag = readLogical(infiletext[63])
-
-			for(i in 71:length(infiletext)) {
-				if(grepl(pattern="#", infiletext[i]))
-					infiletext=infiletext[-i]
-			}
-
-			data = matrix(NA,nrow=length(71:length(infiletext)),ncol=2)
-			colnames(data)<-c("ndx", "layer")
-			for(i in 71:length(infiletext)) {
-				if(!grepl(pattern="#", infiletext[i]))
-					data[i-70,] = readNumerics(infiletext[i],2)
-			}
-			object@TranspirationRegions = data
-			return(object)
-})
-# nolint end

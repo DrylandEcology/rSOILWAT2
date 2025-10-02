@@ -29,7 +29,6 @@
 #'
 #' @param object An object of class \code{\linkS4class{swFiles}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param file A character string. The file name from which to read.
 #' @param ... Arguments to the helper constructor function.
 #'  Dots can either contain objects to copy into slots of that class
 #'  (must be named identical to the corresponding slot) or
@@ -39,22 +38,7 @@
 #'  \code{rSOILWAT2::sw_exampleData}
 #'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
-#' @seealso
-#' \code{\linkS4class{swInputData}}
-#' \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swYears}}
-#' \code{\linkS4class{swWeather}}
-#' \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}}
-#' \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}}
-#' \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swSpinup}}
-#' \code{\linkS4class{swEstab}}
-#' \code{\linkS4class{swOUT}}
-#' \code{\linkS4class{swCarbon}}
-#' \code{\linkS4class{swSWC}}
-#' \code{\linkS4class{swLog}}
+#' @seealso \code{\linkS4class{swInputData}}
 #'
 #' @examples
 #' showClass("swFiles")
@@ -538,40 +522,3 @@ setReplaceMethod(
   signature = "swFiles",
   function(object, value) set_InFiles(object, "eOutput", value)
 )
-
-
-#' @rdname swFiles-class
-#' @export
-# nolint start
-setMethod(
-  "swReadLines",
-  signature = c(object = "swFiles", file = "character"),
-  function(object, file) {
-  stop("TODO: method 'swReadLines' is not up-to-date;",
-    "hard-coded indices are incorrect", call. = FALSE)
-
-    infiletext <- readLines(con = file)
-    object@InFiles[1] <- file
-    object@InFiles[2] <- strsplit(x = infiletext[5], split = "\t")[[1]][1]
-    object@InFiles[3] <- strsplit(x = infiletext[6], split = "\t")[[1]][1]
-    object@InFiles[4] <- strsplit(x = infiletext[9], split = "\t")[[1]][1]
-    object@InFiles[5] <- strsplit(x = infiletext[10], split = "\t")[[1]][1]
-    object@InFiles[6] <- strsplit(x = infiletext[13], split = "\t")[[1]][1]
-    object@WeatherPrefix <- strsplit(x = infiletext[14], split = "\t")[[1]][1]
-    object@InFiles[7] <- strsplit(x = infiletext[15], split = "\t")[[1]][1]
-    object@InFiles[8] <- strsplit(x = infiletext[16], split = "\t")[[1]][1]
-    object@InFiles[9] <- strsplit(x = infiletext[17], split = "\t")[[1]][1]
-    object@InFiles[10] <- strsplit(x = infiletext[20], split = "\t")[[1]][1]
-    object@InFiles[11] <- strsplit(x = infiletext[21], split = "\t")[[1]][1]
-    object@InFiles[12] <- strsplit(x = infiletext[24], split = "\t")[[1]][1]
-    object@OutputPrefix <- strsplit(x = infiletext[27], split = "\t")[[1]][1]
-    object@InFiles[13] <- strsplit(x = infiletext[28], split = "\t")[[1]][1]
-    names(object@InFiles) <- c("InputFilesForSimulation", "Model_Years",
-      "Model_LogFile", "Site_Params", "Site_Soils", "Weather_setup",
-      "Markov_precip_probs", "Markov_covarianceTable",
-      "Weather_atmosphericParams", "Vegetation_Productivity",
-      "Vegetation_Establishment", "SWC_setup", "Output_setup")
-
-    object
-})
-# nolint end

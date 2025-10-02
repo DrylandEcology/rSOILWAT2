@@ -17,6 +17,20 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###############################################################################
 
+
+#' Deprecated functions in package \pkg{rSOILWAT2}
+#'
+#' Executing a deprecated function will warn and tell you which function
+#' replaces them.
+#'
+#' @inheritParams sw_exec
+#' @param object An object of a \code{rSOILWAT2} class.
+#' @param value A value to assign to a specific slot of the object.
+#'
+#' @name rSOILWAT2-deprecated
+NULL
+
+
 # nolint start.
 
 dbW_getWeatherData_old <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startYear=NULL,endYear=NULL, Scenario="Current") {
@@ -130,7 +144,7 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 		for(j in 1:length(weath)) {
 			year <- as.numeric(sub(pattern="weath.",replacement="",weath[j]))
 			temp <- utils::read.csv(file.path(weatherFolderPath,weath[j]),header=FALSE,skip=2,sep="\t")
-			weatherData[[j]] <- swReadLines(new("swWeatherData",year),file.path(weatherFolderPath,weath[j]))
+			weatherData[[j]] <- swReadLinesWeather3Vars(new("swWeatherData",year),file.path(weatherFolderPath,weath[j]))
 		}
 		StartYear <- years[1]
 		EndYear <- years[length(years)]
@@ -138,6 +152,35 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 		DBI::dbExecute(rSW2_glovars$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,", ",scenarioID,", ",StartYear,", ",EndYear,", ",data_blob,");",sep=""))
 		#dbCommit(rSW2_glovars$con)
 	}
+}
+
+
+swReadLinesWeather3Vars <- function(object, file) {
+    .Deprecated("C_rSW2_readAllWeatherFromDisk")
+    warning(
+      "swReadLines works only with traditional weather data.", call. = FALSE
+    )
+
+    object@year <- as.integer(
+      strsplit(
+        x = basename(file),
+        split = ".",
+      fixed = TRUE
+      )[[1]][2]
+    )
+    x <- utils::read.table(
+      file,
+      header = FALSE,
+      comment.char = "#",
+      blank.lines.skip = TRUE,
+      sep = "\t"
+    )
+    stopifnot(ncol(x) != 4L)
+    colnames(x) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+    object@data[] <- NA
+    object@data[, colnames(x)] <- as.matrix(x)
+
+    object
 }
 
 
@@ -1279,11 +1322,7 @@ readNumerics <- function(text,expectedArgs,showWarnings=FALSE) {
 #------ Other deprecated functions ------
 
 
-#' Return output data
-#'
-#' @inheritParams sw_exec
-#'
-#' @return An object of class \code{\linkS4class{swOutput}}.
+#' @rdname rSOILWAT2-deprecated
 #' @export
 sw_outputData <- function(inputData) {
   .Deprecated("Store return value of `rSOILWAT2::sw_exec()`.")
@@ -1298,5 +1337,258 @@ sw_outputData <- function(inputData) {
 
   res
 }
+
+
+#------ Vegetation-type related methods & functions ------
+
+#' @rdname rSOILWAT2-deprecated
+setGeneric(
+  "swProd_MonProd_grass",
+  function(object) {
+    .Deprecated("swProd_MonProd_veg")
+    standardGeneric("swProd_MonProd_grass")
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+setGeneric(
+  "swProd_MonProd_shrub",
+  function(object) {
+    .Deprecated("swProd_MonProd_veg")
+    standardGeneric("swProd_MonProd_shrub")
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+setGeneric(
+  "swProd_MonProd_tree",
+  function(object) {
+    .Deprecated("swProd_MonProd_veg")
+    standardGeneric("swProd_MonProd_tree")
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+setGeneric(
+  "swProd_MonProd_forb",
+  function(object) {
+    .Deprecated("swProd_MonProd_veg")
+    standardGeneric("swProd_MonProd_forb")
+  }
+)
+
+
+#' @rdname rSOILWAT2-deprecated
+setGeneric(
+  "swProd_MonProd_grass<-",
+  function(object, value) {
+    .Deprecated("swProd_MonProd_veg")
+    standardGeneric("swProd_MonProd_grass<-")
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+setGeneric(
+  "swProd_MonProd_shrub<-",
+  function(object, value) {
+    .Deprecated("swProd_MonProd_veg")
+    standardGeneric("swProd_MonProd_shrub<-")
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+setGeneric(
+  "swProd_MonProd_tree<-",
+  function(object, value) {
+    .Deprecated("swProd_MonProd_veg")
+    standardGeneric("swProd_MonProd_tree<-")
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+setGeneric(
+  "swProd_MonProd_forb<-",
+  function(object, value) {
+    .Deprecated("swProd_MonProd_veg")
+    standardGeneric("swProd_MonProd_forb<-")
+  }
+)
+
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_grass",
+  "swProd",
+  function(object) {
+    object@MonthlyVeg[[
+      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]
+    ]]
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_shrub",
+  "swProd",
+  function(object) {
+    object@MonthlyVeg[[
+      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]
+    ]]
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_tree",
+  "swProd",
+  function(object) {
+    object@MonthlyVeg[[
+      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]
+    ]]
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_forb",
+  "swProd",
+  function(object) {
+    object@MonthlyVeg[[
+      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]
+    ]]
+  }
+)
+
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_grass",
+  signature = "swProd",
+  function(object, value) {
+    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]
+    swProd_MonProd_veg(object, id_vegtype) <- value
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_shrub",
+  signature = "swProd",
+  function(object, value) {
+    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]
+    swProd_MonProd_veg(object, id_vegtype) <- value
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_tree",
+  signature = "swProd",
+  function(object, value) {
+    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]
+    swProd_MonProd_veg(object, id_vegtype) <- value
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_forb",
+  signature = "swProd",
+  function(object, value) {
+    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]
+    swProd_MonProd_veg(object, id_vegtype) <- value
+    object
+  }
+)
+
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_grass",
+  signature = "swInputData",
+  function(object) swProd_MonProd_grass(object@prod)
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_shrub",
+  signature = "swInputData",
+  function(object) swProd_MonProd_shrub(object@prod)
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_tree",
+  signature = "swInputData",
+  function(object) swProd_MonProd_tree(object@prod)
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_forb",
+  signature = "swInputData",
+  function(object) swProd_MonProd_forb(object@prod)
+)
+
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_grass",
+  signature = "swInputData",
+  function(object, value) {
+    swProd_MonProd_grass(object@prod) <- value
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_shrub",
+  signature = "swInputData",
+  function(object, value) {
+    swProd_MonProd_shrub(object@prod) <- value
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_tree",
+  signature = "swInputData",
+  function(object, value) {
+    swProd_MonProd_tree(object@prod) <- value
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_forb",
+  signature = "swInputData",
+  function(object, value) {
+    swProd_MonProd_forb(object@prod) <- value
+    object
+  }
+)
+
 
 # nolint end.

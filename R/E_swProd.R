@@ -32,7 +32,6 @@ lc_names <- c(veg_names, "Bare Ground")
 #'
 #' @param object An object of class \code{\linkS4class{swProd}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param file A character string. The file name from which to read.
 #' @param ... Arguments to the helper constructor function.
 #'  Dots can either contain objects to copy into slots of that class
 #'  (must be named identical to the corresponding slot) or
@@ -43,22 +42,7 @@ lc_names <- c(veg_names, "Bare Ground")
 #'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #' @param vegtype The name or index of the vegetation type.
 #'
-#' @seealso
-#' \code{\linkS4class{swInputData}}
-#' \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swYears}}
-#' \code{\linkS4class{swWeather}}
-#' \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}}
-#' \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}}
-#' \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swSpinup}}
-#' \code{\linkS4class{swEstab}}
-#' \code{\linkS4class{swOUT}}
-#' \code{\linkS4class{swCarbon}}
-#' \code{\linkS4class{swSWC}}
-#' \code{\linkS4class{swLog}}
+#' @seealso \code{\linkS4class{swInputData}}
 #'
 #' @examples
 #' showClass("swProd")
@@ -491,54 +475,6 @@ setMethod(
 
 #' @rdname swProd-class
 #' @export
-setMethod(
-  "swProd_MonProd_grass",
-  "swProd",
-  function(object) {
-    object@MonthlyVeg[[
-      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]
-    ]]
-  }
-)
-
-#' @rdname swProd-class
-#' @export
-setMethod(
-  "swProd_MonProd_shrub",
-  "swProd",
-  function(object) {
-    object@MonthlyVeg[[
-      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]
-    ]]
-  }
-)
-
-#' @rdname swProd-class
-#' @export
-setMethod(
-  "swProd_MonProd_tree",
-  "swProd",
-  function(object) {
-    object@MonthlyVeg[[
-      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]
-    ]]
-  }
-)
-
-#' @rdname swProd-class
-#' @export
-setMethod(
-  "swProd_MonProd_forb",
-  "swProd",
-  function(object) {
-    object@MonthlyVeg[[
-      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]
-    ]]
-  }
-)
-
-#' @rdname swProd-class
-#' @export
 setReplaceMethod(
   "set_swProd",
   signature = "swProd",
@@ -729,94 +665,3 @@ setReplaceMethod(
     object
   }
 )
-
-#' @rdname swProd-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_grass",
-  signature = "swProd",
-  function(object, value) {
-    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]
-    swProd_MonProd_veg(object, id_vegtype) <- value
-    object
-  }
-)
-
-#' @rdname swProd-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_shrub",
-  signature = "swProd",
-  function(object, value) {
-    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]
-    swProd_MonProd_veg(object, id_vegtype) <- value
-    object
-  }
-)
-
-#' @rdname swProd-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_tree",
-  signature = "swProd",
-  function(object, value) {
-    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]
-    swProd_MonProd_veg(object, id_vegtype) <- value
-    object
-  }
-)
-
-#' @rdname swProd-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_forb",
-  signature = "swProd",
-  function(object, value) {
-    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]
-    swProd_MonProd_veg(object, id_vegtype) <- value
-    object
-  }
-)
-
-
-#' @rdname swProd-class
-#' @export
-# nolint start
-setMethod(
-  "swReadLines",
-  signature = c(object = "swProd", file = "character"),
-  function(object, file) {
-    stop("swReadLines is defunct", call. = FALSE)
-    infiletext <- readLines(con = file)
-    object@Composition = readNumerics(infiletext[6],5)
-    object@Albedo = readNumerics(infiletext[11],5)
-    object@CanopyHeight[1,] = readNumerics(infiletext[21],4)
-    object@CanopyHeight[2,] = readNumerics(infiletext[22],4)
-    object@CanopyHeight[3,] = readNumerics(infiletext[23],4)
-    object@CanopyHeight[4,] = readNumerics(infiletext[24],4)
-    object@CanopyHeight[5,] = readNumerics(infiletext[25],4)
-    object@VegetationInterceptionParameters[1,] = readNumerics(infiletext[30],4)
-    object@VegetationInterceptionParameters[2,] = readNumerics(infiletext[31],4)
-    object@LitterInterceptionParameters[1,] = readNumerics(infiletext[38],4)
-    object@EsTpartitioning_param = readNumerics(infiletext[46],4)
-    object@Es_param_limit = readNumerics(infiletext[51],4)
-    object@Shade[1,] = readNumerics(infiletext[56],4)
-    object@Shade[2,] = readNumerics(infiletext[57],4)
-    object@Shade[3,] = readNumerics(infiletext[58],4)
-    object@Shade[4,] = readNumerics(infiletext[59],4)
-    object@Shade[5,] = readNumerics(infiletext[60],4)
-    object@Shade[6,] = readNumerics(infiletext[61],4)
-    object@HydraulicRedistribution_use = as.logical(as.integer(readNumerics(infiletext[66],4)))
-    object@HydraulicRedistribution[1,] = readNumerics(infiletext[67],4)
-    object@HydraulicRedistribution[2,] = readNumerics(infiletext[68],4)
-    object@HydraulicRedistribution[3,] = readNumerics(infiletext[69],4)
-    object@CriticalSoilWaterPotential = readNumerics(infiletext[74],4)
-    for(i in 1:4)  object@CO2Coefficients[i, ] = readNumerics(infiletext[79 + i], 4)
-    for(i in 1:12) object@MonthlyVeg[[1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]]][i, ] = readNumerics(infiletext[94+i],4)
-    for(i in 1:12) object@MonthlyVeg[[1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]]][i, ] = readNumerics(infiletext[109+i],4)
-    for(i in 1:12) object@MonthlyVeg[[1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]]][i, ] = readNumerics(infiletext[124+i],4)
-    for(i in 1:12) object@MonthlyVeg[[1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]]][i, ] = readNumerics(infiletext[139+i],4)
-    return(object)
-  }
-)
-# nolint end

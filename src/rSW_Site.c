@@ -77,26 +77,27 @@ static char *cOMSWRCp[] = {
 /* Copy soil properties into "Layers" matrix */
 static SEXP onGet_SW_LYR(void) {
 	int i, dmax = 0;
-	SW_SITE *v = &SoilWatRun.Site;
+	SW_SOIL_RUN_INPUTS *s = &SoilWatRun.RunIn.SoilRunIn;
+	LyrIndex n_layers = SoilWatRun.RunIn.SiteRunIn.n_layers;
 	SEXP Layers, Layers_names, Layers_names_y;
 	double *p_Layers;
 
-	PROTECT(Layers = allocMatrix(REALSXP, v->n_layers, 13));
+	PROTECT(Layers = allocMatrix(REALSXP, n_layers, 13));
 	p_Layers = REAL(Layers);
-	for (i = 0; i < (v->n_layers); i++) {
-		p_Layers[i + (v->n_layers) * 0] = dmax = v->soils.width[i] + dmax;
-		p_Layers[i + (v->n_layers) * 1] = v->soils.soilDensityInput[i];
-		p_Layers[i + (v->n_layers) * 2] = v->soils.fractionVolBulk_gravel[i];
-		p_Layers[i + (v->n_layers) * 3] = v->soils.evap_coeff[i];
-		p_Layers[i + (v->n_layers) * 4] = v->soils.transp_coeff[SW_GRASS][i];
-		p_Layers[i + (v->n_layers) * 5] = v->soils.transp_coeff[SW_SHRUB][i];
-		p_Layers[i + (v->n_layers) * 6] = v->soils.transp_coeff[SW_TREES][i];
-		p_Layers[i + (v->n_layers) * 7] = v->soils.transp_coeff[SW_FORBS][i];
-		p_Layers[i + (v->n_layers) * 8] = v->soils.fractionWeightMatric_sand[i];
-		p_Layers[i + (v->n_layers) * 9] = v->soils.fractionWeightMatric_clay[i];
-		p_Layers[i + (v->n_layers) * 10] = v->soils.impermeability[i];
-		p_Layers[i + (v->n_layers) * 11] = v->soils.avgLyrTempInit[i];
-		p_Layers[i + (v->n_layers) * 12] = v->soils.fractionWeight_om[i];
+	for (i = 0; i < (n_layers); i++) {
+		p_Layers[i + (n_layers) * 0] = dmax = s->width[i] + dmax;
+		p_Layers[i + (n_layers) * 1] = s->soilDensityInput[i];
+		p_Layers[i + (n_layers) * 2] = s->fractionVolBulk_gravel[i];
+		p_Layers[i + (n_layers) * 3] = s->evap_coeff[i];
+		p_Layers[i + (n_layers) * 4] = s->transp_coeff[SW_GRASS][i];
+		p_Layers[i + (n_layers) * 5] = s->transp_coeff[SW_SHRUB][i];
+		p_Layers[i + (n_layers) * 6] = s->transp_coeff[SW_TREES][i];
+		p_Layers[i + (n_layers) * 7] = s->transp_coeff[SW_FORBS][i];
+		p_Layers[i + (n_layers) * 8] = s->fractionWeightMatric_sand[i];
+		p_Layers[i + (n_layers) * 9] = s->fractionWeightMatric_clay[i];
+		p_Layers[i + (n_layers) * 10] = s->impermeability[i];
+		p_Layers[i + (n_layers) * 11] = s->avgLyrTempInit[i];
+		p_Layers[i + (n_layers) * 12] = s->fractionWeight_om[i];
 	}
 
 	PROTECT(Layers_names = allocVector(VECSXP, 2));
@@ -116,7 +117,8 @@ static SEXP onGet_SW_LYR(void) {
 */
 static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 
-	SW_SITE *v = &SoilWatRun.Site;
+	SW_SOIL_RUN_INPUTS *s = &SoilWatRun.RunIn.SoilRunIn;
+	LyrIndex *n_layers = &SoilWatRun.RunIn.SiteRunIn.n_layers;
 	LyrIndex lyrno;
 	int i, j, k, columns;
 	double dmin = 0.0, dmax, evco, trco_veg[NVEGTYPES], psand, pclay,
@@ -140,7 +142,7 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 	}
 
 	for (i = 0; i < j; i++) {
-		lyrno = SoilWatRun.Site.n_layers++;
+		lyrno = (*n_layers)++;
 
 		dmax = p_Layers[i + j * 0];
 		soildensity = p_Layers[i + j * 1];
@@ -156,20 +158,20 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 		soiltemp = p_Layers[i + j * 11];
         som_frac = p_Layers[i + j * 12];
 
-		v->soils.width[lyrno] = dmax - dmin;
-        v->soils.depths[lyrno] = dmax;
+		s->width[lyrno] = dmax - dmin;
+        s->depths[lyrno] = dmax;
 		dmin = dmax;
-		v->soils.soilDensityInput[lyrno] = soildensity;
-		v->soils.fractionVolBulk_gravel[lyrno] = f_gravel;
-		v->soils.evap_coeff[lyrno] = evco;
+		s->soilDensityInput[lyrno] = soildensity;
+		s->fractionVolBulk_gravel[lyrno] = f_gravel;
+		s->evap_coeff[lyrno] = evco;
 		ForEachVegType(k) {
-			v->soils.transp_coeff[k][lyrno] = trco_veg[k];
+			s->transp_coeff[k][lyrno] = trco_veg[k];
 		}
-		v->soils.fractionWeightMatric_sand[lyrno] = psand;
-		v->soils.fractionWeightMatric_clay[lyrno] = pclay;
-		v->soils.impermeability[lyrno] = imperm;
-		v->soils.avgLyrTempInit[lyrno] = soiltemp;
-        v->soils.fractionWeight_om[lyrno] = som_frac;
+		s->fractionWeightMatric_sand[lyrno] = psand;
+		s->fractionWeightMatric_clay[lyrno] = pclay;
+		s->impermeability[lyrno] = imperm;
+		s->avgLyrTempInit[lyrno] = soiltemp;
+        s->fractionWeight_om[lyrno] = som_frac;
 
 		if (lyrno >= MAX_LAYERS) {
 			LogError(
@@ -183,22 +185,23 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 		}
 	}
 
-    v->n_evap_lyrs = nlayers_bsevap(v->soils.evap_coeff, v->n_layers);
+    SoilWatRun.SiteSim.n_evap_lyrs = nlayers_bsevap(s->evap_coeff, *n_layers);
 }
 
 
 /* Copy SWRC parameters into "SWRCp" matrix */
 static SEXP onGet_SW_SWRCp(void) {
 	int i, k;
-	SW_SITE *v = &SoilWatRun.Site;
+	SW_SOIL_RUN_INPUTS *s = &SoilWatRun.RunIn.SoilRunIn;
+	LyrIndex n_layers = SoilWatRun.RunIn.SiteRunIn.n_layers;
 	SEXP SWRCp, SWRCp_names, SWRCp_names_y;
 	double *p_SWRCp;
 
-	PROTECT(SWRCp = allocMatrix(REALSXP, v->n_layers, SWRC_PARAM_NMAX));
+	PROTECT(SWRCp = allocMatrix(REALSXP, n_layers, SWRC_PARAM_NMAX));
 	p_SWRCp = REAL(SWRCp);
-	for (i = 0; i < (v->n_layers); i++) {
+	for (i = 0; i < (n_layers); i++) {
 		for (k = 0; k < SWRC_PARAM_NMAX; k++) {
-			p_SWRCp[i + (v->n_layers) * k] = v->soils.swrcpMineralSoil[i][k];
+			p_SWRCp[i + (n_layers) * k] = s->swrcpMineralSoil[i][k];
 		}
 	}
 
@@ -217,7 +220,7 @@ static SEXP onGet_SW_SWRCp(void) {
 /* Copy omSWRC parameters into "omSWRCp" matrix */
 static SEXP onGet_SW_omSWRCp(void) {
     int i, k;
-    SW_SITE *v = &SoilWatRun.Site;
+    SW_SITE_SIM *s = &SoilWatRun.SiteSim;
     SEXP omSWRCp, omSWRCp_names, omSWRCp_rownames, omSWRCp_colnames;
     double *p_omSWRCp;
 
@@ -225,7 +228,7 @@ static SEXP onGet_SW_omSWRCp(void) {
     p_omSWRCp = REAL(omSWRCp);
     for (i = 0; i < 2; i++) {
         for (k = 0; k < SWRC_PARAM_NMAX; k++) {
-            p_omSWRCp[i + 2 * k] = v->swrcpOM[i][k];
+            p_omSWRCp[i + 2 * k] = s->swrcpOM[i][k];
         }
     }
     PROTECT(omSWRCp_names = allocVector(VECSXP, 2));
@@ -248,7 +251,8 @@ static SEXP onGet_SW_omSWRCp(void) {
 /* Function `onSet_SW_SWRCp()` corresponds to SOILWAT2's `SW_SWRC_read()` */
 static void onSet_SW_SWRCp(SEXP SW_SWRCp, LOG_INFO* LogInfo) {
 
-	SW_SITE *v = &SoilWatRun.Site;
+	SW_SOIL_RUN_INPUTS *s = &SoilWatRun.RunIn.SoilRunIn;
+	LyrIndex n_layers = SoilWatRun.RunIn.SiteRunIn.n_layers;
 	int i, k;
 	double *p_SWRCp;
 
@@ -264,13 +268,13 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp, LOG_INFO* LogInfo) {
 	}
 
 	/* Check that we have `SW_Site.n_layers` */
-	if (nrows(SW_SWRCp) != SoilWatRun.Site.n_layers) {
+	if (nrows(SW_SWRCp) != n_layers) {
 		LogError(
 			LogInfo,
 			LOGERROR,
 			"swrcp.in : Number of layers with SWRC parameters (%d) "
 			"must match number of soil layers (%d)\n",
-			nrows(SW_SWRCp), SoilWatRun.Site.n_layers
+			nrows(SW_SWRCp), n_layers
 		);
         return; // Exit function prematurely due to error
 	}
@@ -278,17 +282,18 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp, LOG_INFO* LogInfo) {
 	/* Copy values */
 	p_SWRCp = REAL(SW_SWRCp);
 
-    for (i = 0; i < (v->n_layers); i++) {
+    for (i = 0; i < n_layers; i++) {
         for (k = 0; k < SWRC_PARAM_NMAX; k++) {
-            v->soils.swrcpMineralSoil[i][k] = p_SWRCp[i + (v->n_layers) * k];
+            s->swrcpMineralSoil[i][k] = p_SWRCp[i + n_layers * k];
         }
     }
 
-    v->site_has_swrcpMineralSoil = v->inputsProvideSWRCp;
+    SoilWatRun.SiteSim.site_has_swrcpMineralSoil =
+        SoilWatRun.SiteIn.inputsProvideSWRCp;
 }
 
 static void onSet_SW_omSWRCp(SEXP SW_omSWRCp, LOG_INFO* LogInfo) {
-    SW_SITE *v = &SoilWatRun.Site;
+    SW_SITE_SIM *s = &SoilWatRun.SiteSim;
     int i, k;
     double *p_omSWRCp;
 
@@ -297,7 +302,7 @@ static void onSet_SW_omSWRCp(SEXP SW_omSWRCp, LOG_INFO* LogInfo) {
 
     for (i = 0; i < 2; i++) {
         for (k = 0; k < SWRC_PARAM_NMAX; k++) {
-            v->swrcpOM[i][k] = p_omSWRCp[i + 2 * k];
+            s->swrcpOM[i][k] = p_omSWRCp[i + 2 * k];
         }
     }
 }
@@ -341,8 +346,9 @@ void onSet_SW_SOILS(SEXP SW_SOILS, LOG_INFO* LogInfo) {
 
 SEXP onGet_SW_SIT(void) {
 	int i;
-	SW_SITE *v = &SoilWatRun.Site;
-	SW_MODEL *m = &SoilWatRun.Model;
+	SW_SITE_INPUTS *v = &SoilWatRun.SiteIn;
+	SW_MODEL_RUN_INPUTS *m = &SoilWatRun.RunIn.ModelRunIn;
+	SW_SITE_SIM *ss = &SoilWatRun.SiteSim;
 
 	SEXP swSite;
 	SEXP SW_SIT;
@@ -483,7 +489,7 @@ SEXP onGet_SW_SIT(void) {
 	REAL(SoilTemperatureConstants)[4] = v->csParam1;
 	REAL(SoilTemperatureConstants)[5] = v->csParam2;
 	REAL(SoilTemperatureConstants)[6] = v->shParam;
-	REAL(SoilTemperatureConstants)[7] = v->Tsoil_constant;
+	REAL(SoilTemperatureConstants)[7] = SoilWatRun.RunIn.SiteRunIn.Tsoil_constant;
 	REAL(SoilTemperatureConstants)[8] = v->stDeltaX;
 	REAL(SoilTemperatureConstants)[9] = v->stMaxDepth;
 	PROTECT(SoilTemperatureConstants_names = allocVector(STRSXP,10));
@@ -493,11 +499,11 @@ SEXP onGet_SW_SIT(void) {
 
 	PROTECT(SoilDensityInputType = ScalarInteger(v->type_soilDensityInput));
 
-	PROTECT(TranspirationRegions = allocMatrix(INTSXP,(v->n_transp_rgn),2));
+	PROTECT(TranspirationRegions = allocMatrix(INTSXP, ss->n_transp_rgn, 2));
 	p_transp = INTEGER(TranspirationRegions);
-	for (i = 0; i < (v->n_transp_rgn); i++) {
-		p_transp[i + (v->n_transp_rgn) * 0] = (i + 1);
-		p_transp[i + (v->n_transp_rgn) * 1] = v->TranspRgnBounds[i];
+	for (i = 0; i < ss->n_transp_rgn; i++) {
+		p_transp[i + ss->n_transp_rgn * 0] = (i + 1);
+		p_transp[i + ss->n_transp_rgn * 1] = ss->TranspRgnBounds[i];
 	}
 	PROTECT(TranspirationRegions_names = allocVector(VECSXP,2));
 	PROTECT(TranspirationRegions_names_y = allocVector(STRSXP,2));
@@ -546,8 +552,8 @@ SEXP onGet_SW_SIT(void) {
 }
 
 void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
-	SW_SITE *v = &SoilWatRun.Site;
-	SW_MODEL *m = &SoilWatRun.Model;
+	SW_SITE_INPUTS *v = &SoilWatRun.SiteIn;
+	SW_MODEL_RUN_INPUTS *m = &SoilWatRun.RunIn.ModelRunIn;
 
 	SEXP SWClimits;
 	SEXP ModelFlags;
@@ -661,7 +667,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	v->csParam1 = REAL(SoilTemperatureConstants)[4];
 	v->csParam2 = REAL(SoilTemperatureConstants)[5];
 	v->shParam = REAL(SoilTemperatureConstants)[6];
-	v->Tsoil_constant = REAL(SoilTemperatureConstants)[7];
+	SoilWatRun.RunIn.SiteRunIn.Tsoil_constant = REAL(SoilTemperatureConstants)[7];
 	v->stDeltaX = REAL(SoilTemperatureConstants)[8];
 	v->stMaxDepth = REAL(SoilTemperatureConstants)[9];
 	#ifdef RSWDEBUG
@@ -694,7 +700,8 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 }
 
 void onSet_SW_SIT_transp(SEXP SW_SIT, LOG_INFO* LogInfo) {
-	SW_SITE *v = &SoilWatRun.Site;
+	SW_SOIL_RUN_INPUTS *s = &SoilWatRun.RunIn.SoilRunIn;
+	SW_SITE_SIM *ss = &SoilWatRun.SiteSim;
 	SEXP TranspirationRegions;
 
 	Bool too_many_regions = FALSE;
@@ -708,14 +715,14 @@ void onSet_SW_SIT_transp(SEXP SW_SIT, LOG_INFO* LogInfo) {
 
     PROTECT(TranspirationRegions = GET_SLOT(SW_SIT, install("TranspirationRegions")));
 	p_transp = INTEGER(TranspirationRegions);
-	v->n_transp_rgn = nrows(TranspirationRegions);
-	if (MAX_TRANSP_REGIONS < v->n_transp_rgn) {
+	ss->n_transp_rgn = nrows(TranspirationRegions);
+	if (MAX_TRANSP_REGIONS < ss->n_transp_rgn) {
 		too_many_regions = TRUE;
 	} else {
-        for (i = 0; i < v->n_transp_rgn; i++) {
-            lyr = p_transp[i + v->n_transp_rgn * 1];
-            v->TranspRgnBounds[i] = lyr;
-            if (i != (p_transp[i + v->n_transp_rgn * 0] - 1) || lyr == 0) {
+        for (i = 0; i < ss->n_transp_rgn; i++) {
+            lyr = p_transp[i + ss->n_transp_rgn * 1];
+            ss->TranspRgnBounds[i] = lyr;
+            if (i != (p_transp[i + ss->n_transp_rgn * 0] - 1) || lyr == 0) {
                 LogError(
                     LogInfo,
                     LOGERROR,
@@ -723,12 +730,12 @@ void onSet_SW_SIT_transp(SEXP SW_SIT, LOG_INFO* LogInfo) {
                 );
                 goto freeMem; // Exit function prematurely due to error
             }
-            v->TranspRgnDepths[i] = v->soils.depths[lyr - 1];
+            ss->TranspRgnDepths[i] = s->depths[lyr - 1];
         }
 	}
 	if (too_many_regions) {
 		LogError(LogInfo, LOGERROR, "siteparam.in : Number of transpiration regions"
-				" exceeds maximum allowed (%d > %d)\n", v->n_transp_rgn, MAX_TRANSP_REGIONS);
+				" exceeds maximum allowed (%d > %d)\n", ss->n_transp_rgn, MAX_TRANSP_REGIONS);
         goto freeMem; // Exit function prematurely due to error
 	}
 	#ifdef RSWDEBUG
@@ -736,8 +743,8 @@ void onSet_SW_SIT_transp(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	#endif
 
 	/* check for any discontinuities (reversals) in the transpiration regions */
-	for (r = 1; r < v->n_transp_rgn; r++) {
-		if (v->TranspRgnBounds[r - 1] >= v->TranspRgnBounds[r]) {
+	for (r = 1; r < ss->n_transp_rgn; r++) {
+		if (ss->TranspRgnBounds[r - 1] >= ss->TranspRgnBounds[r]) {
 			LogError(LogInfo, LOGERROR, "siteparam.in : Discontinuity/reversal in transpiration regions.\n");
             goto freeMem; // Exit function prematurely due to error
 		}

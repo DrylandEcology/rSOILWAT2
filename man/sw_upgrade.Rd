@@ -105,6 +105,9 @@ List of changes:
 \item class \code{\linkS4class{swProd}}: new slots \code{"vegYear"} and
 \code{"isBiomAsIf100Cover"}
 \item class \code{\linkS4class{swWeather}}: new slot \code{"correctWeatherValues"}
+\item class \code{\linkS4class{swOUT}}:
+two new \code{outkey}s \code{"DERIVEDSUM"} and \code{"DERIVEDAVG"},
+for a new total of 34 \code{outkey}s
 }
 \item Changes with \code{v6.3.0}:
 \itemize{
@@ -156,7 +159,7 @@ new slot \code{"vegType"}
 \item class \code{\linkS4class{swOUT}}:
 \code{"FROZEN"} added as \code{outkey} 28 for a new total of 32
 }
-\item Changes with \code{v3.1.0}:
+\item Changes with \code{v3.1.2}:
 \itemize{
 \item class \code{\linkS4class{swOUT}}:
 \code{"BIOMASS"} added as \code{outkey} 31 for a new total of 31

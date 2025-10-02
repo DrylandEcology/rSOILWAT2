@@ -32,7 +32,6 @@
 \alias{swSite_SoilTemperatureConsts<-,swSite-method}
 \alias{swSite_SoilDensityInputType<-,swSite-method}
 \alias{swSite_TranspirationRegions<-,swSite-method}
-\alias{swReadLines,swSite,character-method}
 \title{Class \code{"swSite"}}
 \usage{
 swSite(...)
@@ -92,8 +91,6 @@ swSite(...)
 \S4method{swSite_SoilDensityInputType}{swSite}(object) <- value
 
 \S4method{swSite_TranspirationRegions}{swSite}(object) <- value
-
-\S4method{swReadLines}{swSite,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -108,8 +105,6 @@ If dots are missing, then corresponding values of
 \item{object}{An object of class \code{\linkS4class{swSite}}.}
 
 \item{value}{A value to assign to a specific slot of the object.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class
@@ -123,18 +118,4 @@ x <- swSite()
 }
 \seealso{
 \code{\linkS4class{swInputData}}
-\code{\linkS4class{swFiles}}
-\code{\linkS4class{swYears}}
-\code{\linkS4class{swWeather}}
-\code{\linkS4class{swCloud}}
-\code{\linkS4class{swMarkov}}
-\code{\linkS4class{swProd}}
-\code{\linkS4class{swSite}}
-\code{\linkS4class{swSoils}}
-\code{\linkS4class{swSpinup}}
-\code{\linkS4class{swEstab}}
-\code{\linkS4class{swOUT}}
-\code{\linkS4class{swCarbon}}
-\code{\linkS4class{swSWC}}
-\code{\linkS4class{swLog}}
 }
