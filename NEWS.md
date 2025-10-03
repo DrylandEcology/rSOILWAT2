@@ -1,7 +1,7 @@
-# rSOILWAT2 v6.4.0-9000
+# rSOILWAT2 v6.4.0
 
 ## Breaking changes
-* `SOILWAT2` updated to v8.2.0-9000
+* `SOILWAT2` updated to v8.2.0
 * This version produces similar but not identical simulation output
   as previously because of the following changes:
     * CO2-fertilization effects are now using provided atmospheric CO2 of the
@@ -19,6 +19,10 @@
   conditions on the ground (at the specified surface cover) or
   if they represent vegetation as if that plant functional type occurred
   at 100% surface cover.
+* Derived metrics are now calculated directly by `SOILWAT2`, see
+  `"DERIVEDSUM"` and `"DERIVEDAVG"`. They currently include
+  climatic water deficit, dry degree-days, wet degree-days, and
+  total profile available soil moisture.
 
 ## Changes to interface
 * The class `"swProd"` gained slot `"vegYear"` for the calendar year that
@@ -26,6 +30,8 @@
   `"isBiomAsIf100Cover"` identifying the spatial reference of biomass inputs.
 * The class `"swWeather"` gained slot `"correctWeatherValues"` that specifies
   which corrections are applied to problematic weather inputs.
+* The class `"swOUT"` gained two new `"outkey"`s `"DERIVEDSUM"` and
+  `"DERIVEDAVG"`.
 * Methods to replace/access biomass values for a specific plant functional type
   are deprecated.
 
