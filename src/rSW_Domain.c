@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stddef.h> // for size_t
 
 #include "SOILWAT2/include/generic.h"
 #include "SOILWAT2/include/filefuncs.h"
@@ -348,7 +349,7 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 void rSW_CTL_setup_domain(
     Bool from_files,
     SEXP InputData,
-    unsigned long userSUID,
+    size_t userSUID,
     SW_DOMAIN* SW_Domain,
     LOG_INFO* LogInfo
 ) {

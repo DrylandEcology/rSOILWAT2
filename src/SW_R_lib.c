@@ -42,6 +42,7 @@
 #include <Rinternals.h>
 #include <Rdefines.h>
 
+#include <stddef.h> // for size_t
 
 
 /* =================================================== */
@@ -132,7 +133,7 @@ static void setGlobal_soiltempError(Bool soiltempError) {
 static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LOG_INFO* LogInfo) {
     int i, argc;
     char *argv[7];
-    unsigned long userSUID = 0; // fix userSUID to 0
+    size_t userSUID = 0; // keep userSUID fixed at 0
     #ifdef RSWDEBUG
     int debug = 0;
     #endif
