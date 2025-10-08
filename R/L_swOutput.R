@@ -55,7 +55,9 @@ sw_out_flags <- function() {
     sw_vwcmatric = tmp["SW_VWCMATRIC"],
     sw_co2effects = tmp["SW_CO2EFFECTS"],
     sw_veg = tmp["SW_BIOMASS"],
-    sw_wetdays = tmp["SW_WETDAY"]
+    sw_wetdays = tmp["SW_WETDAY"],
+    sw_derivedsum = tmp["SW_DERIVEDSUM"],
+    sw_derivedavg = tmp["SW_DERIVEDAVG"]
   )
 
   # Fix names
@@ -76,12 +78,8 @@ sw_out_flags <- function() {
 #' @param value A value to assign to a specific slot of the object.
 #' @param index An integer value. One of the four possible time steps.
 #'
-#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
-#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#'
+#' @seealso \code{\linkS4class{swInputData}}
 #'
 #' @examples
 #' showClass("swOutput_KEY")
@@ -177,12 +175,7 @@ setReplaceMethod(
 #' @param index An integer value. One of the four possible time steps.
 #' @param name A character string. The name of the of the slots of this class.
 #'
-#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
-#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#' @seealso \code{\linkS4class{swInputData}}
 #'
 #' @examples
 #' showClass("swOutput")
@@ -230,7 +223,9 @@ swOutput <- setClass(
     ALLVEG = "swOutput_KEY",
     ESTABL = "swOutput_KEY",
     CO2EFFECTS = "swOutput_KEY",
-    BIOMASS = "swOutput_KEY"
+    BIOMASS = "swOutput_KEY",
+    DERIVEDSUM = "swOutput_KEY",
+    DERIVEDAVG = "swOutput_KEY"
   ),
   prototype = list(
     version = rSW2_version(),
@@ -269,7 +264,9 @@ swOutput <- setClass(
     ALLVEG = swOutput_KEY(),
     ESTABL = swOutput_KEY(),
     CO2EFFECTS = swOutput_KEY(),
-    BIOMASS = swOutput_KEY()
+    BIOMASS = swOutput_KEY(),
+    DERIVEDSUM = swOutput_KEY(),
+    DERIVEDAVG = swOutput_KEY()
   )
 )
 

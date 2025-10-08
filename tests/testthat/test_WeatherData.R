@@ -50,6 +50,99 @@ test_that("Missing weather data", {
   expect_false(is_missing_weather(100))
 })
 
+# Set daily input flags for each data source
+get_dif <- function(dataset) {
+  template_dailyInputFlags <- c(rep(TRUE, 3L), rep(FALSE, 11L))
+  switch(
+    EXPR = dataset,
+    minimalInputs = template_dailyInputFlags,
+    daymet = {
+      dif <- template_dailyInputFlags
+      dif[13L] <- TRUE # ACTUAL_VP
+      dif[14L] <- TRUE # SHORT_WR, desc_rsds = 2
+      dif
+    },
+    gridmet = {
+      dif <- template_dailyInputFlags
+      dif[5L] <- TRUE # WIND_SPEED
+      dif[9L] <- TRUE # REL_HUMID_MAX
+      dif[10L] <- TRUE # REL_HUMID_MIN
+      dif[14L] <- TRUE # SHORT_WR, desc_rsds = 1
+      dif
+    },
+    "maca-type1" = {
+      dif <- template_dailyInputFlags
+      dif[6L] <- TRUE # WIND_EAST
+      dif[7L] <- TRUE # WIND_NORTH
+      dif[9L] <- TRUE # REL_HUMID_MAX
+      dif[10L] <- TRUE # REL_HUMID_MIN
+      dif[14L] <- TRUE # SHORT_WR, desc_rsds = 1
+      dif
+    },
+    "maca-type2" = {
+      dif <- template_dailyInputFlags
+      dif[6L] <- TRUE # WIND_EAST
+      dif[7L] <- TRUE # WIND_NORTH
+      dif[11L] <- TRUE # SPEC_HUMID
+      dif[14L] <- TRUE # SHORT_WR, desc_rsds = 1
+      dif
+    }
+  )
+}
+
+# Set fixes for each data source
+get_fwd <- function(dataset) {
+  template_fixWeatherData <- rep(FALSE, 3L)
+  switch(
+    EXPR = dataset,
+    minimalInputs = template_fixWeatherData,
+    daymet = {
+      tmp <- template_fixWeatherData
+      tmp[2L:3L] <- TRUE # fix percent, max radiation
+      tmp
+    },
+    gridmet = template_fixWeatherData,
+    "maca-type1" = template_fixWeatherData,
+    "maca-type2" = {
+      tmp <- template_fixWeatherData
+      tmp[2L] <- TRUE # fix percent
+      tmp
+    }
+  )
+}
+
+get_descRSDS <- function(dataset) {
+  switch(
+    EXPR = dataset,
+    minimalInputs = 0L,
+    daymet = 2L, # flux density over the daylight period
+    gridmet = 1L, # flux density over 24-hour period
+    "maca-type1" = 1L, # flux density over 24-hour period
+    "maca-type2" = 1L # flux density over 24-hour period
+  )
+}
+
+get_useMonthlies <- function(dataset) {
+  template_useMonthlies <- rep(TRUE, 3L)
+  switch(
+    EXPR = dataset,
+    minimalInputs = template_useMonthlies,
+    daymet = {
+      tmp <- template_useMonthlies
+      tmp[[1L]] <- FALSE # use radiation instead
+      tmp[[3L]] <- FALSE # use vapor pressure instead
+      tmp
+    },
+    gridmet = ,
+    "maca-type1" = ,
+    "maca-type2" = {
+      tmp <- template_useMonthlies
+      tmp[] <- FALSE
+      tmp
+    }
+  )
+}
+
 
 test_that("Weather data sources", {
   template_swin <- rSOILWAT2::sw_exampleData
@@ -60,44 +153,13 @@ test_that("Weather data sources", {
   add_weather_sources <- c(
     "minimalInputs", "daymet", "gridmet", "maca-type1", "maca-type2"
   )
-  template_dailyInputFlags <- c(rep(TRUE, 3L), rep(FALSE, 11L))
+
 
   for (ws in add_weather_sources) {
-    ws_dailyInputFlags <- switch(
-      EXPR = ws,
-      minimalInputs = template_dailyInputFlags,
-      daymet = {
-        dif <- template_dailyInputFlags
-        dif[13L] <- TRUE # ACTUAL_VP
-        dif[14L] <- TRUE # SHORT_WR, desc_rsds = 2
-        dif
-      },
-      gridmet = {
-        dif <- template_dailyInputFlags
-        dif[5L] <- TRUE # WIND_SPEED
-        dif[9L] <- TRUE # REL_HUMID_MAX
-        dif[10L] <- TRUE # REL_HUMID_MIN
-        dif[14L] <- TRUE # SHORT_WR, desc_rsds = 1
-        dif
-      },
-      "maca-type1" = {
-        dif <- template_dailyInputFlags
-        dif[6L] <- TRUE # WIND_EAST
-        dif[7L] <- TRUE # WIND_NORTH
-        dif[9L] <- TRUE # REL_HUMID_MAX
-        dif[10L] <- TRUE # REL_HUMID_MIN
-        dif[14L] <- TRUE # SHORT_WR, desc_rsds = 1
-        dif
-      },
-      "maca-type2" = {
-        dif <- template_dailyInputFlags
-        dif[6L] <- TRUE # WIND_EAST
-        dif[7L] <- TRUE # WIND_NORTH
-        dif[11L] <- TRUE # SPEC_HUMID
-        dif[14L] <- TRUE # SHORT_WR, desc_rsds = 1
-        dif
-      }
-    )
+
+    ws_dailyInputFlags <- get_dif(ws)
+    ws_fixWeatherData <- get_fwd(ws)
+    ws_useMonthlies <- get_useMonthlies(ws)
 
     weatherDirName <- switch(
       EXPR = ws,
@@ -114,19 +176,21 @@ test_that("Weather data sources", {
           weatherDirName = weatherDirName,
           filebasename = "weath",
           dailyInputFlags = ws_dailyInputFlags,
+          correctWeatherValues = ws_fixWeatherData,
           elevation = siteElevation,
           method = "C"
         )
       ),
 
-      R = suppressWarnings(rSOILWAT2::getWeatherData_folders(
-        LookupWeatherFolder = file.path(path_example1, "Input"),
-        weatherDirName = weatherDirName,
-        filebasename = "weath",
-        dailyInputFlags = ws_dailyInputFlags,
-        elevation = siteElevation,
-        method = "R"
-      )
+      R = suppressWarnings(
+        rSOILWAT2::getWeatherData_folders(
+          LookupWeatherFolder = file.path(path_example1, "Input"),
+          weatherDirName = weatherDirName,
+          filebasename = "weath",
+          dailyInputFlags = ws_dailyInputFlags,
+          elevation = siteElevation,
+          method = "R"
+        )
       )
     )
 
@@ -163,32 +227,11 @@ test_that("Weather data sources", {
     swYears_EndYear(swin) <- max(years)
     swYears_StartYear(swin) <- min(years)
 
-    if (ws == "minimalInputs") {
-      swin@weather@desc_rsds <- 0L
-      swin@weather@use_cloudCoverMonthly <- TRUE
-      swin@weather@use_windSpeedMonthly <- TRUE
-      swin@weather@use_humidityMonthly <- TRUE
-
-    } else if (ws == "daymet") {
-      swin@weather@desc_rsds <- 2L # flux density over the daylight period
-      swin@weather@use_cloudCoverMonthly <- FALSE # use radiation instead
-      swin@weather@use_windSpeedMonthly <- TRUE
-      swin@weather@use_humidityMonthly <- FALSE # use vapor pressure instead
-
-    } else if (ws == "gridmet") {
-      swin@weather@desc_rsds <- 1L # flux density over 24-hour period
-      swin@weather@use_cloudCoverMonthly <- FALSE # use radiation instead
-      swin@weather@use_windSpeedMonthly <- FALSE # has daily wind
-      swin@weather@use_humidityMonthly <- FALSE # has humidity
-
-    } else if (ws %in% c("maca-type1", "maca-type2")) {
-      swin@weather@desc_rsds <- 1L # flux density over 24-hour period
-      swin@weather@use_cloudCoverMonthly <- FALSE # use radiation instead
-      swin@weather@use_windSpeedMonthly <- FALSE # has daily wind
-      swin@weather@use_humidityMonthly <- FALSE # has humidity
-
-    }
-
+    swin@weather@correctWeatherValues <- ws_fixWeatherData
+    swin@weather@desc_rsds <- get_descRSDS(ws)
+    swin@weather@use_cloudCoverMonthly <- ws_useMonthlies[[1L]]
+    swin@weather@use_windSpeedMonthly <- ws_useMonthlies[[2L]]
+    swin@weather@use_humidityMonthly <- ws_useMonthlies[[3L]]
 
     #--- Run and check simulation with specified weather data
     rd <- list()
@@ -373,7 +416,7 @@ test_that("Weather data substitution", {
 
 
 test_that("Weather data fixing", {
-  x0 <- x <- as.data.frame(dbW_weatherData_to_dataframe(rSOILWAT2::weatherData))
+  x0 <- as.data.frame(dbW_weatherData_to_dataframe(rSOILWAT2::weatherData))
   dif <- calc_dailyInputFlags(x0)
   vars <- names(dif)[dif]
 
@@ -385,23 +428,25 @@ test_that("Weather data fixing", {
 
 
   #--- * Check interpolation and substitution ------
+  x1 <- x0
+
   # * Expect short missing spell to interpolate (except precipitation)
   # Set May 23-24 of 1981 as missing
-  tmp <- x[, "Year"] == 1981
-  ids_to_interp <- tmp & x[, "DOY"] >= 144 & x[, "DOY"] <= 145
-  x[ids_to_interp, -(1:2)] <- NA
+  tmp <- x1[, "Year"] == 1981
+  ids_to_interp <- tmp & x1[, "DOY"] >= 144 & x1[, "DOY"] <= 145
+  x1[ids_to_interp, -(1:2)] <- NA
 
   # * Expect long missing spell to substitute
   # Set June-August of 1980 as missing
-  tmp <- x[, "Year"] == 1980
-  ids_to_sub <- tmp & x[, "DOY"] >= 153 & x[, "DOY"] <= 244
-  x[ids_to_sub, -(1:2)] <- NA
+  tmp <- x1[, "Year"] == 1980
+  ids_to_sub <- tmp & x1[, "DOY"] >= 153 & x1[, "DOY"] <= 244
+  x1[ids_to_sub, -(1:2)] <- NA
 
 
   xf <- dbW_fixWeather(
-    weatherData = x,
+    weatherData = x1,
     subData = x0,
-    new_endYear = max(x[["Year"]]) + 1L, # expect long term daily mean
+    new_endYear = max(x1[["Year"]]) + 1L, # expect long term daily mean
     nmax_interp = 5L,
     return_weatherDF = TRUE
   )
@@ -414,7 +459,7 @@ test_that("Weather data fixing", {
     x0[!ids_to_interp, vars]
   )
 
-  tmpc <- table(xf[["meta"]])
+  tmpc <- as.list(table(xf[["meta"]]))
   expect_identical(
     tmpc[["interpolateLinear (<= 5 days)"]],
     sum(ids_to_interp) * length(setdiff(vars, "PPT_cm"))
@@ -432,6 +477,69 @@ test_that("Weather data fixing", {
     365L * length(vars)
   )
 
+
+  #--- * Check switched min/max daily temperature ------
+  x2 <- x0
+
+  #--- Weather with switched min/max daily temperature
+  ids1 <- x2[, "Year"] == 1949 & x2[, "DOY"] >= 144 & x2[, "DOY"] <= 145
+  x2[ids1, c("Tmin_C", "Tmax_C")] <- x2[ids1, c("Tmax_C", "Tmin_C")]
+  Ns1 <- sum(ids1)
+
+  # Sort
+  xf <- dbW_fixWeather(x2, correctWeatherValues = TRUE, return_weatherDF = TRUE)
+
+  # Expect correct values
+  expect_identical(xf[["weatherData"]], as.data.frame(x0))
+
+  tmpc <- as.list(table(xf[["meta"]]))
+  expect_identical(tmpc[["correctedValue"]], expected = 2L * Ns1)
+
+
+  #--- * Check substitute and min/max daily temperature ------
+  x0s <- x0
+
+  #--- Weather with switched min/max daily temperature
+  ids2 <- which(ids_to_sub)[1L:2L]
+  x0s[ids2, c("Tmin_C", "Tmax_C")] <- x0s[ids2, c("Tmax_C", "Tmin_C")]
+  x1[ids2, c("Tmin_C", "Tmax_C")] <- x0[ids2, c("Tmax_C", "Tmin_C")]
+  Ns2 <- length(ids2)
+
+  # Fix and sort
+  xf <- dbW_fixWeather(
+    weatherData = x1,
+    subData = x0,
+    new_endYear = max(x1[["Year"]]) + 1L, # expect long term daily mean
+    nmax_interp = 5L,
+    correctWeatherValues = TRUE,
+    return_weatherDF = TRUE
+  )
+
+  expect_false(anyNA(xf[["weatherData"]][, vars]))
+
+  ids_has <- seq_len(nrow(x0))
+  expect_identical(
+    xf[["weatherData"]][ids_has[!ids_to_interp], vars],
+    x0[!ids_to_interp, vars]
+  )
+
+  tmpc <- as.list(table(xf[["meta"]]))
+  expect_identical(
+    tmpc[["interpolateLinear (<= 5 days)"]],
+    sum(ids_to_interp) * length(setdiff(vars, "PPT_cm"))
+  )
+  expect_identical(
+    tmpc[["fixedValue"]],
+    sum(ids_to_interp) # precipitation
+  )
+  expect_identical(
+    tmpc[["substituteData"]],
+    sum(ids_to_sub) * length(vars) - 2L * Ns2
+  )
+  expect_identical(
+    tmpc[["correctedValue"]],
+    2L * Ns2
+  )
 })
 
 

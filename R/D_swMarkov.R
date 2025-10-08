@@ -30,7 +30,6 @@
 #'
 #' @param object An object of class \code{\linkS4class{swMarkov}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param file A character string. The file name from which to read.
 #' @param ... Arguments to the helper constructor function.
 #'  Dots can either contain objects to copy into slots of that class
 #'  (must be named identical to the corresponding slot) or
@@ -40,22 +39,7 @@
 #'  \code{rSOILWAT2::sw_exampleData}
 #'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
-#' @seealso
-#' \code{\linkS4class{swInputData}}
-#' \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swYears}}
-#' \code{\linkS4class{swWeather}}
-#' \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}}
-#' \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}}
-#' \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swSpinup}}
-#' \code{\linkS4class{swEstab}}
-#' \code{\linkS4class{swOUT}}
-#' \code{\linkS4class{swCarbon}}
-#' \code{\linkS4class{swSWC}}
-#' \code{\linkS4class{swLog}}
+#' @seealso \code{\linkS4class{swInputData}}
 #'
 #' @examples
 #' showClass("swMarkov")
@@ -257,39 +241,3 @@ setReplaceMethod(
     object
   }
 )
-
-
-#' @rdname swMarkov-class
-#' @export
-# nolint start
-setMethod(
-  "swReadLines",
-  signature = c(object = "swMarkov", file = "character"),
-  function(object, file) {
-    stop("swReadLines is defunct")
-    id_skip <- 1:2
-
-    infiletext <- readLines(con = file[1])
-    infiletext <- infiletext[-id_skip]
-    if (length(infiletext) != 366)
-      stop("Markov Prod wrong number of lines")
-
-    object@Prob <- matrix(0, 366, 5)
-    for (i in seq_len(366)) {
-      object@Prob[i, ] <- readNumerics(infiletext[i], 5)
-    }
-
-    infiletext <- readLines(con = file[2])
-    infiletext <- infiletext[-id_skip]
-    if (length(infiletext) != 53)
-      stop("Markov Prod wrong number of lines")
-
-    object@Conv <- matrix(0, 53, 11)
-    for (i in seq_len(53)) {
-      object@Conv[i, ] <- readNumerics(infiletext[i], 11)
-    }
-
-    object
-  }
-)
-# nolint end

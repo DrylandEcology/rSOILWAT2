@@ -15,6 +15,13 @@
 7			# Seed random number generator for weather generator (only used if SOILWAT2)
 			# (seed with 0 to use current time)
 
+
+#--- Flags to fix small problems in weather inputs
+0           # Swap min/max if min > max (air temperature, relative humidity)
+0           # Reset percentages to 100% if > 100% (relative humidity, cloud cover)
+0           # Reset observed to extraterrestrial solar radiation if observed > extraterrestrial
+
+
 #--- Flags describing mean monthly climate input usage:
 # 0 = Don't use mean monthly input
 # 1 = Use mean monthly input (climate.in) and override respective flag for daily input, if flags conflict

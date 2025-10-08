@@ -124,24 +124,24 @@ compare_objects <- function(new, old, tolerance = 1e-9) {
 #'
 #' @section Classic vs. non-classic files:
 #'   * classic file lines: "value   # comment" where tag matches in the comment
-#'   * non-classic file line: "tag value  # comment" where tag matches tag
+#'   * non-classic file idl: "tag value  # comment" where tag matches tag
 setTxtInput <- function(filename, tag, value, classic = FALSE) {
   value <- paste(value, collapse = " ")
   # suppress warnings about incomplete final lines
   fin <- suppressWarnings(readLines(filename))
-  line <- grep(
+  idl <- grep(
     pattern = if (isTRUE(classic)) tag else paste0("^", tag, " "),
     x = fin,
     ignore.case = TRUE
   )
-  stopifnot(length(line) == 1L, line > 0L, line <= length(fin))
-  posComment <- regexpr("#", text = fin[[line]], fixed = TRUE)
+  stopifnot(length(idl) == 1L, idl > 0L, idl <= length(fin))
+  posComment <- regexpr("#", text = fin[[idl]], fixed = TRUE)
   res <- if (isTRUE(classic)) as.character(value) else paste(tag, value)
-  fin[[line]] <- if (posComment > 0L) {
+  fin[[idl]] <- if (posComment > 0L) {
     paste0(
       res,
       strrep(" ", times = max(1, posComment - 1L - nchar(res))),
-      substr(fin[[line]], start = posComment, stop = 1e3)
+      substr(fin[[idl]], start = posComment, stop = 1e3)
     )
   } else {
     res
@@ -152,13 +152,13 @@ setTxtInput <- function(filename, tag, value, classic = FALSE) {
 toggleWeatherGenerator <- function(path, activate = FALSE) {
   ftmp <- file.path(path, "Input", "weathsetup.in")
   fin <- readLines(ftmp)
-  line <- grep(
+  idl <- grep(
     "Activate/deactivate weather generator",
     fin,
     ignore.case = TRUE
   )
-  stopifnot(length(line) == 1, line > 0, line < length(fin))
-  substr(fin[line + 1], 1, 1) <- if (activate) "1" else "0"
+  stopifnot(length(idl) == 1, idl > 0, idl < length(fin))
+  substr(fin[idl + 1], 1, 1) <- if (activate) "1" else "0"
   writeLines(fin, con = ftmp)
 }
 
@@ -170,16 +170,16 @@ setPartialWeatherData <- function(path) {
 
   ftmp <- file.path(path, "files.in")
   fin <- readLines(ftmp)
-  line <- grep(
+  idl <- grep(
     "historical weather data",
     fin,
     ignore.case = TRUE
   )
-  stopifnot(length(line) == 1, line > 0, line < length(fin))
-  fin[line] <- sub(
+  stopifnot(length(idl) == 1, idl > 0, idl < length(fin))
+  fin[idl] <- sub(
     file.path("Input", "data_weather", "weath"),
     file.path("Input", "data_weather_missing", "weath"),
-    x = fin[line]
+    x = fin[idl]
   )
   writeLines(fin, con = ftmp)
 }
@@ -187,33 +187,33 @@ setPartialWeatherData <- function(path) {
 toggleSoilTemperature <- function(path, activate = TRUE) {
   ftmp <- file.path(path, "Input", "siteparam.in")
   fin <- readLines(ftmp)
-  line <- grep(
+  idl <- grep(
     "flag, 1 to calculate soil_temperature",
     fin,
     fixed = TRUE
   )
-  stopifnot(length(line) == 1, line > 0, line < length(fin))
-  substr(fin[line], 1, 1) <- if (activate) "1" else "0"
+  stopifnot(length(idl) == 1, idl > 0, idl < length(fin))
+  substr(fin[idl], 1, 1) <- if (activate) "1" else "0"
   writeLines(fin, con = ftmp)
 }
 
 toggleCO2Effects <- function(path, activate = TRUE) {
   ftmp <- file.path(path, "Input", "siteparam.in")
   fin <- readLines(ftmp)
-  line <- grep(
+  idl <- grep(
     "biomass multiplier",
     fin,
     fixed = TRUE
   )
-  stopifnot(length(line) == 1, line > 0, line < length(fin))
-  substr(fin[line + 1], 1, 1) <- if (activate) "1" else "0"
-  line <- grep(
+  stopifnot(length(idl) == 1, idl > 0, idl < length(fin))
+  substr(fin[idl + 1], 1, 1) <- if (activate) "1" else "0"
+  idl <- grep(
     "water-usage efficiency multiplier",
     fin,
     fixed = TRUE
   )
-  stopifnot(length(line) == 1, line > 0, line < length(fin))
-  substr(fin[line + 1], 1, 1) <- if (activate) "1" else "0"
+  stopifnot(length(idl) == 1, idl > 0, idl < length(fin))
+  substr(fin[idl + 1], 1, 1) <- if (activate) "1" else "0"
   writeLines(fin, con = ftmp)
 }
 
@@ -221,25 +221,25 @@ toggleSurfaceTilt <- function(path, tilt = FALSE, slope = 30, aspect = -45) {
   ftmp <- file.path(path, "Input", "modelrun.in")
   fin <- readLines(ftmp)
 
-  line <- grep("slope (degrees)", fin, fixed = TRUE)
-  stopifnot(length(line) == 1, line > 0, line < length(fin))
+  idl <- grep("slope (degrees)", fin, fixed = TRUE)
+  stopifnot(length(idl) == 1, idl > 0, idl < length(fin))
   tmp <- if (tilt) as.character(slope) else "0"
   stopifnot(nchar(tmp) <= 2)
-  substr(fin[line], 1, 2) <- paste0(
+  substr(fin[idl], 1, 2) <- paste0(
     tmp,
     rep("\t", max(0, 2 - nchar(tmp))),
     collapse = ""
   )
 
-  line <- grep(
+  idl <- grep(
     "aspect = surface azimuth angle (degrees)",
     fin,
     fixed = TRUE
   )
-  stopifnot(length(line) == 1, line > 0, line < length(fin))
+  stopifnot(length(idl) == 1, idl > 0, idl < length(fin))
   tmp <- if (tilt) as.character(aspect) else "NAN"
   stopifnot(nchar(tmp) <= 4)
-  substr(fin[line], 1, 4) <- paste0(
+  substr(fin[idl], 1, 4) <- paste0(
     tmp,
     rep("\t", max(0, 4 - nchar(tmp))),
     collapse = ""
@@ -251,19 +251,19 @@ toggleSurfaceTilt <- function(path, tilt = FALSE, slope = 30, aspect = -45) {
 toggleVegEstab <- function(path, activate = TRUE) {
   ftemp <- file.path(path, "Input", "estab.in")
   fin <- readLines(ftemp)
-  line <- grep("calculate and output establishment", fin, fixed = TRUE)
-  stopifnot(length(line) == 1, line > 0, line < length(fin))
-  substr(fin[line], 1, 1) <- if (activate) "1" else "0"
+  idl <- grep("calculate and output establishment", fin, fixed = TRUE)
+  stopifnot(length(idl) == 1, idl > 0, idl < length(fin))
+  substr(fin[idl], 1, 1) <- if (activate) "1" else "0"
   writeLines(fin, con = ftemp)
 
   ftemp <- file.path(path, "Input", "outsetup.in")
   fin <- readLines(ftemp)
-  line <- grep("establishment results", fin, fixed = TRUE)
-  stopifnot(length(line) == 1, line > 0, line < length(fin))
-  fin[line] <- sub(
+  idl <- grep("establishment results", fin, fixed = TRUE)
+  stopifnot(length(idl) == 1, idl > 0, idl < length(fin))
+  fin[idl] <- sub(
     pattern = "AVG", # "AVG" is the new SOILWAT2 default example since v8.0.0
     replacement = if (activate) "AVG" else "OFF",
-    x = fin[line],
+    x = fin[idl],
     fixed = TRUE
   )
   writeLines(fin, con = ftemp)
@@ -278,7 +278,7 @@ setSWRC <- function(
     Campbell1974 = "swrc_params.in",
     vanGenuchten1980 = "swrc_params_vanGenuchten1980.in",
     FXW = "swrc_params_FXW.in",
-    stop(shQuote(swrc_name), " is not implemented.")
+    stop(shQuote(swrc_name), " is not implemented.", call. = FALSE)
   )
 
   setTxtInput(
@@ -551,8 +551,8 @@ message(
   " before pushing to repository if script worked well."
 )
 
-print(paste(
-  "NOTE: Copy",
-  "'Ex1_input.rds' to 'versioned_swInputData/' as 'Ex1_input_vX.Y.Z.rds'",
+message(
+  "NOTE: Copy ",
+  "'Ex1_input.rds' to 'versioned_swInputData/' as 'Ex1_input_vX.Y.Z.rds' ",
   "if significant changes to any class occurred."
-))
+)

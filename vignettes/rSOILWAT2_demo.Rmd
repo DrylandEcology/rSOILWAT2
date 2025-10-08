@@ -43,61 +43,6 @@ options(tinytex.verbose = TRUE)
 ```
 
 
-## How to find help and documentation
-```{r, help, results = "hide"}
-  # Package documentation
-  help(package = "rSOILWAT2")
-
-  # Documentation of a specific function, e.g.,
-  ?rSOILWAT2::sw_exec
-
-  # View code of a specific function, e.g.,
-  rSOILWAT2::sw_exec
-```
-
-
-## Quick R re-cap: how to subset data.frames, matrices, and lists
-```{r, subset, results = "hide"}
-  ?Extract
-
-  #--- Subset a list
-  x <- list(ID = 1, Lyr_1 = 1:10, Lyr_2 = 11:30)
-
-  x[[1]] # extract element by position
-  x[["Lyr_1"]] # extract element by name
-
-  x[1:2] # subset by position
-
-
-  #--- Subset a data.frame
-  x <- as.data.frame(x)
-
-  # extract column by column number
-  x[[1]]
-  x[, 1]
-
-  # subset by column numbers
-  x[1:2]
-  x[, 1:2]
-
-  # extract column by column name
-  x[["Lyr_1"]]
-  x[, "Lyr_1"]
-  x$Lyr_1
-
-
-  #--- Subset a matrix
-  x <- as.matrix(x)
-
-  x[, 1] # extract element by position
-  x[, "Lyr_1"] # extract element by name
-
-  x[, 1:2] # subset by position
-```
-
-
-
-
 # Example rSOILWAT2 simulation
 ```{r, simulate0}
   # Load data for an example site: see ?sw_exampleData
@@ -256,9 +201,16 @@ You may organize weather data in a variety of ways:
 
     if (!inherits(mm_dm, "try-error")) {
       # Impute values for added leap days
+      # Correct weather values, e.g., min > max, percent > 100%
+      wdata <- rSOILWAT2::dbW_fixWeather(
+        weatherData = mm_dm[["weatherDF"]],
+        correctWeatherValues = TRUE,
+        fillMissingValues = FALSE,
+        return_weatherDF = TRUE
+      )
       # Use weather generator for available variables, otherwise interpolate
       wdata <- rSOILWAT2::dbW_imputeWeather(
-        weatherData = mm_dm[["weatherDF"]],
+        weatherData = wdata[["weatherData"]],
         use_wg = TRUE,
         method_after_wg = "interp",
         seed = 123L
@@ -272,7 +224,7 @@ You may organize weather data in a variety of ways:
       sw_in@weather@use_cloudCoverMonthly <- mm_dm[["use_cloudCoverMonthly"]]
       sw_in@weather@use_windSpeedMonthly <- mm_dm[["use_windSpeedMonthly"]]
       sw_in@weather@use_humidityMonthly <- mm_dm[["use_humidityMonthly"]]
-      sw_in@weather@dailyInputFlags <- mm_dm[["dailyInputFlags"]]
+      sw_in@weather@dailyInputFlags <- rSOILWAT2::calc_dailyInputFlags(wdata)
 
       has_daymet <- TRUE
     }
@@ -334,7 +286,7 @@ data from `DayMet`
 ## Atmospheric CO2 concentration
 ```{r, co2a}
   # Name of the CO2 concentration scenario
-  co2_nametag <- "RCP85"
+  co2_nametag <- "CMIP5_historical|CMIP5_RCP85"
 
   # Obtain yearly values from look-up table
   co2_data <- rSOILWAT2::lookup_annual_CO2a(
@@ -413,7 +365,9 @@ data from `DayMet`
 
 
     if (inherits(soils_sda, "try-error")) {
-      warning("Vignette was not able to extract soils from NRCS SDA!")
+      warning(
+        "Vignette was not able to extract soils from NRCS SDA!", call. = FALSE
+      )
 
     } else {
       # Add homogenized soil layers
@@ -566,8 +520,10 @@ data from `DayMet`
   # Note: monthly biomass values of forbs, trees, etc. need to be estimated
   v1 <- c("Litter", "Biomass", "Perc.Live")
   v2 <- c("Litter", "Biomass", "Live_pct")
-  rSOILWAT2::swProd_MonProd_grass(sw_in)[, v2] <- veg_biom[["grass"]][, v1]
-  rSOILWAT2::swProd_MonProd_shrub(sw_in)[, v2] <- veg_biom[["shrub"]][, v1]
+  rSOILWAT2::swProd_MonProd_veg(sw_in, "SW_GRASS")[, v2] <-
+    veg_biom[["grass"]][, v1]
+  rSOILWAT2::swProd_MonProd_veg(sw_in, "SW_SHRUB")[, v2] <-
+    veg_biom[["shrub"]][, v1]
 ```
 
 

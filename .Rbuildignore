@@ -17,6 +17,7 @@ tests/rSOILWAT_IntegrationTestOutput*
 src/SOILWAT2/\.git
 src/SOILWAT2/\.github
 src/SOILWAT2/doc
+src/SOILWAT2/bin
 src/SOILWAT2/build
 src/SOILWAT2/external/googletest
 src/SOILWAT2/tests

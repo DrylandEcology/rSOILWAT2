@@ -85,7 +85,6 @@ unlink_forcefully <- function(x, recursive = TRUE, force = TRUE, info = NULL) {
 test_that("Disk file write and delete permissions", {
   # remove once issue #43 is fixed (unit tests for 'test_dbW_functionality.R'
   # fail on appveyor but not on travis)
-  skip_on_appveyor()
   skip_on_os("windows")
 
   tmp <- try(write(NA, file = fdbWeather), silent = TRUE)
@@ -113,7 +112,6 @@ test_that("Disk file write and delete permissions", {
 test_that("dbW creation", {
   # remove once issue #43 is fixed (unit tests for 'test_dbW_functionality.R'
   # fail on appveyor but not on travis)
-  skip_on_appveyor()
   skip_on_os("windows")
 
   #--- * Attempt to connect to (no) weather database ------
@@ -257,7 +255,6 @@ test_that("dbW creation", {
 test_that("dbW site/scenario tables manipulation", {
   #remove once issue #43 is fixed (unit tests for 'test_dbW_functionality.R'
   # fail on appveyor but not on travis)
-  skip_on_appveyor()
   skip_on_os("windows")
 
   #--- * Obtain site_id all at once ------
@@ -491,7 +488,6 @@ test_that("dbW site/scenario tables manipulation", {
 test_that("dbW weather data manipulation", {
   #remove once issue #43 is fixed (unit tests for 'test_dbW_functionality.R'
   # fail on appveyor but not on travis)
-  skip_on_appveyor()
   skip_on_os("windows")
 
   #--- * Add weather data ------

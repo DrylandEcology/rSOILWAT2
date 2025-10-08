@@ -83,8 +83,6 @@ weather_dataAggFun <- function() {
 #' The methods listed below work on this class and the proper slot of the class
 #'   \code{\linkS4class{swInputData}}.
 #'
-#' @param object An object of class \code{\linkS4class{swWeatherData}}.
-#' @param file A character string. The file name from which to read.
 #' @param weatherList A list or \code{NULL}. Each element is an object of class
 #'   \code{\link[rSOILWAT2:swWeatherData-class]{rSOILWAT2::swWeatherData}}
 #'   containing daily weather data of a specific year.
@@ -110,22 +108,7 @@ weather_dataAggFun <- function() {
 #'   \var{actVP_kPa}, and
 #'   \var{shortWR}.
 #'
-#' @seealso
-#' \code{\linkS4class{swInputData}}
-#' \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swYears}}
-#' \code{\linkS4class{swWeather}}
-#' \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}}
-#' \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}}
-#' \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swSpinup}}
-#' \code{\linkS4class{swEstab}}
-#' \code{\linkS4class{swOUT}}
-#' \code{\linkS4class{swCarbon}}
-#' \code{\linkS4class{swSWC}}
-#' \code{\linkS4class{swLog}}
+#' @seealso \code{\linkS4class{swInputData}}
 #'
 #' @examples
 #' showClass("swWeatherData")
@@ -264,7 +247,8 @@ upgrade_weatherColumns <- function(
         stop(
           "Renaming ", shQuote(cns[[k]]), " to ",
           shQuote(as.character(rds[ids[[k]], "new", drop = TRUE])),
-          " failed because of non-missing values."
+          " failed because of non-missing values.",
+          call. = FALSE
         )
       }
 
@@ -304,7 +288,10 @@ upgrade_weatherDF <- function(
   weatherDF <- upgrade_weatherColumns(weatherDF)
 
   cns <- intersect(template_weatherColumns, colnames(weatherDF))
-  if (length(cns) < 1L) stop("Required weather variables not found.")
+  if (length(cns) < 1L) {
+    stop("Required weather variables not found.", call. = FALSE)
+  }
+
   template_data[, cns] <- weatherDF[, cns]
   template_data
 }
@@ -364,34 +351,3 @@ validObject_weatherHistory <- function(object) {
     TRUE
   }
 }
-
-#' @rdname swWeatherData-class
-#' @export
-setMethod(
-  "swReadLines",
-  signature = c(object = "swWeatherData", file = "character"),
-  function(object, file) {
-    .Deprecated("C_rSW2_readAllWeatherFromDisk")
-    warning("swReadLines works only with traditional weather data.")
-
-    object@year <- as.integer(
-      strsplit(
-        x = basename(file),
-        split = ".",
-      fixed = TRUE
-      )[[1]][2]
-    )
-    data <- utils::read.table(
-      file,
-      header = FALSE,
-      comment.char = "#",
-      blank.lines.skip = TRUE,
-      sep = "\t"
-    )
-    stopifnot(ncol(data) != 4L)
-    colnames(data) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
-    object@data[] <- NA
-    object@data[, colnames(data)] <- as.matrix(data)
-
-    object
-})

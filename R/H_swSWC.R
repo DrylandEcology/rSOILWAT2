@@ -28,8 +28,6 @@
 #'   \code{\linkS4class{swInputData}}.
 #'
 #'
-#' @param object An object of class \code{\linkS4class{swSWC_hist}}.
-#' @param file A character string. The file name from which to read.
 #' @param ... Arguments to the helper constructor function.
 #'  Dots can either contain objects to copy into slots of that class
 #'  (must be named identical to the corresponding slot) or
@@ -86,30 +84,6 @@ swSWC_hist <- function(...) {
 }
 
 
-#' @rdname swSWC_hist-class
-#' @export
-# nolint start
-setMethod(
-  "swReadLines",
-  signature = c(object = "swSWC_hist", file = "character"),
-  function(object, file) {
-    stop("swReadLines is defunct.")
-    object@year <- as.integer(strsplit(x = file, split = ".",
-      fixed = TRUE)[[1]][2])
-    infiletext <- readLines(con = file)
-    #should be no empty lines
-    infiletext <- infiletext[infiletext != ""]
-    days <- length(infiletext) - 2
-    data <- matrix(data = NA, nrow = days, ncol = 4)
-    colnames(data) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
-    for (i in 3:length(infiletext)) {
-      data[i - 2, ] <- readNumerics(infiletext[i], 4)
-    }
-    object@data <- data
-    object
-})
-# nolint end
-
 ##########################swcsetup.in#########################################
 
 #' Class \code{"swSWC"}
@@ -118,7 +92,6 @@ setMethod(
 #'   \code{\linkS4class{swInputData}}.
 #'
 #' @param object An object of class \code{\linkS4class{swSWC}}.
-#' @param file A character string. The file name from which to read.
 #' @param value A value to assign to a specific slot of the object.
 #' @param ... Arguments to the helper constructor function.
 #'  Dots can either contain objects to copy into slots of that class
@@ -131,12 +104,7 @@ setMethod(
 #' @param year An integer value. The calendar year of the \var{SWC}
 #'   \code{data} object.
 #'
-#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
-#' \code{\linkS4class{swInputData}} \code{\linkS4class{swLog}}
+#' @seealso \code{\linkS4class{swInputData}}
 #'
 #' @examples
 #' showClass("swSWC")
@@ -221,11 +189,14 @@ setMethod(
   function(object, year) {
     index <- which(names(object@History) == as.character(year))
     if (length(index) != 1) {
-      print("swc historic data Index has wrong length.")
+      warning("swc historic data Index has wrong length.", call. = FALSE)
       return(NULL)
     }
     if (object@History[[index]]@year != as.integer(year)) {
-      print("Somethings wrong with the historical soil moisture data.")
+      warning(
+        "Somethings wrong with the historical soil moisture data.",
+        call. = FALSE
+      )
     }
 
     object@History[[index]]
@@ -307,37 +278,16 @@ setReplaceMethod(
       years <- years[ids_sorted]
       names(object@History) <- as.character(years)
       if (!all(years == cummax(years))) {
-        print("SWC data is Missing")
+        stop("SWC data is missing", call. = FALSE)
       }
 
     } else if (length(index) == 1) {
       object@History[[index]] <- value
 
     } else {
-      print("To many index. Not set")
+      stop("To many index. Not set", call. = FALSE)
     }
 
     object
   }
 )
-
-
-#' @rdname swSWC-class
-#' @export
-# nolint start
-setMethod(
-  "swReadLines",
-  signature = c(object = "swSWC", file = "character"),
-  function(object, file) {
-    stop("swReadLines is defunct")
-    infiletext <- readLines(con = file)
-    #should be no empty lines
-    infiletext <- infiletext[infiletext != ""]
-    object@UseSWCHistoricData <- readLogical(infiletext[4])
-    object@DataFilePrefix <- readCharacter(infiletext[5])
-    object@FirstYear <- readInteger(infiletext[6])
-    object@Method <- readInteger(infiletext[7])
-    return(object)
-  }
-)
-# nolint end

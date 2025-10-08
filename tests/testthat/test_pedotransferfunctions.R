@@ -450,7 +450,7 @@ test_that("Simulate with all SWRC/PTF combinations", {
         succeed(
           paste(
             "No live access to",
-            paste0(list_swrcs_ptfs[[isp]], collapse = "/"),
+            paste(list_swrcs_ptfs[[isp]], collapse = "/"),
             ", skipping for now!"
           )
         )
@@ -501,7 +501,7 @@ test_that("Simulate with all SWRC/PTF combinations", {
             tolerance = rSW2_glovars[["tol"]],
             info = paste0(
               it, ": ",
-              paste0(list_swrcs_ptfs[[isp]], collapse = "/"),
+              paste(list_swrcs_ptfs[[isp]], collapse = "/"),
               " - slot ",
               shQuote(sv)
             )

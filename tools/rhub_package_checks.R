@@ -14,5 +14,8 @@ if (grepl("rSOILWAT2", path) && requireNamespace("rhub")) {
   setwd(path)
 
 } else {
-  stop("The source package 'rSOILWAT2' cannot be found in the current path")
+  stop(
+    "The source package 'rSOILWAT2' cannot be found in the current path",
+    call. = FALSE
+  )
 }

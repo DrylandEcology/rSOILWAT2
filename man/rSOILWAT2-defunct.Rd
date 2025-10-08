@@ -12,6 +12,7 @@
 \alias{setup_time_simulation_run}
 \alias{simTiming_ForEachUsedTimeUnit}
 \alias{update_requested_years}
+\alias{swReadLines}
 \title{Defunct functions in package \pkg{rSOILWAT2}}
 \usage{
 SMR_names(...)
@@ -33,6 +34,8 @@ setup_time_simulation_run(...)
 simTiming_ForEachUsedTimeUnit(...)
 
 update_requested_years(...)
+
+swReadLines(...)
 }
 \arguments{
 \item{...}{Function arguments. Unused since functions are defunct.}

@@ -37,12 +37,7 @@
 #'  \code{rSOILWAT2::sw_exampleData}
 #'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
-#' @seealso \code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swEstab}} \code{\linkS4class{swOUT}}
-#' \code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+#' @seealso \code{\linkS4class{swInputData}}
 #'
 #' @examples
 #' showClass("swMonthlyScalingParams")
@@ -177,7 +172,6 @@ setMethod(
 #'
 #' @param object An object of class \code{\linkS4class{swWeather}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param file A character string. The file name from which to read.
 #' @param ... Arguments to the helper constructor function.
 #'  Dots can either contain objects to copy into slots of that class
 #'  (must be named identical to the corresponding slot) or
@@ -187,22 +181,7 @@ setMethod(
 #'  \code{rSOILWAT2::sw_exampleData}
 #'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
-#' @seealso
-#' \code{\linkS4class{swInputData}}
-#' \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swYears}}
-#' \code{\linkS4class{swWeather}}
-#' \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}}
-#' \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}}
-#' \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swSpinup}}
-#' \code{\linkS4class{swEstab}}
-#' \code{\linkS4class{swOUT}}
-#' \code{\linkS4class{swCarbon}}
-#' \code{\linkS4class{swSWC}}
-#' \code{\linkS4class{swLog}}
+#' @seealso \code{\linkS4class{swInputData}}
 #'
 #' @examples
 #' showClass("swWeather")
@@ -224,7 +203,8 @@ setClass(
     use_windSpeedMonthly = "logical",
     use_humidityMonthly = "logical",
     desc_rsds = "integer",
-    dailyInputFlags = "logical"
+    dailyInputFlags = "logical",
+    correctWeatherValues = "logical"
   ),
   # TODO: this class should not contain `swMonthlyScalingParams` but
   # instead be a composition, i.e., have a slot of that class
@@ -242,7 +222,10 @@ setClass(
     desc_rsds = NA_integer_,
     # NOTE: 14 must be
     # equal to rSW2_glovars[["kSOILWAT2"]][["kINT"]][["MAX_INPUT_COLUMNS"]]
-    dailyInputFlags = rep(NA, 14L)
+    dailyInputFlags = rep(NA, 14L),
+    # NOTE: 3 must be
+    # equal to rSW2_glovars[["kSOILWAT2"]][["kINT"]][["NFIXWEATHER"]]
+    correctWeatherValues = rep(NA, 3L)
   )
 )
 
@@ -253,11 +236,14 @@ setValidity(
     sns <- setdiff(slotNames("swWeather"), inheritedSlotNames("swWeather"))
 
     for (sn in sns) {
-      n_exp <- if (identical(sn, "dailyInputFlags")) {
-        rSW2_glovars[["kSOILWAT2"]][["kINT"]][["MAX_INPUT_COLUMNS"]]
-      } else {
+      n_exp <- switch(
+        EXPR = sn,
+        dailyInputFlags =
+          rSW2_glovars[["kSOILWAT2"]][["kINT"]][["MAX_INPUT_COLUMNS"]],
+        correctWeatherValues =
+          rSW2_glovars[["kSOILWAT2"]][["kINT"]][["NFIXWEATHER"]],
         1L
-      }
+      )
 
       n_has <- length(slot(object, sn))
 
@@ -514,47 +500,3 @@ setReplaceMethod(
     object
   }
 )
-
-
-
-#' @rdname swWeather-class
-#' @export
-# nolint start
-setMethod(
-  "swReadLines",
-  signature = c(object = "swWeather", file = "character"),
-  function(object, file) {
-    print(paste(
-      "TODO: method 'swReadLines' for class 'swWeather' is not up-to-date;",
-      "hard-coded indices are incorrect"
-    ))
-    infiletext <- readLines(con = file)
-
-    object@UseSnow <- readLogical(infiletext[4])
-    object@pct_SnowDrift <- readNumeric(infiletext[5])
-    object@pct_SnowRunoff <- readNumeric(infiletext[6])
-    object@use_weathergenerator <- readLogical(infiletext[7])
-    object@FirstYear_Historical <- readInteger(infiletext[8])
-    object@use_cloudCoverMonthly <- readLogical(infiletext[9])
-    object@use_windSpeedMonthly <- readLogical(infiletext[10])
-    object@use_relHumidityMonthly <- readLogical(infiletext[11])
-    object@desc_rsds <- readLogical(infiletext[12])
-
-    for (i in seq_len(14)) {
-      object@dailyInputFlags[i] <- readLogical(infiletext[12 + 1])
-    }
-
-    data <- matrix(data = c(rep(1, 12), rep(NA, 12 * 5)), nrow = 12, ncol = 8)
-    colnames(data) <- c("PPT", "MaxT", "MinT", "SkyCover", "Wind", "rH", "actVP", "shortWR")
-    rownames(data) <- c("January", "February", "March", "April", "May",
-      "June", "July", "August", "September", "October", "November", "December")
-
-    for (i in 1:12) {
-      data[i, ] <- readNumerics(infiletext[12 + 14 + i], 8)[2:8]
-    }
-    object@MonthlyScalingParams <- data
-
-    object
-  }
-)
-# nolint end

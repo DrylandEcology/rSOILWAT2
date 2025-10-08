@@ -344,7 +344,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
 #'
 #' @examples
 #' sw_in <- rSOILWAT2::sw_exampleData
-#' tmp <- swProd_MonProd_grass(sw_in)
+#' tmp <- swProd_MonProd_veg(sw_in, "SW_GRASS")
 #' phen_reference <- data.frame(
 #'   tmp,
 #'   Litter_pct = tmp[, "Litter"] / max(tmp[, "Litter"]),
@@ -825,13 +825,15 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp, x_asif = NULL) {
 
 
   if (ksc > 0.2 * Nadj) {
-    warning("More than 20% of adjustment points failed.")
+    warning("More than 20% of adjustment points failed.", call. = FALSE)
   }
 
   if (max(kce[2:3]) > 0.1 * Nadj) {
     warning(
       "The longest contiguous section of failed adjustments ",
-      "is longer than 10% of all points.")
+      "is longer than 10% of all points.",
+      call. = FALSE
+    )
   }
 
 
@@ -946,7 +948,10 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp, x_asif = NULL) {
     pres <- predict(fxpsp_adj, mon_norm)[["y"]]
 
   } else {
-    warning("Less than 3 adjustment points succeeded: return mean value.")
+    warning(
+      "Less than 3 adjustment points succeeded: return mean value.",
+      call. = FALSE
+    )
     pres <- rep(mean(veg_new), nmon)
   }
 
@@ -1473,7 +1478,8 @@ estimate_PotNatVeg_roots <- function(
     if (!all(tmp_type == tmp_adj)) {
       stop(
         "Names of `trco_type_by_veg` do not match ",
-        "`trco_adj_by_veg` for ", shQuote(veg_types[k1])
+        "`trco_adj_by_veg` for ", shQuote(veg_types[k1]),
+        call. = FALSE
       )
     }
 
@@ -1496,7 +1502,8 @@ estimate_PotNatVeg_roots <- function(
         if (anyNA(tmp_igfcov)) {
           stop(
             "Names of `fgrass_c3c4ann` do not match ",
-            "`trco_adj_by_veg` for ", shQuote(veg_types[k1])
+            "`trco_adj_by_veg` for ", shQuote(veg_types[k1]),
+            call. = FALSE
           )
         }
 
@@ -1529,9 +1536,8 @@ estimate_PotNatVeg_roots <- function(
 
       } else {
         stop(
-          "Root information for ",
-          shQuote(veg_types[k1]),
-          " incomplete."
+          "Root information for ", shQuote(veg_types[k1]), " incomplete.",
+          call. = FALSE
         )
       }
 
@@ -1546,8 +1552,9 @@ estimate_PotNatVeg_roots <- function(
           "Root information for ",
           shQuote(veg_types[k1]),
           " is problematic: ",
-          paste0(round(tmp_root, 4), collapse = " / "),
-          "; it was re-set to 0s."
+          paste(round(tmp_root, 4L), collapse = " / "),
+          "; it was re-set to 0s.",
+          call. = FALSE
         )
 
         tmp_root <- rep(0, n_slyrs)
@@ -1558,7 +1565,8 @@ estimate_PotNatVeg_roots <- function(
     } else {
       warning(
         "No rooting profile selected for ",
-        shQuote(veg_types[k1]), "."
+        shQuote(veg_types[k1]), ".",
+        call. = FALSE
       )
     }
   }
@@ -1587,9 +1595,9 @@ estimate_PotNatVeg_roots <- function(
 #' @md
 update_biomass <- function(
   fg = c("Grass", "Shrub", "Tree", "Forb"),
-  use, # nolint: function_argument_linter.
-  prod_input, # nolint: function_argument_linter.
-  prod_default # nolint: function_argument_linter.
+  use,
+  prod_input,
+  prod_default
 ) {
 
   fg <- match.arg(fg)

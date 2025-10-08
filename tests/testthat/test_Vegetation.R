@@ -370,13 +370,13 @@ test_that("Vegetation: estimate land cover composition", {
 
 test_that("Vegetation: adjust phenology", {
   phen_in <- list()
-  phen_in[["x1n"]] <- swProd_MonProd_grass(sw_exampleData)
-  phen_in[["x11"]] <- phen_in[["x1n"]][, 2]
+  phen_in[["x1n"]] <- swProd_MonProd_veg(sw_exampleData, "SW_GRASS")
+  phen_in[["x11"]] <- phen_in[["x1n"]][, 2L]
   phen_in[["xnn"]] <- list(
-    swProd_MonProd_forb(sw_exampleData),
-    swProd_MonProd_grass(sw_exampleData),
-    swProd_MonProd_shrub(sw_exampleData),
-    swProd_MonProd_tree(sw_exampleData)
+    swProd_MonProd_veg(sw_exampleData, "SW_FORBS"),
+    swProd_MonProd_veg(sw_exampleData, "SW_GRASS"),
+    swProd_MonProd_veg(sw_exampleData, "SW_SHRUB"),
+    swProd_MonProd_veg(sw_exampleData, "SW_TREE")
   )
 
   phen_in <- lapply(phen_in, as.data.frame)
@@ -427,5 +427,62 @@ test_that("Vegetation: adjust phenology", {
       diffs[ids_rel] <- diffs[ids_rel] / res[ids_rel, i]
       expect_true(all(diffs < tol))
     }
+  }
+})
+
+
+test_that("VegetationTypeEquivalency", {
+  # Expect that relevant simulation values of vt1 and vt2 are identical
+  # If vt1 and vt2 are represented identically by the simulation
+  # see https://github.com/DrylandEcology/SOILWAT2/issues/471
+  vt1 <- "Grasses"
+  vt2 <- "Forbs"
+
+  trco1 <- paste0("transp", substr(vt1, 1L, 5L), "_frac")
+  trco2 <- paste0("transp", substr(vt2, 1L, 4L), "_frac")
+
+
+  #--- Default simulation inputs
+  swin <- rSOILWAT2::sw_exampleData
+
+  tc12 <-
+    rSOILWAT2::swProd_Composition(swin)[[vt1]] +
+    rSOILWAT2::swProd_Composition(swin)[[vt2]]
+
+
+  #--- Set parameters of vt2 equal to parameters of vt1 (if not already)
+  rSOILWAT2::swProd_CritSoilWaterPotential(swin)[[vt2]] <-
+    rSOILWAT2::swProd_CritSoilWaterPotential(swin)[[vt1]]
+
+  rSOILWAT2::swProd_VegInterParam(swin)[, vt2] <-
+    rSOILWAT2::swProd_VegInterParam(swin)[, vt1]
+
+  rSOILWAT2::swSoils_Layers(swin)[, trco2] <-
+    rSOILWAT2::swSoils_Layers(swin)[, trco1]
+
+
+  #--- Run with vt1
+  swin1 <- swin
+  rSOILWAT2::swProd_Composition(swin1)[[vt1]] <- tc12
+  rSOILWAT2::swProd_Composition(swin1)[[vt2]] <- 0
+  swout1 <- rSOILWAT2::sw_exec(swin1)
+
+  #--- Run with vt2
+  swin2 <- swin
+  rSOILWAT2::swProd_Composition(swin2)[[vt1]] <- 0
+  rSOILWAT2::swProd_Composition(swin2)[[vt2]] <- tc12
+  swout2 <- rSOILWAT2::sw_exec(swin2)
+
+
+  #--- Expect that relevant simulation values for vt1 and vt2 are identical
+  evars <- c("evap_grass", "evap_forbs")
+
+  for (pd in c("Day", "Year")) {
+    expect_equal(slot(swout1@AET, pd), slot(swout2@AET, pd))
+
+    expect_equal(
+      rowSums(slot(swout1@EVAPSURFACE, pd)[, evars]),
+      rowSums(slot(swout2@EVAPSURFACE, pd)[, evars])
+    )
   }
 })

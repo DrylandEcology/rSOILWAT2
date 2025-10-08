@@ -42,6 +42,7 @@ SEXP rSW2_readAllWeatherFromDisk(
   SEXP endYear,
   SEXP elevation,
   SEXP dailyInputFlags,
+  SEXP fixWeatherData,
   SEXP sw_template
 );
 SEXP sw_consts(void);

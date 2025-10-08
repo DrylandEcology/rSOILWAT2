@@ -4,12 +4,9 @@
 \name{swSWC_hist-class}
 \alias{swSWC_hist-class}
 \alias{swSWC_hist}
-\alias{swReadLines,swSWC_hist,character-method}
 \title{Class \code{"swSWC_hist"}}
 \usage{
 swSWC_hist(...)
-
-\S4method{swReadLines}{swSWC_hist,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -20,10 +17,6 @@ any missing slots will take their default values).
 If dots are missing, then corresponding values of
 \code{rSOILWAT2::sw_exampleData}
 (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
-
-\item{object}{An object of class \code{\linkS4class{swSWC_hist}}.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class

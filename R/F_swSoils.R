@@ -43,7 +43,6 @@ soilLayer_dataColumns <- function() {
 #'
 #' @param object An object of class \code{\linkS4class{swSoils}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param file A character string. The file name from which to read.
 #' @param ... Arguments to the helper constructor function.
 #'  Dots can either contain objects to copy into slots of that class
 #'  (must be named identical to the corresponding slot) or
@@ -53,22 +52,7 @@ soilLayer_dataColumns <- function() {
 #'  \code{rSOILWAT2::sw_exampleData}
 #'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
 #'
-#' @seealso
-#' \code{\linkS4class{swInputData}}
-#' \code{\linkS4class{swFiles}}
-#' \code{\linkS4class{swYears}}
-#' \code{\linkS4class{swWeather}}
-#' \code{\linkS4class{swCloud}}
-#' \code{\linkS4class{swMarkov}}
-#' \code{\linkS4class{swProd}}
-#' \code{\linkS4class{swSite}}
-#' \code{\linkS4class{swSoils}}
-#' \code{\linkS4class{swSpinup}}
-#' \code{\linkS4class{swEstab}}
-#' \code{\linkS4class{swOUT}}
-#' \code{\linkS4class{swCarbon}}
-#' \code{\linkS4class{swSWC}}
-#' \code{\linkS4class{swLog}}
+#' @seealso \code{\linkS4class{swInputData}}
 #'
 #' @examples
 #' showClass("swSoils")
@@ -301,7 +285,7 @@ upgrade_soilLayers <- function(
   )
 
   cns <- intersect(template_soilLayerProperties, colnames(soilLayers))
-  if (length(cns) < 1L) stop("Required variables not found.")
+  if (length(cns) < 1L) stop("Required variables not found.", call. = FALSE)
   template_data[, cns] <- as.matrix(soilLayers)[, cns]
 
   varsToZero <- "som_frac"
@@ -441,30 +425,3 @@ reset_omSWRCp <- function(omSWRCp) {
     dimnames = dimnames(omSWRCp)
   )
 }
-
-
-
-#' @rdname swSoils-class
-#' @export
-# nolint start
-setMethod(
-  "swReadLines",
-  signature = c(object = "swSoils", file = "character"),
-  function(object, file) {
-    stop("This function no longer works correctly; and SWRCp are not read.")
-    infiletext <- readLines(con = file)
-    infiletext <- infiletext[infiletext != ""] #get rid of extra spaces
-    infiletext <- infiletext[17:length(infiletext)] #get rid of comments
-    object@Layers <- matrix(data = NA, nrow = length(infiletext), ncol = 12)
-    colnames(object@Layers) <- c("depth_cm", "bulkDensity_g/cm^3",
-      "gravel_content", "EvapBareSoil_frac", "transpGrass_frac",
-      "transpShrub_frac", "transpTree_frac", "transpForb_frac",
-      "sand_frac", "clay_frac", "impermeability_frac", "soilTemp_c")
-    for (i in seq_along(infiletext)) {
-      object@Layers[i, ] <- readNumerics(infiletext[i], 12)
-    }
-
-    object
-  }
-)
-# nolint end

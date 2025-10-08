@@ -23,12 +23,12 @@
 
 #' Class \code{"swInputData"}
 #'
-#' This class is a container class to the input file \var{S4} objects. The
+#' This class is a container class to the input \var{S4} objects. The
 #' generic functions listed work on this and the proper \pkg{rSOILWAT2}
 #' classes in the container's slots.
 #'
-#' \code{\linkS4class{swInputData}} consists of slots for each file that is
-#' read in. These slots can be accessed via the following functions: \itemize{
+#' \code{\linkS4class{swInputData}} consists of slots for each input class.
+#' These slots can be accessed via the following functions: \itemize{
 #'   \item \code{\link{get_swMarkov}}
 #'   \item \code{\link{get_swCloud}}
 #'   \item \code{\link{get_swFiles}}
@@ -53,7 +53,6 @@
 #'
 #' @param object An object of class \code{\linkS4class{swInputData}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param file A character string. The file name from which to read.
 #' @param ... Arguments to the helper constructor function.
 #'  Dots can either contain objects to copy into slots of that class
 #'  (must be named identical to the corresponding slot) or
@@ -292,7 +291,10 @@ setMethod(
               }
 
             } else {
-              stop("Failed to upgrade 'swInputData' object slot ", shQuote(sn))
+              stop(
+                "Failed to upgrade 'swInputData' object slot ", shQuote(sn),
+                call. = FALSE
+              )
             }
 
             msg_upgrades <- c(msg_upgrades, sn)
@@ -1199,10 +1201,10 @@ setMethod(
   function(object, year) {
     index <- which(names(object@weatherHistory) == as.character(year))
     if (length(index) != 1) {
-      stop("Index has wrong length.")
+      stop("Index has wrong length.", call. = FALSE)
     }
     if (object@weatherHistory[[index]]@year != as.integer(year)) {
-      print("Somethings wrong with the weather data.")
+      stop("Somethings wrong with the weather data.", call. = FALSE)
     }
 
     object@weatherHistory[[index]]
@@ -1217,10 +1219,10 @@ setMethod(
   function(object, year) {
     index <- which(names(object) == as.character(year))
     if (length(index) != 1) {
-      stop("Index has wrong length.")
+      stop("Index has wrong length.", call. = FALSE)
     }
     if (object[[index]]@year != as.integer(year)) {
-      print("Somethings wrong with the weather data.")
+      stop("Somethings wrong with the weather data.", call. = FALSE)
     }
 
     object[[index]]
@@ -1247,14 +1249,14 @@ setReplaceMethod(
       years <- years[ids_sorted]
       names(object@weatherHistory) <- as.character(years)
       if (!all(years == cummax(years))) {
-        print("Weather data is Missing")
+        stop("Weather data is Missing", call. = FALSE)
       }
 
     } else if (length(index) == 1) {
       object@weatherHistory[[index]] <- value
 
     } else {
-      print("To many indices. Weather data not set")
+      stop("To many indices. Weather data not set", call. = FALSE)
     }
 
     object
@@ -1281,14 +1283,14 @@ setReplaceMethod(
       years <- years[ids_sorted]
       names(object) <- as.character(years)
       if (!all(years == cummax(years))) {
-        print("Weather data are missing")
+        stop("Weather data are missing", call. = FALSE)
       }
 
     } else if (length(index) == 1) {
      object[[index]] <- value
 
     } else {
-      print("To many indices. Weather data not set")
+      stop("To many indices. Weather data not set", call. = FALSE)
     }
 
     object
@@ -1403,38 +1405,6 @@ setMethod(
   "swProd_MonProd_veg",
   signature = "swInputData",
   function(object, vegtype) swProd_MonProd_veg(object@prod, vegtype)
-)
-
-#' @rdname swInputData-class
-#' @export
-setMethod(
-  "swProd_MonProd_grass",
-  signature = "swInputData",
-  function(object) swProd_MonProd_grass(object@prod)
-)
-
-#' @rdname swInputData-class
-#' @export
-setMethod(
-  "swProd_MonProd_shrub",
-  signature = "swInputData",
-  function(object) swProd_MonProd_shrub(object@prod)
-)
-
-#' @rdname swInputData-class
-#' @export
-setMethod(
-  "swProd_MonProd_tree",
-  signature = "swInputData",
-  function(object) swProd_MonProd_tree(object@prod)
-)
-
-#' @rdname swInputData-class
-#' @export
-setMethod(
-  "swProd_MonProd_forb",
-  signature = "swInputData",
-  function(object) swProd_MonProd_forb(object@prod)
 )
 
 
@@ -1588,50 +1558,6 @@ setReplaceMethod(
   signature = "swInputData",
   function(object, vegtype, value) {
     swProd_MonProd_veg(object@prod, vegtype) <- value
-    object
-  }
-)
-
-#' @rdname swInputData-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_grass",
-  signature = "swInputData",
-  function(object, value) {
-    swProd_MonProd_grass(object@prod) <- value
-    object
-  }
-)
-
-#' @rdname swInputData-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_shrub",
-  signature = "swInputData",
-  function(object, value) {
-    swProd_MonProd_shrub(object@prod) <- value
-    object
-  }
-)
-
-#' @rdname swInputData-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_tree",
-  signature = "swInputData",
-  function(object, value) {
-    swProd_MonProd_tree(object@prod) <- value
-    object
-  }
-)
-
-#' @rdname swInputData-class
-#' @export
-setReplaceMethod(
-  "swProd_MonProd_forb",
-  signature = "swInputData",
-  function(object, value) {
-    swProd_MonProd_forb(object@prod) <- value
     object
   }
 )
@@ -2242,14 +2168,14 @@ setReplaceMethod(
       years <- years[ids_sorted]
       names(object@swc@History) <- as.character(years)
       if (!all(years == cummax(years))) {
-        print("SWC data is Missing")
+        stop("SWC data is missing", call. = FALSE)
       }
 
     } else if (length(index) == 1) {
       object@swc@History[[index]] <- value
 
     } else {
-     print("To many index. Not set")
+      stop("To many index. Not set", call. = FALSE)
     }
 
     object
@@ -2574,45 +2500,3 @@ setReplaceMethod(
     object
   }
 )
-
-
-
-#' @rdname swInputData-class
-#' @export
-# nolint start
-setMethod(
-  "swReadLines",
-  signature = c(object="swInputData",file="character"),
-  function(object,file) {
-    print("TODO: method 'swReadLines' for class 'swInputData' is not up-to-date; hard-coded indices are incorrect")
-
-    object@files <- swReadLines(object@files,file)
-    object@files@ProjDir <- dirname(file)
-    object@years <- swReadLines(object@years,file.path(object@files@ProjDir, object@files@InFiles[2]))
-    object@weather <- swReadLines(object@weather,file.path(object@files@ProjDir, object@files@InFiles[6]))
-    weatherFiles <- list.files(path=file.path(object@files@ProjDir,dirname(object@files@WeatherPrefix)), pattern=basename(object@files@WeatherPrefix), include.dirs=F, recursive=F, full.names=T)
-    object@weatherHistory <- list()
-    if(length(weatherFiles) > 0) {
-      for(i in 1:length(weatherFiles)) {
-        wd <- new("swWeatherData",year=0)
-        wd <- swReadLines(wd, weatherFiles[i])
-        object@weatherHistory[[i]] <- wd
-      }
-    }
-
-    object@cloud <- swReadLines(object@cloud,file.path(object@files@ProjDir, object@files@InFiles[9]))
-    if(all(file.exists(file.path(object@files@ProjDir, object@files@InFiles[7:8]))))
-      object@markov <- swReadLines(object@markov,file.path(object@files@ProjDir, object@files@InFiles[7:8]))
-    object@prod <- swReadLines(object@prod,file.path(object@files@ProjDir, object@files@InFiles[10]))
-    object@site <- swReadLines(object@site,file.path(object@files@ProjDir, object@files@InFiles[4]))
-    object@soils <- swReadLines(object@soils,file.path(object@files@ProjDir, object@files@InFiles[5]))
-    if(file.exists(file.path(object@files@ProjDir, object@files@InFiles[11]))) {#Optional File
-      object@estab <- swReadLines(object@estab,c(file.path(object@files@ProjDir, object@files@InFiles[11]),object@files@ProjDir))
-    }
-    object@output <- swReadLines(object@output,file.path(object@files@ProjDir, object@files@InFiles[14]))
-    object@swc <- swReadLines(object@swc,file.path(object@files@ProjDir, object@files@InFiles[13]))
-    object@carbon <- swReadLines(object@carbon, file.path(object@files@ProjDir, object@files@InFiles[12]))
-    return(object)
-  }
-)
-# nolint end

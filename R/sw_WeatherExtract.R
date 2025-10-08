@@ -48,7 +48,7 @@ sw_download_DayMet <- function(longitude, latitude, years) {
   )
 
   if (inherits(res, "try-error")) {
-    stop("Download DayMet data failed: ", res)
+    stop("Download DayMet data failed: ", res, call. = FALSE)
   }
 
   res
@@ -199,7 +199,7 @@ sw_download_SCAN <- function(nrcs_site_code, years) {
   )
 
   if (inherits(res, "try-error") || is.null(res)) {
-    stop("Download NRCS station data failed: ", res)
+    stop("Download NRCS station data failed: ", res, call. = FALSE)
   }
 
   res
@@ -248,6 +248,7 @@ sw_download_SCAN <- function(nrcs_site_code, years) {
 #'   }
 #'
 #'   graphics::par(par_prev)
+#'   unlink("Rplots.*") # clean up
 #' }
 #'
 #' @md

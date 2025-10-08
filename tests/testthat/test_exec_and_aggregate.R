@@ -26,40 +26,15 @@ expect_within <- function(
   object,
   expected,
   ...,
-  info = NULL,
-  tol = tols[["ranges"]],
-  digits_N = 4L
+  tol = tols[["ranges"]]
 ) {
+  dots <- list(...) # ignored
 
-  robj <- range(object)
-  rexp <- range(expected)
+  # min of `object` >= minimum of `expected`:
+  expect_gte(min(object), min(expected) - tol)
 
-  # min of `object` is gte to minimum of `expected`:
-  gte <- robj[1] - rexp[1] >= -tol
-  # max of `object` is lte to max of `expected`:
-  lte <- rexp[2] - robj[2] >= -tol
-  within <- gte & lte
-
-  expect_true(
-    within,
-    info = paste(
-      info,
-      if (!gte) {
-        paste(
-          "min =",
-          signif(robj[2], digits_N),
-          "smaller than expected", signif(rexp[1], digits_N)
-        )
-      },
-      if (!lte) {
-        paste(
-          "max =",
-          signif(robj[2], digits_N),
-          "larger than expected", signif(rexp[2], digits_N)
-        )
-      }
-    )
-  )
+  # max of `object` <= max of `expected`:
+  expect_lte(max(object), max(expected) + tol)
 }
 
 

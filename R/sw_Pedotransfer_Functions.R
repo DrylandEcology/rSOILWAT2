@@ -57,8 +57,12 @@ pedotransfer <- function(x, sand, clay, pdf) {
     thetas <- -14.2 * sand - 3.7 * clay + 50.5
     psis <- 10 ^ (-1.58 * sand - 0.63 * clay + 2.17)
     b <- -0.3 * sand + 15.7 * clay + 3.10
-    if (any(b <= 0, na.rm = TRUE))
-      stop("Pedotransfer for soil texture with b <= 0 is not possible.")
+    if (any(b <= 0, na.rm = TRUE)) {
+      stop(
+        "Pedotransfer for soil texture with b <= 0 is not possible.",
+        call. = FALSE
+      )
+    }
 
     np_x <- NROW(x) * NCOL(x)
 
@@ -420,7 +424,8 @@ encode_name2swrc <- function(swrc_name, fail = TRUE) {
     stop(
       "Requested SWRC ",
       shQuote(swrc_name[is.na(res)]),
-      " is not available."
+      " is not available.",
+      call. = FALSE
     )
   }
 
@@ -437,7 +442,10 @@ encode_name2ptf <- function(ptf_name, fail = TRUE) {
   res <- as.integer(unname(ptfs_implemented_by_SW2()[std_ptf(ptf_name)]))
 
   if (isTRUE(fail) && anyNA(res)) {
-    stop("Requested PTF ", shQuote(ptf_name[is.na(res)]), " is not available.")
+    stop(
+      "Requested PTF ", shQuote(ptf_name[is.na(res)]), " is not available.",
+      call. = FALSE
+    )
   }
 
   res
@@ -528,7 +536,8 @@ check_SWRC_vs_PTF <- function(swrc_name, ptf_name, fail = FALSE) {
 
     stop(
       toString(paste(swrc_names[ids], ptf_names[ids], collapse = "-")),
-      " are not available or incompatible."
+      " are not available or incompatible.",
+      call. = FALSE
     )
   }
 
@@ -673,7 +682,7 @@ ptf_estimate <- function(
   if (!all(check_swrcp(swrc_name, swrcp))) {
     msg <- "Some estimated parameters failed checks."
 
-    if (isTRUE(fail)) stop(msg) else warning(msg)
+    if (isTRUE(fail)) stop(msg, call. = FALSE) else warning(msg, call. = FALSE)
   }
 
   swrcp
@@ -800,7 +809,7 @@ rSW2_SWRC_PTF_estimate_parameters <- function( # nolint: object_length_linter.
   } else {
     msg <- paste("PTF", shQuote(ptf_name), "is not implemented in rSOILWAT2.")
 
-    if (isTRUE(fail)) stop(msg) else warning(msg)
+    if (isTRUE(fail)) stop(msg, call. = FALSE) else warning(msg, call. = FALSE)
 
     NULL
   }
@@ -1012,17 +1021,17 @@ ptf_neuroFX2021_for_FXW <- function(
       warning(
         "`ptf_neuroFX2021_for_FXW()`: ",
         "`bdensity` ignored because ",
-        "'neuroFX2021' object is for SSC (sand, silt, clay)."
+        "'neuroFX2021' object is for SSC (sand, silt, clay).",
+        call. = FALSE
       )
     }
-  } else {
-    if (is_sscbd) {
-      stop(
-        "`ptf_neuroFX2021_for_FXW()`: ",
-        "'neuroFX2021' object is for SSCBD (sand, silt, clay, bulk density) ",
-        "but `bdensity` contains no values."
-      )
-    }
+  } else if (is_sscbd) {
+    stop(
+     "`ptf_neuroFX2021_for_FXW()`: ",
+      "'neuroFX2021' object is for SSCBD (sand, silt, clay, bulk density) ",
+      "but `bdensity` contains no values.",
+      call. = FALSE
+    )
   }
 
   # Evaluate neuroFX2021
@@ -1281,27 +1290,29 @@ check_swrcp <- function(swrc_name, swrcp) {
 #'
 #'
 #' # Available water content "SWA" based on van Genuchten / Rosetta
-#' soils <- swSoils_Layers(rSOILWAT2::sw_exampleData)
-#' w <- diff(c(0, soils[, "depth_cm"]))
-#' vwc <- rbind(
-#'   day1 = rep(0.1, nrow(soils)),
-#'   day2 = rep(0.2, nrow(soils))
-#' )
-#' p <- ptf_estimate(
-#'   sand = soils[, "sand_frac"],
-#'   clay = soils[, "clay_frac"],
-#'   fcoarse = soils[, "gravel_content"],
-#'   bdensity = soils[, "bulkDensity_g/cm^3"],
-#'   swrc_name = "vanGenuchten1980",
-#'   ptf_name = "Rosetta3"
-#' )
-#' swa_base <- swrc_swp_to_vwc(
-#'   -3,
-#'   fcoarse = soils[, "gravel_content"],
-#'   swrc = list(name = "vanGenuchten1980", swrcp = p)
-#' )
-#' swa <- t(w * (t(vwc) - swa_base))
-#' swa[swa <= 0] <- 0 # SWA [cm / layer] above -3 MPa
+#' if (check_ptf_availability("Rosetta3")) {
+#'   soils <- swSoils_Layers(rSOILWAT2::sw_exampleData)
+#'   w <- diff(c(0, soils[, "depth_cm"]))
+#'   vwc <- rbind(
+#'     day1 = rep(0.1, nrow(soils)),
+#'     day2 = rep(0.2, nrow(soils))
+#'   )
+#'   p <- ptf_estimate(
+#'     sand = soils[, "sand_frac"],
+#'     clay = soils[, "clay_frac"],
+#'     fcoarse = soils[, "gravel_content"],
+#'     bdensity = soils[, "bulkDensity_g/cm^3"],
+#'     swrc_name = "vanGenuchten1980",
+#'     ptf_name = "Rosetta3"
+#'   )
+#'   swa_base <- swrc_swp_to_vwc(
+#'     -3,
+#'     fcoarse = soils[, "gravel_content"],
+#'     swrc = list(name = "vanGenuchten1980", swrcp = p)
+#'   )
+#'   swa <- t(w * (t(vwc) - swa_base))
+#'   swa[swa <= 0] <- 0 # SWA [cm / layer] above -3 MPa
+#' }
 #'
 #'
 #' # Shape of SWRCs
@@ -1414,7 +1425,9 @@ swrc_conversion <- function(
           is.null(sand) || is.null(clay)
       )
   ) {
-    stop("Insufficient information to estimate SWRC parameters.")
+    stop(
+      "Insufficient information to estimate SWRC parameters.", call. = FALSE
+    )
   }
 
 
@@ -1422,20 +1435,18 @@ swrc_conversion <- function(
   if (missing(fcoarse) && missing(layer_width)) {
     ntmp <- if (!is.null(swrc[["swrcp"]])) {
       nrow(swrc[["swrcp"]])
-    } else {
-      if (!is.null(sand)) {
-        length(sand)
-      } else if (!is.null(clay)) {
-        length(clay)
-      }
+    } else if (!is.null(sand)) {
+      length(sand)
+    } else if (!is.null(clay)) {
+      length(clay)
     }
 
-    if (!is.null(ntmp)) {
-      fcoarse <- rep(0, ntmp)
-      layer_width <- rep(1, ntmp)
-    } else {
-      stop("Insufficient soil parameters to use SWRC.")
+    if (is.null(ntmp)) {
+      stop("Insufficient soil parameters to use SWRC.", call. = FALSE)
     }
+
+    fcoarse <- rep(0, ntmp)
+    layer_width <- rep(1, ntmp)
 
   } else if (missing(fcoarse)) {
     fcoarse <- rep(0, length(layer_width))
@@ -1460,11 +1471,14 @@ swrc_conversion <- function(
   nsoils <- unique(lengths(soils))
 
   if (length(nsoils) > 1) {
-    stop("Soil variables have different lengths.")
+    stop("Soil variables have different lengths.", call. = FALSE)
   }
 
   if (!is.null(swrc[["swrcp"]]) && nrow(swrc[["swrcp"]]) != nsoils) {
-    stop("Dimensions of `swrcp` and length of soil variables disagree.")
+    stop(
+      "Dimensions of `swrcp` and length of soil variables disagree.",
+      call. = FALSE
+    )
   }
 
 
@@ -1599,7 +1613,7 @@ swrc_conversion <- function(
     )
 
   } else {
-    stop("Unsuitable inputs.")
+    stop("Unsuitable inputs.", call. = FALSE)
   }
 
   res

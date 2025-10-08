@@ -18,12 +18,27 @@
 ###############################################################################
 
 
+#' Deprecated functions in package \pkg{rSOILWAT2}
+#'
+#' Executing a deprecated function will warn and tell you which function
+#' replaces them.
+#'
+#' @inheritParams sw_exec
+#' @param object An object of a \code{rSOILWAT2} class.
+#' @param value A value to assign to a specific slot of the object.
+#'
+#' @name rSOILWAT2-deprecated
+NULL
+
+
+# nolint start.
+
 dbW_getWeatherData_old <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,startYear=NULL,endYear=NULL, Scenario="Current") {
 	.Deprecated("dbW_getWeatherData")
 	stopifnot(dbW_IsValid())
 
 	if(is.null(Site_id) && is.null(Label) && is.null(lat) && is.null(long)) {
-		stop("No way to locate weather data from input")
+		stop("No way to locate weather data from input", call. = FALSE)
 	}
 
 	useYears<-FALSE
@@ -37,7 +52,7 @@ dbW_getWeatherData_old <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,st
 		if(useStart | useEnd) useYears<-TRUE
 		if(useStart & useEnd) {
 			if(startYear >= endYear | startYear<0 | endYear<0) {
-				stop("Wrong start or end year")
+				stop("Wrong start or end year", call. = FALSE)
 			}
 		}
 	}
@@ -46,16 +61,16 @@ dbW_getWeatherData_old <- function(Site_id=NULL,lat=NULL,long=NULL,Label=NULL,st
 		Site_id <- dbW_getSiteId(lat,long,Label)
 	} else {
 		if(!DBI::dbGetQuery(rSW2_glovars$con, paste("SELECT COUNT(*) FROM WeatherData WHERE Site_id=",Site_id,";",sep=""))[1,1]) {
-			stop("Site_id does not exist.")
+			stop("Site_id does not exist.", call. = FALSE)
 		}
 	}
 	if(!is.null(Site_id) && is.integer(Site_id) && Site_id >= 0) {
 		Scenario <- DBI::dbGetQuery(rSW2_glovars$con, paste("SELECT id FROM Scenarios WHERE Scenario='",Scenario,"';",sep=""))[1,1]
 		result <- DBI::dbGetQuery(rSW2_glovars$con, paste("SELECT StartYear,EndYear,data FROM WeatherData WHERE Site_id=",Site_id, " AND Scenario=",Scenario,";",sep=""));
 		data <- dbW_blob_to_weatherData_old(result$StartYear, result$EndYear, result$data, rSW2_glovars$blob_compression_type)
-		if(inherits(data, "try-error")) stop(paste("Weather data for Site_id", Site_id, "is corrupted"))
+		if(inherits(data, "try-error")) stop(paste("Weather data for Site_id", Site_id, "is corrupted"), call. = FALSE)
 	} else {
-		stop(paste("Site_id for", Label, "not obtained."))
+		stop(paste("Site_id for", Label, "not obtained."), call. = FALSE)
 	}
 
 	if(useYears) {
@@ -95,9 +110,9 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
     ) &
     (is.null(weatherData) | !is.list(weatherData) | !inherits(weatherData[[1]], "swWeatherData"))
   ) {
-    stop("addWeatherDataToDataBase does not have folder path or weatherData to insert")
+    stop("addWeatherDataToDataBase does not have folder path or weatherData to insert", call. = FALSE)
   }
-	if( (is.null(Site_id) & is.null(lat) & is.null(long) & is.null(weatherFolderPath) & (is.null(label))) | ((!is.null(Site_id) & !is.numeric(Site_id)) & (!is.null(lat) & !is.numeric(lat)) & (!is.null(long) & !is.numeric(long))) ) stop("addWeatherDataToDataBase not enough info to create Site in Sites table.")
+	if( (is.null(Site_id) & is.null(lat) & is.null(long) & is.null(weatherFolderPath) & (is.null(label))) | ((!is.null(Site_id) & !is.numeric(Site_id)) & (!is.null(lat) & !is.numeric(lat)) & (!is.null(long) & !is.numeric(long))) ) stop("addWeatherDataToDataBase not enough info to create Site in Sites table.", call. = FALSE)
 
 	Site_id <- dbW_addSite(
 		Site_id = Site_id,
@@ -129,7 +144,7 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 		for(j in 1:length(weath)) {
 			year <- as.numeric(sub(pattern="weath.",replacement="",weath[j]))
 			temp <- utils::read.csv(file.path(weatherFolderPath,weath[j]),header=FALSE,skip=2,sep="\t")
-			weatherData[[j]] <- swReadLines(new("swWeatherData",year),file.path(weatherFolderPath,weath[j]))
+			weatherData[[j]] <- swReadLinesWeather3Vars(new("swWeatherData",year),file.path(weatherFolderPath,weath[j]))
 		}
 		StartYear <- years[1]
 		EndYear <- years[length(years)]
@@ -137,6 +152,35 @@ dbW_addWeatherData_old <- function(Site_id=NULL, lat=NULL, long=NULL, weatherFol
 		DBI::dbExecute(rSW2_glovars$con, paste("INSERT INTO WeatherData (Site_id, Scenario, StartYear, EndYear, data) VALUES (",Site_id,", ",scenarioID,", ",StartYear,", ",EndYear,", ",data_blob,");",sep=""))
 		#dbCommit(rSW2_glovars$con)
 	}
+}
+
+
+swReadLinesWeather3Vars <- function(object, file) {
+    .Deprecated("C_rSW2_readAllWeatherFromDisk")
+    warning(
+      "swReadLines works only with traditional weather data.", call. = FALSE
+    )
+
+    object@year <- as.integer(
+      strsplit(
+        x = basename(file),
+        split = ".",
+      fixed = TRUE
+      )[[1]][2]
+    )
+    x <- utils::read.table(
+      file,
+      header = FALSE,
+      comment.char = "#",
+      blank.lines.skip = TRUE,
+      sep = "\t"
+    )
+    stopifnot(ncol(x) != 4L)
+    colnames(x) <- c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+    object@data[] <- NA
+    object@data[, colnames(x)] <- as.matrix(x)
+
+    object
 }
 
 
@@ -232,7 +276,8 @@ dbW_addSite <- function(Site_id = NULL, lat = NULL, long = NULL, Label = NULL) {
 				"with NULL being ignored. Compare data (database:input) ",
 				"lat(", SiteData[1, "Latitude"], ":", lat, ") ",
 				"long(", SiteData[1, "Longitude"], ":", long, ") ",
-				"label(", SiteData[1, "Label"], ":", Label, ").")
+				"label(", SiteData[1, "Label"], ":", Label, ").",
+				call. = FALSE)
 		}
 	}
 
@@ -490,7 +535,7 @@ calc_SiteClimate_old <- function(weatherList, year.start = NA, year.end = NA,
 
   if (length(years) == 0) {
     stop("'calc_SiteClimate': no weather data available for ",
-      "requested range of years")
+      "requested range of years", call. = FALSE)
   }
 
   # Mean daily temperature
@@ -811,7 +856,8 @@ estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
       stop(
         "'estimate_PotNatVeg_composition': ",
         "User defined grass values including C3, C4, and annuals ",
-        "sum to more than user defined total grass cover."
+        "sum to more than user defined total grass cover.",
+        call. = FALSE
       )
 
     }
@@ -853,7 +899,8 @@ estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
     stop(
       "'estimate_PotNatVeg_composition': ",
       "User defined relative abundance values sum to more than ",
-      "1 = full land cover."
+      "1 = full land cover.",
+      call. = FALSE
     )
   }
 
@@ -873,7 +920,8 @@ estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
         stop(
           "'estimate_PotNatVeg_composition': ",
           "User defined relative abundance values are all fixed, ",
-          "but their sum is smaller than 1 = full land cover."
+          "but their sum is smaller than 1 = full land cover.",
+          call. = FALSE
         )
       }
 
@@ -927,7 +975,8 @@ estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
           # values for x < 1. Hence the threshold of 1.
           warning(
             "Equations used outside supported range (2 - 21.2 C): ",
-           "MAT = ", round(MAT_C, 2), " C reset to 1 C."
+           "MAT = ", round(MAT_C, 2), " C reset to 1 C.",
+           call. = FALSE
           )
           MAT_C <- 1
         }
@@ -935,14 +984,16 @@ estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
         if (MAT_C > 21.2) {
           warning(
             "Equations used outside supported range (2 - 21.2 C): ",
-            "MAT = ", round(MAT_C, 2), " C."
+            "MAT = ", round(MAT_C, 2), " C.",
+            call. = FALSE
           )
         }
 
         if (MAP_mm < 117 || MAP_mm > 1011) {
           warning(
             "Equations used outside supported range (117-1011 mm): ",
-            "MAP = ", round(MAP_mm), " mm."
+            "MAP = ", round(MAP_mm), " mm.",
+            call. = FALSE
           )
         }
       }
@@ -1096,7 +1147,8 @@ estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
           warning(
             "'estimate_PotNatVeg_composition': ",
             "Total grass cover set, but no grass cover estimated; ",
-            "requested cover evenly divided among grass types."
+            "requested cover evenly divided among grass types.",
+            call. = FALSE
           )
         }
       }
@@ -1136,7 +1188,8 @@ estimate_PotNatVeg_composition_old <- function(MAP_mm, MAT_C,
               "the user fixed relative abundance values sum to less than 1, ",
               "and bare-ground is fixed. ",
               "Thus, the function cannot compute ",
-              "complete land cover composition."
+              "complete land cover composition.",
+              call. = FALSE
             )
           }
         }
@@ -1189,11 +1242,13 @@ readInteger <- function(text,showWarnings=FALSE) {
   .Deprecated("SOILWAT2's read functionality")
   tmp <- suppressWarnings(as.integer(strsplit(x=text,split="\t")[[1]][1]))
   if(is.na(tmp)) {
-    if(showWarnings) print(paste("Line: ",text,sep=""))
-    if(showWarnings) print("Not formatted with \t. Going to try [space].")
-    tmp <- suppressWarnings(as.integer(strsplit(x=text,split=" ")[[1]][1]))
+    if(showWarnings) warning("Line: ", text, call. = FALSE)
+    if(showWarnings) {
+      warning("Not formatted with \t. Going to try [space].", call. = FALSE)
+    }
+    tmp <- suppressWarnings(as.integer(strsplit(x=text, split=" ")[[1]][1]))
     if(is.na(tmp)) {
-      stop("Bad Line. Or Bad line numbers.")
+      stop("Bad Line. Or Bad line numbers.", call. = FALSE)
     }
   }
   return(tmp)
@@ -1203,11 +1258,13 @@ readLogical <- function(text,showWarnings=FALSE) {
   .Deprecated("SOILWAT2's read functionality")
   tmp <- suppressWarnings(as.logical(as.integer(strsplit(x=text,split="\t")[[1]][1])))
   if(is.na(tmp)) {
-    if(showWarnings) print(paste("Line: ",text,sep=""))
-    if(showWarnings) print("Not formatted with \t. Going to try [space].")
+    if(showWarnings) warning("Line: ",text, call. = FALSE)
+    if(showWarnings) {
+      warning("Not formatted with \t. Going to try [space].", call. = FALSE)
+    }
     tmp <- suppressWarnings(as.logical(as.integer(strsplit(x=text,split=" ")[[1]][1])))
     if(is.na(tmp)) {
-      stop("Bad Line. Or Bad line numbers.")
+      stop("Bad Line. Or Bad line numbers.", call. = FALSE)
     }
   }
   return(tmp)
@@ -1217,11 +1274,13 @@ readNumeric <- function(text,showWarnings=FALSE) {
   .Deprecated("SOILWAT2's read functionality")
   tmp <- suppressWarnings(as.numeric(strsplit(x=text,split="\t")[[1]][1]))
   if(is.na(tmp)) {
-    if(showWarnings) print(paste("Line: ",text,sep=""))
-    if(showWarnings) print("Not formatted with \t. Going to try [space].")
+    if(showWarnings) warning("Line: ",text, call. = FALSE)
+    if(showWarnings) {
+      warning("Not formatted with \t. Going to try [space].", call. = FALSE)
+    }
     tmp <- suppressWarnings(as.numeric(strsplit(x=text,split=" ")[[1]][1]))
     if(is.na(tmp)) {
-      stop("Bad Line. Or Bad line numbers.")
+      stop("Bad Line. Or Bad line numbers.", call. = FALSE)
     }
   }
   return(tmp)
@@ -1234,8 +1293,10 @@ readNumerics <- function(text,expectedArgs,showWarnings=FALSE) {
   if(length(tmp) > expectedArgs) tmp <- tmp[1:expectedArgs] #get rid of comment?
   tmp <- suppressWarnings(as.numeric(tmp))
   if(any(is.na(tmp))) {
-    if(showWarnings & any(is.na(tmp))) print(paste("Line: ",text,sep=""))
-    if(showWarnings & any(is.na(tmp))) print("Not formatted with \t. Going to try [space].")
+    if(showWarnings && any(is.na(tmp))) warning("Line: ",text, call. = FALSE)
+    if(showWarnings && any(is.na(tmp))) {
+      warning("Not formatted with \t. Going to try [space].", call. = FALSE)
+    }
     tmp <- strsplit(x=text,split="\t")[[1]][1] #remove comment
     tmp <- strsplit(x=tmp,split=" ")[[1]]
     tmp <- tmp[tmp!=""] #remove extra spaces
@@ -1246,12 +1307,12 @@ readNumerics <- function(text,expectedArgs,showWarnings=FALSE) {
       tmp <- unlist(strsplit(x=tmp,split="\t",fixed=T))
       tmp <- tmp[tmp!=""] #remove extra spaces
       tmp <- suppressWarnings(as.numeric(tmp[1:expectedArgs]))
-      if(any(is.na(tmp))) stop("Bad Line. Or Bad line numbers.")
+      if(any(is.na(tmp))) stop("Bad Line. Or Bad line numbers.", call. = FALSE)
     }
   }
   if(length(tmp) != expectedArgs) {
-    if(showWarnings) print(paste("Line: ",text,sep=""))
-    stop(paste("Expected ",expectedArgs," Got ",length(tmp),sep=""))
+    if(showWarnings) warning("Line: ",text, call. = FALSE)
+    stop(paste("Expected ",expectedArgs," Got ",length(tmp),sep=""), call. = FALSE)
   }
   return(tmp)
 }
@@ -1261,11 +1322,7 @@ readNumerics <- function(text,expectedArgs,showWarnings=FALSE) {
 #------ Other deprecated functions ------
 
 
-#' Return output data
-#'
-#' @inheritParams sw_exec
-#'
-#' @return An object of class \code{\linkS4class{swOutput}}.
+#' @rdname rSOILWAT2-deprecated
 #' @export
 sw_outputData <- function(inputData) {
   .Deprecated("Store return value of `rSOILWAT2::sw_exec()`.")
@@ -1280,3 +1337,258 @@ sw_outputData <- function(inputData) {
 
   res
 }
+
+
+#------ Vegetation-type related methods & functions ------
+
+#' @rdname rSOILWAT2-deprecated
+setGeneric(
+  "swProd_MonProd_grass",
+  function(object) {
+    .Deprecated("swProd_MonProd_veg")
+    standardGeneric("swProd_MonProd_grass")
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+setGeneric(
+  "swProd_MonProd_shrub",
+  function(object) {
+    .Deprecated("swProd_MonProd_veg")
+    standardGeneric("swProd_MonProd_shrub")
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+setGeneric(
+  "swProd_MonProd_tree",
+  function(object) {
+    .Deprecated("swProd_MonProd_veg")
+    standardGeneric("swProd_MonProd_tree")
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+setGeneric(
+  "swProd_MonProd_forb",
+  function(object) {
+    .Deprecated("swProd_MonProd_veg")
+    standardGeneric("swProd_MonProd_forb")
+  }
+)
+
+
+#' @rdname rSOILWAT2-deprecated
+setGeneric(
+  "swProd_MonProd_grass<-",
+  function(object, value) {
+    .Deprecated("swProd_MonProd_veg")
+    standardGeneric("swProd_MonProd_grass<-")
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+setGeneric(
+  "swProd_MonProd_shrub<-",
+  function(object, value) {
+    .Deprecated("swProd_MonProd_veg")
+    standardGeneric("swProd_MonProd_shrub<-")
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+setGeneric(
+  "swProd_MonProd_tree<-",
+  function(object, value) {
+    .Deprecated("swProd_MonProd_veg")
+    standardGeneric("swProd_MonProd_tree<-")
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+setGeneric(
+  "swProd_MonProd_forb<-",
+  function(object, value) {
+    .Deprecated("swProd_MonProd_veg")
+    standardGeneric("swProd_MonProd_forb<-")
+  }
+)
+
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_grass",
+  "swProd",
+  function(object) {
+    object@MonthlyVeg[[
+      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]
+    ]]
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_shrub",
+  "swProd",
+  function(object) {
+    object@MonthlyVeg[[
+      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]
+    ]]
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_tree",
+  "swProd",
+  function(object) {
+    object@MonthlyVeg[[
+      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]
+    ]]
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_forb",
+  "swProd",
+  function(object) {
+    object@MonthlyVeg[[
+      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]
+    ]]
+  }
+)
+
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_grass",
+  signature = "swProd",
+  function(object, value) {
+    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]
+    swProd_MonProd_veg(object, id_vegtype) <- value
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_shrub",
+  signature = "swProd",
+  function(object, value) {
+    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]
+    swProd_MonProd_veg(object, id_vegtype) <- value
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_tree",
+  signature = "swProd",
+  function(object, value) {
+    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]
+    swProd_MonProd_veg(object, id_vegtype) <- value
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_forb",
+  signature = "swProd",
+  function(object, value) {
+    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]
+    swProd_MonProd_veg(object, id_vegtype) <- value
+    object
+  }
+)
+
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_grass",
+  signature = "swInputData",
+  function(object) swProd_MonProd_grass(object@prod)
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_shrub",
+  signature = "swInputData",
+  function(object) swProd_MonProd_shrub(object@prod)
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_tree",
+  signature = "swInputData",
+  function(object) swProd_MonProd_tree(object@prod)
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_forb",
+  signature = "swInputData",
+  function(object) swProd_MonProd_forb(object@prod)
+)
+
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_grass",
+  signature = "swInputData",
+  function(object, value) {
+    swProd_MonProd_grass(object@prod) <- value
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_shrub",
+  signature = "swInputData",
+  function(object, value) {
+    swProd_MonProd_shrub(object@prod) <- value
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_tree",
+  signature = "swInputData",
+  function(object, value) {
+    swProd_MonProd_tree(object@prod) <- value
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_forb",
+  signature = "swInputData",
+  function(object, value) {
+    swProd_MonProd_forb(object@prod) <- value
+    object
+  }
+)
+
+
+# nolint end.

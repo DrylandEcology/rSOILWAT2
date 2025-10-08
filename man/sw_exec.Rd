@@ -136,7 +136,7 @@ sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3, quiet = TRUE)
 sw_in5 <- sw_in3
 
 ## Turn on the CO2-effects and set the CO2-concentration scenario
-swCarbon_Scenario(sw_in5) <- "RCP85"
+swCarbon_Scenario(sw_in5) <- "CMIP5_historical|CMIP5_RCP85"
 swCarbon_Use_Bio(sw_in5) <- 1L
 swCarbon_Use_WUE(sw_in5) <- 1L
 

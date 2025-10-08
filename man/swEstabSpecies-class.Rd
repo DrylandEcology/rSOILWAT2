@@ -4,12 +4,9 @@
 \name{swEstabSpecies-class}
 \alias{swEstabSpecies-class}
 \alias{swEstabSpecies}
-\alias{swReadLines,swEstabSpecies,character-method}
 \title{Class \code{"swEstabSpecies"}}
 \usage{
 swEstabSpecies(...)
-
-\S4method{swReadLines}{swEstabSpecies,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -20,10 +17,6 @@ any missing slots will take their default values).
 If dots are missing, then corresponding values of
 \code{rSOILWAT2::sw_exampleData}
 (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.}
-
-\item{object}{An object of class \code{\linkS4class{swEstabSpecies}}.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class
@@ -36,10 +29,5 @@ x <- swEstabSpecies()
 
 }
 \seealso{
-\code{\linkS4class{swInputData}} \code{\linkS4class{swFiles}}
-\code{\linkS4class{swWeather}} \code{\linkS4class{swCloud}}
-\code{\linkS4class{swMarkov}} \code{\linkS4class{swProd}}
-\code{\linkS4class{swSite}} \code{\linkS4class{swSoils}}
-\code{\linkS4class{swEstab}} \code{\linkS4class{swInputData}}
-\code{\linkS4class{swSWC}} \code{\linkS4class{swLog}}
+\code{\linkS4class{swInputData}}
 }

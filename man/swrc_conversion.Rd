@@ -217,27 +217,29 @@ awc <- diff(c(0, soils[, "depth_cm"])) * as.vector(diff(tmp))
 
 
 # Available water content "SWA" based on van Genuchten / Rosetta
-soils <- swSoils_Layers(rSOILWAT2::sw_exampleData)
-w <- diff(c(0, soils[, "depth_cm"]))
-vwc <- rbind(
-  day1 = rep(0.1, nrow(soils)),
-  day2 = rep(0.2, nrow(soils))
-)
-p <- ptf_estimate(
-  sand = soils[, "sand_frac"],
-  clay = soils[, "clay_frac"],
-  fcoarse = soils[, "gravel_content"],
-  bdensity = soils[, "bulkDensity_g/cm^3"],
-  swrc_name = "vanGenuchten1980",
-  ptf_name = "Rosetta3"
-)
-swa_base <- swrc_swp_to_vwc(
-  -3,
-  fcoarse = soils[, "gravel_content"],
-  swrc = list(name = "vanGenuchten1980", swrcp = p)
-)
-swa <- t(w * (t(vwc) - swa_base))
-swa[swa <= 0] <- 0 # SWA [cm / layer] above -3 MPa
+if (check_ptf_availability("Rosetta3")) {
+  soils <- swSoils_Layers(rSOILWAT2::sw_exampleData)
+  w <- diff(c(0, soils[, "depth_cm"]))
+  vwc <- rbind(
+    day1 = rep(0.1, nrow(soils)),
+    day2 = rep(0.2, nrow(soils))
+  )
+  p <- ptf_estimate(
+    sand = soils[, "sand_frac"],
+    clay = soils[, "clay_frac"],
+    fcoarse = soils[, "gravel_content"],
+    bdensity = soils[, "bulkDensity_g/cm^3"],
+    swrc_name = "vanGenuchten1980",
+    ptf_name = "Rosetta3"
+  )
+  swa_base <- swrc_swp_to_vwc(
+    -3,
+    fcoarse = soils[, "gravel_content"],
+    swrc = list(name = "vanGenuchten1980", swrcp = p)
+  )
+  swa <- t(w * (t(vwc) - swa_base))
+  swa[swa <= 0] <- 0 # SWA [cm / layer] above -3 MPa
+}
 
 
 # Shape of SWRCs

@@ -5,7 +5,7 @@ linters: lintr::linters_with_tags(
   #--- Turn off linters:
   undesirable_function_linter = NULL,
   implicit_integer_linter = NULL,
-  extraction_operator_linter = NULL,
+  library_call_linter = NULL,
   object_name_linter = NULL,
   object_usage_linter = NULL,
   cyclocomp_linter = NULL,

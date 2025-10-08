@@ -19,10 +19,6 @@
 \alias{swProd_CO2Coefficients,swProd-method}
 \alias{swProd_MonProd_veg,swProd,numeric-method}
 \alias{swProd_MonProd_veg,swProd,character-method}
-\alias{swProd_MonProd_grass,swProd-method}
-\alias{swProd_MonProd_shrub,swProd-method}
-\alias{swProd_MonProd_tree,swProd-method}
-\alias{swProd_MonProd_forb,swProd-method}
 \alias{set_swProd<-,swProd-method}
 \alias{swProd_Composition<-,swProd-method}
 \alias{swProd_Albedo<-,swProd-method}
@@ -38,11 +34,6 @@
 \alias{swProd_CO2Coefficients<-,swProd-method}
 \alias{swProd_MonProd_veg<-,swProd,numeric,matrix-method}
 \alias{swProd_MonProd_veg<-,swProd,character,matrix-method}
-\alias{swProd_MonProd_grass<-,swProd-method}
-\alias{swProd_MonProd_shrub<-,swProd-method}
-\alias{swProd_MonProd_tree<-,swProd-method}
-\alias{swProd_MonProd_forb<-,swProd-method}
-\alias{swReadLines,swProd,character-method}
 \title{Class \code{"swProd"}}
 \usage{
 swProd(...)
@@ -77,14 +68,6 @@ swProd(...)
 
 \S4method{swProd_MonProd_veg}{swProd,character}(object, vegtype)
 
-\S4method{swProd_MonProd_grass}{swProd}(object)
-
-\S4method{swProd_MonProd_shrub}{swProd}(object)
-
-\S4method{swProd_MonProd_tree}{swProd}(object)
-
-\S4method{swProd_MonProd_forb}{swProd}(object)
-
 \S4method{set_swProd}{swProd}(object) <- value
 
 \S4method{swProd_Composition}{swProd}(object) <- value
@@ -114,16 +97,6 @@ swProd(...)
 \S4method{swProd_MonProd_veg}{swProd,numeric,matrix}(object, vegtype) <- value
 
 \S4method{swProd_MonProd_veg}{swProd,character,matrix}(object, vegtype) <- value
-
-\S4method{swProd_MonProd_grass}{swProd}(object) <- value
-
-\S4method{swProd_MonProd_shrub}{swProd}(object) <- value
-
-\S4method{swProd_MonProd_tree}{swProd}(object) <- value
-
-\S4method{swProd_MonProd_forb}{swProd}(object) <- value
-
-\S4method{swReadLines}{swProd,character}(object, file)
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.
@@ -140,8 +113,6 @@ If dots are missing, then corresponding values of
 \item{vegtype}{The name or index of the vegetation type.}
 
 \item{value}{A value to assign to a specific slot of the object.}
-
-\item{file}{A character string. The file name from which to read.}
 }
 \description{
 The methods listed below work on this class and the proper slot of the class
@@ -155,18 +126,4 @@ x <- swProd()
 }
 \seealso{
 \code{\linkS4class{swInputData}}
-\code{\linkS4class{swFiles}}
-\code{\linkS4class{swYears}}
-\code{\linkS4class{swWeather}}
-\code{\linkS4class{swCloud}}
-\code{\linkS4class{swMarkov}}
-\code{\linkS4class{swProd}}
-\code{\linkS4class{swSite}}
-\code{\linkS4class{swSoils}}
-\code{\linkS4class{swSpinup}}
-\code{\linkS4class{swEstab}}
-\code{\linkS4class{swOUT}}
-\code{\linkS4class{swCarbon}}
-\code{\linkS4class{swSWC}}
-\code{\linkS4class{swLog}}
 }

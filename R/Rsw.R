@@ -187,7 +187,7 @@ sw_verbosity <- function(verbose = TRUE) {
 #' sw_in5 <- sw_in3
 #'
 #' ## Turn on the CO2-effects and set the CO2-concentration scenario
-#' swCarbon_Scenario(sw_in5) <- "RCP85"
+#' swCarbon_Scenario(sw_in5) <- "CMIP5_historical|CMIP5_RCP85"
 #' swCarbon_Use_Bio(sw_in5) <- 1L
 #' swCarbon_Use_WUE(sw_in5) <- 1L
 #'
@@ -265,7 +265,8 @@ sw_exec <- function(
   if (!check_version(inputData, level = "minor")) {
     warning(
       "Object `inputData is outdated; ",
-      "SOILWAT2 may fail or produce unexpected outcomes."
+      "SOILWAT2 may fail or produce unexpected outcomes.",
+      call. = FALSE
     )
   }
 
@@ -277,7 +278,8 @@ sw_exec <- function(
     if (!dbW_check_weatherData(weatherList)) {
       warning(
         "Object `weatherList is outdated; ",
-        "SOILWAT2 may fail or produce unexpected outcomes."
+        "SOILWAT2 may fail or produce unexpected outcomes.",
+        call. = FALSE
       )
     }
   }
@@ -468,7 +470,10 @@ set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE,
   default = NA) {
 
   if (!inherits(swIn, "swInputData")) {
-    stop("ERROR: argument 'swIn' is not a class 'swInputData' object.")
+    stop(
+      "ERROR: argument 'swIn' is not a class 'swInputData' object.",
+      call. = FALSE
+    )
   }
 
   val_names <- names(use)
@@ -490,43 +495,43 @@ set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE,
           vals[temp_bad],
           collapse = " / "
         ),
-        "contain(s) unsuitable values."
+        "contain(s) unsuitable values.",
+        call. = FALSE
       )
-
-    } else {
-      def <- get(fun)(swIn)
-
-      def_mode <- mode(def)
-      if (!identical(def_mode, mode(vals))) {
-        vals <- as(vals, def_mode)
-      }
-
-      # Check dimensional agreement
-      ndim_gt1_vals <- sum(dim(data.frame(vals)) > 1)
-      ndim_gt1_def <- sum(dim(data.frame(def)) > 1)
-
-      if (ndim_gt1_vals == 1 && ndim_gt1_def == 1) {
-        # Transfer values
-        itemp <- sapply(names(def), function(x) {
-          k <- grep(substr(x, 1, 4), val_names)
-          if (length(k) == 1) k else 0})
-        def[itemp > 0] <- vals[itemp]
-
-        if (reset) {
-          def[itemp == 0] <- default
-        }
-
-        swIn <- get(paste0(fun, "<-"))(swIn, def)
-
-      } else {
-        stop(
-          "ERROR: ",
-          toString(shQuote(val_names)),
-          " are not represented as 1-dimensional objects in",
-          " class 'swInputData'."
-        )
-      }
     }
+
+    def <- get(fun)(swIn)
+
+    def_mode <- mode(def)
+    if (!identical(def_mode, mode(vals))) {
+      vals <- as(vals, def_mode)
+    }
+
+    # Check dimensional agreement
+    ndim_gt1_vals <- sum(dim(data.frame(vals)) > 1)
+    ndim_gt1_def <- sum(dim(data.frame(def)) > 1)
+
+    if (!all(ndim_gt1_vals == 1, ndim_gt1_def == 1)) {
+      stop(
+        "ERROR: ",
+        toString(shQuote(val_names)),
+        " are not represented as 1-dimensional objects in",
+        " class 'swInputData'.",
+        call. = FALSE
+      )
+    }
+
+    # Transfer values
+    itemp <- sapply(names(def), function(x) {
+      k <- grep(substr(x, 1, 4), val_names)
+      if (length(k) == 1) k else 0})
+    def[itemp > 0] <- vals[itemp]
+
+    if (reset) {
+      def[itemp == 0] <- default
+    }
+
+    swIn <- get(paste0(fun, "<-"))(swIn, def)
   }
 
   swIn
