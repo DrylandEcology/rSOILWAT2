@@ -49,6 +49,9 @@
 /*                  Global Variables                   */
 /* --------------------------------------------------- */
 
+// rSOILWAT2 does not utilize SOILWAT2's MPI-based parallelization
+const int rSW2_rank = 0;
+
 // rSOILWAT2 is currently set up to have a fixed domain size of 1
 SW_DOMAIN SoilWatDomain;
 
