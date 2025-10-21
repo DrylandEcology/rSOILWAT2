@@ -1,5 +1,13 @@
 # rSOILWAT2 v6.5.0-9000
 
+## New features
+* Soil temperature at the lower boundary can now be approximated by a
+  long-term moving window of mean annual air temperature that is updated yearly.
+
+## Changes to interface
+* The class `"swSite"` gained slot `"SoilTemperatureBoundaryMethod"` and
+  associated methods `swSite_SoilTempBoundaryMethod()`.
+
 
 # rSOILWAT2 v6.4.0
 

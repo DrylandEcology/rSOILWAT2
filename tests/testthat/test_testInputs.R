@@ -60,6 +60,10 @@ test_that("Check example data", {
     expect_equal(swSite_SurfaceTempMethod(sw_input), 1L)
 
 
+    #--- Check that dynamic lower boundary of soil temperature turned off ------
+    expect_equal(swSite_SoilTempBoundaryMethod(sw_input), 0L)
+
+
     #--- Check that CO2-effects are turned on ------
     expect_true(as.logical(swCarbon_Use_Bio(sw_input)))
     expect_true(as.logical(swCarbon_Use_WUE(sw_input)))

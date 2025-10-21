@@ -1679,6 +1679,14 @@ setMethod(
 #' @rdname swInputData-class
 #' @export
 setMethod(
+  "swSite_SoilTempBoundaryMethod",
+  signature = "swInputData",
+  function(object) swSite_SoilTempBoundaryMethod(object@site)
+)
+
+#' @rdname swInputData-class
+#' @export
+setMethod(
   "swSite_SoilTemperatureConsts",
   signature = "swInputData",
   function(object) swSite_SoilTemperatureConsts(object@site)
@@ -1869,6 +1877,17 @@ setReplaceMethod(
   signature = "swInputData",
   function(object, value) {
     swSite_SoilTemperatureFlag(object@site) <- value
+    object
+  }
+)
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "swSite_SoilTempBoundaryMethod",
+  signature = "swInputData",
+  function(object, value) {
+    swSite_SoilTempBoundaryMethod(object@site) <- value
     object
   }
 )
