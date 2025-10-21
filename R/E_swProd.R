@@ -55,6 +55,8 @@ setClass(
   "swProd",
   slots = c(
     veg_method = "integer",
+    nYearsDynamicShort = "integer",
+    nYearsDynamicLong = "integer",
     Composition = "numeric",
     Albedo = "numeric",
     CanopyHeight = "matrix",
@@ -73,6 +75,8 @@ setClass(
   ),
   prototype = list(
     veg_method = NA_integer_,
+    nYearsDynamicShort = NA_integer_,
+    nYearsDynamicLong = NA_integer_,
     # 5 should be 1 + rSW2_glovars[["kSOILWAT2"]][["kINT"]][["NVEGTYPES"]]
     Composition = stats::setNames(rep(NA_real_, 5), lc_names),
     Albedo = stats::setNames(rep(NA_real_, 5), lc_names),
@@ -177,6 +181,22 @@ setValidity(
         "@Composition must have 1 + NVEGTYPES values",
         "between 0 and 1 or NA."
       )
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+    
+    if (
+      length(object@nYearsDynamicShort) != 1L &&
+        (is.na(object@nYearsDynamicShort) || object@nYearsDynamicShort >= 0L)
+    ) {
+      msg <- "@nYearsDynamicShort must have 1 value that is NA, 0, or positive."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (
+      length(object@nYearsDynamicLong) != 1L &&
+        (is.na(object@nYearsDynamicLong) || object@nYearsDynamicLong >= 0L)
+    ) {
+      msg <- "@nYearsDynamicLong must have 1 value that is NA, 0, or positive."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 

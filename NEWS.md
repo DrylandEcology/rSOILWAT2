@@ -4,9 +4,18 @@
 * Soil temperature at the lower boundary can now be approximated by a
   long-term moving window of mean annual air temperature that is updated yearly.
 
+* Vegetation (currently, fractional cover of bare ground and vegetation types)
+  can now be estimated dynamically from predictors based on soil properties and
+  long-term and short-term moving windows of climate conditions that are
+  updated yearly (selected as `"veg_method"` 2).
+
+
 ## Changes to interface
 * The class `"swSite"` gained slot `"SoilTemperatureBoundaryMethod"` and
   associated methods `swSite_SoilTempBoundaryMethod()`.
+* The class `"swProd"` gained new slots `"nYearsDynamicShort"` and
+  `"nYearsDynamicLong"`.
+
 
 
 # rSOILWAT2 v6.4.0

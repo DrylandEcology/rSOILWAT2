@@ -41,7 +41,10 @@ vegetation production parameter information.
 /*                  Local Variables                    */
 /* --------------------------------------------------- */
 static char *cVegProd_names[] = {
-	"veg_method", "Composition", "Albedo", "CanopyHeight",
+	"veg_method", 
+	"nYearsDynamicShort", 
+	"nYearsDynamicLong", 
+	"Composition", "Albedo", "CanopyHeight",
 	"VegetationInterceptionParameters", "LitterInterceptionParameters",
 	"EsTpartitioning_param", "Es_param_limit", "Shade", "HydraulicRedistribution_use",
 	"HydraulicRedistribution", "CriticalSoilWaterPotential", "MonthlyVeg",
@@ -67,6 +70,8 @@ SEXP onGet_SW_VPD(void) {
 
 	SEXP VegComp, VegComp_names, vegtype_names, col_names;
 	SEXP Albedo, veg_method;
+    SEXP nYearsDynamicShort;
+	SEXP nYearsDynamicLong;
 
 	SEXP Canopy, Canopy_names, Canopy_names_x;
 	char *cCanopy_names_x[] = { "xinflec", "yinflec", "range", "slope", "height_cm" };
@@ -154,6 +159,14 @@ SEXP onGet_SW_VPD(void) {
 
     PROTECT(veg_method = NEW_INTEGER(1));
     INTEGER(veg_method)[0] = vi->veg_method;
+
+    /* Get values for slot: nYearsDynamicShort */
+    PROTECT(nYearsDynamicShort = NEW_INTEGER(1));
+    INTEGER(nYearsDynamicShort)[0] = vi->nYearsDynamicShort;
+
+    /* Get values for slot: nYearsDynamicLong */
+    PROTECT(nYearsDynamicLong = NEW_INTEGER(1));
+    INTEGER(nYearsDynamicLong)[0] = vi->nYearsDynamicLong;
 
 	PROTECT(VegComp = allocVector(REALSXP, NVEGTYPES + 1));
 	REAL(VegComp)[0] = v->veg[SW_GRASS].cov.fCover; //Grass
@@ -404,23 +417,25 @@ SEXP onGet_SW_VPD(void) {
 	setAttrib(MonthlyVeg, R_NamesSymbol, col_names);
 
     SET_SLOT(VegProd, install(cVegProd_names[0]), veg_method);
-	SET_SLOT(VegProd, install(cVegProd_names[1]), VegComp);
-	SET_SLOT(VegProd, install(cVegProd_names[2]), Albedo);
-	SET_SLOT(VegProd, install(cVegProd_names[3]), Canopy);
-	SET_SLOT(VegProd, install(cVegProd_names[4]), VegInterception);
-	SET_SLOT(VegProd, install(cVegProd_names[5]), LitterInterception);
-	SET_SLOT(VegProd, install(cVegProd_names[6]), EsTpartitioning_param);
-	SET_SLOT(VegProd, install(cVegProd_names[7]), Es_param_limit);
-	SET_SLOT(VegProd, install(cVegProd_names[8]), Shade);
-	SET_SLOT(VegProd, install(cVegProd_names[9]), Hydraulic_flag);
-	SET_SLOT(VegProd, install(cVegProd_names[10]), Hydraulic);
-	SET_SLOT(VegProd, install(cVegProd_names[11]), CSWP);
-	SET_SLOT(VegProd, install(cVegProd_names[12]), MonthlyVeg);
-	SET_SLOT(VegProd, install(cVegProd_names[13]), CO2Coefficients);
-	SET_SLOT(VegProd, install(cVegProd_names[14]), VegYear);
-	SET_SLOT(VegProd, install(cVegProd_names[15]), IsBiomAsIf100Cover);
+    SET_SLOT(VegProd, install(cVegProd_names[1]), nYearsDynamicShort);
+    SET_SLOT(VegProd, install(cVegProd_names[2]), nYearsDynamicLong);
+    SET_SLOT(VegProd, install(cVegProd_names[3]), VegComp);
+    SET_SLOT(VegProd, install(cVegProd_names[4]), Albedo);
+    SET_SLOT(VegProd, install(cVegProd_names[5]), Canopy);
+    SET_SLOT(VegProd, install(cVegProd_names[6]), VegInterception);
+    SET_SLOT(VegProd, install(cVegProd_names[7]), LitterInterception);
+    SET_SLOT(VegProd, install(cVegProd_names[8]), EsTpartitioning_param);
+    SET_SLOT(VegProd, install(cVegProd_names[9]), Es_param_limit);
+    SET_SLOT(VegProd, install(cVegProd_names[10]), Shade);
+    SET_SLOT(VegProd, install(cVegProd_names[11]), Hydraulic_flag);
+    SET_SLOT(VegProd, install(cVegProd_names[12]), Hydraulic);
+    SET_SLOT(VegProd, install(cVegProd_names[13]), CSWP);
+    SET_SLOT(VegProd, install(cVegProd_names[14]), MonthlyVeg);
+    SET_SLOT(VegProd, install(cVegProd_names[15]), CO2Coefficients);
+    SET_SLOT(VegProd, install(cVegProd_names[16]), VegYear);
+    SET_SLOT(VegProd, install(cVegProd_names[17]), IsBiomAsIf100Cover);
 
-	UNPROTECT(43);
+	UNPROTECT(45);
 	return VegProd;
 }
 
@@ -430,6 +445,8 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 	SW_VEGPROD_RUN_INPUTS *v = &SoilWatRun.RunIn.VegProdRunIn;
 
     SEXP veg_method;
+    SEXP nYearsDynamicShort;
+    SEXP nYearsDynamicLong;
 	SEXP VegComp;
 	SEXP Albedo;
 	SEXP Canopy;
@@ -454,21 +471,28 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
     PROTECT(veg_method = GET_SLOT(SW_VPD, install(cVegProd_names[0])));
     vi->veg_method = INTEGER(veg_method)[0];
 
-	PROTECT(VegComp = GET_SLOT(SW_VPD, install(cVegProd_names[1])));
+    /* Set values using slots: nYearsDynamicShort, nYearsDynamicLong */
+    PROTECT(nYearsDynamicShort = GET_SLOT(SW_VPD, install(cVegProd_names[1])));
+    vi->nYearsDynamicShort = INTEGER(nYearsDynamicShort)[0];
+    
+    PROTECT(nYearsDynamicLong = GET_SLOT(SW_VPD, install(cVegProd_names[2])));
+    vi->nYearsDynamicLong = INTEGER(nYearsDynamicLong)[0];
+
+	PROTECT(VegComp = GET_SLOT(SW_VPD, install(cVegProd_names[3])));
 	v->veg[SW_GRASS].cov.fCover = REAL(VegComp)[0]; //Grass
 	v->veg[SW_SHRUB].cov.fCover = REAL(VegComp)[1]; //Shrub
 	v->veg[SW_TREES].cov.fCover = REAL(VegComp)[2]; //Tree
 	v->veg[SW_FORBS].cov.fCover = REAL(VegComp)[3]; //Forb
 	v->bare_cov.fCover = REAL(VegComp)[4]; //Bare Ground
 
-	PROTECT(Albedo = GET_SLOT(SW_VPD, install(cVegProd_names[2])));
+	PROTECT(Albedo = GET_SLOT(SW_VPD, install(cVegProd_names[4])));
 	vi->veg[SW_GRASS].cov.albedo = REAL(Albedo)[0]; //Grass
 	vi->veg[SW_SHRUB].cov.albedo = REAL(Albedo)[1]; //Shrub
 	vi->veg[SW_TREES].cov.albedo = REAL(Albedo)[2]; //Tree
 	vi->veg[SW_FORBS].cov.albedo = REAL(Albedo)[3]; //Forb
 	vi->bare_cov.albedo = REAL(Albedo)[4]; //Bare Ground
 
-	PROTECT(Canopy = GET_SLOT(SW_VPD, install(cVegProd_names[3])));
+	PROTECT(Canopy = GET_SLOT(SW_VPD, install(cVegProd_names[5])));
 	p_Canopy = REAL(Canopy);
 	vi->veg[SW_GRASS].cnpy.xinflec = p_Canopy[0];
 	vi->veg[SW_GRASS].cnpy.yinflec = p_Canopy[1];
@@ -491,7 +515,7 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 	vi->veg[SW_FORBS].cnpy.slope = p_Canopy[18];
 	vi->veg[SW_FORBS].canopy_height_constant = p_Canopy[19];
 
-	PROTECT(VegInterception = GET_SLOT(SW_VPD, install(cVegProd_names[4])));
+	PROTECT(VegInterception = GET_SLOT(SW_VPD, install(cVegProd_names[6])));
 	p_VegInterception = REAL(VegInterception);
 	vi->veg[SW_GRASS].veg_kSmax = p_VegInterception[0];
 	vi->veg[SW_GRASS].veg_kdead = p_VegInterception[1];
@@ -502,26 +526,26 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 	vi->veg[SW_FORBS].veg_kSmax = p_VegInterception[6];
 	vi->veg[SW_FORBS].veg_kdead = p_VegInterception[7];
 
-	PROTECT(LitterInterception = GET_SLOT(SW_VPD, install(cVegProd_names[5])));
+	PROTECT(LitterInterception = GET_SLOT(SW_VPD, install(cVegProd_names[7])));
 	p_LitterInterception = REAL(LitterInterception);
 	vi->veg[SW_GRASS].lit_kSmax = p_LitterInterception[0];
 	vi->veg[SW_SHRUB].lit_kSmax = p_LitterInterception[1];
 	vi->veg[SW_TREES].lit_kSmax = p_LitterInterception[2];
 	vi->veg[SW_FORBS].lit_kSmax = p_LitterInterception[3];
 
-	PROTECT(EsTpartitioning_param = GET_SLOT(SW_VPD, install(cVegProd_names[6])));
+	PROTECT(EsTpartitioning_param = GET_SLOT(SW_VPD, install(cVegProd_names[8])));
 	vi->veg[SW_GRASS].EsTpartitioning_param = REAL(EsTpartitioning_param)[0]; //Grass
 	vi->veg[SW_SHRUB].EsTpartitioning_param = REAL(EsTpartitioning_param)[1]; //Shrub
 	vi->veg[SW_TREES].EsTpartitioning_param = REAL(EsTpartitioning_param)[2]; //Tree
 	vi->veg[SW_FORBS].EsTpartitioning_param = REAL(EsTpartitioning_param)[3]; //Forb
 
-	PROTECT(Es_param_limit = GET_SLOT(SW_VPD, install(cVegProd_names[7])));
+	PROTECT(Es_param_limit = GET_SLOT(SW_VPD, install(cVegProd_names[9])));
 	vi->veg[SW_GRASS].Es_param_limit = REAL(Es_param_limit)[0]; //Grass
 	vi->veg[SW_SHRUB].Es_param_limit = REAL(Es_param_limit)[1]; //Shrub
 	vi->veg[SW_TREES].Es_param_limit = REAL(Es_param_limit)[2]; //Tree
 	vi->veg[SW_FORBS].Es_param_limit = REAL(Es_param_limit)[3]; //Forb
 
-	PROTECT(Shade = GET_SLOT(SW_VPD, install(cVegProd_names[8])));
+	PROTECT(Shade = GET_SLOT(SW_VPD, install(cVegProd_names[10])));
 	p_Shade = REAL(Shade);
 	vi->veg[SW_GRASS].shade_scale = p_Shade[0];
 	vi->veg[SW_GRASS].shade_deadmax = p_Shade[1];
@@ -548,8 +572,8 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 	vi->veg[SW_FORBS].tr_shade_effects.range = p_Shade[22];
 	vi->veg[SW_FORBS].tr_shade_effects.slope = p_Shade[23];
 
-	PROTECT(Hydraulic_flag = GET_SLOT(SW_VPD, install(cVegProd_names[9])));
-	PROTECT(Hydraulic = GET_SLOT(SW_VPD, install(cVegProd_names[10])));
+	PROTECT(Hydraulic_flag = GET_SLOT(SW_VPD, install(cVegProd_names[11])));
+	PROTECT(Hydraulic = GET_SLOT(SW_VPD, install(cVegProd_names[12])));
 	vi->veg[SW_GRASS].flagHydraulicRedistribution = LOGICAL_POINTER(Hydraulic_flag)[0]; //Grass
 	vi->veg[SW_SHRUB].flagHydraulicRedistribution = LOGICAL_POINTER(Hydraulic_flag)[1]; //Shrub
 	vi->veg[SW_TREES].flagHydraulicRedistribution = LOGICAL_POINTER(Hydraulic_flag)[2]; //Tree
@@ -567,7 +591,7 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 	vi->veg[SW_FORBS].swpMatric50 = REAL(Hydraulic)[10]; //Forb
 	vi->veg[SW_FORBS].shapeCond = REAL(Hydraulic)[11]; //Forb
 
-	PROTECT(CSWP = GET_SLOT(SW_VPD, install(cVegProd_names[11])));
+	PROTECT(CSWP = GET_SLOT(SW_VPD, install(cVegProd_names[13])));
 	vi->veg[SW_GRASS].SWPcrit = -10 * REAL(CSWP)[0]; //Grass
 	vi->veg[SW_SHRUB].SWPcrit = -10 * REAL(CSWP)[1]; //Shrub
 	vi->veg[SW_TREES].SWPcrit = -10 * REAL(CSWP)[2]; //Tree
@@ -582,13 +606,13 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 
 	get_critical_rank(&SoilWatRun.VegProdIn);
 
-    PROTECT(VegYear = GET_SLOT(SW_VPD, install(cVegProd_names[14])));
+    PROTECT(VegYear = GET_SLOT(SW_VPD, install(cVegProd_names[16])));
     vi->vegYear = INTEGER(VegYear)[0];
 
-    PROTECT(IsBiomAsIf100Cover = GET_SLOT(SW_VPD, install(cVegProd_names[15])));
+    PROTECT(IsBiomAsIf100Cover = GET_SLOT(SW_VPD, install(cVegProd_names[17])));
     vi->isBiomAsIf100Cover = LOGICAL(IsBiomAsIf100Cover)[0];
 
-	PROTECT(MonthlyVeg = GET_SLOT(SW_VPD, install(cVegProd_names[12])));
+	PROTECT(MonthlyVeg = GET_SLOT(SW_VPD, install(cVegProd_names[14])));
 	PROTECT(Grasslands = VECTOR_ELT(MonthlyVeg, SW_GRASS));
 	p_Grasslands = REAL(Grasslands);
 	for (i = 0; i < 12; i++) {
@@ -622,7 +646,7 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 		v->veg[SW_FORBS].lai_conv[i] = p_Forb[i + 12 * 3];
 	}
 
-	PROTECT(CO2Coefficients = GET_SLOT(SW_VPD, install(cVegProd_names[13])));
+	PROTECT(CO2Coefficients = GET_SLOT(SW_VPD, install(cVegProd_names[15])));
 	vi->veg[SW_GRASS].co2_bio_coeff1 = REAL(CO2Coefficients)[0];
 	vi->veg[SW_SHRUB].co2_bio_coeff1 = REAL(CO2Coefficients)[1];
 	vi->veg[SW_TREES].co2_bio_coeff1 = REAL(CO2Coefficients)[2];
@@ -643,7 +667,7 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 
   SW_VPD_fix_cover(&SoilWatRun.RunIn.VegProdRunIn, LogInfo);
   if(LogInfo->stopRun) {
-    UNPROTECT(20); // Unprotect the eighteen protected variables before exiting
+    UNPROTECT(22); // Unprotect the protected variables before exiting
     return; // Exit function prematurely due to error
   }
 
@@ -651,7 +675,7 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 		echo_VegProd(&SoilWatRun.RunIn.VegProdRunIn, &SoilWatRun.VegProdIn);
 	}
 
-	UNPROTECT(20);
+	UNPROTECT(22);
 }
 
 // `estimate_PotNatVeg_composition()` is R interface to rSW2_estimate_PotNatVeg_composition()

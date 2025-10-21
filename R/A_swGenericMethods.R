@@ -203,6 +203,8 @@ format_timestamp <- function(object) {
 #' List of changes:
 #'   * Changes with `v6.5.0`:
 #'       * class [`swSite-class`]: new slot `"SoilTemperatureBoundaryMethod"`
+#'       * class [`swProd-class`]: new slots `"nYearsDynamicShort"` and
+#'         `"nYearsDynamicLong"`
 #'   * Changes with `v6.4.0`:
 #'       * class [`swProd-class`]: new slots `"vegYear"` and
 #'         `"isBiomAsIf100Cover"`

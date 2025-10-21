@@ -1,4 +1,12 @@
 
+dir_test_data <- file.path("..", "test_data")
+temp <- list.files(dir_test_data, pattern = "Ex")
+temp <- sapply(strsplit(temp, "_", fixed = TRUE), function(x) x[[1]])
+tests <- unique(temp)
+
+test_that("Test data availability", {
+  expect_gt(length(tests), 0)
+})
 
 
 #---TESTS
@@ -83,5 +91,44 @@ test_that("Manipulate 'swProd' class", {
     expect_equal(xinput, xinput_ref)
     swProd_MonProd_veg(xinv, names_VegTypes[1 + k]) <- data_good
     expect_equal(xinv, xinv_ref)
+  }
+})
+
+
+test_that("Run 'rSOILWAT2' with different 'swProd' inputs", {
+  it <- tests[[1L]]
+
+  #---INPUTS
+  sw_input <- readRDS(file.path(dir_test_data, paste0(it, "_input.rds")))
+  sw_weather <- readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
+
+
+  #--- Method for vegetation
+  defaultType <- 0L
+  types <- c(defaultType, 1L, 2L)
+
+  for (ftype in types) {
+    # Set method
+    sw_input@prod@veg_method <- ftype
+
+    # Run SOILWAT
+    res <- sw_exec(
+      inputData = sw_input,
+      weatherList = sw_weather,
+      echo = FALSE,
+      quiet = TRUE
+    )
+
+    expect_s4_class(res, "swOutput")
+
+    if (identical(ftype, defaultType)) {
+      res_default <- slot(slot(res, "BIOMASS"), "Day")
+    } else {
+      # Expect non-default methods to produce different values than default run
+      expect_gt(
+        sum(abs(res_default - slot(slot(res, "BIOMASS"), "Day"))),
+        0
+      )
+    }
   }
 })

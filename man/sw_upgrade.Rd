@@ -103,6 +103,8 @@ List of changes:
 \item Changes with \code{v6.5.0}:
 \itemize{
 \item class \code{\linkS4class{swSite}}: new slot \code{"SoilTemperatureBoundaryMethod"}
+\item class \code{\linkS4class{swProd}}: new slots \code{"nYearsDynamicShort"} and
+\code{"nYearsDynamicLong"}
 }
 \item Changes with \code{v6.4.0}:
 \itemize{
