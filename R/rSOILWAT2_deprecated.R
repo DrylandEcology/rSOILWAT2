@@ -1786,7 +1786,7 @@ setReplaceMethod(
   function(object, value) {
     .Deprecated("set_swProd() for signature swProd2")
     warning("Simulation inputs are **not** updated.", call. = FALSE)
-    object@Composition[] <- value
+    stopifnot(length(object@Composition) == length(value))
     validObject(object)
     object
   }

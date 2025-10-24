@@ -635,6 +635,9 @@ setReplaceMethod(
   "swProd_Composition",
   signature = "swProd2",
   function(object, value) {
+    # Check that x in swProd_Composition() <- x has correct length
+    # Note: check does not work with subset, e.g., swProd_Composition()[1] <- x
+    stopifnot(length(object@Composition) == length(value))
     object@Composition[] <- value
     validObject(object)
     object
