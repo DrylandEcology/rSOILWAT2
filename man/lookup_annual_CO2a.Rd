@@ -43,10 +43,10 @@ lookup_annual_CO2a(
   name_co2 = "CMIP6_historical|CMIP6_SSP119"
 )
 
-\dontrun{
 ## This fails because "CMIP5_historical" has no values after 2005
-lookup_annual_CO2a(start = 1980, end = 2020, name_co2 = "CMIP5_historical")
-}
+try(
+  lookup_annual_CO2a(start = 1980, end = 2020, name_co2 = "CMIP5_historical")
+)
 
 }
 \seealso{
