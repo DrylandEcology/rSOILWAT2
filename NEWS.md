@@ -1,7 +1,10 @@
-# rSOILWAT2 v6.5.0-9000
+# rSOILWAT2 v6.5.0
 
 ## Breaking changes
-* `SOILWAT2` updated to v8.3.0-9000
+* `SOILWAT2` updated to v8.3.0
+* Simulation output remains the same as the previous version.
+  However, output contains renamed and additional variables for the new
+  plant functional types.
 * Plant functional types were redefined and new types added (now 6, from 4).
   The new set of six plant functional types is now called `"v2"` (while the
   previous set of four is `"v1"`).
