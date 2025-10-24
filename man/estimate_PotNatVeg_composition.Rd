@@ -141,9 +141,16 @@ A list with three named numeric vectors. \describe{
   }
   \item{Rel_Abundance_L1}{A numeric vector of length 5 with
     relative abundance/cover [0-1] values of \pkg{rSOILWAT2} land cover
-    types that sum to 1.
-    The names of the 5 types are: \var{SW_TREES}, \var{SW_SHRUBS},
+    types (\code{"v1"}) that sum to 1.
+    The names of the 5 types are: \var{SW_TREES}, \var{SW_SHRUB},
     \var{SW_FORBS}, \var{SW_GRASS}, and \var{SW_BAREGROUND}.
+  }
+  \item{Rel_Abundance_L2}{A numeric vector of length 7 with
+    relative abundance/cover [0-1] values of \pkg{rSOILWAT2} land cover
+    types (\code{"v2"}) that sum to 1.
+    The names of the 7 types are: \var{SW_TREENL}, \var{SW_TREEBL},
+    \var{SW_SHRUB}, \var{SW_FORBS}, \var{SW_GRASS3}, \var{SW_GRASS4},
+    and \var{SW_BAREGROUND}.
   }
   \item{Grasses}{A numeric vector of length 3 with
     relative abundance/cover [0-1] values of the grass types that sum to 1,
@@ -238,7 +245,7 @@ estimate_PotNatVeg_composition(
 ## SOILWAT2 uses the same algorithm internally if requested to do so
 # Obtain cover values from SOILWAT2 output
 swin <- rSOILWAT2::sw_exampleData
-swin@prod@veg_method <- 1L
+swin@prod2@veg_method <- 1L
 swout <- sw_exec(swin)
 tmp <- slot(slot(swout, "BIOMASS"), "Year")
 pnvsim <- tmp[1, grep("fCover", colnames(tmp)), drop = TRUE]
@@ -250,13 +257,13 @@ pnvex <- estimate_PotNatVeg_composition(
   MAT_C = climex[["MAT_C"]],
   mean_monthly_ppt_mm = 10 * climex[["meanMonthlyPPTcm"]],
   mean_monthly_Temp_C = climex[["meanMonthlyTempC"]]
-)[["Rel_Abundance_L1"]]
+)[["Rel_Abundance_L2"]]
 
 # They are identical
 identical(pnvsim[["fCover_shrub"]], pnvex[["SW_SHRUB"]])
-identical(pnvsim[["fCover_grass"]], pnvex[["SW_GRASS"]])
+identical(pnvsim[["fCover_grassC3"]], pnvex[["SW_GRASS3"]])
 identical(pnvsim[["fCover_forbs"]], pnvex[["SW_FORBS"]])
-identical(pnvsim[["fCover_tree"]], pnvex[["SW_TREES"]])
+identical(pnvsim[["fCover_treeNL"]], pnvex[["SW_TREENL"]])
 identical(pnvsim[["fCover_BareGround"]], pnvex[["SW_BAREGROUND"]])
 
 

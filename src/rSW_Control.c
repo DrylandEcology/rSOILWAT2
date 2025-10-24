@@ -73,9 +73,13 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
   #endif
 
   if (from_files) {
-    SW_CTL_read_inputs_from_disk(&SoilWatRun, &SoilWatDomain,
-                                 &SoilWatDomain.hasConsistentSoilLayerDepths,
-                                 LogInfo);
+     SW_CTL_read_inputs_from_disk(
+        rSW2_rank,
+        &SoilWatRun,
+        &SoilWatDomain,
+        &SoilWatDomain.hasConsistentSoilLayerDepths,
+        LogInfo
+    );
 
   } else { //Use R data to set the data
     #ifdef RSWDEBUG
@@ -120,7 +124,7 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
       }
     }
 
-    onSet_SW_VPD(GET_SLOT(InputData, install("prod")), LogInfo);
+    onSet_SW_VPD(GET_SLOT(InputData, install("prod2")), LogInfo);
     #ifdef RSWDEBUG
     if (debug) sw_printf(" > 'veg'");
     #endif
