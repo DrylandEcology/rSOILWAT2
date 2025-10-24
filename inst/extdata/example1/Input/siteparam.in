@@ -71,6 +71,10 @@
         #     0, default prior to v8.1.0 (Parton 1978)
         #     1, default since v8.1.0 (Parton 1984)
 
+0       # Method for soil temperature at maximum depth:
+        #     0, user provided value (default prior to v8.3.0)
+        #     1, dynamically calculated from a moving long-term mean annual air temperature (recommended since v8.3.0)
+
 # ---- CO2 Settings ----
 # Activate (1) / deactivate (0) biomass multiplier
 1
