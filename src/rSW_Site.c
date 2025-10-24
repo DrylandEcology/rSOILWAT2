@@ -57,10 +57,21 @@ static char *cSW_SIT[] = {
 };
 
 static char *cLayers[] = {
-  "depth_cm", "bulkDensity_g/cm^3", "gravel_content",
-  "EvapBareSoil_frac", "transpGrass_frac", "transpShrub_frac", "transpTree_frac",
-  "transpForb_frac", "sand_frac", "clay_frac", "impermeability_frac", "soilTemp_c",
-  "som_frac"
+    "depth_cm",
+    "bulkDensity_g/cm^3",
+    "gravel_content",
+    "sand_frac",
+    "clay_frac",
+    "som_frac",
+    "impermeability_frac",
+    "soilTemp_c",
+    "EvapBareSoil_frac",
+    "TrCo_treeNL", // see key2veg[]
+    "TrCo_treeBL",
+    "TrCo_shrub",
+    "TrCo_forbs",
+    "TrCo_grassC3",
+    "TrCo_grassC4"
 };
 
 static char *cSWRCp[] = {
@@ -77,33 +88,34 @@ static char *cOMSWRCp[] = {
 
 /* Copy soil properties into "Layers" matrix */
 static SEXP onGet_SW_LYR(void) {
-	int i, dmax = 0;
+	int i;
+	int k;
+	int dmax = 0;
 	SW_SOIL_RUN_INPUTS *s = &SoilWatRun.RunIn.SoilRunIn;
 	LyrIndex n_layers = SoilWatRun.RunIn.SiteRunIn.n_layers;
 	SEXP Layers, Layers_names, Layers_names_y;
 	double *p_Layers;
 
-	PROTECT(Layers = allocMatrix(REALSXP, n_layers, 13));
+	PROTECT(Layers = allocMatrix(REALSXP, n_layers, 15));
 	p_Layers = REAL(Layers);
-	for (i = 0; i < (n_layers); i++) {
-		p_Layers[i + (n_layers) * 0] = dmax = s->width[i] + dmax;
-		p_Layers[i + (n_layers) * 1] = s->soilDensityInput[i];
-		p_Layers[i + (n_layers) * 2] = s->fractionVolBulk_gravel[i];
-		p_Layers[i + (n_layers) * 3] = s->evap_coeff[i];
-		p_Layers[i + (n_layers) * 4] = s->transp_coeff[SW_GRASS][i];
-		p_Layers[i + (n_layers) * 5] = s->transp_coeff[SW_SHRUB][i];
-		p_Layers[i + (n_layers) * 6] = s->transp_coeff[SW_TREES][i];
-		p_Layers[i + (n_layers) * 7] = s->transp_coeff[SW_FORBS][i];
-		p_Layers[i + (n_layers) * 8] = s->fractionWeightMatric_sand[i];
-		p_Layers[i + (n_layers) * 9] = s->fractionWeightMatric_clay[i];
-		p_Layers[i + (n_layers) * 10] = s->impermeability[i];
-		p_Layers[i + (n_layers) * 11] = s->avgLyrTempInit[i];
-		p_Layers[i + (n_layers) * 12] = s->fractionWeight_om[i];
+	for (i = 0; i < n_layers; i++) {
+		p_Layers[i + n_layers * 0] = dmax = s->width[i] + dmax;
+		p_Layers[i + n_layers * 1] = s->soilDensityInput[i];
+		p_Layers[i + n_layers * 2] = s->fractionVolBulk_gravel[i];
+		p_Layers[i + n_layers * 3] = s->fractionWeightMatric_sand[i];
+		p_Layers[i + n_layers * 4] = s->fractionWeightMatric_clay[i];
+		p_Layers[i + n_layers * 5] = s->fractionWeight_om[i];
+		p_Layers[i + n_layers * 6] = s->impermeability[i];
+		p_Layers[i + n_layers * 7] = s->avgLyrTempInit[i];
+		p_Layers[i + n_layers * 8] = s->evap_coeff[i];
+		for (k = 0; k < NVEGTYPES; k++) {
+			p_Layers[i + n_layers * (k + 9)] = s->transp_coeff[k][i];
+		}
 	}
 
 	PROTECT(Layers_names = allocVector(VECSXP, 2));
-	PROTECT(Layers_names_y = allocVector(STRSXP, 13));
-	for (i = 0; i < 13; i++) {
+	PROTECT(Layers_names_y = allocVector(STRSXP, 15));
+	for (i = 0; i < 15; i++) {
 		SET_STRING_ELT(Layers_names_y, i, mkChar(cLayers[i]));
 	}
 	SET_VECTOR_ELT(Layers_names, 1, Layers_names_y);
@@ -120,73 +132,58 @@ static void onSet_SW_LYR(SEXP SW_LYR, LOG_INFO* LogInfo) {
 
 	SW_SOIL_RUN_INPUTS *s = &SoilWatRun.RunIn.SoilRunIn;
 	LyrIndex *n_layers = &SoilWatRun.RunIn.SiteRunIn.n_layers;
-	LyrIndex lyrno;
-	int i, j, k, columns;
-	double dmin = 0.0, dmax, evco, trco_veg[NVEGTYPES], psand, pclay,
-          soildensity, imperm, soiltemp, f_gravel, som_frac;
+	int i, k, columns;
+	double dmin = 0.0;
+	double dmax;
 	double *p_Layers;
 
-	j = nrows(SW_LYR);
+	*n_layers = nrows(SW_LYR);
 	p_Layers = REAL(SW_LYR);
 	columns = ncols(SW_LYR);
 
-	/* Check that we have 13 values per layer */
+	if (*n_layers >= MAX_LAYERS) {
+		LogError(
+			LogInfo,
+			LOGERROR,
+			"soils.in : Too many layers specified (%d).\n"
+			"Maximum number of layers is %d\n",
+			*n_layers + 1, MAX_LAYERS
+		);
+		return; // Exit function prematurely due to error
+	}
+
+	/* Check that we have 15 values per layer */
 	/* Adjust number if new variables are added */
-	if (columns != 13) {
+	if (columns != 15) {
 		LogError(
 			LogInfo,
 			LOGERROR,
 			"soils.in : Too few columns in layers specified (%d).\n",
 			columns
 		);
-        return; // Exit function prematurely due to error
+		return; // Exit function prematurely due to error
 	}
 
-	for (i = 0; i < j; i++) {
-		lyrno = (*n_layers)++;
-
-		dmax = p_Layers[i + j * 0];
-		soildensity = p_Layers[i + j * 1];
-		f_gravel = p_Layers[i + j * 2];
-		evco = p_Layers[i + j * 3];
-		trco_veg[SW_GRASS] = p_Layers[i + j * 4];
-		trco_veg[SW_SHRUB] = p_Layers[i + j * 5];
-		trco_veg[SW_TREES] = p_Layers[i + j * 6];
-		trco_veg[SW_FORBS] = p_Layers[i + j * 7];
-		psand = p_Layers[i + j * 8];
-		pclay = p_Layers[i + j * 9];
-		imperm = p_Layers[i + j * 10];
-		soiltemp = p_Layers[i + j * 11];
-        som_frac = p_Layers[i + j * 12];
-
-		s->width[lyrno] = dmax - dmin;
-        s->depths[lyrno] = dmax;
+	for (i = 0; i < *n_layers; i++) {
+		dmax = p_Layers[i + (*n_layers) * 0];
+		s->width[i] = dmax - dmin;
+		s->depths[i] = dmax;
 		dmin = dmax;
-		s->soilDensityInput[lyrno] = soildensity;
-		s->fractionVolBulk_gravel[lyrno] = f_gravel;
-		s->evap_coeff[lyrno] = evco;
-		ForEachVegType(k) {
-			s->transp_coeff[k][lyrno] = trco_veg[k];
-		}
-		s->fractionWeightMatric_sand[lyrno] = psand;
-		s->fractionWeightMatric_clay[lyrno] = pclay;
-		s->impermeability[lyrno] = imperm;
-		s->avgLyrTempInit[lyrno] = soiltemp;
-        s->fractionWeight_om[lyrno] = som_frac;
 
-		if (lyrno >= MAX_LAYERS) {
-			LogError(
-				LogInfo,
-				LOGERROR,
-				"soils.in : Too many layers specified (%d).\n"
-				"Maximum number of layers is %d\n",
-				lyrno + 1, MAX_LAYERS
-			);
-            return; // Exit function prematurely due to error
+		s->soilDensityInput[i] = p_Layers[i + (*n_layers) * 1];
+		s->fractionVolBulk_gravel[i] = p_Layers[i + (*n_layers) * 2];
+		s->fractionWeightMatric_sand[i] = p_Layers[i + (*n_layers) * 3];
+		s->fractionWeightMatric_clay[i] = p_Layers[i + (*n_layers) * 4];
+		s->fractionWeight_om[i] = p_Layers[i + (*n_layers) * 5];
+		s->impermeability[i] = p_Layers[i + (*n_layers) * 6];
+		s->avgLyrTempInit[i] = p_Layers[i + (*n_layers) * 7];
+		s->evap_coeff[i] = p_Layers[i + (*n_layers) * 8];
+		for (k = 0; k < NVEGTYPES; k++) {
+			s->transp_coeff[k][i] = p_Layers[i + (*n_layers) * (k + 9)];
 		}
 	}
 
-    SoilWatRun.SiteSim.n_evap_lyrs = nlayers_bsevap(s->evap_coeff, *n_layers);
+	SoilWatRun.SiteSim.n_evap_lyrs = nlayers_bsevap(s->evap_coeff, *n_layers);
 }
 
 

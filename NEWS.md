@@ -1,21 +1,45 @@
 # rSOILWAT2 v6.5.0-9000
 
+## Breaking changes
+* `SOILWAT2` updated to v8.3.0-9000
+* Plant functional types were redefined and new types added (now 6, from 4).
+  The new set of six plant functional types is now called `"v2"` (while the
+  previous set of four is `"v1"`).
+    * `"treeNL"`: needle-leaved trees
+    * `"treeBL"`: broad-leaved trees
+    * `"shrub"`: shrubs
+    * `"forbs"`: forbs
+    * `"grassC3"`: grasses with a C3 photosynthetic pathway
+    * `"grassC4"`: grasses with a C4 photosynthetic pathway
+
 ## New features
+* New `namesVegTypes()` provides the names of plant functional types from
+  different vegetation type versions.
+* New `mapVegTypes()` provides mappings between a new and an old vegetation
+  types as if `match(..., nomatch = 0L)` had been used.
+* `estimate_PotNatVeg_composition()` gains new output element
+  `"Rel_Abundance_L2"` that returns the estimated cover of the new
+  plant functional types (`"v2"`); the existing output `"Rel_Abundance_L1"`
+  continues to return the cover estimates of the old types (`"v1"`).
 * Soil temperature at the lower boundary can now be approximated by a
   long-term moving window of mean annual air temperature that is updated yearly.
-
 * Vegetation (currently, fractional cover of bare ground and vegetation types)
   can now be estimated dynamically from predictors based on soil properties and
   long-term and short-term moving windows of climate conditions that are
   updated yearly (selected as `"veg_method"` 2).
 
-
 ## Changes to interface
 * The class `"swSite"` gained slot `"SoilTemperatureBoundaryMethod"` and
   associated methods `swSite_SoilTempBoundaryMethod()`.
-* The class `"swProd"` gained new slots `"nYearsDynamicShort"` and
+* The class `"swProd"` gained slots `"nYearsDynamicShort"` and
   `"nYearsDynamicLong"`.
-
+* The new class `"swProd2"` holds the values for the new plant functional types
+  (`"v2"`) and supersedes `"swProd"`.
+  `sw_upgrade()` attempts to crosswalk values from the old to the new types
+  if an old `"swProd"` slot but no new `"swProd2"` slot is present.
+* Methods with signature `"swProd"` (which represented `"v1"`) are deprecated.
+* The slot `"Layers"` of class `swSoils` reorganized several columns
+  and replaced rooting profile columns from old with new vegetation types.
 
 
 # rSOILWAT2 v6.4.0

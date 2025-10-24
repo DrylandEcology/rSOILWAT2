@@ -124,7 +124,7 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
       }
     }
 
-    onSet_SW_VPD(GET_SLOT(InputData, install("prod")), LogInfo);
+    onSet_SW_VPD(GET_SLOT(InputData, install("prod2")), LogInfo);
     #ifdef RSWDEBUG
     if (debug) sw_printf(" > 'veg'");
     #endif

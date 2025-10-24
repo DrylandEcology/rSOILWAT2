@@ -28,12 +28,26 @@
 #' @export
 soilLayer_dataColumns <- function() {
   c(
-    "depth_cm", "bulkDensity_g/cm^3", "gravel_content",
-    "EvapBareSoil_frac", "transpGrass_frac", "transpShrub_frac",
-    "transpTree_frac", "transpForb_frac", "sand_frac", "clay_frac",
-    "impermeability_frac", "soilTemp_c", "som_frac"
+    "depth_cm",
+    "bulkDensity_g/cm^3",
+    "gravel_content",
+    "sand_frac",
+    "clay_frac",
+    "som_frac",
+    "impermeability_frac",
+    "soilTemp_c",
+    "EvapBareSoil_frac",
+    # TrCo_<veg>: see key2veg and rSW2_glovars[["kSOILWAT2"]][["VegTypeNames2"]]
+    "TrCo_treeNL",
+    "TrCo_treeBL",
+    "TrCo_shrub",
+    "TrCo_forbs",
+    "TrCo_grassC3",
+    "TrCo_grassC4"
   )
 }
+
+nSoilVars <- length(soilLayer_dataColumns())
 
 
 #' Class \code{"swSoils"}
@@ -71,7 +85,7 @@ setClass(
   prototype = list(
     Layers = array(
       NA_real_,
-      dim = c(0L, 13L),
+      dim = c(0L, nSoilVars),
       dimnames = list(NULL, soilLayer_dataColumns())
     ),
     SWRCp = array(
@@ -101,12 +115,12 @@ setValidity(
     tmpL <- dim(object@Layers)
     tmpp <- dim(object@SWRCp)
     tmpom <- dim(object@omSWRCp)
-    dtol1 <- 1. + tmpL[1] * rSW2_glovars[["tol"]]
+    dtol1 <- 1. + tmpL[[1L]] * rSW2_glovars[["tol"]]
 
     varsExpected <- soilLayer_dataColumns()
 
     #--- Check "Layers"
-    if (tmpL[2] != length(varsExpected)) {
+    if (tmpL[[2L]] != length(varsExpected)) {
       msg <- paste(
         "@Layers must have exactly",
         length(varsExpected),
@@ -114,6 +128,7 @@ setValidity(
         toString(varsExpected)
       )
       val <- if (isTRUE(val)) msg else c(val, msg)
+      return(val) # return early to avoid subscriptOutOfBoundsError
     }
 
     depths <- object@Layers[, 1L]
@@ -139,21 +154,21 @@ setValidity(
     }
 
 
-    tmp <- object@Layers[, c(3L:11L, 13L), drop = FALSE]
+    tmp <- object@Layers[, c(3L:7L, 9L:nSoilVars), drop = FALSE]
     res <- apply(tmp, 2L, function(x) all(is.na(x)) || all(x >= 0., x <= dtol1))
     if (!all(res)) {
       msg <- paste(
-        "@Layers values of gravel, evco, trcos, sand, clay",
-        "impermeability, and som must be between 0 and 1",
+        "@Layers values of gravel, sand, clay, som, impermeability,",
+        "and evco and all trcos must be between 0 and 1",
         "(or all NA)."
       )
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
-    tmp <- colSums(object@Layers[, 4L:8L, drop = FALSE])
+    tmp <- colSums(object@Layers[, 9L:nSoilVars, drop = FALSE])
     if (!all(is.na(tmp) | tmp <= dtol1)) {
       msg <- paste(
-        "@Layers values of profile sums of evco and trcos must be",
+        "@Layers values of profile sums of evco and each trcos must be",
         "between 0 and 1",
         "(or all NA)."
       )
@@ -268,10 +283,16 @@ swSoils <- function(...) {
 #'
 #' @examples
 #' upgrade_soilLayers(
-#'   data.frame(sand_frac = runif(2), clay_frac = runif(2), dummy = runif(2))
+#'   data.frame(
+#'     sand_frac = runif(2),
+#'     clay_frac = runif(2),
+#'     dummy = runif(2),
+#'     transpGrass_frac = runif(2)
+#'   )
 #' )
 #' soils <- slot(rSOILWAT2::sw_exampleData, "soils")
-#' upgrade_soilLayers(slot(soils, "Layers")[, 1:12L, drop = FALSE])
+#' upgrade_soilLayers(slot(soils, "Layers"))
+#' upgrade_soilLayers(slot(soils, "Layers")[, 1:8L, drop = FALSE])
 #'
 #' @md
 #' @export
@@ -279,19 +300,41 @@ upgrade_soilLayers <- function(
   soilLayers,
   template_soilLayerProperties = soilLayer_dataColumns()
 ) {
+  soilLayers <- data.matrix(soilLayers)
+
   template_data <- array(
     dim = c(nrow(soilLayers), length(template_soilLayerProperties)),
     dimnames = list(NULL, template_soilLayerProperties)
   )
 
+  #--- Copy values of shared variables
   cns <- intersect(template_soilLayerProperties, colnames(soilLayers))
   if (length(cns) < 1L) stop("Required variables not found.", call. = FALSE)
-  template_data[, cns] <- as.matrix(soilLayers)[, cns]
+  template_data[, cns] <- soilLayers[, cns, drop = FALSE]
 
-  varsToZero <- "som_frac"
+  #--- Set some variables to zero
+  idsMapVegTypes1to2 <- mapVegTypes("2from1")
+  varsTrCo <- paste0("TrCo_", names(idsMapVegTypes1to2))
+
+  varsToZero <- intersect(c("som_frac", varsTrCo), template_soilLayerProperties)
   cns <- setdiff(varsToZero, colnames(soilLayers))
   if (length(cns) > 0L) {
     template_data[, cns] <- 0
+  }
+
+  #--- Copy trco values from old to new veg types
+  varsTrCoOld <- paste0("transp", c("Grass", "Shrub", "Tree", "Forb"), "_frac")
+  idsTrCoUsed <- intersect(
+    which(
+      varsTrCo[idsMapVegTypes1to2 > 0L] %in% template_soilLayerProperties
+    ),
+    which(
+      varsTrCoOld[idsMapVegTypes1to2] %in% colnames(soilLayers)
+    )
+  )
+  if (length(idsTrCoUsed) > 0L) {
+    template_data[, varsTrCo[idsMapVegTypes1to2 > 0L][idsTrCoUsed]] <-
+      soilLayers[, varsTrCoOld[idsMapVegTypes1to2][idsTrCoUsed], drop = FALSE]
   }
 
   template_data

@@ -685,7 +685,7 @@ x <- swInputData() # constructor helper
 \code{\linkS4class{swWeather}}
 \code{\linkS4class{swCloud}}
 \code{\linkS4class{swMarkov}}
-\code{\linkS4class{swProd}}
+\code{\linkS4class{swProd2}}
 \code{\linkS4class{swSite}}
 \code{\linkS4class{swSoils}}
 \code{\linkS4class{swSpinup}}

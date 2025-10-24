@@ -17,6 +17,7 @@
 #include "SOILWAT2/include/SW_Sky.h"
 #include "SOILWAT2/include/SW_SoilWater.h"
 #include "SOILWAT2/include/SW_VegEstab.h"
+#include "SOILWAT2/include/SW_VegProd.h"
 #include "SOILWAT2/include/SW_Output.h"
 #include "SOILWAT2/include/SW_Main_lib.h"
 #include "SOILWAT2/include/SW_Site.h"
@@ -227,7 +228,11 @@ static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LO
 */
 SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   SEXP swInputData, SW_DataList = NULL, swLog, oRlogfile;
-  int numUnprotects = 2;
+  SEXP swProdOld1;
+  SEXP prodold1;
+
+  int numUnprotects = 0;
+
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
@@ -240,6 +245,8 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   #endif
   PROTECT(swLog = MAKE_CLASS("swLog"));
   PROTECT(oRlogfile = NEW_OBJECT(swLog));
+  numUnprotects += 2;
+
   // read user inputs: from files
   // setup and construct global variables
   #ifdef RSWDEBUG
@@ -315,8 +322,6 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 
   PROTECT(swInputData = MAKE_CLASS("swInputData"));
   PROTECT(SW_DataList = NEW_OBJECT(swInputData));
-
-  // Include the above protects in the number of variables to unprotect
   numUnprotects += 2;
 
 
@@ -367,7 +372,12 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
     #endif
   }
 
-  SET_SLOT(SW_DataList, install("prod"), onGet_SW_VPD());
+  PROTECT(swProdOld1 = MAKE_CLASS("swProd"));
+  PROTECT(prodold1 = NEW_OBJECT(swProdOld1));
+  numUnprotects += 2;
+  SET_SLOT(SW_DataList, install("prod"), prodold1);
+
+  SET_SLOT(SW_DataList, install("prod2"), onGet_SW_VPD());
   #ifdef RSWDEBUG
   if (debug) sw_printf(" > 'veg'");
   #endif
@@ -948,9 +958,10 @@ SEXP rSW2_readAllWeatherFromDisk(
 
   `C_sw_consts()` is R interface to sw_consts()
 
-  @return A list with six elements:
+  @return A list with elements:
     one element `kINT` for integer constants;
-    other elements contain vegetation keys, `VegTypes`;
+    other elements contain vegetation keys, `VegTypes1`, `VegTypes2`,
+    `VegTypeNames1`, `VegTypeNames2`;
     output keys, `OutKeys`;
     output periods, `OutPeriods`;
     output aggregation types, `OutAggs`;
@@ -961,8 +972,8 @@ SEXP sw_consts(void) {
   int debug = 0;
   #endif
 
-  const int nret = 9; // length of cret
-  const int nINT = 15; // length of vINT and cINT
+  const int nret = 12; // length of cret
+  const int nINT = 16; // length of vINT and cINT
   const int nNUM = 1; // length of vNUM and cNUM
 
   #ifdef RSWDEBUG
@@ -974,8 +985,9 @@ SEXP sw_consts(void) {
     cnames,
     ret_num,
     ret_int,
-    ret_int2,
-    ret_str1, ret_str2, ret_str3,
+    res_int2v1,
+    res_int2v2,
+    ret_str1, ret_str2, ret_str3, ret_str4, ret_str5,
     ret_infiles,
     ret_swrc,
     ret_ptf;
@@ -985,7 +997,8 @@ SEXP sw_consts(void) {
   char *cret[] = {
     "kNUM",
     "kINT",
-    "VegTypes",
+    "VegTypes1", "VegTypes2",
+    "VegTypeNames1", "VegTypeNames2",
     "OutKeys", "OutPeriods", "OutAggs",
     "InFiles",
     "SWRC_types",
@@ -996,26 +1009,38 @@ SEXP sw_consts(void) {
   double vNUM[] = {SW_MISSING};
   char *cNUM[] = {"SW_MISSING"};
 
+  // Vegetation types (old v1)
+  // NOTE: order must match their numeric values, i.e., SOILWAT2 < v8.4.0
+  int NVEGTYPESv1 = 4;
+  char *cINT2v1[4] = {"SW_TREES", "SW_SHRUB", "SW_FORBS", "SW_GRASS"};
+  char *cINT3v1[4] = {"Trees", "Shrubs", "Forbs", "Grasses"};
+
+  // Vegetation types (v2)
+  // NOTE: order must match their numeric values, i.e., SOILWAT2 >= v8.4.0
+  int vINT2v2[NVEGTYPES] = {
+      SW_TREENL, SW_TREEBL, SW_SHRUB, SW_FORBS, SW_GRASS3, SW_GRASS4
+  };
+  char *cINT2v2[NVEGTYPES] = {
+      "SW_TREENL", "SW_TREEBL", "SW_SHRUB", "SW_FORBS", "SW_GRASS3", "SW_GRASS4"
+  };
+
   // Miscellaneous integer constants
   int vINT[] = {
     SW_NFILES, MAX_LAYERS, MAX_TRANSP_REGIONS, MAX_NYEAR,
     SWRC_PARAM_NMAX,
-    eSW_NoTime, SW_OUTNPERIODS, SW_OUTNKEYS, SW_NSUMTYPES, NVEGTYPES,
+    eSW_NoTime, SW_OUTNPERIODS, SW_OUTNKEYS, SW_NSUMTYPES,
+    NVEGTYPESv1, NVEGTYPES,
     OUT_DIGITS,
     N_SWRCs, N_PTFs, MAX_INPUT_COLUMNS, NFIXWEATHER
   };
   char *cINT[] = {
     "SW_NFILES", "MAX_LAYERS", "MAX_TRANSP_REGIONS", "MAX_NYEAR",
     "SWRC_PARAM_NMAX",
-    "eSW_NoTime", "SW_OUTNPERIODS", "SW_OUTNKEYS", "SW_NSUMTYPES", "NVEGTYPES",
+    "eSW_NoTime", "SW_OUTNPERIODS", "SW_OUTNKEYS", "SW_NSUMTYPES",
+    "NVEGTYPESv1", "NVEGTYPES",
     "OUT_DIGITS",
     "N_SWRCs", "N_PTFs", "MAX_INPUT_COLUMNS", "NFIXWEATHER"
   };
-
-  // Vegetation types
-  // NOTE: order must match their numeric values, i.e., how SOILWAT2 uses them
-  int vINT2[] = {SW_TREES, SW_SHRUB, SW_FORBS, SW_GRASS};
-  char *cINT2[] = {"SW_TREES", "SW_SHRUB", "SW_FORBS", "SW_GRASS"};
 
   // Output categories
   // NOTE: `cSTR1` must agree with SW_Output.c/key2str[]
@@ -1081,18 +1106,55 @@ SEXP sw_consts(void) {
   }
   namesgets(ret_int, cnames);
 
-  // create vector of vegetation types
+  // create vector of vegetation types (old1)
   #ifdef RSWDEBUG
-  if (debug) sw_printf(" create ret_int2 ...");
+  if (debug) sw_printf(" create res_int2v1 ...");
   #endif
-  PROTECT(ret_int2 = allocVector(INTSXP, NVEGTYPES));
-  pvINT = INTEGER(ret_int2);
+  PROTECT(res_int2v1 = allocVector(INTSXP, NVEGTYPESv1));
+  pvINT = INTEGER(res_int2v1);
+  PROTECT(cnames = allocVector(STRSXP, NVEGTYPESv1));
+  for (i = 0; i < NVEGTYPESv1; i++) {
+    pvINT[i] = i;
+    SET_STRING_ELT(cnames, i, mkChar(cINT2v1[i]));
+  }
+  namesgets(res_int2v1, cnames);
+
+  // create vector of vegetation types (v2)
+  #ifdef RSWDEBUG
+  if (debug) sw_printf(" create res_int2v2 ...");
+  #endif
+  PROTECT(res_int2v2 = allocVector(INTSXP, NVEGTYPES));
+  pvINT = INTEGER(res_int2v2);
   PROTECT(cnames = allocVector(STRSXP, NVEGTYPES));
   for (i = 0; i < NVEGTYPES; i++) {
-    pvINT[i] = vINT2[i];
-    SET_STRING_ELT(cnames, i, mkChar(cINT2[i]));
+    pvINT[i] = vINT2v2[i];
+    SET_STRING_ELT(cnames, i, mkChar(cINT2v2[i]));
   }
-  namesgets(ret_int2, cnames);
+  namesgets(res_int2v2, cnames);
+
+  // create vector of vegetation type names (v1)
+  #ifdef RSWDEBUG
+  if (debug) sw_printf(" create ret_str4 ...");
+  #endif
+  PROTECT(ret_str4 = allocVector(STRSXP, NVEGTYPESv1));
+  PROTECT(cnames = allocVector(STRSXP, NVEGTYPESv1));
+  for (i = 0; i < NVEGTYPESv1; i++) {
+    SET_STRING_ELT(ret_str4, i, mkChar(cINT3v1[i]));
+    SET_STRING_ELT(cnames, i, mkChar(cINT2v1[i]));
+  }
+  namesgets(ret_str4, cnames);
+
+  // create vector of vegetation type names (v2)
+  #ifdef RSWDEBUG
+  if (debug) sw_printf(" create ret_str5 ...");
+  #endif
+  PROTECT(ret_str5 = allocVector(STRSXP, NVEGTYPES));
+  PROTECT(cnames = allocVector(STRSXP, NVEGTYPES));
+  for (i = 0; i < NVEGTYPES; i++) {
+    SET_STRING_ELT(ret_str5, i, mkChar(key2veg[i]));
+    SET_STRING_ELT(cnames, i, mkChar(cINT2v2[i]));
+  }
+  namesgets(ret_str5, cnames);
 
   // create vector of output key constants
   #ifdef RSWDEBUG
@@ -1176,18 +1238,22 @@ SEXP sw_consts(void) {
   #endif
   PROTECT(ret = allocVector(VECSXP, nret));
   PROTECT(cnames = allocVector(STRSXP, nret));
-  for (i = 0; i < nret; i++)
+  for (i = 0; i < nret; i++) {
     SET_STRING_ELT(cnames, i, mkChar(cret[i]));
+  }
   namesgets(ret, cnames);
   SET_VECTOR_ELT(ret, 0, ret_num);
   SET_VECTOR_ELT(ret, 1, ret_int);
-  SET_VECTOR_ELT(ret, 2, ret_int2);
-  SET_VECTOR_ELT(ret, 3, ret_str1);
-  SET_VECTOR_ELT(ret, 4, ret_str2);
-  SET_VECTOR_ELT(ret, 5, ret_str3);
-  SET_VECTOR_ELT(ret, 6, ret_infiles);
-  SET_VECTOR_ELT(ret, 7, ret_swrc);
-  SET_VECTOR_ELT(ret, 8, ret_ptf);
+  SET_VECTOR_ELT(ret, 2, res_int2v1);
+  SET_VECTOR_ELT(ret, 3, res_int2v2);
+  SET_VECTOR_ELT(ret, 4, ret_str4);
+  SET_VECTOR_ELT(ret, 5, ret_str5);
+  SET_VECTOR_ELT(ret, 6, ret_str1);
+  SET_VECTOR_ELT(ret, 7, ret_str2);
+  SET_VECTOR_ELT(ret, 8, ret_str3);
+  SET_VECTOR_ELT(ret, 9, ret_infiles);
+  SET_VECTOR_ELT(ret, 10, ret_swrc);
+  SET_VECTOR_ELT(ret, 11, ret_ptf);
 
   // clean up
   UNPROTECT(nret * 2 + 2);
