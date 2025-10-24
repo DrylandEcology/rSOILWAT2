@@ -177,12 +177,12 @@ sw_verbosity <- function(verbose = TRUE) {
 #'
 #' ## Set the vegetation composition to 40% grassC3 and 60% shrub
 #' swProd_Composition(sw_in4) <- c(
-#'   treeNL = 0, 
-#'   treeBL = 0, 
-#'   shrub = 0.6, 
-#'   forbs = 0, 
-#'   grassC3 = 0.4, 
-#'   grassC4 = 0, 
+#'   treeNL = 0,
+#'   treeBL = 0,
+#'   shrub = 0.6,
+#'   forbs = 0,
+#'   grassC3 = 0.4,
+#'   grassC4 = 0,
 #'   `Bare Ground` = 0
 #' )
 #'
