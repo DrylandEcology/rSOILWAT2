@@ -93,10 +93,10 @@ if (!is.null(mm_dm) && !inherits(mm_dm, "try-error")) {
   rSOILWAT2::swCloud_WindSpeed(swin)[] <- rep(1.5, times = 12L)
   rSOILWAT2::swCloud_SkyCover(swin)[] <- NA_real_
 
-  # Obtain atmospheric CO2 concentration
+  # Obtain atmospheric CO2 concentration (including for vegetation reference)
   rSOILWAT2::swCarbon_Scenario(swin) <- "CMIP6_historical|CMIP6_SSP119"
   rSOILWAT2::swCarbon_CO2ppm(swin) <- rSOILWAT2::lookup_annual_CO2a(
-    start = 2015,
+    start = min(swin@prod2@vegYear, 2015),
     end = 2023,
     name_co2 = rSOILWAT2::swCarbon_Scenario(swin)
   )
