@@ -183,7 +183,13 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
         return; // Exit function prematurely due to error
     }
 
-    onSet_swCarbon(GET_SLOT(InputData, install("carbon")), LogInfo);
+    onSet_swCarbon(
+        GET_SLOT(InputData, install("carbon")),
+        SoilWatRun.ModelIn.startyr,   // set by onSet_SW_MDL()
+        SoilWatRun.ModelIn.endyr,     // set by onSet_SW_MDL()
+        SoilWatRun.VegProdIn.vegYear, // set by onSet_SW_VPD()
+        LogInfo
+    );
     #ifdef RSWDEBUG
     if (debug) sw_printf(" > 'CO2'");
     #endif

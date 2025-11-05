@@ -43,6 +43,8 @@
 * Methods with signature `"swProd"` (which represented `"v1"`) are deprecated.
 * The slot `"Layers"` of class `swSoils` reorganized several columns
   and replaced rooting profile columns from old with new vegetation types.
+* The class `"swCarbon"` gained the slot `"CO2ppmVegRef"`;
+  the functionality related to the slot `"DeltaYear"` has become defunct.
 
 
 # rSOILWAT2 v6.4.0

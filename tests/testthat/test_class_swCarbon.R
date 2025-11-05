@@ -1,4 +1,14 @@
 
+dir_test_data <- file.path("..", "test_data")
+temp <- list.files(dir_test_data, pattern = "Ex")
+temp <- sapply(strsplit(temp, "_", fixed = TRUE), function(x) x[[1]])
+tests <- unique(temp)
+
+test_that("Test data availability", {
+  expect_gt(length(tests), 0)
+})
+
+
 #---TESTS
 test_that("Manipulate swCarbon", {
   x <- new("swCarbon")
@@ -61,4 +71,28 @@ test_that("Manipulate swCarbon", {
   co2 <- co2_ok
   co2[10, "Year"] <- 1789
   expect_error(swCarbon_CO2ppm(xinput2) <- co2)
+})
+
+
+test_that("Run 'rSOILWAT2' with different 'swCarbon' inputs", {
+  it <- tests[[1L]]
+
+  #---INPUTS
+  sw_input <- readRDS(file.path(dir_test_data, paste0(it, "_input.rds")))
+  sw_weather <- readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
+
+
+  # 'DeltaYear' is defunct since SOILWAT2 v8.3.0
+  rSOILWAT2::swCarbon_DeltaYear(sw_input) <- 30L
+
+  # Run SOILWAT
+  expect_error(
+    rSOILWAT2::sw_exec(
+      inputData = sw_input,
+      weatherList = sw_weather,
+      echo = FALSE,
+      quiet = TRUE
+    ),
+    regexp = "'DeltaYear' for aCO2 is defunct"
+  )
 })

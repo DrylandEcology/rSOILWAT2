@@ -212,6 +212,7 @@ format_timestamp <- function(object) {
 #'       * class [`swSoils-class`]: slot `"Layers"` reorganized several columns
 #'         and replaced rooting profile columns from old with new vegetation
 #'         types
+#'       * class [`swCarbon-class`]: new slot `"CO2ppmVegRef"`
 #'  * Changes with `v6.4.0`:
 #'       * class [`swProd-class`]: new slots `"vegYear"` and
 #'         `"isBiomAsIf100Cover"`

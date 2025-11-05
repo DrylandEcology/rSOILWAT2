@@ -46,9 +46,11 @@
 #'   \pkg{rSOILWAT2}, but it's useful to see what scenario was used in the
 #'   \pkg{SOILWAT2} input object.
 #' @slot DeltaYear Object of class \code{"integer"}, that represents the number
-#'   of years in the future that this simulation is being run.
+#'   of years in the future that this simulation is being run
+#'   (unused since \code{"v6.5.0"}).
 #' @slot CO2ppm Object of class \code{"matrix"}, that holds years in the first
 #'   column and CO2 ppm concentrations in the second column.
+#' @slot CO2ppmVegRef Atmospheric CO2 in the vegetation reference year.
 #'
 #' @seealso \code{\linkS4class{swInputData}}
 #'
@@ -66,7 +68,8 @@ setClass(
     CarbonUseWUE = "integer",
     Scenario = "character",
     DeltaYear = "integer",
-    CO2ppm = "matrix"
+    CO2ppm = "matrix",
+    CO2ppmVegRef = "numeric"
   ),
   prototype = list(
     CarbonUseBio = NA_integer_,
@@ -77,7 +80,8 @@ setClass(
       NA_real_,
       dim = c(0, 2),
       dimnames = list(NULL, c("Year", "CO2ppm"))
-    )
+    ),
+    CO2ppmVegRef = NA_real_
   )
 )
 
@@ -142,7 +146,31 @@ setValidity(
       }
     }
 
+    ids_bad <- is.na(object@CO2ppmVegRef) | object@CO2ppmVegRef < 0
+    if (any(ids_bad)) {
+      msg <- "@CO2ppmVegRef: value is missing and/or negative"
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
     val
+  }
+)
+
+
+#' @rdname sw_upgrade
+setMethod(
+  "sw_upgrade",
+  signature = "swCarbon",
+  definition = function(object, verbose = FALSE) {
+    tmp <- try(validObject(object), silent = TRUE)
+    if (inherits(tmp, "try-error")) {
+      if (verbose) {
+        message("Upgrading object of class `swCarbon`.")
+      }
+      object <- suppressWarnings(swCarbon(object))
+    }
+
+    object
   }
 )
 
