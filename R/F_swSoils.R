@@ -313,7 +313,7 @@ upgrade_soilLayers <- function(
   template_data[, cns] <- soilLayers[, cns, drop = FALSE]
 
   #--- Set some variables to zero
-  idsMapVegTypes1to2 <- mapVegTypes("2from1")
+  idsMapVegTypes1to2 <- mapVegTypes("2from1", order = "rSOILWAT2")
   varsTrCo <- paste0("TrCo_", names(idsMapVegTypes1to2))
 
   varsToZero <- intersect(c("som_frac", varsTrCo), template_soilLayerProperties)

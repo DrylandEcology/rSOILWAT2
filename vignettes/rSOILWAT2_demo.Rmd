@@ -489,12 +489,15 @@ data from `DayMet`
     dailyC4vars = clim[["dailyC4vars"]]
   )
 
-  ids <- rSOILWAT2::mapVegTypes("2from1")
-
-  # Assign fractional cover values to rSOILWAT2 input object
+  # Assign fractional cover values to rSOILWAT2 input object (using v1 types)
+  ids <- rSOILWAT2::mapVegTypes("2from1", order = "SOILWAT2")
   rSOILWAT2::swProd_Composition(sw_in) <- 0
   rSOILWAT2::swProd_Composition(sw_in)[c(which(ids > 0L), 7L)] <-
     veg_cover[["Rel_Abundance_L1"]][c(ids, 5L)]
+
+  # Assign fractional cover values to rSOILWAT2 input object (using v2 types)
+  rSOILWAT2::swProd_Composition(sw_in) <- 0
+  rSOILWAT2::swProd_Composition(sw_in) <- veg_cover[["Rel_Abundance_L2"]]
 ```
 
 

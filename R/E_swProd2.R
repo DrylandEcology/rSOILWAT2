@@ -422,7 +422,7 @@ swProd2FromProd1 <- function(prodv1) {
   }
 
   #--- Assign values from old to new veg types
-  ids <- mapVegTypes("2from1")
+  ids <- mapVegTypes("2from1", order = "rSOILWAT2")
   idsnz <- which(ids > 0L)
 
   res@veg_method <- prodv1@veg_method

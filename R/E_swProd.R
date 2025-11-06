@@ -47,7 +47,7 @@
 #' @md
 #' @export
 namesVegTypes <- function(
-    version = c("v2", "v1"),
+  version = c("v2", "v1"),
   order = c("rSOILWAT2", "SOILWAT2")
 ) {
   ids <- switch(
@@ -82,18 +82,30 @@ namesVegTypes <- function(
 #' @rdname VegTypes
 #' @md
 #' @export
-mapVegTypes <- function(request = "2from1") {
-  request <- match.arg(request)
-
+mapVegTypes <- function(
+  request = "2from1",
+  order = c("rSOILWAT2", "SOILWAT2")
+) {
   switch(
-    EXPR = request,
-    "2from1" = c(
-      treeNL = 3L,
-      treeBL = 0L,
-      shrub = 2L,
-      forbs = 4L,
-      grassC3 = 1L,
-      grassC4 = 0L
+    EXPR =  match.arg(request),
+    "2from1" = switch(
+      EXPR = match.arg(order),
+      rSOILWAT2 = c(
+        treeNL = 3L,
+        treeBL = 0L,
+        shrub = 2L,
+        forbs = 4L,
+        grassC3 = 1L,
+        grassC4 = 0L
+      ),
+      SOILWAT2 = c(
+        treeNL = 1L,
+        treeBL = 0L,
+        shrub = 2L,
+        forbs = 3L,
+        grassC3 = 4L,
+        grassC4 = 0L
+      )
     )
   )
 }

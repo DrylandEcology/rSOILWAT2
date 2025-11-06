@@ -8,7 +8,7 @@
 \usage{
 namesVegTypes(version = c("v2", "v1"), order = c("rSOILWAT2", "SOILWAT2"))
 
-mapVegTypes(request = "2from1")
+mapVegTypes(request = "2from1", order = c("rSOILWAT2", "SOILWAT2"))
 }
 \arguments{
 \item{version}{A character string indicating the vegetation type version.}

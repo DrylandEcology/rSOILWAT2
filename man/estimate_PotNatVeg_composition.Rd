@@ -266,6 +266,30 @@ identical(pnvsim[["fCover_forbs"]], pnvex[["SW_FORBS"]])
 identical(pnvsim[["fCover_treeNL"]], pnvex[["SW_TREENL"]])
 identical(pnvsim[["fCover_BareGround"]], pnvex[["SW_BAREGROUND"]])
 
+# Comparison between v1 and v2 vegetation types
+pnv <- estimate_PotNatVeg_composition(
+  MAP_mm = 10 * climex[["MAP_cm"]],
+  MAT_C = climex[["MAT_C"]],
+  mean_monthly_ppt_mm = 10 * climex[["meanMonthlyPPTcm"]],
+  mean_monthly_Temp_C = climex[["meanMonthlyTempC"]],
+  dailyC4vars = climex[["dailyC4vars"]]
+)
+
+ids2f1 <- mapVegTypes("2from1", order = "SOILWAT2")
+mappedFrom1 <- c(which(ids2f1 > 0L), 7L)
+ids1 <- c(ids2f1, 5L)
+
+tmpn <- tmpv <- rep(NA, length(pnv[["Rel_Abundance_L2"]]))
+tmpn[mappedFrom1] <- names(pnv[["Rel_Abundance_L1"]])[ids1]
+tmpv[mappedFrom1] <- pnv[["Rel_Abundance_L1"]][ids1]
+
+data.frame(
+  v2_name = names(pnv[["Rel_Abundance_L2"]]),
+  v2_value = pnv[["Rel_Abundance_L2"]],
+  v1_name = tmpn,
+  v1_value = tmpv,
+  row.names = NULL
+)
 
 }
 \references{
