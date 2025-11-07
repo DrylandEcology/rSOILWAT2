@@ -1616,38 +1616,63 @@ estimate_PotNatVeg_roots <- function(
 #'   names of a `MonthlyVeg` element of an [`swProd-class`] object
 #' @param prod_input A data frame. The values that replace the selected
 #'   biomass values.
-#' @param prod_default A [`swProd-class`] object that contains
-#'   the `MonthlyVeg` element with biomass values to be updated.
+#' @param prod_default A data frame with the `MonthlyVeg` element of
+#' a [`swProd2-class`] object, or an object from which to retrieve a
+#' a [`swProd2-class`] object.
 #'
 #' @return The requested `MonthlyVeg` element from `prod_default` with updated
 #'   values.
 #'
+#' @examples
+#' swin <- rSOILWAT2::sw_exampleData
+#' vt <- "shrub"
+#' use <- stats::setNames(
+#'   c(rep(TRUE, 12L), rep(FALSE, 12L)),
+#'   nm = c(
+#'     paste0(vt, "_Biomass_m", seq_len(12L)),
+#'     paste0(vt, "_FractionLive_m", seq_len(12L))
+#'   )
+#' )
+#' pi <- matrix(data = rep(100, length(use)), nrow = 1L)
+#' colnames(pi) <- names(use)
+#'
+#' res1 <- rSOILWAT2::update_biomass(vt, use, pi, swin)
+#' x <- rSOILWAT2::swProd_MonProd_veg(swin, vt)
+#' res2 <- rSOILWAT2::update_biomass(vt, use, pi, x)
+#'
 #' @export
 #' @md
-update_biomass <- function(
-  fg = c("Grass", "Shrub", "Tree", "Forb"),
-  use,
-  prod_input,
-  prod_default
-) {
-
-  fg <- match.arg(fg)
-
+update_biomass <- function(fg, use, prod_input, prod_default) {
   comps <- c("_Litter", "_Biomass", "_FractionLive", "_LAIconv")
   veg_ids <- lapply(
     comps,
     function(x) grep(paste0(fg, x), names(use))
   )
+  if (all(lengths(veg_ids) == 0L)) {
+    warning(
+      sprintf("'%s' is not a known vegetation type in argument 'use'.", fg),
+      call. = FALSE
+    )
+  }
   veg_incl <- lapply(veg_ids, function(x) use[x])
 
-  temp <- swProd_MonProd_veg(prod_default, fg)
-  if (any(unlist(veg_incl))) {
-    for (k in seq_along(comps)) if (any(veg_incl[[k]]))
-      temp[veg_incl[[k]], k] <-
-        as.numeric(prod_input[, veg_ids[[k]][veg_incl[[k]]]])
+  prod <- if (inherits(prod_default, c("swInputData", "swProd", "swProd2"))) {
+    rSOILWAT2::swProd_MonProd_veg(prod_default, fg)
+  } else {
+    prod_default
   }
 
-  temp
+  if (any(unlist(veg_incl))) {
+    for (k in seq_along(comps)) {
+      if (any(veg_incl[[k]])) {
+        prod[veg_incl[[k]], k] <- as.numeric(
+          prod_input[, veg_ids[[k]][veg_incl[[k]]]]
+        )
+      }
+    }
+  }
+
+  prod
 }
 
 

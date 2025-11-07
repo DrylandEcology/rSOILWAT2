@@ -493,3 +493,26 @@ test_that("VegetationTypeEquivalency", {
     )
   }
 })
+
+
+test_that("Vegetation: update_biomass", {
+  swin <- rSOILWAT2::sw_exampleData
+  vt <- "shrub"
+  x <- rSOILWAT2::swProd_MonProd_veg(swin, vt)
+  use <- stats::setNames(
+    c(rep(TRUE, 12L), rep(FALSE, 12L)),
+    nm = c(
+      paste0(vt, "_Biomass_m", seq_len(12L)),
+      paste0(vt, "_FractionLive_m", seq_len(12L))
+    )
+  )
+  testValue <- 100
+  pi <- matrix(data = rep(testValue, length(use)), nrow = 1L)
+  colnames(pi) <- names(use)
+
+  res1 <- rSOILWAT2::update_biomass(vt, use, pi, swin)
+  res2 <- rSOILWAT2::update_biomass(vt, use, pi, x)
+
+  expect_identical(res1, res2)
+  expect_identical(unname(res1[, "Biomass", drop = TRUE]), rep(testValue, 12L))
+})
