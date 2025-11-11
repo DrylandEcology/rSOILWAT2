@@ -74,7 +74,6 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
 
   if (from_files) {
      SW_CTL_read_inputs_from_disk(
-        rSW2_rank,
         &SoilWatRun,
         &SoilWatDomain,
         &SoilWatDomain.hasConsistentSoilLayerDepths,
