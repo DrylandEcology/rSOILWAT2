@@ -146,9 +146,9 @@ setValidity(
       }
     }
 
-    ids_bad <- is.na(object@CO2ppmVegRef) | object@CO2ppmVegRef < 0
+    ids_bad <- !is.na(object@CO2ppmVegRef) && object@CO2ppmVegRef < 0
     if (any(ids_bad)) {
-      msg <- "@CO2ppmVegRef: value is missing and/or negative"
+      msg <- "@CO2ppmVegRef: value is negative"
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
