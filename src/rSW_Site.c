@@ -574,6 +574,8 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	SEXP swrc_flags, has_swrcp;
     SEXP depthSapric;
 
+    int unprotects = 0;
+
   #ifdef RSWDEBUG
   int debug = 0;
   #endif
@@ -692,21 +694,24 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 
 
 	PROTECT(swrc_flags = GET_SLOT(SW_SIT, install("swrc_flags")));
+	unprotects += 14;
 	strcpy(si->site_swrc_name, CHAR(STRING_ELT(swrc_flags, 0)));
 	si->site_swrc_type = encode_str2swrc(si->site_swrc_name, LogInfo);
     if(LogInfo->stopRun) {
-        UNPROTECT(12); // Unprotect the twelve protected variables before exiting
-        return; // Exit function prematurely due to error
+        goto freeMem; // Exit function prematurely due to error
     }
 	strcpy(si->site_ptf_name, CHAR(STRING_ELT(swrc_flags, 1)));
 	si->site_ptf_type = encode_str2ptf(si->site_ptf_name);
 	PROTECT(has_swrcp = GET_SLOT(SW_SIT, install("has_swrcp")));
+	unprotects++;
 	si->inputsProvideSWRCp = LOGICAL(has_swrcp)[0];
 
     PROTECT(depthSapric = GET_SLOT(SW_SIT, install("depth_sapric")));
+	unprotects++;
     si->depthSapric = REAL(depthSapric)[0];
 
-    UNPROTECT(16);
+freeMem:
+    UNPROTECT(unprotects);
 }
 
 void onSet_SW_SIT_transp(SEXP SW_SIT, LOG_INFO* LogInfo) {

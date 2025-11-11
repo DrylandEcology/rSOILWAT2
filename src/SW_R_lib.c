@@ -144,7 +144,6 @@ static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LO
     Bool renameDomainTemplateNC = swFALSE;
     Bool prepareFiles = swFALSE;
     Bool endQuietly = swFALSE;
-    int rank = 0; // unused
 
 
   #ifdef RSWDEBUG
@@ -173,7 +172,7 @@ static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LO
     sw_init_args(
         argc,
         argv,
-        rank,
+        rSW2_rank,
         &EchoInits,
         &SoilWatDomain.SW_PathInputs.txtInFiles[eFirst],
         &userSUID,
@@ -452,6 +451,7 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
 	SEXP outputData = NULL, swLog, oRlogfile;
 //  SW_WALLTIME local_WallTime;
   LOG_INFO local_LogInfo;
+  int unprotects = 0;
 
   #ifdef RSWDEBUG
   int debug = 0;
@@ -468,6 +468,7 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
   #endif
 	PROTECT(swLog = MAKE_CLASS("swLog"));
 	PROTECT(oRlogfile = NEW_OBJECT(swLog));
+    unprotects += 2;
 
   // setup and construct model (via inputData)
   #ifdef RSWDEBUG
@@ -552,9 +553,10 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
     }
 
 	PROTECT(outputData = onGetOutput(inputData, &local_LogInfo));
-  if(local_LogInfo.stopRun) {
-      goto report;
-  }
+    unprotects++;
+    if (local_LogInfo.stopRun) {
+        goto report;
+    }
 	setGlobalrSOILWAT2_OutputVariables(outputData);
 
   // run simulation: loop through each year
@@ -581,7 +583,7 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
   #endif
 
   report: {
-    UNPROTECT(2);
+    UNPROTECT(unprotects);
 
     if (local_LogInfo.stopRun) {
         setGlobal_soiltempError(TRUE);
