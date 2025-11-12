@@ -53,6 +53,7 @@ void onSet_SW_OUT(SEXP OUT, LOG_INFO* LogInfo) {
 	OutKey k;
 	SEXP sep, outfile, tp_convert;
 	int *timePeriods, *sumtype, *first_orig, *last_orig;
+	int *use;
 	// mykey, myobj and use are currently unused:
 	// int *use, *mykey, *myobj;
 	char msg[200]; // message to print
@@ -75,7 +76,7 @@ void onSet_SW_OUT(SEXP OUT, LOG_INFO* LogInfo) {
 	// mykey, myobj and use are currently unused:
 	// mykey = INTEGER(GET_SLOT(OUT, install("mykey")));
 	// myobj = INTEGER(GET_SLOT(OUT, install("myobj")));
-	// use = LOGICAL(GET_SLOT(OUT, install("use")));
+	use = LOGICAL(GET_SLOT(OUT, install("use")));
 	sumtype = INTEGER(GET_SLOT(OUT, install("sumtype")));
 	first_orig = INTEGER(GET_SLOT(OUT, install("first_orig")));
 	last_orig = INTEGER(GET_SLOT(OUT, install("last_orig")));
@@ -85,7 +86,7 @@ void onSet_SW_OUT(SEXP OUT, LOG_INFO* LogInfo) {
 		msg_type = SW_OUT_read_onekey(
             &SoilWatDomain.OutDom,
 			k,
-			sumtype[k],
+			(use[k]) ? sumtype[k] : eSW_Off,
 			first_orig[k],
 			last_orig[k],
 			msg,
@@ -265,10 +266,6 @@ SEXP onGetOutput(SEXP inputData, LOG_INFO* LogInfo) {
     PROTECT(swOutput = MAKE_CLASS("swOutput"));
     PROTECT(swOutput_Object = NEW_OBJECT(swOutput));
     numUnprotects += 2;
-
-    if (OutDom->used_OUTNPERIODS <= 0) {
-        goto report;
-    }
 
     // Determine which output is turned on
     use = LOGICAL(GET_SLOT(GET_SLOT(inputData, install("output")), install("use")));

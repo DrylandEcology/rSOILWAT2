@@ -10,13 +10,25 @@ test_that("Partial output", {
 
   activate_swOUT_OutKey(swin) <- swof[names(swof) %in% tmp]
   rSOILWAT2::swOUT_TimeStepsForEveryKey(swin) <- c(
-    daily = 1, monthly = 2, yearly = 3
+    daily = 0, monthly = 2, yearly = 3
   )
 
   # Expect no "Warning: stack imbalance in ..."
   x <- expect_no_warning(
     rSOILWAT2::sw_exec(inputData = swin, echo = FALSE, quiet = TRUE),
     message = "stack imbalance"
+  )
+
+  expect_s4_class(x, "swOutput")
+})
+
+test_that("No output", {
+  swin <- rSOILWAT2::sw_exampleData
+
+  slot(slot(swin, "output"), "use")[] <- FALSE
+
+  x <- expect_silent(
+    rSOILWAT2::sw_exec(inputData = swin, echo = FALSE, quiet = TRUE)
   )
 
   expect_s4_class(x, "swOutput")
