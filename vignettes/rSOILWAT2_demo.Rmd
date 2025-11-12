@@ -530,20 +530,13 @@ data from `DayMet`
   # Select rooting profile types
   # Set those to "FILL" where cover == 0 (because of transpiration regions)
   trco_type_by_veg <- list(
-    grass_C3 = if (veg_cover[["Rel_Abundance_L0"]][["Grasses_C3"]] > 0) {
-      "SchenkJackson2003_PCdry_grasses"
+    treeNL = if (veg_cover[["Rel_Abundance_L0"]][["Trees"]] > 0) {
+      "Bradfordetal2014_LodgepolePine"
     } else {
       "FILL"
     },
-    grass_C4 = if (veg_cover[["Rel_Abundance_L0"]][["Grasses_C4"]] > 0) {
-      "SchenkJackson2003_PCdry_grasses"
-    } else {
-      "FILL"
-    },
-    grass_annuals = if (
-      veg_cover[["Rel_Abundance_L0"]][["Grasses_Annuals"]] > 0
-    ) {
-      "Jacksonetal1996_crops"
+    treeBL = if (veg_cover[["Rel_Abundance_L0"]][["Trees"]] > 0) {
+      "Bradfordetal2014_LodgepolePine"
     } else {
       "FILL"
     },
@@ -552,13 +545,25 @@ data from `DayMet`
     } else {
       "FILL"
     },
-    forb = if (veg_cover[["Rel_Abundance_L0"]][["Forbs"]] > 0) {
+    forbs = if (veg_cover[["Rel_Abundance_L0"]][["Forbs"]] > 0) {
       "SchenkJackson2003_PCdry_forbs"
     } else {
       "FILL"
     },
-    tree = if (veg_cover[["Rel_Abundance_L0"]][["Trees"]] > 0) {
-      "Bradfordetal2014_LodgepolePine"
+    grassC3 = if (veg_cover[["Rel_Abundance_L0"]][["Grasses_C3"]] > 0) {
+      "SchenkJackson2003_PCdry_grasses"
+    } else {
+      "FILL"
+    },
+    grassC4 = if (veg_cover[["Rel_Abundance_L0"]][["Grasses_C4"]] > 0) {
+      "SchenkJackson2003_PCdry_grasses"
+    } else {
+      "FILL"
+    },
+    grass_annuals = if (
+      veg_cover[["Rel_Abundance_L0"]][["Grasses_Annuals"]] > 0
+    ) {
+      "Jacksonetal1996_crops"
     } else {
       "FILL"
     }
@@ -571,9 +576,9 @@ data from `DayMet`
   )
 
   # Add rooting profile to soil
-  v1 <- c("Tree", "Tree", "Shrub", "Forb", "Grass", "Grass")
-  v2 <- paste0("TrCo_", rSOILWAT2::namesVegTypes("v2"))
-  soil_new[, v2] <- veg_roots[, v1]
+  vn <- rSOILWAT2::namesVegTypes("v2")
+  v2 <- paste0("TrCo_", vn)
+  soil_new[, v2] <- veg_roots[, vn, drop = FALSE]
 ```
 
 

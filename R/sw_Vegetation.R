@@ -1439,6 +1439,8 @@ TranspCoeffByVegType <- function(
 #'   annuals functional groups. The sum of \code{fgrass_c3c4ann} is 1.
 #' @param trco_table A named list with two elements. Default values
 #'   are taken from \code{\link{sw2_trco_table}}.
+#' @param version A string. The version of vegetation types,
+#' see \code{\link{namesVegTypes}}.
 #'
 #' @seealso \code{\link{TranspCoeffByVegType}}
 #'
@@ -1460,47 +1462,74 @@ TranspCoeffByVegType <- function(
 #'   fgrass_c3c4ann = veg_cover[["Grasses"]]
 #' )
 #'
+#' estimate_PotNatVeg_roots(
+#'   layers_depth = c(5, 10, 20, 30, 40, 50, 100, 200),
+#'   fgrass_c3c4ann = veg_cover[["Grasses"]],
+#'   version = "v1"
+#' )
+#'
 #' @export
 estimate_PotNatVeg_roots <- function(
   layers_depth,
   trco_type_by_veg = list(
-    grass_C3 = "SchenkJackson2003_PCdry_grasses",
-    grass_C4 = "SchenkJackson2003_PCdry_grasses",
-    grass_annuals = "Jacksonetal1996_crops",
+    treeNL = "Bradfordetal2014_LodgepolePine",
+    treeBL = "Bradfordetal2014_LodgepolePine",
     shrub = "SchenkJackson2003_PCdry_shrubs",
-    forb = "SchenkJackson2003_PCdry_forbs",
-    tree = "Bradfordetal2014_LodgepolePine"
+    forbs = "SchenkJackson2003_PCdry_forbs",
+    grassC3 = "SchenkJackson2003_PCdry_grasses",
+    grassC4 = "SchenkJackson2003_PCdry_grasses",
+    grass_annuals = "Jacksonetal1996_crops"
   ),
   trco_adj_by_veg = list(
-    grass_C3 = "positive",
-    grass_C4 = "positive",
-    grass_annuals = "positive",
+    treeNL = "positive",
+    treeBL = "positive",
     shrub = "positive",
-    forb = "positive",
-    tree = "positive"
+    forbs = "positive",
+    grassC3 = "positive",
+    grassC4 = "positive",
+    grass_annuals = "positive"
   ),
-  fgrass_c3c4ann = c(grass_C3 = NA, grass_C4 = NA, grass_annuals = NA),
-  trco_table = rSOILWAT2::sw2_trco_table
+  fgrass_c3c4ann = c(grassC3 = NA, grassC4 = NA, grass_annuals = NA),
+  trco_table = rSOILWAT2::sw2_trco_table,
+  version = c("v2", "v1")
 ) {
-  n_slyrs <- length(layers_depth)
-  veg_types <- c("Grass", "Shrub", "Tree", "Forb")
-
-  res_trco <- array(
-    data = NA,
-    dim = c(n_slyrs, length(veg_types)),
-    dimnames = list(NULL, veg_types)
+  stopifnot(
+    names(trco_type_by_veg) %in% c(namesVegTypes("v2"), "grass_annuals")
   )
 
-  for (k1 in seq_along(veg_types)) {
+  n_slyrs <- length(layers_depth)
+
+  version <- match.arg(version)
+  vegTypeNames <- switch(
+    EXPR = version,
+    v1 = namesVegTypes("v1", shortened = TRUE),
+    v2 = namesVegTypes("v2")
+  )
+  vegTypes <- switch(
+    EXPR = version,
+    v1 = {
+      tmp <- mapVegTypes("2from1")
+      ids <- tmp > 0L
+      namesVegTypes("v2")[ids][order(tmp[ids])]
+    },
+    v2 = namesVegTypes("v2")
+  )
+
+  res_trco <- array(
+    dim = c(n_slyrs, length(vegTypes)),
+    dimnames = list(NULL, vegTypeNames)
+  )
+
+  for (k1 in seq_along(vegTypes)) {
     tmp_type <- sort(grep(
-      veg_types[k1],
+      vegTypes[[k1]],
       names(trco_type_by_veg),
       ignore.case = TRUE,
       value = TRUE
     ))
 
     tmp_adj <- sort(grep(
-      veg_types[k1],
+      vegTypes[[k1]],
       names(trco_adj_by_veg),
       ignore.case = TRUE,
       value = TRUE
@@ -1509,7 +1538,7 @@ estimate_PotNatVeg_roots <- function(
     if (!all(tmp_type == tmp_adj)) {
       stop(
         "Names of `trco_type_by_veg` do not match ",
-        "`trco_adj_by_veg` for ", shQuote(veg_types[k1]),
+        "`trco_adj_by_veg` for ", shQuote(vegTypeNames[[k1]]),
         call. = FALSE
       )
     }
@@ -1518,22 +1547,20 @@ estimate_PotNatVeg_roots <- function(
       isTRUE(!anyNA(unlist(trco_type_by_veg[tmp_type]))) &&
       isTRUE(!anyNA(unlist(trco_adj_by_veg[tmp_adj])))
     ) {
-      if (length(tmp_type) > 1 && veg_types[k1] == "Grass") {
+      if (length(tmp_type) > 1 && vegTypeNames[[k1]] == "Grass") {
 
-        tmp1 <- sapply(
-          strsplit(names(fgrass_c3c4ann), split = "_", fixed = TRUE),
-          FUN = function(x) x[[2]]
+        n1 <- nchar(tmp_type)
+        n2 <- nchar(names(fgrass_c3c4ann))
+        tmp_igfcov <- match(
+          substr(tolower(tmp_type), n1 - 1L, n1),
+          substr(tolower(names(fgrass_c3c4ann)), n2 - 1L, n2),
+          nomatch = NA
         )
-        tmp2 <- sapply(
-          strsplit(tmp_type, split = "_", fixed = TRUE),
-          FUN = function(x) x[[2]]
-        )
-        tmp_igfcov <- match(tolower(tmp2), tolower(tmp1), nomatch = NA)
 
         if (anyNA(tmp_igfcov)) {
           stop(
             "Names of `fgrass_c3c4ann` do not match ",
-            "`trco_adj_by_veg` for ", shQuote(veg_types[k1]),
+            "`trco_adj_by_veg` for ", shQuote(vegTypeNames[[k1]]),
             call. = FALSE
           )
         }
@@ -1567,7 +1594,7 @@ estimate_PotNatVeg_roots <- function(
 
       } else {
         stop(
-          "Root information for ", shQuote(veg_types[k1]), " incomplete.",
+          "Root information for ", shQuote(vegTypeNames[[k1]]), " incomplete.",
           call. = FALSE
         )
       }
@@ -1581,7 +1608,7 @@ estimate_PotNatVeg_roots <- function(
       if (!is_good) {
         warning(
           "Root information for ",
-          shQuote(veg_types[k1]),
+          shQuote(vegTypeNames[[k1]]),
           " is problematic: ",
           paste(round(tmp_root, 4L), collapse = " / "),
           "; it was re-set to 0s.",
@@ -1591,12 +1618,12 @@ estimate_PotNatVeg_roots <- function(
         tmp_root <- rep(0, n_slyrs)
       }
 
-      res_trco[, veg_types[k1]] <- tmp_root
+      res_trco[, vegTypeNames[[k1]]] <- tmp_root
 
     } else {
       warning(
         "No rooting profile selected for ",
-        shQuote(veg_types[k1]), ".",
+        shQuote(vegTypeNames[[k1]]), ".",
         call. = FALSE
       )
     }
