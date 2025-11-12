@@ -6,7 +6,11 @@
 \alias{mapVegTypes}
 \title{Vegetation (plant functional) types}
 \usage{
-namesVegTypes(version = c("v2", "v1"), order = c("rSOILWAT2", "SOILWAT2"))
+namesVegTypes(
+  version = c("v2", "v1"),
+  order = c("rSOILWAT2", "SOILWAT2"),
+  shortened = FALSE
+)
 
 mapVegTypes(request = "2from1", order = c("rSOILWAT2", "SOILWAT2"))
 }
@@ -14,7 +18,10 @@ mapVegTypes(request = "2from1", order = c("rSOILWAT2", "SOILWAT2"))
 \item{version}{A character string indicating the vegetation type version.}
 
 \item{order}{A character string indicating the order of vegetation types
-as relevant for \code{SOILWAT2} or \code{rSOILWAT2} (relevant only for type \code{"v1"}).}
+as relevant for \code{SOILWAT2} or \code{rSOILWAT2} (impacts only version \code{"v1"}).}
+
+\item{shortened}{A logical value. Shortened or full vegetation type names
+(impacts only version \code{"v1"}).}
 
 \item{request}{A character string defining the request to map one version
 of vegetation types from a previous version.}
@@ -43,6 +50,8 @@ inconsistent.
 
 \examples{
 namesVegTypes("v1")
+namesVegTypes("v1", order = "SOILWAT2")
+namesVegTypes("v1", shortened = TRUE)
 namesVegTypes("v2")
 
 mapVegTypes()

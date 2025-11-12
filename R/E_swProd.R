@@ -27,7 +27,9 @@
 #'
 #' @param version A character string indicating the vegetation type version.
 #' @param order A character string indicating the order of vegetation types
-#' as relevant for `SOILWAT2` or `rSOILWAT2` (relevant only for type `"v1"`).
+#' as relevant for `SOILWAT2` or `rSOILWAT2` (impacts only version `"v1"`).
+#' @param shortened A logical value. Shortened or full vegetation type names
+#' (impacts only version `"v1"`).
 #'
 #' @return `namesVegTypes()`: a named character vector that contains the
 #' requested vegetation types.
@@ -41,6 +43,8 @@
 #'
 #' @examples
 #' namesVegTypes("v1")
+#' namesVegTypes("v1", order = "SOILWAT2")
+#' namesVegTypes("v1", shortened = TRUE)
 #' namesVegTypes("v2")
 #'
 #' @name VegTypes
@@ -48,7 +52,8 @@
 #' @export
 namesVegTypes <- function(
   version = c("v2", "v1"),
-  order = c("rSOILWAT2", "SOILWAT2")
+  order = c("rSOILWAT2", "SOILWAT2"),
+  shortened = FALSE
 ) {
   ids <- switch(
     EXPR = match.arg(order),
@@ -57,7 +62,13 @@ namesVegTypes <- function(
   )
   switch(
     EXPR = match.arg(version),
-    v1 = rSW2_glovars[["kSOILWAT2"]][["VegTypeNames1"]][ids],
+    v1 = {
+      tmp <- rSW2_glovars[["kSOILWAT2"]][["VegTypeNames1"]]
+      if (isTRUE(shortened)) {
+        tmp <- substr(tmp, 1L, c(4L, 5L, 4L, 5L))
+      }
+      tmp[ids]
+    },
     v2 = rSW2_glovars[["kSOILWAT2"]][["VegTypeNames2"]]
   )
 }
