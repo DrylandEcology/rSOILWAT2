@@ -2,32 +2,30 @@
 
 # A table with up to `MAX_LAYERS` rows (soil layers) and 12 columns:
 #   - depth = (cm) lower limit of layer; layers must be in order of depth
-#   - matricd = (g / cm^3) soil density of the < 2 mm fraction
-#     (i.e., matric component)
-#   - gravel_content = (frac, 0-1) proportion of rocks/rock fragments/gravel
+#   - density = (g / cm^3) soil density (bulk or matric, see parameter in siteparam.in)
+#   - %gravel = (frac, 0-1) proportion of rocks/coarse fragments/gravel
 #     by volume (i.e., particles > 2 mm)
-#   - evco = (frac, 0-1) proportion of potential bare soil evaporation
-#   - trco = (frac, 0-1) proportion of potential transpiration for each
-#     vegetation type (tree, forb, shrub, grass),
-#     e.g., estimated as proportion of active roots
 #   - %sand = (frac, 0-1) proportion of sand by weight
 #   - %clay = (frac, 0-1) proportion of clay by weight
+#   - %om = (frac, 0-1) proportion of organic matter by weight
 #   - imperm = (frac, 0-1) proportion of 'impermeability' to water
 #     percolation(/infiltration/drainage)
 #   - soiltemp = (C) initial temperature
-#   - %om = (frac, 0-1) proportion of organic matter by weight
+#   - evco = (frac, 0-1) coefficient of potential bare soil evaporation
+#   - trco = (frac, 0-1) coefficient of potential transpiration for each
+#     vegetation type (see key2veg), e.g., estimated as proportion of active roots
 
 # USER: the evco and trco columns must sum to 1.0 or they will be normalized.
 
 # The minimum number of soil layers is 1 and the maximum number is `MAX_LAYERS`
 # which is defined in `SW_Defines.h`.
 
-# depth    matricd    gravel_content    evco    trco_grass    trco_shrub    trco_tree    trco_forb    %sand    %clay    imperm    soiltemp   %om
-  5.0      1.430      0.100          0.813        0.0496         0.134       0.0496        0.134    0.510    0.150     0.000      -1.000     0.0
- 10.0      1.410      0.100          0.153        0.0495         0.094       0.0495        0.094    0.440    0.260     0.000      -1.000     0.0
- 20.0      1.390      0.100          0.034        0.1006         0.176       0.1006        0.176    0.350    0.410     0.000      -1.000     0.0
- 30.0      1.390      0.100          0.000        0.1006         0.175       0.1006        0.175    0.320    0.450     0.000      -1.000     0.0
- 40.0      1.380      0.200          0.000        0.1006         0.110       0.1006        0.110    0.310    0.470     0.000       0.000     0.0
- 60.0      1.150      0.200          0.000        0.1997         0.109       0.1997        0.109    0.320    0.470     0.000       0.000     0.0
- 80.0      1.310      0.200          0.000        0.1997         0.101       0.1997        0.101    0.570    0.280     0.000       1.000     0.0
-100.0      1.310      0.200          0.000        0.1997         0.101       0.1997        0.101    0.570    0.280     0.000       1.000     0.0
+# depth    density    %gravel  %sand    %clay     %om    imperm    soiltemp    evco   trco_treeNL   trco_treeBL    trco_shrub    trco_forbs trco_grassC3   trco_grassC4
+  5.0      1.430      0.100    0.510    0.150     0.0     0.000      -1.000    0.813       0.0496        0.0496         0.134        0.134        0.0496         0.0496
+ 10.0      1.410      0.100    0.440    0.260     0.0     0.000      -1.000    0.153       0.0495        0.0495         0.094        0.094        0.0495         0.0495
+ 20.0      1.390      0.100    0.350    0.410     0.0     0.000      -1.000    0.034       0.1006        0.1006         0.176        0.176        0.1006         0.1006
+ 30.0      1.390      0.100    0.320    0.450     0.0     0.000      -1.000    0.000       0.1006        0.1006         0.175        0.175        0.1006         0.1006
+ 40.0      1.380      0.200    0.310    0.470     0.0     0.000       0.000    0.000       0.1006        0.1006         0.110        0.110        0.1006         0.1006
+ 60.0      1.150      0.200    0.320    0.470     0.0     0.000       0.000    0.000       0.1997        0.1997         0.109        0.109        0.1997         0.1997
+ 80.0      1.310      0.200    0.570    0.280     0.0     0.000       1.000    0.000       0.1997        0.1997         0.101        0.101        0.1997         0.1997
+100.0      1.310      0.200    0.570    0.280     0.0     0.000       1.000    0.000       0.1997        0.1997         0.101        0.101        0.1997         0.1997

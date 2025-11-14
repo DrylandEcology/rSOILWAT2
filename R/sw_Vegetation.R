@@ -108,9 +108,16 @@
 #'   }
 #'   \item{Rel_Abundance_L1}{A numeric vector of length 5 with
 #'     relative abundance/cover [0-1] values of \pkg{rSOILWAT2} land cover
-#'     types that sum to 1.
-#'     The names of the 5 types are: \var{SW_TREES}, \var{SW_SHRUBS},
+#'     types (\code{"v1"}) that sum to 1.
+#'     The names of the 5 types are: \var{SW_TREES}, \var{SW_SHRUB},
 #'     \var{SW_FORBS}, \var{SW_GRASS}, and \var{SW_BAREGROUND}.
+#'   }
+#'   \item{Rel_Abundance_L2}{A numeric vector of length 7 with
+#'     relative abundance/cover [0-1] values of \pkg{rSOILWAT2} land cover
+#'     types (\code{"v2"}) that sum to 1.
+#'     The names of the 7 types are: \var{SW_TREENL}, \var{SW_TREEBL},
+#'     \var{SW_SHRUB}, \var{SW_FORBS}, \var{SW_GRASS3}, \var{SW_GRASS4},
+#'     and \var{SW_BAREGROUND}.
 #'   }
 #'   \item{Grasses}{A numeric vector of length 3 with
 #'     relative abundance/cover [0-1] values of the grass types that sum to 1,
@@ -178,7 +185,7 @@
 #' ## SOILWAT2 uses the same algorithm internally if requested to do so
 #' # Obtain cover values from SOILWAT2 output
 #' swin <- rSOILWAT2::sw_exampleData
-#' swin@prod@veg_method <- 1L
+#' swin@prod2@veg_method <- 1L
 #' swout <- sw_exec(swin)
 #' tmp <- slot(slot(swout, "BIOMASS"), "Year")
 #' pnvsim <- tmp[1, grep("fCover", colnames(tmp)), drop = TRUE]
@@ -190,15 +197,39 @@
 #'   MAT_C = climex[["MAT_C"]],
 #'   mean_monthly_ppt_mm = 10 * climex[["meanMonthlyPPTcm"]],
 #'   mean_monthly_Temp_C = climex[["meanMonthlyTempC"]]
-#' )[["Rel_Abundance_L1"]]
+#' )[["Rel_Abundance_L2"]]
 #'
 #' # They are identical
 #' identical(pnvsim[["fCover_shrub"]], pnvex[["SW_SHRUB"]])
-#' identical(pnvsim[["fCover_grass"]], pnvex[["SW_GRASS"]])
+#' identical(pnvsim[["fCover_grassC3"]], pnvex[["SW_GRASS3"]])
 #' identical(pnvsim[["fCover_forbs"]], pnvex[["SW_FORBS"]])
-#' identical(pnvsim[["fCover_tree"]], pnvex[["SW_TREES"]])
+#' identical(pnvsim[["fCover_treeNL"]], pnvex[["SW_TREENL"]])
 #' identical(pnvsim[["fCover_BareGround"]], pnvex[["SW_BAREGROUND"]])
 #'
+#' # Comparison between v1 and v2 vegetation types
+#' pnv <- estimate_PotNatVeg_composition(
+#'   MAP_mm = 10 * climex[["MAP_cm"]],
+#'   MAT_C = climex[["MAT_C"]],
+#'   mean_monthly_ppt_mm = 10 * climex[["meanMonthlyPPTcm"]],
+#'   mean_monthly_Temp_C = climex[["meanMonthlyTempC"]],
+#'   dailyC4vars = climex[["dailyC4vars"]]
+#' )
+#'
+#' ids2f1 <- mapVegTypes("2from1", order = "SOILWAT2")
+#' mappedFrom1 <- c(which(ids2f1 > 0L), 7L)
+#' ids1 <- c(ids2f1, 5L)
+#'
+#' tmpn <- tmpv <- rep(NA, length(pnv[["Rel_Abundance_L2"]]))
+#' tmpn[mappedFrom1] <- names(pnv[["Rel_Abundance_L1"]])[ids1]
+#' tmpv[mappedFrom1] <- pnv[["Rel_Abundance_L1"]][ids1]
+#'
+#' data.frame(
+#'   v2_name = names(pnv[["Rel_Abundance_L2"]]),
+#'   v2_value = pnv[["Rel_Abundance_L2"]],
+#'   v1_name = tmpn,
+#'   v1_value = tmpv,
+#'   row.names = NULL
+#' )
 #'
 #' @export
 estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
@@ -344,7 +375,7 @@ estimate_PotNatVeg_composition <- function(MAP_mm, MAT_C,
 #'
 #' @examples
 #' sw_in <- rSOILWAT2::sw_exampleData
-#' tmp <- swProd_MonProd_veg(sw_in, "SW_GRASS")
+#' tmp <- swProd_MonProd_veg(sw_in, namesVegTypes("v2")[[5L]])
 #' phen_reference <- data.frame(
 #'   tmp,
 #'   Litter_pct = tmp[, "Litter"] / max(tmp[, "Litter"]),
@@ -1408,6 +1439,8 @@ TranspCoeffByVegType <- function(
 #'   annuals functional groups. The sum of \code{fgrass_c3c4ann} is 1.
 #' @param trco_table A named list with two elements. Default values
 #'   are taken from \code{\link{sw2_trco_table}}.
+#' @param version A string. The version of vegetation types,
+#' see \code{\link{namesVegTypes}}.
 #'
 #' @seealso \code{\link{TranspCoeffByVegType}}
 #'
@@ -1429,47 +1462,74 @@ TranspCoeffByVegType <- function(
 #'   fgrass_c3c4ann = veg_cover[["Grasses"]]
 #' )
 #'
+#' estimate_PotNatVeg_roots(
+#'   layers_depth = c(5, 10, 20, 30, 40, 50, 100, 200),
+#'   fgrass_c3c4ann = veg_cover[["Grasses"]],
+#'   version = "v1"
+#' )
+#'
 #' @export
 estimate_PotNatVeg_roots <- function(
   layers_depth,
   trco_type_by_veg = list(
-    grass_C3 = "SchenkJackson2003_PCdry_grasses",
-    grass_C4 = "SchenkJackson2003_PCdry_grasses",
-    grass_annuals = "Jacksonetal1996_crops",
+    treeNL = "Bradfordetal2014_LodgepolePine",
+    treeBL = "Bradfordetal2014_LodgepolePine",
     shrub = "SchenkJackson2003_PCdry_shrubs",
-    forb = "SchenkJackson2003_PCdry_forbs",
-    tree = "Bradfordetal2014_LodgepolePine"
+    forbs = "SchenkJackson2003_PCdry_forbs",
+    grassC3 = "SchenkJackson2003_PCdry_grasses",
+    grassC4 = "SchenkJackson2003_PCdry_grasses",
+    grass_annuals = "Jacksonetal1996_crops"
   ),
   trco_adj_by_veg = list(
-    grass_C3 = "positive",
-    grass_C4 = "positive",
-    grass_annuals = "positive",
+    treeNL = "positive",
+    treeBL = "positive",
     shrub = "positive",
-    forb = "positive",
-    tree = "positive"
+    forbs = "positive",
+    grassC3 = "positive",
+    grassC4 = "positive",
+    grass_annuals = "positive"
   ),
-  fgrass_c3c4ann = c(grass_C3 = NA, grass_C4 = NA, grass_annuals = NA),
-  trco_table = rSOILWAT2::sw2_trco_table
+  fgrass_c3c4ann = c(grassC3 = NA, grassC4 = NA, grass_annuals = NA),
+  trco_table = rSOILWAT2::sw2_trco_table,
+  version = c("v2", "v1")
 ) {
-  n_slyrs <- length(layers_depth)
-  veg_types <- c("Grass", "Shrub", "Tree", "Forb")
-
-  res_trco <- array(
-    data = NA,
-    dim = c(n_slyrs, length(veg_types)),
-    dimnames = list(NULL, veg_types)
+  stopifnot(
+    names(trco_type_by_veg) %in% c(namesVegTypes("v2"), "grass_annuals")
   )
 
-  for (k1 in seq_along(veg_types)) {
+  n_slyrs <- length(layers_depth)
+
+  version <- match.arg(version)
+  vegTypeNames <- switch(
+    EXPR = version,
+    v1 = namesVegTypes("v1", shortened = TRUE),
+    v2 = namesVegTypes("v2")
+  )
+  vegTypes <- switch(
+    EXPR = version,
+    v1 = {
+      tmp <- mapVegTypes("2from1")
+      ids <- tmp > 0L
+      namesVegTypes("v2")[ids][order(tmp[ids])]
+    },
+    v2 = namesVegTypes("v2")
+  )
+
+  res_trco <- array(
+    dim = c(n_slyrs, length(vegTypes)),
+    dimnames = list(NULL, vegTypeNames)
+  )
+
+  for (k1 in seq_along(vegTypes)) {
     tmp_type <- sort(grep(
-      veg_types[k1],
+      vegTypes[[k1]],
       names(trco_type_by_veg),
       ignore.case = TRUE,
       value = TRUE
     ))
 
     tmp_adj <- sort(grep(
-      veg_types[k1],
+      vegTypes[[k1]],
       names(trco_adj_by_veg),
       ignore.case = TRUE,
       value = TRUE
@@ -1478,7 +1538,7 @@ estimate_PotNatVeg_roots <- function(
     if (!all(tmp_type == tmp_adj)) {
       stop(
         "Names of `trco_type_by_veg` do not match ",
-        "`trco_adj_by_veg` for ", shQuote(veg_types[k1]),
+        "`trco_adj_by_veg` for ", shQuote(vegTypeNames[[k1]]),
         call. = FALSE
       )
     }
@@ -1487,22 +1547,20 @@ estimate_PotNatVeg_roots <- function(
       isTRUE(!anyNA(unlist(trco_type_by_veg[tmp_type]))) &&
       isTRUE(!anyNA(unlist(trco_adj_by_veg[tmp_adj])))
     ) {
-      if (length(tmp_type) > 1 && veg_types[k1] == "Grass") {
+      if (length(tmp_type) > 1 && vegTypeNames[[k1]] == "Grass") {
 
-        tmp1 <- sapply(
-          strsplit(names(fgrass_c3c4ann), split = "_", fixed = TRUE),
-          FUN = function(x) x[[2]]
+        n1 <- nchar(tmp_type)
+        n2 <- nchar(names(fgrass_c3c4ann))
+        tmp_igfcov <- match(
+          substr(tolower(tmp_type), n1 - 1L, n1),
+          substr(tolower(names(fgrass_c3c4ann)), n2 - 1L, n2),
+          nomatch = NA
         )
-        tmp2 <- sapply(
-          strsplit(tmp_type, split = "_", fixed = TRUE),
-          FUN = function(x) x[[2]]
-        )
-        tmp_igfcov <- match(tolower(tmp2), tolower(tmp1), nomatch = NA)
 
         if (anyNA(tmp_igfcov)) {
           stop(
             "Names of `fgrass_c3c4ann` do not match ",
-            "`trco_adj_by_veg` for ", shQuote(veg_types[k1]),
+            "`trco_adj_by_veg` for ", shQuote(vegTypeNames[[k1]]),
             call. = FALSE
           )
         }
@@ -1536,7 +1594,7 @@ estimate_PotNatVeg_roots <- function(
 
       } else {
         stop(
-          "Root information for ", shQuote(veg_types[k1]), " incomplete.",
+          "Root information for ", shQuote(vegTypeNames[[k1]]), " incomplete.",
           call. = FALSE
         )
       }
@@ -1550,7 +1608,7 @@ estimate_PotNatVeg_roots <- function(
       if (!is_good) {
         warning(
           "Root information for ",
-          shQuote(veg_types[k1]),
+          shQuote(vegTypeNames[[k1]]),
           " is problematic: ",
           paste(round(tmp_root, 4L), collapse = " / "),
           "; it was re-set to 0s.",
@@ -1560,12 +1618,12 @@ estimate_PotNatVeg_roots <- function(
         tmp_root <- rep(0, n_slyrs)
       }
 
-      res_trco[, veg_types[k1]] <- tmp_root
+      res_trco[, vegTypeNames[[k1]]] <- tmp_root
 
     } else {
       warning(
         "No rooting profile selected for ",
-        shQuote(veg_types[k1]), ".",
+        shQuote(vegTypeNames[[k1]]), ".",
         call. = FALSE
       )
     }
@@ -1585,48 +1643,81 @@ estimate_PotNatVeg_roots <- function(
 #'   names of a `MonthlyVeg` element of an [`swProd-class`] object
 #' @param prod_input A data frame. The values that replace the selected
 #'   biomass values.
-#' @param prod_default A [`swProd-class`] object that contains
-#'   the `MonthlyVeg` element with biomass values to be updated.
+#' @param prod_default A data frame with the `MonthlyVeg` element of
+#' a [`swProd2-class`] object, or an object from which to retrieve a
+#' a [`swProd2-class`] object.
 #'
 #' @return The requested `MonthlyVeg` element from `prod_default` with updated
 #'   values.
 #'
+#' @examples
+#' swin <- rSOILWAT2::sw_exampleData
+#' vt <- "shrub"
+#' use <- stats::setNames(
+#'   c(rep(TRUE, 12L), rep(FALSE, 12L)),
+#'   nm = c(
+#'     paste0(vt, "_Biomass_m", seq_len(12L)),
+#'     paste0(vt, "_FractionLive_m", seq_len(12L))
+#'   )
+#' )
+#' pi <- matrix(data = rep(100, length(use)), nrow = 1L)
+#' colnames(pi) <- names(use)
+#'
+#' res1 <- rSOILWAT2::update_biomass(vt, use, pi, swin)
+#' x <- rSOILWAT2::swProd_MonProd_veg(swin, vt)
+#' res2 <- rSOILWAT2::update_biomass(vt, use, pi, x)
+#'
 #' @export
 #' @md
-update_biomass <- function(
-  fg = c("Grass", "Shrub", "Tree", "Forb"),
-  use,
-  prod_input,
-  prod_default
-) {
-
-  fg <- match.arg(fg)
-
+update_biomass <- function(fg, use, prod_input, prod_default) {
   comps <- c("_Litter", "_Biomass", "_FractionLive", "_LAIconv")
   veg_ids <- lapply(
     comps,
     function(x) grep(paste0(fg, x), names(use))
   )
+  if (all(lengths(veg_ids) == 0L)) {
+    warning(
+      sprintf("'%s' is not a known vegetation type in argument 'use'.", fg),
+      call. = FALSE
+    )
+  }
   veg_incl <- lapply(veg_ids, function(x) use[x])
 
-  temp <- swProd_MonProd_veg(prod_default, fg)
-  if (any(unlist(veg_incl))) {
-    for (k in seq_along(comps)) if (any(veg_incl[[k]]))
-      temp[veg_incl[[k]], k] <-
-        as.numeric(prod_input[, veg_ids[[k]][veg_incl[[k]]]])
+  res <- if (inherits(prod_default, c("swInputData", "swProd", "swProd2"))) {
+    rSOILWAT2::swProd_MonProd_veg(prod_default, fg)
+  } else {
+    prod_default
   }
 
-  temp
+  if (any(unlist(veg_incl))) {
+    for (k in seq_along(comps)) {
+      if (any(veg_incl[[k]])) {
+        res[veg_incl[[k]], k] <- as.numeric(
+          prod_input[, veg_ids[[k]][veg_incl[[k]]]]
+        )
+      }
+    }
+  }
+
+  res
 }
 
 
 # Determine minimal number of rooted soil layers with veg > 0
 get_min_rooted_soil_layers <- function(swInputData) {
   veg_comp <- swProd_Composition(swInputData)
-  soils <- swSoils_Layers(swInputData)
-  var_veg1 <- c("Grass", "Shrub", "Tree", "Forb")
-  var_trco <- paste0("transp", var_veg1, "_frac")
+  var_veg1 <- namesVegTypes("v2")
   var_comp <- sapply(var_veg1, grep, x = names(veg_comp), value = TRUE)
+
+  soils <- swSoils_Layers(swInputData)
+  var_trco <- paste0("TrCo_", var_veg1)
+  if (!all(var_trco %in% colnames(soils))) {
+    stop(
+      "Could not locate expected columns in soils data: ",
+      toString(setdiff(var_trco, colnames(soils))),
+      call. = FALSE
+    )
+  }
 
   tmp <- apply(
     soils[, var_trco, drop = FALSE],

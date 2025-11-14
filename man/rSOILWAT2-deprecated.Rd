@@ -27,6 +27,36 @@
 \alias{swProd_MonProd_shrub<-,swInputData-method}
 \alias{swProd_MonProd_tree<-,swInputData-method}
 \alias{swProd_MonProd_forb<-,swInputData-method}
+\alias{get_swProd,swProd-method}
+\alias{swProd_Composition,swProd-method}
+\alias{swProd_Albedo,swProd-method}
+\alias{swProd_CanopyHeight,swProd-method}
+\alias{swProd_VegInterParam,swProd-method}
+\alias{swProd_LitterInterParam,swProd-method}
+\alias{swProd_EsTpartitioning_param,swProd-method}
+\alias{swProd_Es_param_limit,swProd-method}
+\alias{swProd_Shade,swProd-method}
+\alias{swProd_HydrRedstro_use,swProd-method}
+\alias{swProd_HydrRedstro,swProd-method}
+\alias{swProd_CritSoilWaterPotential,swProd-method}
+\alias{swProd_CO2Coefficients,swProd-method}
+\alias{swProd_MonProd_veg,swProd,numeric-method}
+\alias{swProd_MonProd_veg,swProd,character-method}
+\alias{set_swProd<-,swProd-method}
+\alias{swProd_Composition<-,swProd-method}
+\alias{swProd_Albedo<-,swProd-method}
+\alias{swProd_CanopyHeight<-,swProd-method}
+\alias{swProd_VegInterParam<-,swProd-method}
+\alias{swProd_LitterInterParam<-,swProd-method}
+\alias{swProd_EsTpartitioning_param<-,swProd-method}
+\alias{swProd_Es_param_limit<-,swProd-method}
+\alias{swProd_Shade<-,swProd-method}
+\alias{swProd_HydrRedstro_use<-,swProd-method}
+\alias{swProd_HydrRedstro<-,swProd-method}
+\alias{swProd_CritSoilWaterPotential<-,swProd-method}
+\alias{swProd_CO2Coefficients<-,swProd-method}
+\alias{swProd_MonProd_veg<-,swProd,numeric,matrix-method}
+\alias{swProd_MonProd_veg<-,swProd,character,matrix-method}
 \title{Deprecated functions in package \pkg{rSOILWAT2}}
 \usage{
 sw_outputData(inputData)
@@ -78,6 +108,66 @@ swProd_MonProd_forb(object) <- value
 \S4method{swProd_MonProd_tree}{swInputData}(object) <- value
 
 \S4method{swProd_MonProd_forb}{swInputData}(object) <- value
+
+\S4method{get_swProd}{swProd}(object)
+
+\S4method{swProd_Composition}{swProd}(object)
+
+\S4method{swProd_Albedo}{swProd}(object)
+
+\S4method{swProd_CanopyHeight}{swProd}(object)
+
+\S4method{swProd_VegInterParam}{swProd}(object)
+
+\S4method{swProd_LitterInterParam}{swProd}(object)
+
+\S4method{swProd_EsTpartitioning_param}{swProd}(object)
+
+\S4method{swProd_Es_param_limit}{swProd}(object)
+
+\S4method{swProd_Shade}{swProd}(object)
+
+\S4method{swProd_HydrRedstro_use}{swProd}(object)
+
+\S4method{swProd_HydrRedstro}{swProd}(object)
+
+\S4method{swProd_CritSoilWaterPotential}{swProd}(object)
+
+\S4method{swProd_CO2Coefficients}{swProd}(object)
+
+\S4method{swProd_MonProd_veg}{swProd,numeric}(object, vegtype)
+
+\S4method{swProd_MonProd_veg}{swProd,character}(object, vegtype)
+
+\S4method{set_swProd}{swProd}(object) <- value
+
+\S4method{swProd_Composition}{swProd}(object) <- value
+
+\S4method{swProd_Albedo}{swProd}(object) <- value
+
+\S4method{swProd_CanopyHeight}{swProd}(object) <- value
+
+\S4method{swProd_VegInterParam}{swProd}(object) <- value
+
+\S4method{swProd_LitterInterParam}{swProd}(object) <- value
+
+\S4method{swProd_EsTpartitioning_param}{swProd}(object) <- value
+
+\S4method{swProd_Es_param_limit}{swProd}(object) <- value
+
+\S4method{swProd_Shade}{swProd}(object) <- value
+
+\S4method{swProd_HydrRedstro_use}{swProd}(object) <- value
+
+\S4method{swProd_HydrRedstro}{swProd}(object) <- value
+
+\S4method{swProd_CritSoilWaterPotential}{swProd}(object) <- value
+
+\S4method{swProd_CO2Coefficients}{swProd}(object) <- value
+
+\S4method{swProd_MonProd_veg}{swProd,numeric,matrix}(object, vegtype) <- value
+
+\S4method{swProd_MonProd_veg}{swProd,character,matrix}(object, vegtype) <- value
 }
 \arguments{
 \item{inputData}{an object of the \var{S4} class
@@ -87,6 +177,8 @@ swProd_MonProd_forb(object) <- value
 \item{object}{An object of a \code{rSOILWAT2} class.}
 
 \item{value}{A value to assign to a specific slot of the object.}
+
+\item{vegtype}{The name or index of a vegetation type.}
 }
 \description{
 Executing a deprecated function will warn and tell you which function

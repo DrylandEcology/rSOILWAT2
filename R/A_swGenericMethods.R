@@ -201,7 +201,19 @@ format_timestamp <- function(object) {
 #'
 #' @section Details:
 #' List of changes:
-#'   * Changes with `v6.4.0`:
+#'   * Changes with `v6.5.0`:
+#'       * class [`swSite-class`]: new slot `"SoilTemperatureBoundaryMethod"`
+#'       * class [`swProd-class`]: new slots `"nYearsDynamicShort"` and
+#'         `"nYearsDynamicLong"`
+#'       * new class [`swProd2-class`] that supersedes [`swProd-class`];
+#'         an upgrade crosswalks old to the new vegetation types
+#'         (retaining old values) if an old `"swProd"` slot but no
+#'         new `"swProd2"` slot is present
+#'       * class [`swSoils-class`]: slot `"Layers"` reorganized several columns
+#'         and replaced rooting profile columns from old with new vegetation
+#'         types
+#'       * class [`swCarbon-class`]: new slot `"CO2ppmVegRef"`
+#'  * Changes with `v6.4.0`:
 #'       * class [`swProd-class`]: new slots `"vegYear"` and
 #'         `"isBiomAsIf100Cover"`
 #'       * class [`swWeather-class`]: new slot `"correctWeatherValues"`
@@ -1368,6 +1380,12 @@ setGeneric(
 
 ########PROD############
 #' \code{get_swProd}
+#' @section Notes:
+#' The method for class \code{\linkS4class{swProd}} is deprecated,
+#' see \code{\link{get_swProd,swProd-method}}; please use class
+#' \code{\linkS4class{swProd2}} instead, see
+#' \code{\link{get_swProd,swProd2-method}}.
+#'
 #' @param object An object of class \code{\linkS4class{swProd}} or
 #'   \code{\linkS4class{swInputData}}.
 #' @seealso \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
@@ -1792,6 +1810,19 @@ setGeneric(
   function(object) standardGeneric("swSite_SoilTemperatureFlag")
 )
 
+# swSite_SoilTempBoundaryMethod() should be called
+# swSite_SoilTemperatureBoundaryMethod() for consistency but that is
+# an "overlong name" (> 32)
+
+#' \code{swSite_SoilTempBoundaryMethod}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_SoilTempBoundaryMethod",
+  function(object) standardGeneric("swSite_SoilTempBoundaryMethod")
+)
+
 #' \code{swSite_SoilTemperatureConsts}
 #' @param object An object of class \code{\linkS4class{swSite}} or
 #'   \code{\linkS4class{swInputData}}.
@@ -1970,6 +2001,16 @@ setGeneric(
 setGeneric(
   "swSite_SoilTemperatureFlag<-",
   function(object, value) standardGeneric("swSite_SoilTemperatureFlag<-")
+)
+
+#' \code{swSite_SoilTempBoundaryMethod<-}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_SoilTempBoundaryMethod<-",
+  function(object, value) standardGeneric("swSite_SoilTempBoundaryMethod<-")
 )
 
 #' \code{swSite_SoilTemperatureConsts<-}

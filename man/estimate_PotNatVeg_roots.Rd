@@ -6,14 +6,16 @@
 \usage{
 estimate_PotNatVeg_roots(
   layers_depth,
-  trco_type_by_veg = list(grass_C3 = "SchenkJackson2003_PCdry_grasses", grass_C4 =
-    "SchenkJackson2003_PCdry_grasses", grass_annuals = "Jacksonetal1996_crops", shrub =
-    "SchenkJackson2003_PCdry_shrubs", forb = "SchenkJackson2003_PCdry_forbs", tree =
-    "Bradfordetal2014_LodgepolePine"),
-  trco_adj_by_veg = list(grass_C3 = "positive", grass_C4 = "positive", grass_annuals =
-    "positive", shrub = "positive", forb = "positive", tree = "positive"),
-  fgrass_c3c4ann = c(grass_C3 = NA, grass_C4 = NA, grass_annuals = NA),
-  trco_table = rSOILWAT2::sw2_trco_table
+  trco_type_by_veg = list(treeNL = "Bradfordetal2014_LodgepolePine", treeBL =
+    "Bradfordetal2014_LodgepolePine", shrub = "SchenkJackson2003_PCdry_shrubs", forbs =
+    "SchenkJackson2003_PCdry_forbs", grassC3 = "SchenkJackson2003_PCdry_grasses", grassC4
+    = "SchenkJackson2003_PCdry_grasses", grass_annuals = "Jacksonetal1996_crops"),
+  trco_adj_by_veg = list(treeNL = "positive", treeBL = "positive", shrub = "positive",
+    forbs = "positive", grassC3 = "positive", grassC4 = "positive", grass_annuals =
+    "positive"),
+  fgrass_c3c4ann = c(grassC3 = NA, grassC4 = NA, grass_annuals = NA),
+  trco_table = rSOILWAT2::sw2_trco_table,
+  version = c("v2", "v1")
 )
 }
 \arguments{
@@ -39,6 +41,9 @@ annuals functional groups. The sum of \code{fgrass_c3c4ann} is 1.}
 
 \item{trco_table}{A named list with two elements. Default values
 are taken from \code{\link{sw2_trco_table}}.}
+
+\item{version}{A string. The version of vegetation types,
+see \code{\link{namesVegTypes}}.}
 }
 \description{
 Calculate rooting profile for a soil profile from \var{lookup} tables
@@ -59,6 +64,12 @@ veg_cover <- rSOILWAT2::estimate_PotNatVeg_composition(
 estimate_PotNatVeg_roots(
   layers_depth = c(5, 10, 20, 30, 40, 50, 100, 200),
   fgrass_c3c4ann = veg_cover[["Grasses"]]
+)
+
+estimate_PotNatVeg_roots(
+  layers_depth = c(5, 10, 20, 30, 40, 50, 100, 200),
+  fgrass_c3c4ann = veg_cover[["Grasses"]],
+  version = "v1"
 )
 
 }
