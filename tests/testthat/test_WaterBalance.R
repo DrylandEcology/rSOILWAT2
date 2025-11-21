@@ -7,7 +7,7 @@
 tol <- 10 ^ (-rSW2_glovars[["kSOILWAT2"]][["kINT"]][["OUT_DIGITS"]])
 SW_OUTNPERIODS <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
 OutPeriods <- rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]]
-veg_types <- c("tree", "shrub", "forbs", "grass")
+veg_types <- rSW2_glovars[["kSOILWAT2"]][["VegTypeNames2"]]
 dir_test_data <- file.path("..", "test_data")
 temp <- list.files(dir_test_data, pattern = "Ex")
 temp <- sapply(strsplit(temp, "_", fixed = TRUE), function(x) x[[1]])

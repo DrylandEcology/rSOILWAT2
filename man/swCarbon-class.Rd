@@ -77,10 +77,13 @@ of the scenario that is being simulated. This slot is not used in
 \pkg{SOILWAT2} input object.}
 
 \item{\code{DeltaYear}}{Object of class \code{"integer"}, that represents the number
-of years in the future that this simulation is being run.}
+of years in the future that this simulation is being run
+(unused since \code{"v6.5.0"}).}
 
 \item{\code{CO2ppm}}{Object of class \code{"matrix"}, that holds years in the first
 column and CO2 ppm concentrations in the second column.}
+
+\item{\code{CO2ppmVegRef}}{Atmospheric CO2 in the vegetation reference year.}
 }}
 
 \examples{

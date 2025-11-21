@@ -4,6 +4,8 @@
 #  Copy "Ex1_input.rds" to "versioned_swInputData/" (with updated name)
 #  if significant changes occurred.
 
+tol <- sqrt(.Machine[["double.eps"]])
+
 test_that("Upgrade old rSOILWAT2 input objects", {
   #--- Locate versioned `swInputData` objects
   dir_test_data <- file.path("..", "test_data", "versioned_swInputData")
@@ -15,6 +17,8 @@ test_that("Upgrade old rSOILWAT2 input objects", {
 
   expect_gt(length(fnames_vdata), 0L)
 
+  sw_weather <- readRDS(file.path("..", "test_data", "Ex1_weather.rds"))
+
 
   # Upgrade `swInputData`
   for (k in seq_along(fnames_vdata)) {
@@ -24,7 +28,16 @@ test_that("Upgrade old rSOILWAT2 input objects", {
       expect_error(validObject(xold))
     }
 
-    expect_true(validObject(sw_upgrade(xold)))
+    xnew <- sw_upgrade(xold)
+
+    expect_true(validObject(xnew))
+
+    # Quick patches
+    ids <- which(xnew@cloud@Cloud["SnowDensity_kg/m^3", ] < tol)
+    xnew@cloud@Cloud["SnowDensity_kg/m^3", ids] <- 1
+
+    # Test that simulation does not fail with upgraded object
+    expect_no_error(suppressWarnings(sw_exec(xnew, weatherList = sw_weather)))
   }
 })
 
