@@ -151,6 +151,16 @@ calc_SiteClimate <- function(weatherList, year.start = NA, year.end = NA,
 #'   lookup_annual_CO2a(start = 1980, end = 2020, name_co2 = "CMIP5_historical")
 #' )
 #'
+#' # aCO2 for simulation run
+#' swin <- rSOILWAT2::sw_exampleData
+#' swCarbon_Scenario(swin) <- "CMIP6_historical"
+#' swCarbon_CO2ppm(swin) <- lookup_annual_CO2a(
+#'   start = min(swin@prod2@vegYear, swYears_StartYear(swin)),
+#'   end = swYears_EndYear(swin),
+#'   name_co2 = swCarbon_Scenario(swin)
+#' )
+#' swout <- sw_exec(swin)
+#'
 #' @export
 lookup_annual_CO2a <- function(
   start,
