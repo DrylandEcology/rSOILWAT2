@@ -73,9 +73,12 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
   #endif
 
   if (from_files) {
-    SW_CTL_read_inputs_from_disk(&SoilWatRun, &SoilWatDomain,
-                                 &SoilWatDomain.hasConsistentSoilLayerDepths,
-                                 LogInfo);
+     SW_CTL_read_inputs_from_disk(
+        &SoilWatRun,
+        &SoilWatDomain,
+        &SoilWatDomain.hasConsistentSoilLayerDepths,
+        LogInfo
+    );
 
   } else { //Use R data to set the data
     #ifdef RSWDEBUG
@@ -120,7 +123,7 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
       }
     }
 
-    onSet_SW_VPD(GET_SLOT(InputData, install("prod")), LogInfo);
+    onSet_SW_VPD(GET_SLOT(InputData, install("prod2")), LogInfo);
     #ifdef RSWDEBUG
     if (debug) sw_printf(" > 'veg'");
     #endif
@@ -179,7 +182,13 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
         return; // Exit function prematurely due to error
     }
 
-    onSet_swCarbon(GET_SLOT(InputData, install("carbon")), LogInfo);
+    onSet_swCarbon(
+        GET_SLOT(InputData, install("carbon")),
+        SoilWatRun.ModelIn.startyr,   // set by onSet_SW_MDL()
+        SoilWatRun.ModelIn.endyr,     // set by onSet_SW_MDL()
+        SoilWatRun.VegProdIn.vegYear, // set by onSet_SW_VPD()
+        LogInfo
+    );
     #ifdef RSWDEBUG
     if (debug) sw_printf(" > 'CO2'");
     #endif

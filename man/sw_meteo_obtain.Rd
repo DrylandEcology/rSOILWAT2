@@ -63,13 +63,17 @@ The argument \code{x} takes a \code{NRCS} \code{SCAN/SNOTEL} station code.
 \examples{
 ## Example: Daymet weather for "Mccracken Mesa" location
 ##   (see `mm_scan[["metadata"]]`)
-if (requireNamespace("curl") && curl::has_internet()) {
-  mm_dm <- rSOILWAT2::sw_meteo_obtain_DayMet(
-    x = c(longitude = -109.3378, latitude = 37.44671),
-    start_year = 2015,
-    end_year = 2023
+mm_dm <- if (requireNamespace("curl") && curl::has_internet()) {
+  try(
+    rSOILWAT2::sw_meteo_obtain_DayMet(
+      x = c(longitude = -109.3378, latitude = 37.44671),
+      start_year = 2015,
+      end_year = 2023
+    )
   )
+}
 
+if (!is.null(mm_dm) && !inherits(mm_dm, "try-error")) {
   # Fill in missing values on leap days
   mm_dm_wdata <- rSOILWAT2::dbW_fixWeather(mm_dm[["weatherDF"]])
 
@@ -89,10 +93,10 @@ if (requireNamespace("curl") && curl::has_internet()) {
   rSOILWAT2::swCloud_WindSpeed(swin)[] <- rep(1.5, times = 12L)
   rSOILWAT2::swCloud_SkyCover(swin)[] <- NA_real_
 
-  # Obtain atmospheric CO2 concentration
+  # Obtain atmospheric CO2 concentration (including for vegetation reference)
   rSOILWAT2::swCarbon_Scenario(swin) <- "CMIP6_historical|CMIP6_SSP119"
   rSOILWAT2::swCarbon_CO2ppm(swin) <- rSOILWAT2::lookup_annual_CO2a(
-    start = 2015,
+    start = min(swin@prod2@vegYear, 2015),
     end = 2023,
     name_co2 = rSOILWAT2::swCarbon_Scenario(swin)
   )
@@ -109,8 +113,8 @@ if (requireNamespace("curl") && curl::has_internet()) {
 }
 
 ## Example: SCAN station "Mccracken Mesa"
-if (requireNamespace("curl") && curl::has_internet()) {
-  mm_scan <- try(
+mm_scan <- if (requireNamespace("curl") && curl::has_internet()) {
+  try(
     rSOILWAT2::sw_meteo_obtain_SCAN(
       x = 2140, # SCAN station code
       start_year = 2015,
@@ -120,8 +124,8 @@ if (requireNamespace("curl") && curl::has_internet()) {
 }
 
 if (
-  exists("mm_scan") && !inherits(mm_scan, "try-error") &&
-  exists("mm_dm") &&
+  !is.null(mm_scan) && !inherits(mm_scan, "try-error") &&
+  !is.null(mm_dm) && !inherits(mm_dm, "try-error") &&
   requireNamespace("graphics")
 ) {
   vars <- c("Tmax_C", "Tmin_C", "PPT_cm")

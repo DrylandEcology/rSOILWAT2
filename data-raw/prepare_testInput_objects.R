@@ -56,6 +56,7 @@ dir_backup <- "backup"
 dir_extdata <- file.path("inst", "extdata")
 dir_pkgdata <- "data"
 dir_testdata <- file.path("tests", "test_data")
+stopifnot(dir.exists(dir_testdata))
 
 list_backups <- lapply(
   c(dir_extdata, dir_pkgdata, dir_testdata),
@@ -68,9 +69,6 @@ list_backups <- lapply(
     )
   }
 )
-
-
-
 
 
 #--- Backup previous version ------
@@ -464,7 +462,7 @@ for (it in seq_along(tests)) {
 
 
   #--- Save weather for unit testing (if different from previous)
-  if (length(res_cmp) > 0) {
+  if (length(res_cmp) > 0L) {
     message("Update weather data (example ", it, ") for tests:")
     print(res_cmp)
 

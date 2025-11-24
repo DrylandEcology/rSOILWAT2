@@ -20,10 +20,7 @@ $(path_lib)/$(lib_target):
 # Compile SOILWAT2-library for rSOILWAT2
 # C11 standard required to find externed SOILWAT2 variables in flat-namespace
 #	-@(cd $(path_target) && $(MAKE) compiler_version)
-	cd $(path_target) && $(MAKE) libr \
-		CC="$(CC)" CPPFLAGS="$(ALL_CPPFLAGS)" CFLAGS="$(ALL_CFLAGS)" \
-		set_std=-std=c11 \
-		AR="$(AR)"
+	cd $(path_target) && $(MAKE) libr CC="$(CC)" CPPFLAGS="$(ALL_CPPFLAGS)" CFLAGS="$(ALL_CFLAGS)" set_std=-std=c11 AR="$(AR)"
 
 shlib-clean: clean
 

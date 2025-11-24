@@ -61,6 +61,35 @@ test_that("Weather generator: estimate input parameters", {
       res[["mkv_woy"]]
     )
   }
+
+
+  # Check temperature correction factor settings
+  varcf_wet <- c("CF_Tmax_wet", "CF_Tmin_wet")
+  varcf_dry <- c("CF_Tmax_dry", "CF_Tmin_dry")
+
+  res <- dbW_estimate_WGen_coefs(test_df, type_cftemp = "all")
+  expect_equal(
+    unname(colSums(res[["mkv_woy"]][, c(varcf_wet, varcf_dry)] == 0)),
+    c(0, 0, 0, 0)
+  )
+
+  res <- dbW_estimate_WGen_coefs(test_df, type_cftemp = "dry")
+  expect_equal(
+    unname(colSums(res[["mkv_woy"]][, c(varcf_wet, varcf_dry)] == 0)),
+    c(53, 53, 0, 0)
+  )
+
+  res <- dbW_estimate_WGen_coefs(test_df, type_cftemp = "wet")
+  expect_equal(
+    unname(colSums(res[["mkv_woy"]][, c(varcf_wet, varcf_dry)] == 0)),
+    c(0, 0, 53, 53)
+  )
+
+  res <- dbW_estimate_WGen_coefs(test_df, type_cftemp = "none")
+  expect_equal(
+    unname(colSums(res[["mkv_woy"]][, c(varcf_wet, varcf_dry)] == 0)),
+    c(53, 53, 53, 53)
+  )
 })
 
 

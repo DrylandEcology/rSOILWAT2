@@ -7,6 +7,7 @@
 dbW_estimate_WGen_coefs(
   weatherData,
   WET_limit_cm = 0,
+  type_cftemp = c("all", "dry", "wet", "none"),
   propagate_NAs = FALSE,
   valNA = NULL,
   imputation_type = c("none", "mean", "locf"),
@@ -21,6 +22,17 @@ or a data frame as returned by \code{\link[=dbW_weatherData_to_dataframe]{dbW_we
 this value is considered \code{wet} instead of \code{dry}. Default is 0.
 This values should be equal to the corresponding value used in
 \code{SOILWAT2}'s function \code{SW_MKV_today()}.}
+
+\item{type_cftemp}{A character string. Indicator for applying
+temperature correction factors:
+\itemize{
+\item \code{"all"}, then correct min/max daily temperature on wet and dry days
+(default);
+\item \code{"dry"}, then correct min/max daily temperature only on dry days;
+\item \code{"wet"}, then correct min/max daily temperature only on wet days;
+\item \code{"none"}, then do not correct min/max daily temperature for
+wet/dry days.
+}}
 
 \item{propagate_NAs}{A logical value. If \code{TRUE}, then missing weather
 values in the input \code{weatherData} are excluded; if \code{FALSE}, then

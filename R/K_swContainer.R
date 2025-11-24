@@ -71,7 +71,7 @@
 #' \code{\linkS4class{swWeather}}
 #' \code{\linkS4class{swCloud}}
 #' \code{\linkS4class{swMarkov}}
-#' \code{\linkS4class{swProd}}
+#' \code{\linkS4class{swProd2}}
 #' \code{\linkS4class{swSite}}
 #' \code{\linkS4class{swSoils}}
 #' \code{\linkS4class{swSpinup}}
@@ -100,6 +100,7 @@ setClass(
     weatherHistory = "list",
     markov = "swMarkov",
     prod = "swProd",
+    prod2 = "swProd2",
     site = "swSite",
     soils = "swSoils",
     spinup = "swSpinup",
@@ -173,6 +174,12 @@ swInputData <- function(...) {
     swProd(dots[["prod"]])
   } else {
     do.call(swProd, dots)
+  }
+
+  object@prod2 <- if ("prod2" %in% dns) {
+    swProd2(dots[["prod2"]])
+  } else {
+    do.call(swProd2, dots)
   }
 
   object@site <- if ("site" %in% dns) {
@@ -288,6 +295,9 @@ setMethod(
               # Add new slot
               if (identical(sn, "spinup")) {
                 object@spinup <- swSpinup()
+
+              } else if (identical(sn, "prod2")) {
+                object@prod2 <- swProd2FromProd1(object@prod)
               }
 
             } else {
@@ -1298,17 +1308,17 @@ setReplaceMethod(
 )
 
 
-# Methods for slot \code{prod}
+# Methods for slot \code{prod2}
 #' @rdname swInputData-class
 #' @export
-setMethod("get_swProd", "swInputData", function(object) object@prod)
+setMethod("get_swProd", "swInputData", function(object) object@prod2)
 
 #' @rdname swInputData-class
 #' @export
 setMethod(
   "swProd_Composition",
   signature = "swInputData",
-  function(object) swProd_Composition(object@prod)
+  function(object) swProd_Composition(object@prod2)
 )
 
 #' @rdname swInputData-class
@@ -1316,7 +1326,7 @@ setMethod(
 setMethod(
   "swProd_Albedo",
   signature = "swInputData",
-  function(object) swProd_Albedo(object@prod)
+  function(object) swProd_Albedo(object@prod2)
 )
 
 #' @rdname swInputData-class
@@ -1324,7 +1334,7 @@ setMethod(
 setMethod(
   "swProd_CanopyHeight",
   signature = "swInputData",
-  function(object) swProd_CanopyHeight(object@prod)
+  function(object) swProd_CanopyHeight(object@prod2)
 )
 
 #' @rdname swInputData-class
@@ -1332,7 +1342,7 @@ setMethod(
 setMethod(
   "swProd_VegInterParam",
   signature = "swInputData",
-  function(object) swProd_VegInterParam(object@prod)
+  function(object) swProd_VegInterParam(object@prod2)
 )
 
 #' @rdname swInputData-class
@@ -1340,7 +1350,7 @@ setMethod(
 setMethod(
   "swProd_LitterInterParam",
   signature = "swInputData",
-  function(object) swProd_LitterInterParam(object@prod)
+  function(object) swProd_LitterInterParam(object@prod2)
 )
 
 #' @rdname swInputData-class
@@ -1348,7 +1358,7 @@ setMethod(
 setMethod(
   "swProd_EsTpartitioning_param",
   signature = "swInputData",
-  function(object) swProd_EsTpartitioning_param(object@prod)
+  function(object) swProd_EsTpartitioning_param(object@prod2)
 )
 
 #' @rdname swInputData-class
@@ -1356,7 +1366,7 @@ setMethod(
 setMethod(
   "swProd_Es_param_limit",
   signature = "swInputData",
-  function(object) swProd_Es_param_limit(object@prod)
+  function(object) swProd_Es_param_limit(object@prod2)
 )
 
 #' @rdname swInputData-class
@@ -1364,7 +1374,7 @@ setMethod(
 setMethod(
   "swProd_Shade",
   signature = "swInputData",
-  function(object) swProd_Shade(object@prod)
+  function(object) swProd_Shade(object@prod2)
 )
 
 #' @rdname swInputData-class
@@ -1372,7 +1382,7 @@ setMethod(
 setMethod(
   "swProd_HydrRedstro_use",
   signature = "swInputData",
-  function(object) swProd_HydrRedstro_use(object@prod)
+  function(object) swProd_HydrRedstro_use(object@prod2)
 )
 
 #' @rdname swInputData-class
@@ -1380,7 +1390,7 @@ setMethod(
 setMethod(
   "swProd_HydrRedstro",
   signature = "swInputData",
-  function(object) swProd_HydrRedstro(object@prod)
+  function(object) swProd_HydrRedstro(object@prod2)
 )
 
 #' @rdname swInputData-class
@@ -1388,7 +1398,7 @@ setMethod(
 setMethod(
   "swProd_CritSoilWaterPotential",
   signature = "swInputData",
-  function(object) swProd_CritSoilWaterPotential(object@prod)
+  function(object) swProd_CritSoilWaterPotential(object@prod2)
 )
 
 #' @rdname swInputData-class
@@ -1396,7 +1406,7 @@ setMethod(
 setMethod(
   "swProd_CO2Coefficients",
   signature = "swInputData",
-  function(object) swProd_CO2Coefficients(object@prod)
+  function(object) swProd_CO2Coefficients(object@prod2)
 )
 
 #' @rdname swInputData-class
@@ -1404,7 +1414,7 @@ setMethod(
 setMethod(
   "swProd_MonProd_veg",
   signature = "swInputData",
-  function(object, vegtype) swProd_MonProd_veg(object@prod, vegtype)
+  function(object, vegtype) swProd_MonProd_veg(object@prod2, vegtype)
 )
 
 
@@ -1414,7 +1424,7 @@ setReplaceMethod(
   "set_swProd",
   signature = "swInputData",
   function(object, value) {
-    set_swProd(object@prod) <- value
+    set_swProd(object@prod2) <- value
     object
   }
 )
@@ -1425,7 +1435,7 @@ setReplaceMethod(
   "swProd_Composition",
   signature = "swInputData",
   function(object, value) {
-    swProd_Composition(object@prod) <- value
+    swProd_Composition(object@prod2) <- value
     object
   }
 )
@@ -1436,7 +1446,7 @@ setReplaceMethod(
   "swProd_Albedo",
   signature = "swInputData",
   function(object, value) {
-    swProd_Albedo(object@prod) <- value
+    swProd_Albedo(object@prod2) <- value
     object
   }
 )
@@ -1447,7 +1457,7 @@ setReplaceMethod(
   "swProd_CanopyHeight",
   signature = "swInputData",
   function(object, value) {
-    swProd_CanopyHeight(object@prod) <- value
+    swProd_CanopyHeight(object@prod2) <- value
     object
   }
 )
@@ -1458,7 +1468,7 @@ setReplaceMethod(
   "swProd_VegInterParam",
   signature = "swInputData",
   function(object, value) {
-    swProd_VegInterParam(object@prod) <- value
+    swProd_VegInterParam(object@prod2) <- value
     object
   }
 )
@@ -1469,7 +1479,7 @@ setReplaceMethod(
   "swProd_LitterInterParam",
   signature = "swInputData",
   function(object, value) {
-    swProd_LitterInterParam(object@prod) <- value
+    swProd_LitterInterParam(object@prod2) <- value
     object
   }
 )
@@ -1480,7 +1490,7 @@ setReplaceMethod(
   "swProd_EsTpartitioning_param",
   signature = "swInputData",
   function(object, value) {
-    swProd_EsTpartitioning_param(object@prod) <- value
+    swProd_EsTpartitioning_param(object@prod2) <- value
     object
   }
 )
@@ -1491,7 +1501,7 @@ setReplaceMethod(
   "swProd_Es_param_limit",
   signature = "swInputData",
   function(object, value) {
-    swProd_Es_param_limit(object@prod) <- value
+    swProd_Es_param_limit(object@prod2) <- value
     object
   }
 )
@@ -1502,7 +1512,7 @@ setReplaceMethod(
   "swProd_Shade",
   signature = "swInputData",
   function(object, value) {
-    swProd_Shade(object@prod) <- value
+    swProd_Shade(object@prod2) <- value
     object
   }
 )
@@ -1513,7 +1523,7 @@ setReplaceMethod(
   "swProd_HydrRedstro_use",
   signature = "swInputData",
   function(object, value) {
-    swProd_HydrRedstro_use(object@prod) <- as.logical(value)
+    swProd_HydrRedstro_use(object@prod2) <- as.logical(value)
     object
   }
 )
@@ -1524,7 +1534,7 @@ setReplaceMethod(
   "swProd_HydrRedstro",
   signature = "swInputData",
   function(object, value) {
-    swProd_HydrRedstro(object@prod) <- value
+    swProd_HydrRedstro(object@prod2) <- value
     object
   }
 )
@@ -1535,7 +1545,7 @@ setReplaceMethod(
   "swProd_CritSoilWaterPotential",
   signature = "swInputData",
   function(object, value) {
-    swProd_CritSoilWaterPotential(object@prod) <- value
+    swProd_CritSoilWaterPotential(object@prod2) <- value
     object
   }
 )
@@ -1546,7 +1556,7 @@ setReplaceMethod(
   "swProd_CO2Coefficients",
   signature = "swInputData",
   function(object, value) {
-    swProd_CO2Coefficients(object@prod) <- value
+    swProd_CO2Coefficients(object@prod2) <- value
     object
   }
 )
@@ -1557,7 +1567,7 @@ setReplaceMethod(
   "swProd_MonProd_veg",
   signature = "swInputData",
   function(object, vegtype, value) {
-    swProd_MonProd_veg(object@prod, vegtype) <- value
+    swProd_MonProd_veg(object@prod2, vegtype) <- value
     object
   }
 )
@@ -1674,6 +1684,14 @@ setMethod(
   "swSite_SoilTemperatureFlag",
   signature = "swInputData",
   function(object) swSite_SoilTemperatureFlag(object@site)
+)
+
+#' @rdname swInputData-class
+#' @export
+setMethod(
+  "swSite_SoilTempBoundaryMethod",
+  signature = "swInputData",
+  function(object) swSite_SoilTempBoundaryMethod(object@site)
 )
 
 #' @rdname swInputData-class
@@ -1869,6 +1887,17 @@ setReplaceMethod(
   signature = "swInputData",
   function(object, value) {
     swSite_SoilTemperatureFlag(object@site) <- value
+    object
+  }
+)
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "swSite_SoilTempBoundaryMethod",
+  signature = "swInputData",
+  function(object, value) {
+    swSite_SoilTempBoundaryMethod(object@site) <- value
     object
   }
 )

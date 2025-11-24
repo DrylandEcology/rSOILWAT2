@@ -13,6 +13,14 @@ get_swProd(object)
 \description{
 \code{get_swProd}
 }
+\section{Notes}{
+
+The method for class \code{\linkS4class{swProd}} is deprecated,
+see \code{\link{get_swProd,swProd-method}}; please use class
+\code{\linkS4class{swProd2}} instead, see
+\code{\link{get_swProd,swProd2-method}}.
+}
+
 \seealso{
 \code{\linkS4class{swProd}} and \code{\linkS4class{swInputData}}
 }

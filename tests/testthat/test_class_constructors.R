@@ -12,7 +12,7 @@ test_that("Class constructors", {
     function(x) class(slot(ref, x)),
     FUN.VALUE = NA_character_
   )
-  list_classes <- setdiff(tmp, c("list", "swLog"))
+  list_classes <- setdiff(tmp, c("list", "swLog", "swProd"))
 
 
   #--- Check that constructor helper for "swInputData" reproduces (valid) inputs
