@@ -175,8 +175,16 @@ sw_verbosity <- function(verbose = TRUE) {
 #' ## ------ Simulation with manipulated input data ------------
 #' sw_in4 <- sw_in3
 #'
-#' ## Set the vegetation composition to 40% grass and 60% shrubs
-#' swProd_Composition(sw_in4) <- c(0.4, 0.6, 0, 0, 0)
+#' ## Set the vegetation composition to 40% grassC3 and 60% shrub
+#' swProd_Composition(sw_in4) <- c(
+#'   treeNL = 0,
+#'   treeBL = 0,
+#'   shrub = 0.6,
+#'   forbs = 0,
+#'   grassC3 = 0.4,
+#'   grassC4 = 0,
+#'   `Bare Ground` = 0
+#' )
 #'
 #' ## Execute the simulation run
 #' sw_out4 <- sw_exec(inputData = sw_in4, weatherList = sw_weath3, quiet = TRUE)
@@ -508,10 +516,10 @@ set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE,
     }
 
     # Check dimensional agreement
-    ndim_gt1_vals <- sum(dim(data.frame(vals)) > 1)
-    ndim_gt1_def <- sum(dim(data.frame(def)) > 1)
+    ndim_gt1_vals <- sum(dim(data.frame(vals)) > 1L)
+    ndim_gt1_def <- sum(dim(data.frame(def)) > 1L)
 
-    if (!all(ndim_gt1_vals == 1, ndim_gt1_def == 1)) {
+    if (!all(ndim_gt1_vals == 1L, ndim_gt1_def == 1L)) {
       stop(
         "ERROR: ",
         toString(shQuote(val_names)),
@@ -522,13 +530,20 @@ set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE,
     }
 
     # Transfer values
-    itemp <- sapply(names(def), function(x) {
-      k <- grep(substr(x, 1, 4), val_names)
-      if (length(k) == 1) k else 0})
-    def[itemp > 0] <- vals[itemp]
+    nc <- max(nchar(rSW2_glovars[["kSOILWAT2"]][["VegTypeNames2"]]))
+
+    itemp <- vapply(
+      names(def),
+      function(x) {
+        k <- grep(substr(x, 1L, nc), val_names)
+        if (length(k) == 1L) k else 0L
+      },
+      FUN.VALUE = NA_integer_
+    )
+    def[itemp > 0L] <- vals[itemp]
 
     if (reset) {
-      def[itemp == 0] <- default
+      def[itemp == 0L] <- default
     }
 
     swIn <- get(paste0(fun, "<-"))(swIn, def)

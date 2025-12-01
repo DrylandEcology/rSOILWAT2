@@ -5,12 +5,7 @@
 \title{Replace selected biomass values of a
 \link[rSOILWAT2:swProd-class]{rSOILWAT2::swProd} object}
 \usage{
-update_biomass(
-  fg = c("Grass", "Shrub", "Tree", "Forb"),
-  use,
-  prod_input,
-  prod_default
-)
+update_biomass(fg, use, prod_input, prod_default)
 }
 \arguments{
 \item{fg}{A character string. One of the functional groups represented by
@@ -22,8 +17,9 @@ names of a \code{MonthlyVeg} element of an \code{\linkS4class{swProd}} object}
 \item{prod_input}{A data frame. The values that replace the selected
 biomass values.}
 
-\item{prod_default}{A \code{\linkS4class{swProd}} object that contains
-the \code{MonthlyVeg} element with biomass values to be updated.}
+\item{prod_default}{A data frame with the \code{MonthlyVeg} element of
+a \code{\linkS4class{swProd2}} object, or an object from which to retrieve a
+a \code{\linkS4class{swProd2}} object.}
 }
 \value{
 The requested \code{MonthlyVeg} element from \code{prod_default} with updated
@@ -32,4 +28,22 @@ values.
 \description{
 Replace selected biomass values of a
 \link[rSOILWAT2:swProd-class]{rSOILWAT2::swProd} object
+}
+\examples{
+swin <- rSOILWAT2::sw_exampleData
+vt <- "shrub"
+use <- stats::setNames(
+  c(rep(TRUE, 12L), rep(FALSE, 12L)),
+  nm = c(
+    paste0(vt, "_Biomass_m", seq_len(12L)),
+    paste0(vt, "_FractionLive_m", seq_len(12L))
+  )
+)
+pi <- matrix(data = rep(100, length(use)), nrow = 1L)
+colnames(pi) <- names(use)
+
+res1 <- rSOILWAT2::update_biomass(vt, use, pi, swin)
+x <- rSOILWAT2::swProd_MonProd_veg(swin, vt)
+res2 <- rSOILWAT2::update_biomass(vt, use, pi, x)
+
 }

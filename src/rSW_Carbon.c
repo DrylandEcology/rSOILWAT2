@@ -57,9 +57,11 @@ SEXP onGet_SW_CARBON(void) {
   SEXP class, object,
     CarbonUseBio, CarbonUseWUE, Scenario, DeltaYear, CO2ppm, CO2ppm_Names,
     cCO2ppm_Names;
+  SEXP CO2ppmVegRef;
   char *cCO2ppm[] = {"Year", "CO2ppm"};
-  char *cSW_CARBON[] = {"CarbonUseBio", "CarbonUseWUE", "Scenario", "DeltaYear", "CO2ppm"};
-  int i, year, n_sim;
+  char *cSW_CARBON[] = {"CarbonUseBio", "CarbonUseWUE", "Scenario", "DeltaYear", "CO2ppm", "CO2ppmVegRef"};
+  int i, year;
+  unsigned int n_sim = SoilWatRun.ModelIn.endyr - SoilWatRun.ModelIn.startyr + 1;
   double *vCO2ppm;
 
   SW_CARBON_INPUTS *c = &SoilWatRun.CarbonIn;
@@ -82,26 +84,31 @@ SEXP onGet_SW_CARBON(void) {
   SET_SLOT(object, install(cSW_CARBON[2]), Scenario);
 
   PROTECT(DeltaYear = NEW_INTEGER(1));
-  INTEGER(DeltaYear)[0] = SoilWatRun.ModelSim.addtl_yr;
+  INTEGER(DeltaYear)[0] = 0; // addtl_yr was removed with SOILWAT2 v8.3.0
   SET_SLOT(object, install(cSW_CARBON[3]), DeltaYear);
 
-  n_sim = SoilWatRun.ModelIn.endyr - SoilWatRun.ModelIn.startyr + 1;
   PROTECT(CO2ppm = allocMatrix(REALSXP, n_sim, 2));
   vCO2ppm = REAL(CO2ppm);
   for (i = 0, year = SoilWatRun.ModelIn.startyr; i < n_sim; i++, year++)
   {
     vCO2ppm[i + n_sim * 0] = year;
-    vCO2ppm[i + n_sim * 1] = c->ppm[year];
+    vCO2ppm[i + n_sim * 1] = c->ppm[i];
   }
   PROTECT(CO2ppm_Names = allocVector(VECSXP, 2));
   PROTECT(cCO2ppm_Names = allocVector(STRSXP, 2));
-  for (i = 0; i < 2; i++)
+  for (i = 0; i < 2; i++) {
     SET_STRING_ELT(cCO2ppm_Names, i, mkChar(cCO2ppm[i]));
+  }
+
   SET_VECTOR_ELT(CO2ppm_Names, 1, cCO2ppm_Names);
   setAttrib(CO2ppm, R_DimNamesSymbol, CO2ppm_Names);
   SET_SLOT(object, install(cSW_CARBON[4]), CO2ppm);
 
-  UNPROTECT(9);
+  PROTECT(CO2ppmVegRef = NEW_NUMERIC(1));
+  REAL(CO2ppmVegRef)[0] = c->ppmVegRef;
+  SET_SLOT(object, install(cSW_CARBON[5]), CO2ppmVegRef);
+
+  UNPROTECT(10);
 
   return object;
 }
@@ -114,83 +121,126 @@ SEXP onGet_SW_CARBON(void) {
  *   1. CarbonUseBio - Whether or not to use the biomass multiplier.
  *   2. CarbonUseWUE - Whether or not to use the WUE multiplier.
  *   3. DeltaYear - How many years in the future we are simulating.
+ *      (Unused since v6.5.0)
  *   4. Scenario - Scenario name of the CO2 concentration time series.
  *   5. CO2ppm - a vector of length 2 where the first element is the vector of
  *               years and the second element is the CO2 values.
+ *   6. ppmVegRef
  *
  * @param object An instance of the swCarbon class.
  */
-void onSet_swCarbon(SEXP object, LOG_INFO* LogInfo) {
-  SW_CARBON_INPUTS *c = &SoilWatRun.CarbonIn;
+void onSet_swCarbon(
+    SEXP object,
+    TimeInt startYr,
+    TimeInt endYr,
+    TimeInt vegYear,
+    LOG_INFO* LogInfo
+) {
+    SW_CARBON_INPUTS *c = &SoilWatRun.CarbonIn;
 
-  // Extract the slots from our object into our structure
-  c->use_bio_mult = INTEGER(GET_SLOT(object, install("CarbonUseBio")))[0];
-  c->use_wue_mult = INTEGER(GET_SLOT(object, install("CarbonUseWUE")))[0];
-  SoilWatRun.ModelSim.addtl_yr = INTEGER(GET_SLOT(object, install("DeltaYear")))[0];  // This is needed for output 100% of the time
-  strcpy(c->scenario, CHAR(STRING_ELT(GET_SLOT(object, install("Scenario")), 0)));
+    // Extract the slots from our object into our structure
+    c->use_bio_mult = INTEGER(GET_SLOT(object, install("CarbonUseBio")))[0];
+    c->use_wue_mult = INTEGER(GET_SLOT(object, install("CarbonUseWUE")))[0];
+    strcpy(c->scenario, CHAR(STRING_ELT(GET_SLOT(object, install("Scenario")), 0)));
 
-  // If CO2 is not being used, we can run without extracting ppm data
-  if (!c->use_bio_mult && !c->use_wue_mult)
-  {
-    return;
-  }
+    // If CO2 is not being used, we can run without extracting ppm data
+    if (!c->use_bio_mult && !c->use_wue_mult) {
+        return;
+    }
 
-  // Only extract the CO2 values that will be used
-  TimeInt year;
-  TimeInt year2;
-  unsigned int i, n_input, n_sim;
-  #ifdef RSWDEBUG
-  int debug = 0;
-  #endif
+    // addtl_yr was removed with SOILWAT2 v8.3.0
+    int addtl_yr = INTEGER(GET_SLOT(object, install("DeltaYear")))[0];
+    if (!R_FINITE(addtl_yr) || addtl_yr != 0) {
+        LogError(
+            LogInfo,
+            LOGERROR,
+            "'DeltaYear' for aCO2 is defunct since SOILWAT2 v8.3.0 (value = %d)",
+            addtl_yr
+        );
+        goto cleanMem; // Exit function prematurely due to error
+    }
 
-  SEXP CO2ppm;
-  double *values;
-
-  year = MIN(
-    SoilWatRun.ModelIn.startyr + SoilWatRun.ModelSim.addtl_yr,
-    SoilWatRun.VegProdIn.vegYear
-  );
-  year2 = MAX(
-    SoilWatRun.ModelIn.endyr + SoilWatRun.ModelSim.addtl_yr,
-    SoilWatRun.VegProdIn.vegYear
-  );
-  n_sim = year2 - year + 1;
-
-  PROTECT(CO2ppm = GET_SLOT(object, install("CO2ppm")));
-  n_input = nrows(CO2ppm);
-  values = REAL(CO2ppm);
-
-  // Locate index of first year for which we need CO2 data
-  for (i = 1; year != (unsigned int) values[i - 1 + n_input * 0] && i < MAX_NYEAR; i++) {}
-
-  #ifdef RSWDEBUG
-  if (debug) {
-    sw_printf("'onSet_swCarbon': year = %d, n_sim = %d, n_input = %d, i = %d\n",
-      year, n_sim, n_input, i);
-  }
-  #endif
-
-  // Check that we have enough data
-  if (i - 1 + n_sim > n_input)
-  {
-    UNPROTECT(1);
-
-    LogError(LogInfo, LOGERROR, "CO2ppm object does not contain data for every year");
-    return; // Exit function prematurely due to error
-  }
-
-  // Copy CO2 concentration values to SOILWAT variable
-  for (; i <= n_input && year < MAX_NYEAR; i++, year++)
-  {
-    c->ppm[year] = values[i - 1 + n_input * 1];  // R's index is 1-based
+    // Only extract the CO2 values that will be used
+    SEXP CO2ppm;
+    double *vCO2ppm;
+    TimeInt idxrSW;
+    TimeInt idxSW = 0;
+    TimeInt year;
+    TimeInt nSW = endYr - startYr + 1;
+    TimeInt nrSW;
 
     #ifdef RSWDEBUG
-    if (debug) {
-      sw_printf("ppm[year = %d] = %3.2f <-> S4[i = %d] = %3.2f\n",
-        year, c->ppm[year], i, values[i - 1 + n_input * 1]);
-    }
+    int debug = 0;
     #endif
-  }
 
-  UNPROTECT(1);
+    c->ppmVegRef = REAL(GET_SLOT(object, install("CO2ppmVegRef")))[0];
+
+    PROTECT(CO2ppm = GET_SLOT(object, install("CO2ppm")));
+    nrSW = nrows(CO2ppm);
+    vCO2ppm = REAL(CO2ppm);
+
+    // Check that we have enough data
+    if (nSW > nrSW) {
+        LogError(
+            LogInfo,
+            LOGERROR,
+            "CO2ppm object does not contain data for every year"
+        );
+        goto cleanMem; // Exit function prematurely due to error
+    }
+
+    // Allocate SOILWAT2 memory
+    SW_CBN_deconstruct(&SoilWatRun.CarbonIn);
+    SW_CBN_alloc_ppm(nSW, &SoilWatRun.CarbonIn.ppm, LogInfo);
+    if (LogInfo->stopRun) {
+        goto cleanMem; // Exit function prematurely due to error
+    }
+
+    // Loop through the rSOILWAT2 data and copy the values that will be used
+    for (idxrSW = 0; idxrSW < nrSW; idxrSW++) {
+        // Should check for overflow when coercing long int to TimeInt
+        year = (TimeInt) lround(vCO2ppm[idxrSW + nrSW * 0]);
+
+        /* Look for requested years */
+        if (!((year >= startYr && year <= endYr) || year == vegYear)) {
+            continue; // We aren't using this year
+        }
+
+        /* Update aCO2 for vegetation reference year if data available */
+        if (year == vegYear) {
+            c->ppmVegRef = vCO2ppm[idxrSW + nrSW * 1];
+        }
+
+        /* Look for sequence of simulation years */
+        if ((year < startYr) || (year > endYr)) {
+            continue; // We aren't using this year
+        }
+
+        if (year != startYr + idxSW) {
+            LogError(
+                LogInfo,
+                LOGERROR,
+                "Unexpected sequence of years in CO2ppm object"
+            );
+            goto cleanMem; // Exit function prematurely due to error
+        }
+
+        c->ppm[idxSW] = vCO2ppm[idxrSW + nrSW * 1];
+        idxSW++;
+    }
+
+    // Check that we extracted the correct number of values
+    if (nSW != idxSW) {
+        LogError(
+            LogInfo,
+            LOGERROR,
+            "Required %d years but found %d years of data in CO2ppm object",
+            nSW,
+            idxSW
+        );
+        goto cleanMem; // Exit function prematurely due to error
+    }
+
+cleanMem:
+    UNPROTECT(1);
 }

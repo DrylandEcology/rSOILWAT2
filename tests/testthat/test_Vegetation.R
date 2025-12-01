@@ -68,6 +68,15 @@ test_that("Vegetation: estimate land cover composition", {
       SW_GRASS = 0.315462487535754,
       SW_BAREGROUND = 0
     ),
+    Rel_Abundance_L2 = c(
+      SW_TREENL = 0,
+      SW_TREEBL = 0,
+      SW_SHRUB = 0.554408144186179,
+      SW_FORBS = 0.130129368278067,
+      SW_GRASS3 = 0.315462487535754,
+      SW_GRASS4 = 0,
+      SW_BAREGROUND = 0
+    ),
     Grasses = c(
       Grasses_C3 = 1,
       Grasses_C4 = 0,
@@ -96,7 +105,7 @@ test_that("Vegetation: estimate land cover composition", {
   #--- SOILWAT2 uses the same algorithm internally if requested to do so ------
   # Obtain cover values from SOILWAT2 output
   swin <- rSOILWAT2::sw_exampleData
-  swin@prod@veg_method <- 1L
+  swin@prod2@veg_method <- 1L
   swout <- sw_exec(swin)
   tmp <- slot(slot(swout, "BIOMASS"), "Year")
   pnvsim <- tmp[1, grep("fCover", colnames(tmp), fixed = TRUE), drop = TRUE]
@@ -108,14 +117,16 @@ test_that("Vegetation: estimate land cover composition", {
     MAT_C = climex[["MAT_C"]],
     mean_monthly_ppt_mm = 10 * climex[["meanMonthlyPPTcm"]],
     mean_monthly_Temp_C = climex[["meanMonthlyTempC"]]
-  )[["Rel_Abundance_L1"]]
+  )[["Rel_Abundance_L2"]]
 
   # Expect them to be identical
   tol <- sqrt(.Machine[["double.eps"]])
   expect_equal(pnvsim[["fCover_shrub"]], pnvex[["SW_SHRUB"]], tolerance = tol)
-  expect_equal(pnvsim[["fCover_grass"]], pnvex[["SW_GRASS"]], tolerance = tol)
+  expect_equal(
+    pnvsim[["fCover_grassC3"]], pnvex[["SW_GRASS3"]], tolerance = tol
+  )
   expect_equal(pnvsim[["fCover_forbs"]], pnvex[["SW_FORBS"]], tolerance = tol)
-  expect_equal(pnvsim[["fCover_tree"]], pnvex[["SW_TREES"]], tolerance = tol)
+  expect_equal(pnvsim[["fCover_treeNL"]], pnvex[["SW_TREENL"]], tolerance = tol)
   expect_equal(
     pnvsim[["fCover_BareGround"]],
     pnvex[["SW_BAREGROUND"]],
@@ -370,13 +381,13 @@ test_that("Vegetation: estimate land cover composition", {
 
 test_that("Vegetation: adjust phenology", {
   phen_in <- list()
-  phen_in[["x1n"]] <- swProd_MonProd_veg(sw_exampleData, "SW_GRASS")
+  phen_in[["x1n"]] <- swProd_MonProd_veg(sw_exampleData, "SW_GRASS3")
   phen_in[["x11"]] <- phen_in[["x1n"]][, 2L]
   phen_in[["xnn"]] <- list(
     swProd_MonProd_veg(sw_exampleData, "SW_FORBS"),
-    swProd_MonProd_veg(sw_exampleData, "SW_GRASS"),
+    swProd_MonProd_veg(sw_exampleData, "SW_GRASS3"),
     swProd_MonProd_veg(sw_exampleData, "SW_SHRUB"),
-    swProd_MonProd_veg(sw_exampleData, "SW_TREE")
+    swProd_MonProd_veg(sw_exampleData, "SW_TREENL")
   )
 
   phen_in <- lapply(phen_in, as.data.frame)
@@ -435,12 +446,8 @@ test_that("VegetationTypeEquivalency", {
   # Expect that relevant simulation values of vt1 and vt2 are identical
   # If vt1 and vt2 are represented identically by the simulation
   # see https://github.com/DrylandEcology/SOILWAT2/issues/471
-  vt1 <- "Grasses"
-  vt2 <- "Forbs"
-
-  trco1 <- paste0("transp", substr(vt1, 1L, 5L), "_frac")
-  trco2 <- paste0("transp", substr(vt2, 1L, 4L), "_frac")
-
+  vt1 <- "grassC3"
+  vt2 <- "forbs"
 
   #--- Default simulation inputs
   swin <- rSOILWAT2::sw_exampleData
@@ -454,11 +461,11 @@ test_that("VegetationTypeEquivalency", {
   rSOILWAT2::swProd_CritSoilWaterPotential(swin)[[vt2]] <-
     rSOILWAT2::swProd_CritSoilWaterPotential(swin)[[vt1]]
 
-  rSOILWAT2::swProd_VegInterParam(swin)[, vt2] <-
-    rSOILWAT2::swProd_VegInterParam(swin)[, vt1]
+  rSOILWAT2::swProd_VegInterParam(swin)[vt2, ] <-
+    rSOILWAT2::swProd_VegInterParam(swin)[vt1, ]
 
-  rSOILWAT2::swSoils_Layers(swin)[, trco2] <-
-    rSOILWAT2::swSoils_Layers(swin)[, trco1]
+  rSOILWAT2::swSoils_Layers(swin)[, paste0("TrCo_", vt2)] <-
+    rSOILWAT2::swSoils_Layers(swin)[, paste0("TrCo_", vt1)]
 
 
   #--- Run with vt1
@@ -475,7 +482,7 @@ test_that("VegetationTypeEquivalency", {
 
 
   #--- Expect that relevant simulation values for vt1 and vt2 are identical
-  evars <- c("evap_grass", "evap_forbs")
+  evars <- paste0("evap_", c(vt1, vt2))
 
   for (pd in c("Day", "Year")) {
     expect_equal(slot(swout1@AET, pd), slot(swout2@AET, pd))
@@ -485,4 +492,27 @@ test_that("VegetationTypeEquivalency", {
       rowSums(slot(swout2@EVAPSURFACE, pd)[, evars])
     )
   }
+})
+
+
+test_that("Vegetation: update_biomass", {
+  swin <- rSOILWAT2::sw_exampleData
+  vt <- "shrub"
+  x <- rSOILWAT2::swProd_MonProd_veg(swin, vt)
+  use <- stats::setNames(
+    c(rep(TRUE, 12L), rep(FALSE, 12L)),
+    nm = c(
+      paste0(vt, "_Biomass_m", seq_len(12L)),
+      paste0(vt, "_FractionLive_m", seq_len(12L))
+    )
+  )
+  testValue <- 100
+  pi <- matrix(data = rep(testValue, length(use)), nrow = 1L)
+  colnames(pi) <- names(use)
+
+  res1 <- rSOILWAT2::update_biomass(vt, use, pi, swin)
+  res2 <- rSOILWAT2::update_biomass(vt, use, pi, x)
+
+  expect_identical(res1, res2)
+  expect_identical(unname(res1[, "Biomass", drop = TRUE]), rep(testValue, 12L))
 })

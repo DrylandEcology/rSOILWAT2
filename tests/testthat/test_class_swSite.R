@@ -76,12 +76,14 @@ test_that("Manipulate 'swSite' class", {
 
 
 test_that("Run 'rSOILWAT2' with different 'swSite' inputs", {
-  it <- tests[1]
+  it <- tests[[1L]]
 
   #---INPUTS
   sw_input <- readRDS(file.path(dir_test_data, paste0(it, "_input.rds")))
   sw_weather <- readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
 
+
+  #--- Transpiration Regions
   # Set transpiration regions to numeric/integer layer values
   types <- c("as.double", "as.integer")
 
@@ -100,5 +102,37 @@ test_that("Run 'rSOILWAT2' with different 'swSite' inputs", {
     )
 
     expect_s4_class(res, "swOutput")
+  }
+
+
+  #--- Method for soil temperature boundary condition
+  defaultType <- 0L
+  types <- c(defaultType, 1L)
+
+  for (ftype in types) {
+    # Set type of soil temperature boundary condition
+    swSite_SoilTempBoundaryMethod(sw_input) <- ftype
+
+    # Run SOILWAT
+    res <- sw_exec(
+      inputData = sw_input,
+      weatherList = sw_weather,
+      echo = FALSE,
+      quiet = TRUE
+    )
+
+    expect_s4_class(res, "swOutput")
+
+    if (identical(ftype, defaultType)) {
+      ts_default <- slot(slot(res, "SOILTEMP"), "Year")
+    } else {
+      expect_false(has_soilTemp_failed())
+      # Expect non-default methods to produce different soil temperature values
+      # than default run
+      expect_gt(
+        sum(abs(ts_default - slot(slot(res, "SOILTEMP"), "Year"))),
+        0
+      )
+    }
   }
 })

@@ -23,6 +23,7 @@ extern SW_RUN SoilWatRun;
 // extern PATH_INFO PathInfo;
 extern SW_DOMAIN SoilWatDomain;
 
+extern const int rSW2_rank;
 extern Bool EchoInits;
 extern FILE *current_sw_verbosity;
 

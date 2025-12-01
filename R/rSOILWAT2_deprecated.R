@@ -26,6 +26,7 @@
 #' @inheritParams sw_exec
 #' @param object An object of a \code{rSOILWAT2} class.
 #' @param value A value to assign to a specific slot of the object.
+#' @param vegtype The name or index of a vegetation type.
 #'
 #' @name rSOILWAT2-deprecated
 NULL
@@ -1422,7 +1423,7 @@ setMethod(
   "swProd",
   function(object) {
     object@MonthlyVeg[[
-      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]
+      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes1"]][["SW_GRASS"]]
     ]]
   }
 )
@@ -1434,7 +1435,7 @@ setMethod(
   "swProd",
   function(object) {
     object@MonthlyVeg[[
-      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]
+      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes1"]][["SW_SHRUB"]]
     ]]
   }
 )
@@ -1446,7 +1447,7 @@ setMethod(
   "swProd",
   function(object) {
     object@MonthlyVeg[[
-      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]
+      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes1"]][["SW_TREES"]]
     ]]
   }
 )
@@ -1458,7 +1459,7 @@ setMethod(
   "swProd",
   function(object) {
     object@MonthlyVeg[[
-      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]
+      1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes1"]][["SW_FORBS"]]
     ]]
   }
 )
@@ -1470,7 +1471,7 @@ setReplaceMethod(
   "swProd_MonProd_grass",
   signature = "swProd",
   function(object, value) {
-    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_GRASS"]]
+    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes1"]][["SW_GRASS"]]
     swProd_MonProd_veg(object, id_vegtype) <- value
     object
   }
@@ -1482,7 +1483,7 @@ setReplaceMethod(
   "swProd_MonProd_shrub",
   signature = "swProd",
   function(object, value) {
-    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_SHRUB"]]
+    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes1"]][["SW_SHRUB"]]
     swProd_MonProd_veg(object, id_vegtype) <- value
     object
   }
@@ -1494,7 +1495,7 @@ setReplaceMethod(
   "swProd_MonProd_tree",
   signature = "swProd",
   function(object, value) {
-    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_TREES"]]
+    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes1"]][["SW_TREES"]]
     swProd_MonProd_veg(object, id_vegtype) <- value
     object
   }
@@ -1506,7 +1507,7 @@ setReplaceMethod(
   "swProd_MonProd_forb",
   signature = "swProd",
   function(object, value) {
-    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes"]][["SW_FORBS"]]
+    id_vegtype <- 1 + rSW2_glovars[["kSOILWAT2"]][["VegTypes1"]][["SW_FORBS"]]
     swProd_MonProd_veg(object, id_vegtype) <- value
     object
   }
@@ -1590,5 +1591,400 @@ setReplaceMethod(
   }
 )
 
+#--- swProd() related methods ------
+
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "get_swProd",
+  signature = "swProd",
+  function(object) {
+    .Deprecated("get_swProd() for signature swProd2")
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_Composition",
+  signature = "swProd",
+  function(object) {
+    .Deprecated("swProd_Composition() for signature swProd2")
+    object@Composition
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_Albedo",
+  signature = "swProd",
+  function(object) {
+    .Deprecated("swProd_Albedo() for signature swProd2")
+    object@Albedo
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_CanopyHeight",
+  signature = "swProd",
+  function(object) {
+    .Deprecated("swProd_CanopyHeight() for signature swProd2")
+    object@CanopyHeight
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_VegInterParam",
+  "swProd",
+  function(object) {
+    .Deprecated("swProd_VegInterParam() for signature swProd2")
+    object@VegetationInterceptionParameters
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_LitterInterParam",
+  "swProd",
+  function(object) {
+    .Deprecated("swProd_LitterInterParam() for signature swProd2")
+    object@LitterInterceptionParameters
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_EsTpartitioning_param",
+  "swProd",
+  function(object) {
+    .Deprecated("swProd_EsTpartitioning_param() for signature swProd2")
+    object@EsTpartitioning_param
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_Es_param_limit",
+  "swProd",
+  function(object) {
+    .Deprecated("swProd_Es_param_limit() for signature swProd2")
+    object@Es_param_limit
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_Shade",
+  "swProd",
+  function(object) {
+    .Deprecated("swProd_Shade() for signature swProd2")
+    object@Shade
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_HydrRedstro_use",
+  "swProd",
+  function(object) {
+    .Deprecated("swProd_HydrRedstro_use() for signature swProd2")
+    object@HydraulicRedistribution_use
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_HydrRedstro",
+  "swProd",
+  function(object) {
+    .Deprecated("swProd_HydrRedstro() for signature swProd2")
+    object@HydraulicRedistribution
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_CritSoilWaterPotential",
+  "swProd",
+  function(object) {
+    .Deprecated("swProd_CritSoilWaterPotential() for signature swProd2")
+    object@CriticalSoilWaterPotential
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_CO2Coefficients",
+  "swProd",
+  function(object) {
+    .Deprecated("swProd_CO2Coefficients() for signature swProd2")
+    object@CO2Coefficients
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_veg",
+  signature = c(object = "swProd", vegtype = "numeric"),
+  function(object, vegtype) {
+    .Deprecated("swProd_MonProd_veg() for signature swProd2")
+    object@MonthlyVeg[[as.integer(vegtype)]]
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setMethod(
+  "swProd_MonProd_veg",
+  signature = c(object = "swProd", vegtype = "character"),
+  function(object, vegtype) {
+    .Deprecated("swProd_MonProd_veg() for signature swProd2")
+    id_vegtype <- grep(
+      vegtype,
+      names(rSW2_glovars[["kSOILWAT2"]][["VegTypes1"]]),
+      ignore.case = TRUE
+    )
+    object@MonthlyVeg[[id_vegtype]]
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "set_swProd",
+  signature = "swProd",
+  function(object, value) {
+    .Deprecated("set_swProd() for signature swProd2")
+    warning("Simulation inputs are **not** updated.", call. = FALSE)
+    object <- value
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_Composition",
+  signature = "swProd",
+  function(object, value) {
+    .Deprecated("set_swProd() for signature swProd2")
+    warning("Simulation inputs are **not** updated.", call. = FALSE)
+    stopifnot(length(value) %in% c(1L, length(object@Composition)))
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_Albedo",
+  signature = "swProd",
+  function(object, value) {
+    .Deprecated("set_swProd() for signature swProd2")
+    warning("Simulation inputs are **not** updated.", call. = FALSE)
+    object@Albedo[] <- value
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_CanopyHeight",
+  signature = "swProd",
+  function(object, value) {
+    .Deprecated("swProd_CanopyHeight() for signature swProd2")
+    warning("Simulation inputs are **not** updated.", call. = FALSE)
+    dimnames(value) <- dimnames(object@CanopyHeight)
+    object@CanopyHeight <- value
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_VegInterParam",
+  signature = "swProd",
+  function(object, value) {
+    .Deprecated("swProd_VegInterParam() for signature swProd2")
+    warning("Simulation inputs are **not** updated.", call. = FALSE)
+    dimnames(value) <- dimnames(object@VegetationInterceptionParameters)
+    object@VegetationInterceptionParameters <- value
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_LitterInterParam",
+  signature = "swProd",
+  function(object, value) {
+    .Deprecated("swProd_LitterInterParam() for signature swProd2")
+    warning("Simulation inputs are **not** updated.", call. = FALSE)
+    dimnames(value) <- dimnames(object@LitterInterceptionParameters)
+    object@LitterInterceptionParameters <- value
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_EsTpartitioning_param",
+  signature = "swProd",
+  function(object, value) {
+    .Deprecated("swProd_EsTpartitioning_param() for signature swProd2")
+    warning("Simulation inputs are **not** updated.", call. = FALSE)
+    dimnames(value) <- dimnames(object@EsTpartitioning_param)
+    object@EsTpartitioning_param <- value
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_Es_param_limit",
+  signature = "swProd",
+  function(object, value) {
+    .Deprecated("swProd_Es_param_limit() for signature swProd2")
+    warning("Simulation inputs are **not** updated.", call. = FALSE)
+    object@Es_param_limit[] <- value
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_Shade",
+  signature = "swProd",
+  function(object, value) {
+    .Deprecated("swProd_Shade() for signature swProd2")
+    warning("Simulation inputs are **not** updated.", call. = FALSE)
+    dimnames(value) <- dimnames(object@Shade)
+    object@Shade <- value
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_HydrRedstro_use",
+  signature = "swProd",
+  function(object, value) {
+    .Deprecated("swProd_HydrRedstro_use() for signature swProd2")
+    warning("Simulation inputs are **not** updated.", call. = FALSE)
+    object@HydraulicRedistribution_use[] <- value
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_HydrRedstro",
+  signature = "swProd",
+  function(object, value) {
+    .Deprecated("swProd_HydrRedstro() for signature swProd2")
+    warning("Simulation inputs are **not** updated.", call. = FALSE)
+    dimnames(value) <- dimnames(object@HydraulicRedistribution)
+    object@HydraulicRedistribution <- value
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_CritSoilWaterPotential",
+  signature = "swProd",
+  function(object, value) {
+    .Deprecated("swProd_CritSoilWaterPotential() for signature swProd2")
+    warning("Simulation inputs are **not** updated.", call. = FALSE)
+    object@CriticalSoilWaterPotential[] <- value
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_CO2Coefficients",
+  signature = "swProd",
+  function(object, value) {
+    .Deprecated("swProd_CO2Coefficients() for signature swProd2")
+    warning("Simulation inputs are **not** updated.", call. = FALSE)
+    dimnames(value) <- dimnames(object@CO2Coefficients)
+    object@CO2Coefficients <- value
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_veg",
+  signature = c(object = "swProd", vegtype = "numeric", value = "matrix"),
+  function(object, vegtype, value) {
+    .Deprecated("swProd_MonProd_veg() for signature swProd2")
+    warning("Simulation inputs are **not** updated.", call. = FALSE)
+    id_vegtype <- as.integer(vegtype)
+    dimnames(value) <- dimnames(object@MonthlyVeg[[id_vegtype]])
+    object@MonthlyVeg[[id_vegtype]] <- value
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname rSOILWAT2-deprecated
+#' @export
+setReplaceMethod(
+  "swProd_MonProd_veg",
+  signature = c(object = "swProd", vegtype = "character", value = "matrix"),
+  function(object, vegtype, value) {
+    .Deprecated("swProd_MonProd_veg() for signature swProd2")
+    warning("Simulation inputs are **not** updated.", call. = FALSE)
+    id_vegtype <- grep(
+      vegtype,
+      names(rSW2_glovars[["kSOILWAT2"]][["VegTypes1"]]),
+      ignore.case = TRUE
+    )
+    swProd_MonProd_veg(object, id_vegtype) <- value
+    object
+  }
+)
 
 # nolint end.

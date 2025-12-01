@@ -9,13 +9,30 @@
 #       modified unless a vegetation type itself is altered.
 
 #---- Select method for vegetation parameters
-0	# 0 - Use values from this file
- 	# 1 - Estimate vegetation composition from long-term climate conditions
- 	#     (values for other vegetation parameters from this file)
+0       # 0 - Use values from this file
+        # 1 - Estimate vegetation composition from long-term climate conditions
+        #     (values for other vegetation parameters from this file)
+        # 2 - Dynamic vegetation using short- and long-term conditions
+        #     (see nYearsDynamicShort & nYearsDynamicLong options)
+
+#--- Dynamic Vegetation Moving Windows
+30	# nYearsDynamicLong: Number of years over which long-term climate predictors are summarized (used for dynamic vegetation and soil temperature at the lower boundary)
+3	# nYearsDynamicShort: Number of years over which short-term vegetation predictors are summarized (as anomaly to long-term predictors)
+
+
+#--- Implemented types of vegetation and land cover
+# The inputs are in the following order:
+# treeNL	needle-leaved trees
+# treeBL	broad-leaved trees
+# shrub		shrubs
+# forbs		forbs
+# grassC3	grasses with a C3 photosynthetic pathway
+# grassC4	grasses with a C4 photosynthetic pathway
+# BareGround
 
 #---- Composition of vegetation type components (0-1; must add up to 1)
-#	grass	shrub	tree	forbs	BareGround
-	0.2	0.2	0.2	0.2	0.2
+#	treeNL	treeBL	shrub	forbs	grassC3	grassC4	BareGround
+	0.2	0.0	0.2	0.2	0.2	0.0	0.2
 
 
 #---- Albedo
@@ -24,35 +41,35 @@
 # MODIS albedo aggregated over pure IGBP cells where NDVI is greater than
 # the 98th percentile NDVI
 
-#	grass	shrub	tree	forbs	BareGround
-	0.167	0.143	0.106	0.167	0.15
+#	treeNL	treeBL	shrub	forbs	grassC3	grassC4	BareGround
+	0.106	0.106	0.143	0.167	0.167	0.167	0.15
 
 
 #--- Canopy height (cm) parameters
 # Canopy height is either constant through season or
 # is a function of monthly biomass (g / m^2)
 
-#	grass	shrub	tree	forbs
-	300.0	0.0	0.0	300.0	# xinflec
-	29.5	5.0	5.0	29.5	# yinflec
-	85.	100.	3000.	85.	# range
-	0.002	0.003	0.00008	0.002	# slope
-	0.0	50.	1200.	0.0	# if > 0 then constant canopy height (cm)
+#	treeNL	treeBL	shrub	forbs	grassC3	grassC4
+	0.0		0.0		0.0		300.0	300.0	300.0	# xinflec
+	5.0		5.0		29.5	29.5	29.5	29.5	# yinflec
+	3000.	3000.	100.	85.		85.		85.		# range
+	0.00008	0.00008	0.003	0.002	0.002	0.002	# slope
+	1200.	1200.	50.		0.0		0.0		0.0		# if > 0 then constant canopy height (cm)
 
 
 #--- Vegetation interception parameters
 # Equation: kSmax * log10(1 + LAI_live + kdead * LAI_dead)
 
-#	grass	shrub	tree	forbs
-	1.0	2.6	2.0	1.0	# kSmax (mm)
-	1.0	0.1	0.01	0.5	# kdead (0-1 fraction)
+#	treeNL	treeBL	shrub	forbs	grassC3	grassC4
+	2.0		2.0		2.6		1.0		1.0		1.0		# kSmax (mm)
+	0.01	0.01	0.1		0.5		1.0		1.0		# kdead (0-1 fraction)
 
 
 #--- Litter interception parameters
 # Equation: kSmax * log10(1 + litter_density)
 
-#	grass	shrub	tree	forbs
-	0.113	0.113	0.290	0.113	# kSmax (mm)
+#	treeNL	treeBL	shrub	forbs	grassC3	grassC4
+	0.290	0.290	0.113	0.113	0.113	0.113	# kSmax (mm)
 
 
 #---- Parameter for partitioning of bare-soil evaporation and transpiration
@@ -60,41 +77,41 @@
 # Default value for trees derived from a regression based on data from a
 # review by Daikoku et al. (2008) Hydrological Processes 22:4083-4096.
 
-#	grass	shrub	tree	forbs
-	1.	1.	0.41	1.
+#	treeNL	treeBL	shrub	forbs	grassC3	grassC4
+	0.41	0.41	1.		1.		1.		1.
 
 
 # --- Parameter for scaling and limiting bare soil evaporation rate
 # If totagb (g / m2) > param then no bare-soil evaporation
-#	grass	shrub	tree	forbs
-	999.	999.	2099.	999.
+#	treeNL	treeBL	shrub	forbs	grassC3	grassC4
+	2099.	2099.	999.	999.	999.	999.
 
 
 #--- Shade effects on transpiration based on live and dead biomass
-#	grass	shrub	tree	forbs
-	0.3	0.3	0.3	0.3	# shade scale
-	150.	150.	150.	150.	# shade maximal dead biomass
-	300.	300.	0.	300.	# tanfunc: xinflec
-	12.	12.	0.	12.	# yinflec
-	34.	34.	2.	34.	# range
-	0.002	0.002	0.0002	0.002	# slope
+#	treeNL	treeBL	shrub	forbs	grassC3	grassC4
+	0.3		0.3		0.3		0.3		0.3		0.3		# shade scale
+	150.	150.	150.	150.	150.	150.	# shade maximal dead biomass
+	0.		0.		300.	300.	300.	300.	# tanfunc: xinflec
+	0.		0.		12.		12.		12.		12.		# yinflec
+	2.		2.		34.		34.		34.		34.		# range
+	0.0002	0.0002	0.002	0.002	0.002	0.002	# slope
 
 
 #---- Hydraulic redistribution
 # Implemenation based on Ryel et al. (2002)  Oecologia 130: 173-184.
-#	grass	shrub	tree	forbs
-	1	1	1	1	# flag to turn on/off (1/0) hydraulic redistribution
-	-0.2328	-0.2328	-0.2328	-0.2328	# maxCondroot - maximum radial soil-root conductance of the entire active root system for water (cm/-bar/day) = 0.097 cm/MPa/h
-	10.	10.	10.	10.	# swp50 - soil water potential (-bar) where conductance is reduced by 50% = -1. MPa
-	3.22	3.22	3.22	3.22	# shapeCond - shaping parameter for the empirical relationship from van Genuchten to model relative soil-root conductance for water
+#	treeNL	treeBL	shrub	forbs	grassC3	grassC4
+	1		1		1		1		1		1		# flag to turn on/off (1/0) hydraulic redistribution
+	-0.2328	-0.2328	-0.2328	-0.2328	-0.2328	-0.2328	# maxCondroot - maximum radial soil-root conductance of the entire active root system for water (cm/-bar/day) = 0.097 cm/MPa/h
+	10.		10.		10.		10.		10.		10.		# swp50 - soil water potential (-bar) where conductance is reduced by 50% = -1. MPa
+	3.22	3.22	3.22	3.22	3.22	3.22	# shapeCond - shaping parameter for the empirical relationship from van Genuchten to model relative soil-root conductance for water
 
 
 #---- Critical soil water potential (MPa)
 # Soil water potential below which transpiration rates cannot be sustained,
 # for instance, for many crop species -1.5 MPa is assumed (wilting point)
 
-#	grass	shrub	tree	forbs
-	-3.5	-3.9	-2.0	-2.0
+#	treeNL	treeBL	shrub	forbs	grassC3	grassC4
+	-2.0	-2.0	-3.9	-2.0	-3.5	-3.5
 
 
 #---- Effects of atmospheric CO2 concentrations
@@ -102,11 +119,11 @@
 # Coefficients assume that monthly biomass inputs reflect values for conditions
 # at 360 ppm CO2, i.e., multiplier = 1 for x = 360 ppm CO2
 
-#	grass	shrub	tree	forbs
-	0.1319	0.1319	0.1319	0.1319	# Biomass Coeff1
-	0.3442	0.3442	0.3442	0.3442	# Biomass Coeff2
-	25.158	25.158	25.158	25.158	# WUE Coeff1
-	-0.548	-0.548	-0.548	-0.548	# WUE Coeff2
+#	treeNL	treeBL	shrub	forbs	grassC3	grassC4
+	0.1319	0.1319	0.1319	0.1319	0.1319	0.1319	# Biomass Coeff1
+	0.3442	0.3442	0.3442	0.3442	0.3442	0.3442	# Biomass Coeff2
+	25.158	25.158	25.158	25.158	25.158	25.158	# WUE Coeff1
+	-0.548	-0.548	-0.548	-0.548	-0.548	-0.548	# WUE Coeff2
 
 
 #------ Mean monthly biomass values
@@ -157,7 +174,52 @@
 # biomass inputs and/or water use efficiency (default: 1995 at 360 ppm CO2)
 1995
 
-# grass component:
+# treeNL component:
+#Litter  Biomass  %Live  LAI_conv
+2000 15000     0.083  500      # January
+2000 15000     0.083  500      # February
+2000 15000     0.083  500      # March
+2000 15000     0.083  500      # April
+2000 15000     0.083  500      # May
+2000 15000     0.083  500      # June
+2000 15000     0.083  500      # July
+2000 15000     0.083  500      # August
+2000 15000     0.083  500      # September
+2000 15000     0.083  500      # October
+2000 15000     0.083  500      # November
+2000 15000     0.083  500      # December
+
+# treeBL component:
+#Litter  Biomass  %Live  LAI_conv
+2000 15000     0.083  500      # January
+2000 15000     0.083  500      # February
+2000 15000     0.083  500      # March
+2000 15000     0.083  500      # April
+2000 15000     0.083  500      # May
+2000 15000     0.083  500      # June
+2000 15000     0.083  500      # July
+2000 15000     0.083  500      # August
+2000 15000     0.083  500      # September
+2000 15000     0.083  500      # October
+2000 15000     0.083  500      # November
+2000 15000     0.083  500      # December
+
+# shrub component:
+#Litter  Biomass  %Live LAI_conv
+ 85.4   210.0     0.06     372      # January
+ 88.2   212.0     0.08     372      # February
+ 95.3   228.0     0.20     372      # March
+100.5   272.0     0.33     372      # April
+166.4   400.0     0.57     372      # May
+186.0   404.0     0.55     372      # June
+177.1   381.0     0.50     372      # July
+212.2   352.0     0.46     372      # August
+157.4   286.0     0.32     372      # September
+124.9   235.0     0.15     372      # October
+110.4   218.0     0.08     372      # November
+104.3   214.0     0.06     372      # December
+
+# forbs component:
 #Litter  Biomass  %Live LAI_conv
  75.0    150.0    0.00  300.     # January
  80.0    150.0    0.00  300.     # February
@@ -172,37 +234,22 @@
  70.0    170.0    0.10  300.     # November
  75.0    160.0    0.00  300.     # December
 
-# shrub component:
+# grassC3 component:
 #Litter  Biomass  %Live LAI_conv
-85.4   210.0     0.06     372      # January
-88.2   212.0     0.08     372      # February
-95.3   228.0     0.20     372      # March
-100.5   272.0     0.33     372      # April
-166.4   400.0     0.57     372      # May
-186.0   404.0     0.55     372      # June
-177.1   381.0     0.50     372      # July
-212.2   352.0     0.46     372      # August
-157.4   286.0     0.32     372      # September
-124.9   235.0     0.15     372      # October
-110.4   218.0     0.08     372      # November
-104.3   214.0     0.06     372      # December
+ 75.0    150.0    0.00  300.     # January
+ 80.0    150.0    0.00  300.     # February
+ 85.0    150.0    0.10  300.     # March
+ 90.0    170.0    0.20  300.     # April
+ 50.0    190.0    0.40  300.     # May
+ 50.0    220.0    0.60  300.     # June
+ 50.0    250.0    0.40  300.     # July
+ 55.0    220.0    0.60  300.     # August
+ 60.0    190.0    0.40  300.     # September
+ 65.0    180.0    0.20  300.     # October
+ 70.0    170.0    0.10  300.     # November
+ 75.0    160.0    0.00  300.     # December
 
-# tree component:
-#Litter  Biomass  %Live  LAI_conv
-2000 15000     0.083  500      # January
-2000 15000     0.083  500      # February
-2000 15000     0.083  500      # March
-2000 15000     0.083  500      # April
-2000 15000     0.083  500     # May
-2000 15000     0.083  500      # June
-2000 15000     0.083  500      # July
-2000 15000     0.083  500      # August
-2000 15000     0.083  500      # September
-2000 15000     0.083  500      # October
-2000 15000     0.083  500      # November
-2000 15000     0.083  500      # December
-
-# forbs component:
+# grassC4 component:
 #Litter  Biomass  %Live LAI_conv
  75.0    150.0    0.00  300.     # January
  80.0    150.0    0.00  300.     # February

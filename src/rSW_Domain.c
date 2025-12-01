@@ -369,7 +369,7 @@ void rSW_CTL_setup_domain(
         }
         #endif
 
-        SW_F_read(&SW_Domain->SW_PathInputs, LogInfo);
+        SW_F_read(rSW2_rank, &SW_Domain->SW_PathInputs, LogInfo);
         if(LogInfo->stopRun) {
            return; // Exit function prematurely due to error
         }
