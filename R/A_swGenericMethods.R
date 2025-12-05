@@ -201,6 +201,8 @@ format_timestamp <- function(object) {
 #'
 #' @section Details:
 #' List of changes:
+#'   * Changes with `v6.6.0`:
+#'       * class [`swSite-class`]: new slot `"PotSoilEvCoMethod"`
 #'   * Changes with `v6.5.0`:
 #'       * class [`swSite-class`]: new slot `"SoilTemperatureBoundaryMethod"`
 #'       * class [`swProd-class`]: new slots `"nYearsDynamicShort"` and
@@ -1841,6 +1843,14 @@ setGeneric(
   function(object) standardGeneric("swSite_SoilDensityInputType")
 )
 
+#' \code{swSite_PotSoilEvCoMethod}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_PotSoilEvCoMethod",
+  function(object) standardGeneric("swSite_PotSoilEvCoMethod")
+)
 
 #' \code{swSite_TranspirationRegions}
 #' @param object An object of class \code{\linkS4class{swSite}} or
@@ -2031,6 +2041,16 @@ setGeneric(
 setGeneric(
   "swSite_SoilDensityInputType<-",
   function(object, value) standardGeneric("swSite_SoilDensityInputType<-")
+)
+
+#' \code{swSite_PotSoilEvCoMethod<-}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_PotSoilEvCoMethod<-",
+  function(object, value) standardGeneric("swSite_PotSoilEvCoMethod<-")
 )
 
 #' \code{swSite_TranspirationRegions<-}

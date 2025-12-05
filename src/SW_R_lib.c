@@ -299,10 +299,8 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
         &SoilWatDomain.SW_PathInputs,
         SoilWatDomain.hasConsistentSoilLayerDepths,
         &SoilWatDomain.nMaxSoilLayers,
-        &SoilWatDomain.nMaxEvapLayers,
         SoilWatDomain.depthsAllSoilLayers,
         SoilWatRun.RunIn.SiteRunIn.n_layers,
-        SoilWatRun.SiteSim.n_evap_lyrs,
         SoilWatRun.RunIn.SoilRunIn.depths,
         &local_LogInfo
     );
@@ -524,10 +522,8 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
         &SoilWatDomain.SW_PathInputs,
         SoilWatDomain.hasConsistentSoilLayerDepths,
         &SoilWatDomain.nMaxSoilLayers,
-        &SoilWatDomain.nMaxEvapLayers,
         SoilWatDomain.depthsAllSoilLayers,
         SoilWatRun.RunIn.SiteRunIn.n_layers,
-        SoilWatRun.SiteSim.n_evap_lyrs,
         SoilWatRun.RunIn.SoilRunIn.depths,
         &local_LogInfo
     );
@@ -542,7 +538,6 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
 
     SW_OUT_setup_output(
         SoilWatDomain.nMaxSoilLayers,
-        SoilWatDomain.nMaxEvapLayers,
         SoilWatRun.VegEstabIn.count,
         SoilWatRun.VegEstabIn.parms,
         &SoilWatDomain.OutDom,

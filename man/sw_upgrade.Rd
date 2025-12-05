@@ -107,6 +107,10 @@ take the new default values from \code{SOILWAT2}.
 
 List of changes:
 \itemize{
+\item Changes with \code{v6.6.0}:
+\itemize{
+\item class \code{\linkS4class{swSite}}: new slot \code{"PotSoilEvCoMethod"}
+}
 \item Changes with \code{v6.5.0}:
 \itemize{
 \item class \code{\linkS4class{swSite}}: new slot \code{"SoilTemperatureBoundaryMethod"}
