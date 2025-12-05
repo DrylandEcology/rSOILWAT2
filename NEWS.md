@@ -1,3 +1,6 @@
+# rSOILWAT2 v6.6.0-devel
+
+
 # rSOILWAT2 v6.5.0
 
 ## Breaking changes
