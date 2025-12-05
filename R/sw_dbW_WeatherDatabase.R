@@ -583,7 +583,7 @@ dbW_getScenarioId <- function(Scenario, ignore.case = FALSE, verbose = FALSE) {
         statement = sql,
         params = list(x = x)
       )[, 1]
-      if (is.null(tmp)) NA else tmp
+      if (is.null(tmp)) NA else tmp # nolint: coalesce_linter.
     }
   )
 

@@ -12,7 +12,7 @@ test_that("set_requested_flags:", {
     SWPcrit_MPa = -0.5
   )
 
-  use <- stats::setNames(
+  used <- stats::setNames(
     rep(FALSE, rSW2_glovars[["kSOILWAT2"]][["kINT"]][["NVEGTYPES"]]),
     unname(rSW2_glovars[["kSOILWAT2"]][["VegTypeNames2"]])
   )
@@ -20,32 +20,32 @@ test_that("set_requested_flags:", {
   test_data <- list(
     Composition = list(
       use = stats::setNames(
-        c(use, FALSE),
-        paste0(c(names(use), "Bare Ground"), "_Composition")
+        c(used, FALSE),
+        paste0(c(names(used), "Bare Ground"), "_Composition")
       ),
       values = swProd_Composition(rswin)
     ),
 
     Albedo = list(
       use = stats::setNames(
-        c(use, FALSE),
-        paste0(c(names(use), "Bare Ground"), "_Albedo")
+        c(used, FALSE),
+        paste0(c(names(used), "Bare Ground"), "_Albedo")
       ),
       values = swProd_Albedo(rswin)
     ),
 
     Height = list(
-      use = stats::setNames(use, paste0(names(use), "_CanopyHeight")),
+      use = stats::setNames(used, paste0(names(used), "_CanopyHeight")),
       values = t(swProd_CanopyHeight(rswin))
     ),
 
     HydRed = list(
-      use = stats::setNames(use, paste0(names(use), "_HydRed")),
+      use = stats::setNames(used, paste0(names(used), "_HydRed")),
       values = swProd_HydrRedstro_use(rswin)
     ),
 
     SWPcrit_MPa = list(
-      use = stats::setNames(use, paste0(names(use), "_SWPcrit_MPa")),
+      use = stats::setNames(used, paste0(names(used), "_SWPcrit_MPa")),
       values = swProd_CritSoilWaterPotential(rswin)
     )
   )
