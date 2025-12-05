@@ -437,8 +437,9 @@ data from `DayMet`
 ```
 
 
-### Potential bare-soil evaporation rates
+### Potential bare-soil evaporation coefficients estimated from soil texture
 ```{r, evco, results = "hide"}
+  # Option 1: Estimate coefficients and provide as inputs
   if (requireNamespace("rSW2data")) {
     soil_new[, "EvapBareSoil_frac"] <- rSW2data::calc_BareSoilEvapCoefs(
       layers_depth = soil_new[, "depth_cm"],
@@ -446,6 +447,10 @@ data from `DayMet`
       clay = soil_new[, "clay_frac"]
     )[1, ]
   }
+
+  # Option 2: Do not provide inputs and estimate with (identical) internal code
+  rSOILWAT2::swSite_PotSoilEvCoMethod(sw_in) <- 1L
+  soil_new[, "EvapBareSoil_frac"] <- NA
 ```
 
 

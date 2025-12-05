@@ -474,8 +474,9 @@ has_soilTemp_failed <- function() {
 #'
 #' @return An updated version of \code{swIn}.
 #' @export
-set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE,
-  default = NA) {
+set_requested_flags <- function(
+  swIn, tag, use, values, fun, reset = TRUE, default = NA
+) {
 
   if (!inherits(swIn, "swInputData")) {
     stop(
@@ -484,9 +485,11 @@ set_requested_flags <- function(swIn, tag, use, values, fun, reset = TRUE,
     )
   }
 
-  val_names <- names(use)
+  used <- use # nolint: backport_linter.
+
+  val_names <- names(used)
   i_flags <- grepl(tag, val_names)
-  i_fuse <- i_flags & use
+  i_fuse <- i_flags & used
 
   if (any(i_fuse)) {
     i_fuse <- which(i_fuse)

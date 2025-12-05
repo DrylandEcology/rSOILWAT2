@@ -108,6 +108,10 @@ CMIP5_historical|CMIP5_RCP85
 # Are inputs of density representing bulk soil (type 1) or the matric component (type 0)?
 0
 
+# Method for potential soil evaporation coefficients
+0   # 0 = Inputs for evco provided via "soils.in"
+    # 1 = Estimation of evco from relationship with soil properties
+
 
 # --- Organic matter ---
 # Depth [cm] at which characteristics of organic matter have completely switched from fibric to sapric peat

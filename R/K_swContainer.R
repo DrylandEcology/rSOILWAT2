@@ -1713,6 +1713,14 @@ setMethod(
 #' @rdname swInputData-class
 #' @export
 setMethod(
+  "swSite_PotSoilEvCoMethod",
+  signature = "swInputData",
+  function(object) swSite_PotSoilEvCoMethod(object@site)
+)
+
+#' @rdname swInputData-class
+#' @export
+setMethod(
   "swSite_TranspirationRegions",
   signature = "swInputData",
   function(object) swSite_TranspirationRegions(object@site)
@@ -1920,6 +1928,17 @@ setReplaceMethod(
   signature = "swInputData",
   function(object, value) {
     swSite_SoilDensityInputType(object@site) <- value
+    object
+  }
+)
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "swSite_PotSoilEvCoMethod",
+  signature = "swInputData",
+  function(object, value) {
+    swSite_PotSoilEvCoMethod(object@site) <- value
     object
   }
 )
