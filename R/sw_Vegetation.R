@@ -1670,10 +1670,12 @@ estimate_PotNatVeg_roots <- function(
 #' @export
 #' @md
 update_biomass <- function(fg, use, prod_input, prod_default) {
+  used <- use # nolint: backport_linter.
+
   comps <- c("_Litter", "_Biomass", "_FractionLive", "_LAIconv")
   veg_ids <- lapply(
     comps,
-    function(x) grep(paste0(fg, x), names(use))
+    function(x) grep(paste0(fg, x), names(used))
   )
   if (all(lengths(veg_ids) == 0L)) {
     warning(
@@ -1681,7 +1683,7 @@ update_biomass <- function(fg, use, prod_input, prod_default) {
       call. = FALSE
     )
   }
-  veg_incl <- lapply(veg_ids, function(x) use[x])
+  veg_incl <- lapply(veg_ids, function(x) used[x])
 
   res <- if (inherits(prod_default, c("swInputData", "swProd", "swProd2"))) {
     rSOILWAT2::swProd_MonProd_veg(prod_default, fg)
