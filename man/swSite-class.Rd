@@ -20,6 +20,7 @@
 \alias{swSite_TranspirationRegions,swSite-method}
 \alias{swSite_SoilDensityInputType,swSite-method}
 \alias{swSite_PotSoilEvCoMethod,swSite-method}
+\alias{swSite_RootingProfileMethod,swSite-method}
 \alias{set_swSite<-,swSite-method}
 \alias{swSite_SWClimits<-,swSite-method}
 \alias{swSite_ModelFlags<-,swSite-method}
@@ -36,6 +37,7 @@
 \alias{swSite_SoilDensityInputType<-,swSite-method}
 \alias{swSite_TranspirationRegions<-,swSite-method}
 \alias{swSite_PotSoilEvCoMethod<-,swSite-method}
+\alias{swSite_RootingProfileMethod<-,swSite-method}
 \title{Class \code{"swSite"}}
 \usage{
 swSite(...)
@@ -72,6 +74,8 @@ swSite(...)
 
 \S4method{swSite_PotSoilEvCoMethod}{swSite}(object)
 
+\S4method{swSite_RootingProfileMethod}{swSite}(object)
+
 \S4method{set_swSite}{swSite}(object) <- value
 
 \S4method{swSite_SWClimits}{swSite}(object) <- value
@@ -103,6 +107,8 @@ swSite(...)
 \S4method{swSite_TranspirationRegions}{swSite}(object) <- value
 
 \S4method{swSite_PotSoilEvCoMethod}{swSite}(object) <- value
+
+\S4method{swSite_RootingProfileMethod}{swSite}(object) <- value
 }
 \arguments{
 \item{...}{Arguments to the helper constructor function.

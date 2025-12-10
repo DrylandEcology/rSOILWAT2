@@ -68,7 +68,8 @@ setClass(
     swrc_flags = "character",
     has_swrcp = "logical",
     depth_sapric = "numeric",
-    PotSoilEvCoMethod = "integer"
+    PotSoilEvCoMethod = "integer",
+    RootingProfileMethod = "integer"
   ),
   prototype = list(
     SWClimits = c(swc_min = NA_real_, swc_init = NA_real_, swc_wet = NA_real_),
@@ -116,7 +117,8 @@ setClass(
     swrc_flags = c(swrc_name = NA_character_, ptf_name = NA_character_),
     has_swrcp = NA,
     depth_sapric = NA_real_,
-    PotSoilEvCoMethod = NA_integer_
+    PotSoilEvCoMethod = NA_integer_,
+    RootingProfileMethod = NA_integer_
   )
 )
 
@@ -205,6 +207,11 @@ setValidity(
 
     if (length(object@PotSoilEvCoMethod) != 1L) {
       msg <- "@PotSoilEvCoMethod length != 1."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (length(object@RootingProfileMethod) != 1L) {
+      msg <- "@RootingProfileMethod length != 1."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
@@ -420,6 +427,14 @@ setMethod(
   "swSite_PotSoilEvCoMethod",
   "swSite",
   function(object) slot(object, "PotSoilEvCoMethod")
+)
+
+#' @rdname swSite-class
+#' @export
+setMethod(
+  "swSite_RootingProfileMethod",
+  "swSite",
+  function(object) slot(object, "RootingProfileMethod")
 )
 
 #' @rdname swSite-class
@@ -651,7 +666,6 @@ setReplaceMethod(
   }
 )
 
-
 #' @rdname swSite-class
 #' @export
 setReplaceMethod(
@@ -659,6 +673,18 @@ setReplaceMethod(
   signature = "swSite",
   definition = function(object, value) {
     object@PotSoilEvCoMethod <- as.integer(value)
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname swSite-class
+#' @export
+setReplaceMethod(
+  "swSite_RootingProfileMethod",
+  signature = "swSite",
+  definition = function(object, value) {
+    object@RootingProfileMethod <- as.integer(value)
     validObject(object)
     object
   }

@@ -174,3 +174,39 @@ test_that("Run 'rSOILWAT2' with different PotEvCo inputs", {
     }
   }
 })
+
+
+test_that("Run 'rSOILWAT2' with different sources for rooting profile", {
+  defaultType <- 0L
+  types <- c(defaultType, 1L)
+
+  for (ftype in types) {
+    swin <- sw_input
+
+    # Set method
+    swSite_RootingProfileMethod(swin) <- ftype
+    if (ftype != 0L) {
+      tmp <- swSoils_Layers(swin)
+      tmp[, grep("^TrCo_", colnames(tmp))] <- NA
+      swSoils_Layers(swin) <- tmp
+    }
+
+    # Run SOILWAT
+    res <- sw_exec(
+      inputData = swin,
+      weatherList = sw_weather,
+      echo = FALSE,
+      quiet = TRUE
+    )
+
+    expect_s4_class(res, "swOutput")
+
+    if (identical(ftype, defaultType)) {
+      tran_default <- slot(slot(res, "TRANSP"), "Day")
+    } else {
+      expect_false(has_soilTemp_failed())
+      # Expect both input methods to produce identical output
+      expect_equal(tran_default, slot(slot(res, "TRANSP"), "Day"))
+    }
+  }
+})

@@ -1721,6 +1721,14 @@ setMethod(
 #' @rdname swInputData-class
 #' @export
 setMethod(
+  "swSite_RootingProfileMethod",
+  signature = "swInputData",
+  function(object) swSite_RootingProfileMethod(object@site)
+)
+
+#' @rdname swInputData-class
+#' @export
+setMethod(
   "swSite_TranspirationRegions",
   signature = "swInputData",
   function(object) swSite_TranspirationRegions(object@site)
@@ -1939,6 +1947,17 @@ setReplaceMethod(
   signature = "swInputData",
   function(object, value) {
     swSite_PotSoilEvCoMethod(object@site) <- value
+    object
+  }
+)
+
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
+  "swSite_RootingProfileMethod",
+  signature = "swInputData",
+  function(object, value) {
+    swSite_RootingProfileMethod(object@site) <- value
     object
   }
 )

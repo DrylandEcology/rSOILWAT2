@@ -109,7 +109,9 @@ List of changes:
 \itemize{
 \item Changes with \code{v6.6.0}:
 \itemize{
-\item class \code{\linkS4class{swSite}}: new slot \code{"PotSoilEvCoMethod"}
+\item class \code{\linkS4class{swSite}}: new slots \code{"PotSoilEvCoMethod"} and
+\code{"RootingProfileMethod"}
+\item class \code{\linkS4class{swProd2}}: new slot \code{"RootProfileParameters"}
 }
 \item Changes with \code{v6.5.0}:
 \itemize{

@@ -54,7 +54,8 @@ static char *cSW_SIT[] = {
   "TranspirationRegions",
   "swrc_flags", "has_swrcp",
   "depth_sapric",
-  "PotSoilEvCoMethod"
+  "PotSoilEvCoMethod",
+  "RootingProfileMethod"
 };
 
 static char *cLayers[] = {
@@ -395,6 +396,8 @@ SEXP onGet_SW_SIT(void) {
 
 	SEXP PotSoilEvCoMethod;
 
+	SEXP RootingProfileMethod;
+
 	SEXP TranspirationRegions, TranspirationRegions_names, TranspirationRegions_names_y;
 	char *cTranspirationRegions[] = { "ndx", "layer" };
 	int *p_transp; // ideally `LyrIndex` so that same type as `_TranspRgnBounds`, but R API INTEGER() is signed
@@ -506,6 +509,8 @@ SEXP onGet_SW_SIT(void) {
 
 	PROTECT(PotSoilEvCoMethod = ScalarInteger(si->methodEvCo));
 
+	PROTECT(RootingProfileMethod = ScalarInteger(si->methodTrCo));
+
 	PROTECT(TranspirationRegions = allocMatrix(INTSXP, si->n_transp_rgn, 2));
 	p_transp = INTEGER(TranspirationRegions);
 	for (i = 0; i < si->n_transp_rgn; i++) {
@@ -555,8 +560,9 @@ SEXP onGet_SW_SIT(void) {
 	SET_SLOT(SW_SIT, install(cSW_SIT[15]), has_swrcp);
 	SET_SLOT(SW_SIT, install(cSW_SIT[16]), depthSapric);
 	SET_SLOT(SW_SIT, install(cSW_SIT[17]), PotSoilEvCoMethod);
+	SET_SLOT(SW_SIT, install(cSW_SIT[18]), RootingProfileMethod);
 
-	UNPROTECT(32);
+	UNPROTECT(33);
 	return SW_SIT;
 }
 
@@ -580,6 +586,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	SEXP swrc_flags, has_swrcp;
     SEXP depthSapric;
     SEXP PotSoilEvCoMethod;
+    SEXP RootingProfileMethod;
 
     int unprotects = 0;
 
@@ -720,6 +727,10 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
     PROTECT(PotSoilEvCoMethod = GET_SLOT(SW_SIT, install("PotSoilEvCoMethod")));
     unprotects++;
     si->methodEvCo = INTEGER(PotSoilEvCoMethod)[0];
+
+    PROTECT(RootingProfileMethod = GET_SLOT(SW_SIT, install("RootingProfileMethod")));
+    unprotects++;
+    si->methodTrCo = INTEGER(RootingProfileMethod)[0];
 
 freeMem:
     UNPROTECT(unprotects);
