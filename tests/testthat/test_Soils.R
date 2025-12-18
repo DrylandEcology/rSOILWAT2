@@ -50,10 +50,10 @@ test_that("Unrealistic soils", {
   sw_out <- try(sw_exec(inputData = sw_input, quiet = TRUE), silent = TRUE)
   e_bs <- slot(slot(sw_out, "EVAPSOIL"), "Day")
   expect_gt(nrow(e_bs), 0L)
-  if (getNamespaceVersion("rSOILWAT2") <= "6.0.0") {
+  if (getNamespaceVersion("rSOILWAT2") <= numeric_version("6.0.0")) {
     # rSOILWAT2: < v6.0.0: expect no output for esoil (interpreted as zero)
     expect_identical(ncol(e_bs), 2L) # Year DOY
-  } else if (getNamespaceVersion("rSOILWAT2") < "6.6.0") {
+  } else if (getNamespaceVersion("rSOILWAT2") < numeric_version("6.6.0")) {
     # rSOILWAT2: v6.0.0 - v6.5.0: expect one layer of 0s for esoil
     expect_identical(ncol(e_bs), 3L) # Year DOY Lyr_1
     expect_identical(sum(e_bs[, 3L]), 0)
