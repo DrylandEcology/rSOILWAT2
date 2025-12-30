@@ -8,8 +8,8 @@
 #       describe the four available vegetation types and should not be
 #       modified unless a vegetation type itself is altered.
 
-#---- Select method for vegetation parameters
-0       # 0 - Use values from this file
+#---- Select method for vegetation composition and biomass
+0       # 0 - Use composition and biomass inputs from veg.in or veg.nc
         # 1 - Estimate vegetation composition from long-term climate conditions
         #     (values for other vegetation parameters from this file)
         # 2 - Dynamic vegetation using short- and long-term conditions

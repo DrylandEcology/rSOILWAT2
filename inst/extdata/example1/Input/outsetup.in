@@ -2,9 +2,7 @@
 #
 # Notes:
 # Time periods available:  DY,WK,MO,YR
-#   eg, if DY is chosen then 100,200 would mean to use the second hundred days
-#   But if YR is chosen, start and end numbers are in days so only those days
-#   are reported for the yearly average.
+#
 # Some keys from older versions (fortran and the c versions mimicking the fortran
 #   version) are not currently implemented:
 #   ALLH20, WTHR.
@@ -39,6 +37,8 @@
 # 'wk' for week, 'mo' for month, and 'yr' for year after TIMESTEP
 # in any order. For example: 'TIMESTEP mo wk' will output for month and week
 #
+# (2025-Dec-19) START and END are no longer used (values other than 1 and end
+# are ignored (with a warning).
 
 TIMESTEP dy wk mo yr # must be lowercase
 
