@@ -452,6 +452,7 @@ test_that("Weather data fixing", {
   )
 
   expect_false(anyNA(xf[["weatherData"]][, vars]))
+  expect_all_true(xf[["weatherData"]][["PPT_cm"]] >= 0)
 
   ids_has <- seq_len(nrow(x0))
   expect_identical(
@@ -540,6 +541,30 @@ test_that("Weather data fixing", {
     tmpc[["correctedValue"]],
     2L * Ns2
   )
+})
+
+test_that("Weather data fixing without negative preciptiation", {
+  skip_if_offline()
+
+  #--- * Issue #258: negative precipitation ------
+  mm_dm <- try(
+    rSOILWAT2::sw_meteo_obtain_DayMet(
+      x = c(longitude = -114.1204, latitude = 38.35762),
+      start_year = 1990,
+      end_year = 2020
+    )
+  )
+
+  if (!is.null(mm_dm) && !inherits(mm_dm, "try-error")) {
+    wd <- rSOILWAT2::dbW_fixWeather(
+      mm_dm[["weatherDF"]],
+      return_weatherDF = TRUE
+    )
+
+    expect_all_true(wd[["weatherData"]][["PPT_cm"]] >= 0)
+  } else {
+    skip("sw_meteo_obtain_DayMet() failed.")
+  }
 })
 
 

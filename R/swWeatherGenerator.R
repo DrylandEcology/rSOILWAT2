@@ -1851,13 +1851,22 @@ dbW_fixWeather <- function(
     ids <- tmp[c(1L, length(tmp))]
 
     ids_startend <- if (length(tmp) > 0L) {
+      lastDOY <- if (
+        wd1[ids[[2L]], "DOY"] == 365L &&
+          rSW2utils::isLeapYear(wd1[ids[[2L]], "Year"])
+      ) {
+        # Include leap day if last year is a leap year
+        366L
+      } else {
+        wd1[ids[[2L]], "DOY"]
+      }
+
       # before start
       (wd1[["Year"]] < wd1[ids[[1L]], "Year"]) |
         (wd1[["Year"]] == wd1[ids[[1L]], "Year"] &
             wd1[["DOY"]] < wd1[ids[[1L]], "DOY"]) |
         # after end
-        (wd1[["Year"]] == wd1[ids[[2L]], "Year"] &
-            wd1[["DOY"]] > wd1[ids[[2L]], "DOY"]) |
+        (wd1[["Year"]] == wd1[ids[[2L]], "Year"] & wd1[["DOY"]] > lastDOY) |
         (wd1[["Year"]] > wd1[ids[[2L]], "Year"])
     }
 
