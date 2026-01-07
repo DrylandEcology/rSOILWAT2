@@ -6,6 +6,12 @@
   this avoids negative precipitation values on the last day
   which occurred in rare situations (#258; @dschlaep).
 
+## New features
+* New `weather_dataBounds()` defines bounded value ranges of weather variables.
+  The new argument `"squashToBounds"` of `dbW_fixWeather()` passes
+  `weather_dataBounds()` to the new argument `"bounds"` of `dbW_imputeWeather()`
+  to squash variables into the provided value ranges (#258; @dschlaep).
+
 
 # rSOILWAT2 v6.5.0
 

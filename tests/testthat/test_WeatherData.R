@@ -543,7 +543,7 @@ test_that("Weather data fixing", {
   )
 })
 
-test_that("Weather data fixing without negative preciptiation", {
+test_that("Weather data fixing without negative values", {
   skip_if_offline()
 
   #--- * Issue #258: negative precipitation ------
@@ -565,6 +565,28 @@ test_that("Weather data fixing without negative preciptiation", {
   } else {
     skip("sw_meteo_obtain_DayMet() failed.")
   }
+
+  #--- * negative shortwave radiation ------
+  mm_dm <- try(
+    rSOILWAT2::sw_meteo_obtain_DayMet(
+      x = c(longitude = -111.8952, latitude = 44.07488),
+      start_year = 1990,
+      end_year = 2020
+    )
+  )
+
+  if (!is.null(mm_dm) && !inherits(mm_dm, "try-error")) {
+    wd <- rSOILWAT2::dbW_fixWeather(
+      mm_dm[["weatherDF"]],
+      squashToBounds = TRUE,
+      return_weatherDF = TRUE
+    )
+
+    expect_all_true(wd[["weatherData"]][["shortWR"]] >= 0)
+  } else {
+    skip("sw_meteo_obtain_DayMet() failed.")
+  }
+
 })
 
 

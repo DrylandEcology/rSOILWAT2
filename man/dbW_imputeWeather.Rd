@@ -11,6 +11,7 @@ dbW_imputeWeather(
   method_after_wg = c("interp", "locf", "mean", "none", "fail"),
   nmax_run = Inf,
   elevation = NA,
+  bounds = list(),
   return_weatherDF = FALSE
 )
 }
@@ -33,6 +34,11 @@ longer runs remain unchanged. Passed to \code{\link[rSW2utils:impute_df]{rSW2uti
 \item{elevation}{A numeric value. Site elevation above sea level \verb{[m]}.
 Used only if specific humidity is provided as input
 for calculating relative humidity.}
+
+\item{bounds}{A named list of length two numeric vectors. Elements that
+are matched by name to variables of \code{weatherData} are used to squash values
+of \code{weatherData} into the provided range, see \code{\link[=weather_dataBounds]{weather_dataBounds()}} for
+recommended values.}
 
 \item{return_weatherDF}{A logical value. See section "Value".}
 }
@@ -88,6 +94,11 @@ x3 <- dbW_imputeWeather(
   x,
   use_wg = FALSE,
   method_after_wg = "locf",
+  return_weatherDF = TRUE
+)
+x4 <- dbW_imputeWeather(
+  x,
+  bounds = list(rHavg_pct = c(0, 100), shortWR = c(0, Inf)),
   return_weatherDF = TRUE
 )
 
