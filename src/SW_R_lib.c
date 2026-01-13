@@ -275,8 +275,6 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
         SoilWatRun.RunIn.weathRunAllHist,
         SoilWatRun.ModelSim.cum_monthdays,
         SoilWatRun.ModelSim.days_in_month,
-        NULL,
-        swFALSE,
         &local_LogInfo
     );
     if(local_LogInfo.stopRun) {
@@ -498,8 +496,6 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
         SoilWatRun.RunIn.weathRunAllHist,
         SoilWatRun.ModelSim.cum_monthdays,
         SoilWatRun.ModelSim.days_in_month,
-        NULL,
-        swFALSE,
         &local_LogInfo
     );
     if(local_LogInfo.stopRun) {
@@ -757,8 +753,6 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
         SoilWatRun.RunIn.weathRunAllHist,
         SoilWatRun.ModelSim.cum_monthdays,
         SoilWatRun.ModelSim.days_in_month,
-        NULL,
-        swFALSE,
         &local_LogInfo
     );
     if(local_LogInfo.stopRun) {

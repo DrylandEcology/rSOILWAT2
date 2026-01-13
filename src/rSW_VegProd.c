@@ -595,7 +595,7 @@ void onSet_SW_VPD(SEXP SW_VPD, LOG_INFO* LogInfo) {
 
 
     /* Wrap up */
-    SW_VPD_fix_cover(&SoilWatRun.RunIn.VegProdRunIn, LogInfo);
+    fixVegCoverInputs(&SoilWatRun.RunIn.VegProdRunIn, LogInfo);
     if (LogInfo->stopRun) {
         goto freeMem; // Exit function prematurely due to error
     }
