@@ -83,7 +83,11 @@ sw_download_DayMet <- function(longitude, latitude, years) {
 #'
 #' if (!is.null(mm_dm) && !inherits(mm_dm, "try-error")) {
 #'   # Fill in missing values on leap days
-#'   mm_dm_wdata <- rSOILWAT2::dbW_fixWeather(mm_dm[["weatherDF"]])
+#'   mm_dm_wdata <- rSOILWAT2::dbW_fixWeather(
+#'     mm_dm[["weatherDF"]],
+#'     fillMissingValues = TRUE,
+#'     squashToBounds = TRUE
+#'   )
 #'
 #'   # Prepare a SOILWAT2 simulation
 #'   swin <- rSOILWAT2::sw_exampleData

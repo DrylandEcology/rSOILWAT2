@@ -509,11 +509,13 @@ get_soilmoisture <- function(
           widths_cm <- diff(c(0., swSoils_Layers(swInput)[, "depth_cm"]))
         }
 
+        # nolint start: coalesce_linter.
         one_minus_fcoarse <- 1. - if (is.null(fcoarse)) {
           swSoils_Layers(swInput)[, "gravel_content"]
         } else {
           fcoarse
         }
+        # nolint end: coalesce_linter.
 
         # nolint start: if_switch_linter.
         if (type == "swc") {

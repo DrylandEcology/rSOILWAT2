@@ -78,6 +78,30 @@ weather_dataAggFun <- function() {
   )
 }
 
+#' List valid ranges of weather variables
+#' @return A named list of length-two numeric vectors.
+#' @export
+weather_dataBounds <- function() {
+  list(
+    Tmax_C = c(-Inf, Inf),
+    Tmin_C = c(-Inf, Inf),
+    PPT_cm = c(0, Inf),
+    cloudCov_pct = c(0, 100),
+    windSpeed_mPERs = c(0, Inf),
+    windSpeed_east_mPERs = c(0, Inf),
+    windSpeed_north_mPERs = c(0, Inf),
+    rHavg_pct = c(0, 100),
+    rHmax_pct = c(0, 100),
+    rHmin_pct = c(0, 100),
+    specHavg_pct = c(0, 100),
+    specHavg_gPERkg = c(0, 1000),
+    Tdewpoint_C = c(-Inf, Inf),
+    actVP_kPa = c(0, Inf),
+    shortWR = c(0, Inf)
+  )
+}
+
+
 #' Class \code{"swWeatherData"}
 #'
 #' The methods listed below work on this class and the proper slot of the class
