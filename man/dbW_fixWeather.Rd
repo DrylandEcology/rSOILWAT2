@@ -14,6 +14,7 @@ dbW_fixWeather(
   elevation = NA,
   correctWeatherValues = FALSE,
   fillMissingValues = TRUE,
+  squashToBounds = FALSE,
   return_weatherDF = FALSE
 )
 }
@@ -47,6 +48,9 @@ Apply all available corrections to weather values (see details).}
 
 \item{fillMissingValues}{A logical value.
 Fill in missing values (see details).}
+
+\item{squashToBounds}{A logical value. Squash values to bounded ranges,
+see argument \code{"bounds"} of \code{\link[=dbW_imputeWeather]{dbW_imputeWeather()}} and \code{\link[=weather_dataBounds]{weather_dataBounds()}}.}
 
 \item{return_weatherDF}{A logical value. See section "Value".}
 }

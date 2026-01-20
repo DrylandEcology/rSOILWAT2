@@ -1330,6 +1330,10 @@ dbW_generateWeather <- function(
 #' @param nmax_run An integer value. Runs (sets of consecutive missing values)
 #' that are equal or shorter to `nmax_run` are imputed;
 #' longer runs remain unchanged. Passed to [rSW2utils::impute_df()].
+#' @param bounds A named list of length two numeric vectors. Elements that
+#' are matched by name to variables of `weatherData` are used to squash values
+#' of `weatherData` into the provided range, see [weather_dataBounds()] for
+#' recommended values.
 #'
 #' @return An updated copy of `weatherData` where missing values are imputed.
 #' If `return_weatherDF` is `TRUE`, then a
@@ -1378,6 +1382,11 @@ dbW_generateWeather <- function(
 #'   method_after_wg = "locf",
 #'   return_weatherDF = TRUE
 #' )
+#' x4 <- dbW_imputeWeather(
+#'   x,
+#'   bounds = list(rHavg_pct = c(0, 100), shortWR = c(0, Inf)),
+#'   return_weatherDF = TRUE
+#' )
 #'
 #' if (requireNamespace("graphics")) {
 #'   ## Compare original vs imputed values for May-Sep of 1980
@@ -1409,6 +1418,7 @@ dbW_imputeWeather <- function(
   method_after_wg = c("interp", "locf", "mean", "none", "fail"),
   nmax_run = Inf,
   elevation = NA,
+  bounds = list(),
   return_weatherDF = FALSE
 ) {
 
@@ -1482,6 +1492,18 @@ dbW_imputeWeather <- function(
 
     weatherData[, vars_wv][needs_im] <- tmp[needs_im]
   }
+
+  # Squash to bounds
+  squashedVars <- intersect(colnames(weatherData), names(bounds))
+
+  for (sqv in squashedVars) {
+    weatherData[, sqv] <- rSW2utils::squash_into_low_high(
+      weatherData[, sqv],
+      val_low = bounds[[sqv]][[1L]],
+      val_high = bounds[[sqv]][[2L]]
+    )
+  }
+
 
   if (isTRUE(as.logical(return_weatherDF[[1L]]))) {
     weatherData
@@ -1686,6 +1708,8 @@ dbW_substituteWeather <- function(
 #' Apply all available corrections to weather values (see details).
 #' @param fillMissingValues A logical value.
 #' Fill in missing values (see details).
+#' @param squashToBounds A logical value. Squash values to bounded ranges,
+#' see argument `"bounds"` of [dbW_imputeWeather()] and [weather_dataBounds()].
 #'
 #' @return A list with two named elements
 #'   * `"weatherData"`: An updated copy of the input `weatherData`
@@ -1744,6 +1768,7 @@ dbW_fixWeather <- function(
   elevation = NA,
   correctWeatherValues = FALSE,
   fillMissingValues = TRUE,
+  squashToBounds = FALSE,
   return_weatherDF = FALSE
 ) {
   nmax_interp <- as.integer(nmax_interp)
@@ -1851,13 +1876,22 @@ dbW_fixWeather <- function(
     ids <- tmp[c(1L, length(tmp))]
 
     ids_startend <- if (length(tmp) > 0L) {
+      lastDOY <- if (
+        wd1[ids[[2L]], "DOY"] == 365L &&
+          rSW2utils::isLeapYear(wd1[ids[[2L]], "Year"])
+      ) {
+        # Include leap day if last year is a leap year
+        366L
+      } else {
+        wd1[ids[[2L]], "DOY"]
+      }
+
       # before start
       (wd1[["Year"]] < wd1[ids[[1L]], "Year"]) |
         (wd1[["Year"]] == wd1[ids[[1L]], "Year"] &
             wd1[["DOY"]] < wd1[ids[[1L]], "DOY"]) |
         # after end
-        (wd1[["Year"]] == wd1[ids[[2L]], "Year"] &
-            wd1[["DOY"]] > wd1[ids[[2L]], "DOY"]) |
+        (wd1[["Year"]] == wd1[ids[[2L]], "Year"] & wd1[["DOY"]] > lastDOY) |
         (wd1[["Year"]] > wd1[ids[[2L]], "Year"])
     }
 
@@ -1869,6 +1903,7 @@ dbW_fixWeather <- function(
         use_wg = FALSE,
         method_after_wg = "interp",
         nmax_run = nmax_interp,
+        bounds = if (isTRUE(squashToBounds)) weather_dataBounds(),
         return_weatherDF = TRUE
       )
     )
@@ -2001,6 +2036,7 @@ dbW_fixWeather <- function(
           use_wg = FALSE,
           method_after_wg = "interp",
           nmax_run = Inf,
+          bounds = if (isTRUE(squashToBounds)) weather_dataBounds(),
           return_weatherDF = TRUE
         )
       )
@@ -2039,7 +2075,6 @@ dbW_fixWeather <- function(
   } else {
     wd4 <-  wd1
   }
-
 
   #--- Return
   list(
