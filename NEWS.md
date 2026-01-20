@@ -1,10 +1,10 @@
-# rSOILWAT2 v6.5.1-devel
+# rSOILWAT2 v6.5.1
 * Simulation output remains the same as the previous version.
 
 ## Bugfix
 * `dbW_fixWeather()` now recognizes if the last year is a leap year;
-  this avoids negative precipitation values on the last day
-  which occurred in rare situations (#258; @dschlaep).
+  this avoids the imputation of missing precipitation on the last day
+  with negative values which occurred in rare situations (#258; @dschlaep).
 
 ## New features
 * New `weather_dataBounds()` defines bounded value ranges of weather variables.
