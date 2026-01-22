@@ -470,8 +470,12 @@ swProd2FromProd1 <- function(prodv1) {
 
   res@isBiomAsIf100Cover <- prodv1@isBiomAsIf100Cover
 
-  for (k in idsnz) {
-    res@MonthlyVeg[[k]] <- prodv1@MonthlyVeg[[ids[[k]]]]
+  # Different sequence of types in prodv1@MonthlyVeg
+  ids2 <- mapVegTypes("2from1", order = "SOILWAT2")
+  ids2nz <- which(ids2 > 0L)
+
+  for (k in ids2nz) {
+    res@MonthlyVeg[[k]] <- prodv1@MonthlyVeg[[ids2[[k]]]]
   }
 
   res
