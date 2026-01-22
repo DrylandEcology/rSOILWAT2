@@ -1,3 +1,7 @@
+# rSOILWAT2 v6.5.2-9000
+* Simulation output remains the same as the previous version.
+
+
 # rSOILWAT2 v6.5.1
 * Simulation output remains the same as the previous version.
 
