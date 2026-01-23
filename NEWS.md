@@ -1,3 +1,11 @@
+# rSOILWAT2 v6.5.2-9000
+* Simulation output remains the same as the previous version.
+
+## Bugfix
+* `sw_upgrade()` now correctly upgrades biomass data from outdated `"v1"`
+  to the new `"v2"` vegetation types (#260; @dschlaep).
+
+
 # rSOILWAT2 v6.5.1
 * Simulation output remains the same as the previous version.
 
@@ -234,8 +242,8 @@
 * This version produces the same output as the previous version.
 * Update `SOILWAT2` to v7.1.0 which prepares for thread-safety and reentrancy
   (@N1ckP3rsl3y, @dschlaep).
-* C-side of `rSOILWAT2` gains new globals of the four main abstract types in
-  `SOILWAT2` - SW_ALL, SW_OUTPUT_POINTERS, LOG_INFO, and PATH_INFO -
+* C-side of `rSOILWAT2` gains new global variables of the four main abstract
+  types in `SOILWAT2` - SW_ALL, SW_OUTPUT_POINTERS, LOG_INFO, and PATH_INFO -
   to interact with `SOILWAT2`(@N1ckP3rsl3y, @dschlaep).
 
 
