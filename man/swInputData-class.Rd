@@ -141,6 +141,8 @@
 \alias{swSite_SoilTempBoundaryMethod,swInputData-method}
 \alias{swSite_SoilTemperatureConsts,swInputData-method}
 \alias{swSite_SoilDensityInputType,swInputData-method}
+\alias{swSite_PotSoilEvCoMethod,swInputData-method}
+\alias{swSite_RootingProfileMethod,swInputData-method}
 \alias{swSite_TranspirationRegions,swInputData-method}
 \alias{set_swSite<-,swInputData-method}
 \alias{swSite_SWClimits<-,swInputData-method}
@@ -156,6 +158,8 @@
 \alias{swSite_SoilTempBoundaryMethod<-,swInputData-method}
 \alias{swSite_SoilTemperatureConsts<-,swInputData-method}
 \alias{swSite_SoilDensityInputType<-,swInputData-method}
+\alias{swSite_PotSoilEvCoMethod<-,swInputData-method}
+\alias{swSite_RootingProfileMethod<-,swInputData-method}
 \alias{swSite_TranspirationRegions<-,swInputData-method}
 \alias{get_swSoils,swInputData-method}
 \alias{set_swSoils<-,swInputData,swSoils-method}
@@ -490,6 +494,10 @@ swInputData(...)
 
 \S4method{swSite_SoilDensityInputType}{swInputData}(object)
 
+\S4method{swSite_PotSoilEvCoMethod}{swInputData}(object)
+
+\S4method{swSite_RootingProfileMethod}{swInputData}(object)
+
 \S4method{swSite_TranspirationRegions}{swInputData}(object)
 
 \S4method{set_swSite}{swInputData}(object) <- value
@@ -519,6 +527,10 @@ swInputData(...)
 \S4method{swSite_SoilTemperatureConsts}{swInputData}(object) <- value
 
 \S4method{swSite_SoilDensityInputType}{swInputData}(object) <- value
+
+\S4method{swSite_PotSoilEvCoMethod}{swInputData}(object) <- value
+
+\S4method{swSite_RootingProfileMethod}{swInputData}(object) <- value
 
 \S4method{swSite_TranspirationRegions}{swInputData}(object) <- value
 

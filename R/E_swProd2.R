@@ -79,6 +79,7 @@ setClass(
     EsTpartitioning_param = "numeric",
     Es_param_limit = "numeric",
     Shade = "matrix",
+    RootProfileParameters = "matrix",
     HydraulicRedistribution_use = "logical",
     HydraulicRedistribution = "matrix",
     CriticalSoilWaterPotential = "numeric",
@@ -121,6 +122,14 @@ setClass(
           "ShadeScale", "ShadeMaximalDeadBiomass", "tanfuncXinflec",
           "yinflec", "range", "slope"
         )
+      )
+    ),
+    RootProfileParameters = array(
+      NA_real_,
+      dim = c(nvegs2, 3L),
+      dimnames = list(
+        veg2_names,
+        c("RootShape1", "RootShape2", "MaxRootDepth")
       )
     ),
     HydraulicRedistribution_use = stats::setNames(rep(NA, nvegs2), veg2_names),
@@ -253,6 +262,12 @@ setValidity(
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
+    temp <- dim(object@RootProfileParameters)
+    if (!identical(temp, c(nvegs2, 3L))) {
+      msg <- "@RootProfileParameters must be a NVEGTYPES x 3 matrix."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
     if (length(object@HydraulicRedistribution_use) != nvegs2) {
       msg <- "@HydraulicRedistribution_use must have NVEGTYPES values."
       val <- if (isTRUE(val)) msg else c(val, msg)
@@ -345,8 +360,12 @@ swProd2 <- function(...) {
 
   # Guarantee names
   gdns <- c(
-    "CanopyHeight", "VegetationInterceptionParameters",
-    "LitterInterceptionParameters", "HydraulicRedistribution",
+    "CanopyHeight",
+    "VegetationInterceptionParameters",
+    "LitterInterceptionParameters",
+    "Shade",
+    "RootProfileParameters",
+    "HydraulicRedistribution",
     "CO2Coefficients"
   )
 

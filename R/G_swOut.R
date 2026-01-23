@@ -85,6 +85,16 @@ setValidity(
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
+    if (!all(object@first_orig %in% c(NA, 1L))) {
+      msg <- "@first_orig must be 1 or NA"
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (!all(object@last_orig %in% c(NA, 365, 366))) {
+      msg <- "@last_orig must be 365, 366 or NA"
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
     val
   }
 )

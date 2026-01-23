@@ -1,3 +1,22 @@
+# rSOILWAT2 v6.6.0-devel
+
+## New features
+* Potential evaporation coefficients can now be estimated from soil properties.
+* Rooting profiles can now be estimated with an equation and parameters
+  for each vegetation type.
+
+## Changes to interface
+* The class `"swSite"` gained slot `"PotSoilEvCoMethod"` and
+  associated method `swSite_PotSoilEvCoMethod()`.
+  It also gained slot `"RootingProfileMethod"` and
+  associated methods `swSite_RootingProfileMethod()`.
+* The class `"swProd2"` gained slot `"RootProfileParameters"`.
+
+* The class `"swOutput"` produces now output of soil evaporation for
+  each soil layer (previously, output was produced only for soil layers with
+  soil evaporation potential).
+
+
 # rSOILWAT2 v6.5.1
 * Simulation output remains the same as the previous version.
 

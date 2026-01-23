@@ -62,7 +62,7 @@ void onSet_SW_DOM(SEXP InputData, LOG_INFO* LogInfo) {
     // copy here complete and correct values into `SoilWatDomain`
 
     // Currently not implemented in rSOILWAT2 but required in SOILWAT2
-    strcpy(SoilWatDomain.DomainType, "s");
+    SoilWatDomain.isSimDomDiscrete = swTRUE;
     SoilWatDomain.nDimX = 1;
     SoilWatDomain.nDimY = 1;
     SoilWatDomain.nDimS = 1;

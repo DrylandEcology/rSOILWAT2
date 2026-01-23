@@ -275,8 +275,6 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
         SoilWatRun.RunIn.weathRunAllHist,
         SoilWatRun.ModelSim.cum_monthdays,
         SoilWatRun.ModelSim.days_in_month,
-        NULL,
-        swFALSE,
         &local_LogInfo
     );
     if(local_LogInfo.stopRun) {
@@ -299,10 +297,8 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
         &SoilWatDomain.SW_PathInputs,
         SoilWatDomain.hasConsistentSoilLayerDepths,
         &SoilWatDomain.nMaxSoilLayers,
-        &SoilWatDomain.nMaxEvapLayers,
         SoilWatDomain.depthsAllSoilLayers,
         SoilWatRun.RunIn.SiteRunIn.n_layers,
-        SoilWatRun.SiteSim.n_evap_lyrs,
         SoilWatRun.RunIn.SoilRunIn.depths,
         &local_LogInfo
     );
@@ -500,8 +496,6 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
         SoilWatRun.RunIn.weathRunAllHist,
         SoilWatRun.ModelSim.cum_monthdays,
         SoilWatRun.ModelSim.days_in_month,
-        NULL,
-        swFALSE,
         &local_LogInfo
     );
     if(local_LogInfo.stopRun) {
@@ -524,10 +518,8 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
         &SoilWatDomain.SW_PathInputs,
         SoilWatDomain.hasConsistentSoilLayerDepths,
         &SoilWatDomain.nMaxSoilLayers,
-        &SoilWatDomain.nMaxEvapLayers,
         SoilWatDomain.depthsAllSoilLayers,
         SoilWatRun.RunIn.SiteRunIn.n_layers,
-        SoilWatRun.SiteSim.n_evap_lyrs,
         SoilWatRun.RunIn.SoilRunIn.depths,
         &local_LogInfo
     );
@@ -542,7 +534,6 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
 
     SW_OUT_setup_output(
         SoilWatDomain.nMaxSoilLayers,
-        SoilWatDomain.nMaxEvapLayers,
         SoilWatRun.VegEstabIn.count,
         SoilWatRun.VegEstabIn.parms,
         &SoilWatDomain.OutDom,
@@ -762,8 +753,6 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
         SoilWatRun.RunIn.weathRunAllHist,
         SoilWatRun.ModelSim.cum_monthdays,
         SoilWatRun.ModelSim.days_in_month,
-        NULL,
-        swFALSE,
         &local_LogInfo
     );
     if(local_LogInfo.stopRun) {

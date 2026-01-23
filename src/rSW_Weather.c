@@ -585,8 +585,6 @@ static void rSW2_setAllWeather(
             tempWeatherHist,
             elevation,
             0,
-            NULL,
-            swFALSE,
             allHist,
             LogInfo
         );

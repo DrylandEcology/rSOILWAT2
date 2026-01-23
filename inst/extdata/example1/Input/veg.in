@@ -8,8 +8,8 @@
 #       describe the four available vegetation types and should not be
 #       modified unless a vegetation type itself is altered.
 
-#---- Select method for vegetation parameters
-0       # 0 - Use values from this file
+#---- Select method for vegetation composition and biomass
+0       # 0 - Use composition and biomass inputs from veg.in or veg.nc
         # 1 - Estimate vegetation composition from long-term climate conditions
         #     (values for other vegetation parameters from this file)
         # 2 - Dynamic vegetation using short- and long-term conditions
@@ -95,6 +95,21 @@
 	0.		0.		12.		12.		12.		12.		# yinflec
 	2.		2.		34.		34.		34.		34.		# range
 	0.0002	0.0002	0.002	0.002	0.002	0.002	# slope
+
+
+#--- Parametric root profiles (request via "siteparam.in")
+# Equation Y = 1 - 1 / 2 * (exp(- p1 * depth) + exp(- p2 * depth))
+# by Zeng (2001) J Hydrometeorology 2:525-530.
+# treeNL -- Evergreen needleleaf tree (Tables 1, 2, 3)
+# treeBL -- Deciduous broadleaf tree (Tables 1, 2, 3)
+# shrub -- Semidesert (Table 1); Barren (Table 2); Broadleaf shrubs with bare soil (Table 3)
+# forbs -- Crop/mixed farming (Table 1); Cropland/natural vegetation (Table 2); Agriculture/C3 grassland (Table 3)
+# grassC3 -- Crop/mixed farming (Table 1); Cropland/natural vegetation (Table 2); Agriculture/C3 grassland (Table 3)
+# grassC4 -- Short vegetation/C4 grassland (Table 3)
+#	treeNL	treeBL	shrub	forbs	grassC3	grassC4
+	6.706	5.990	4.372	5.558	5.558	7.795	# shape parameter 'a' [m-1]
+	2.175	1.955	0.978	2.614	2.614	1.862	# shape parameter 'b' [m-1]
+	1.800	2.000	4.000	1.500	1.500	2.100	# maximum rooting zone depth [m]
 
 
 #---- Hydraulic redistribution
