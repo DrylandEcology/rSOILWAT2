@@ -1,4 +1,4 @@
-# rSOILWAT2 v6.5.2-9000
+# rSOILWAT2 v6.5.2
 * Simulation output remains the same as the previous version.
 
 ## Bugfix
