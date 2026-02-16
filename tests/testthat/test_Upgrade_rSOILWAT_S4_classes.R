@@ -108,3 +108,15 @@ test_that("Upgrade old rSOILWAT2 weather objects", {
     )
   )
 })
+
+
+test_that("Upgrade v1 rSOILWAT2 vegetation biomass", {
+  x1 <- swProd()
+  b1 <- slot(x1, "MonthlyVeg")
+  b2 <- slot(swProd2FromProd1(x1), "MonthlyVeg")
+
+  expect_equal(b2[["treeNL"]], b1[["Trees"]])
+  expect_equal(b2[["shrub"]], b1[["Shrubs"]])
+  expect_equal(b2[["forbs"]], b1[["Forbs"]])
+  expect_equal(b2[["grassC3"]], b1[["Grasses"]])
+})
