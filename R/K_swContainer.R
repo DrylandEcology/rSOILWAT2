@@ -17,7 +17,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###############################################################################
 
-
 # Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2013-2018)
 ###############################################################################
 
@@ -137,7 +136,6 @@ swInputData <- function(...) {
   object@version <- rSW2_version()
   object@timestamp <- rSW2_timestamp()
 
-
   object@files <- if ("files" %in% dns) {
     swFiles(dots[["files"]])
   } else {
@@ -234,7 +232,6 @@ swInputData <- function(...) {
 }
 
 
-
 setValidity(
   "swInputData",
   function(object) {
@@ -265,12 +262,10 @@ setMethod(
   "sw_upgrade",
   signature = "swInputData",
   definition = function(object, verbose = FALSE) {
-
     msg_upgrades <- NULL
 
     # Suppress warnings in case `object` is indeed invalid (outdated)
     if (!suppressWarnings(check_version(object))) {
-
       # Upgrade slots of swInputData
       for (sn in slotNames(object)) {
         if (identical(sn, "weatherHistory")) {
@@ -280,7 +275,6 @@ setMethod(
             )
             msg_upgrades <- c(msg_upgrades, sn)
           }
-
         } else {
           tmp <- try(validObject(slot(object, sn)), silent = TRUE)
 
@@ -290,19 +284,17 @@ setMethod(
               slot(object, sn) <- suppressWarnings(
                 sw_upgrade(slot(object, sn), verbose = FALSE)
               )
-
             } else if (grepl("no slot of name", tmp, fixed = TRUE)) {
               # Add new slot
               if (identical(sn, "spinup")) {
                 object@spinup <- swSpinup()
-
               } else if (identical(sn, "prod2")) {
                 object@prod2 <- swProd2FromProd1(object@prod)
               }
-
             } else {
               stop(
-                "Failed to upgrade 'swInputData' object slot ", shQuote(sn),
+                "Failed to upgrade 'swInputData' object slot ",
+                shQuote(sn),
                 call. = FALSE
               )
             }
@@ -332,8 +324,6 @@ setMethod(
     object
   }
 )
-
-
 
 
 # Methods for slot \code{files}
@@ -997,7 +987,6 @@ setReplaceMethod(
 )
 
 
-
 # Methods for slot \code{cloud}
 #' @rdname swInputData-class
 #' @export
@@ -1261,10 +1250,8 @@ setReplaceMethod(
       if (!all(years == cummax(years))) {
         stop("Weather data is Missing", call. = FALSE)
       }
-
     } else if (length(index) == 1) {
       object@weatherHistory[[index]] <- value
-
     } else {
       stop("To many indices. Weather data not set", call. = FALSE)
     }
@@ -1295,10 +1282,8 @@ setReplaceMethod(
       if (!all(years == cummax(years))) {
         stop("Weather data are missing", call. = FALSE)
       }
-
     } else if (length(index) == 1) {
-     object[[index]] <- value
-
+      object[[index]] <- value
     } else {
       stop("To many indices. Weather data not set", call. = FALSE)
     }
@@ -1729,6 +1714,13 @@ setMethod(
 #' @rdname swInputData-class
 #' @export
 setMethod(
+  "swSite_AlbedoMethod",
+  signature = "swInputData",
+  function(object) swSite_AlbedoMethod(object@site)
+)
+#' @rdname swInputData-class
+#' @export
+setMethod(
   "swSite_TranspirationRegions",
   signature = "swInputData",
   function(object) swSite_TranspirationRegions(object@site)
@@ -1965,6 +1957,16 @@ setReplaceMethod(
 #' @rdname swInputData-class
 #' @export
 setReplaceMethod(
+  "swSite_AlbedoMethod",
+  signature = "swInputData",
+  function(object, value) {
+    swSite_AlbedoMethod(object@site) <- value
+    object
+  }
+)
+#' @rdname swInputData-class
+#' @export
+setReplaceMethod(
   "swSite_TranspirationRegions",
   signature = "swInputData",
   function(object, value) {
@@ -1988,16 +1990,16 @@ setMethod(
 
 #' @rdname swSoils_SWRCp
 setMethod(
- "swSoils_SWRCp",
- signature = "swInputData",
- function(object) swSoils_SWRCp(object@soils)
+  "swSoils_SWRCp",
+  signature = "swInputData",
+  function(object) swSoils_SWRCp(object@soils)
 )
 
 #' @rdname swSoils_omSWRCp
 setMethod(
- "swSoils_omSWRCp",
- signature = "swInputData",
- function(object) swSoils_omSWRCp(object@soils)
+  "swSoils_omSWRCp",
+  signature = "swInputData",
+  function(object) swSoils_omSWRCp(object@soils)
 )
 
 #' @rdname swInputData-class
@@ -2044,7 +2046,6 @@ setReplaceMethod(
   "swSoils_Layers",
   signature = "swInputData",
   function(object, value) {
-
     if (!swSite_hasSWRCp(object@site)) {
       # --> assigning new soil layers fails `swSoils` validity checks
       # if number of soil layers disagrees with the SWRC parameter object.
@@ -2237,10 +2238,8 @@ setReplaceMethod(
       if (!all(years == cummax(years))) {
         stop("SWC data is missing", call. = FALSE)
       }
-
     } else if (length(index) == 1) {
       object@swc@History[[index]] <- value
-
     } else {
       stop("To many index. Not set", call. = FALSE)
     }
@@ -2257,28 +2256,33 @@ setMethod("get_swSpinup", "swInputData", function(object) object@spinup)
 
 #' @rdname swInputData-class
 #' @export
-setMethod("swSpinup_SpinupActive", "swInputData",
-  function(object) swSpinup_SpinupActive(object@spinup))
+setMethod("swSpinup_SpinupActive", "swInputData", function(object) {
+  swSpinup_SpinupActive(object@spinup)
+})
 
 #' @rdname swInputData-class
 #' @export
-setMethod("swSpinup_SpinupMode", "swInputData",
-  function(object) swSpinup_SpinupMode(object@spinup))
+setMethod("swSpinup_SpinupMode", "swInputData", function(object) {
+  swSpinup_SpinupMode(object@spinup)
+})
 
 #' @rdname swInputData-class
 #' @export
-setMethod("swSpinup_SpinupScope", "swInputData",
-  function(object) swSpinup_SpinupScope(object@spinup))
+setMethod("swSpinup_SpinupScope", "swInputData", function(object) {
+  swSpinup_SpinupScope(object@spinup)
+})
 
 #' @rdname swInputData-class
 #' @export
-setMethod("swSpinup_SpinupDuration", "swInputData",
-  function(object) swSpinup_SpinupDuration(object@spinup))
+setMethod("swSpinup_SpinupDuration", "swInputData", function(object) {
+  swSpinup_SpinupDuration(object@spinup)
+})
 
 #' @rdname swInputData-class
 #' @export
-setMethod("swSpinup_SpinupSeed", "swInputData",
-  function(object) swSpinup_SpinupSeed(object@spinup))
+setMethod("swSpinup_SpinupSeed", "swInputData", function(object) {
+  swSpinup_SpinupSeed(object@spinup)
+})
 
 
 #' @rdname swInputData-class
@@ -2346,8 +2350,6 @@ setReplaceMethod(
     object
   }
 )
-
-
 
 
 # Methods for slot \code{carbon}
