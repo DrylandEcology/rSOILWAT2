@@ -281,7 +281,7 @@ setSWRC <- function(
 
   setTxtInput(
     filename = file.path(path, "files.in"),
-    tag = "# Input for soil water retention curve",
+    tag = "# Soil water retention curve",
     value = file.path("Input", fnameSWRCp),
     classic = TRUE
   )
