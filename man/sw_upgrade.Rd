@@ -109,9 +109,15 @@ List of changes:
 \itemize{
 \item Changes with \code{v6.6.0}:
 \itemize{
-\item class \code{\linkS4class{swSite}}: new slots \code{"PotSoilEvCoMethod"} and
-\code{"RootingProfileMethod"}
-\item class \code{\linkS4class{swProd2}}: new slot \code{"RootProfileParameters"}
+\item class \code{\linkS4class{swSite}}: new slots \code{"PotSoilEvCoMethod"},
+\code{"RootingProfileMethod"}, \code{"RoughnessLengthGroundSurface"},
+\code{"AlbedoMethod"}, \code{"AlbedoSnowMax"}, \code{"AlbedoSoilDry"},
+\code{"AlbedoSoilSaturated"}, \code{"AlbedoSoilDarkeningParameter"},
+\code{"SnowFractionalCoverMeltingFactor"}
+\item class \code{\linkS4class{swProd2}}: new slots \code{"RootProfileParameters"},
+\code{"kExtVegAlbedo"}
+\item class \code{\linkS4class{swOUT}}: one new \code{outkey} \code{"ENERGYAVG"},
+for a new total of 35 \code{outkey}
 }
 \item Changes with \code{v6.5.0}:
 \itemize{

@@ -1,4 +1,3 @@
-
 #---INPUTS
 dir_test_data <- file.path("..", "test_data")
 temp <- list.files(dir_test_data, pattern = "Ex")
@@ -6,7 +5,7 @@ temp <- sapply(strsplit(temp, "_", fixed = TRUE), function(x) x[[1]])
 tests <- unique(temp)
 
 test_that("Test data availability", {
-  expect_gt(length(tests), 0)
+  expect_gt(length(tests), 0L)
 })
 
 
@@ -65,7 +64,6 @@ test_that("Manipulate 'swSite' class", {
     swSite_ModelCoefficients(xinput2),
     swSite_ModelCoefficients(site1)
   )
-
 
   #--- Slot TranspirationRegions
   expect_equal(
@@ -207,6 +205,40 @@ test_that("Run 'rSOILWAT2' with different sources for rooting profile", {
       expect_false(has_soilTemp_failed())
       # Expect both input methods to produce identical output
       expect_equal(tran_default, slot(slot(res, "TRANSP"), "Day"))
+    }
+  }
+})
+
+
+test_that("Run 'rSOILWAT2' with different methods for surface albedo", {
+  defaultType <- 0L
+  types <- c(defaultType, 1L)
+
+  for (ftype in types) {
+    swin <- sw_input
+
+    # Set method
+    swSite_AlbedoMethod(swin) <- ftype
+
+    # Run SOILWAT
+    res <- sw_exec(
+      inputData = swin,
+      weatherList = sw_weather,
+      echo = FALSE,
+      quiet = TRUE
+    )
+
+    expect_s4_class(res, "swOutput")
+
+    if (identical(ftype, defaultType)) {
+      pet_default <- slot(slot(res, "PET"), "Year")
+    } else {
+      expect_false(has_soilTemp_failed())
+      # Expect non-default methods to produce different pet than default run
+      expect_gt(
+        sum(abs(pet_default - slot(slot(res, "PET"), "Year"))),
+        0
+      )
     }
   }
 })

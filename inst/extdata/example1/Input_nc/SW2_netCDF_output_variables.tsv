@@ -34,6 +34,7 @@ PET	H_oh	H_oh_MJm-2	MJ m-2	T	1	hoh	extraterrestrial horizontal solar irradiation
 PET	H_ot	H_ot_MJm-2	MJ m-2	T	1	hot	extraterrestrial tilted solar irradiation	NA	MJ m-2	time: sum	NA
 PET	H_gh	H_gh_MJm-2	MJ m-2	T	1	hgh	global horizontal irradiation	NA	MJ m-2	time: sum	NA
 PET	H_gt	H_gt_MJm-2	MJ m-2	T	1	hgt	global tilted irradiation	NA	MJ m-2	time: sum	NA
+ENERGYAVG	surfaceAlbedo	surfaceAlbedo	1	T	1	alb	surface albedo	NA	1	time: mean	NA
 SNOWPACK	snowpack	snowpackWaterEquivalent_cm	cm	T	1	snw	surface snow amount	Liquid water equivalent of surface snow	mm	time: mean	CMIP6/CMOR3
 SNOWPACK	snowdepth	snowdepth_cm	cm	T	1	snd	surface snow thickness	Snow depth	m	time: mean	CMIP6/CMOR3
 DEEPSWC	deep	lowLayerDrain_cm	cm	T	1	qgwr	drainage amount through base of soil model	Groundwater recharge from soil layer	mm	time: sum	CMIP6/CMOR3

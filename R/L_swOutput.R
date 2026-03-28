@@ -17,10 +17,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###############################################################################
 
-
 # Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2013-2018)
 ###############################################################################
-
 
 #' Slot names of \linkS4class{swOutput}
 #' @return Standardized named vector for easier access to slots of class
@@ -57,7 +55,8 @@ sw_out_flags <- function() {
     sw_veg = tmp["SW_BIOMASS"],
     sw_wetdays = tmp["SW_WETDAY"],
     sw_derivedsum = tmp["SW_DERIVEDSUM"],
-    sw_derivedavg = tmp["SW_DERIVEDAVG"]
+    sw_derivedavg = tmp["SW_DERIVEDAVG"],
+    sw_energyavg = tmp["SW_ENERGYAVG"]
   )
 
   # Fix names
@@ -225,7 +224,8 @@ swOutput <- setClass(
     CO2EFFECTS = "swOutput_KEY",
     BIOMASS = "swOutput_KEY",
     DERIVEDSUM = "swOutput_KEY",
-    DERIVEDAVG = "swOutput_KEY"
+    DERIVEDAVG = "swOutput_KEY",
+    ENERGYAVG = "swOutput_KEY"
   ),
   prototype = list(
     version = rSW2_version(),
@@ -266,7 +266,8 @@ swOutput <- setClass(
     CO2EFFECTS = swOutput_KEY(),
     BIOMASS = swOutput_KEY(),
     DERIVEDSUM = swOutput_KEY(),
-    DERIVEDAVG = swOutput_KEY()
+    DERIVEDAVG = swOutput_KEY(),
+    ENERGYAVG = swOutput_KEY()
   )
 )
 

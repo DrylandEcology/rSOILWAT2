@@ -30,19 +30,38 @@
 # grassC4	grasses with a C4 photosynthetic pathway
 # BareGround
 
+
 #---- Composition of vegetation type components (0-1; must add up to 1)
 #	treeNL	treeBL	shrub	forbs	grassC3	grassC4	BareGround
 	0.2	0.0	0.2	0.2	0.2	0.0	0.2
 
 
 #---- Albedo
-# Default values from Houldcroft et al. 2009:
-# MODIS snowfree 'grassland', 'open shrub', ‘evergreen needle forest’ with
-# MODIS albedo aggregated over pure IGBP cells where NDVI is greater than
-# the 98th percentile NDVI
+# * 'albedoFixed' method uses these albedo values directly;
+#   "BareGround" albedo is only used by surface albedo method 'albedoFixed'
+# * 'albedoDynamic1' method interprets the values as leaf albedo at full
+#   canopy closure and, based on LAI, mixes soil albedo background
 
 #	treeNL	treeBL	shrub	forbs	grassC3	grassC4	BareGround
+
+# Legacy values (SOILWAT2 < v8.4.0)
 	0.106	0.106	0.143	0.167	0.167	0.167	0.15
+
+# White-sky shortwave MODIS albedo for pure IGBP cells: Houldcroft et al. 2009, Table 3
+#	1		4		7		10		10		9		-
+#	0.106	0.168	0.143	0.167	0.167	0.156	0.15
+
+# White-sky shortwave MODIS albedo for JULES PFTs: Houldcroft et al. 2009, Table 4
+#	NL		BL		sh		C3g		C3g		C4g		-
+#	0.088	0.143	0.115	0.178	0.178	0.159	0.15
+
+
+# Extinction coefficient for calculating canopy albedo from leaf albedo
+# and leaf area index (LAI), default 0.5 for spherical leaf angle distribution
+# (Ross 1981; Houldcroft et al. 2009)
+
+#	treeNL	treeBL	shrub	forbs	grassC3	grassC4
+	0.5		0.5		0.5		0.5		0.5		0.5
 
 
 #--- Canopy height (cm) parameters
@@ -184,10 +203,10 @@
 # LAI_conv - monthly amount of biomass needed to produce LAI=1.0 (g/m^2).
 # There should be 12 rows, one for each month, starting with January.
 
-# Calendar year corresponding to vegetation inputs
-# Note: year during which atmospheric CO2 fertilization does not modify
-# biomass inputs and/or water use efficiency (default: 1995 at 360 ppm CO2)
-1995
+1995 # Calendar year corresponding to vegetation inputs
+     # Note: year during which atmospheric CO2 fertilization does not modify
+     # biomass inputs and/or water use efficiency (default: 1995 at 360 ppm CO2)
+
 
 # treeNL component:
 #Litter  Biomass  %Live  LAI_conv

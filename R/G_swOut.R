@@ -17,11 +17,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###############################################################################
 
-
 # Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2013-2018)
 ###############################################################################
-
-
 
 #######
 #' Class \code{"swOUT_key"}
@@ -58,13 +55,13 @@ setClass(
   ),
   # TODO: lengths must be rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]
   prototype = list(
-    mykey = rep(NA_integer_, 34L),
-    myobj = rep(NA_integer_, 34L),
-    sumtype = rep(NA_integer_, 34L),
-    use = rep(NA, 34L),
-    first_orig = rep(NA_integer_, 34L),
-    last_orig = rep(NA_integer_, 34L),
-    outfile = rep(NA_character_, 34L)
+    mykey = rep(NA_integer_, 35L),
+    myobj = rep(NA_integer_, 35L),
+    sumtype = rep(NA_integer_, 35L),
+    use = rep(NA, 35L),
+    first_orig = rep(NA_integer_, 35L),
+    last_orig = rep(NA_integer_, 35L),
+    outfile = rep(NA_character_, 35L)
   )
 )
 
@@ -185,7 +182,7 @@ setClass(
     #   * 999 must be rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]]
     #   * nrows = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]
     #   * ncols = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
-    timeSteps = array(999, dim = c(34L, 4L))
+    timeSteps = array(999, dim = c(35L, 4L))
   )
 )
 
@@ -295,7 +292,9 @@ setMethod(
       # v520: `"FROZEN"` added as `outkey` 28 for a new total of 32
       to_v520 = n_has <= 31L && n_exp >= 32L,
       # v640: `"DERIVEDSUM"` and `"DERIVEDAVG"` for a new total of 34
-      to_v640 = n_has <= 32L && n_exp >= 34L
+      to_v640 = n_has <= 32L && n_exp >= 34L,
+      # v660: `"ENERGYAVG"` added as `outkey` 35 for a new total of 35
+      to_v660 = n_has <= 34L && n_exp >= 35L
     )
 
     do_upgrade <- do_upgrade[do_upgrade]
@@ -304,10 +303,8 @@ setMethod(
       target <- swOUT()
       stopifnot(nrow(target) == n_exp)
 
-
       #--- Loop over upgrades sequentially
       for (k in seq_along(do_upgrade)) {
-
         if (verbose) {
           message(
             "Upgrading object of class `swOUT`: ",
@@ -326,13 +323,15 @@ setMethod(
           to_v520 = 28L,
           # v640: `"DERIVEDSUM"` and `"DERIVEDAVG"` for a new total of 34
           to_v640 = 33L:34L,
+          # v660: `"ENERGYAVG"` added as `outkey` 35 for a new total of 35
+          to_v660 = 35L,
           stop(
-            "Upgrade ", shQuote(names(do_upgrade)[[k]]),
+            "Upgrade ",
+            shQuote(names(do_upgrade)[[k]]),
             " is not implemented for class `swOUT`.",
             call. = FALSE
           )
         )
-
 
         #--- Upgrade `timeSteps`
         tmp <- object@timeSteps
@@ -366,7 +365,12 @@ setMethod(
         object@mykey <- target@mykey
 
         list_keys <- c(
-          "myobj", "sumtype", "use", "first_orig", "last_orig", "outfile"
+          "myobj",
+          "sumtype",
+          "use",
+          "first_orig",
+          "last_orig",
+          "outfile"
         )
 
         for (sn in list_keys) {
@@ -516,7 +520,6 @@ setReplaceMethod(
     object
   }
 )
-
 
 
 #' @rdname swOUT-class

@@ -55,7 +55,14 @@ static char *cSW_SIT[] = {
   "swrc_flags", "has_swrcp",
   "depth_sapric",
   "PotSoilEvCoMethod",
-  "RootingProfileMethod"
+  "RootingProfileMethod",
+  "RoughnessLengthGroundSurface",
+  "AlbedoMethod",
+  "AlbedoSnowMax",
+  "AlbedoSoilDry",
+  "AlbedoSoilSaturated",
+  "AlbedoSoilDarkeningParameter",
+  "SnowFractionalCoverMeltingFactor"
 };
 
 static char *cLayers[] = {
@@ -347,6 +354,7 @@ void onSet_SW_SOILS(SEXP SW_SOILS, LOG_INFO* LogInfo) {
 SEXP onGet_SW_SIT(void) {
 	int i;
 	SW_SITE_INPUTS *si = &SoilWatRun.SiteIn;
+	SW_SITE_RUN_INPUTS *sri = &SoilWatRun.RunIn.SiteRunIn;
 	SW_MODEL_RUN_INPUTS *m = &SoilWatRun.RunIn.ModelRunIn;
 	SW_SITE_SIM *ss = &SoilWatRun.SiteSim;
 
@@ -397,6 +405,14 @@ SEXP onGet_SW_SIT(void) {
 	SEXP PotSoilEvCoMethod;
 
 	SEXP RootingProfileMethod;
+
+	SEXP RoughnessLengthGroundSurface;
+	SEXP AlbedoMethod;
+	SEXP AlbedoSnowMax;
+	SEXP AlbedoSoilDry;
+	SEXP AlbedoSoilSaturated;
+	SEXP AlbedoSoilDarkeningParameter;
+	SEXP SnowFractionalCoverMeltingFactor;
 
 	SEXP TranspirationRegions, TranspirationRegions_names, TranspirationRegions_names_y;
 	char *cTranspirationRegions[] = { "ndx", "layer" };
@@ -497,7 +513,7 @@ SEXP onGet_SW_SIT(void) {
 	REAL(SoilTemperatureConstants)[4] = si->csParam1;
 	REAL(SoilTemperatureConstants)[5] = si->csParam2;
 	REAL(SoilTemperatureConstants)[6] = si->shParam;
-	REAL(SoilTemperatureConstants)[7] = SoilWatRun.RunIn.SiteRunIn.Tsoil_constant;
+	REAL(SoilTemperatureConstants)[7] = sri->Tsoil_constant;
 	REAL(SoilTemperatureConstants)[8] = si->stDeltaX;
 	REAL(SoilTemperatureConstants)[9] = si->stMaxDepth;
 	PROTECT(SoilTemperatureConstants_names = allocVector(STRSXP,10));
@@ -510,6 +526,14 @@ SEXP onGet_SW_SIT(void) {
 	PROTECT(PotSoilEvCoMethod = ScalarInteger(si->methodEvCo));
 
 	PROTECT(RootingProfileMethod = ScalarInteger(si->methodTrCo));
+
+	PROTECT(RoughnessLengthGroundSurface = ScalarReal(si->z_0g));
+	PROTECT(AlbedoMethod = ScalarInteger(si->methodAlbedo));;
+	PROTECT(AlbedoSnowMax = ScalarReal(si->alpha_snow_max));
+	PROTECT(AlbedoSoilDry = ScalarReal(sri->alpha_soil_dry));
+	PROTECT(AlbedoSoilSaturated = ScalarReal(sri->alpha_soil_sat));
+	PROTECT(AlbedoSoilDarkeningParameter = ScalarReal(sri->paramSoilAlbedoDarkening));
+	PROTECT(SnowFractionalCoverMeltingFactor = ScalarReal(si->snowFractionalCoverMeltingFactor));
 
 	PROTECT(TranspirationRegions = allocMatrix(INTSXP, si->n_transp_rgn, 2));
 	p_transp = INTEGER(TranspirationRegions);
@@ -561,13 +585,21 @@ SEXP onGet_SW_SIT(void) {
 	SET_SLOT(SW_SIT, install(cSW_SIT[16]), depthSapric);
 	SET_SLOT(SW_SIT, install(cSW_SIT[17]), PotSoilEvCoMethod);
 	SET_SLOT(SW_SIT, install(cSW_SIT[18]), RootingProfileMethod);
+	SET_SLOT(SW_SIT, install(cSW_SIT[19]), RoughnessLengthGroundSurface);
+	SET_SLOT(SW_SIT, install(cSW_SIT[20]), AlbedoMethod);
+	SET_SLOT(SW_SIT, install(cSW_SIT[21]), AlbedoSnowMax);
+	SET_SLOT(SW_SIT, install(cSW_SIT[22]), AlbedoSoilDry);
+	SET_SLOT(SW_SIT, install(cSW_SIT[23]), AlbedoSoilSaturated);
+	SET_SLOT(SW_SIT, install(cSW_SIT[24]), AlbedoSoilDarkeningParameter);
+	SET_SLOT(SW_SIT, install(cSW_SIT[25]), SnowFractionalCoverMeltingFactor);
 
-	UNPROTECT(33);
+	UNPROTECT(40);
 	return SW_SIT;
 }
 
 void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	SW_SITE_INPUTS *si = &SoilWatRun.SiteIn;
+	SW_SITE_RUN_INPUTS *sri = &SoilWatRun.RunIn.SiteRunIn;
 	SW_MODEL_RUN_INPUTS *m = &SoilWatRun.RunIn.ModelRunIn;
 
 	SEXP SWClimits;
@@ -587,6 +619,13 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
     SEXP depthSapric;
     SEXP PotSoilEvCoMethod;
     SEXP RootingProfileMethod;
+	SEXP RoughnessLengthGroundSurface;
+	SEXP AlbedoMethod;
+	SEXP AlbedoSnowMax;
+	SEXP AlbedoSoilDry;
+	SEXP AlbedoSoilSaturated;
+	SEXP AlbedoSoilDarkeningParameter;
+	SEXP SnowFractionalCoverMeltingFactor;
 
     int unprotects = 0;
 
@@ -693,7 +732,7 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	si->csParam1 = REAL(SoilTemperatureConstants)[4];
 	si->csParam2 = REAL(SoilTemperatureConstants)[5];
 	si->shParam = REAL(SoilTemperatureConstants)[6];
-	SoilWatRun.RunIn.SiteRunIn.Tsoil_constant = REAL(SoilTemperatureConstants)[7];
+	sri->Tsoil_constant = REAL(SoilTemperatureConstants)[7];
 	si->stDeltaX = REAL(SoilTemperatureConstants)[8];
 	si->stMaxDepth = REAL(SoilTemperatureConstants)[9];
 	#ifdef RSWDEBUG
@@ -731,6 +770,34 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
     PROTECT(RootingProfileMethod = GET_SLOT(SW_SIT, install("RootingProfileMethod")));
     unprotects++;
     si->methodTrCo = INTEGER(RootingProfileMethod)[0];
+
+    PROTECT(RoughnessLengthGroundSurface = GET_SLOT(SW_SIT, install("RoughnessLengthGroundSurface")));
+    unprotects++;
+    si->z_0g = REAL(RoughnessLengthGroundSurface)[0];
+
+    PROTECT(AlbedoMethod = GET_SLOT(SW_SIT, install("AlbedoMethod")));
+    unprotects++;
+    si->methodAlbedo = INTEGER(AlbedoMethod)[0];
+
+    PROTECT(AlbedoSnowMax = GET_SLOT(SW_SIT, install("AlbedoSnowMax")));
+    unprotects++;
+    si->alpha_snow_max = REAL(AlbedoSnowMax)[0];
+
+    PROTECT(AlbedoSoilDry = GET_SLOT(SW_SIT, install("AlbedoSoilDry")));
+    unprotects++;
+    sri->alpha_soil_dry = REAL(AlbedoSoilDry)[0];
+
+    PROTECT(AlbedoSoilSaturated = GET_SLOT(SW_SIT, install("AlbedoSoilSaturated")));
+    unprotects++;
+    sri->alpha_soil_sat = REAL(AlbedoSoilSaturated)[0];
+
+    PROTECT(AlbedoSoilDarkeningParameter = GET_SLOT(SW_SIT, install("AlbedoSoilDarkeningParameter")));
+    unprotects++;
+    sri->paramSoilAlbedoDarkening = REAL(AlbedoSoilDarkeningParameter)[0];
+
+    PROTECT(SnowFractionalCoverMeltingFactor = GET_SLOT(SW_SIT, install("SnowFractionalCoverMeltingFactor")));
+    unprotects++;
+    si->snowFractionalCoverMeltingFactor = REAL(SnowFractionalCoverMeltingFactor)[0];
 
 freeMem:
     UNPROTECT(unprotects);

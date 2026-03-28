@@ -67,13 +67,13 @@ TIMESTEP dy wk mo yr # must be lowercase
      SNOWPACK     AVG       WK       1     end        snowpack      /* snowpack water equivalent (cm), snowdepth (cm); since snowpack is already summed, use avg - sum sums the sums = nonsense */
       DEEPSWC     SUM       MO       1     end      deep_drain      /* deep drainage into lowest layer (cm) */
      SOILTEMP     AVG       MO       1     end       temp_soil      /* soil temperature from each soil layer (in celsius) */
-       FROZEN     AVG	    MO	     1     end     frozen_soil      /*Frozen state for each soil layer */
+       FROZEN     AVG       MO       1     end     frozen_soil      /* Frozen state for each soil layer */
        ESTABL     OFF       YR       1     end          estabs      /* yearly establishment results */
    CO2EFFECTS     AVG       DY       1     end      co2effects      /* vegetation CO2-effect (multiplier) for trees, shrubs, forbs, grasses; WUE CO2-effect (multiplier) for trees, shrubs, forbs, grasses */
       BIOMASS     AVG       DY       1     end      vegetation      /* vegetation: cover (%) for trees, shrubs, forbs, grasses; biomass (g/m2 as component of total) for total, trees, shrubs, forbs, grasses, and litter; live biomass (g/m2 as component of total) total, trees, shrubs, forbs, grasses; leaf area index LAI (m2/m2) */
    DERIVEDSUM     SUM       DY       1     end      derivedsum      /* cumulative derived metrics: cwd, ddd5C30bar000to100cm, wdd5C15bar000to100cm */
    DERIVEDAVG     AVG       DY       1     end      derivedavg      /* average derived metrics: swa30bar000to100cm, swa39bar000to100cm */
-
+    ENERGYAVG     AVG       DY       1     end       energyavg      /* surface albedo */
 
 # Simulation output directory/filenames
 Output/			# Path for output files: / for same directory, or e.g., Output/; PROGRAMMER NOTE: This is currently the 13th position; if this changes then update function SW_Files.c/SW_F_read()
