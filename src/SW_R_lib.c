@@ -11,6 +11,7 @@
 #include "SOILWAT2/include/SW_Defines.h"
 
 #include "SOILWAT2/include/SW_Files.h"
+#include "SOILWAT2/include/SW_Main_lib.h" // for sw_init_args(), sw_setup_prog_data()
 #include "SOILWAT2/include/SW_Carbon.h"
 #include "SOILWAT2/include/SW_Model.h"
 #include "SOILWAT2/include/SW_Weather.h"
@@ -52,6 +53,7 @@
 
 // rSOILWAT2 does not utilize SOILWAT2's MPI-based parallelization
 const int rSW2_rank = 0;
+const int rSW2_worldSize = 1;
 
 // rSOILWAT2 is currently set up to have a fixed domain size of 1
 SW_DOMAIN SoilWatDomain;
@@ -137,10 +139,12 @@ static void setGlobal_soiltempError(Bool soiltempError) {
 static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LOG_INFO* LogInfo) {
     int i, argc;
     char *argv[7];
-    size_t userSUID = 0; // keep userSUID fixed at 0
     #ifdef RSWDEBUG
     int debug = 0;
     #endif
+    // unrealistic large value (1e12 seconds are c. 3.6 years)
+    double wallTimeLimit = 1e12;
+    TimeInt runSimDayLen = 0;
     Bool renameDomainTemplateNC = swFALSE;
     Bool prepareFiles = swFALSE;
     Bool endQuietly = swFALSE;
@@ -167,7 +171,7 @@ static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LO
     #endif
 
     SW_DOM_init_ptrs(&SoilWatDomain);
-    SW_CTL_init_ptrs(&SoilWatRun);
+    SW_CTL_init_ptrs(&SoilWatDomain, &SoilWatRun);
 
     sw_init_args(
         argc,
@@ -175,11 +179,11 @@ static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LO
         rSW2_rank,
         &EchoInits,
         &SoilWatDomain.SW_PathInputs.txtInFiles[eFirst],
-        &userSUID,
-        NULL,
+        &wallTimeLimit,
         &renameDomainTemplateNC,
         &prepareFiles,
         &endQuietly,
+        &runSimDayLen,
         LogInfo
     );
     if(endQuietly || LogInfo->stopRun) {
@@ -190,7 +194,9 @@ static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LO
     if (debug) sw_printf("Initialize SOILWAT ...");
     #endif
 
-    rSW_CTL_setup_domain(from_files, InputData, userSUID, &SoilWatDomain, LogInfo);
+    rSW_CTL_setup_domain(
+        from_files, InputData, runSimDayLen, &SoilWatDomain, LogInfo
+    );
     if(LogInfo->stopRun) {
       return; // Exit function prematurely due to error
     }
@@ -206,12 +212,14 @@ static void setupSOILWAT2(Bool from_files, SEXP InputData, SEXP inputOptions, LO
         return; // Exit function prematurely due to error
     }
 
-    SW_CTL_setup_model(&SoilWatRun, &SoilWatDomain.OutDom, TRUE, LogInfo);
+    SW_CTL_setup_model(&SoilWatRun, TRUE, LogInfo);
+
     if(LogInfo->stopRun) {
         return; // Exit function prematurely due to error
     }
 
-    SW_MDL_get_ModelRun(&SoilWatRun.ModelIn, &SoilWatDomain, NULL, LogInfo);
+    SW_MDL_get_ModelRun(SoilWatRun.ModelIn, &SoilWatDomain, NULL, LogInfo);
+
     if(LogInfo->stopRun) {
       return; // Exit function prematurely due to error
     }
@@ -229,6 +237,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   SEXP swInputData, SW_DataList = NULL, swLog, oRlogfile;
   SEXP swProdOld1;
   SEXP prodold1;
+  int n_years;
 
   int numUnprotects = 0;
 
@@ -269,26 +278,26 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
     #ifdef RSWDEBUG
     if (debug) sw_printf(" finalize daily weather ...\n");
     #endif
-    SW_WTH_finalize_all_weather(
+    n_years = SoilWatRun.ModelIn->endyr - SoilWatRun.ModelIn->startyr + 1;
+    SW_WTH_finalize_yearly_weather(
         &SoilWatRun.MarkovIn,
-        &SoilWatRun.WeatherIn,
+        SoilWatRun.WeatherIn,
         SoilWatRun.RunIn.weathRunAllHist,
-        SoilWatRun.ModelSim.cum_monthdays,
-        SoilWatRun.ModelSim.days_in_month,
+        &SoilWatRun.WeatherSim,
+        SoilWatRun.ModelSim->cum_monthdays,
+        SoilWatRun.ModelSim->days_in_month,
+        SoilWatRun.ModelSim->year,
+        n_years,
+        SoilWatDomain.startstart,
+        SoilWatDomain.endend,
+        SoilWatDomain.startyr,
+        SoilWatDomain.endyr,
+        SoilWatRun.WeatherSim.trivialScaling,
         &local_LogInfo
     );
     if(local_LogInfo.stopRun) {
         goto report;
     }
-
-  // initialize simulation run (based on user inputs)
-  #ifdef RSWDEBUG
-  if (debug) sw_printf(" init simulation run ...\n");
-  #endif
-  SW_CTL_init_run(&SoilWatRun, &local_LogInfo);
-  if(local_LogInfo.stopRun) {
-    goto report;
-  }
 
     // identify domain-wide soil profile information
     // value of hasConsistentSoilLayerDepths does not matter
@@ -305,6 +314,17 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
     if(local_LogInfo.stopRun) {
         goto report;
     }
+
+
+  // initialize simulation run (based on user inputs)
+  #ifdef RSWDEBUG
+  if (debug) sw_printf(" init simulation run ...\n");
+  #endif
+  SW_CTL_init_run(&SoilWatRun, &local_LogInfo, &local_LogInfo);
+  if(local_LogInfo.stopRun) {
+    goto report;
+  }
+
 
   #ifdef RSWDEBUG
   if (debug) {
@@ -444,72 +464,46 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   `sw_exec()` is R interface to sw_start()
 */
 SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
-	SEXP outputData = NULL, swLog, oRlogfile;
-//  SW_WALLTIME local_WallTime;
-  LOG_INFO local_LogInfo;
-  int unprotects = 0;
+    SEXP outputData = NULL, swLog, oRlogfile;
+    LOG_INFO local_LogInfo;
+    int unprotects = 0;
 
-  #ifdef RSWDEBUG
-  int debug = 0;
-  #endif
-    // Start overall wall time
-//    local_WallTime.has_walltime = swFALSE; // rSOILWAT2 currently does not do wall-time
+    #ifdef RSWDEBUG
+    int debug = 0;
+    #endif
 
     // Initialize logs and pointer objects
     sw_init_logs(current_sw_verbosity, &local_LogInfo);
 
 
-  #ifdef RSWDEBUG
-  if (debug) sw_printf("'start': create log ...");
-  #endif
-	PROTECT(swLog = MAKE_CLASS("swLog"));
-	PROTECT(oRlogfile = NEW_OBJECT(swLog));
+    #ifdef RSWDEBUG
+    if (debug) sw_printf("'start': create log ...");
+    #endif
+    PROTECT(swLog = MAKE_CLASS("swLog"));
+    PROTECT(oRlogfile = NEW_OBJECT(swLog));
     unprotects += 2;
 
-  // setup and construct model (via inputData)
-  #ifdef RSWDEBUG
-  if (debug) sw_printf(" input arguments & setup model ...");
-  #endif
-  setupSOILWAT2(FALSE, inputData, inputOptions, &local_LogInfo);
-  if(local_LogInfo.stopRun) {
-    goto report;
-  }
-
-	// read user inputs: either from files or from memory (depending on useFiles)
-
-	#ifdef RSWDEBUG
-	if (debug) sw_printf(" obtain inputs ...");
-	#endif
-
-	rSW_CTL_obtain_inputs(FALSE, inputData, weatherList, &local_LogInfo);
-  if(local_LogInfo.stopRun) {
-    goto report;
-  }
-
-    // finalize daily weather
+    // setup and construct model (via inputData)
     #ifdef RSWDEBUG
-    if (debug) sw_printf(" finalize daily weather ...\n");
+    if (debug) sw_printf(" input arguments & setup model ...");
     #endif
-    SW_WTH_finalize_all_weather(
-        &SoilWatRun.MarkovIn,
-        &SoilWatRun.WeatherIn,
-        SoilWatRun.RunIn.weathRunAllHist,
-        SoilWatRun.ModelSim.cum_monthdays,
-        SoilWatRun.ModelSim.days_in_month,
-        &local_LogInfo
-    );
+    setupSOILWAT2(FALSE, inputData, inputOptions, &local_LogInfo);
     if(local_LogInfo.stopRun) {
         goto report;
     }
 
-	// initialize simulation run (based on user inputs)
-	#ifdef RSWDEBUG
-	if (debug) sw_printf(" init simulation run ...");
-	#endif
-	SW_CTL_init_run(&SoilWatRun, &local_LogInfo);
+    // read user inputs: either from files or from memory (depending on useFiles)
+
+    #ifdef RSWDEBUG
+    if (debug) sw_printf(" obtain inputs ...");
+    #endif
+
+    rSW_CTL_obtain_inputs(FALSE, inputData, weatherList, &local_LogInfo);
     if(local_LogInfo.stopRun) {
         goto report;
     }
+
+    // finalize daily weather --> now done by prepare_next_day()
 
     // identify domain-wide soil profile information
     // value of hasConsistentSoilLayerDepths does not matter
@@ -523,6 +517,15 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
         SoilWatRun.RunIn.SoilRunIn.depths,
         &local_LogInfo
     );
+    if (local_LogInfo.stopRun) {
+        goto report;
+    }
+
+    // initialize simulation run (based on user inputs)
+    #ifdef RSWDEBUG
+    if (debug) sw_printf(" init simulation run ...");
+    #endif
+    SW_CTL_init_run(&SoilWatRun, &local_LogInfo, &local_LogInfo);
     if(local_LogInfo.stopRun) {
         goto report;
     }
@@ -532,48 +535,64 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
     if (debug) sw_printf(" setup output variables ...");
     #endif
 
-    SW_OUT_setup_output(
-        SoilWatDomain.nMaxSoilLayers,
-        SoilWatRun.VegEstabIn.count,
-        SoilWatRun.VegEstabIn.parms,
-        &SoilWatDomain.OutDom,
+    sw_setup_prog_data(
+        rSW2_worldSize,
+        FALSE, //prepareFiles,
+        &SoilWatRun,
+        &SoilWatDomain,
         &local_LogInfo
     );
-    if(local_LogInfo.stopRun) {
+    if (local_LogInfo.stopRun) {
         goto report;
     }
 
-	PROTECT(outputData = onGetOutput(inputData, &local_LogInfo));
+    PROTECT(outputData = onGetOutput(inputData, &local_LogInfo));
     unprotects++;
     if (local_LogInfo.stopRun) {
         goto report;
     }
-	setGlobalrSOILWAT2_OutputVariables(outputData);
+    setGlobalrSOILWAT2_OutputVariables(outputData);
 
-  // run simulation: loop through each year
-  #ifdef RSWDEBUG
-  if (debug) sw_printf(" run SOILWAT2 ...");
-  #endif
+
+    // run simulation: loop through each year
+    #ifdef RSWDEBUG
+    if (debug) sw_printf(" run SOILWAT2 ...");
+    #endif
     // Ideally, we call here SW_CTL_RunSimSet() -- equivalently to SOILWAT2;
     // however, rSOILWAT2's output memory is handled by R instead of SOILWAT2,
     // i.e., we cannot take a local deep copy (and free all after the run).
     // Thus, we mimic here SW_CTL_run_sw() instead
     // and are using rSOILWAT2's global variables
     if (SoilWatDomain.SW_SpinUp.spinup) {
-      SW_CTL_run_spinup(&SoilWatRun, &SoilWatDomain.OutDom, &local_LogInfo);
-      if (local_LogInfo.stopRun) {
-          goto report;
-      }
+        double *tempVals = NULL;
+        SW_CTL_run_spinup(
+            rSW2_rank,
+            &SoilWatDomain,
+            tempVals,
+            &SoilWatRun,
+            &SoilWatRun,
+            &local_LogInfo,
+            &local_LogInfo
+        );
+        if (local_LogInfo.stopRun) {
+            goto report;
+        }
     }
 
-    SW_CTL_main(&SoilWatRun, &SoilWatDomain.OutDom, &local_LogInfo);
+    SW_CTL_run_single_site(
+        SoilWatRun.ModelIn->startyr,
+        SoilWatRun.ModelIn->endyr,
+        &SoilWatDomain,
+        &SoilWatRun,
+        &SoilWatRun,
+        &local_LogInfo
+    );
 
+    #ifdef RSWDEBUG
+    if (debug) sw_printf(" clean up ...");
+    #endif
 
-  #ifdef RSWDEBUG
-  if (debug) sw_printf(" clean up ...");
-  #endif
-
-  report: {
+report: {
     UNPROTECT(unprotects);
 
     if (local_LogInfo.stopRun) {
@@ -587,13 +606,13 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
 
     sw_write_warnings("(rlib) ", &local_LogInfo);
     sw_fail_on_error(&local_LogInfo);
-  }
+}
 
-  #ifdef RSWDEBUG
-  if (debug) sw_printf(" completed.\n");
-  #endif
+    #ifdef RSWDEBUG
+    if (debug) sw_printf(" completed.\n");
+    #endif
 
-	return(outputData);
+    return(outputData);
 }
 
 
@@ -652,6 +671,8 @@ SEXP onGetOutputDeprecated(SEXP inputData) {
 SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   SEXP res = NULL, inputOptions;
   SEXP IntrinsicSiteParams;
+  int n_years;
+
   int numUnprotects = 0;
   #ifdef RSWDEBUG
   int debug = 0;
@@ -747,12 +768,21 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
     #ifdef RSWDEBUG
     if (debug) sw_printf(" > finalize daily weather.\n");
     #endif
-    SW_WTH_finalize_all_weather(
+    n_years = SoilWatRun.ModelIn->endyr - SoilWatRun.ModelIn->startyr + 1;
+    SW_WTH_finalize_yearly_weather(
         &SoilWatRun.MarkovIn,
-        &SoilWatRun.WeatherIn,
+        SoilWatRun.WeatherIn,
         SoilWatRun.RunIn.weathRunAllHist,
-        SoilWatRun.ModelSim.cum_monthdays,
-        SoilWatRun.ModelSim.days_in_month,
+        &SoilWatRun.WeatherSim,
+        SoilWatRun.ModelSim->cum_monthdays,
+        SoilWatRun.ModelSim->days_in_month,
+        SoilWatRun.ModelSim->year,
+        n_years,
+        SoilWatDomain.startstart,
+        SoilWatDomain.endend,
+        SoilWatDomain.startyr,
+        SoilWatDomain.endyr,
+        SoilWatRun.WeatherSim.trivialScaling,
         &local_LogInfo
     );
     if(local_LogInfo.stopRun) {
@@ -838,22 +868,22 @@ SEXP rSW2_readAllWeatherFromDisk(
   }
 
   /* Copy relevant data to global variable SoilWatRun */
-  SoilWatRun.ModelIn.startyr = INTEGER(startYear)[0];
-  SoilWatRun.ModelIn.endyr = INTEGER(endYear)[0];
+  SoilWatRun.ModelIn->startyr = INTEGER(startYear)[0];
+  SoilWatRun.ModelIn->endyr = INTEGER(endYear)[0];
 
   SoilWatRun.RunIn.ModelRunIn.elevation = REAL(elevation)[0];
 
-  strcpy(SoilWatRun.WeatherIn.name_prefix, CHAR(STRING_ELT(path, 0)));
-  strcat(SoilWatRun.WeatherIn.name_prefix, "/");
-  strcat(SoilWatRun.WeatherIn.name_prefix, CHAR(STRING_ELT(name_prefix, 0)));
+  strcpy(SoilWatRun.WeatherIn->name_prefix, CHAR(STRING_ELT(path, 0)));
+  strcat(SoilWatRun.WeatherIn->name_prefix, "/");
+  strcat(SoilWatRun.WeatherIn->name_prefix, CHAR(STRING_ELT(name_prefix, 0)));
 
   // read only from files
-  SoilWatRun.WeatherIn.use_weathergenerator_only = FALSE; // no weather generator
-  SoilWatRun.WeatherIn.generateWeatherMethod = 0;
+  SoilWatRun.WeatherIn->use_weathergenerator_only = FALSE; // no weather generator
+  SoilWatRun.WeatherIn->generateWeatherMethod = 0;
 
-  SoilWatRun.WeatherIn.use_cloudCoverMonthly = FALSE; // don't interpolate monthly values
-  SoilWatRun.WeatherIn.use_windSpeedMonthly = FALSE; // don't interpolate monthly values
-  SoilWatRun.WeatherIn.use_humidityMonthly = FALSE; // don't interpolate monthly values
+  SoilWatRun.WeatherIn->use_cloudCoverMonthly = FALSE; // don't interpolate monthly values
+  SoilWatRun.WeatherIn->use_windSpeedMonthly = FALSE; // don't interpolate monthly values
+  SoilWatRun.WeatherIn->use_humidityMonthly = FALSE; // don't interpolate monthly values
   for (i = 0; i < MAX_MONTHS; i++) {
     SoilWatRun.RunIn.SkyRunIn.cloudcov[i] = SW_MISSING;
     SoilWatRun.RunIn.SkyRunIn.windspeed[i] = SW_MISSING;
@@ -861,20 +891,20 @@ SEXP rSW2_readAllWeatherFromDisk(
   }
 
   for (i = 0; i < MAX_INPUT_COLUMNS; i++) {
-    SoilWatRun.WeatherIn.dailyInputFlags[i] = xdif[i] ? swTRUE : swFALSE;
+    SoilWatRun.WeatherIn->dailyInputFlags[i] = xdif[i] ? swTRUE : swFALSE;
   };
 
   set_dailyInputIndices(
-    SoilWatRun.WeatherIn.dailyInputFlags,
-    SoilWatRun.WeatherIn.dailyInputIndices,
-    &SoilWatRun.WeatherIn.n_input_forcings
+    SoilWatRun.WeatherIn->dailyInputFlags,
+    SoilWatRun.WeatherIn->dailyInputIndices,
+    &SoilWatRun.WeatherIn->n_input_forcings
   );
 
   check_and_update_dailyInputFlags(
-    SoilWatRun.WeatherIn.use_cloudCoverMonthly,
-    SoilWatRun.WeatherIn.use_humidityMonthly,
-    SoilWatRun.WeatherIn.use_windSpeedMonthly,
-    SoilWatRun.WeatherIn.dailyInputFlags,
+    SoilWatRun.WeatherIn->use_cloudCoverMonthly,
+    SoilWatRun.WeatherIn->use_humidityMonthly,
+    SoilWatRun.WeatherIn->use_windSpeedMonthly,
+    SoilWatRun.WeatherIn->dailyInputFlags,
     &local_LogInfo
   );
   if(local_LogInfo.stopRun) {
@@ -883,19 +913,19 @@ SEXP rSW2_readAllWeatherFromDisk(
 
   // no monthly scaling
   for (i = 0; i < MAX_MONTHS; i++) {
-    SoilWatRun.WeatherIn.scale_precip[i] = 1;
-    SoilWatRun.WeatherIn.scale_temp_max[i] = 0;
-    SoilWatRun.WeatherIn.scale_temp_min[i] = 0;
-    SoilWatRun.WeatherIn.scale_skyCover[i] = 0;
-    SoilWatRun.WeatherIn.scale_wind[i] = 1;
-    SoilWatRun.WeatherIn.scale_rH[i] = 0;
-    SoilWatRun.WeatherIn.scale_actVapPress[i] = 1;
-    SoilWatRun.WeatherIn.scale_shortWaveRad[i] = 1;
+    SoilWatRun.WeatherIn->scale_precip[i] = 1;
+    SoilWatRun.WeatherIn->scale_temp_max[i] = 0;
+    SoilWatRun.WeatherIn->scale_temp_min[i] = 0;
+    SoilWatRun.WeatherIn->scale_skyCover[i] = 0;
+    SoilWatRun.WeatherIn->scale_wind[i] = 1;
+    SoilWatRun.WeatherIn->scale_rH[i] = 0;
+    SoilWatRun.WeatherIn->scale_actVapPress[i] = 1;
+    SoilWatRun.WeatherIn->scale_shortWaveRad[i] = 1;
   }
 
   // Requested fixes of weather values
   for (i = 0; i < NFIXWEATHER; i++) {
-    SoilWatRun.WeatherIn.fixWeatherData[i] = xfix[i] ? swTRUE : swFALSE;
+    SoilWatRun.WeatherIn->fixWeatherData[i] = xfix[i] ? swTRUE : swFALSE;
   }
 
 
@@ -904,14 +934,14 @@ SEXP rSW2_readAllWeatherFromDisk(
     if (debug) sw_printf("'rSW2_readAllWeatherFromDisk': read weather data");
     #endif
     SW_WTH_read(
-        &SoilWatRun.WeatherIn,
+        SoilWatRun.WeatherIn,
         &SoilWatRun.RunIn.weathRunAllHist,
         &SoilWatRun.RunIn.SkyRunIn,
-        &SoilWatRun.ModelIn,
+        SoilWatRun.ModelIn,
         SoilWatRun.RunIn.ModelRunIn.elevation,
         swTRUE,
-        SoilWatRun.ModelSim.cum_monthdays,
-        SoilWatRun.ModelSim.days_in_month,
+        SoilWatRun.ModelSim->cum_monthdays,
+        SoilWatRun.ModelSim->days_in_month,
         &local_LogInfo
     );
     if(local_LogInfo.stopRun) {
@@ -1057,7 +1087,7 @@ SEXP sw_consts(void) {
   // Note: `cInF` must agree with SW_Files.h/SW_FileIndex
   char *cInF[] = {
     "eFirst",
-    "eNCIn", "eNCInAtt", "eNCOutVars",
+    "eNCIn", "eNCInAtt", "eNCOutVars", "eNCCache", "eNCSysInfo",
     "eDomain",
     "eModel",
     "eLog",

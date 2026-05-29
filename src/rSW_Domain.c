@@ -122,7 +122,7 @@ SEXP onGet_SW_SPINUP(void) {
 }
 
 SEXP onGet_SW_MDL(void) {
-	SW_MODEL_INPUTS *m = &SoilWatRun.ModelIn;
+	SW_MODEL_INPUTS *m = SoilWatRun.ModelIn;
 	SW_MODEL_RUN_INPUTS *mr = &SoilWatRun.RunIn.ModelRunIn;
 
 	SEXP swYears;
@@ -237,7 +237,7 @@ void onSet_SW_SPINUP(SEXP SW_DOM, LOG_INFO* LogInfo) {
 }
 
 void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
-	SW_MODEL_INPUTS *m = &SoilWatRun.ModelIn;
+	SW_MODEL_INPUTS *m = SoilWatRun.ModelIn;
 	SW_MODEL_RUN_INPUTS *mr = &SoilWatRun.RunIn.ModelRunIn;
 
 	SEXP StartYear;
@@ -349,7 +349,7 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 void rSW_CTL_setup_domain(
     Bool from_files,
     SEXP InputData,
-    size_t userSUID,
+    TimeInt runSimDayLen,
     SW_DOMAIN* SW_Domain,
     LOG_INFO* LogInfo
 ) {
@@ -415,7 +415,7 @@ void rSW_CTL_setup_domain(
        return;  // Exit function prematurely due to error
     }
 
-    SW_DOM_SimSet(SW_Domain, userSUID, LogInfo);
+    SW_DOM_SimSet(rSW2_rank, rSW2_worldSize, runSimDayLen, SW_Domain, LogInfo);
 
     #ifdef RSWDEBUG
     if (debug) sw_printf(" completed.\n");

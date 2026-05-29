@@ -109,7 +109,7 @@ SEXP onGet_SW_WTH_setup(void) {
 	int i;
 	const int nitems = 8;
 	double *p_MonthlyValues;
-	SW_WEATHER_INPUTS *w = &SoilWatRun.WeatherIn;
+	SW_WEATHER_INPUTS *w = SoilWatRun.WeatherIn;
 
 	SEXP swWeather;
 	SEXP SW_WTH;
@@ -217,7 +217,7 @@ SEXP onGet_SW_WTH_setup(void) {
 */
 void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo) {
 	int i;
-	SW_WEATHER_INPUTS *w = &SoilWatRun.WeatherIn;
+	SW_WEATHER_INPUTS *w = SoilWatRun.WeatherIn;
 	SEXP
         use_snow, pct_snowdrift, pct_snowRunoff,
         use_weathergenerator, use_weathergenerator_only,
@@ -232,7 +232,7 @@ void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo) {
 
 
     // Copy weather prefix from PathInfo to Weather within `SoilWatRun`
-    strcpy(SoilWatRun.WeatherIn.name_prefix, SoilWatDomain.SW_PathInputs.txtWeatherPrefix);
+    strcpy(SoilWatRun.WeatherIn->name_prefix, SoilWatDomain.SW_PathInputs.txtWeatherPrefix);
 
 	PROTECT(MonthlyScalingParams = GET_SLOT(SW_WTH, install(cSW_WTH_names[0])));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
@@ -328,7 +328,7 @@ void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo) {
   Called by `onGetInputDataFromFiles()`
 */
 SEXP onGet_WTH_DATA(void) {
-	SW_WEATHER_INPUTS *w = &SoilWatRun.WeatherIn;
+	SW_WEATHER_INPUTS *w = SoilWatRun.WeatherIn;
 	TimeInt year, yearIndex;
 	SEXP WTH_DATA, WTH_DATA_names;
 	char cYear[5];
@@ -380,7 +380,7 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 		"shortWR"
 	};
 	double *p_Year;
-	SW_WEATHER_INPUTS *w = &SoilWatRun.WeatherIn;
+	SW_WEATHER_INPUTS *w = SoilWatRun.WeatherIn;
 	SW_WEATHER_HIST *allHist = SoilWatRun.RunIn.weathRunAllHist;
 
 	days = Time_get_lastdoy_y(year);
@@ -455,8 +455,8 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
     from specific humidity.
 */
 void onSet_WTH_DATA(SEXP weatherList, LOG_INFO* LogInfo) {
-  SW_WEATHER_INPUTS *w = &SoilWatRun.WeatherIn;
-  SW_MODEL_INPUTS *m = &SoilWatRun.ModelIn;
+  SW_WEATHER_INPUTS *w = SoilWatRun.WeatherIn;
+  SW_MODEL_INPUTS *m = SoilWatRun.ModelIn;
 
   // Deallocate (previous, if any) `allHist`
   // (using value of `SW_Weather.n_years` previously used to allocate)
@@ -529,7 +529,7 @@ static void rSW2_setAllWeather(
 
     /* Interpolation is to be in base0 in `interpolate_monthlyValues()` */
     Bool interpAsBase1 = swFALSE;
-    SW_MODEL_SIM *m = &SoilWatRun.ModelSim;
+    SW_MODEL_SIM *m = SoilWatRun.ModelSim;
 
     for(yearIndex = 0; yearIndex < n_years; yearIndex++) {
         year = yearIndex + startYear;

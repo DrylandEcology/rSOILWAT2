@@ -61,10 +61,10 @@ SEXP onGet_SW_CARBON(void) {
   char *cCO2ppm[] = {"Year", "CO2ppm"};
   char *cSW_CARBON[] = {"CarbonUseBio", "CarbonUseWUE", "Scenario", "DeltaYear", "CO2ppm", "CO2ppmVegRef"};
   int i, year;
-  unsigned int n_sim = SoilWatRun.ModelIn.endyr - SoilWatRun.ModelIn.startyr + 1;
+  unsigned int n_sim = SoilWatRun.ModelIn->endyr - SoilWatRun.ModelIn->startyr + 1;
   double *vCO2ppm;
 
-  SW_CARBON_INPUTS *c = &SoilWatRun.CarbonIn;
+  SW_CARBON_INPUTS *c = SoilWatRun.CarbonIn;
 
   // Grab our S4 carbon class as an object
   PROTECT(class  = MAKE_CLASS("swCarbon"));
@@ -89,7 +89,7 @@ SEXP onGet_SW_CARBON(void) {
 
   PROTECT(CO2ppm = allocMatrix(REALSXP, n_sim, 2));
   vCO2ppm = REAL(CO2ppm);
-  for (i = 0, year = SoilWatRun.ModelIn.startyr; i < n_sim; i++, year++)
+  for (i = 0, year = SoilWatRun.ModelIn->startyr; i < n_sim; i++, year++)
   {
     vCO2ppm[i + n_sim * 0] = year;
     vCO2ppm[i + n_sim * 1] = c->ppm[i];
@@ -136,7 +136,7 @@ void onSet_swCarbon(
     TimeInt vegYear,
     LOG_INFO* LogInfo
 ) {
-    SW_CARBON_INPUTS *c = &SoilWatRun.CarbonIn;
+    SW_CARBON_INPUTS *c = SoilWatRun.CarbonIn;
 
     // Extract the slots from our object into our structure
     c->use_bio_mult = INTEGER(GET_SLOT(object, install("CarbonUseBio")))[0];
@@ -169,10 +169,6 @@ void onSet_swCarbon(
     TimeInt nSW = endYr - startYr + 1;
     TimeInt nrSW;
 
-    #ifdef RSWDEBUG
-    int debug = 0;
-    #endif
-
     c->ppmVegRef = REAL(GET_SLOT(object, install("CO2ppmVegRef")))[0];
 
     PROTECT(CO2ppm = GET_SLOT(object, install("CO2ppm")));
@@ -190,8 +186,8 @@ void onSet_swCarbon(
     }
 
     // Allocate SOILWAT2 memory
-    SW_CBN_deconstruct(&SoilWatRun.CarbonIn);
-    SW_CBN_alloc_ppm(nSW, &SoilWatRun.CarbonIn.ppm, LogInfo);
+    SW_CBN_deconstruct(SoilWatRun.CarbonIn);
+    SW_CBN_alloc_ppm(nSW, &SoilWatRun.CarbonIn->ppm, LogInfo);
     if (LogInfo->stopRun) {
         goto cleanMem; // Exit function prematurely due to error
     }

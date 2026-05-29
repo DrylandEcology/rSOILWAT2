@@ -17,7 +17,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###############################################################################
 
-
 # Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2013-2018)
 ##############################################
 
@@ -57,8 +56,8 @@ setClass(
   ),
   prototype = list(
     ProjDir = NA_character_,
-    # 27 must be equal to rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_NFILES"]]
-    InFiles = rep(NA_character_, 27L),
+    # 29 must be equal to rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_NFILES"]]
+    InFiles = rep(NA_character_, 29L),
     WeatherPrefix = NA_character_,
     OutputPrefix = NA_character_
   )
@@ -120,7 +119,6 @@ setValidity(
 )
 
 
-
 #' @rdname sw_upgrade
 #' @export
 setMethod(
@@ -133,7 +131,6 @@ setMethod(
     n_exp <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_NFILES"]]
     n_has <- length(object@InFiles)
 
-
     #--- Identify upgrade(s)
     # Maintenance:
     #   update `do_upgrade` when `n_exp` changes or new upgrades required!
@@ -144,9 +141,9 @@ setMethod(
     is_lt_v600 <- n_has == 22L
     is_in_v600tov604 <- n_has == 23L
     is_ge_v610 <- n_has == 27L
+    is_ge_v670 <- n_has == 29L
 
-
-    #--- Upgrade object from < v6.0.0 to v6.0.0-v6.0.4
+    #--- Upgrade object to v6.0.0-v6.0.4: from < v6.0.0
     if (is_lt_v600 && n_exp == 23L) {
       object@InFiles <- c(
         object@InFiles[1L:5L],
@@ -155,23 +152,56 @@ setMethod(
       )
     }
 
-    #--- Upgrade object from < v6.0.0 to >= v6.1.0
+    #--- Upgrade object to v6.1.0-v6.6.x: from < v6.0.0
     if (is_lt_v600 && n_exp == 27L) {
       object@InFiles <- c(
         object@InFiles[1L],
-        target@InFiles[2L:6L],  # insert names of new files with v6.1.0
+        target@InFiles[2L:6L], # insert names of new files with v6.1.0
         object@InFiles[3L:5L],
         target@InFiles[10L], # insert name of new file with v6.0.0,
         object@InFiles[6L:22L]
       )
     }
 
-    #--- Upgrade object from v6.0.0-v6.0.4 to >= v6.1.0
+    #--- Upgrade object to v6.1.0-v6.6.x: from v6.0.0-v6.0.4
     if (is_in_v600tov604 && n_exp == 27L) {
       object@InFiles <- c(
         object@InFiles[1L],
-        target@InFiles[2L:6L],  # insert names of new files with v6.1.0
+        target@InFiles[2L:6L], # insert names of new files with v6.1.0
         object@InFiles[3L:23L]
+      )
+    }
+
+    #--- Upgrade object to >= v6.7.0: from < v6.0.0
+    if (is_lt_v600 && n_exp == 29L) {
+      object@InFiles <- c(
+        object@InFiles[1L],
+        target@InFiles[2L:4L], # insert names of new files with v6.1.0
+        target@InFiles[5L:6L], # insert names of new files with v6.7.0
+        target@InFiles[7L:8L], # insert names of new files with v6.1.0
+        object@InFiles[3L:5L],
+        target@InFiles[12L], # insert name of new file with v6.0.0
+        object@InFiles[6L:22L]
+      )
+    }
+
+    #--- Upgrade object to >= v6.7.0: from v6.0.0-v6.0.4
+    if (is_in_v600tov604 && n_exp == 29L) {
+      object@InFiles <- c(
+        object@InFiles[1L],
+        target@InFiles[2L:4L], # insert names of new files with v6.1.0
+        target@InFiles[5L:6L], # insert names of new files with v6.7.0
+        target@InFiles[7L:8L], # insert names of new files with v6.1.0
+        object@InFiles[3L:23L]
+      )
+    }
+
+    #--- Upgrade object to >= v6.7.0: from v6.1.0-v6.6.x
+    if (is_ge_v610 && n_exp == 29L) {
+      object@InFiles <- c(
+        object@InFiles[1L:4L],
+        target@InFiles[5L:6L], # insert names of new files with v6.7.0
+        object@InFiles[5L:27L]
       )
     }
 
