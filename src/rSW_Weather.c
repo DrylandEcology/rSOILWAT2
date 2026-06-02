@@ -443,7 +443,7 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 
   Called by `rSW_CTL_obtain_inputs()` if `from_files` is `FALSE`.
 
-  @note Elements `endyr` and `startyr` of `SW_Model` must be set/updated
+  @note Elements `endyr` and `startyr` of `SW_Domain` must be set/updated
     via `onSet_SW_MDL()` before this function is called.
 
   @note `SW_Weather` (via `onSet_SW_WTH_setup()`) and
@@ -456,7 +456,6 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 */
 void onSet_WTH_DATA(SEXP weatherList, LOG_INFO* LogInfo) {
   SW_WEATHER_INPUTS *w = SoilWatRun.WeatherIn;
-  SW_MODEL_INPUTS *m = SoilWatRun.ModelIn;
 
   // Deallocate (previous, if any) `allHist`
   // (using value of `SW_Weather.n_years` previously used to allocate)
@@ -464,8 +463,8 @@ void onSet_WTH_DATA(SEXP weatherList, LOG_INFO* LogInfo) {
   deallocateAllWeather(&SoilWatRun.RunIn.weathRunAllHist);
 
   // Update number of years and first calendar year represented
-  w->n_years = m->endyr - m->startyr + 1;
-  w->startYear = m->startyr;
+  w->n_years = SoilWatDomain.endyr - SoilWatDomain.startyr + 1;
+  w->startYear = SoilWatDomain.startyr;
 
   // Allocate new `allHist` (based on current `SW_Weather.n_years`)
   SW_WTH_allocateAllWeather(

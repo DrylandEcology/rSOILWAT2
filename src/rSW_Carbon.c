@@ -61,7 +61,7 @@ SEXP onGet_SW_CARBON(void) {
   char *cCO2ppm[] = {"Year", "CO2ppm"};
   char *cSW_CARBON[] = {"CarbonUseBio", "CarbonUseWUE", "Scenario", "DeltaYear", "CO2ppm", "CO2ppmVegRef"};
   int i, year;
-  unsigned int n_sim = SoilWatRun.ModelIn->endyr - SoilWatRun.ModelIn->startyr + 1;
+  unsigned int n_sim = SoilWatDomain.endyr - SoilWatDomain.startyr + 1;
   double *vCO2ppm;
 
   SW_CARBON_INPUTS *c = SoilWatRun.CarbonIn;
@@ -89,7 +89,7 @@ SEXP onGet_SW_CARBON(void) {
 
   PROTECT(CO2ppm = allocMatrix(REALSXP, n_sim, 2));
   vCO2ppm = REAL(CO2ppm);
-  for (i = 0, year = SoilWatRun.ModelIn->startyr; i < n_sim; i++, year++)
+  for (i = 0, year = SoilWatDomain.startyr; i < n_sim; i++, year++)
   {
     vCO2ppm[i + n_sim * 0] = year;
     vCO2ppm[i + n_sim * 1] = c->ppm[i];

@@ -130,7 +130,7 @@ void onSet_SW_SWC(SEXP SWC, LOG_INFO* LogInfo) {
         UNPROTECT(4); // Unprotect the four protected variables before exiting
         return; // Exit function prematurely due to error
 	}
-	v->hist.yr.last = SoilWatRun.ModelIn->endyr;
+	v->hist.yr.last = SoilWatDomain.endyr;
 	v->hist.yr.total = v->hist.yr.last - v->hist.yr.first + 1;
 	UNPROTECT(4);
 }
@@ -139,13 +139,13 @@ void onSet_SW_SWC(SEXP SWC, LOG_INFO* LogInfo) {
 SEXP onGet_SW_SWC_hists(LOG_INFO* LogInfo) {
 	TimeInt year;
 	SEXP SWC_hists, SWC_hists_names;
-	int years = ((SoilWatRun.ModelIn->endyr + 1) - SoilWatRun.ModelIn->startyr), i = 0;
+	int years = ((SoilWatDomain.endyr + 1) - SoilWatDomain.startyr), i = 0;
 	char cYear[5];
 
 	PROTECT(SWC_hists_names = allocVector(STRSXP, years));
 	PROTECT(SWC_hists = allocVector(VECSXP,years));
 
-	for (year = SoilWatRun.ModelIn->startyr; year <= SoilWatRun.ModelIn->endyr; year++) {
+	for (year = SoilWatDomain.startyr; year <= SoilWatDomain.endyr; year++) {
 		if (SoilWatRun.SoilWatIn->hist_use && year >= SoilWatRun.SoilWatIn->hist.yr.first) {
 			read_swc_hist(&SoilWatRun.SoilWatIn->hist, year, LogInfo);
             if(LogInfo->stopRun) {

@@ -238,6 +238,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   SEXP swProdOld1;
   SEXP prodold1;
   int n_years;
+  Bool fromFiles = swTRUE;
 
   int numUnprotects = 0;
 
@@ -255,12 +256,12 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   PROTECT(oRlogfile = NEW_OBJECT(swLog));
   numUnprotects += 2;
 
-  // read user inputs: from files
+  // read user inputs (files, domain): from files
   // setup and construct global variables
   #ifdef RSWDEBUG
   if (debug) sw_printf("Read input from disk files into SOILWAT2 variables (part 1)\n");
   #endif
-  setupSOILWAT2(TRUE, NULL, inputOptions, &local_LogInfo);
+  setupSOILWAT2(fromFiles, NULL, inputOptions, &local_LogInfo);
   if(local_LogInfo.stopRun) {
     goto report;
   }
@@ -269,7 +270,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
   #ifdef RSWDEBUG
   if (debug) sw_printf("Read input from disk files into SOILWAT2 variables (part 2)\n");
   #endif
-  rSW_CTL_obtain_inputs(TRUE, NULL, NULL, &local_LogInfo);
+  rSW_CTL_obtain_inputs(fromFiles, NULL, NULL, &local_LogInfo);
   if(local_LogInfo.stopRun) {
     goto report;
   }
@@ -278,7 +279,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
     #ifdef RSWDEBUG
     if (debug) sw_printf(" finalize daily weather ...\n");
     #endif
-    n_years = SoilWatRun.ModelIn->endyr - SoilWatRun.ModelIn->startyr + 1;
+    n_years = SoilWatDomain.endyr - SoilWatDomain.startyr + 1;
     SW_WTH_finalize_yearly_weather(
         &SoilWatRun.MarkovIn,
         SoilWatRun.WeatherIn,
@@ -467,6 +468,7 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
     SEXP outputData = NULL, swLog, oRlogfile;
     LOG_INFO local_LogInfo;
     int unprotects = 0;
+    Bool fromFiles = swFALSE;
 
     #ifdef RSWDEBUG
     int debug = 0;
@@ -487,18 +489,17 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
     #ifdef RSWDEBUG
     if (debug) sw_printf(" input arguments & setup model ...");
     #endif
-    setupSOILWAT2(FALSE, inputData, inputOptions, &local_LogInfo);
+    setupSOILWAT2(fromFiles, inputData, inputOptions, &local_LogInfo);
     if(local_LogInfo.stopRun) {
         goto report;
     }
 
     // read user inputs: either from files or from memory (depending on useFiles)
-
     #ifdef RSWDEBUG
     if (debug) sw_printf(" obtain inputs ...");
     #endif
 
-    rSW_CTL_obtain_inputs(FALSE, inputData, weatherList, &local_LogInfo);
+    rSW_CTL_obtain_inputs(fromFiles, inputData, weatherList, &local_LogInfo);
     if(local_LogInfo.stopRun) {
         goto report;
     }
@@ -580,8 +581,8 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
     }
 
     SW_CTL_run_single_site(
-        SoilWatRun.ModelIn->startyr,
-        SoilWatRun.ModelIn->endyr,
+        SoilWatDomain.startyr,
+        SoilWatDomain.endyr,
         &SoilWatDomain,
         &SoilWatRun,
         &SoilWatRun,
@@ -672,6 +673,7 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   SEXP res = NULL, inputOptions;
   SEXP IntrinsicSiteParams;
   int n_years;
+  Bool fromFiles = swFALSE;
 
   int numUnprotects = 0;
   #ifdef RSWDEBUG
@@ -700,14 +702,15 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
   numUnprotects++;
   SET_STRING_ELT(inputOptions, 0, mkChar("SOILWAT2"));
 
-  setupSOILWAT2(FALSE, inputData, inputOptions, &local_LogInfo);
+  setupSOILWAT2(fromFiles, inputData, inputOptions, &local_LogInfo);
   if(local_LogInfo.stopRun) {
     goto report;
   }
 
 
   // rSW_CTL_obtain_inputs():
-  // `onSet_WTH_DATA()` requires `endyr`, `startyr`, `elevation` from `SW_Model`
+  // `onSet_WTH_DATA()` requires `endyr` and `startyr` from `SW_Domain` and
+  // `elevation` from `SW_Model`
   #ifdef RSWDEBUG
   if (debug) sw_printf("'model' > ");
   #endif
@@ -768,7 +771,7 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
     #ifdef RSWDEBUG
     if (debug) sw_printf(" > finalize daily weather.\n");
     #endif
-    n_years = SoilWatRun.ModelIn->endyr - SoilWatRun.ModelIn->startyr + 1;
+    n_years = SoilWatDomain.endyr - SoilWatDomain.startyr + 1;
     SW_WTH_finalize_yearly_weather(
         &SoilWatRun.MarkovIn,
         SoilWatRun.WeatherIn,
@@ -867,9 +870,11 @@ SEXP rSW2_readAllWeatherFromDisk(
     goto report;
   }
 
-  /* Copy relevant data to global variable SoilWatRun */
-  SoilWatRun.ModelIn->startyr = INTEGER(startYear)[0];
-  SoilWatRun.ModelIn->endyr = INTEGER(endYear)[0];
+  /* Copy relevant data to global variables */
+  SoilWatDomain.startyr = INTEGER(startYear)[0];
+  SoilWatDomain.endyr = INTEGER(endYear)[0];
+  SoilWatRun.ModelIn->startyr = SoilWatDomain.startyr;
+  SoilWatRun.ModelIn->endyr = SoilWatDomain.endyr;
 
   SoilWatRun.RunIn.ModelRunIn.elevation = REAL(elevation)[0];
 

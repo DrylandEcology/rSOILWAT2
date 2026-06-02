@@ -49,28 +49,32 @@
 
 // onGet_SW_DOM() is currently empty and unused because
 // rSOILWAT2 doesn't have a swDomain S4 class
-// -- see instead onGet_SW_SPINUP()
+// -- see instead onGet_SW_SPINUP() and onGet_SW_MDL()
 SEXP onGet_SW_DOM(void) {
     SEXP swDOM = NULL;
 
     return swDOM ;
 }
 
+// onSet_SW_DOM() is setting temporal and spinup information
 void onSet_SW_DOM(SEXP InputData, LOG_INFO* LogInfo) {
     // Maintenance note: if `sw_start()` switches from using
     // `SW_CTL_main()` to `SW_CTL_RunSimSet()`, then we would need to
     // copy here complete and correct values into `SoilWatDomain`
 
     // Currently not implemented in rSOILWAT2 but required in SOILWAT2
+    // --> rSOILWAT2 represents single-site domains
     SoilWatDomain.isSimDomDiscrete = swTRUE;
     SoilWatDomain.nDimX = 1;
     SoilWatDomain.nDimY = 1;
     SoilWatDomain.nDimS = 1;
-    // Currently not implemented in rSOILWAT2 and not utilized in SOILWAT2
-    // SoilWatDomain.startyr =
-    // SoilWatDomain.endyr =
-    // SoilWatDomain.startstart =
-    // SoilWatDomain.endend =
+
+    // Temporal information: rSOILWAT2 uses class swYears
+    // (SOILWAT2 < v8.5.0 used `SW_MODEL_INPUTS` instead of `SW_DOMAIN`)
+    onSet_SW_MDL(GET_SLOT(InputData, install("years")), LogInfo);
+
+    // Currently not implemented in rSOILWAT2 and
+    //   not utilized by SOILWAT2 if RSOILWAT
     // SoilWatDomain.crs_bbox =
     // SoilWatDomain.min_x =
     // SoilWatDomain.min_y =
@@ -237,7 +241,6 @@ void onSet_SW_SPINUP(SEXP SW_DOM, LOG_INFO* LogInfo) {
 }
 
 void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
-	SW_MODEL_INPUTS *m = SoilWatRun.ModelIn;
 	SW_MODEL_RUN_INPUTS *mr = &SoilWatRun.RunIn.ModelRunIn;
 
 	SEXP StartYear;
@@ -262,7 +265,7 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
         UNPROTECT(1);
         return; // Exit function prematurely due to error
 	}
-	m->startyr = INTEGER(StartYear)[0];
+	SoilWatDomain.startyr = INTEGER(StartYear)[0];
 	PROTECT(EndYear = GET_SLOT(SW_MDL, install("EndYear")));
 	if (isNull(EndYear) || INTEGER(EndYear)[0] == NA_INTEGER) {
 		LogError(LogInfo, LOGERROR, "Ending year not found.");
@@ -276,8 +279,8 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
         UNPROTECT(2);
         return; // Exit function prematurely due to error
 	}
-	m->endyr = INTEGER(EndYear)[0];
-	if (m->endyr < m->startyr) {
+	SoilWatDomain.endyr = INTEGER(EndYear)[0];
+	if (SoilWatDomain.endyr < SoilWatDomain.startyr) {
 		LogError(LogInfo, LOGERROR, "Start Year > End Year");
 
         UNPROTECT(2);
@@ -285,7 +288,7 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 	}
 
 	PROTECT(StartStart = GET_SLOT(SW_MDL, install("FDOFY")));
-	m->startstart = INTEGER(StartStart)[0];
+	SoilWatDomain.startstart = INTEGER(StartStart)[0];
 	fstartdy = TRUE;
 	PROTECT(EndEnd = GET_SLOT(SW_MDL, install("EDOEY")));
 
@@ -302,7 +305,7 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 		snprintf(errstr, MAX_ERROR, "\nNot found in inputs:\n");
 		if (!fstartdy) {
 			strcat(errstr, "\tStart Day  - using 1\n");
-			m->startstart = 1;
+			SoilWatDomain.startstart = 1;
 		}
 		if (!fenddy) {
 			strcat(errstr, "\tEnd Day    - using \"end\"\n");
@@ -316,11 +319,11 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 		LogError(LogInfo, LOGWARN, errstr);
 	}
 
-	m->startstart += ((mr->isnorth) ? DAYFIRST_NORTH : DAYFIRST_SOUTH) - 1;
+	SoilWatDomain.startstart += ((mr->isnorth) ? DAYFIRST_NORTH : DAYFIRST_SOUTH) - 1;
 	//if (strcmp(enddyval, "end") == 0) {
 		//m->endend = (m->isnorth) ? Time_get_lastdoy_y(m->endyr) : DAYLAST_SOUTH;
 	//} else {
-	m->endend = (d == 365) ? Time_get_lastdoy_y(m->endyr) : 365;
+	SoilWatDomain.endend = (d == 365) ? Time_get_lastdoy_y(SoilWatDomain.endyr) : 365;
 	//}
 
 	// m->daymid = (m->isnorth) ? DAYMID_NORTH : DAYMID_SOUTH;
