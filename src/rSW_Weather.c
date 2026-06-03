@@ -520,6 +520,10 @@ static void rSW2_setAllWeather(
 ) {
     unsigned int yearIndex, year;
     double ***tempWeatherHist = NULL;
+    TimeInt days_in_month[MAX_MONTHS];
+    TimeInt cum_monthdays[MAX_MONTHS];
+
+    Time_init_model(days_in_month);
 
     allocate_temp_weather(n_years, 1, &tempWeatherHist, LogInfo);
     if (LogInfo->stopRun) {
@@ -528,7 +532,6 @@ static void rSW2_setAllWeather(
 
     /* Interpolation is to be in base0 in `interpolate_monthlyValues()` */
     Bool interpAsBase1 = swFALSE;
-    SW_MODEL_SIM *m = SoilWatRun.ModelSim;
 
     for(yearIndex = 0; yearIndex < n_years; yearIndex++) {
         year = yearIndex + startYear;
@@ -538,23 +541,23 @@ static void rSW2_setAllWeather(
 
         // Update yearly day/month information needed when interpolating
         // cloud cover, wind speed, and relative humidity if necessary
-        Time_new_year(year, m->days_in_month, m->cum_monthdays);
+        Time_new_year(year, days_in_month, cum_monthdays);
 
         if(use_cloudCoverMonthly) {
             interpolate_monthlyValues(cloudcov, interpAsBase1,
-                    m->cum_monthdays, m->days_in_month,
+                    cum_monthdays, days_in_month,
                     allHist[yearIndex].cloudcov_daily);
         }
 
         if(use_humidityMonthly) {
             interpolate_monthlyValues(r_humidity, interpAsBase1,
-                    m->cum_monthdays, m->days_in_month,
+                    cum_monthdays, days_in_month,
                     allHist[yearIndex].r_humidity_daily);
         }
 
         if(use_windSpeedMonthly) {
             interpolate_monthlyValues(windspeed, interpAsBase1,
-                    m->cum_monthdays, m->days_in_month,
+                    cum_monthdays, days_in_month,
                     allHist[yearIndex].windspeed_daily);
         }
 
