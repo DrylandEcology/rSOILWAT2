@@ -259,12 +259,11 @@ test_that("Vegetation: estimate land cover composition", {
     )
   }
 
-
-  # issue 218: correction to C4 grass cover was not carried out as documented
-  # without C4 correction, C4 grass cover was 0.1166967
+  # issue 218: correction to C4 grass cover was not carried out as documented.
+  # Without C4 correction, C4 grass cover was 0.1166967
   res_wo218 <- estimate_PotNatVeg_composition(
     MAP_mm = 10 * clim[["MAP_cm"]],
-    MAT_C = 15,
+    MAT_C = 5 + clim[["MAT_C"]],
     mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
     mean_monthly_Temp_C = 5 + clim[["meanMonthlyTempC"]],
     dailyC4vars = NULL
@@ -273,7 +272,7 @@ test_that("Vegetation: estimate land cover composition", {
 
   res_w218 <- estimate_PotNatVeg_composition(
     MAP_mm = 10 * clim[["MAP_cm"]],
-    MAT_C = 15,
+    MAT_C = 5 + clim[["MAT_C"]],
     mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
     mean_monthly_Temp_C = 5 + clim[["meanMonthlyTempC"]],
     dailyC4vars = c(
