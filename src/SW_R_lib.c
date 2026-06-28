@@ -567,7 +567,6 @@ SEXP sw_start(SEXP inputOptions, SEXP inputData, SEXP weatherList) {
     if (SoilWatDomain.SW_SpinUp.spinup) {
         double *tempVals = NULL;
         SW_CTL_run_spinup(
-            rSW2_rank,
             &SoilWatDomain,
             tempVals,
             &SoilWatRun,

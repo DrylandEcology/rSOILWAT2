@@ -1,4 +1,4 @@
 [submodule "src/SOILWAT2"]
 	path = src/SOILWAT2
 	url = https://github.com/DrylandEcology/SOILWAT2
-	branch = release/feature_space_before_time
+	branch = feature_space_before_time

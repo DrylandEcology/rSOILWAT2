@@ -36,5 +36,5 @@ SpinupDuration   0               # Duration ( M ): sample M years of the first N
 SpinupSeed       11              # Seed for randomly generating years for mode 1, default = 11
 
 # Simulation Maxes
-MaxPercSimErrors     50.0        # Threshold for the ratio of failed to active sites controlled by a process before shutting the program down (active in netCDF-enabled modes, i.e., SWNETCDF/SWNC and SWMPI)
+MaxPercSimErrors     50.0        # Threshold for the ratio of failed sites to active sites through the whole domain before shutting the program down early (active in netCDF-enabled modes, i.e., SWNETCDF/SWNC and SWMPI)
                                  # 0% = no sites can fail, 100% = all sites can fail before shutting down, default = 50%

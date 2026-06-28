@@ -418,7 +418,7 @@ void rSW_CTL_setup_domain(
        return;  // Exit function prematurely due to error
     }
 
-    SW_DOM_SimSet(rSW2_rank, rSW2_worldSize, runSimDayLen, SW_Domain, LogInfo);
+    SW_DOM_SimSet(rSW2_worldSize, runSimDayLen, SW_Domain, LogInfo);
 
     #ifdef RSWDEBUG
     if (debug) sw_printf(" completed.\n");
