@@ -23,7 +23,7 @@ swSite_SWRCflags(object) <- value
 \S4method{swSite_SWRCflags}{swInputData}(object) <- value
 }
 \arguments{
-\item{object}{An object of class \linkS4class{swSite} or \linkS4class{swInputData}.}
+\item{object}{An object of class \link[=swSite-class]{swSite} or \link[=swInputData-class]{swInputData}.}
 
 \item{value}{A character vector with two elements for
 \code{"swrc_name"} and \code{"ptf_name"}.}
@@ -36,7 +36,7 @@ Names of \code{SWRC} and \code{PTF}
 }
 \section{Details}{
 
-The replacement method \code{\link[=swSite_SWRCflags]{swSite_SWRCflags()}} for class \linkS4class{swInputData}
+The replacement method \code{\link[=swSite_SWRCflags]{swSite_SWRCflags()}} for class \link[=swInputData-class]{swInputData}
 resets \code{has_swrcp} to \code{FALSE} if \code{"swrc_name"} or \code{"ptf_name"} are updated.
 This is to avoid inconsistency between
 \code{SWRCp}, \code{has_swrcp}, and \code{swrc_flags}.

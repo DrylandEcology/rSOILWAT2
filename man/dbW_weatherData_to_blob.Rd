@@ -7,7 +7,7 @@
 dbW_weatherData_to_blob(weatherData, type = "gzip")
 }
 \arguments{
-\item{weatherData}{A list of elements of class \code{\linkS4class{swWeatherData}}
+\item{weatherData}{A list of elements of class \code{\link[=swWeatherData-class]{swWeatherData}}
 that each hold daily weather data for one calendar year.}
 
 \item{type}{A character string. One of \code{c("gzip", "bzip2", "xz",

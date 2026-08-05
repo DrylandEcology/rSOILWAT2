@@ -2632,8 +2632,7 @@ setGeneric(
 #'   \code{\linkS4class{swOUT}}, \code{\linkS4class{swInputData}}, and
 #'   \code{\link{sw_exec}}
 #'
-#' @aliases activate_swOUT_OutKey
-#'   deactivate_swOUT_OutKey deactivate_swOUT_OutKey-set
+#' @aliases activate_swOUT_OutKey deactivate_swOUT_OutKey deactivate_swOUT_OutKey-set
 #' @name activate_swOUT_OutKey-set
 NULL
 

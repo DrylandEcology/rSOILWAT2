@@ -109,47 +109,47 @@ List of changes:
 \itemize{
 \item Changes with \code{v6.6.0}:
 \itemize{
-\item class \code{\linkS4class{swSite}}: new slots \code{"PotSoilEvCoMethod"},
+\item class \code{\link[=swSite-class]{swSite}}: new slots \code{"PotSoilEvCoMethod"},
 \code{"RootingProfileMethod"}, \code{"RoughnessLengthGroundSurface"},
 \code{"AlbedoMethod"}, \code{"AlbedoSnowMax"}, \code{"AlbedoSoilDry"},
 \code{"AlbedoSoilSaturated"}, \code{"AlbedoSoilDarkeningParameter"},
 \code{"SnowFractionalCoverMeltingFactor"}
-\item class \code{\linkS4class{swProd2}}: new slots \code{"RootProfileParameters"},
+\item class \code{\link[=swProd2-class]{swProd2}}: new slots \code{"RootProfileParameters"},
 \code{"kExtVegAlbedo"}
-\item class \code{\linkS4class{swOUT}}: one new \code{outkey} \code{"ENERGYAVG"},
+\item class \code{\link[=swOUT-class]{swOUT}}: one new \code{outkey} \code{"ENERGYAVG"},
 for a new total of 35 \code{outkey}
 }
 \item Changes with \code{v6.5.0}:
 \itemize{
-\item class \code{\linkS4class{swSite}}: new slot \code{"SoilTemperatureBoundaryMethod"}
-\item class \code{\linkS4class{swProd}}: new slots \code{"nYearsDynamicShort"} and
+\item class \code{\link[=swSite-class]{swSite}}: new slot \code{"SoilTemperatureBoundaryMethod"}
+\item class \code{\link[=swProd-class]{swProd}}: new slots \code{"nYearsDynamicShort"} and
 \code{"nYearsDynamicLong"}
-\item new class \code{\linkS4class{swProd2}} that supersedes \code{\linkS4class{swProd}};
+\item new class \code{\link[=swProd2-class]{swProd2}} that supersedes \code{\link[=swProd-class]{swProd}};
 an upgrade crosswalks old to the new vegetation types
 (retaining old values) if an old \code{"swProd"} slot but no
 new \code{"swProd2"} slot is present
-\item class \code{\linkS4class{swSoils}}: slot \code{"Layers"} reorganized several columns
+\item class \code{\link[=swSoils-class]{swSoils}}: slot \code{"Layers"} reorganized several columns
 and replaced rooting profile columns from old with new vegetation
 types
-\item class \code{\linkS4class{swCarbon}}: new slot \code{"CO2ppmVegRef"}
+\item class \code{\link[=swCarbon-class]{swCarbon}}: new slot \code{"CO2ppmVegRef"}
 }
 \item Changes with \code{v6.4.0}:
 \itemize{
-\item class \code{\linkS4class{swProd}}: new slots \code{"vegYear"} and
+\item class \code{\link[=swProd-class]{swProd}}: new slots \code{"vegYear"} and
 \code{"isBiomAsIf100Cover"}
-\item class \code{\linkS4class{swWeather}}: new slot \code{"correctWeatherValues"}
-\item class \code{\linkS4class{swOUT}}:
+\item class \code{\link[=swWeather-class]{swWeather}}: new slot \code{"correctWeatherValues"}
+\item class \code{\link[=swOUT-class]{swOUT}}:
 two new \code{outkey}s \code{"DERIVEDSUM"} and \code{"DERIVEDAVG"},
 for a new total of 34 \code{outkey}s
 }
 \item Changes with \code{v6.3.0}:
 \itemize{
-\item class \code{\linkS4class{swSoils}}:
+\item class \code{\link[=swSoils-class]{swSoils}}:
 \itemize{
 \item new slot \code{"omSWRCp"}; slot \code{"SWRCp"} refers to mineral soil
 \item slot \code{"Layers"} gained column \code{"som_frac"}
 }
-\item class \code{\linkS4class{swSite}}: new slots \code{"depth_sapric"} and
+\item class \code{\link[=swSite-class]{swSite}}: new slots \code{"depth_sapric"} and
 \code{"SurfaceTemperatureMethod"}
 }
 \item Changes with \code{v6.2.0}:
@@ -160,19 +160,19 @@ units (\code{"\%"} to \code{"g kg-1"}).
 }
 \item Changes with \code{v6.1.0}:
 \itemize{
-\item class \code{\linkS4class{swInputData}}:
-new slot \code{"spinup"} of new class \code{\linkS4class{swSpinup}}
-\item class \code{\linkS4class{swFiles}}: new total of 27 input files
+\item class \code{\link[=swInputData-class]{swInputData}}:
+new slot \code{"spinup"} of new class \code{\link[=swSpinup-class]{swSpinup}}
+\item class \code{\link[=swFiles-class]{swFiles}}: new total of 27 input files
 }
 \item Changes with \code{v6.0.0}:
 \itemize{
-\item class \code{\linkS4class{swSite}}:
+\item class \code{\link[=swSite-class]{swSite}}:
 new slots \code{"swrc_flags"}, \code{"has_swrcp"}, and
 \code{"SoilDensityInputType"}
-\item class \code{\linkS4class{swSoils}}: new slot \code{"SWRCp"}
-\item class \code{\linkS4class{swFiles}}:
+\item class \code{\link[=swSoils-class]{swSoils}}: new slot \code{"SWRCp"}
+\item class \code{\link[=swFiles-class]{swFiles}}:
 \code{SWRC} parameter input file added as file 6 for a new total of 23
-\item class \code{\linkS4class{swProd}}: new slot \code{"veg_method"}
+\item class \code{\link[=swProd-class]{swProd}}: new slot \code{"veg_method"}
 \item class \code{\link{swWeatherData}}: new slots \code{"use_cloudCoverMonthly"},
 \code{"use_windSpeedMonthly"}, \code{"use_humidityMonthly"},
 \code{"dailyInputFlags"}, and \code{"desc_rsds"}
@@ -184,22 +184,22 @@ and \code{"shortWR"}
 }
 \item Changes with \code{v5.4.0}:
 \itemize{
-\item classes \code{\linkS4class{swEstabSpecies}} and \code{\linkS4class{swEstab}}:
+\item classes \code{\link[=swEstabSpecies-class]{swEstabSpecies}} and \code{\link[=swEstab-class]{swEstab}}:
 new slot \code{"vegType"}
 }
 \item Changes with \code{v5.2.0}:
 \itemize{
-\item class \code{\linkS4class{swOUT}}:
+\item class \code{\link[=swOUT-class]{swOUT}}:
 \code{"FROZEN"} added as \code{outkey} 28 for a new total of 32
 }
 \item Changes with \code{v3.1.2}:
 \itemize{
-\item class \code{\linkS4class{swOUT}}:
+\item class \code{\link[=swOUT-class]{swOUT}}:
 \code{"BIOMASS"} added as \code{outkey} 31 for a new total of 31
 }
 \item Changes with \code{v2.3.0}:
 \itemize{
-\item class \code{\linkS4class{swOUT}}:
+\item class \code{\link[=swOUT-class]{swOUT}}:
 \code{"SWA"} added as \code{outkey} 8 for a new total of 30
 }
 }

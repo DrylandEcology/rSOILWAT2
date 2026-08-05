@@ -21,7 +21,7 @@ get_soilmoisture(
 
 \item{type}{A character string selecting type of soil moisture.}
 
-\item{swInput}{An object of class \linkS4class{swInputData}.}
+\item{swInput}{An object of class \link[=swInputData-class]{swInputData}.}
 
 \item{widths_cm}{A numeric vector of soil layer widths (units \verb{[cm]}).}
 
