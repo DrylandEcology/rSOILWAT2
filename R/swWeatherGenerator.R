@@ -200,7 +200,7 @@ dbW_estimate_WGen_coefs <- function(
       if (length(ppt) > 0) {
         c(
           PPT_avg = mean(ppt, na.rm = na.rm),
-          PPT_sd = sd(ppt, na.rm = na.rm)
+          PPT_sd = stats::sd(ppt, na.rm = na.rm)
         )
       } else {
         # there are no wet days for this DOY; thus PPT = 0
@@ -336,7 +336,7 @@ dbW_estimate_WGen_coefs <- function(
   temp <- by(
     wdata[, c("Tmax_C", "Tmin_C")],
     wdata[["WEEK"]],
-    cov,
+    stats::cov,
     use = if (na.rm) "na.or.complete" else "everything"
   )
   temp <- sapply(temp, function(x) c(x[1, 1], x[1, 2], x[2, 1], x[2, 2]))
@@ -1091,7 +1091,7 @@ compare_weather <- function(
         )
 
         for (k in seq_along(data)) {
-          isgood <- complete.cases(cbind(x, data[[k]][[obj]][, v]))
+          isgood <- stats::complete.cases(cbind(x, data[[k]][[obj]][, v]))
           graphics::lines(
             stats::lowess(x[isgood], data[[k]][[obj]][isgood, v]),
             col = "gray"
@@ -1859,7 +1859,7 @@ dbW_fixWeather <- function(
     )
     meta[idsFixed] <- vapply(
       meta[idsFixed],
-      function(x) toString(na.omit(c(x, "correctedValue"))),
+      function(x) toString(stats::na.omit(c(x, "correctedValue"))),
       FUN.VALUE = NA_character_
     )
 
@@ -1935,14 +1935,14 @@ dbW_fixWeather <- function(
     msg <- sprintf("interpolateLinear (<= %d days)", nmax_interp)
     meta[idsFixed] <- vapply(
       meta[idsFixed],
-      function(x) toString(na.omit(c(x, msg))),
+      function(x) toString(stats::na.omit(c(x, msg))),
       FUN.VALUE = NA_character_
     )
 
     if (length(is_pptFixedValue) > 0L) {
       meta[is_pptFixedValue, "PPT_cm"] <- vapply(
         meta[is_pptFixedValue, "PPT_cm"],
-        function(x) toString(na.omit(c(x, "fixedValue"))),
+        function(x) toString(stats::na.omit(c(x, "fixedValue"))),
         FUN.VALUE = NA_character_
       )
     }
@@ -1984,7 +1984,7 @@ dbW_fixWeather <- function(
       idsFixed <- !is_miss3 & is_miss2
       meta[idsFixed] <- vapply(
         meta[idsFixed],
-        function(x) toString(na.omit(c(x, "substituteData"))),
+        function(x) toString(stats::na.omit(c(x, "substituteData"))),
         FUN.VALUE = NA_character_
       )
     }
@@ -1999,7 +1999,7 @@ dbW_fixWeather <- function(
     if (any(is_missing_weather(wd3[, vars_wd3]))) {
       daymeans <- data.frame(
         Year = NA,
-        aggregate(
+        stats::aggregate(
           wd1[, weather_dataColumns()],
           by = wd1["DOY"],
           FUN = mean,
@@ -2017,7 +2017,7 @@ dbW_fixWeather <- function(
         if (length(tmp_vars) > 0L) {
           sd_daymeans <- data.frame(
             Year = NA,
-            aggregate(
+            stats::aggregate(
               subData[, weather_dataColumns()],
               by = subData["DOY"],
               FUN = mean,
@@ -2064,7 +2064,7 @@ dbW_fixWeather <- function(
       idsFixed <- !is_miss4 & is_miss3
       meta[idsFixed] <- vapply(
         meta[idsFixed],
-        function(x) toString(na.omit(c(x, "longTermDailyMean"))),
+        function(x) toString(stats::na.omit(c(x, "longTermDailyMean"))),
         FUN.VALUE = NA_character_
       )
 

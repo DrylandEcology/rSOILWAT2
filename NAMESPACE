@@ -438,19 +438,5 @@ importFrom(methods,
   slotNames,
   validObject
 )
-importFrom(stats,
-  aggregate,
-  coef,
-  complete.cases,
-  cor,
-  cov,
-  fitted,
-  median,
-  na.exclude,
-  na.omit,
-  predict,
-  quantile,
-  sd,
-  weighted.mean
-)
+importFrom(stats,predict)
 useDynLib(rSOILWAT2, .registration = TRUE, .fixes = "C_")

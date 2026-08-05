@@ -158,7 +158,7 @@ for (it in tests) {
 
     # Check that input weather is identical to output weather
     # (don't check missing days that the weather generator filled in)
-    is_obs <- complete.cases(dbW_df_day)
+    is_obs <- stats::complete.cases(dbW_df_day)
 
     # Precipitation
     expect_equal(
@@ -263,7 +263,7 @@ for (it in tests) {
 
           # Aggregate daily to yearly values
           nid <- 1:2
-          temp1d <- aggregate(
+          temp1d <- stats::aggregate(
             x1@Day[, -nid],
             by = list(x1@Day[, 1]),
             FUN = fun_agg[k]
