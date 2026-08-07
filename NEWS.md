@@ -1,7 +1,13 @@
 # rSOILWAT2 v6.7.0-devel
 
 
-# rSOILWAT2 v6.6.0-devel
+# rSOILWAT2 v6.6.0
+
+* Simulation output remains the same as the previous version, but
+  output of vegetation establishment is now correct. Additionally,
+  output of the example differs slightly from previous example output
+  because of the following changes to the example inputs:
+  updated potential evaporation coefficients; updated rooting profiles.
 
 ## New features
 * Potential evaporation coefficients can now be estimated from soil properties.

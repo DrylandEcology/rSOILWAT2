@@ -53,7 +53,7 @@ pedotransfer <- function(x, sand, clay, pdf) {
   sand <- rSW2utils::finite01(sand, NA, NA)
   clay <- rSW2utils::finite01(clay, NA, NA)
 
-  if (any(complete.cases(sand, clay))) {
+  if (any(stats::complete.cases(sand, clay))) {
     thetas <- -14.2 * sand - 3.7 * clay + 50.5
     psis <- 10 ^ (-1.58 * sand - 0.63 * clay + 2.17)
     b <- -0.3 * sand + 15.7 * clay + 3.10

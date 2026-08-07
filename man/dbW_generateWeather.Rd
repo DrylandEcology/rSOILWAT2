@@ -42,7 +42,7 @@ for imputation of missing values in estimated weather generator coefficients.}
 \item{digits}{An integer value. The number of decimal places for rounding
 weather values (or \code{TRUE} but no rounding if \code{FALSE} or not finite).}
 
-\item{seed}{An integer value or \code{NULL}. See \code{\link[base:Random]{base::set.seed()}}.}
+\item{seed}{An integer value or \code{NULL}. See \code{\link[base:set.seed]{base::set.seed()}}.}
 }
 \value{
 An updated copy of \code{weatherData} where missing values are imputed

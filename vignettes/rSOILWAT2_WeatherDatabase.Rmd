@@ -275,7 +275,7 @@ Here, we use again the weather generator to generate weather that is 2 C warmer
     )
 
     tmp_df <- dbW_weatherData_to_dataframe(tmp)
-    tmp_clim <- aggregate(
+    tmp_clim <- stats::aggregate(
       x = tmp_df[, vars],
       by = list(DOY = tmp_df[, "DOY"]),
       FUN = mean

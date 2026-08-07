@@ -23,7 +23,7 @@ swSoils_omSWRCp(object) <- value
 \S4method{swSoils_omSWRCp}{swInputData}(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\link{swSoils}} or \linkS4class{swInputData}.}
+\item{object}{An object of class \code{\link{swSoils}} or \link[=swInputData-class]{swInputData}.}
 
 \item{value}{An object that can be converted to a data matrix and represents
 required `SWRC` parameters.}

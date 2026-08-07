@@ -12,14 +12,14 @@ update_biomass(fg, use, prod_input, prod_default)
 \pkg{rSOILWAT2}}
 
 \item{use}{A named logical vector. The names must represent the column
-names of a \code{MonthlyVeg} element of an \code{\linkS4class{swProd}} object}
+names of a \code{MonthlyVeg} element of an \code{\link[=swProd-class]{swProd}} object}
 
 \item{prod_input}{A data frame. The values that replace the selected
 biomass values.}
 
 \item{prod_default}{A data frame with the \code{MonthlyVeg} element of
-a \code{\linkS4class{swProd2}} object, or an object from which to retrieve a
-a \code{\linkS4class{swProd2}} object.}
+a \code{\link[=swProd2-class]{swProd2}} object, or an object from which to retrieve a
+a \code{\link[=swProd2-class]{swProd2}} object.}
 }
 \value{
 The requested \code{MonthlyVeg} element from \code{prod_default} with updated

@@ -325,12 +325,15 @@ setMethod(
           to_v640 = 33L:34L,
           # v660: `"ENERGYAVG"` added as `outkey` 35 for a new total of 35
           to_v660 = 35L,
+          # nolint start: unreachable_code_linter.
+          # bug in lintr v3.4.0: https://github.com/r-lib/lintr/issues/3084
           stop(
             "Upgrade ",
             shQuote(names(do_upgrade)[[k]]),
             " is not implemented for class `swOUT`.",
             call. = FALSE
           )
+          # nolint end: unreachable_code_linter.
         )
 
         #--- Upgrade `timeSteps`

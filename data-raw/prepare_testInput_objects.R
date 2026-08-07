@@ -276,7 +276,10 @@ setSWRC <- function(
     Campbell1974 = "swrc_params.in",
     vanGenuchten1980 = "swrc_params_vanGenuchten1980.in",
     FXW = "swrc_params_FXW.in",
+    # nolint start: unreachable_code_linter.
+    # bug in lintr v3.4.0: https://github.com/r-lib/lintr/issues/3084
     stop(shQuote(swrc_name), " is not implemented.", call. = FALSE)
+    # nolint end: unreachable_code_linter.
   )
 
   setTxtInput(

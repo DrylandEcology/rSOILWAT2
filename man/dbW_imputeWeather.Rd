@@ -21,7 +21,7 @@ or a data frame as returned by \code{\link[=dbW_weatherData_to_dataframe]{dbW_we
 
 \item{use_wg}{A logical value. Should the weather generator be used first?}
 
-\item{seed}{An integer value or \code{NULL}. See \code{\link[base:Random]{base::set.seed()}}.}
+\item{seed}{An integer value or \code{NULL}. See \code{\link[base:set.seed]{base::set.seed()}}.}
 
 \item{method_after_wg}{A string. The imputation type passed
 to \code{\link[rSW2utils:impute_df]{rSW2utils::impute_df()}}, if any missing values remain after the

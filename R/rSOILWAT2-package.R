@@ -51,8 +51,7 @@ rSW2_glovars <- new.env()
 ## Package uses S3/S4 classes - they are defined in package:methods
 #' @importFrom methods slot slot<- as as<- new slotNames
 #'   inheritedSlotNames getSlots validObject callNextMethod
-#' @importFrom stats aggregate coef complete.cases cor cov fitted median
-#'   na.exclude na.omit predict quantile sd weighted.mean
+#' @importFrom stats predict
 NULL
 
 ##------ Access SOILWAT2 C code

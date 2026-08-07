@@ -4,13 +4,13 @@
 \alias{sw_weather_data}
 \title{\code{rSOILWAT2} weather data functionality}
 \arguments{
-\item{wd}{A list of elements of class \code{\linkS4class{swWeatherData}}
+\item{wd}{A list of elements of class \code{\link[=swWeatherData-class]{swWeatherData}}
 that each hold daily weather data for one calendar year.}
 
-\item{weatherData}{A list of elements of class \code{\linkS4class{swWeatherData}}
+\item{weatherData}{A list of elements of class \code{\link[=swWeatherData-class]{swWeatherData}}
 that each hold daily weather data for one calendar year.}
 
-\item{dailySW}{A list of elements of class \code{\linkS4class{swWeatherData}}
+\item{dailySW}{A list of elements of class \code{\link[=swWeatherData-class]{swWeatherData}}
 that each hold daily weather data for one calendar year.}
 
 \item{weatherDF}{A \code{data.frame}. Daily weather data where rows represent

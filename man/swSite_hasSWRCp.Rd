@@ -23,7 +23,7 @@ swSite_hasSWRCp(object) <- value
 \S4method{swSite_hasSWRCp}{swInputData}(object) <- value
 }
 \arguments{
-\item{object}{An object of class \linkS4class{swSite} or \linkS4class{swInputData}.}
+\item{object}{An object of class \link[=swSite-class]{swSite} or \link[=swInputData-class]{swInputData}.}
 
 \item{value}{A logical value.}
 }

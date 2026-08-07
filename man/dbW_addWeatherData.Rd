@@ -37,7 +37,7 @@ longitude and latitude values.}
 
 \item{weatherFolderPath}{A character string. The path to the parent folder.}
 
-\item{weatherData}{A list of elements of class \code{\linkS4class{swWeatherData}}
+\item{weatherData}{A list of elements of class \code{\link[=swWeatherData-class]{swWeatherData}}
 that each hold daily weather data for one calendar year.}
 
 \item{Label}{A character string. The name/label of the queried site.}
