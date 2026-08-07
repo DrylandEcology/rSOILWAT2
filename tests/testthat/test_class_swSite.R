@@ -1,12 +1,18 @@
-
+#---INPUTS
 dir_test_data <- file.path("..", "test_data")
 temp <- list.files(dir_test_data, pattern = "Ex")
 temp <- sapply(strsplit(temp, "_", fixed = TRUE), function(x) x[[1]])
 tests <- unique(temp)
 
 test_that("Test data availability", {
-  expect_gt(length(tests), 0)
+  expect_gt(length(tests), 0L)
 })
+
+
+sw_input <- readRDS(file.path(dir_test_data, paste0(tests[[1L]], "_input.rds")))
+sw_weather <- readRDS(
+  file.path(dir_test_data, paste0(tests[[1L]], "_weather.rds"))
+)
 
 
 #---TESTS
@@ -59,7 +65,6 @@ test_that("Manipulate 'swSite' class", {
     swSite_ModelCoefficients(site1)
   )
 
-
   #--- Slot TranspirationRegions
   expect_equal(
     swSite_TranspirationRegions(xinput),
@@ -75,27 +80,21 @@ test_that("Manipulate 'swSite' class", {
 })
 
 
-test_that("Run 'rSOILWAT2' with different 'swSite' inputs", {
-  it <- tests[[1L]]
-
-  #---INPUTS
-  sw_input <- readRDS(file.path(dir_test_data, paste0(it, "_input.rds")))
-  sw_weather <- readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
-
-
-  #--- Transpiration Regions
+test_that("Run 'rSOILWAT2' with different transpiration regions", {
   # Set transpiration regions to numeric/integer layer values
   types <- c("as.double", "as.integer")
 
   for (ftype in types) {
+    swin <- sw_input
+
     # Set type of transpiration regions
-    mc <- mc_ok <- swSite_TranspirationRegions(sw_input)
+    mc <- mc_ok <- swSite_TranspirationRegions(swin)
     mc <- array(match.fun(ftype)(mc), dim = dim(mc), dimnames = dimnames(mc))
-    swSite_TranspirationRegions(sw_input) <- mc
+    swSite_TranspirationRegions(swin) <- mc
 
     # Run SOILWAT
     res <- sw_exec(
-      inputData = sw_input,
+      inputData = swin,
       weatherList = sw_weather,
       echo = FALSE,
       quiet = TRUE
@@ -103,19 +102,22 @@ test_that("Run 'rSOILWAT2' with different 'swSite' inputs", {
 
     expect_s4_class(res, "swOutput")
   }
+})
 
 
-  #--- Method for soil temperature boundary condition
+test_that("Run 'rSOILWAT2' with different soil temperature boundary methods", {
   defaultType <- 0L
   types <- c(defaultType, 1L)
 
   for (ftype in types) {
+    swin <- sw_input
+
     # Set type of soil temperature boundary condition
-    swSite_SoilTempBoundaryMethod(sw_input) <- ftype
+    swSite_SoilTempBoundaryMethod(swin) <- ftype
 
     # Run SOILWAT
     res <- sw_exec(
-      inputData = sw_input,
+      inputData = swin,
       weatherList = sw_weather,
       echo = FALSE,
       quiet = TRUE
@@ -131,6 +133,110 @@ test_that("Run 'rSOILWAT2' with different 'swSite' inputs", {
       # than default run
       expect_gt(
         sum(abs(ts_default - slot(slot(res, "SOILTEMP"), "Year"))),
+        0
+      )
+    }
+  }
+})
+
+
+test_that("Run 'rSOILWAT2' with different PotEvCo inputs", {
+  defaultType <- 0L
+  types <- c(defaultType, 1L)
+
+  for (ftype in types) {
+    swin <- sw_input
+
+    # Set method
+    swSite_PotSoilEvCoMethod(swin) <- ftype
+    if (ftype != 0L) {
+      swSoils_Layers(swin)[, "EvapBareSoil_frac"] <- NA
+    }
+
+    # Run SOILWAT
+    res <- sw_exec(
+      inputData = swin,
+      weatherList = sw_weather,
+      echo = FALSE,
+      quiet = TRUE
+    )
+
+    expect_s4_class(res, "swOutput")
+
+    if (identical(ftype, defaultType)) {
+      es_default <- slot(slot(res, "EVAPSOIL"), "Day")
+    } else {
+      expect_false(has_soilTemp_failed())
+      # Expect both input methods to produce identical output
+      expect_equal(es_default, slot(slot(res, "EVAPSOIL"), "Day"))
+    }
+  }
+})
+
+
+test_that("Run 'rSOILWAT2' with different sources for rooting profile", {
+  defaultType <- 0L
+  types <- c(defaultType, 1L)
+
+  for (ftype in types) {
+    swin <- sw_input
+
+    # Set method
+    swSite_RootingProfileMethod(swin) <- ftype
+    if (ftype != 0L) {
+      tmp <- swSoils_Layers(swin)
+      tmp[, grep("^TrCo_", colnames(tmp))] <- NA
+      swSoils_Layers(swin) <- tmp
+    }
+
+    # Run SOILWAT
+    res <- sw_exec(
+      inputData = swin,
+      weatherList = sw_weather,
+      echo = FALSE,
+      quiet = TRUE
+    )
+
+    expect_s4_class(res, "swOutput")
+
+    if (identical(ftype, defaultType)) {
+      tran_default <- slot(slot(res, "TRANSP"), "Day")
+    } else {
+      expect_false(has_soilTemp_failed())
+      # Expect both input methods to produce identical output
+      expect_equal(tran_default, slot(slot(res, "TRANSP"), "Day"))
+    }
+  }
+})
+
+
+test_that("Run 'rSOILWAT2' with different methods for surface albedo", {
+  defaultType <- 0L
+  types <- c(defaultType, 1L)
+
+  for (ftype in types) {
+    swin <- sw_input
+
+    # Set method
+    swSite_AlbedoMethod(swin) <- ftype
+
+    # Run SOILWAT
+    res <- sw_exec(
+      inputData = swin,
+      weatherList = sw_weather,
+      echo = FALSE,
+      quiet = TRUE
+    )
+
+    expect_s4_class(res, "swOutput")
+
+    if (identical(ftype, defaultType)) {
+      pet_default <- slot(slot(res, "PET"), "Year")
+    } else {
+      expect_false(has_soilTemp_failed())
+      # Expect non-default methods to produce different pet than default run
+      expect_gt(
+        sum(abs(pet_default - slot(slot(res, "PET"), "Year"))),
         0
       )
     }

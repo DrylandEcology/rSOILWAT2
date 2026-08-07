@@ -875,7 +875,7 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp, x_asif = NULL) {
   vadj <- vadj[seq_len(k_vadj - 1)]
 
   vadj2 <- matrix(unlist(vadj), nrow = length(vadj), ncol = 4, byrow = TRUE)
-  vadj2 <- vadj2[complete.cases(vadj2), ]
+  vadj2 <- vadj2[stats::complete.cases(vadj2), ]
 
   # determine duplicated values: see `smooth.spline`
   tmp <- vadj2[, 1]
@@ -934,7 +934,7 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp, x_asif = NULL) {
           xt2 / Nadj - 1 / (2 * Nadj)
         )
 
-        tmp <- aggregate(
+        tmp <- stats::aggregate(
           tmp[["y"]],
           by = list(tmp[["x"]] %% yr_std_d),
           FUN = mean
@@ -955,7 +955,7 @@ adj_phenology_by_temp <- function(x, ref_temp, target_temp, x_asif = NULL) {
 
   # Average values across seasons
   vadj4[, 4] <- rowMeans(vadj4[, -1], na.rm = TRUE)
-  isgood <- complete.cases(vadj4[, c(1, 4)])
+  isgood <- stats::complete.cases(vadj4[, c(1, 4)])
   vadj4 <- vadj4[isgood, , drop = FALSE]
 
 
@@ -1363,7 +1363,7 @@ TranspCoeffByVegType <- function(
   trco.code <- as.character(tr_input_code[,
     which(colnames(tr_input_code) == trco_type)])
   trco <- rep(0, times = soillayer_no)
-  trco.raw <- na.omit(tr_input_coeff[,
+  trco.raw <- stats::na.omit(tr_input_coeff[,
     which(colnames(tr_input_coeff) == trco_type)])
 
   if (trco.code == "DepthCM") {

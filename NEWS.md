@@ -1,3 +1,38 @@
+# rSOILWAT2 v6.6.0
+
+* Simulation output remains the same as the previous version, but
+  output of vegetation establishment is now correct. Additionally,
+  output of the example differs slightly from previous example output
+  because of the following changes to the example inputs:
+  updated potential evaporation coefficients; updated rooting profiles.
+
+## New features
+* Potential evaporation coefficients can now be estimated from soil properties.
+* Rooting profiles can now be estimated with an equation and parameters
+  for each vegetation type.
+* New option to select method for surface albedo:
+    * fixed, cover-weighted sum over PFTs and bare ground with fixed values
+    * dynamic (new), albedo components for vegetation (LAI dependent),
+      soil (moisture darkening) and snow (age- and temperature dependent)
+
+## Changes to interface
+* The class `"swSite"` gained
+    * slot `"PotSoilEvCoMethod"` and methods `swSite_PotSoilEvCoMethod()`
+    * slot `"RootingProfileMethod"` and methods `swSite_RootingProfileMethod()`
+    * slot `"AlbedoMethod"` and methods `swSite_AlbedoMethod()`
+    * additional new slots `"RoughnessLengthGroundSurface"`, `"AlbedoSnowMax"`,
+      `"AlbedoSoilDry"`, `"AlbedoSoilSaturated"`,
+      `"AlbedoSoilDarkeningParameter"`, `"SnowFractionalCoverMeltingFactor"`
+* The class `"swProd2"` gained slots `"RootProfileParameters"` and
+  `"kExtVegAlbedo"`.
+
+* The class `"swOutput"` produces now output of soil evaporation for
+  each soil layer (previously, output was produced only for soil layers with
+  soil evaporation potential).
+* The class `"swOutput"` now contains a new output element `"SW_ENERGYAVG"`
+  with output of surface albedo.
+
+
 # rSOILWAT2 v6.5.2
 * Simulation output remains the same as the previous version.
 

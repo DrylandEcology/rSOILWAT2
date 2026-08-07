@@ -17,7 +17,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###############################################################################
 
-
 # Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2013-2018);
 #   Zach Kramer (2017)
 ###############################################################################
@@ -73,12 +72,14 @@ setClass(
     nYearsDynamicLong = "integer",
     Composition = "numeric",
     Albedo = "numeric",
+    kExtVegAlbedo = "numeric",
     CanopyHeight = "matrix",
     VegetationInterceptionParameters = "matrix",
     LitterInterceptionParameters = "matrix",
     EsTpartitioning_param = "numeric",
     Es_param_limit = "numeric",
     Shade = "matrix",
+    RootProfileParameters = "matrix",
     HydraulicRedistribution_use = "logical",
     HydraulicRedistribution = "matrix",
     CriticalSoilWaterPotential = "numeric",
@@ -93,11 +94,13 @@ setClass(
     nYearsDynamicLong = NA_integer_,
     Composition = stats::setNames(rep(NA_real_, nvegs2 + 1L), lc2_names),
     Albedo = stats::setNames(rep(NA_real_, nvegs2 + 1L), lc2_names),
+    kExtVegAlbedo = stats::setNames(rep(NA_real_, nvegs2), veg2_names),
     CanopyHeight = array(
       NA_real_,
       dim = c(nvegs2, 5L),
       dimnames = list(
-        veg2_names, c("xinflec", "yinflec", "range", "slope", "height_cm")
+        veg2_names,
+        c("xinflec", "yinflec", "range", "slope", "height_cm")
       )
     ),
     VegetationInterceptionParameters = array(
@@ -118,9 +121,21 @@ setClass(
       dimnames = list(
         veg2_names,
         c(
-          "ShadeScale", "ShadeMaximalDeadBiomass", "tanfuncXinflec",
-          "yinflec", "range", "slope"
+          "ShadeScale",
+          "ShadeMaximalDeadBiomass",
+          "tanfuncXinflec",
+          "yinflec",
+          "range",
+          "slope"
         )
+      )
+    ),
+    RootProfileParameters = array(
+      NA_real_,
+      dim = c(nvegs2, 3L),
+      dimnames = list(
+        veg2_names,
+        c("RootShape1", "RootShape2", "MaxRootDepth")
       )
     ),
     HydraulicRedistribution_use = stats::setNames(rep(NA, nvegs2), veg2_names),
@@ -133,7 +148,8 @@ setClass(
       )
     ),
     CriticalSoilWaterPotential = stats::setNames(
-      rep(NA_real_, nvegs2), veg2_names
+      rep(NA_real_, nvegs2),
+      veg2_names
     ),
     CO2Coefficients = array(
       NA_real_,
@@ -154,8 +170,18 @@ setClass(
             dim = c(12L, 4L),
             dimnames = list(
               c(
-                "January", "February", "March", "April", "May", "June",
-                "July", "August", "September", "October", "November", "December"
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December"
               ),
               c("Litter", "Biomass", "Live_pct", "LAI_conv")
             )
@@ -166,7 +192,6 @@ setClass(
     )
   )
 )
-
 
 
 setValidity(
@@ -198,8 +223,11 @@ setValidity(
 
     if (
       length(object@Composition) != 1L + nvegs2 ||
-        !all(is.na(object@Composition) | (object@Composition >= 0. &
-            object@Composition <= 1.))
+        !all(
+          is.na(object@Composition) |
+            (object@Composition >= 0. &
+              object@Composition <= 1.)
+        )
     ) {
       msg <- paste(
         "@Composition must have 1 + NVEGTYPES values",
@@ -213,6 +241,14 @@ setValidity(
         !all(is.na(object@Albedo) | (object@Albedo >= 0. & object@Albedo <= 1.))
     ) {
       msg <- "@Albedo must have 1 + NVEGTYPES values between 0 and 1 or NA."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (
+      length(object@kExtVegAlbedo) != nvegs2 ||
+        !all(is.na(object@kExtVegAlbedo) | object@kExtVegAlbedo >= 0.)
+    ) {
+      msg <- "@kExtVegAlbedo must have NVEGTYPES values larger than 0 or NA."
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
@@ -253,6 +289,12 @@ setValidity(
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
+    temp <- dim(object@RootProfileParameters)
+    if (!identical(temp, c(nvegs2, 3L))) {
+      msg <- "@RootProfileParameters must be a NVEGTYPES x 3 matrix."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
     if (length(object@HydraulicRedistribution_use) != nvegs2) {
       msg <- "@HydraulicRedistribution_use must have NVEGTYPES values."
       val <- if (isTRUE(val)) msg else c(val, msg)
@@ -264,7 +306,8 @@ setValidity(
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
-    if (length(object@CriticalSoilWaterPotential) != nvegs2 ||
+    if (
+      length(object@CriticalSoilWaterPotential) != nvegs2 ||
         !all(
           is.na(object@CriticalSoilWaterPotential) |
             object@Composition[seq_len(nvegs2)] < 1e-6 |
@@ -293,13 +336,13 @@ setValidity(
 
     if (
       length(object@MonthlyVeg) != nvegs2 ||
-      !all(
-        vapply(
-          object@MonthlyVeg,
-          function(x) identical(dim(x), c(12L, 4L)) && all(x >= 0 | is.na(x)),
-          FUN.VALUE = NA
+        !all(
+          vapply(
+            object@MonthlyVeg,
+            function(x) identical(dim(x), c(12L, 4L)) && all(x >= 0 | is.na(x)),
+            FUN.VALUE = NA
+          )
         )
-      )
     ) {
       msg <- paste(
         "@MonthlyVeg must be a list with NVEGTYPES elements of a",
@@ -345,13 +388,19 @@ swProd2 <- function(...) {
 
   # Guarantee names
   gdns <- c(
-    "CanopyHeight", "VegetationInterceptionParameters",
-    "LitterInterceptionParameters", "HydraulicRedistribution",
+    "CanopyHeight",
+    "VegetationInterceptionParameters",
+    "LitterInterceptionParameters",
+    "Shade",
+    "RootProfileParameters",
+    "HydraulicRedistribution",
     "CO2Coefficients"
   )
 
-  for (g in gdns) if (g %in% dns) {
-    dimnames(dots[[g]]) <- dimnames(slot(def, g))
+  for (g in gdns) {
+    if (g %in% dns) {
+      dimnames(dots[[g]]) <- dimnames(slot(def, g))
+    }
   }
 
   if ("MonthlyVeg" %in% dns) {

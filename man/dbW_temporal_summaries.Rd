@@ -24,7 +24,7 @@ dbW_dataframe_aggregate(
 dbW_dataframe_to_monthly(dailySW, na.rm = FALSE)
 }
 \arguments{
-\item{dailySW}{A list of elements of class \code{\linkS4class{swWeatherData}}
+\item{dailySW}{A list of elements of class \code{\link[=swWeatherData-class]{swWeatherData}}
 that each hold daily weather data for one calendar year.}
 
 \item{na.rm}{A logical value. Should missing daily values be removed before

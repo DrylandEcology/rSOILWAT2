@@ -53,9 +53,14 @@ test_that("Unrealistic soils", {
   if (getNamespaceVersion("rSOILWAT2") <= numeric_version("6.0.0")) {
     # rSOILWAT2: < v6.0.0: expect no output for esoil (interpreted as zero)
     expect_identical(ncol(e_bs), 2L) # Year DOY
-  } else {
-    # rSOILWAT2: >= v6.0.0: expect one layer of 0s for esoil
+  } else if (getNamespaceVersion("rSOILWAT2") < numeric_version("6.6.0")) {
+    # rSOILWAT2: v6.0.0 - v6.5.0: expect one layer of 0s for esoil
     expect_identical(ncol(e_bs), 3L) # Year DOY Lyr_1
     expect_identical(sum(e_bs[, 3L]), 0)
+  } else {
+    # rSOILWAT2: >= v6.6.0: expect each soil layer with 0s for esoil
+    # Year DOY Lyr_1 ... Lyr_n
+    expect_identical(ncol(e_bs), 2L + nrow(sw_input@soils@Layers))
+    expect_identical(sum(e_bs[, -(1L:2L)]), 0)
   }
 })

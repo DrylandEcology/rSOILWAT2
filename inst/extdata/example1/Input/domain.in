@@ -14,7 +14,7 @@ nDimS     1                     # Number of sites (used if "s")
 
 StartYear 1980                  # First (Gregorian) calendar year of simulation
 EndYear   2010                  # Last (Gregorian) calendar year of simulation
-StartDoy  1                     # First day of first year
+StartDoy  1                     # First day of first year (values other than 1 are not (fully) supported)
 EndDoy    365                   # Last day of last year (365 is equivalent to 366)
 
 # Bounding box information

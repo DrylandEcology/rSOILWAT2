@@ -67,7 +67,7 @@ calc_rates_per_sampling <- function(data, cats) {
   tmp <- lapply(
     cats,
     function(x) {
-      aggregate(data[, x], by = data["Process_ID"], FUN = diff)
+      stats::aggregate(data[, x], by = data["Process_ID"], FUN = diff)
     }
   )
 
@@ -355,7 +355,7 @@ test_that("Concurrent read/write weather database", {
     grates[, "variable"] == "success" &
     grates[, "Sampling"] >= 4 / 5 * max(grates[, "Sampling"])
 
-  expect_false(any(aggregate(
+  expect_false(any(stats::aggregate(
     grates[ids, "value"],
     by = list(grates[ids, "Process"]),
     function(x) {
@@ -376,7 +376,7 @@ test_that("Concurrent read/write weather database", {
     grates[, "variable"] == "success" &
     grates[, "Sampling"] <= 1 / 5 * max(grates[, "Sampling"])
 
-  expect_false(any(aggregate(
+  expect_false(any(stats::aggregate(
     grates[ids, "value"],
     by = list(grates[ids, "Process"]),
     function(x) {

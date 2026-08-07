@@ -53,6 +53,7 @@ dynamics in the shortgrass steppe.  \emph{Ecology} \bold{73}:1175--1181.
 
 Authors:
 \itemize{
+  \item Daniel Schlaepfer \email{danielrschlaepfer@gmail.com} (\href{https://orcid.org/0000-0001-9973-2065}{ORCID})
   \item Ryan Murphy
 }
 

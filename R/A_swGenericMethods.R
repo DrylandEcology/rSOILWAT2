@@ -17,7 +17,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###############################################################################
 
-
 # TODO: Add comment
 #
 # Author: Ryan J. Murphy (2013)
@@ -100,7 +99,6 @@ check_version <- function(
 
   if (length(has) == 0L || is.na(has) || is.na(expected_version)) {
     FALSE
-
   } else {
     has <- as.numeric_version(has)
     expected <- as.numeric_version(expected_version)
@@ -120,8 +118,16 @@ check_version <- function(
         }
       )
 
-      if (ns[[1]] > 3) for (k in seq(4, ns[[1]])) has[[c(1, k)]] <- 0
-      if (ns[[2]] > 3) for (k in seq(4, ns[[2]])) expected[[c(1, k)]] <- 0
+      if (ns[[1]] > 3) {
+        for (k in seq(4, ns[[1]])) {
+          has[[c(1, k)]] <- 0
+        }
+      }
+      if (ns[[2]] > 3) {
+        for (k in seq(4, ns[[2]])) {
+          expected[[c(1, k)]] <- 0
+        }
+      }
     }
 
     if (level %in% c("major", "minor")) {
@@ -201,6 +207,16 @@ format_timestamp <- function(object) {
 #'
 #' @section Details:
 #' List of changes:
+#'   * Changes with `v6.6.0`:
+#'       * class [`swSite-class`]: new slots `"PotSoilEvCoMethod"`,
+#'         `"RootingProfileMethod"`, `"RoughnessLengthGroundSurface"`,
+#'         `"AlbedoMethod"`, `"AlbedoSnowMax"`, `"AlbedoSoilDry"`,
+#'         `"AlbedoSoilSaturated"`, `"AlbedoSoilDarkeningParameter"`,
+#'         `"SnowFractionalCoverMeltingFactor"`
+#'       * class [`swProd2-class`]: new slots `"RootProfileParameters"`,
+#'         `"kExtVegAlbedo"`
+#'       * class [`swOUT-class`]: one new `outkey` `"ENERGYAVG"`,
+#'         for a new total of 35 `outkey`
 #'   * Changes with `v6.5.0`:
 #'       * class [`swSite-class`]: new slot `"SoilTemperatureBoundaryMethod"`
 #'       * class [`swProd-class`]: new slots `"nYearsDynamicShort"` and
@@ -281,7 +297,6 @@ setMethod(
     object
   }
 )
-
 
 
 #########FILES##########
@@ -1190,7 +1205,6 @@ setGeneric(
 )
 ########################
 
-
 #####WeatherData########
 #' \code{get_WeatherHistory}
 #' @param object An object of class \code{\linkS4class{swInputData}}.
@@ -1841,7 +1855,32 @@ setGeneric(
   function(object) standardGeneric("swSite_SoilDensityInputType")
 )
 
+#' \code{swSite_PotSoilEvCoMethod}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_PotSoilEvCoMethod",
+  function(object) standardGeneric("swSite_PotSoilEvCoMethod")
+)
 
+#' \code{swSite_RootingProfileMethod}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_RootingProfileMethod",
+  function(object) standardGeneric("swSite_RootingProfileMethod")
+)
+
+#' \code{swSite_AlbedoMethod}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_AlbedoMethod",
+  function(object) standardGeneric("swSite_AlbedoMethod")
+)
 #' \code{swSite_TranspirationRegions}
 #' @param object An object of class \code{\linkS4class{swSite}} or
 #'   \code{\linkS4class{swInputData}}.
@@ -2033,6 +2072,35 @@ setGeneric(
   function(object, value) standardGeneric("swSite_SoilDensityInputType<-")
 )
 
+#' \code{swSite_PotSoilEvCoMethod<-}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_PotSoilEvCoMethod<-",
+  function(object, value) standardGeneric("swSite_PotSoilEvCoMethod<-")
+)
+
+#' \code{swSite_RootingProfileMethod<-}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_RootingProfileMethod<-",
+  function(object, value) standardGeneric("swSite_RootingProfileMethod<-")
+)
+
+#' \code{swSite_AlbedoMethod<-}
+#' @param object An object of class \code{\linkS4class{swSite}} or
+#'   \code{\linkS4class{swInputData}}.
+#' @param value A value to assign to a specific slot of the \code{object}.
+#' @seealso \code{\linkS4class{swSite}} and \code{\linkS4class{swInputData}}
+setGeneric(
+  "swSite_AlbedoMethod<-",
+  function(object, value) standardGeneric("swSite_AlbedoMethod<-")
+)
 #' \code{swSite_TranspirationRegions<-}
 #' @param object An object of class \code{\linkS4class{swSite}} or
 #'   \code{\linkS4class{swInputData}}.
@@ -2564,8 +2632,9 @@ setGeneric(
 #'   \code{\linkS4class{swOUT}}, \code{\linkS4class{swInputData}}, and
 #'   \code{\link{sw_exec}}
 #'
-#' @aliases activate_swOUT_OutKey
-#'   deactivate_swOUT_OutKey deactivate_swOUT_OutKey-set
+# nolint start: line_length_linter.
+#' @aliases activate_swOUT_OutKey deactivate_swOUT_OutKey deactivate_swOUT_OutKey-set
+# nolint end: line_length_linter.
 #' @name activate_swOUT_OutKey-set
 NULL
 

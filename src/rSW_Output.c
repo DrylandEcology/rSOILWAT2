@@ -52,7 +52,7 @@ void onSet_SW_OUT(SEXP OUT, LOG_INFO* LogInfo) {
 	int i, msg_type;
 	OutKey k;
 	SEXP sep, outfile, tp_convert;
-	int *timePeriods, *sumtype, *first_orig, *last_orig;
+	int *timePeriods, *sumtype;
 	int *use;
 	// mykey, myobj and use are currently unused:
 	// int *use, *mykey, *myobj;
@@ -78,8 +78,6 @@ void onSet_SW_OUT(SEXP OUT, LOG_INFO* LogInfo) {
 	// myobj = INTEGER(GET_SLOT(OUT, install("myobj")));
 	use = LOGICAL(GET_SLOT(OUT, install("use")));
 	sumtype = INTEGER(GET_SLOT(OUT, install("sumtype")));
-	first_orig = INTEGER(GET_SLOT(OUT, install("first_orig")));
-	last_orig = INTEGER(GET_SLOT(OUT, install("last_orig")));
 	PROTECT(outfile = GET_SLOT(OUT, install("outfile")));
 
 	ForEachOutKey(k) {
@@ -87,8 +85,6 @@ void onSet_SW_OUT(SEXP OUT, LOG_INFO* LogInfo) {
             &SoilWatDomain.OutDom,
 			k,
 			(use[k]) ? sumtype[k] : eSW_Off,
-			first_orig[k],
-			last_orig[k],
 			msg,
 			sizeof msg,
 			&SoilWatRun.VegProdIn.use_SWA,
@@ -176,8 +172,8 @@ SEXP onGet_SW_OUT(void) {
 		INTEGER(myobj)[k] = OutDom->myobj[k];
 		INTEGER(sumtype)[k] = OutDom->sumtype[k];
 		LOGICAL(use)[k] = OutDom->use[k];
-		INTEGER(first_orig)[k] = OutDom->first_orig[k];
-		INTEGER(last_orig)[k] = OutDom->last_orig[k];
+		INTEGER(first_orig)[k] = 1; // dropped with SOILWAT2 v8.4.0
+		INTEGER(last_orig)[k] = 366; // dropped with SOILWAT2 v8.4.0
 
 		if (OutDom->use[k])
 		{

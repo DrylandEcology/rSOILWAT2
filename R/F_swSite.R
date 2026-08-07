@@ -17,10 +17,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###############################################################################
 
-
 # Author: Ryan J. Murphy (2013); Daniel R Schlaepfer (2013-2018)
 ###############################################################################
-
 
 ###############################################################SITE############
 #' Class \code{"swSite"}
@@ -67,7 +65,16 @@ setClass(
     TranspirationRegions = "matrix",
     swrc_flags = "character",
     has_swrcp = "logical",
-    depth_sapric = "numeric"
+    depth_sapric = "numeric",
+    PotSoilEvCoMethod = "integer",
+    RootingProfileMethod = "integer",
+    RoughnessLengthGroundSurface = "numeric",
+    AlbedoMethod = "integer",
+    AlbedoSnowMax = "numeric",
+    AlbedoSoilDry = "numeric",
+    AlbedoSoilSaturated = "numeric",
+    AlbedoSoilDarkeningParameter = "numeric",
+    SnowFractionalCoverMeltingFactor = "numeric"
   ),
   prototype = list(
     SWClimits = c(swc_min = NA_real_, swc_init = NA_real_, swc_wet = NA_real_),
@@ -100,10 +107,16 @@ setClass(
     SoilTemperatureConstants = stats::setNames(
       rep(NA_real_, 10L),
       c(
-        "BiomassLimiter_g/m^2", "T1constant_a", "T1constant_b", "T1constant_c",
-        "cs_constant_SoilThermCondct", "cs_constant",
+        "BiomassLimiter_g/m^2",
+        "T1constant_a",
+        "T1constant_b",
+        "T1constant_c",
+        "cs_constant_SoilThermCondct",
+        "cs_constant",
         "sh_constant_SpecificHeatCapacity",
-        "ConstMeanAirTemp", "deltaX_Param", "MaxDepth"
+        "ConstMeanAirTemp",
+        "deltaX_Param",
+        "MaxDepth"
       )
     ),
     SoilDensityInputType = NA_integer_,
@@ -114,7 +127,16 @@ setClass(
     ),
     swrc_flags = c(swrc_name = NA_character_, ptf_name = NA_character_),
     has_swrcp = NA,
-    depth_sapric = NA_real_
+    depth_sapric = NA_real_,
+    PotSoilEvCoMethod = NA_integer_,
+    RootingProfileMethod = NA_integer_,
+    RoughnessLengthGroundSurface = NA_real_,
+    AlbedoMethod = NA_integer_,
+    AlbedoSnowMax = NA_real_,
+    AlbedoSoilDry = NA_real_,
+    AlbedoSoilSaturated = NA_real_,
+    AlbedoSoilDarkeningParameter = NA_real_,
+    SnowFractionalCoverMeltingFactor = NA_real_
   )
 )
 
@@ -201,6 +223,51 @@ setValidity(
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
+    if (length(object@PotSoilEvCoMethod) != 1L) {
+      msg <- "@PotSoilEvCoMethod length != 1."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (length(object@RootingProfileMethod) != 1L) {
+      msg <- "@RootingProfileMethod length != 1."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (length(object@RoughnessLengthGroundSurface) != 1L) {
+      msg <- "@RoughnessLengthGroundSurface length != 1."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (length(object@AlbedoMethod) != 1L) {
+      msg <- "@AlbedoMethod length != 1."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (length(object@AlbedoSnowMax) != 1L) {
+      msg <- "@AlbedoSnowMax length != 1."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (length(object@AlbedoSoilDry) != 1L) {
+      msg <- "@AlbedoSoilDry length != 1."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (length(object@AlbedoSoilSaturated) != 1L) {
+      msg <- "@AlbedoSoilSaturated length != 1."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (length(object@AlbedoSoilDarkeningParameter) != 1L) {
+      msg <- "@AlbedoSoilDarkeningParameter length != 1."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
+    if (length(object@SnowFractionalCoverMeltingFactor) != 1L) {
+      msg <- "@SnowFractionalCoverMeltingFactor length != 1."
+      val <- if (isTRUE(val)) msg else c(val, msg)
+    }
+
     val
   }
 )
@@ -248,7 +315,6 @@ swSite <- function(...) {
 
   do.call("new", args = c("swSite", tmp))
 }
-
 
 
 #' @rdname sw_upgrade
@@ -407,6 +473,29 @@ setMethod(
   function(object) slot(object, "SoilDensityInputType")
 )
 
+#' @rdname swSite-class
+#' @export
+setMethod(
+  "swSite_PotSoilEvCoMethod",
+  "swSite",
+  function(object) slot(object, "PotSoilEvCoMethod")
+)
+
+#' @rdname swSite-class
+#' @export
+setMethod(
+  "swSite_RootingProfileMethod",
+  "swSite",
+  function(object) slot(object, "RootingProfileMethod")
+)
+
+#' @rdname swSite-class
+#' @export
+setMethod(
+  "swSite_AlbedoMethod",
+  "swSite",
+  function(object) slot(object, "AlbedoMethod")
+)
 #' @rdname swSite-class
 #' @export
 setReplaceMethod(
@@ -596,7 +685,8 @@ setReplaceMethod(
     object@SoilTemperatureConstants[] <- value
     validObject(object)
     object
-})
+  }
+)
 
 #' @rdname swSite-class
 #' @export
@@ -631,6 +721,43 @@ setReplaceMethod(
       dim = dim(value),
       dimnames = list(NULL, colnames(object@TranspirationRegions))
     )
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname swSite-class
+#' @export
+setReplaceMethod(
+  "swSite_PotSoilEvCoMethod",
+  signature = "swSite",
+  definition = function(object, value) {
+    object@PotSoilEvCoMethod <- as.integer(value)
+    validObject(object)
+    object
+  }
+)
+
+#' @rdname swSite-class
+#' @export
+setReplaceMethod(
+  "swSite_RootingProfileMethod",
+  signature = "swSite",
+  definition = function(object, value) {
+    object@RootingProfileMethod <- as.integer(value)
+    validObject(object)
+    object
+  }
+)
+
+
+#' @rdname swSite-class
+#' @export
+setReplaceMethod(
+  "swSite_AlbedoMethod",
+  signature = "swSite",
+  definition = function(object, value) {
+    object@AlbedoMethod <- as.integer(value)
     validObject(object)
     object
   }

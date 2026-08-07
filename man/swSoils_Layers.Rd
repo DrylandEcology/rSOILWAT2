@@ -23,7 +23,7 @@ swSoils_Layers(object) <- value
 \S4method{swSoils_Layers}{swInputData}(object) <- value
 }
 \arguments{
-\item{object}{An object of class \code{\link{swSoils}} or \linkS4class{swInputData}.}
+\item{object}{An object of class \code{\link{swSoils}} or \link[=swInputData-class]{swInputData}.}
 
 \item{value}{An object that can be converted to a data matrix and represents
 required soil layer information.}
@@ -33,7 +33,7 @@ Interact with the soil layer data frame
 }
 \section{Details}{
 
-The replacement method \verb{swSoils_Layers<-} for class \linkS4class{swInputData}
+The replacement method \verb{swSoils_Layers<-} for class \link[=swInputData-class]{swInputData}
 resizes \code{SWRCp} to match number of new soil layers
 (and reset \code{SWRCp} values to \code{NA}) if \code{"has_swrcp"} is \code{FALSE}.
 This is to avoid inconsistency between

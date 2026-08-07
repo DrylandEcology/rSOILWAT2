@@ -35,20 +35,29 @@ aggregate_for_each_timestep <- function(x, dyt) {
     Day = x,
     Week = {
       temp <- if (NCOL(x) > 1) x[dyt[["nfw"]] - 1, ] else x[dyt[["nfw"]] - 1]
-      temp <- aggregate(temp, by = dyt[["d"]][dyt[["nfw"]], c("Week", "Year")],
-        FUN = sum)
+      temp <- stats::aggregate(
+        temp,
+        by = dyt[["d"]][dyt[["nfw"]], c("Week", "Year")],
+        FUN = sum
+      )
       temp <- temp[, -nid]
     },
     Month = {
       temp <- if (NCOL(x) > 1) x[dyt[["nfm"]] - 1, ] else x[dyt[["nfm"]] - 1]
-      temp <- aggregate(temp, by = dyt[["d"]][dyt[["nfm"]], c("Month", "Year")],
-        FUN = sum)
+      temp <- stats::aggregate(
+        temp,
+        by = dyt[["d"]][dyt[["nfm"]], c("Month", "Year")],
+        FUN = sum
+      )
       temp <- temp[, -nid]
     },
     Year = {
       temp <- if (NCOL(x) > 1) x[dyt[["nfy"]] - 1, ] else x[dyt[["nfy"]] - 1]
-      temp <- aggregate(temp, by = list(dyt[["d"]][dyt[["nfy"]], "Year"]),
-        FUN = sum)
+      temp <- stats::aggregate(
+        temp,
+        by = list(dyt[["d"]][dyt[["nfy"]], "Year"]),
+        FUN = sum
+      )
       temp <- temp[, -1]
     })
 }

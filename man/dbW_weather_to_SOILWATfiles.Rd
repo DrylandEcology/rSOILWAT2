@@ -21,7 +21,7 @@ dbW_weather_to_SOILWATfiles(
 \item{site.label}{A character string. Site identification name added to
 comment on first line of each file.}
 
-\item{weatherData}{A list of elements of class \code{\linkS4class{swWeatherData}}
+\item{weatherData}{A list of elements of class \code{\link[=swWeatherData-class]{swWeatherData}}
 that each hold daily weather data for one calendar year.}
 
 \item{weatherDF}{A data.frame. Weather data, see details.}

@@ -2,9 +2,7 @@
 #
 # Notes:
 # Time periods available:  DY,WK,MO,YR
-#   eg, if DY is chosen then 100,200 would mean to use the second hundred days
-#   But if YR is chosen, start and end numbers are in days so only those days
-#   are reported for the yearly average.
+#
 # Some keys from older versions (fortran and the c versions mimicking the fortran
 #   version) are not currently implemented:
 #   ALLH20, WTHR.
@@ -39,6 +37,8 @@
 # 'wk' for week, 'mo' for month, and 'yr' for year after TIMESTEP
 # in any order. For example: 'TIMESTEP mo wk' will output for month and week
 #
+# (2025-Dec-19) START and END are no longer used (values other than 1 and end
+# are ignored (with a warning).
 
 TIMESTEP dy wk mo yr # must be lowercase
 
@@ -67,16 +67,16 @@ TIMESTEP dy wk mo yr # must be lowercase
      SNOWPACK     AVG       WK       1     end        snowpack      /* snowpack water equivalent (cm), snowdepth (cm); since snowpack is already summed, use avg - sum sums the sums = nonsense */
       DEEPSWC     SUM       MO       1     end      deep_drain      /* deep drainage into lowest layer (cm) */
      SOILTEMP     AVG       MO       1     end       temp_soil      /* soil temperature from each soil layer (in celsius) */
-       FROZEN     AVG	    MO	     1     end     frozen_soil      /*Frozen state for each soil layer */
+       FROZEN     AVG       MO       1     end     frozen_soil      /* Frozen state for each soil layer */
        ESTABL     OFF       YR       1     end          estabs      /* yearly establishment results */
    CO2EFFECTS     AVG       DY       1     end      co2effects      /* vegetation CO2-effect (multiplier) for trees, shrubs, forbs, grasses; WUE CO2-effect (multiplier) for trees, shrubs, forbs, grasses */
       BIOMASS     AVG       DY       1     end      vegetation      /* vegetation: cover (%) for trees, shrubs, forbs, grasses; biomass (g/m2 as component of total) for total, trees, shrubs, forbs, grasses, and litter; live biomass (g/m2 as component of total) total, trees, shrubs, forbs, grasses; leaf area index LAI (m2/m2) */
    DERIVEDSUM     SUM       DY       1     end      derivedsum      /* cumulative derived metrics: cwd, ddd5C30bar000to100cm, wdd5C15bar000to100cm */
    DERIVEDAVG     AVG       DY       1     end      derivedavg      /* average derived metrics: swa30bar000to100cm, swa39bar000to100cm */
-
+    ENERGYAVG     AVG       DY       1     end       energyavg      /* surface albedo */
 
 # Simulation output directory/filenames
-Output/			# Path for output files: / for same directory, or e.g., Output/; PROGRAMMER NOTE: This is currently the 13th position; if this changes then update function SW_Files.c/SW_F_read()
+Output/			# Path for output files: / for same directory, or e.g., Output/; PROGRAMMER NOTE: This is currently the 33rd position; if this changes then update function SW_Output.c/SW_OUT_read()
 
 sw2_daily.csv	        # Output file if daily output time period was selected; relative to output directory
 sw2_weekly.csv	        # Output file if weekly output time period was selected; relative to output directory
