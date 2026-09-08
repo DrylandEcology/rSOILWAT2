@@ -36,6 +36,10 @@
 # you want. To change which periods to output type 'dy' for day,
 # 'wk' for week, 'mo' for month, and 'yr' for year after TIMESTEP
 # in any order. For example: 'TIMESTEP mo wk' will output for month and week
+# for every key.
+# 'TIMESTEP' overrides 'PERIOD'. If 'TIMESTEP' is absent, then output for each
+# key is produced only at that key's time step 'PERIOD'.
+# See Input_nc/SW2_netCDF_output_variables.tsv for netCDF output.
 #
 # (2025-Dec-19) START and END are no longer used (values other than 1 and end
 # are ignored (with a warning).

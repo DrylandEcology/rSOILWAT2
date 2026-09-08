@@ -73,7 +73,7 @@ SEXP onGet_SW_F(void) {
 }
 
 void onSet_SW_F(SEXP SW_F_construct, LOG_INFO* LogInfo) {
-	int i, j;
+	int i;
 	SEXP ProjDir;
 	SEXP FilesIn;
 	SEXP Rweather_prefix;
@@ -83,19 +83,13 @@ void onSet_SW_F(SEXP SW_F_construct, LOG_INFO* LogInfo) {
 	strcpy(SoilWatDomain.SW_PathInputs.SW_ProjDir, CHAR(STRING_ELT(ProjDir,0)));
 
 	PROTECT(FilesIn = GET_SLOT(SW_F_construct, install("InFiles")));
-	j = LENGTH(FilesIn);
-	for(i=0;i<SW_NFILES;i++)
+	for(i=0;i<SW_NFILES;i++) {
 		if (!isnull(SoilWatDomain.SW_PathInputs.txtInFiles[i])) {
 			free(SoilWatDomain.SW_PathInputs.txtInFiles[i]);
 		}
-	for (i = 0; i < j; i++) {
 		// txtInFiles is unused if values set by rSOILWAT2
 		// SoilWatDomain.SW_PathInputs.txtInFiles[i] = Str_Dup(CHAR(STRING_ELT(FilesIn,i)), LogInfo);
 		SoilWatDomain.SW_PathInputs.txtInFiles[i] = NULL;
-        if(LogInfo->stopRun) {
-            UNPROTECT(2); // Unprotect the two protected variables before exiting
-            return; // Exit function prematurely
-        }
 	}
 
 	PROTECT(Rweather_prefix = GET_SLOT(SW_F_construct, install("WeatherPrefix")));

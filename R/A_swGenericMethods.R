@@ -207,6 +207,9 @@ format_timestamp <- function(object) {
 #'
 #' @section Details:
 #' List of changes:
+#'   * Changes with `v6.7.0`:
+#'       * class [`swInputData-class`]:
+#'       * class [`swFiles-class`]: new total of 29 input files
 #'   * Changes with `v6.6.0`:
 #'       * class [`swSite-class`]: new slots `"PotSoilEvCoMethod"`,
 #'         `"RootingProfileMethod"`, `"RoughnessLengthGroundSurface"`,

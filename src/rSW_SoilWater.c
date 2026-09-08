@@ -57,7 +57,7 @@ void rSW_SWC_construct(void) {
 
 
 SEXP onGet_SW_SWC(LOG_INFO* LogInfo) {
-	SW_SOILWAT_INPUTS *v = &SoilWatRun.SoilWatIn;
+	SW_SOILWAT_INPUTS *v = SoilWatRun.SoilWatIn;
 	SEXP swSWC;
 	SEXP SWC;
 	char *cSWC[] = { "UseSWCHistoricData", "DataFilePrefix", "FirstYear", "Method", "History" };
@@ -95,7 +95,7 @@ SEXP onGet_SW_SWC(LOG_INFO* LogInfo) {
 }
 
 void onSet_SW_SWC(SEXP SWC, LOG_INFO* LogInfo) {
-	SW_SOILWAT_INPUTS *v = &SoilWatRun.SoilWatIn;
+	SW_SOILWAT_INPUTS *v = SoilWatRun.SoilWatIn;
 	SEXP swcUseData;
 	SEXP swcFilePrefix;
 	SEXP swcFirstYear;
@@ -130,7 +130,7 @@ void onSet_SW_SWC(SEXP SWC, LOG_INFO* LogInfo) {
         UNPROTECT(4); // Unprotect the four protected variables before exiting
         return; // Exit function prematurely due to error
 	}
-	v->hist.yr.last = SoilWatRun.ModelIn.endyr;
+	v->hist.yr.last = SoilWatDomain.endyr;
 	v->hist.yr.total = v->hist.yr.last - v->hist.yr.first + 1;
 	UNPROTECT(4);
 }
@@ -139,15 +139,15 @@ void onSet_SW_SWC(SEXP SWC, LOG_INFO* LogInfo) {
 SEXP onGet_SW_SWC_hists(LOG_INFO* LogInfo) {
 	TimeInt year;
 	SEXP SWC_hists, SWC_hists_names;
-	int years = ((SoilWatRun.ModelIn.endyr + 1) - SoilWatRun.ModelIn.startyr), i = 0;
+	int years = ((SoilWatDomain.endyr + 1) - SoilWatDomain.startyr), i = 0;
 	char cYear[5];
 
 	PROTECT(SWC_hists_names = allocVector(STRSXP, years));
 	PROTECT(SWC_hists = allocVector(VECSXP,years));
 
-	for (year = SoilWatRun.ModelIn.startyr; year <= SoilWatRun.ModelIn.endyr; year++) {
-		if (SoilWatRun.SoilWatIn.hist_use && year >= SoilWatRun.SoilWatIn.hist.yr.first) {
-			read_swc_hist(&SoilWatRun.SoilWatIn.hist, year, LogInfo);
+	for (year = SoilWatDomain.startyr; year <= SoilWatDomain.endyr; year++) {
+		if (SoilWatRun.SoilWatIn->hist_use && year >= SoilWatRun.SoilWatIn->hist.yr.first) {
+			read_swc_hist(&SoilWatRun.SoilWatIn->hist, year, LogInfo);
             if(LogInfo->stopRun) {
                 UNPROTECT(2); // Unprotect the two protected variables before exiting
                 return NULL; // Exit function prematurely due to error
@@ -170,7 +170,7 @@ SEXP onGet_SW_SWC_hist(TimeInt year, LOG_INFO* LogInfo) {
     return NULL; // Exit function prematurely due to error
 
 	int i, j = 0;
-	SW_SOILWAT_INPUTS *v = &SoilWatRun.SoilWatIn;
+	SW_SOILWAT_INPUTS *v = SoilWatRun.SoilWatIn;
 	SEXP swSWC_hist;
 	SEXP hist;
 	char *cSWC_hist[] = { "doy", "lyr", "swc", "st_err" };
@@ -209,7 +209,7 @@ void onSet_SW_SWC_hist(LOG_INFO* LogInfo) {
     return; // Exit function prematurely due to error
 
 	int i, j = 0;
-	SW_SOILWAT_INPUTS *v = &SoilWatRun.SoilWatIn;
+	SW_SOILWAT_INPUTS *v = SoilWatRun.SoilWatIn;
 	double *p_lyrs;
 	SEXP lyrs; // lyrs = VECTOR_ELT(VECTOR_ELT(VECTOR_ELT(InputData,7),4),swcdataIndex);
 	swcdataIndex++;

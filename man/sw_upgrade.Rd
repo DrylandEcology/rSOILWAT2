@@ -107,6 +107,11 @@ take the new default values from \code{SOILWAT2}.
 
 List of changes:
 \itemize{
+\item Changes with \code{v6.7.0}:
+\itemize{
+\item class \code{\link[=swInputData-class]{swInputData}}:
+\item class \code{\link[=swFiles-class]{swFiles}}: new total of 29 input files
+}
 \item Changes with \code{v6.6.0}:
 \itemize{
 \item class \code{\link[=swSite-class]{swSite}}: new slots \code{"PotSoilEvCoMethod"},

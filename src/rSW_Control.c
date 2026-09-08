@@ -184,9 +184,9 @@ void rSW_CTL_obtain_inputs(Bool from_files, SEXP InputData, SEXP weatherList, LO
 
     onSet_swCarbon(
         GET_SLOT(InputData, install("carbon")),
-        SoilWatRun.ModelIn.startyr,   // set by onSet_SW_MDL()
-        SoilWatRun.ModelIn.endyr,     // set by onSet_SW_MDL()
-        SoilWatRun.VegProdIn.vegYear, // set by onSet_SW_VPD()
+        SoilWatDomain.startyr,   // set by onSet_SW_Domain()
+        SoilWatDomain.endyr,     // set by onSet_SW_Domain()
+        SoilWatRun.VegProdIn->vegYear, // set by onSet_SW_VPD()
         LogInfo
     );
     #ifdef RSWDEBUG
