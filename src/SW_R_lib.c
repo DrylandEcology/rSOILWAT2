@@ -442,7 +442,7 @@ SEXP onGetInputDataFromFiles(SEXP inputOptions) {
 
     // de-allocate SOILWAT2 memory, but let R handle `p_OUT`
     SW_DOM_deconstruct(&SoilWatDomain);
-    SW_CTL_clear_model(FALSE, &SoilWatRun);
+    SW_CTL_clear_model(FALSE, SoilWatDomain.OutDom.nvar_OUT, &SoilWatRun);
 
     sw_write_warnings("(rlib) ", &local_LogInfo);
     sw_fail_on_error(&local_LogInfo);
@@ -602,7 +602,7 @@ report: {
     }
     // de-allocate SOILWAT2 memory, but let R handle `p_OUT`
     SW_DOM_deconstruct(&SoilWatDomain);
-    SW_CTL_clear_model(FALSE, &SoilWatRun);
+    SW_CTL_clear_model(FALSE, SoilWatDomain.OutDom.nvar_OUT, &SoilWatRun);
 
     sw_write_warnings("(rlib) ", &local_LogInfo);
     sw_fail_on_error(&local_LogInfo);
@@ -648,7 +648,7 @@ SEXP onGetOutputDeprecated(SEXP inputData) {
 
     // de-allocate SOILWAT2 memory, but let R handle `p_OUT`
     SW_DOM_deconstruct(&SoilWatDomain);
-    SW_CTL_clear_model(FALSE, &SoilWatRun);
+    SW_CTL_clear_model(FALSE, SoilWatDomain.OutDom.nvar_OUT, &SoilWatRun);
 
     sw_write_warnings("(rlib) ", &local_LogInfo);
     sw_fail_on_error(&local_LogInfo);
@@ -801,7 +801,7 @@ SEXP rSW2_processAllWeather(SEXP weatherList, SEXP inputData) {
 
     // de-allocate SOILWAT2 memory, but let R handle `p_OUT`
     SW_DOM_deconstruct(&SoilWatDomain);
-    SW_CTL_clear_model(FALSE, &SoilWatRun);
+    SW_CTL_clear_model(FALSE, SoilWatDomain.OutDom.nvar_OUT, &SoilWatRun);
 
     sw_write_warnings("(rlib) ", &local_LogInfo);
     sw_fail_on_error(&local_LogInfo);
@@ -967,7 +967,7 @@ SEXP rSW2_readAllWeatherFromDisk(
 
     // de-allocate SOILWAT2 memory, but let R handle `p_OUT`
     SW_DOM_deconstruct(&SoilWatDomain);
-    SW_CTL_clear_model(FALSE, &SoilWatRun);
+    SW_CTL_clear_model(FALSE, SoilWatDomain.OutDom.nvar_OUT, &SoilWatRun);
 
     sw_write_warnings("(rlib) ", &local_LogInfo);
     sw_fail_on_error(&local_LogInfo);
