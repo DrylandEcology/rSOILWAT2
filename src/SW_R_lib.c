@@ -1081,7 +1081,7 @@ SEXP sw_consts(void) {
 
   // Output time steps
   // Note: `cSTR2` must agree with SW_Output.c/pd2longstr[]
-  char *cSTR2[] = {"SW_DAY", "SW_WEEK", "SW_MONTH", "SW_YEAR"};
+  char *cSTR2[] = {"SW_DAY", "SW_WEEK", "SW_MONTH", "SW_SEASON", "SW_YEAR"};
 
   // Output aggregation types
   // Note: `cSTR3` must agree with SW_Output.c/styp2str
@@ -1101,8 +1101,8 @@ SEXP sw_consts(void) {
     "eCarbon",
     "eSoilwat",
     "eOutput",
-    "eOutputDaily", "eOutputWeekly", "eOutputMonthly", "eOutputYearly",
-    "eOutputDaily_soil", "eOutputWeekly_soil", "eOutputMonthly_soil", "eOutputYearly_soil"
+    "eOutputDaily", "eOutputWeekly", "eOutputMonthly", "eOutputSeasonal", "eOutputYearly",
+    "eOutputDaily_soil", "eOutputWeekly_soil", "eOutputMonthly_soil", "eOutputSeasonal_soil", "eOutputYearly_soil"
   };
 
 

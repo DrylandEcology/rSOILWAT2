@@ -247,7 +247,9 @@ SEXP onGetOutput(SEXP inputData, LOG_INFO* LogInfo) {
     SEXP swOutput, swOutput_Object, outfile, swOutput_KEY, stemp_KEY,
         rTimeStep, xKEY, xKEY_names, xKEY_cnames;
 
-    char *cSWoutput_Names[] = {"dy_nrow", "wk_nrow", "mo_nrow", "yr_nrow"};
+    char *cSWoutput_Names[] = {
+        "dy_nrow", "wk_nrow", "mo_nrow", "sn_nrow", "yr_nrow"
+    };
 
     SW_OUT_DOM *OutDom = &SoilWatDomain.OutDom;
 

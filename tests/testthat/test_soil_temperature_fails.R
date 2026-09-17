@@ -9,9 +9,9 @@ test_that("Test data availability", {
 })
 
 
-
 test_that("Check soil temperature", {
   st_name <- rSW2_glovars[["kSOILWAT2"]][["OutKeys"]][["SW_SOILTEMP"]]
+  reqOPs <- seq_len(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]])
 
   format_badData <- function(data, ids_bad) {
     if (any(ids_bad)) {
@@ -28,6 +28,9 @@ test_that("Check soil temperature", {
     #---INPUTS
     sw_input <- readRDS(file.path(dir_test_data, paste0(it, "_input.rds")))
     sw_weather <- readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
+
+    # Turn on output for all time steps
+    rSOILWAT2::swOUT_TimeStepsForEveryKey(sw_input) <- reqOPs - 1L
 
     #---Check weather
     dbW_df_day <- dbW_weatherData_to_dataframe(sw_weather)
@@ -48,9 +51,9 @@ test_that("Check soil temperature", {
     expect_false(has_soilTemp_failed())
 
     Tsoil_data <- slot(rd, st_name)
-    time_steps <- rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]][
-      1 + Tsoil_data@TimeStep
-    ]
+    ids <- Tsoil_data@TimeStep
+    ids <- ids[ids != 999L]
+    time_steps <- rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]][1 + ids]
 
     for (k in seq_along(time_steps)) {
       info <- paste("test-data", it, "- slot", time_steps[k])

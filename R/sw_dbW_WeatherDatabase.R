@@ -2319,15 +2319,18 @@ dbW_weatherData_to_monthly <- function(
 #' @export
 dbW_dataframe_aggregate <- function(
   dailySW,
-  time_step = c("Year", "Month", "Week", "Day"),
+  time_step = c("Year", "Season", "Month", "Week", "Day"),
   na.rm = FALSE,
   funs = weather_dataAggFun()
 ) {
-
   time_step <- match.arg(time_step)
 
   if (time_step == "Day") {
     return(dailySW)
+  }
+
+  if (time_step == "Season") {
+    stop("'Season' is not implemented.")
   }
 
   icol_day <- grep(

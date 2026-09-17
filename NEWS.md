@@ -1,5 +1,16 @@
 # rSOILWAT2 v6.7.0-devel
 
+## New features
+* New seasonal output time step: MAM (season 1), JJA, SON, DJF.
+
+## Changes to interface
+* The class `"swOUT"` gained a new output time step `"seasonal"`.
+* The class `"swOutput_KEY"` gained a new output time step `"Season"`.
+* The class `"swOutput"` gained a new slot `"sn_nrow"` as well as
+  the new output time step `"Season"` inherited from `"swOutput_KEY"` for
+  each `"outkey"`.
+* Class `"swFiles"` slot `"InFiles"` contains now 31 input file names.
+
 
 # rSOILWAT2 v6.6.0
 

@@ -18,10 +18,13 @@ NULL
 #' time_columns("Month")
 #'
 #' @export
-time_columns <- function(timestep = c("Day", "Week", "Month", "Year")) {
+time_columns <- function(
+  timestep = c("Day", "Week", "Month", "Season", "Year")
+) {
   switch(
     EXPR = match.arg(timestep),
     Year = 1L,
+    Season = ,
     Month = ,
     Week = ,
     Day = 1L:2L
@@ -36,7 +39,10 @@ time_columns <- function(timestep = c("Day", "Week", "Month", "Year")) {
 #' nrow_output(sw_exec(rSOILWAT2::sw_exampleData), "Month")
 #'
 #' @export
-nrow_output <- function(x, timestep = c("Day", "Week", "Month", "Year")) {
+nrow_output <- function(
+  x,
+  timestep = c("Day", "Week", "Month", "Season", "Year")
+) {
   slot(
     x,
     switch(
@@ -44,6 +50,7 @@ nrow_output <- function(x, timestep = c("Day", "Week", "Month", "Year")) {
       Day = "dy_nrow",
       Week = "wk_nrow",
       Month = "mo_nrow",
+      Season = "sn_nrow",
       Year = "yr_nrow"
     )
   )
@@ -65,7 +72,7 @@ nrow_output <- function(x, timestep = c("Day", "Week", "Month", "Year")) {
 #' @export
 get_transpiration <- function(
   x,
-  timestep = c("Day", "Week", "Month", "Year"),
+  timestep = c("Day", "Week", "Month", "Season", "Year"),
   keep_time = FALSE
 ) {
   timestep <- match.arg(timestep)
@@ -128,7 +135,7 @@ get_transpiration <- function(
 #' @export
 get_evaporation <- function(
   x,
-  timestep = c("Day", "Week", "Month", "Year"),
+  timestep = c("Day", "Week", "Month", "Season", "Year"),
   keep_time = FALSE
 ) {
   timestep <- match.arg(timestep)
@@ -240,7 +247,7 @@ get_evaporation <- function(
 #' @export
 get_soiltemp <- function(
   x,
-  timestep = c("Day", "Week", "Month", "Year"),
+  timestep = c("Day", "Week", "Month", "Season", "Year"),
   levels = c("min", "avg", "max"),
   surface = TRUE,
   soillayers = NULL,
@@ -454,7 +461,7 @@ get_soiltemp <- function(
 #' @export
 get_soilmoisture <- function(
   x,
-  timestep = c("Day", "Week", "Month", "Year"),
+  timestep = c("Day", "Week", "Month", "Season", "Year"),
   type = c("swc", "vwc_bulk", "vwc_matric"),
   swInput = NULL,
   widths_cm = NULL,

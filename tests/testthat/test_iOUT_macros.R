@@ -4,7 +4,8 @@
 # defined by SOILWAT2
 NVEGTYPES <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["NVEGTYPES"]]
 SW_OUTNPERIODS <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
-ncol_TimeOUT <- c(2, 2, 2, 1)
+ncol_TimeOUT <- c(2, 2, 2, 2, 1)
+expect_length(ncol_TimeOUT, SW_OUTNPERIODS)
 SW_OUTNKEYS <- 2 # is actually much larger
 
 # test input and inits
@@ -13,7 +14,8 @@ tobase1 <- 1
 n_vars <- 5
 n_layers <- 3
 ncol_OUT <- c(n_vars, NVEGTYPES * n_layers)
-nrow_OUT <- c(31, 6, 5, 1)
+nrow_OUT <- c(31, 6, 5, 4, 1)
+expect_length(nrow_OUT, SW_OUTNPERIODS)
 irow_OUT <- rep(0, SW_OUTNPERIODS)
 vars <- paste0("Out", seq_len(n_vars))
 

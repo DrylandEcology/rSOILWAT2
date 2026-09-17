@@ -110,7 +110,10 @@ List of changes:
 \item Changes with \code{v6.7.0}:
 \itemize{
 \item class \code{\link[=swInputData-class]{swInputData}}:
-\item class \code{\link[=swFiles-class]{swFiles}}: new total of 29 input files
+\item class \code{\link[=swFiles-class]{swFiles}}: new total of 31 input files
+\item class \code{\link[=swOUT-class]{swOUT}}: one new output time step \code{"seasonal"}
+\item class \code{\link[=swOutput_KEY-class]{swOutput_KEY}}: one new output time step \code{"Season"}
+\item class \code{\link[=swOutput-class]{swOutput}}: one new slot \code{"sn_nrow"}
 }
 \item Changes with \code{v6.6.0}:
 \itemize{

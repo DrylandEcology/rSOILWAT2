@@ -147,6 +147,15 @@ setTxtInput <- function(filename, tag, value, classic = FALSE) {
   writeLines(fin, con = filename)
 }
 
+toggleSeasonalOutput <- function(path, activate = FALSE) {
+  setTxtInput(
+    filename = file.path(path, "Input", "outsetup.in"),
+    tag = "TIMESTEP",
+    value = if (isTRUE(activate)) "dy wk mo sn yr" else "dy wk mo yr",
+    classic = FALSE
+  )
+}
+
 toggleWeatherGenerator <- function(path, activate = FALSE) {
   ftmp <- file.path(path, "Input", "weathsetup.in")
   fin <- readLines(ftmp)
@@ -336,6 +345,8 @@ for (it in seq_along(tests)) {
 
   #--- Modify input files for tests ------
   #--- * example1: default run ------
+  # turn off seasonal output (for rSOILWAT2 tests backwards compatibility)
+  toggleSeasonalOutput(dir_ex, activate = FALSE)
 
   #--- * example2: use Markov weather generator ------
   if (define_ex[it, "WeatherGenerator"]) {
@@ -501,10 +512,10 @@ for (it in seq_along(tests)) {
     )
   }
 
-
   #--- Run rSOILWAT2 with yearly output and save it as reference output
   if (!rSOILWAT2::swWeather_UseMarkov(sw_input)) {
-    rSOILWAT2::swOUT_TimeStepsForEveryKey(sw_input) <- 3
+    # yearly is rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]] - 1
+    rSOILWAT2::swOUT_TimeStepsForEveryKey(sw_input) <- 4L
 
     rdy <- rSOILWAT2::sw_exec(
       inputData = sw_input,

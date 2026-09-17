@@ -1,7 +1,7 @@
 # Output setup file for SOILWAT2
 #
 # Notes:
-# Time periods available:  DY,WK,MO,YR
+# Time periods available:  DY,WK,MO,SN,YR
 #
 # Some keys from older versions (fortran and the c versions mimicking the fortran
 #   version) are not currently implemented:
@@ -34,7 +34,7 @@
 # (01/17/2013) TIMESTEP key indicates which periods you want to output.
 # You can output all the periods at a time, just one, or however many
 # you want. To change which periods to output type 'dy' for day,
-# 'wk' for week, 'mo' for month, and 'yr' for year after TIMESTEP
+# 'wk' for week, 'mo' for month, 'sn' for season, and 'yr' for year after TIMESTEP
 # in any order. For example: 'TIMESTEP mo wk' will output for month and week
 # for every key.
 # 'TIMESTEP' overrides 'PERIOD'. If 'TIMESTEP' is absent, then output for each
@@ -44,7 +44,7 @@
 # (2025-Dec-19) START and END are no longer used (values other than 1 and end
 # are ignored (with a warning).
 
-TIMESTEP dy wk mo yr # must be lowercase
+TIMESTEP dy wk mo yr    # must be lowercase
 
 #         KEY     SUMTYPE   PERIOD   START END FILENAME_PREFIX      DESCRIPTION
          TEMP     AVG       WK       1     end        temp_air      /* max., min., average air temperature (C) max., min., average surface temperature (C)*/
@@ -85,9 +85,11 @@ Output/			# Path for output files: / for same directory, or e.g., Output/; PROGR
 sw2_daily.csv	        # Output file if daily output time period was selected; relative to output directory
 sw2_weekly.csv	        # Output file if weekly output time period was selected; relative to output directory
 sw2_monthly.csv	        # Output file if monthly output time period was selected; relative to output directory
+sw2_seasonal.csv        # Output file if seasonal output time period was selected; relative to output directory
 sw2_yearly.csv	        # Output file if yearly output time period was selected; relative to output directory
 
 sw2_daily_slyrs.csv	# Output file for soil layer specific variables if daily output time period was selected; relative to output directory
 sw2_weekly_slyrs.csv	# Output file for soil layer specific variables if weekly output time period was selected; relative to output directory
 sw2_monthly_slyrs.csv	# Output file for soil layer specific variables if monthly output time period was selected; relative to output directory
+sw2_seasonal_slyrs.csv  # Output file for soil layer specific variables if seasonal output time period was selected; relative to output directory
 sw2_yearly_slyrs.csv	# Output file for soil layer specific variables if yearly output time period was selected; relative to output directory

@@ -262,7 +262,8 @@ test_that("Derived output: soil/surface temperature", {
 
 
 test_that("Derived output: soil moisture", {
-  timesteps <- c("Day", "Week", "Month", "Year")
+  timesteps <- c("Day", "Week", "Month", "Season", "Year")
+  reqOPs <- seq_len(rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]])
   types <- c(
     sw_swcbulk = "swc",
     sw_vwcbulk = "vwc_bulk",
@@ -270,13 +271,14 @@ test_that("Derived output: soil moisture", {
   )
 
   sw_in <- rSOILWAT2::sw_exampleData
+  # Turn output on for all time steps
+  rSOILWAT2::swOUT_TimeStepsForEveryKey(sw_in) <- reqOPs - 1L
   n_soillayers <- nrow(swSoils_Layers(sw_in))
   widths_cm <- diff(c(0., swSoils_Layers(sw_in)[, "depth_cm"]))
   fcoarse <- swSoils_Layers(sw_in)[, "gravel_content"]
 
   # Loop over `keep_time`
   for (kt in c(TRUE, FALSE)) {
-
     # Loop over time steps
     for (tp in timesteps) {
       #--- Requested soil moisture directly available
