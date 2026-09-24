@@ -1,5 +1,7 @@
 # rSOILWAT2 v6.7.0-devel
 
+* `SOILWAT2` updated to v8.5.0
+
 ## New features
 * New seasonal output time step: MAM (season 1), JJA, SON, DJF.
 
@@ -9,10 +11,12 @@
 * The class `"swOutput"` gained a new slot `"sn_nrow"` as well as
   the new output time step `"Season"` inherited from `"swOutput_KEY"` for
   each `"outkey"`.
-* Class `"swFiles"` slot `"InFiles"` contains now 31 input file names.
+* Class `"swFiles"` slot `"InFiles"` contains now 31 file names.
 
 
 # rSOILWAT2 v6.6.0
+
+* `SOILWAT2` updated to v8.4.0
 
 * Simulation output remains the same as the previous version, but
   output of vegetation establishment is now correct. Additionally,

@@ -1,4 +1,4 @@
-SW2 output group	SW2 variable	SW2 txt output	SW2 units	XY+Dim	Do output?	netCDF variable name	netCDF long_name	netCDF comment	netCDF units	Output type	Scale factor	Add offset	Active output period(s)	netCDF cell_method	User comment
+SW2 output group	SW2 variable	SW2 txt output	SW2 units	XY+Dim	Do output?	netCDF variable name	netCDF long_name	netCDF comment	netCDF units	Output type	Scale factor	Add offset	Active output period(s)	netCDF cell_methods	User comment
 TEMP	temp_max	max_C	degC	T	1	tasmax	daily maximum air temperature	NA	degC	double	1	0	dwmsy	time: maximum	CMIP6/CMOR3
 TEMP	temp_min	min_C	degC	T	1	tasmin	daily minimum air temperature	NA	degC	double	1	0	dwmsy	time: minimum	CMIP6/CMOR3
 TEMP	temp_avg	avg_C	degC	T	1	tas	daily mean air temperature	NA	degC	double	1	0	dwmsy	time: mean	CMIP6/CMOR3

@@ -8,7 +8,7 @@
 #   * user can provide their input for fields "Do output?",
 #     "netCDF variable name", "netCDF long_name", "netCDF comment",
 #     and "netCDF units"
-#   * field "netCDF cell_method" refers to internal within-day calculation
+#   * field "netCDF cell_methods" refers to internal within-day calculation
 #   * field "User comment" is ignored
 #   * changing values of other fields leads to incorrect output or a crash
 
