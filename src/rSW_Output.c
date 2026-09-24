@@ -87,8 +87,8 @@ void onSet_SW_OUT(SEXP OUT, LOG_INFO* LogInfo) {
 			(use[k]) ? sumtype[k] : eSW_Off,
 			msg,
 			sizeof msg,
-			&SoilWatRun.VegProdIn.use_SWA,
-			SoilWatRun.SiteIn.deepdrain,
+			&SoilWatRun.VegProdIn->use_SWA,
+			SoilWatRun.SiteIn->deepdrain,
 			SoilWatDomain.SW_PathInputs.txtInFiles
 		);
 
@@ -228,7 +228,7 @@ void setGlobalrSOILWAT2_OutputVariables(SEXP outputData) {
 			if (SoilWatDomain.OutDom.use[k] &&
 						SoilWatDomain.OutDom.timeSteps[k][i] != eSW_NoTime)
 			{
-				SoilWatRun.OutRun.p_OUT[k][SoilWatDomain.OutDom.timeSteps[k][i]] =
+				SoilWatRun.OutRun->p_OUT[k][SoilWatDomain.OutDom.timeSteps[k][i]] =
 					REAL(GET_SLOT(GET_SLOT(outputData, install(key2str[k])),
 					install(pd2longstr[SoilWatDomain.OutDom.timeSteps[k][i]])));
 			}
@@ -247,9 +247,15 @@ SEXP onGetOutput(SEXP inputData, LOG_INFO* LogInfo) {
     SEXP swOutput, swOutput_Object, outfile, swOutput_KEY, stemp_KEY,
         rTimeStep, xKEY, xKEY_names, xKEY_cnames;
 
-    char *cSWoutput_Names[] = {"dy_nrow", "wk_nrow", "mo_nrow", "yr_nrow"};
+    char *cSWoutput_Names[] = {
+        "dy_nrow", "wk_nrow", "mo_nrow", "sn_nrow", "yr_nrow"
+    };
 
     SW_OUT_DOM *OutDom = &SoilWatDomain.OutDom;
+
+    // For rSOILWAT2, nrow_OUT[OutKey][OutPeriod] does not vary with OutKey
+    int rSW2_fixedKey = eSW_NoKey;
+    int tmp_odm = 0;
 
     #ifdef RSWDEBUG
     int debug = 0;
@@ -271,14 +277,22 @@ SEXP onGetOutput(SEXP inputData, LOG_INFO* LogInfo) {
 
     // Determine number of used years/months/weeks/days in simulation period
     SW_OUT_set_nrow(
-        &SoilWatRun.ModelIn, OutDom->use_OutPeriod, OutDom->nrow_OUT
+        SoilWatRun.ModelIn, OutDom->use_OutPeriod, OutDom->nrow_OUT
     );
+
+    // Determine first active output key to extract nrow_OUT values for rSOILWAT2
+    ForEachOutKey(k) {
+        if (use[k]) {
+            rSW2_fixedKey = k;
+            break;
+        }
+    }
 
     ForEachOutPeriod(pd) {
         SET_SLOT(
             swOutput_Object,
             install(cSWoutput_Names[pd]),
-            ScalarInteger(OutDom->nrow_OUT[pd])
+            ScalarInteger(OutDom->nrow_OUT[rSW2_fixedKey][pd])
         );
     }
 
@@ -334,9 +348,9 @@ SEXP onGetOutput(SEXP inputData, LOG_INFO* LogInfo) {
                 #ifdef RSWDEBUG
                 if (debug) sw_printf(" %s (n=%ld = %ld x (%d + %d) alloc'ed) /",
                     pd2longstr[OutDom->timeSteps[k][i]],
-                    OutDom->nrow_OUT[OutDom->timeSteps[k][i]] *
+                    OutDom->nrow_OUT[rSW2_fixedKey][OutDom->timeSteps[k][i]] *
                     (OutDom->ncol_OUT[k] + ncol_TimeOUT[OutDom->timeSteps[k][i]]),
-                    OutDom->nrow_OUT[OutDom->timeSteps[k][i]],
+                    OutDom->nrow_OUT[rSW2_fixedKey][OutDom->timeSteps[k][i]],
                     OutDom->ncol_OUT[k], ncol_TimeOUT[OutDom->timeSteps[k][i]]);
                 #endif
 
@@ -346,15 +360,15 @@ SEXP onGetOutput(SEXP inputData, LOG_INFO* LogInfo) {
                 PROTECT(
                     xKEY = allocMatrix(
                         REALSXP,
-                        OutDom->nrow_OUT[OutDom->timeSteps[k][i]],
+                        OutDom->nrow_OUT[rSW2_fixedKey][OutDom->timeSteps[k][i]],
                         OutDom->ncol_OUT[k] + h
                     )
                 );
                 numUnprotects++;
 
-
-                for (l = 0; l < OutDom->nrow_OUT[OutDom->timeSteps[k][i]] *
-                                                (OutDom->ncol_OUT[k] + h); l++) {
+                tmp_odm = OutDom->nrow_OUT[rSW2_fixedKey][OutDom->timeSteps[k][i]] *
+                    (OutDom->ncol_OUT[k] + h);
+                for (l = 0; l < tmp_odm; l++) {
                     // Initialize to 0:
                     // allocMatrix does not initialize and
                     // memset appears to not work on `allocMatrix` objects

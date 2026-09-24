@@ -1,12 +1,11 @@
-
 # The 8 checks, implemented below, correspond to the checks in
 # \var{SOILWAT/test/test_WaterBalance.cc}
 
-
 #---CONSTANTS
-tol <- 10 ^ (-rSW2_glovars[["kSOILWAT2"]][["kINT"]][["OUT_DIGITS"]])
+tol <- 10^(-rSW2_glovars[["kSOILWAT2"]][["kINT"]][["OUT_DIGITS"]])
 SW_OUTNPERIODS <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
 OutPeriods <- rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]]
+reqOPs <- seq_len(SW_OUTNPERIODS)[!OutPeriods %in% "Season"] # skip seasonal
 veg_types <- rSW2_glovars[["kSOILWAT2"]][["VegTypeNames2"]]
 dir_test_data <- file.path("..", "test_data")
 temp <- list.files(dir_test_data, pattern = "Ex")
@@ -59,7 +58,8 @@ aggregate_for_each_timestep <- function(x, dyt) {
         FUN = sum
       )
       temp <- temp[, -1]
-    })
+    }
+  )
 }
 
 
@@ -69,15 +69,11 @@ for (it in tests) {
   sw_weather <- readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
   sw_input <- readRDS(file.path(dir_test_data, paste0(it, "_input.rds")))
 
-
-
-  # Request summed values for every time step
+  # Request summed values for all time steps (skip seasonal)
   # but turn off SWP (because summed VWC may be larger than theta_sat)
   deactivate_swOUT_OutKey(sw_input) <- rSOILWAT2::sw_out_flags()["sw_swp"]
-
-  swOUT_TimeStepsForEveryKey(sw_input) <- seq_len(SW_OUTNPERIODS) - 1
+  swOUT_TimeStepsForEveryKey(sw_input) <- reqOPs - 1L # base0
   slot(slot(sw_input, "output"), "sumtype")[] <- 1L
-
 
   #--- Loop over SWRC-PTF combinations ------
   for (isp in seq_along(list_swrcs_ptfs)) {
@@ -173,9 +169,11 @@ for (it in tests) {
           dyt = dyt
         )
 
-
-        # Loop through time steps
+        # Loop through time steps (skip seasonal)
         for (pd in seq_len(SW_OUTNPERIODS)) {
+          if (OutPeriods[pd] %in% "Season") {
+            next
+          }
           info2 <- paste(info1, "/ time step:", OutPeriods[pd])
 
           # Get values

@@ -95,6 +95,7 @@ swOutput_KEY <- setClass(
     Day = "matrix",
     Week = "matrix",
     Month = "matrix",
+    Season = "matrix",
     Year = "matrix"
   ),
   prototype = list(
@@ -104,6 +105,7 @@ swOutput_KEY <- setClass(
     Day = matrix(NA_real_)[0, 0],
     Week = matrix(NA_real_)[0, 0],
     Month = matrix(NA_real_)[0, 0],
+    Season = matrix(NA_real_)[0, 0],
     Year = matrix(NA_real_)[0, 0]
   )
 )
@@ -188,6 +190,7 @@ swOutput <- setClass(
     version = "character",
     timestamp = "numeric",
     yr_nrow = "integer",
+    sn_nrow = "integer",
     mo_nrow = "integer",
     wk_nrow = "integer",
     dy_nrow = "integer",
@@ -231,6 +234,7 @@ swOutput <- setClass(
     version = rSW2_version(),
     timestamp = rSW2_timestamp(),
     yr_nrow = integer(),
+    sn_nrow = integer(),
     mo_nrow = integer(),
     wk_nrow = integer(),
     dy_nrow = integer(),
@@ -279,6 +283,12 @@ setValidity(
   }
 )
 
+#' Count of slots in class `swOutput` before those with output values
+#' @noRd
+countNonOutputSlots <- function() {
+  7L # Maintenance: update if swOutput adds slots!
+}
+
 
 #' @rdname swOutput-class
 #' @export
@@ -291,7 +301,7 @@ setMethod(
   "swOutput_getKEY",
   signature = "swOutput",
   function(object, index) {
-    nid <- seq_len(6)
+    nid <- seq_len(countNonOutputSlots())
     slot(object, slotNames("swOutput")[-nid][index])
   }
 )
@@ -303,7 +313,7 @@ setReplaceMethod(
   "swOutput_setKEY",
   signature = c(object = "swOutput", value = "swOutput_KEY"),
   function(object, index, value) {
-    nid <- seq_len(6)
+    nid <- seq_len(countNonOutputSlots())
     slot(object, slotNames("swOutput")[-nid][index]) <- value
     object
   }

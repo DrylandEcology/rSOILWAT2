@@ -6,7 +6,7 @@
 \usage{
 get_soilmoisture(
   x,
-  timestep = c("Day", "Week", "Month", "Year"),
+  timestep = c("Day", "Week", "Month", "Season", "Year"),
   type = c("swc", "vwc_bulk", "vwc_matric"),
   swInput = NULL,
   widths_cm = NULL,

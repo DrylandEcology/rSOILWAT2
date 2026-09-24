@@ -109,7 +109,7 @@ SEXP onGet_SW_WTH_setup(void) {
 	int i;
 	const int nitems = 8;
 	double *p_MonthlyValues;
-	SW_WEATHER_INPUTS *w = &SoilWatRun.WeatherIn;
+	SW_WEATHER_INPUTS *w = SoilWatRun.WeatherIn;
 
 	SEXP swWeather;
 	SEXP SW_WTH;
@@ -217,7 +217,7 @@ SEXP onGet_SW_WTH_setup(void) {
 */
 void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo) {
 	int i;
-	SW_WEATHER_INPUTS *w = &SoilWatRun.WeatherIn;
+	SW_WEATHER_INPUTS *w = SoilWatRun.WeatherIn;
 	SEXP
         use_snow, pct_snowdrift, pct_snowRunoff,
         use_weathergenerator, use_weathergenerator_only,
@@ -232,7 +232,7 @@ void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo) {
 
 
     // Copy weather prefix from PathInfo to Weather within `SoilWatRun`
-    strcpy(SoilWatRun.WeatherIn.name_prefix, SoilWatDomain.SW_PathInputs.txtWeatherPrefix);
+    strcpy(SoilWatRun.WeatherIn->name_prefix, SoilWatDomain.SW_PathInputs.txtWeatherPrefix);
 
 	PROTECT(MonthlyScalingParams = GET_SLOT(SW_WTH, install(cSW_WTH_names[0])));
 	p_MonthlyValues = REAL(MonthlyScalingParams);
@@ -328,7 +328,7 @@ void onSet_SW_WTH_setup(SEXP SW_WTH, LOG_INFO* LogInfo) {
   Called by `onGetInputDataFromFiles()`
 */
 SEXP onGet_WTH_DATA(void) {
-	SW_WEATHER_INPUTS *w = &SoilWatRun.WeatherIn;
+	SW_WEATHER_INPUTS *w = SoilWatRun.WeatherIn;
 	TimeInt year, yearIndex;
 	SEXP WTH_DATA, WTH_DATA_names;
 	char cYear[5];
@@ -380,7 +380,7 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 		"shortWR"
 	};
 	double *p_Year;
-	SW_WEATHER_INPUTS *w = &SoilWatRun.WeatherIn;
+	SW_WEATHER_INPUTS *w = SoilWatRun.WeatherIn;
 	SW_WEATHER_HIST *allHist = SoilWatRun.RunIn.weathRunAllHist;
 
 	days = Time_get_lastdoy_y(year);
@@ -443,7 +443,7 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
 
   Called by `rSW_CTL_obtain_inputs()` if `from_files` is `FALSE`.
 
-  @note Elements `endyr` and `startyr` of `SW_Model` must be set/updated
+  @note Elements `endyr` and `startyr` of `SW_Domain` must be set/updated
     via `onSet_SW_MDL()` before this function is called.
 
   @note `SW_Weather` (via `onSet_SW_WTH_setup()`) and
@@ -455,8 +455,7 @@ SEXP onGet_WTH_DATA_YEAR(TimeInt year) {
     from specific humidity.
 */
 void onSet_WTH_DATA(SEXP weatherList, LOG_INFO* LogInfo) {
-  SW_WEATHER_INPUTS *w = &SoilWatRun.WeatherIn;
-  SW_MODEL_INPUTS *m = &SoilWatRun.ModelIn;
+  SW_WEATHER_INPUTS *w = SoilWatRun.WeatherIn;
 
   // Deallocate (previous, if any) `allHist`
   // (using value of `SW_Weather.n_years` previously used to allocate)
@@ -464,8 +463,8 @@ void onSet_WTH_DATA(SEXP weatherList, LOG_INFO* LogInfo) {
   deallocateAllWeather(&SoilWatRun.RunIn.weathRunAllHist);
 
   // Update number of years and first calendar year represented
-  w->n_years = m->endyr - m->startyr + 1;
-  w->startYear = m->startyr;
+  w->n_years = SoilWatDomain.endyr - SoilWatDomain.startyr + 1;
+  w->startYear = SoilWatDomain.startyr;
 
   // Allocate new `allHist` (based on current `SW_Weather.n_years`)
   SW_WTH_allocateAllWeather(
@@ -521,6 +520,10 @@ static void rSW2_setAllWeather(
 ) {
     unsigned int yearIndex, year;
     double ***tempWeatherHist = NULL;
+    TimeInt days_in_month[MAX_MONTHS];
+    TimeInt cum_monthdays[MAX_MONTHS];
+
+    Time_init_model(days_in_month);
 
     allocate_temp_weather(n_years, 1, &tempWeatherHist, LogInfo);
     if (LogInfo->stopRun) {
@@ -529,7 +532,6 @@ static void rSW2_setAllWeather(
 
     /* Interpolation is to be in base0 in `interpolate_monthlyValues()` */
     Bool interpAsBase1 = swFALSE;
-    SW_MODEL_SIM *m = &SoilWatRun.ModelSim;
 
     for(yearIndex = 0; yearIndex < n_years; yearIndex++) {
         year = yearIndex + startYear;
@@ -539,23 +541,23 @@ static void rSW2_setAllWeather(
 
         // Update yearly day/month information needed when interpolating
         // cloud cover, wind speed, and relative humidity if necessary
-        Time_new_year(year, m->days_in_month, m->cum_monthdays);
+        Time_new_year(year, days_in_month, cum_monthdays);
 
         if(use_cloudCoverMonthly) {
             interpolate_monthlyValues(cloudcov, interpAsBase1,
-                    m->cum_monthdays, m->days_in_month,
+                    cum_monthdays, days_in_month,
                     allHist[yearIndex].cloudcov_daily);
         }
 
         if(use_humidityMonthly) {
             interpolate_monthlyValues(r_humidity, interpAsBase1,
-                    m->cum_monthdays, m->days_in_month,
+                    cum_monthdays, days_in_month,
                     allHist[yearIndex].r_humidity_daily);
         }
 
         if(use_windSpeedMonthly) {
             interpolate_monthlyValues(windspeed, interpAsBase1,
-                    m->cum_monthdays, m->days_in_month,
+                    cum_monthdays, days_in_month,
                     allHist[yearIndex].windspeed_daily);
         }
 

@@ -207,6 +207,12 @@ format_timestamp <- function(object) {
 #'
 #' @section Details:
 #' List of changes:
+#'   * Changes with `v6.7.0`:
+#'       * class [`swInputData-class`]:
+#'       * class [`swFiles-class`]: new total of 31 input files
+#'       * class [`swOUT-class`]: one new output time step `"seasonal"`
+#'       * class [`swOutput_KEY-class`]: one new output time step `"Season"`
+#'       * class [`swOutput-class`]: one new slot `"sn_nrow"`
 #'   * Changes with `v6.6.0`:
 #'       * class [`swSite-class`]: new slots `"PotSoilEvCoMethod"`,
 #'         `"RootingProfileMethod"`, `"RoughnessLengthGroundSurface"`,

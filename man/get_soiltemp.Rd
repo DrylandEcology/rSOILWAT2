@@ -6,7 +6,7 @@
 \usage{
 get_soiltemp(
   x,
-  timestep = c("Day", "Week", "Month", "Year"),
+  timestep = c("Day", "Week", "Month", "Season", "Year"),
   levels = c("min", "avg", "max"),
   surface = TRUE,
   soillayers = NULL,

@@ -227,7 +227,7 @@ static SEXP onGet_SW_SWRCp(void) {
 /* Copy omSWRC parameters into "omSWRCp" matrix */
 static SEXP onGet_SW_omSWRCp(void) {
     int i, k;
-    SW_SITE_INPUTS *si = &SoilWatRun.SiteIn;
+    SW_SITE_INPUTS *si = SoilWatRun.SiteIn;
     SEXP omSWRCp, omSWRCp_names, omSWRCp_rownames, omSWRCp_colnames;
     double *p_omSWRCp;
 
@@ -296,11 +296,11 @@ static void onSet_SW_SWRCp(SEXP SW_SWRCp, LOG_INFO* LogInfo) {
     }
 
     SoilWatRun.SiteSim.site_has_swrcpMineralSoil =
-        SoilWatRun.SiteIn.inputsProvideSWRCp;
+        SoilWatRun.SiteIn->inputsProvideSWRCp;
 }
 
 static void onSet_SW_omSWRCp(SEXP SW_omSWRCp, LOG_INFO* LogInfo) {
-    SW_SITE_INPUTS *si = &SoilWatRun.SiteIn;
+    SW_SITE_INPUTS *si = SoilWatRun.SiteIn;
     int i, k;
     double *p_omSWRCp;
 
@@ -353,7 +353,7 @@ void onSet_SW_SOILS(SEXP SW_SOILS, LOG_INFO* LogInfo) {
 
 SEXP onGet_SW_SIT(void) {
 	int i;
-	SW_SITE_INPUTS *si = &SoilWatRun.SiteIn;
+	SW_SITE_INPUTS *si = SoilWatRun.SiteIn;
 	SW_SITE_RUN_INPUTS *sri = &SoilWatRun.RunIn.SiteRunIn;
 	SW_MODEL_RUN_INPUTS *m = &SoilWatRun.RunIn.ModelRunIn;
 	SW_SITE_SIM *ss = &SoilWatRun.SiteSim;
@@ -598,7 +598,7 @@ SEXP onGet_SW_SIT(void) {
 }
 
 void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
-	SW_SITE_INPUTS *si = &SoilWatRun.SiteIn;
+	SW_SITE_INPUTS *si = SoilWatRun.SiteIn;
 	SW_SITE_RUN_INPUTS *sri = &SoilWatRun.RunIn.SiteRunIn;
 	SW_MODEL_RUN_INPUTS *m = &SoilWatRun.RunIn.ModelRunIn;
 
@@ -806,7 +806,7 @@ freeMem:
 void onSet_SW_SIT_transp(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	SW_SOIL_RUN_INPUTS *s = &SoilWatRun.RunIn.SoilRunIn;
 	SW_SITE_SIM *ss = &SoilWatRun.SiteSim;
-	SW_SITE_INPUTS *si = &SoilWatRun.SiteIn;
+	SW_SITE_INPUTS *si = SoilWatRun.SiteIn;
 	SEXP TranspirationRegions;
 
 	Bool too_many_regions = FALSE;
