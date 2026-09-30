@@ -43,7 +43,7 @@
 /* =================================================== */
 /*                  Local Variables                    */
 /* --------------------------------------------------- */
-static int swcdataIndex;
+//static int swcdataIndex;
 
 
 
@@ -52,7 +52,7 @@ static int swcdataIndex;
 /* --------------------------------------------------- */
 
 void rSW_SWC_construct(void) {
-	swcdataIndex = 0;
+	//swcdataIndex = 0;
 }
 
 
@@ -212,7 +212,7 @@ void onSet_SW_SWC_hist(LOG_INFO* LogInfo) {
 	SW_SOILWAT_INPUTS *v = SoilWatRun.SoilWatIn;
 	double *p_lyrs;
 	SEXP lyrs; // lyrs = VECTOR_ELT(VECTOR_ELT(VECTOR_ELT(InputData,7),4),swcdataIndex);
-	swcdataIndex++;
+	//swcdataIndex++;
 
 	p_lyrs = REAL(lyrs);
   //TODO: variable j is used as index but not incremented

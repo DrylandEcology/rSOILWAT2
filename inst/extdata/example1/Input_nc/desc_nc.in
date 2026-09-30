@@ -52,11 +52,13 @@ proj_false_northing                0
 
 
 #------ Output file information
-strideOutYears       20            # Specifies the number of years to put into a single output netCDF -- may be 1, X (e.g., 10), or "Inf" (all years in one file), defaults to "Inf" if this line is not found
-baseCalendarYear     1980
-deflateLevel         0             # Specifies how much output files will be deflated - may be 0 (off) or 1-9 (intensity of deflation), defaults to 0 if this line is not found
-posTimeInBnds        0             # Position of time coordinate values relative to bounds - -1 (opening/starting bound), 0 (centered, default), 1 (closing/ending bound)
-posVerticalInBnds    1             # Position of vertical coordinate values relative to bounds - -1 (opening/top bound), 0 (centered), 1 (closing/bottom bound, default)
+strideOutYears               20        # Specifies the number of years to put into a single output netCDF -- may be 1, X (e.g., 10), or "Inf" (all years in one file), defaults to "Inf" if this line is not found
+baseCalendarYear             1980
+deflateLevel                 0         # Specifies how much output files will be deflated - may be 0 (off) or 1-9 (intensity of deflation), defaults to 0 if this line is not found
+posTimeInBnds                0         # Position of time coordinate values relative to bounds - -1 (opening/starting bound), 0 (centered, default), 1 (closing/ending bound)
+posVerticalInBnds            1         # Position of vertical coordinate values relative to bounds - -1 (opening/top bound), 0 (centered), 1 (closing/bottom bound, default)
+trimOutputToSimulationTime   1         # Trim the final stridded output file to necessary time steps (1) or the final stridded output file contains full stride (0).
+enableExpandedSimulationTime 0         # If "strideOutYears" = Inf, time size will be unlimited (1), or static if "strideOutYears" != Inf or this flag is set to 0.
 
 
 #------ Spatial axes
