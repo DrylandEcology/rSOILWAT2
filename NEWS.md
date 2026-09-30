@@ -13,6 +13,10 @@
   each `"outkey"`.
 * Class `"swFiles"` slot `"InFiles"` contains now 31 file names.
 
+## Bugfix
+* `sw_exec()` no longer resets soil temperature output of a successful run
+  by mistake if the previously unprotected error flag was garbage collected.
+
 
 # rSOILWAT2 v6.6.0
 

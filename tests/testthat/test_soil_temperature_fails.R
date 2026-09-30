@@ -160,3 +160,20 @@ test_that("Check min/avg/max soil temperature", {
     expect_true(all(tsoil[has_snow, var_avg] <= tsoil[has_snow, var_max]))
   }
 })
+
+
+#--- Check that the soil temperature error flag survives garbage collection ----
+test_that("Soil temperature error flag is a valid logical value", {
+  # Flag is a logical value (FALSE before the first run)
+  expect_identical(.Call(C_tempError), FALSE)
+
+  sw_out <- rSOILWAT2::sw_exec(inputData = rSOILWAT2::sw_exampleData)
+
+  # Flag must not be freed or reused by garbage collection
+  for (k in 1:3) {
+    gc()
+    tmp <- lapply(seq_len(1000L), function(i) c(i, i))
+    expect_identical(.Call(C_tempError), FALSE)
+    expect_false(has_soilTemp_failed())
+  }
+})

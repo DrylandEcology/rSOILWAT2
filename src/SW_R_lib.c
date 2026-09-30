@@ -76,7 +76,12 @@ FILE *current_sw_verbosity = &dummyLogFile;
 /* =================================================== */
 /*                  Local Variables                    */
 /* --------------------------------------------------- */
-static SEXP sw_has_soiltemp_error = FALSE;
+/** Soil temperature error status of the most recent run (`sw_start()`)
+
+A plain C flag (and not an R object) because an R object that is only
+referenced by a C static variable is not protected from garbage collection.
+*/
+static Bool sw_has_soiltemp_error = swFALSE;
 
 
 /* =================================================== */
@@ -121,13 +126,11 @@ SEXP sw_verbose(SEXP verbose) {
  *
  */
 SEXP tempError(void) {
-	return sw_has_soiltemp_error;
+	return ScalarLogical(sw_has_soiltemp_error ? TRUE : FALSE);
 }
 
 static void setGlobal_soiltempError(Bool soiltempError) {
-	PROTECT(sw_has_soiltemp_error = NEW_LOGICAL(1));
-	LOGICAL_POINTER(sw_has_soiltemp_error)[0] = soiltempError;
-	UNPROTECT(1);
+	sw_has_soiltemp_error = soiltempError;
 }
 
 
