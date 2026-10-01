@@ -16,6 +16,11 @@
 ## Bugfix
 * `sw_exec()` no longer resets soil temperature output of a successful run
   by mistake if the previously unprotected error flag was garbage collected.
+* Simulations now end on the last day of the last year requested by
+  `swYears@EDOEY`; values of 365 and 366 represent the last day of the year.
+  Previously, other values were ignored (simulations ended on day 365),
+  `EDOEY = 366` dropped the leap day of a leap end year, and simulations of
+  a single leap year failed with invalid weather inputs.
 
 
 # rSOILWAT2 v6.6.0

@@ -320,11 +320,32 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 	}
 
 	SoilWatDomain.startstart += ((mr->isnorth) ? DAYFIRST_NORTH : DAYFIRST_SOUTH) - 1;
-	//if (strcmp(enddyval, "end") == 0) {
-		//m->endend = (m->isnorth) ? Time_get_lastdoy_y(m->endyr) : DAYLAST_SOUTH;
-	//} else {
-	SoilWatDomain.endend = (d == 365) ? Time_get_lastdoy_y(SoilWatDomain.endyr) : 365;
-	//}
+
+	// Last day of the last year (as SOILWAT2's `SW_DOM_read()`):
+	// 365 or 366 represent the last day of the last calendar year
+	if (d < 1 || d > 366) {
+		LogError(LogInfo, LOGERROR, "Invalid last day of simulation: %d is outside 1-366", d);
+
+		UNPROTECT(5);
+		return; // Exit function prematurely due to error
+	}
+	SoilWatDomain.endend = (d == 365 || d == 366) ? Time_get_lastdoy_y(SoilWatDomain.endyr) : d;
+
+	if (
+		SoilWatDomain.startyr == SoilWatDomain.endyr &&
+		SoilWatDomain.endend < SoilWatDomain.startstart
+	) {
+		LogError(
+			LogInfo,
+			LOGERROR,
+			"Last day of simulation (%d) is before first day (%d)",
+			SoilWatDomain.endend,
+			SoilWatDomain.startstart
+		);
+
+		UNPROTECT(5);
+		return; // Exit function prematurely due to error
+	}
 
 	// m->daymid = (m->isnorth) ? DAYMID_NORTH : DAYMID_SOUTH;
 
