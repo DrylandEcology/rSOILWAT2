@@ -74,10 +74,19 @@ sw_out_flags <- function() {
 #'   in \code{rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]]}
 #'   (i.e., the base0 value of \code{TimeStep} plus 1).
 #'
+#' @slot Title A character string. The output file name tag of the output key
+#'   (as in slot \code{outfile} of class \code{\linkS4class{swOUT}}).
 #' @slot TimeStep An integer vector with up to \code{SW_OUTNPERIODS} unique
 #'   values: the output time steps of the output key as base0 codes
 #'   (as in slot \code{timeSteps} of class \code{\linkS4class{swOUT}});
 #'   unused elements have the value \code{eSW_NoTime = 999L}.
+#' @slot Columns An integer value. The number of output variables,
+#'   i.e., columns of the output matrices without the time columns.
+#' @slot Day,Week,Month,Season,Year A numeric matrix with output for
+#'   the respective time step: one row per simulated time step and
+#'   columns for time (\code{Year} and, except for \code{Year},
+#'   the time step within the year) followed by the output variables;
+#'   a 0x0 matrix if the time step is not requested.
 #'
 #'
 #' @seealso \code{\linkS4class{swInputData}}
