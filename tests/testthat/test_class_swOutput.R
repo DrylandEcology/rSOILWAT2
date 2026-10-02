@@ -16,8 +16,8 @@ test_that("Manipulate 'swOutput' class", {
 test_that("Check sw_out_flags()", {
   expect_length(
     sw_out_flags(),
-    # Five inactive outkeys
-    rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]] - 5L
+    # 4 inactive outkeys
+    rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]] - 4L
   )
 })
 
