@@ -75,7 +75,14 @@ sw_out_flags <- function() {
 #'
 #' @param object An object of class \code{\linkS4class{swOutput_KEY}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param index An integer value. One of the four possible time steps.
+#' @param index An integer value. The base1 index of an output time step
+#'   in \code{rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]]}
+#'   (i.e., the base0 value of \code{TimeStep} plus 1).
+#'
+#' @slot TimeStep An integer vector with up to \code{SW_OUTNPERIODS} unique
+#'   values: the output time steps of the output key as base0 codes
+#'   (as in slot \code{timeSteps} of class \code{\linkS4class{swOUT}});
+#'   unused elements have the value \code{eSW_NoTime = 999L}.
 #'
 #'
 #' @seealso \code{\linkS4class{swInputData}}
@@ -114,14 +121,24 @@ setValidity(
   "swOutput_KEY",
   function(object) {
     val <- TRUE
-    ntemp <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
+    kINT <- rSW2_glovars[["kSOILWAT2"]][["kINT"]]
+    ntemp <- kINT[["SW_OUTNPERIODS"]]
+
+    # TimeStep is base0 (as swOUT@timeSteps); unused elements are eSW_NoTime;
+    # zero length is allowed for an empty object (prototype)
+    ok <- c(kINT[["eSW_NoTime"]], seq_len(ntemp) - 1L)
+    used <- object@TimeStep[object@TimeStep != kINT[["eSW_NoTime"]]]
 
     if (
-      length(object@TimeStep) != 1 ||
-        object@TimeStep > ntemp ||
-        object@TimeStep < 1
+      length(object@TimeStep) > ntemp ||
+        anyNA(object@TimeStep) ||
+        !all(object@TimeStep %in% ok) ||
+        anyDuplicated(used) > 0L
     ) {
-      msg <- "@TimeStep must have exactly 1 value between 1 and SW_OUTNPERIODS"
+      msg <- paste(
+        "@TimeStep must have at most SW_OUTNPERIODS unique values,",
+        "each within 0 and SW_OUTNPERIODS - 1 (base0) or equal to eSW_NoTime"
+      )
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
@@ -157,7 +174,10 @@ setReplaceMethod(
   "swOutput_KEY_Period",
   signature = "swOutput_KEY",
   function(object, index, value) {
-    slot(object, rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]][index]) <- value
+    slot(
+      object,
+      rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]][index]
+    ) <- value
     validObject(object)
     object
   }
@@ -173,8 +193,8 @@ setReplaceMethod(
 #' @param object An object of class \code{\linkS4class{swOutput}}.
 #' @param x An object of class \code{\linkS4class{swOutput}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param index An integer value. One of the four possible time steps.
-#' @param name A character string. The name of the of the slots of this class.
+#' @param index An integer value. Index to an output slot (key).
+#' @param name A character string. The name of one of the slots in this class.
 #'
 #' @seealso \code{\linkS4class{swInputData}}
 #'

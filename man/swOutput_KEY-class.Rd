@@ -21,7 +21,9 @@
 \arguments{
 \item{object}{An object of class \code{\linkS4class{swOutput_KEY}}.}
 
-\item{index}{An integer value. One of the four possible time steps.}
+\item{index}{An integer value. The base1 index of an output time step
+in \code{rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]]}
+(i.e., the base0 value of \code{TimeStep} plus 1).}
 
 \item{value}{A value to assign to a specific slot of the object.}
 }
@@ -29,6 +31,15 @@
 The methods listed below work on this class and the proper slot of the class
   \code{\linkS4class{swInputData}}.
 }
+\section{Slots}{
+
+\describe{
+\item{\code{TimeStep}}{An integer vector with up to \code{SW_OUTNPERIODS} unique
+values: the output time steps of the output key as base0 codes
+(as in slot \code{timeSteps} of class \code{\linkS4class{swOUT}});
+unused elements have the value \code{eSW_NoTime = 999L}.}
+}}
+
 \examples{
 showClass("swOutput_KEY")
 x <- new("swOutput_KEY")
