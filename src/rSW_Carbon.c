@@ -149,15 +149,21 @@ void onSet_swCarbon(
     }
 
     // addtl_yr was removed with SOILWAT2 v8.3.0
+    // NA_integer_ is nonzero and thus also rejected
     int addtl_yr = INTEGER(GET_SLOT(object, install("DeltaYear")))[0];
-    if (!R_FINITE(addtl_yr) || addtl_yr != 0) {
+    if (addtl_yr != 0) {
+        char strYr[12] = "NA";
+        if (addtl_yr != NA_INTEGER) {
+            (void) snprintf(strYr, sizeof strYr, "%d", addtl_yr);
+        }
         LogError(
             LogInfo,
             LOGERROR,
-            "'DeltaYear' for aCO2 is defunct since SOILWAT2 v8.3.0 (value = %d)",
-            addtl_yr
+            "'DeltaYear' for aCO2 is defunct since SOILWAT2 v8.3.0 "
+            "(value = %s); set it to 0",
+            strYr
         );
-        goto cleanMem; // Exit function prematurely due to error
+        return; // Exit function prematurely due to error (nothing protected)
     }
 
     // Only extract the CO2 values that will be used
