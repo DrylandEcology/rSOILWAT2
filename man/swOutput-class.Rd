@@ -18,11 +18,11 @@
 \arguments{
 \item{x}{An object of class \code{\linkS4class{swOutput}}.}
 
-\item{name}{A character string. The name of the of the slots of this class.}
+\item{name}{A character string. The name of one of the slots in this class.}
 
 \item{object}{An object of class \code{\linkS4class{swOutput}}.}
 
-\item{index}{An integer value. One of the four possible time steps.}
+\item{index}{An integer value. Index to an output slot (key).}
 
 \item{value}{A value to assign to a specific slot of the object.}
 }

@@ -17,12 +17,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###############################################################################
 
-
 # TODO: Add comment
 #
 # Author: Ryan J. Murphy (2013)
 ###############################################################################
-
 
 #' Class \code{"swYears"}
 #'
@@ -39,6 +37,15 @@
 #'  If dots are missing, then corresponding values of
 #'  \code{rSOILWAT2::sw_exampleData}
 #'  (i.e., the \pkg{SOILWAT2} "testing" defaults) are copied.
+#'
+#' @details
+#' Slot \code{isNorth} is not used as simulation input;
+#' its methods \code{swYears_isNorth} and \code{swYears_isNorth<-}
+#' are deprecated.
+#' \pkg{SOILWAT2} derives the hemisphere from latitude
+#' (northern hemisphere if latitude > 0; see
+#' \code{\link{swSite_IntrinsicSiteParams}}).
+#' The first day of the simulation is \code{FDOFY} in both hemispheres.
 #'
 #' @seealso \code{\linkS4class{swInputData}}
 #'
@@ -82,8 +89,12 @@ swYears <- function(...) {
   # We don't set values for slots `StartYear` and `EndYear` if not passed
   # via ...; this is to prevent simulation runs with accidentally incorrect
   # values
-  if (!("StartYear" %in% dns)) def@StartYear <- NA_integer_
-  if (!("EndYear" %in% dns)) def@EndYear <- NA_integer_
+  if (!("StartYear" %in% dns)) {
+    def@StartYear <- NA_integer_
+  }
+  if (!("EndYear" %in% dns)) {
+    def@EndYear <- NA_integer_
+  }
 
   # Copy from SOILWAT2 "testing" (defaults), but dot arguments take precedence
   tmp <- lapply(
@@ -103,7 +114,7 @@ setValidity(
 
     if (
       length(object@StartYear) != 1L ||
-      (!anyNA(object@StartYear) && isTRUE(object@StartYear < 0L))
+        (!anyNA(object@StartYear) && isTRUE(object@StartYear < 0L))
     ) {
       msg <- "There must be exactly one NA or non-negative @StartYear value."
       val <- if (isTRUE(val)) msg else c(val, msg)
@@ -112,8 +123,9 @@ setValidity(
     if (
       length(object@EndYear) != 1L ||
         (!anyNA(object@EndYear) && isTRUE(object@EndYear < 0L)) ||
-        (!anyNA(object@EndYear) && !anyNA(object@StartYear) &&
-            isTRUE(object@EndYear < object@StartYear))
+        (!anyNA(object@EndYear) &&
+          !anyNA(object@StartYear) &&
+          isTRUE(object@EndYear < object@StartYear))
     ) {
       msg <- paste(
         "There must be exactly NA or one non-negative @EndYear value ",
@@ -124,9 +136,9 @@ setValidity(
 
     if (
       length(object@FDOFY) != 1L ||
-      !is.finite(object@FDOFY) ||
-      object@FDOFY < 0L ||
-      object@FDOFY > 365L
+        !is.finite(object@FDOFY) ||
+        object@FDOFY < 0L ||
+        object@FDOFY > 365L
     ) {
       msg <- paste(
         "There must be exactly one non-negative finite @FDOFY value",
@@ -137,10 +149,10 @@ setValidity(
 
     if (
       length(object@EDOEY) != 1L ||
-      !is.finite(object@EDOEY) ||
-      object@EDOEY < 0L ||
-      object@EDOEY > 366L ||
-      object@EDOEY < object@FDOFY
+        !is.finite(object@EDOEY) ||
+        object@EDOEY < 0L ||
+        object@EDOEY > 366L ||
+        object@EDOEY < object@FDOFY
     ) {
       msg <- paste(
         "There must be exactly one non-negative finite @EDOEY value",
@@ -159,9 +171,6 @@ setValidity(
 )
 
 
-
-
-
 #' @rdname swYears-class
 #' @export
 setMethod("swYears_StartYear", "swYears", function(object) object@StartYear)
@@ -176,7 +185,20 @@ setMethod("swYears_FDOFY", "swYears", function(object) object@FDOFY)
 setMethod("swYears_EDOEY", "swYears", function(object) object@EDOEY)
 #' @rdname swYears-class
 #' @export
-setMethod("swYears_isNorth", "swYears", function(object) object@isNorth)
+setMethod(
+  "swYears_isNorth",
+  "swYears",
+  function(object) {
+    .Deprecated(
+      msg = paste(
+        "'swYears_isNorth' is deprecated:",
+        "the value of slot 'isNorth' is ignored;",
+        "SOILWAT2 derives the hemisphere from latitude."
+      )
+    )
+    object@isNorth
+  }
+)
 
 #' @rdname swYears-class
 #' @export
@@ -232,6 +254,13 @@ setReplaceMethod(
   "swYears_isNorth",
   signature = "swYears",
   function(object, value) {
+    .Deprecated(
+      msg = paste(
+        "'swYears_isNorth<-' is deprecated:",
+        "the value of slot 'isNorth' is ignored;",
+        "SOILWAT2 derives the hemisphere from latitude."
+      )
+    )
     object@isNorth <- as.logical(value)
     validObject(object)
     object

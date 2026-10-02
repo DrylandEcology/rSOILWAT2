@@ -61,10 +61,10 @@ SEXP onGet_SW_CARBON(void) {
   char *cCO2ppm[] = {"Year", "CO2ppm"};
   char *cSW_CARBON[] = {"CarbonUseBio", "CarbonUseWUE", "Scenario", "DeltaYear", "CO2ppm", "CO2ppmVegRef"};
   int i, year;
-  unsigned int n_sim = SoilWatRun.ModelIn.endyr - SoilWatRun.ModelIn.startyr + 1;
+  unsigned int n_sim = SoilWatDomain.endyr - SoilWatDomain.startyr + 1;
   double *vCO2ppm;
 
-  SW_CARBON_INPUTS *c = &SoilWatRun.CarbonIn;
+  SW_CARBON_INPUTS *c = SoilWatRun.CarbonIn;
 
   // Grab our S4 carbon class as an object
   PROTECT(class  = MAKE_CLASS("swCarbon"));
@@ -89,7 +89,7 @@ SEXP onGet_SW_CARBON(void) {
 
   PROTECT(CO2ppm = allocMatrix(REALSXP, n_sim, 2));
   vCO2ppm = REAL(CO2ppm);
-  for (i = 0, year = SoilWatRun.ModelIn.startyr; i < n_sim; i++, year++)
+  for (i = 0, year = SoilWatDomain.startyr; i < n_sim; i++, year++)
   {
     vCO2ppm[i + n_sim * 0] = year;
     vCO2ppm[i + n_sim * 1] = c->ppm[i];
@@ -136,7 +136,7 @@ void onSet_swCarbon(
     TimeInt vegYear,
     LOG_INFO* LogInfo
 ) {
-    SW_CARBON_INPUTS *c = &SoilWatRun.CarbonIn;
+    SW_CARBON_INPUTS *c = SoilWatRun.CarbonIn;
 
     // Extract the slots from our object into our structure
     c->use_bio_mult = INTEGER(GET_SLOT(object, install("CarbonUseBio")))[0];
@@ -149,15 +149,21 @@ void onSet_swCarbon(
     }
 
     // addtl_yr was removed with SOILWAT2 v8.3.0
+    // NA_integer_ is nonzero and thus also rejected
     int addtl_yr = INTEGER(GET_SLOT(object, install("DeltaYear")))[0];
-    if (!R_FINITE(addtl_yr) || addtl_yr != 0) {
+    if (addtl_yr != 0) {
+        char strYr[12] = "NA";
+        if (addtl_yr != NA_INTEGER) {
+            (void) snprintf(strYr, sizeof strYr, "%d", addtl_yr);
+        }
         LogError(
             LogInfo,
             LOGERROR,
-            "'DeltaYear' for aCO2 is defunct since SOILWAT2 v8.3.0 (value = %d)",
-            addtl_yr
+            "'DeltaYear' for aCO2 is defunct since SOILWAT2 v8.3.0 "
+            "(value = %s); set it to 0",
+            strYr
         );
-        goto cleanMem; // Exit function prematurely due to error
+        return; // Exit function prematurely due to error (nothing protected)
     }
 
     // Only extract the CO2 values that will be used
@@ -168,10 +174,6 @@ void onSet_swCarbon(
     TimeInt year;
     TimeInt nSW = endYr - startYr + 1;
     TimeInt nrSW;
-
-    #ifdef RSWDEBUG
-    int debug = 0;
-    #endif
 
     c->ppmVegRef = REAL(GET_SLOT(object, install("CO2ppmVegRef")))[0];
 
@@ -190,8 +192,8 @@ void onSet_swCarbon(
     }
 
     // Allocate SOILWAT2 memory
-    SW_CBN_deconstruct(&SoilWatRun.CarbonIn);
-    SW_CBN_alloc_ppm(nSW, &SoilWatRun.CarbonIn.ppm, LogInfo);
+    SW_CBN_deconstruct(SoilWatRun.CarbonIn);
+    SW_CBN_alloc_ppm(nSW, &SoilWatRun.CarbonIn->ppm, LogInfo);
     if (LogInfo->stopRun) {
         goto cleanMem; // Exit function prematurely due to error
     }

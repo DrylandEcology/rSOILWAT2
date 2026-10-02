@@ -64,7 +64,7 @@ SEXP onGet_MKV(void) {
 void onSet_MKV(SEXP MKV, LOG_INFO* LogInfo) {
   SEXP MKV_prob, MKV_conv;
 
-  SW_MKV_construct(SoilWatRun.WeatherIn.rng_seed, &SoilWatRun.MarkovIn);
+  SW_MKV_construct(SoilWatRun.WeatherIn->rng_seed, &SoilWatRun.MarkovIn);
   allocateMKV(&SoilWatRun.MarkovIn, LogInfo);
   if(LogInfo->stopRun) {
     return; // Exit function prematurely due to error
@@ -75,7 +75,7 @@ void onSet_MKV(SEXP MKV, LOG_INFO* LogInfo) {
 
   if (
       !onSet_MKV_prob(MKV_prob) &&
-      SoilWatRun.WeatherIn.generateWeatherMethod == 2
+      SoilWatRun.WeatherIn->generateWeatherMethod == 2
   ) {
     LogError(
       LogInfo,
@@ -90,7 +90,7 @@ void onSet_MKV(SEXP MKV, LOG_INFO* LogInfo) {
 
   if (
       !onSet_MKV_conv(MKV_conv) &&
-      SoilWatRun.WeatherIn.generateWeatherMethod == 2
+      SoilWatRun.WeatherIn->generateWeatherMethod == 2
   ) {
     LogError(
       LogInfo,
@@ -225,4 +225,3 @@ Bool onSet_MKV_conv(SEXP MKV_conv) {
 
 	return TRUE;
 }
-

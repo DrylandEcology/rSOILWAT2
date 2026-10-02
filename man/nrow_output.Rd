@@ -4,7 +4,7 @@
 \alias{nrow_output}
 \title{Number of time steps in output}
 \usage{
-nrow_output(x, timestep = c("Day", "Week", "Month", "Year"))
+nrow_output(x, timestep = c("Day", "Week", "Month", "Season", "Year"))
 }
 \arguments{
 \item{x}{An object of class \code{\linkS4class{swOutput}}.}

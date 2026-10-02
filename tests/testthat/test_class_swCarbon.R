@@ -1,4 +1,3 @@
-
 dir_test_data <- file.path("..", "test_data")
 temp <- list.files(dir_test_data, pattern = "Ex")
 temp <- sapply(strsplit(temp, "_", fixed = TRUE), function(x) x[[1]])
@@ -81,7 +80,6 @@ test_that("Run 'rSOILWAT2' with different 'swCarbon' inputs", {
   sw_input <- readRDS(file.path(dir_test_data, paste0(it, "_input.rds")))
   sw_weather <- readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
 
-
   # 'DeltaYear' is defunct since SOILWAT2 v8.3.0
   rSOILWAT2::swCarbon_DeltaYear(sw_input) <- 30L
 
@@ -94,5 +92,18 @@ test_that("Run 'rSOILWAT2' with different 'swCarbon' inputs", {
       quiet = TRUE
     ),
     regexp = "'DeltaYear' for aCO2 is defunct"
+  )
+
+  # Missing 'DeltaYear' is rejected as well
+  rSOILWAT2::swCarbon_DeltaYear(sw_input) <- NA_integer_
+
+  expect_error(
+    rSOILWAT2::sw_exec(
+      inputData = sw_input,
+      weatherList = sw_weather,
+      echo = FALSE,
+      quiet = TRUE
+    ),
+    regexp = "'DeltaYear' for aCO2 is defunct.+value = NA"
   )
 })

@@ -4,7 +4,7 @@
 \alias{time_columns}
 \title{Output column indices with time information}
 \usage{
-time_columns(timestep = c("Day", "Week", "Month", "Year"))
+time_columns(timestep = c("Day", "Week", "Month", "Season", "Year"))
 }
 \arguments{
 \item{timestep}{A character string. One of the \pkg{rSOILWAT2} time steps.}

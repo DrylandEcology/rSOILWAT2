@@ -56,6 +56,15 @@ If dots are missing, then corresponding values of
 The methods listed below work on this class and the proper slot of the class
   \code{\linkS4class{swInputData}}.
 }
+\details{
+Slot \code{isNorth} is not used as simulation input;
+its methods \code{swYears_isNorth} and \code{swYears_isNorth<-}
+are deprecated.
+\pkg{SOILWAT2} derives the hemisphere from latitude
+(northern hemisphere if latitude > 0; see
+\code{\link{swSite_IntrinsicSiteParams}}).
+The first day of the simulation is \code{FDOFY} in both hemispheres.
+}
 \examples{
 showClass("swYears")
 x <- new("swYears")

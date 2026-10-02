@@ -133,7 +133,7 @@ void onSet_SW_VES(SEXP VES, LOG_INFO* LogInfo) {
     if (EchoInits) {
         echo_VegEstab(
             SoilWatRun.RunIn.SoilRunIn.width,
-            SoilWatRun.VegEstabIn.parms,
+            &SoilWatRun.VegEstabIn.parms,
             SoilWatRun.VegEstabIn.count,
             LogInfo
         );
@@ -170,24 +170,24 @@ void onGet_SW_VES_spps(SEXP SPP) {
 	PROTECT(max_temp_estab = NEW_NUMERIC(vcount));
 
 	for (i = 0; i < vcount; i++) {
-		v = &SoilWatRun.VegEstabIn.parms[i];
-		SET_STRING_ELT(fileName, i, mkChar(v->sppFileName));
-		SET_STRING_ELT(name, i, mkChar(v->sppname));
-		INTEGER(vegType)[i] = v->vegType;
-		INTEGER(estab_lyrs)[i] = v->estab_lyrs;
-		REAL(barsGERM)[i] = v->bars[0];
-		REAL(barsESTAB)[i] = v->bars[1];
-		INTEGER(min_pregerm_days)[i] = v->min_pregerm_days;
-		INTEGER(max_pregerm_days)[i] = v->max_pregerm_days;
-		INTEGER(min_wetdays_for_germ)[i] = v->min_wetdays_for_germ;
-		INTEGER(max_drydays_postgerm)[i] = v->max_drydays_postgerm;
-		INTEGER(min_wetdays_for_estab)[i] = v->min_wetdays_for_estab;
-		INTEGER(min_days_germ2estab)[i] = v->min_days_germ2estab;
-		INTEGER(max_days_germ2estab)[i] = v->max_days_germ2estab;
-		REAL(min_temp_germ)[i] = v->min_temp_germ;
-		REAL(max_temp_germ)[i] = v->max_temp_germ;
-		REAL(min_temp_estab)[i] = v->min_temp_estab;
-		REAL(max_temp_estab)[i] = v->max_temp_estab;
+		v = &SoilWatRun.VegEstabIn.parms;
+		SET_STRING_ELT(fileName, i, mkChar(v->sppFileName[i]));
+		SET_STRING_ELT(name, i, mkChar(v->sppname[i]));
+		INTEGER(vegType)[i] = v->vegType[i];
+		INTEGER(estab_lyrs)[i] = v->estab_lyrs[i];
+		REAL(barsGERM)[i] = v->bars[i][SW_GERM_BARS];
+		REAL(barsESTAB)[i] = v->bars[i][SW_ESTAB_BARS];
+		INTEGER(min_pregerm_days)[i] = v->min_pregerm_days[i];
+		INTEGER(max_pregerm_days)[i] = v->max_pregerm_days[i];
+		INTEGER(min_wetdays_for_germ)[i] = v->min_wetdays_for_germ[i];
+		INTEGER(max_drydays_postgerm)[i] = v->max_drydays_postgerm[i];
+		INTEGER(min_wetdays_for_estab)[i] = v->min_wetdays_for_estab[i];
+		INTEGER(min_days_germ2estab)[i] = v->min_days_germ2estab[i];
+		INTEGER(max_days_germ2estab)[i] = v->max_days_germ2estab[i];
+		REAL(min_temp_germ)[i] = v->min_temp_germ[i];
+		REAL(max_temp_germ)[i] = v->max_temp_germ[i];
+		REAL(min_temp_estab)[i] = v->min_temp_estab[i];
+		REAL(max_temp_estab)[i] = v->max_temp_estab[i];
 	}
 	SET_SLOT(SPP, install("fileName"), fileName);
 	SET_SLOT(SPP, install("Name"), name);
@@ -228,33 +228,33 @@ void onSet_SW_VES_spp(SEXP SPP, IntU i, LOG_INFO* LogInfo) {
         return; // Exit function prematurely due to error
     }
 
-    v = &SoilWatRun.VegEstabIn.parms[i];
+    v = &SoilWatRun.VegEstabIn.parms;
 
-	v->vegType = INTEGER(GET_SLOT(SPP, install("vegType")))[i];
-	v->estab_lyrs = INTEGER(GET_SLOT(SPP, install("estab_lyrs")))[i];
-	v->bars[SW_GERM_BARS] = REAL(GET_SLOT(SPP, install("barsGERM")))[i];
-	v->bars[SW_ESTAB_BARS] = REAL(GET_SLOT(SPP, install("barsESTAB")))[i];
-	v->min_pregerm_days = INTEGER(GET_SLOT(SPP, install("min_pregerm_days")))[i];
-	v->max_pregerm_days = INTEGER(GET_SLOT(SPP, install("max_pregerm_days")))[i];
-	v->min_wetdays_for_germ = INTEGER(GET_SLOT(SPP, install("min_wetdays_for_germ")))[i];
-	v->max_drydays_postgerm = INTEGER(GET_SLOT(SPP, install("max_drydays_postgerm")))[i];
-	v->min_wetdays_for_estab = INTEGER(GET_SLOT(SPP, install("min_wetdays_for_estab")))[i];
-	v->min_days_germ2estab = INTEGER(GET_SLOT(SPP, install("min_days_germ2estab")))[i];
-	v->max_days_germ2estab = INTEGER(GET_SLOT(SPP, install("max_days_germ2estab")))[i];
-	v->min_temp_germ = REAL(GET_SLOT(SPP, install("min_temp_germ")))[i];
-	v->max_temp_germ = REAL(GET_SLOT(SPP, install("max_temp_germ")))[i];
-	v->min_temp_estab = REAL(GET_SLOT(SPP, install("min_temp_estab")))[i];
-	v->max_temp_estab = REAL(GET_SLOT(SPP, install("max_temp_estab")))[i];
+	v->vegType[i] = INTEGER(GET_SLOT(SPP, install("vegType")))[i];
+	v->estab_lyrs[i] = INTEGER(GET_SLOT(SPP, install("estab_lyrs")))[i];
+	v->bars[i][SW_GERM_BARS] = REAL(GET_SLOT(SPP, install("barsGERM")))[i];
+	v->bars[i][SW_ESTAB_BARS] = REAL(GET_SLOT(SPP, install("barsESTAB")))[i];
+	v->min_pregerm_days[i] = INTEGER(GET_SLOT(SPP, install("min_pregerm_days")))[i];
+	v->max_pregerm_days[i] = INTEGER(GET_SLOT(SPP, install("max_pregerm_days")))[i];
+	v->min_wetdays_for_germ[i] = INTEGER(GET_SLOT(SPP, install("min_wetdays_for_germ")))[i];
+	v->max_drydays_postgerm[i] = INTEGER(GET_SLOT(SPP, install("max_drydays_postgerm")))[i];
+	v->min_wetdays_for_estab[i] = INTEGER(GET_SLOT(SPP, install("min_wetdays_for_estab")))[i];
+	v->min_days_germ2estab[i] = INTEGER(GET_SLOT(SPP, install("min_days_germ2estab")))[i];
+	v->max_days_germ2estab[i] = INTEGER(GET_SLOT(SPP, install("max_days_germ2estab")))[i];
+	v->min_temp_germ[i] = REAL(GET_SLOT(SPP, install("min_temp_germ")))[i];
+	v->max_temp_germ[i] = REAL(GET_SLOT(SPP, install("max_temp_germ")))[i];
+	v->min_temp_estab[i] = REAL(GET_SLOT(SPP, install("min_temp_estab")))[i];
+	v->max_temp_estab[i] = REAL(GET_SLOT(SPP, install("max_temp_estab")))[i];
 
 	PROTECT(fileName = GET_SLOT(SPP, install("fileName")));
 	PROTECT(Name = GET_SLOT(SPP, install("Name")));
 
-	strcpy(v->sppFileName, CHAR(STRING_ELT(fileName, i)) );
+	strcpy(v->sppFileName[i], CHAR(STRING_ELT(fileName, i)) );
 	/* check for valid name first */
 	if (strlen(CHAR(STRING_ELT(Name, i))) > MAX_SPECIESNAMELEN) {
 		LogError(LogInfo, LOGERROR, "Species name too long (> 4 chars).");
 	} else {
-		strcpy(v->sppname, CHAR(STRING_ELT(Name, i)) );
+		strcpy(v->sppname[i], CHAR(STRING_ELT(Name, i)) );
 	}
 	UNPROTECT(2);
 }

@@ -24,6 +24,7 @@ extern SW_RUN SoilWatRun;
 extern SW_DOMAIN SoilWatDomain;
 
 extern const int rSW2_rank;
+extern const int rSW2_worldSize;
 extern Bool EchoInits;
 extern FILE *current_sw_verbosity;
 

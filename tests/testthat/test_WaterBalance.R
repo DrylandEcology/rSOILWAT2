@@ -1,12 +1,11 @@
-
 # The 8 checks, implemented below, correspond to the checks in
 # \var{SOILWAT/test/test_WaterBalance.cc}
 
-
 #---CONSTANTS
-tol <- 10 ^ (-rSW2_glovars[["kSOILWAT2"]][["kINT"]][["OUT_DIGITS"]])
+tol <- 10^(-rSW2_glovars[["kSOILWAT2"]][["kINT"]][["OUT_DIGITS"]])
 SW_OUTNPERIODS <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
 OutPeriods <- rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]]
+reqOPs <- seq_len(SW_OUTNPERIODS)[which(OutPeriods != "Season")] # skip seasonal
 veg_types <- rSW2_glovars[["kSOILWAT2"]][["VegTypeNames2"]]
 dir_test_data <- file.path("..", "test_data")
 temp <- list.files(dir_test_data, pattern = "Ex")
@@ -59,7 +58,8 @@ aggregate_for_each_timestep <- function(x, dyt) {
         FUN = sum
       )
       temp <- temp[, -1]
-    })
+    }
+  )
 }
 
 
@@ -69,15 +69,11 @@ for (it in tests) {
   sw_weather <- readRDS(file.path(dir_test_data, paste0(it, "_weather.rds")))
   sw_input <- readRDS(file.path(dir_test_data, paste0(it, "_input.rds")))
 
-
-
-  # Request summed values for every time step
+  # Request summed values for all time steps (skip seasonal)
   # but turn off SWP (because summed VWC may be larger than theta_sat)
   deactivate_swOUT_OutKey(sw_input) <- rSOILWAT2::sw_out_flags()["sw_swp"]
-
-  swOUT_TimeStepsForEveryKey(sw_input) <- seq_len(SW_OUTNPERIODS) - 1
+  swOUT_TimeStepsForEveryKey(sw_input) <- reqOPs - 1L # base0
   slot(slot(sw_input, "output"), "sumtype")[] <- 1L
-
 
   #--- Loop over SWRC-PTF combinations ------
   for (isp in seq_along(list_swrcs_ptfs)) {
@@ -90,7 +86,9 @@ for (it in tests) {
 
     #---TESTS
     info1 <- paste(
-      "test-data:", it, "/",
+      "test-data:",
+      it,
+      "/",
       paste(list_swrcs_ptfs[[isp]], collapse = "-")
     )
 
@@ -113,11 +111,8 @@ for (it in tests) {
         } else {
           fail(paste(info1, x))
         }
-
       } else {
-
         expect_s4_class(x, "swOutput")
-
 
         # State change values which are directly re-aggregated from daily data
         N <- slot(x, "dy_nrow")
@@ -173,22 +168,24 @@ for (it in tests) {
           dyt = dyt
         )
 
-
-        # Loop through time steps
+        # Loop through time steps (skip seasonal)
         for (pd in seq_len(SW_OUTNPERIODS)) {
-          info2 <- paste(info1, "/ time step:", OutPeriods[pd])
+          if (identical(OutPeriods[[pd]], "Season")) {
+            next
+          }
+          info2 <- paste(info1, "/ time step:", OutPeriods[[pd]])
 
           # Get values
-          ets <- slot(slot(x, "AET"), OutPeriods[pd])
+          ets <- slot(slot(x, "AET"), OutPeriods[[pd]])
           aet <- ets[, "evapotr_cm"]
-          pet <- slot(slot(x, "PET"), OutPeriods[pd])[, "pet_cm"]
+          pet <- slot(slot(x, "PET"), OutPeriods[[pd]])[, "pet_cm"]
 
           temp <- seq_along(aet)
           idelta1 <- temp[-length(temp)]
           idelta2 <- temp[-1]
 
           # Get evaporation values
-          temp <- slot(slot(x, "EVAPSURFACE"), OutPeriods[pd])
+          temp <- slot(slot(x, "EVAPSURFACE"), OutPeriods[[pd]])
           Etotalsurf <- temp[, "evap_total"]
           Elitter <- temp[, "evap_litter"]
           Eponded <- temp[, "evap_surfaceWater"]
@@ -196,7 +193,7 @@ for (it in tests) {
           Eveg <- rowSums(Evegi)
           Etotalint <- Eveg + Elitter
 
-          temp <- slot(slot(x, "EVAPSOIL"), OutPeriods[pd])
+          temp <- slot(slot(x, "EVAPSOIL"), OutPeriods[[pd]])
           ids <- grep("Lyr", colnames(temp), fixed = TRUE)
           Esoilj <- temp[, ids, drop = FALSE]
           Esoil <- rowSums(Esoilj)
@@ -205,11 +202,11 @@ for (it in tests) {
           temp[, seq_len(ncol(Esoilj))] <- Esoilj
           Esoilj <- temp
 
-          Esnow <- slot(slot(x, "PRECIP"), OutPeriods[pd])[, "snowloss"]
+          Esnow <- slot(slot(x, "PRECIP"), OutPeriods[[pd]])[, "snowloss"]
           Etotal <- Etotalsurf + Esoil + Esnow
 
           # Get transpiration values
-          temp <- slot(slot(x, "TRANSP"), OutPeriods[pd])
+          temp <- slot(slot(x, "TRANSP"), OutPeriods[[pd]])
           ids <- grep("transp_total_Lyr", colnames(temp), fixed = TRUE)
           Ttotalj <- temp[, ids, drop = FALSE]
           Ttotal <- rowSums(Ttotalj)
@@ -226,7 +223,6 @@ for (it in tests) {
           )
           names(Tvegij) <- veg_types
 
-
           #--- Check that calculated transpiration and evaporation matches
           # newly available ones from "AET" slot
           expect_equal(Ttotal, ets[, "tran_cm"], tolerance = tol)
@@ -240,48 +236,45 @@ for (it in tests) {
           expect_equal(Etotal, Etotal2, tolerance = tol)
           expect_equal(aet, ets[, "tran_cm"] + Etotal2, tolerance = tol)
 
-
           #--- Get other water flux values
           infiltration <- slot(
             slot(x, "SOILINFILT"),
-            OutPeriods[pd]
+            OutPeriods[[pd]]
           )[, "soil_inf"]
           deepDrainage <- slot(
             slot(x, "DEEPSWC"),
-            OutPeriods[pd]
+            OutPeriods[[pd]]
           )[, "lowLayerDrain_cm"]
 
-          temp <- slot(slot(x, "LYRDRAIN"), OutPeriods[pd])
+          temp <- slot(slot(x, "LYRDRAIN"), OutPeriods[[pd]])
           ids <- grep("Lyr", colnames(temp), fixed = TRUE)
           temp <- temp[, ids, drop = FALSE]
           percolationIn <- cbind(infiltration, temp)
           percolationOut <- cbind(temp, deepDrainage)
 
-          temp <- slot(slot(x, "HYDRED"), OutPeriods[pd])
+          temp <- slot(slot(x, "HYDRED"), OutPeriods[[pd]])
           ctemp <- grep("total_Lyr", colnames(temp), fixed = TRUE)
           hydraulicRedistribution <- temp[, ctemp, drop = FALSE]
 
-          temp <- slot(slot(x, "INTERCEPTION"), OutPeriods[pd])
+          temp <- slot(slot(x, "INTERCEPTION"), OutPeriods[[pd]])
           intercepted <- temp[, "int_total"]
 
-          temp <- slot(slot(x, "RUNOFF"), OutPeriods[pd])
+          temp <- slot(slot(x, "RUNOFF"), OutPeriods[[pd]])
           ctemp <- grep("runoff", colnames(temp), fixed = TRUE)
           runoff <- rowSums(temp[, ctemp, drop = FALSE])
           ctemp <- grep("runon", colnames(temp), fixed = TRUE)
           runon <- rowSums(temp[, ctemp, drop = FALSE])
 
-          temp <- slot(slot(x, "PRECIP"), OutPeriods[pd])
+          temp <- slot(slot(x, "PRECIP"), OutPeriods[[pd]])
           snowmelt <- temp[, "snowmelt"]
           rain <- temp[, "rain"]
 
           arriving_water <- rain + snowmelt + runon
 
-
           # Get state change values
-          delta_surfaceWater <- list_delta_surfaceWater[[OutPeriods[pd]]]
-          delta_swcj <- list_delta_swcj[[OutPeriods[pd]]]
-          delta_swc_total <- list_delta_swc_total[[OutPeriods[pd]]]
-
+          delta_surfaceWater <- list_delta_surfaceWater[[OutPeriods[[pd]]]]
+          delta_swcj <- list_delta_swcj[[OutPeriods[[pd]]]]
+          delta_swc_total <- list_delta_swc_total[[OutPeriods[[pd]]]]
 
           #--- Water balance checks
           # (1) \code{AET <= PET}
@@ -301,25 +294,29 @@ for (it in tests) {
           #     + E(total litter-intercepted) + E(total veg-intercepted) +
           #     + E(snow sublimation)}
           expect_equal(
-            Etotal, Esoil + Eponded + Eveg + Elitter + Esnow,
+            Etotal,
+            Esoil + Eponded + Eveg + Elitter + Esnow,
             info = info2
           )
 
           # (5) \code{E(total surface) = E(ponded water) +
           #      + E(total litter-intercepted) + E(total veg-intercepted)}
           expect_equal(
-            Etotalsurf, Eponded + Eveg + Elitter,
+            Etotalsurf,
+            Eponded + Eveg + Elitter,
             info = info2
           )
-
 
           #--- Water cycling checks
           # (6) \code{infiltration = [rain + snowmelt + runon] -
           #     (runoff + intercepted + delta_surfaceWater + Eponded)}
           expect_equal(
-            infiltration[idelta2], arriving_water[idelta2] -
-            (runoff[idelta2] + intercepted[idelta2] + delta_surfaceWater +
-            Eponded[idelta2]),
+            infiltration[idelta2],
+            arriving_water[idelta2] -
+              (runoff[idelta2] +
+                intercepted[idelta2] +
+                delta_surfaceWater +
+                Eponded[idelta2]),
             info = info2
           )
 
@@ -337,9 +334,11 @@ for (it in tests) {
           for (j in seq_len(n_soillayers)) {
             expect_equal(
               delta_swcj[, j],
-              percolationIn[idelta2, j] + hydraulicRedistribution[idelta2, j] -
-              (percolationOut[idelta2, j] + Ttotalj[idelta2, j] +
-              Esoilj[idelta2, j]),
+              percolationIn[idelta2, j] +
+                hydraulicRedistribution[idelta2, j] -
+                (percolationOut[idelta2, j] +
+                  Ttotalj[idelta2, j] +
+                  Esoilj[idelta2, j]),
               info = paste(info2, "/ soil layer:", j)
             )
           }

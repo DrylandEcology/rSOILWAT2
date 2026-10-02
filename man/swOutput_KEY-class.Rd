@@ -21,7 +21,9 @@
 \arguments{
 \item{object}{An object of class \code{\linkS4class{swOutput_KEY}}.}
 
-\item{index}{An integer value. One of the four possible time steps.}
+\item{index}{An integer value. The base1 index of an output time step
+in \code{rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]]}
+(i.e., the base0 value of \code{TimeStep} plus 1).}
 
 \item{value}{A value to assign to a specific slot of the object.}
 }
@@ -29,6 +31,27 @@
 The methods listed below work on this class and the proper slot of the class
   \code{\linkS4class{swInputData}}.
 }
+\section{Slots}{
+
+\describe{
+\item{\code{Title}}{A character string. The output file name tag of the output key
+(as in slot \code{outfile} of class \code{\linkS4class{swOUT}}).}
+
+\item{\code{TimeStep}}{An integer vector with up to \code{SW_OUTNPERIODS} unique
+values: the output time steps of the output key as base0 codes
+(as in slot \code{timeSteps} of class \code{\linkS4class{swOUT}});
+unused elements have the value \code{eSW_NoTime = 999L}.}
+
+\item{\code{Columns}}{An integer value. The number of output variables,
+i.e., columns of the output matrices without the time columns.}
+
+\item{\code{Day,Week,Month,Season,Year}}{A numeric matrix with output for
+the respective time step: one row per simulated time step and
+columns for time (\code{Year} and, except for \code{Year},
+the time step within the year) followed by the output variables;
+a 0x0 matrix if the time step is not requested.}
+}}
+
 \examples{
 showClass("swOutput_KEY")
 x <- new("swOutput_KEY")

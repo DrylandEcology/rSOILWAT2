@@ -26,44 +26,39 @@
 #' @export
 sw_out_flags <- function() {
   tmp <- rSW2_glovars[["kSOILWAT2"]][["OutKeys"]]
-  res <- c(
-    sw_aet = tmp["SW_AET"],
-    sw_deepdrain = tmp["SW_DEEPSWC"],
-    sw_estabs = tmp["SW_ESTAB"],
-    sw_evsoil = tmp["SW_EVAPSOIL"],
-    sw_evapsurface = tmp["SW_EVAPSURFACE"],
-    sw_frozen = tmp["SW_FROZEN"],
-    sw_hd = tmp["SW_HYDRED"],
-    sw_inf_soil = tmp["SW_SOILINF"],
-    sw_interception = tmp["SW_INTERCEPTION"],
-    sw_percolation = tmp["SW_LYRDRAIN"],
-    sw_pet = tmp["SW_PET"],
-    sw_precip = tmp["SW_PRECIP"],
-    sw_runoff = tmp["SW_RUNOFF"],
-    sw_snow = tmp["SW_SNOWPACK"],
-    sw_soiltemp = tmp["SW_SOILTEMP"],
-    sw_surfaceWater = tmp["SW_SURFACEW"],
-    sw_swp = tmp["SW_SWPMATRIC"],
-    sw_swabulk = tmp["SW_SWABULK"],
-    sw_swcbulk = tmp["SW_SWCBULK"],
-    sw_swa = tmp["SW_SWA"],
-    sw_temp = tmp["SW_TEMP"],
-    sw_transp = tmp["SW_TRANSP"],
-    sw_vwcbulk = tmp["SW_VWCBULK"],
-    sw_vwcmatric = tmp["SW_VWCMATRIC"],
-    sw_co2effects = tmp["SW_CO2EFFECTS"],
-    sw_veg = tmp["SW_BIOMASS"],
-    sw_wetdays = tmp["SW_WETDAY"],
-    sw_derivedsum = tmp["SW_DERIVEDSUM"],
-    sw_derivedavg = tmp["SW_DERIVEDAVG"],
-    sw_energyavg = tmp["SW_ENERGYAVG"]
+  c(
+    sw_aet = tmp[["SW_AET"]],
+    sw_deepdrain = tmp[["SW_DEEPSWC"]],
+    sw_estabs = tmp[["SW_ESTAB"]],
+    sw_evsoil = tmp[["SW_EVAPSOIL"]],
+    sw_evapsurface = tmp[["SW_EVAPSURFACE"]],
+    sw_frozen = tmp[["SW_FROZEN"]],
+    sw_hd = tmp[["SW_HYDRED"]],
+    sw_inf_soil = tmp[["SW_SOILINF"]],
+    sw_interception = tmp[["SW_INTERCEPTION"]],
+    sw_percolation = tmp[["SW_LYRDRAIN"]],
+    sw_pet = tmp[["SW_PET"]],
+    sw_precip = tmp[["SW_PRECIP"]],
+    sw_runoff = tmp[["SW_RUNOFF"]],
+    sw_snow = tmp[["SW_SNOWPACK"]],
+    sw_soiltemp = tmp[["SW_SOILTEMP"]],
+    sw_surfaceWater = tmp[["SW_SURFACEW"]],
+    sw_swp = tmp[["SW_SWPMATRIC"]],
+    sw_swabulk = tmp[["SW_SWABULK"]],
+    sw_swcbulk = tmp[["SW_SWCBULK"]],
+    sw_swamatric = tmp[["SW_SWAMATRIC"]],
+    sw_swa = tmp[["SW_SWA"]],
+    sw_temp = tmp[["SW_TEMP"]],
+    sw_transp = tmp[["SW_TRANSP"]],
+    sw_vwcbulk = tmp[["SW_VWCBULK"]],
+    sw_vwcmatric = tmp[["SW_VWCMATRIC"]],
+    sw_co2effects = tmp[["SW_CO2EFFECTS"]],
+    sw_veg = tmp[["SW_BIOMASS"]],
+    sw_wetdays = tmp[["SW_WETDAY"]],
+    sw_derivedsum = tmp[["SW_DERIVEDSUM"]],
+    sw_derivedavg = tmp[["SW_DERIVEDAVG"]],
+    sw_energyavg = tmp[["SW_ENERGYAVG"]]
   )
-
-  # Fix names
-  tmp <- sapply(strsplit(names(res), split = ".", fixed = TRUE), `[`, j = 1)
-  names(res) <- tmp
-
-  res
 }
 
 
@@ -75,7 +70,23 @@ sw_out_flags <- function() {
 #'
 #' @param object An object of class \code{\linkS4class{swOutput_KEY}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param index An integer value. One of the four possible time steps.
+#' @param index An integer value. The base1 index of an output time step
+#'   in \code{rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]]}
+#'   (i.e., the base0 value of \code{TimeStep} plus 1).
+#'
+#' @slot Title A character string. The output file name tag of the output key
+#'   (as in slot \code{outfile} of class \code{\linkS4class{swOUT}}).
+#' @slot TimeStep An integer vector with up to \code{SW_OUTNPERIODS} unique
+#'   values: the output time steps of the output key as base0 codes
+#'   (as in slot \code{timeSteps} of class \code{\linkS4class{swOUT}});
+#'   unused elements have the value \code{eSW_NoTime = 999L}.
+#' @slot Columns An integer value. The number of output variables,
+#'   i.e., columns of the output matrices without the time columns.
+#' @slot Day,Week,Month,Season,Year A numeric matrix with output for
+#'   the respective time step: one row per simulated time step and
+#'   columns for time (\code{Year} and, except for \code{Year},
+#'   the time step within the year) followed by the output variables;
+#'   a 0x0 matrix if the time step is not requested.
 #'
 #'
 #' @seealso \code{\linkS4class{swInputData}}
@@ -95,6 +106,7 @@ swOutput_KEY <- setClass(
     Day = "matrix",
     Week = "matrix",
     Month = "matrix",
+    Season = "matrix",
     Year = "matrix"
   ),
   prototype = list(
@@ -104,6 +116,7 @@ swOutput_KEY <- setClass(
     Day = matrix(NA_real_)[0, 0],
     Week = matrix(NA_real_)[0, 0],
     Month = matrix(NA_real_)[0, 0],
+    Season = matrix(NA_real_)[0, 0],
     Year = matrix(NA_real_)[0, 0]
   )
 )
@@ -112,14 +125,24 @@ setValidity(
   "swOutput_KEY",
   function(object) {
     val <- TRUE
-    ntemp <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
+    kINT <- rSW2_glovars[["kSOILWAT2"]][["kINT"]]
+    ntemp <- kINT[["SW_OUTNPERIODS"]]
+
+    # TimeStep is base0 (as swOUT@timeSteps); unused elements are eSW_NoTime;
+    # zero length is allowed for an empty object (prototype)
+    ok <- c(kINT[["eSW_NoTime"]], seq_len(ntemp) - 1L)
+    used <- object@TimeStep[object@TimeStep != kINT[["eSW_NoTime"]]]
 
     if (
-      length(object@TimeStep) != 1 ||
-        object@TimeStep > ntemp ||
-        object@TimeStep < 1
+      length(object@TimeStep) > ntemp ||
+        anyNA(object@TimeStep) ||
+        !all(object@TimeStep %in% ok) ||
+        anyDuplicated(used) > 0L
     ) {
-      msg <- "@TimeStep must have exactly 1 value between 1 and SW_OUTNPERIODS"
+      msg <- paste(
+        "@TimeStep must have at most SW_OUTNPERIODS unique values,",
+        "each within 0 and SW_OUTNPERIODS - 1 (base0) or equal to eSW_NoTime"
+      )
       val <- if (isTRUE(val)) msg else c(val, msg)
     }
 
@@ -155,7 +178,10 @@ setReplaceMethod(
   "swOutput_KEY_Period",
   signature = "swOutput_KEY",
   function(object, index, value) {
-    slot(object, rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]][index]) <- value
+    slot(
+      object,
+      rSW2_glovars[["kSOILWAT2"]][["OutPeriods"]][index]
+    ) <- value
     validObject(object)
     object
   }
@@ -171,8 +197,8 @@ setReplaceMethod(
 #' @param object An object of class \code{\linkS4class{swOutput}}.
 #' @param x An object of class \code{\linkS4class{swOutput}}.
 #' @param value A value to assign to a specific slot of the object.
-#' @param index An integer value. One of the four possible time steps.
-#' @param name A character string. The name of the of the slots of this class.
+#' @param index An integer value. Index to an output slot (key).
+#' @param name A character string. The name of one of the slots in this class.
 #'
 #' @seealso \code{\linkS4class{swInputData}}
 #'
@@ -188,6 +214,7 @@ swOutput <- setClass(
     version = "character",
     timestamp = "numeric",
     yr_nrow = "integer",
+    sn_nrow = "integer",
     mo_nrow = "integer",
     wk_nrow = "integer",
     dy_nrow = "integer",
@@ -231,6 +258,7 @@ swOutput <- setClass(
     version = rSW2_version(),
     timestamp = rSW2_timestamp(),
     yr_nrow = integer(),
+    sn_nrow = integer(),
     mo_nrow = integer(),
     wk_nrow = integer(),
     dy_nrow = integer(),
@@ -279,6 +307,12 @@ setValidity(
   }
 )
 
+#' Count of slots in class `swOutput` before those with output values
+#' @noRd
+countNonOutputSlots <- function() {
+  7L # Maintenance: update if swOutput adds slots!
+}
+
 
 #' @rdname swOutput-class
 #' @export
@@ -291,7 +325,7 @@ setMethod(
   "swOutput_getKEY",
   signature = "swOutput",
   function(object, index) {
-    nid <- seq_len(6)
+    nid <- seq_len(countNonOutputSlots())
     slot(object, slotNames("swOutput")[-nid][index])
   }
 )
@@ -303,7 +337,7 @@ setReplaceMethod(
   "swOutput_setKEY",
   signature = c(object = "swOutput", value = "swOutput_KEY"),
   function(object, index, value) {
-    nid <- seq_len(6)
+    nid <- seq_len(countNonOutputSlots())
     slot(object, slotNames("swOutput")[-nid][index]) <- value
     object
   }

@@ -182,7 +182,7 @@ setClass(
     #   * 999 must be rSW2_glovars[["kSOILWAT2"]][["kINT"]][["eSW_NoTime"]]
     #   * nrows = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]
     #   * ncols = rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
-    timeSteps = array(999, dim = c(35L, 4L))
+    timeSteps = array(999, dim = c(35L, 5L))
   )
 )
 
@@ -277,6 +277,47 @@ setMethod(
   "sw_upgrade",
   signature = "swOUT",
   definition = function(object, verbose = FALSE) {
+    wasUpgraded <- FALSE
+
+    #--- 1) Upgrade output time periods ------
+    n_exp <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]]
+    n_has <- ncol(object@timeSteps)
+
+    # Maintenance:
+    #   update `do_upgrade` when `n_exp` changes or new upgrades required!
+    do_upgrade <- c(
+      # v670: added a fifth (seasonal) output time step
+      to_v670 = n_has <= 4L && n_exp >= 5L
+    )
+
+    do_upgrade <- do_upgrade[do_upgrade]
+
+    #--- Identify upgrade(s)
+    if (any(do_upgrade)) {
+      wasUpgraded <- TRUE
+      target <- swOUT()
+      stopifnot(ncol(target@timeSteps) == n_exp)
+
+      #--- Loop over upgrades sequentially
+      for (k in seq_along(do_upgrade)) {
+        if (verbose) {
+          message(
+            "Upgrading object of class `swOUT`: ",
+            shQuote(names(do_upgrade)[[k]])
+          )
+        }
+
+        #--- Upgrade `timeSteps`
+        if (names(do_upgrade)[[k]] == "to_v670") {
+          tmp_new <- cbind(object@timeSteps, 999L)
+          idsYr <- tmp_new == 3L # base0
+          tmp_new[idsYr] <- tmp_new[idsYr] + 1L
+          object@timeSteps <- tmp_new
+        }
+      }
+    }
+
+    #--- 2) Upgrade output keys ------
     #--- Compare available and expected number of outkeys
     n_exp <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNKEYS"]]
     n_has <- nrow(object@timeSteps)
@@ -300,6 +341,7 @@ setMethod(
     do_upgrade <- do_upgrade[do_upgrade]
 
     if (any(do_upgrade)) {
+      wasUpgraded <- TRUE
       target <- swOUT()
       stopifnot(nrow(target) == n_exp)
 
@@ -389,8 +431,10 @@ setMethod(
           )
         }
       }
+    }
 
-      #--- Check validity and return
+    #--- Check validity
+    if (wasUpgraded) {
       validObject(object)
     }
 

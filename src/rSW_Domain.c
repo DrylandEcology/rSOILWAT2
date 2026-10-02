@@ -49,28 +49,32 @@
 
 // onGet_SW_DOM() is currently empty and unused because
 // rSOILWAT2 doesn't have a swDomain S4 class
-// -- see instead onGet_SW_SPINUP()
+// -- see instead onGet_SW_SPINUP() and onGet_SW_MDL()
 SEXP onGet_SW_DOM(void) {
     SEXP swDOM = NULL;
 
     return swDOM ;
 }
 
+// onSet_SW_DOM() is setting temporal and spinup information
 void onSet_SW_DOM(SEXP InputData, LOG_INFO* LogInfo) {
     // Maintenance note: if `sw_start()` switches from using
     // `SW_CTL_main()` to `SW_CTL_RunSimSet()`, then we would need to
     // copy here complete and correct values into `SoilWatDomain`
 
     // Currently not implemented in rSOILWAT2 but required in SOILWAT2
+    // --> rSOILWAT2 represents single-site domains
     SoilWatDomain.isSimDomDiscrete = swTRUE;
     SoilWatDomain.nDimX = 1;
     SoilWatDomain.nDimY = 1;
     SoilWatDomain.nDimS = 1;
-    // Currently not implemented in rSOILWAT2 and not utilized in SOILWAT2
-    // SoilWatDomain.startyr =
-    // SoilWatDomain.endyr =
-    // SoilWatDomain.startstart =
-    // SoilWatDomain.endend =
+
+    // Temporal information: rSOILWAT2 uses class swYears
+    // (SOILWAT2 < v8.5.0 used `SW_MODEL_INPUTS` instead of `SW_DOMAIN`)
+    onSet_SW_MDL(GET_SLOT(InputData, install("years")), LogInfo);
+
+    // Currently not implemented in rSOILWAT2 and
+    //   not utilized by SOILWAT2 if RSOILWAT
     // SoilWatDomain.crs_bbox =
     // SoilWatDomain.min_x =
     // SoilWatDomain.min_y =
@@ -122,7 +126,7 @@ SEXP onGet_SW_SPINUP(void) {
 }
 
 SEXP onGet_SW_MDL(void) {
-	SW_MODEL_INPUTS *m = &SoilWatRun.ModelIn;
+	SW_MODEL_INPUTS *m = SoilWatRun.ModelIn;
 	SW_MODEL_RUN_INPUTS *mr = &SoilWatRun.RunIn.ModelRunIn;
 
 	SEXP swYears;
@@ -237,18 +241,11 @@ void onSet_SW_SPINUP(SEXP SW_DOM, LOG_INFO* LogInfo) {
 }
 
 void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
-	SW_MODEL_INPUTS *m = &SoilWatRun.ModelIn;
-	SW_MODEL_RUN_INPUTS *mr = &SoilWatRun.RunIn.ModelRunIn;
-
 	SEXP StartYear;
 	SEXP EndYear;
 	SEXP StartStart;
 	SEXP EndEnd;
-	//SEXP DayMid;
-	SEXP North;
-	Bool fstartdy = FALSE, fenddy = FALSE, fhemi = FALSE;
 	TimeInt d;
-	char enddyval[6], errstr[MAX_ERROR];
 
 	if (!Rf_isS4(SW_MDL)) {
 		LogError(LogInfo, LOGERROR, "modelrun.in: missing input.");
@@ -262,7 +259,7 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
         UNPROTECT(1);
         return; // Exit function prematurely due to error
 	}
-	m->startyr = INTEGER(StartYear)[0];
+	SoilWatDomain.startyr = INTEGER(StartYear)[0];
 	PROTECT(EndYear = GET_SLOT(SW_MDL, install("EndYear")));
 	if (isNull(EndYear) || INTEGER(EndYear)[0] == NA_INTEGER) {
 		LogError(LogInfo, LOGERROR, "Ending year not found.");
@@ -276,8 +273,8 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
         UNPROTECT(2);
         return; // Exit function prematurely due to error
 	}
-	m->endyr = INTEGER(EndYear)[0];
-	if (m->endyr < m->startyr) {
+	SoilWatDomain.endyr = INTEGER(EndYear)[0];
+	if (SoilWatDomain.endyr < SoilWatDomain.startyr) {
 		LogError(LogInfo, LOGERROR, "Start Year > End Year");
 
         UNPROTECT(2);
@@ -285,47 +282,42 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 	}
 
 	PROTECT(StartStart = GET_SLOT(SW_MDL, install("FDOFY")));
-	m->startstart = INTEGER(StartStart)[0];
-	fstartdy = TRUE;
+	SoilWatDomain.startstart = INTEGER(StartStart)[0];
 	PROTECT(EndEnd = GET_SLOT(SW_MDL, install("EDOEY")));
 
 	d = INTEGER(EndEnd)[0];
-	fenddy = TRUE;
 
-	//PROTECT(DayMid = VECTOR_ELT(SW_MDL, 4));
-	//m->daymid = INTEGER(DayMid)[0];
-	PROTECT(North = GET_SLOT(SW_MDL, install("isNorth")));
-	mr->isnorth = (Bool)LOGICAL(North)[0];
-	fhemi = TRUE;
+	// Hemisphere: `isnorth` is derived from latitude by `onSet_SW_SIT()`
+	// (as SOILWAT2's `SW_MDL_read()`); slot `isNorth` is not used as input.
+	// The first day is not shifted (as SOILWAT2's `SW_DOM_read()`).
 
-	if (!(fstartdy && fenddy && fhemi)) {
-		snprintf(errstr, MAX_ERROR, "\nNot found in inputs:\n");
-		if (!fstartdy) {
-			strcat(errstr, "\tStart Day  - using 1\n");
-			m->startstart = 1;
-		}
-		if (!fenddy) {
-			strcat(errstr, "\tEnd Day    - using \"end\"\n");
-			strcpy(enddyval, "end");
-		}
-		if (!fhemi) {
-			strcat(errstr, "\tHemisphere - using \"N\"\n");
-			mr->isnorth = TRUE;
-		}
-		strcat(errstr, "Continuing.\n");
-		LogError(LogInfo, LOGWARN, errstr);
+	// Last day of the last year (as SOILWAT2's `SW_DOM_read()`):
+	// 365 or 366 represent the last day of the last calendar year
+	if (d < 1 || d > 366) {
+		LogError(LogInfo, LOGERROR, "Invalid last day of simulation: %d is outside 1-366", d);
+
+		UNPROTECT(4);
+		return; // Exit function prematurely due to error
+	}
+	SoilWatDomain.endend = (d == 365 || d == 366) ? Time_get_lastdoy_y(SoilWatDomain.endyr) : d;
+
+	if (
+		SoilWatDomain.startyr == SoilWatDomain.endyr &&
+		SoilWatDomain.endend < SoilWatDomain.startstart
+	) {
+		LogError(
+			LogInfo,
+			LOGERROR,
+			"Last day of simulation (%d) is before first day (%d)",
+			SoilWatDomain.endend,
+			SoilWatDomain.startstart
+		);
+
+		UNPROTECT(4);
+		return; // Exit function prematurely due to error
 	}
 
-	m->startstart += ((mr->isnorth) ? DAYFIRST_NORTH : DAYFIRST_SOUTH) - 1;
-	//if (strcmp(enddyval, "end") == 0) {
-		//m->endend = (m->isnorth) ? Time_get_lastdoy_y(m->endyr) : DAYLAST_SOUTH;
-	//} else {
-	m->endend = (d == 365) ? Time_get_lastdoy_y(m->endyr) : 365;
-	//}
-
-	// m->daymid = (m->isnorth) ? DAYMID_NORTH : DAYMID_SOUTH;
-
-	UNPROTECT(5);
+	UNPROTECT(4);
 }
 
 
@@ -349,7 +341,7 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 void rSW_CTL_setup_domain(
     Bool from_files,
     SEXP InputData,
-    size_t userSUID,
+    TimeInt runSimDayLen,
     SW_DOMAIN* SW_Domain,
     LOG_INFO* LogInfo
 ) {
@@ -415,7 +407,7 @@ void rSW_CTL_setup_domain(
        return;  // Exit function prematurely due to error
     }
 
-    SW_DOM_SimSet(SW_Domain, userSUID, LogInfo);
+    SW_DOM_SimSet(rSW2_worldSize, runSimDayLen, SW_Domain, LogInfo);
 
     #ifdef RSWDEBUG
     if (debug) sw_printf(" completed.\n");

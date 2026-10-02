@@ -6,7 +6,7 @@
 \usage{
 get_evaporation(
   x,
-  timestep = c("Day", "Week", "Month", "Year"),
+  timestep = c("Day", "Week", "Month", "Season", "Year"),
   keep_time = FALSE
 )
 }

@@ -282,7 +282,7 @@ for (it in tests) {
         # slot 'vars[k]' contains
         #   - meta information:
         #     - "version", "timestamp"
-        #     - "yr_nrow", "mo_nrow", "wk_nrow", "dy_nrow"
+        #     - "yr_nrow", "sn_nrow", "mo_nrow", "wk_nrow", "dy_nrow"
         #   - empty slot: "WTHR", "ALLH2O", "ALLVEG"
       }
     }
@@ -290,8 +290,9 @@ for (it in tests) {
 }
 
 
-
 #------ Run SOILWAT2 and compare yearly output to previous simulation run
+idYr <- rSW2_glovars[["kSOILWAT2"]][["kINT"]][["SW_OUTNPERIODS"]] - 1L
+
 test_that("Compare to previous runs", {
   for (it in tests) {
     info1 <- paste("test-data", it)
@@ -305,7 +306,7 @@ test_that("Compare to previous runs", {
       )
       sw_output <- readRDS(file.path(dir_test_data, paste0(it, "_output.rds")))
 
-      swOUT_TimeStepsForEveryKey(sw_input) <- 3 # produce yearly output only
+      swOUT_TimeStepsForEveryKey(sw_input) <- idYr
 
       rdy <- sw_exec(
         inputData = sw_input,

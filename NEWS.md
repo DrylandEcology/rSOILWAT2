@@ -1,4 +1,34 @@
+# rSOILWAT2 v6.7.0-devel
+
+* `SOILWAT2` updated to v8.5.0
+
+## New features
+* New seasonal output time step: MAM (season 1), JJA, SON, DJF.
+
+## Changes to interface
+* The class `"swOUT"` gained a new output time step `"seasonal"`.
+* The class `"swOutput_KEY"` gained a new output time step `"Season"`.
+* The class `"swOutput"` gained a new slot `"sn_nrow"` as well as
+  the new output time step `"Season"` inherited from `"swOutput_KEY"` for
+  each `"outkey"`.
+* Class `"swFiles"` slot `"InFiles"` contains now 31 file names.
+
+## Bugfix
+* `sw_exec()` no longer resets soil temperature output of a successful run
+  by mistake if the previously unprotected error flag was garbage collected.
+* Simulations now end on the last day of the last year requested by
+  `swYears@EDOEY`; values of 365 and 366 represent the last day of the year.
+  Previously, other values were ignored (simulations ended on day 365),
+  `EDOEY = 366` dropped the leap day of a leap end year, and simulations of
+  a single leap year failed with invalid weather inputs.
+* The hemisphere is now derived from latitude (as in `SOILWAT2`),
+  `swYears@isNorth` is ignored and its methods deprecated, and
+  simulations start consistently on `swYears@FDOFY` in both hemispheres.
+
+
 # rSOILWAT2 v6.6.0
+
+* `SOILWAT2` updated to v8.4.0
 
 * Simulation output remains the same as the previous version, but
   output of vegetation establishment is now correct. Additionally,

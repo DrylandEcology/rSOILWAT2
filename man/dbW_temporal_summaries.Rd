@@ -16,7 +16,7 @@ dbW_weatherData_to_monthly(
 
 dbW_dataframe_aggregate(
   dailySW,
-  time_step = c("Year", "Month", "Week", "Day"),
+  time_step = c("Year", "Season", "Month", "Week", "Day"),
   na.rm = FALSE,
   funs = weather_dataAggFun()
 )
