@@ -241,17 +241,11 @@ void onSet_SW_SPINUP(SEXP SW_DOM, LOG_INFO* LogInfo) {
 }
 
 void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
-	SW_MODEL_RUN_INPUTS *mr = &SoilWatRun.RunIn.ModelRunIn;
-
 	SEXP StartYear;
 	SEXP EndYear;
 	SEXP StartStart;
 	SEXP EndEnd;
-	//SEXP DayMid;
-	SEXP North;
-	Bool fstartdy = FALSE, fenddy = FALSE, fhemi = FALSE;
 	TimeInt d;
-	char enddyval[6], errstr[MAX_ERROR];
 
 	if (!Rf_isS4(SW_MDL)) {
 		LogError(LogInfo, LOGERROR, "modelrun.in: missing input.");
@@ -289,44 +283,20 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 
 	PROTECT(StartStart = GET_SLOT(SW_MDL, install("FDOFY")));
 	SoilWatDomain.startstart = INTEGER(StartStart)[0];
-	fstartdy = TRUE;
 	PROTECT(EndEnd = GET_SLOT(SW_MDL, install("EDOEY")));
 
 	d = INTEGER(EndEnd)[0];
-	fenddy = TRUE;
 
-	//PROTECT(DayMid = VECTOR_ELT(SW_MDL, 4));
-	//m->daymid = INTEGER(DayMid)[0];
-	PROTECT(North = GET_SLOT(SW_MDL, install("isNorth")));
-	mr->isnorth = (Bool)LOGICAL(North)[0];
-	fhemi = TRUE;
-
-	if (!(fstartdy && fenddy && fhemi)) {
-		snprintf(errstr, MAX_ERROR, "\nNot found in inputs:\n");
-		if (!fstartdy) {
-			strcat(errstr, "\tStart Day  - using 1\n");
-			SoilWatDomain.startstart = 1;
-		}
-		if (!fenddy) {
-			strcat(errstr, "\tEnd Day    - using \"end\"\n");
-			strcpy(enddyval, "end");
-		}
-		if (!fhemi) {
-			strcat(errstr, "\tHemisphere - using \"N\"\n");
-			mr->isnorth = TRUE;
-		}
-		strcat(errstr, "Continuing.\n");
-		LogError(LogInfo, LOGWARN, errstr);
-	}
-
-	SoilWatDomain.startstart += ((mr->isnorth) ? DAYFIRST_NORTH : DAYFIRST_SOUTH) - 1;
+	// Hemisphere: `isnorth` is derived from latitude by `onSet_SW_SIT()`
+	// (as SOILWAT2's `SW_MDL_read()`); slot `isNorth` is not used as input.
+	// The first day is not shifted (as SOILWAT2's `SW_DOM_read()`).
 
 	// Last day of the last year (as SOILWAT2's `SW_DOM_read()`):
 	// 365 or 366 represent the last day of the last calendar year
 	if (d < 1 || d > 366) {
 		LogError(LogInfo, LOGERROR, "Invalid last day of simulation: %d is outside 1-366", d);
 
-		UNPROTECT(5);
+		UNPROTECT(4);
 		return; // Exit function prematurely due to error
 	}
 	SoilWatDomain.endend = (d == 365 || d == 366) ? Time_get_lastdoy_y(SoilWatDomain.endyr) : d;
@@ -343,13 +313,11 @@ void onSet_SW_MDL(SEXP SW_MDL, LOG_INFO* LogInfo) {
 			SoilWatDomain.startstart
 		);
 
-		UNPROTECT(5);
+		UNPROTECT(4);
 		return; // Exit function prematurely due to error
 	}
 
-	// m->daymid = (m->isnorth) ? DAYMID_NORTH : DAYMID_SOUTH;
-
-	UNPROTECT(5);
+	UNPROTECT(4);
 }
 
 

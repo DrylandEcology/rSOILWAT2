@@ -698,6 +698,8 @@ void onSet_SW_SIT(SEXP SW_SIT, LOG_INFO* LogInfo) {
 	PROTECT(IntrinsicSiteParams = GET_SLOT(SW_SIT, install("IntrinsicSiteParams")));
 	m->longitude = REAL(IntrinsicSiteParams)[0] * deg_to_rad;
 	m->latitude = REAL(IntrinsicSiteParams)[1] * deg_to_rad;
+	// Calculate hemisphere based on latitude (as SOILWAT2's `SW_MDL_read()`)
+	m->isnorth = (GT(m->latitude, 0.)) ? swTRUE : swFALSE;
 	m->elevation = REAL(IntrinsicSiteParams)[2];
 	m->slope = REAL(IntrinsicSiteParams)[3] * deg_to_rad;
 	m->aspect = REAL(IntrinsicSiteParams)[4];

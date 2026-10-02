@@ -71,3 +71,44 @@ test_that("Simulation ends on requested last day of last year", {
     )
   }
 })
+
+
+#--- Hemisphere: derived from latitude; first day is not shifted ------
+test_that("Simulation period does not depend on hemisphere", {
+  sw_in <- rSOILWAT2::sw_exampleData
+  swYears_EndYear(sw_in) <- 2010L
+  swYears_StartYear(sw_in) <- 2009L
+
+  res <- list()
+
+  for (lat in c(39.59, -39.59)) {
+    swSite_IntrinsicSiteParams(sw_in)[["Latitude"]] <- lat
+
+    for (isNorth in c(TRUE, FALSE)) {
+      expect_warning(
+        swYears_isNorth(sw_in) <- isNorth,
+        class = "deprecatedWarning"
+      )
+      expect_warning(
+        expect_identical(swYears_isNorth(sw_in), isNorth),
+        class = "deprecatedWarning"
+      )
+      sw_out <- rSOILWAT2::sw_exec(inputData = sw_in)
+      x <- slot(slot(sw_out, "TEMP"), "Day")
+      info <- paste("latitude", lat, "isNorth", isNorth)
+
+      # All days of all years are simulated
+      expect_identical(nrow(x), 730L, info = info)
+      expect_equal(unname(x[1L, c("Year", "Day")]), c(2009, 1), info = info)
+
+      res[[paste(lat, isNorth)]] <- x
+    }
+
+    # Slot `isNorth` has no effect
+    expect_identical(
+      res[[paste(lat, TRUE)]],
+      res[[paste(lat, FALSE)]],
+      info = paste("latitude", lat)
+    )
+  }
+})

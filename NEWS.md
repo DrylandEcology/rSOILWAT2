@@ -21,6 +21,9 @@
   Previously, other values were ignored (simulations ended on day 365),
   `EDOEY = 366` dropped the leap day of a leap end year, and simulations of
   a single leap year failed with invalid weather inputs.
+* The hemisphere is now derived from latitude (as in `SOILWAT2`),
+  `swYears@isNorth` is ignored and its methods deprecated, and
+  simulations start consistently on `swYears@FDOFY` in both hemispheres.
 
 
 # rSOILWAT2 v6.6.0
