@@ -51,7 +51,8 @@
 void onSet_SW_OUT(SEXP OUT, LOG_INFO* LogInfo) {
 	int i, msg_type;
 	OutKey k;
-	SEXP sep, outfile, tp_convert;
+	SEXP sep, outfile, tp_convert, dimTP;
+	int nrowTP = 0, ncolTP = 0;
 	int *timePeriods, *sumtype;
 	int *use;
 	// mykey, myobj and use are currently unused:
@@ -65,13 +66,49 @@ void onSet_SW_OUT(SEXP OUT, LOG_INFO* LogInfo) {
 	if (debug) sw_printf("onSet_SW_OUT: start ...");
 	#endif
 
+	// Check dimensions before reading values indexed by output key and
+	// time period (guarded in R by the validity method of `swOUT`)
+	dimTP = GET_DIM(GET_SLOT(OUT, install("timeSteps")));
+	if (length(dimTP) == 2) {
+		nrowTP = INTEGER(dimTP)[0];
+		ncolTP = INTEGER(dimTP)[1];
+	}
+
+	if (nrowTP != SW_OUTNKEYS || ncolTP != SW_OUTNPERIODS) {
+		LogError(
+			LogInfo,
+			LOGERROR,
+			"'timeSteps' of swOUT must be a matrix with %d rows and %d columns "
+			"(has %d rows and %d columns)",
+			SW_OUTNKEYS,
+			SW_OUTNPERIODS,
+			nrowTP,
+			ncolTP
+		);
+		return; // Exit function prematurely due to error (nothing protected)
+	}
+
+	if (
+		length(GET_SLOT(OUT, install("use"))) != SW_OUTNKEYS ||
+		length(GET_SLOT(OUT, install("sumtype"))) != SW_OUTNKEYS ||
+		length(GET_SLOT(OUT, install("outfile"))) != SW_OUTNKEYS
+	) {
+		LogError(
+			LogInfo,
+			LOGERROR,
+			"'use', 'sumtype', and 'outfile' of swOUT must have %d elements",
+			SW_OUTNKEYS
+		);
+		return; // Exit function prematurely due to error (nothing protected)
+	}
+
 	PROTECT(sep = GET_SLOT(OUT, install("outputSeparator")));
 
 	// TODO: I don't know why `GET_SLOT(OUT, install("timeSteps"))` is suddenly
 	// of type real and not integer any more
 	PROTECT(tp_convert = coerceVector(GET_SLOT(OUT, install("timeSteps")), INTSXP));
 	timePeriods = INTEGER(tp_convert);
-	SoilWatDomain.OutDom.used_OUTNPERIODS = INTEGER(GET_DIM(GET_SLOT(OUT, install("timeSteps"))))[1]; // number of columns
+	SoilWatDomain.OutDom.used_OUTNPERIODS = (IntUS) ncolTP; // number of columns
 
 	// mykey, myobj and use are currently unused:
 	// mykey = INTEGER(GET_SLOT(OUT, install("mykey")));
