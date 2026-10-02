@@ -2330,7 +2330,7 @@ dbW_dataframe_aggregate <- function(
   }
 
   if (time_step == "Season") {
-    stop("'Season' is not implemented.")
+    stop("'Season' is not implemented.", call. = FALSE)
   }
 
   icol_day <- grep(

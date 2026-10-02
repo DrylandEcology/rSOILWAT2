@@ -1,4 +1,3 @@
-
 #---CONSTANTS
 dir_test_data <- file.path("..", "test_data")
 temp <- list.files(dir_test_data, pattern = "Ex")
@@ -38,7 +37,6 @@ test_that("Check soil temperature", {
     info <- paste("test-data", it)
     expect_true(all(dbW_df_day[, "Tmin_C"] > -100, na.rm = TRUE), info = info)
     expect_true(all(dbW_df_day[, "Tmax_C"] < +100, na.rm = TRUE), info = info)
-
 
     # Run SOILWAT
     rd <- sw_exec(
@@ -116,7 +114,6 @@ test_that("Check min/avg/max soil temperature", {
   var_tsurf_min <- "surfaceTemp_min_C"
   var_tsurf_max <- "surfaceTemp_max_C"
 
-
   #--- Expect that
   #  - if snow-free: average temperature > minimum temperature
   #  - if snow covered: average temperature >= minimum temperature
@@ -137,7 +134,6 @@ test_that("Check min/avg/max soil temperature", {
     expect_true(all(tsoil[!has_snow, var_avg] > tsoil[!has_snow, var_min]))
     expect_true(all(tsoil[has_snow, var_avg] >= tsoil[has_snow, var_min]))
   }
-
 
   #--- Expect that
   #  - if snow-free: average temperature < maximum temperature
@@ -165,7 +161,7 @@ test_that("Check min/avg/max soil temperature", {
 #--- Check that the soil temperature error flag survives garbage collection ----
 test_that("Soil temperature error flag is a valid logical value", {
   # Flag is a logical value (FALSE before the first run)
-  expect_identical(.Call(C_tempError), FALSE)
+  expect_false(.Call(C_tempError))
 
   sw_out <- rSOILWAT2::sw_exec(inputData = rSOILWAT2::sw_exampleData)
 
@@ -173,7 +169,7 @@ test_that("Soil temperature error flag is a valid logical value", {
   for (k in 1:3) {
     gc()
     tmp <- lapply(seq_len(1000L), function(i) c(i, i))
-    expect_identical(.Call(C_tempError), FALSE)
+    expect_false(.Call(C_tempError))
     expect_false(has_soilTemp_failed())
   }
 })
